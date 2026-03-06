@@ -71,6 +71,17 @@ function createGroupedMessagingOutgoingEdge(): ServiceMapEdge {
   } as unknown as ServiceMapEdge;
 }
 
+function createGroupedMessagingIncomingEdge(): ServiceMapEdge {
+  return {
+    source: 'producer-service',
+    target: 'resourceGroup{order-service}',
+    data: {
+      isBidirectional: false,
+      isGrouped: true,
+    },
+  } as unknown as ServiceMapEdge;
+}
+
 describe('EdgeContents', () => {
   it('shows stats for a producer edge (service to messaging queue)', () => {
     const edge = createMsgQueueProducerEdge();
@@ -98,6 +109,18 @@ describe('EdgeContents', () => {
 
   it('shows no-metrics message for an outgoing edge from a grouped messaging node', () => {
     const edge = createGroupedMessagingOutgoingEdge();
+
+    render(
+      <IntlProvider locale="en">
+        <EdgeContents selection={edge} {...defaultProps} />
+      </IntlProvider>
+    );
+
+    expect(screen.getByTestId(TEST_SUBJ)).toBeInTheDocument();
+  });
+
+  it('shows no-metrics message for an incoming edge to a grouped messaging node', () => {
+    const edge = createGroupedMessagingIncomingEdge();
 
     render(
       <IntlProvider locale="en">

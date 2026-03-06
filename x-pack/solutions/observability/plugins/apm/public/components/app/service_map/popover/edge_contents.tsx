@@ -9,7 +9,7 @@ import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
+import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
@@ -17,7 +17,7 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { isExitSpan } from '../../../../../common/service_map/utils';
+import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -79,8 +79,7 @@ export function EdgeContents({
   const sourceServiceName =
     sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
   // Message queue consumer edges (messaging dependency to service) are derived while transforming data into Service Map format, no metrics are available for these edges
-  const isMsgQueueConsumerEdge =
-    sourceData != null && isExitSpan(sourceData) && sourceData[SPAN_TYPE] === 'messaging';
+  const isMsgQueueConsumerEdge = isMessagingExitSpan(sourceData);
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {

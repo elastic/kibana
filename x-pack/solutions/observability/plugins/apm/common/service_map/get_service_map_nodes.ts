@@ -27,6 +27,10 @@ import { FORBIDDEN_SERVICE_NAMES } from './constants';
 
 // Exports helper functions for use in React Flow transformation
 
+export const isMessagingExitSpan = (node?: ConnectionNode): boolean => {
+  return node !== undefined && isExitSpan(node) && node[SPAN_TYPE] === 'messaging';
+};
+
 export function addMessagingConnections(
   connections: Connection[],
   destinationServices: ExitSpanDestination[]
@@ -44,7 +48,7 @@ export function addMessagingConnections(
 
   const messagingConnections = connections.reduce<Connection[]>((acc, connection) => {
     const destination = connection.destination;
-    if (isExitSpan(destination) && destination[SPAN_TYPE] === 'messaging') {
+    if (isMessagingExitSpan(destination)) {
       const matchedServices =
         servicesByDestination.get(destination[SPAN_DESTINATION_SERVICE_RESOURCE]) ?? [];
       matchedServices.forEach((matchedService) => {
