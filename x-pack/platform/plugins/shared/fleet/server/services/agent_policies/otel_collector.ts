@@ -62,8 +62,7 @@ export function generateOtelcolConfig(
         );
 
         const shouldAddAPMConfig =
-          (stream.data_stream.type === dataTypes.Traces || hasDynamicSignalTypes(packageInfo)) &&
-          stream[USE_APM_VAR_NAME] === true;
+          stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true;
 
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
