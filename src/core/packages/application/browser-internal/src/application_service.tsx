@@ -147,7 +147,7 @@ export class ApplicationService {
     });
 
     this.navigate = (url, state, replace) => {
-      // any side effects are executed immediately to reduce breaking changes due to moving to concurrent mode
+      // basePath not needed here because `history` is configured with basename
       return replace ? this.history!.replace(url, state) : this.history!.push(url, state);
     };
 
