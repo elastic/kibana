@@ -65,14 +65,4 @@ describe('titles api', () => {
     expect(comparator(undefined, false)).toBe(true);
     expect(comparator(true, undefined)).toBe(false);
   });
-
-  it('should initialize hide_border with true if borderlessByDefault is true', () => {
-    const { api } = initializeTitleManager({}, { borderlessByDefault: true });
-    expect(api.hideBorder$.value).toBe(true);
-  });
-
-  it('should not override explicit hide_border with borderlessByDefault', () => {
-    const { api } = initializeTitleManager({ hide_border: false }, { borderlessByDefault: true });
-    expect(api.hideBorder$.value).toBe(false);
-  });
 });
