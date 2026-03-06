@@ -17,6 +17,7 @@ export type {
   OriginOnlyRouting,
   SpaceNPRERouting,
   AllProjectsRouting,
+  HeaderRouting,
   ScopeableRequest,
   UnauthorizedErrorHandlerResult,
   UnauthorizedErrorHandler,

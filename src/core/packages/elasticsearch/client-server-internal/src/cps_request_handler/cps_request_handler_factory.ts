@@ -18,7 +18,12 @@ import { getCpsRequestHandler } from './cps_request_handler';
  * @internal
  */
 export function getRequestHandlerFactory(cpsEnabled: boolean): OnRequestHandlerFactory {
-  return ({ projectRouting }) => {
+  return (opts) => {
+    if ('resolvedProjectRouting' in opts) {
+      return getCpsRequestHandler(cpsEnabled, opts.resolvedProjectRouting);
+    }
+
+    const { projectRouting } = opts;
     switch (projectRouting) {
       case 'origin-only':
         return getCpsRequestHandler(cpsEnabled, PROJECT_ROUTING_ORIGIN);

@@ -12,6 +12,7 @@ import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { type ICPSManager, type CPSAppAccessResolver } from '@kbn/cps-utils';
+import { PROJECT_ROUTING_HEADER } from '@kbn/cps-common';
 import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
 import { CPSManager } from './services/cps_manager';
 
@@ -44,6 +45,20 @@ export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
         logger: this.initializerContext.logger.get('cps'),
         application: core.application,
         appAccessResolvers: this.appAccessResolvers,
+      });
+
+      core.http.intercept({
+        request(fetchOptions) {
+          const projectRouting = manager.getProjectRouting();
+          if (projectRouting) {
+            return {
+              headers: {
+                ...fetchOptions.headers,
+                [PROJECT_ROUTING_HEADER]: projectRouting,
+              },
+            };
+          }
+        },
       });
 
       // Register project picker only after the default project routing is known

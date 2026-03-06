@@ -236,6 +236,59 @@ describe('getCpsRequestHandler', () => {
       );
     });
 
+    describe('raw transport.request() calls (no acceptedParams metadata)', () => {
+      const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN);
+
+      it('injects project_routing into body when acceptedParams is undefined and body exists', () => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_query',
+          body: { query: 'FROM logs | LIMIT 10' },
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect((params.body as Record<string, unknown>)?.project_routing).toBe(
+          PROJECT_ROUTING_ORIGIN
+        );
+      });
+
+      it('does not override existing project_routing in body for raw transport.request()', () => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_query',
+          body: { query: 'FROM logs | LIMIT 10', project_routing: 'custom-value' },
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect((params.body as Record<string, unknown>)?.project_routing).toBe('custom-value');
+      });
+
+      it('does not inject when acceptedParams is undefined and body is absent', () => {
+        const params: TransportRequestParams = {
+          method: 'GET',
+          path: '/_query/async/some-id',
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect(params.body).toBeUndefined();
+      });
+
+      it('does not inject when acceptedParams is undefined and body is not a plain object', () => {
+        const params: TransportRequestParams = {
+          method: 'POST',
+          path: '/_bulk',
+          body: 'ndjson\nlines\n',
+        };
+
+        onRequest({ scoped: true }, params, {});
+
+        expect(params.body).toBe('ndjson\nlines\n');
+      });
+    });
+
     describe('backward compatibility: flat-array acceptedParams (legacy / transport.request() callers)', () => {
       const onRequest = getCpsRequestHandler(true, PROJECT_ROUTING_ORIGIN);
 

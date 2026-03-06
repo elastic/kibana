@@ -15,6 +15,7 @@ export type {
   OriginOnlyRouting,
   SpaceNPRERouting,
   AllProjectsRouting,
+  HeaderRouting,
 } from './cluster_client';
 export type { ScopeableRequest, FakeRequest, UrlRequest, ScopeableUrlRequest } from './types';
 export type { IScopedClusterClient } from './scoped_cluster_client';

@@ -147,5 +147,4 @@ export type ISearchOptionsSerializable = Pick<
   | 'retrieveResults'
   | 'executionContext'
   | 'stream'
-  | 'projectRouting'
 >;

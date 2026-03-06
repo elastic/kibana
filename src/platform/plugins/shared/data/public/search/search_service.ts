@@ -17,7 +17,6 @@ import type {
   PluginInitializerContext,
   StartServicesAccessor,
 } from '@kbn/core/public';
-import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -29,7 +28,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { ICPSManager } from '@kbn/cps-utils';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
@@ -111,7 +110,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private sessionsClient!: ISessionsClient;
   private backgroundSearchNotifier!: BackgroundSearchNotifier;
   private searchSessionEBTManager!: ISearchSessionEBTManager;
-  private cpsManager?: ICPSManager;
+  private cpsStart?: CPSPluginStart;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -150,7 +149,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
       searchConfig: this.initializerContext.config.get().search,
-      getCPSManager: () => this.cpsManager,
+      getProjectRouting: () => {
+        return this.cpsStart?.cpsManager?.getProjectRouting();
+      },
     });
 
     expressions.registerFunction(
@@ -252,6 +253,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchStart {
     const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
 
+    this.cpsStart = cps;
+
     const search = ((request, options = {}) => {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
@@ -266,8 +269,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       notifications,
       ...startServices,
     };
-
-    this.cpsManager = cps?.cpsManager;
 
     const searchSourceDependencies: SearchSourceDependencies = {
       aggs,

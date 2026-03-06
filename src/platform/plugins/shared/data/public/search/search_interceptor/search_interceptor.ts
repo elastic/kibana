@@ -64,7 +64,6 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import { AbortReason, defaultFreeze } from '@kbn/kibana-utils-plugin/common';
-import type { ICPSManager } from '@kbn/cps-utils';
 import {
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
@@ -105,7 +104,12 @@ export interface SearchInterceptorDeps {
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
   searchConfig: SearchConfigSchema;
-  getCPSManager?: () => ICPSManager | undefined;
+  /**
+   * Returns the current project routing value for cache key differentiation.
+   * When the value changes, searches with the same params produce different cache keys,
+   * preventing stale results from being served.
+   */
+  getProjectRouting?: () => string | undefined;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -184,7 +188,9 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
-    const { sessionId, projectRouting } = options;
+    const { sessionId } = options;
+    const projectRouting =
+      options.projectRouting ?? this.deps.getProjectRouting?.(); // this is here only to make sure that the cache key is different when the project routing changes
     const hashOptions = {
       ...request.params,
       sessionId,
@@ -285,9 +291,6 @@ export class SearchInterceptor {
     if (combined.executionContext !== undefined) {
       serializableOptions.executionContext = combined.executionContext;
     }
-    if (combined.projectRouting !== undefined) {
-      serializableOptions.projectRouting = combined.projectRouting;
-    }
 
     return serializableOptions;
   }
@@ -310,12 +313,10 @@ export class SearchInterceptor {
         { isSearchStored: false },
         () => {},
       ];
-      const projectRouting = this.deps.getCPSManager?.()?.getProjectRouting(options.projectRouting);
       return this.runSearch(
         { id, ...request },
         {
           ...options,
-          projectRouting,
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal,
           isSearchStored,

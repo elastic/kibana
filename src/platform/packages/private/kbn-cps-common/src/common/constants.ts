@@ -19,3 +19,11 @@ export const PROJECT_ROUTING = {
 } as const;
 
 export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
+
+/**
+ * HTTP header name used by the CPS plugin to propagate the current project routing
+ * selection from the browser to the Kibana server. The core ES client's "header" routing
+ * mode reads this header to determine which `project_routing` value to inject into
+ * outgoing Elasticsearch requests.
+ */
+export const PROJECT_ROUTING_HEADER = 'x-kbn-project-routing';

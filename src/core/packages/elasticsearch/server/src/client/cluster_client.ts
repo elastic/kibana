@@ -43,7 +43,7 @@ export interface AsScopedOptions {
    * stripped from requests to avoid Elasticsearch rejections and to preserve traditional
    * single-cluster routing behavior.
    */
-  projectRouting: 'origin-only' | 'space' | 'all';
+  projectRouting: 'origin-only' | 'space' | 'all' | 'header';
 }
 
 /**
@@ -72,6 +72,19 @@ export interface SpaceNPRERouting extends AsScopedOptions {
  */
 export interface AllProjectsRouting extends AsScopedOptions {
   projectRouting: 'all';
+}
+
+/**
+ * {@link AsScopedOptions} variant that reads the project routing value from the incoming
+ * Kibana HTTP request's `x-kbn-project-routing` header. The CPS plugin injects this header
+ * on every client-side request. If the header is absent, falls back to the space NPRE.
+ *
+ * Requires a {@link ScopeableUrlRequest} to be passed to `asScoped` so the space can be
+ * extracted from the URL pathname as a fallback when the header is not present.
+ * @public
+ */
+export interface HeaderRouting extends AsScopedOptions {
+  projectRouting: 'header';
 }
 
 /**
@@ -105,6 +118,18 @@ export interface IClusterClient {
    * @param opts - {@link SpaceNPRERouting} options with `projectRouting` set to `'space'`.
    */
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
+  /**
+   * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
+   * forwarding the request's authentication headers to Elasticsearch.
+   *
+   * In CPS-enabled Serverless environments, the `opts` parameter controls how `project_routing`
+   * is injected into outgoing requests. See {@link AsScopedOptions} for details.
+   *
+   * @param request - A {@link ScopeableUrlRequest} whose URL provides the fallback space NPRE
+   *   when the `x-kbn-project-routing` header is absent.
+   * @param opts - {@link HeaderRouting} options with `projectRouting` set to `'header'`.
+   */
+  asScoped(request: ScopeableUrlRequest, opts: HeaderRouting): IScopedClusterClient;
   /**
    * Creates a {@link IScopedClusterClient | scoped cluster client} bound to the given request,
    * forwarding the request's authentication headers to Elasticsearch.

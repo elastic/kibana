@@ -546,7 +546,7 @@ export class SearchService {
       const deps = {
         searchSessionsClient,
         savedObjectsClient,
-        esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts }),
+        esClient: this.createScopedEsClient({ client: elasticsearch.client, request, opts: {...opts, projectRouting: 'header'} }),
         uiSettingsClient: new CachedUiSettingsClient(
           uiSettings.asScopedToClient(savedObjectsClient)
         ),

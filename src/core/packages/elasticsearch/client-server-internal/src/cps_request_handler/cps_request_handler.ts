@@ -33,6 +33,10 @@ export function getCpsRequestHandler(
         } else {
           injectProjectRoutingBody(projectRouting, params, body);
         }
+      } else if (!acceptedParams && body) {
+        // Raw transport.request() calls don't carry acceptedParams metadata.
+        // Default to body injection when a body is present (covers ES|QL _query endpoints).
+        injectProjectRoutingBody(projectRouting, params, body);
       }
     } else {
       // Strip from body, querystring, and NDJSON bulk body unconditionally: project_routing is

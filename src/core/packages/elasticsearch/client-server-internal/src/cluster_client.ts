@@ -27,7 +27,9 @@ import type {
   OriginOnlyRouting,
   SpaceNPRERouting,
   AllProjectsRouting,
+  HeaderRouting,
 } from '@kbn/core-elasticsearch-server';
+import { PROJECT_ROUTING_HEADER } from '@kbn/cps-common';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
 import { configureClient } from './configure_client';
@@ -51,9 +53,11 @@ const noop = () => undefined;
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
  */
-export type OnRequestHandlerFactory = (opts: {
-  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
-}) => OnRequestHandler;
+export type OnRequestHandlerFactory = (
+  opts:
+    | { projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest }
+    | { resolvedProjectRouting: string }
+) => OnRequestHandler;
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
@@ -122,6 +126,7 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
+  asScoped(request: ScopeableUrlRequest, opts: HeaderRouting): IScopedClusterClient;
   asScoped(
     request: ScopeableRequest,
     opts?: OriginOnlyRouting | AllProjectsRouting
@@ -131,15 +136,13 @@ export class ClusterClient implements ICustomClusterClient {
       const scopedHeaders = this.getScopedHeaders(request);
       const { projectRouting } = opts;
 
+      const onRequest = this.resolveOnRequestHandler(projectRouting, request);
+
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory(
-          projectRouting === 'space'
-            ? { projectRouting: request as ScopeableUrlRequest }
-            : { projectRouting }
-        ),
+        onRequest,
       });
 
       // TODO: callers who pass { Transport: CustomTransport } to child() bypass our
@@ -187,6 +190,40 @@ export class ClusterClient implements ICustomClusterClient {
         setAuthHeaders: this.authHeaders!.set,
       });
   };
+
+  private resolveOnRequestHandler(
+    projectRouting: AsScopedOptions['projectRouting'],
+    request: ScopeableRequest
+  ): OnRequestHandler {
+    if (projectRouting === 'header') {
+      const headerValue = this.getProjectRoutingHeader(request);
+      if (headerValue) {
+        return this.onRequestHandlerFactory({ resolvedProjectRouting: headerValue });
+      }
+      // Fall back to space NPRE when the header is absent
+      return this.onRequestHandlerFactory({
+        projectRouting: request as ScopeableUrlRequest,
+      });
+    }
+
+    if (projectRouting === 'space') {
+      return this.onRequestHandlerFactory({
+        projectRouting: request as ScopeableUrlRequest,
+      });
+    }
+
+    return this.onRequestHandlerFactory({ projectRouting });
+  }
+
+  private getProjectRoutingHeader(request: ScopeableRequest): string | undefined {
+    if (isRealRequest(request)) {
+      const rawHeaders = ensureRawRequest(request).headers ?? {};
+      const value = rawHeaders[PROJECT_ROUTING_HEADER];
+      return Array.isArray(value) ? value[0] : value ?? undefined;
+    }
+    const value = request?.headers?.[PROJECT_ROUTING_HEADER];
+    return typeof value === 'string' ? value : undefined;
+  }
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
