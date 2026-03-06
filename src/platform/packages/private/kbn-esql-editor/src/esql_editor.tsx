@@ -72,6 +72,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { createTimedCallbacks } from './telemetry/timed_callbacks';
 import { useEsqlEditorActionsRegistration } from './editor_actions_context';
 import {
   filterDataErrors,
@@ -807,11 +808,15 @@ const ESQLEditorInternal = function ESQLEditor({
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
       if (editorModel.current) {
-        return await ESQLLang.validate(editorModel.current, code, esqlCallbacks, options);
+        const { callbacks: timedCallbacks, getCallbacksDuration } =
+          createTimedCallbacks(esqlCallbacks);
+        const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
+        return { ...result, callbacksDuration: getCallbacksDuration() };
       }
       return {
         errors: [],
         warnings: [],
+        callbacksDuration: 0,
       };
     },
     [esqlCallbacks, code]
@@ -821,10 +826,10 @@ const ESQLEditorInternal = function ESQLEditor({
     const setQueryToTheCache = async () => {
       if (editorRef?.current) {
         try {
-          const parserMessages = await parseMessages();
-          const clientParserStatus = parserMessages.errors?.length
+          const { errors, warnings } = await parseMessages();
+          const clientParserStatus = errors?.length
             ? 'error'
-            : parserMessages.warnings.length
+            : warnings.length
             ? 'warning'
             : 'success';
 
@@ -856,7 +861,11 @@ const ESQLEditorInternal = function ESQLEditor({
     }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
+      const {
+        warnings: parserWarnings,
+        errors: parserErrors,
+        callbacksDuration,
+      } = await parseMessages({
         invalidateColumnsCache,
       });
 
@@ -887,7 +896,7 @@ const ESQLEditorInternal = function ESQLEditor({
         markers.push(...underlinedMessages);
       }
 
-      trackValidationLatencyEnd(active);
+      trackValidationLatencyEnd(active, callbacksDuration);
 
       if (active) {
         const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
