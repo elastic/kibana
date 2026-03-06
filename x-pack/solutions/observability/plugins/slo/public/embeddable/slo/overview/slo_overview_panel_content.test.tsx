@@ -10,8 +10,10 @@ import { getByTestId, queryByTestId } from '@testing-library/react';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { Subject } from 'rxjs';
 import { render } from '../../../utils/test_helper';
-import { hasSloGroupBy, SloOverviewPanelContent } from './slo_overview_panel_content';
+import type { GetSLOResponse } from '@kbn/slo-schema';
+import { baseSlo } from '../../../data/slo';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
+import { hasSloGroupBy, SloOverviewPanelContent } from './slo_overview_panel_content';
 
 jest.mock('../../../hooks/use_fetch_slo_details');
 jest.mock('./slo_overview', () => ({
@@ -34,6 +36,9 @@ const defaultProps = {
   remoteName: undefined,
   reloadSubject: new Subject<boolean>(),
 };
+
+const sloWithoutGroupBy: GetSLOResponse = { ...baseSlo, id: 'slo-12345678' };
+const sloWithGroupBy: GetSLOResponse = { ...baseSlo, id: 'slo-12345678', groupBy: ['host'] };
 
 describe('hasSloGroupBy', () => {
   it('returns false when groupBy is null or undefined', () => {
@@ -86,14 +91,14 @@ describe('SloOverviewPanelContent', () => {
 
   it('renders single overview (SloOverview) when overviewMode is single and SLO has no group_by', () => {
     useFetchSloDetailsMock.mockReturnValue({
-      data: { groupBy: undefined },
+      data: sloWithoutGroupBy,
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFetchSloDetails>);
+    });
 
     const { container } = render(<SloOverviewPanelContent {...defaultProps} />);
 
@@ -104,14 +109,14 @@ describe('SloOverviewPanelContent', () => {
 
   it('renders single overview when overviewMode is single and instance is not ALL', () => {
     useFetchSloDetailsMock.mockReturnValue({
-      data: { groupBy: ['host'] },
+      data: sloWithGroupBy,
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFetchSloDetails>);
+    });
 
     const { container } = render(
       <SloOverviewPanelContent {...defaultProps} sloInstanceId="instance-1" />
@@ -123,14 +128,14 @@ describe('SloOverviewPanelContent', () => {
 
   it('renders card list when overviewMode is single, instance is ALL, and SLO has group_by', () => {
     useFetchSloDetailsMock.mockReturnValue({
-      data: { groupBy: ['host'] },
+      data: sloWithGroupBy,
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFetchSloDetails>);
+    });
 
     const { container } = render(<SloOverviewPanelContent {...defaultProps} />);
 
@@ -142,14 +147,14 @@ describe('SloOverviewPanelContent', () => {
 
   it('renders single overview when overviewMode is single, instance is ALL, but sloId is missing', () => {
     useFetchSloDetailsMock.mockReturnValue({
-      data: { groupBy: ['host'] },
+      data: sloWithGroupBy,
       isLoading: false,
       isInitialLoading: false,
       isRefetching: false,
       isSuccess: true,
       isError: false,
       refetch: jest.fn(),
-    } as ReturnType<typeof useFetchSloDetails>);
+    });
 
     const { container } = render(<SloOverviewPanelContent {...defaultProps} sloId={undefined} />);
 
