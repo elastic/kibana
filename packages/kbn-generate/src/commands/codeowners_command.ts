@@ -13,6 +13,7 @@ import Path from 'path';
 import { REPO_ROOT, kibanaPackageJson } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 
+import { cleanNonGeneratedSection } from '../lib/clean_codeowners';
 import type { GenerateCommand } from '../generate_command';
 
 const REL = '.github/CODEOWNERS';
@@ -54,8 +55,14 @@ const ULTIMATE_PRIORITY_RULES =
 export const CodeownersCommand: GenerateCommand = {
   name: 'codeowners',
   description: 'Update the codeowners file based on the package manifest files',
-  usage: 'node scripts/generate codeowners',
-  async run({ log }) {
+  usage: 'node scripts/generate codeowners [--clean-empty]',
+  flags: {
+    boolean: ['clean-empty'],
+    help: `
+      --clean-empty  Remove entries from the overrides section whose path no longer exists in the repo
+    `,
+  },
+  async run({ log, flags }) {
     const pkgs = getPackages(REPO_ROOT);
     const path = Path.resolve(REPO_ROOT, REL);
     const oldCodeowners = await Fsp.readFile(path, 'utf8');
@@ -71,6 +78,18 @@ export const CodeownersCommand: GenerateCommand = {
     const ultStart = content.indexOf(ULTIMATE_PRIORITY_RULES_COMMENT);
     if (ultStart !== -1) {
       content = content.slice(0, ultStart);
+    }
+
+    if (flags['clean-empty']) {
+      const { cleaned: cleanedContent, removed } = cleanNonGeneratedSection(content, REPO_ROOT);
+      content = cleanedContent;
+      removed.forEach(({ lineNumber, line }) => {
+        log.warning(`  removed line ${lineNumber}: ${line.trim()}`);
+      });
+      if (removed.length > 0) {
+        const word = removed.length === 1 ? 'entry' : 'entries';
+        log.info(`Cleaned ${removed.length} dead CODEOWNERS ${word} from overrides section`);
+      }
     }
 
     // sort genarated entries by directory name
