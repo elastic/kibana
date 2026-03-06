@@ -51,27 +51,15 @@ export const splitQueryAndCondition = (query: string): SplitQueryResult | null =
 
     const { commands } = root;
 
-    // Find the index of the last WHERE command
-    let lastWhereIndex = -1;
-    for (let i = commands.length - 1; i >= 0; i--) {
-      if (commands[i].name === 'where') {
-        lastWhereIndex = i;
-        break;
-      }
-    }
-
-    // No WHERE clause found
-    if (lastWhereIndex === -1) {
+    // Only split if the last command is WHERE — if WHERE appears earlier
+    // (followed by STATS, etc.), the condition wouldn't properly bound
+    // subsequent transformations.
+    const lastCommand = commands.at(-1);
+    if (lastCommand?.name !== 'where') {
       return null;
     }
 
-    // Only split if WHERE is the last command - if there are commands after it,
-    // the condition wouldn't properly bound subsequent transformations (e.g., STATS BY)
-    if (lastWhereIndex !== commands.length - 1) {
-      return null;
-    }
-
-    const whereCommand = commands[lastWhereIndex];
+    const whereCommand = lastCommand;
 
     // Extract the condition expression from the WHERE command's arguments
     const conditionArg = whereCommand.args[0];
@@ -85,8 +73,8 @@ export const splitQueryAndCondition = (query: string): SplitQueryResult | null =
       return null;
     }
 
-    // Build the base query from all commands before the WHERE (which is guaranteed to be last)
-    const baseCommands = commands.slice(0, lastWhereIndex);
+    // Build the base query from all commands before the WHERE
+    const baseCommands = commands.slice(0, -1);
 
     // If no commands remain, return null (edge case: query was only "WHERE ...")
     if (baseCommands.length === 0) {
