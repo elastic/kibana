@@ -16,7 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
-import { CascadeRowPrimitive } from './data_cascade_row';
+import { CascadeRowPrimitive, CascadeRowHeaderSlotsScrollSyncProvider } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
 import { type GroupNode, type LeafNode } from '../../store_provider';
 import { TableHeader, useCascadeTable, type Table, type CellContext } from '../../lib/core/table';
@@ -31,7 +31,6 @@ import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
-import { ScrollSyncProvider } from '../helpers/scroll_sync';
 import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
@@ -241,7 +240,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 </div>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div {...treeGridContainerARIAAttributes} css={relativePosition}>
-                    <ScrollSyncProvider disableScrollSync={isScrolling}>
+                    <CascadeRowHeaderSlotsScrollSyncProvider disableScrollSync={isScrolling}>
                       <VirtualizedCascadeRowList<G>
                         {...{
                           activeStickyIndex,
@@ -251,7 +250,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                           listItemRenderer: virtualCascadeRowRenderer,
                         }}
                       />
-                    </ScrollSyncProvider>
+                    </CascadeRowHeaderSlotsScrollSyncProvider>
                   </div>
                 </div>
               </div>

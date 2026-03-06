@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useSyncExternalStore } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiPanel } from '@elastic/eui';
-import { useScrollSync } from '../../../helpers/scroll_sync';
+import { useRowHeaderSlotsScrollSync } from './row_header_slots_scroll_sync';
 import { useStyles as useCascadeRowHeaderSlotsRendererStyles } from './cascade_row_header_slots_renderer.styles';
 
 const SCROLL_STEP = 150;
@@ -21,37 +21,32 @@ interface CascadeRowHeaderSlotsRendererProps {
 
 const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlotsRendererProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollSync = useScrollSync();
+  const slotsScrollSync = useRowHeaderSlotsScrollSync();
 
-  const [scrollState, setScrollState] = useState(() => scrollSync.getScrollState());
+  const rowHeaderSlotsScrollSyncState = useSyncExternalStore(
+    slotsScrollSync.subscribe,
+    slotsScrollSync.getSnapshot
+  );
 
   useLayoutEffect(() => {
     const el = containerRef.current;
     if (el) {
-      scrollSync.register(el);
-      return () => scrollSync.unregister(el);
+      slotsScrollSync.register(el);
+      return () => slotsScrollSync.unregister(el);
     }
-  }, [scrollSync]);
-
-  const handleScroll = useCallback(() => {
-    if (containerRef.current) {
-      scrollSync.syncScroll(containerRef.current);
-      setScrollState(scrollSync.getScrollState());
-    }
-  }, [scrollSync]);
+  }, [slotsScrollSync]);
 
   const handleMouseEnter = useCallback(() => {
     if (containerRef.current) {
-      scrollSync.notifyHover(containerRef.current);
-      setScrollState(scrollSync.getScrollState());
+      slotsScrollSync.notifyHover(containerRef.current);
     }
-  }, [scrollSync]);
+  }, [slotsScrollSync]);
 
   const handleMouseLeave = useCallback(() => {
     if (containerRef.current) {
-      scrollSync.notifyHoverEnd(containerRef.current);
+      slotsScrollSync.notifyHoverEnd(containerRef.current);
     }
-  }, [scrollSync]);
+  }, [slotsScrollSync]);
 
   const scrollLeft = useCallback(() => {
     if (containerRef.current) {
@@ -91,9 +86,9 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
       responsive={false}
       wrap={false}
       css={styles.slotsContainerWrapper}
-      data-scrollable={String(scrollState.isScrollable)}
-      data-can-scroll-left={String(scrollState.canScrollLeft)}
-      data-can-scroll-right={String(scrollState.canScrollRight)}
+      data-scrollable={String(rowHeaderSlotsScrollSyncState.isScrollable)}
+      data-can-scroll-left={String(rowHeaderSlotsScrollSyncState.canScrollLeft)}
+      data-can-scroll-right={String(rowHeaderSlotsScrollSyncState.canScrollRight)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -108,13 +103,7 @@ const CascadeRowHeaderSlotsRenderer = ({ headerMetaSlots }: CascadeRowHeaderSlot
           display="empty"
         />
       </EuiPanel>
-      <EuiFlexItem
-        grow
-        ref={containerRef}
-        onScroll={handleScroll}
-        css={styles.slotsContainer}
-        tabIndex={0}
-      >
+      <EuiFlexItem grow ref={containerRef} css={styles.slotsContainer} tabIndex={0}>
         <EuiFlexGroup
           css={styles.slotsContainerInner}
           gutterSize="s"
