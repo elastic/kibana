@@ -8,31 +8,28 @@
  */
 
 import Path from 'path';
-
-import { pipeline } from 'stream';
-import { promisify } from 'util';
+import Fsp from 'fs/promises';
 import fs from 'fs';
+import zlib from 'zlib';
+import { cpus } from 'os';
 
-import gulpBrotli from 'gulp-brotli';
-// @ts-expect-error
-import gulpPostCSS from 'gulp-postcss';
-// @ts-expect-error
-import gulpTerser from 'gulp-terser';
+import { minifySync } from '@swc/core';
+import { transform as lightningTransform } from 'lightningcss';
+import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
-import terser from 'terser';
-import vfs from 'vinyl-fs';
 import globby from 'globby';
 import del from 'del';
-import zlib from 'zlib';
 
 import type { Task } from '../lib';
 import { write } from '../lib';
 
 const EUI_THEME_RE = /\.v\d\.(light|dark)\.css$/;
 const ASYNC_CHUNK_RE = /\.chunk\.\d+\.js$/;
-const asyncPipeline = promisify(pipeline);
 
 const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSync(path).size, 0);
+
+const BROTLI_QUALITY = 9;
+const PARALLEL_CONCURRENCY = cpus().length;
 
 async function optimizeAssets(log: ToolingLog, assetDir: string) {
   log.info('Creating optimized assets for', assetDir);
@@ -41,31 +38,41 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     log.debug('Remove Pre Minify Sourcemaps');
     await del(['**/*.map'], { cwd: assetDir });
 
-    log.debug('Minify CSS');
-    await asyncPipeline(
-      vfs.src(['**/*.css'], { cwd: assetDir }),
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      gulpPostCSS(require('@kbn/optimizer/postcss.config').plugins),
-      vfs.dest(assetDir)
-    );
+    log.debug('Minify CSS with Lightning CSS');
+    const cssFiles = await globby(['**/*.css'], { cwd: assetDir, absolute: true });
+    await asyncForEachWithLimit(cssFiles, PARALLEL_CONCURRENCY, async (file) => {
+      const code = await Fsp.readFile(file);
+      const result = lightningTransform({
+        filename: Path.basename(file),
+        code,
+        minify: true,
+      });
+      await Fsp.writeFile(file, result.code);
+    });
 
-    log.debug('Minify JS');
-    await asyncPipeline(
-      vfs.src(['**/*.js'], { cwd: assetDir }),
-      gulpTerser({ compress: { passes: 2 }, mangle: true }, terser.minify),
-      vfs.dest(assetDir)
-    );
+    log.debug('Minify JS with SWC');
+    const jsFiles = await globby(['**/*.js'], { cwd: assetDir, absolute: true });
+    await asyncForEachWithLimit(jsFiles, PARALLEL_CONCURRENCY, async (file) => {
+      const source = await Fsp.readFile(file, 'utf8');
+      const result = minifySync(source, {
+        compress: { passes: 2 },
+        mangle: true,
+        sourceMap: false,
+      });
+      await Fsp.writeFile(file, result.code);
+    });
 
     log.debug('Brotli compress');
-    await asyncPipeline(
-      vfs.src(['**/*.{js,css}'], { cwd: assetDir }),
-      gulpBrotli({
+    const compressFiles = await globby(['**/*.{js,css}'], { cwd: assetDir, absolute: true });
+    await asyncForEachWithLimit(compressFiles, PARALLEL_CONCURRENCY, async (file) => {
+      const content = await Fsp.readFile(file);
+      const compressed = zlib.brotliCompressSync(content, {
         params: {
-          [zlib.constants.BROTLI_PARAM_QUALITY]: zlib.constants.BROTLI_MAX_QUALITY,
+          [zlib.constants.BROTLI_PARAM_QUALITY]: BROTLI_QUALITY,
         },
-      }),
-      vfs.dest(assetDir)
-    );
+      });
+      await Fsp.writeFile(file + '.br', compressed);
+    });
   } finally {
     log.indent(-4);
   }
@@ -123,7 +130,6 @@ function categorizeAssets(assetDirs: string[]) {
 
   for (const { path, category } of assets) {
     if (category === 'euiTheme') {
-      // only track borealis.light theme
       if (path.includes('borealis.light')) {
         add('css', path);
       }
@@ -148,12 +154,8 @@ export const GeneratePackagesOptimizedAssets: Task = {
     );
     const assetDirs = [npmAssetDir, srcAssetDir];
 
-    // process assets in each ui-shared-deps package
-    for (const assetDir of assetDirs) {
-      await optimizeAssets(log, assetDir);
-    }
+    await Promise.all(assetDirs.map((dir) => optimizeAssets(log, dir)));
 
-    // analyze assets to produce metrics.json file
     const groups = categorizeAssets(assetDirs);
     log.verbose('categorized assets', groups);
     const metrics = [
@@ -180,7 +182,6 @@ export const GeneratePackagesOptimizedAssets: Task = {
     ];
     log.verbose('metrics:', metrics);
 
-    // write unified metrics to the @kbn/ui-shared-deps-src asset dir
     log.debug('Create metrics.json');
     await write(Path.resolve(srcAssetDir, 'metrics.json'), JSON.stringify(metrics, null, 2));
   },

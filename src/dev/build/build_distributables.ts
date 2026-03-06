@@ -81,17 +81,20 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallDependencies);
     await globalRun(Tasks.GeneratePackagesOptimizedAssets);
 
-    // Run on all source files
-    // **/packages need to be read
-    // before DeletePackagesFromBuildRoot
-    await globalRun(Tasks.CreateNoticeFile);
-    await globalRun(Tasks.CreateXPackNoticeFile);
+    // **/packages need to be read before DeletePackagesFromBuildRoot
+    await Promise.all([globalRun(Tasks.CreateNoticeFile), globalRun(Tasks.CreateXPackNoticeFile)]);
 
-    await globalRun(Tasks.DeletePackagesFromBuildRoot);
-    await globalRun(Tasks.UpdateLicenseFile);
-    await globalRun(Tasks.RemovePackageJsonDeps);
-    await globalRun(Tasks.CleanPackageManagerRelatedFiles);
-    await globalRun(Tasks.CleanExtraFilesFromModules);
+    await Promise.all([
+      globalRun(Tasks.DeletePackagesFromBuildRoot),
+      globalRun(Tasks.CleanExtraFilesFromModules),
+    ]);
+
+    await Promise.all([
+      globalRun(Tasks.UpdateLicenseFile),
+      globalRun(Tasks.RemovePackageJsonDeps),
+      globalRun(Tasks.CleanPackageManagerRelatedFiles),
+    ]);
+
     await globalRun(Tasks.CleanEmptyFolders);
     await globalRun(Tasks.FetchAgentVersionsList);
   }

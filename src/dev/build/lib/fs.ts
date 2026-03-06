@@ -12,8 +12,8 @@ import Fsp from 'fs/promises';
 import * as Rx from 'rxjs';
 import { createHash } from 'crypto';
 import { pipeline } from 'stream/promises';
-import { resolve, dirname, isAbsolute, sep } from 'path';
-import { createGunzip } from 'zlib';
+import { resolve, dirname, isAbsolute, basename, sep } from 'path';
+import { createGunzip, createGzip } from 'zlib';
 import { inspect } from 'util';
 
 import archiver from 'archiver';
@@ -21,6 +21,7 @@ import globby from 'globby';
 import cpy from 'cpy';
 import del from 'del';
 import * as tar from 'tar';
+import { pack as tarFsPack } from 'tar-fs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
@@ -231,29 +232,37 @@ interface CompressTarOptions {
   rootDirectoryName?: string;
   source: string;
   destination: string;
-  archiverOptions?: archiver.TarOptions & archiver.CoreOptions;
+  gzipLevel?: number;
 }
 export async function compressTar({
   source,
   destination,
-  archiverOptions,
+  gzipLevel = 6,
   createRootDirectory,
   rootDirectoryName,
 }: CompressTarOptions) {
-  const output = fs.createWriteStream(destination);
-  const archive = archiver('tar', archiverOptions);
-  const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
-  const name = createRootDirectory ? folder : false;
-  archive.pipe(output);
+  const folder = rootDirectoryName ?? basename(source);
 
   let fileCount = 0;
-  archive.on('entry', (entry) => {
-    if (entry.stats?.isFile()) {
+  const packStream = tarFsPack(source, {
+    map(header) {
+      if (createRootDirectory) {
+        header.name = folder + '/' + header.name;
+      }
+      return header;
+    },
+  });
+
+  packStream.on('entry', (header: { type: string }) => {
+    if (header.type === 'file') {
       fileCount += 1;
     }
   });
 
-  await archive.directory(source, name).finalize();
+  const gzip = createGzip({ level: gzipLevel });
+  const output = fs.createWriteStream(destination);
+
+  await pipeline(packStream, gzip, output);
 
   return fileCount;
 }
