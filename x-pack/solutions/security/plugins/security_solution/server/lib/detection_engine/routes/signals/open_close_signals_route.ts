@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTS_API_READ } from '@kbn/security-solution-features/constants';
 import { ALERT_CLOSING_REASON_VALIDATION_ERROR } from './translations';
 import { DefaultClosingReasonSchema } from '../../../../../common/types';

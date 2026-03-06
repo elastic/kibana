@@ -6,16 +6,23 @@
  */
 
 import { each } from 'lodash';
+import type { EndpointRunScriptActionRequestParams } from '../../../../common/api/endpoint';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type {
   RuleResponseEndpointAction,
   ProcessesParams,
 } from '../../../../common/api/detection_engine';
-import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
+import {
+  getErrorProcessAlerts,
+  getIsolateAlerts,
+  getProcessAlerts,
+  getResponseActionDataFromAlert,
+} from './utils';
 import type { AlertsAction, ResponseActionAlerts } from './types';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type {
+  AutomatedRunScriptConfig,
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
 } from '../../../../common/endpoint/types';
@@ -50,6 +57,8 @@ export const endpointResponseAction = async (
     username: 'unknown',
     spaceId,
   });
+
+  logger.debug(() => `Processing automated response action: ${stringify(responseAction)}`);
 
   const processResponseActionClientError = (err: Error, endpointIds: string[]): Promise<void> => {
     errors.push(
@@ -149,6 +158,84 @@ export const endpointResponseAction = async (
 
       response.push(Promise.all([processActions, processActionsWithError]));
 
+      break;
+
+    case 'runscript':
+      if (
+        !endpointAppContextService.experimentalFeatures.responseActionsEndpointAutomatedRunScript
+      ) {
+        logger.debug(
+          `${logMsgPrefix}: Endpoint runscript automated response action feature is not enabled`
+        );
+      } else {
+        const processedAgentIds = new Set<string>();
+
+        for (const alert of alerts) {
+          const alertData = getResponseActionDataFromAlert(alert);
+
+          if (processedAgentIds.has(alertData.agentId)) {
+            // eslint-disable-next-line no-continue
+            continue;
+          }
+
+          processedAgentIds.add(alert.agent.id);
+
+          logger.debug(
+            () => `${logMsgPrefix}: Alert data for use with runscript: ${stringify(alertData)}`
+          );
+
+          let ruleScriptConfig: EndpointRunScriptActionRequestParams | undefined;
+          let error: string | undefined;
+
+          if (!alertData.hostOsType) {
+            error = `Unable to determine host OS type from alert [${alertData.alertId}]`;
+          } else {
+            ruleScriptConfig = (
+              responseAction.params.config as AutomatedRunScriptConfig | undefined
+            )?.[alertData.hostOsType];
+          }
+
+          logger.debug(
+            () =>
+              `${logMsgPrefix}: runscript configuration for OS type [${
+                alertData.hostOsType
+              }]: ${stringify(ruleScriptConfig)}`
+          );
+
+          // If we have an error
+          //  - OR -
+          //  the rule defined a runscript configuration for this OS type
+          // then create the action request
+          if (error || (ruleScriptConfig && ruleScriptConfig.scriptId)) {
+            response.push(
+              responseActionsClient.runscript(
+                {
+                  endpoint_ids: [alertData.agentId],
+                  alert_ids: [alertData.alertId],
+                  comment: responseAction.params.comment,
+                  parameters: {
+                    scriptId: ruleScriptConfig?.scriptId ?? 'error',
+                    scriptInput: ruleScriptConfig?.scriptInput,
+                    timeout: ruleScriptConfig?.timeout,
+                  },
+                },
+                {
+                  hosts: { [alertData.agentId]: { name: alertData.hostName } },
+                  ruleId: alertData.ruleId,
+                  ruleName: alertData.ruleName,
+                  error,
+                }
+              )
+            );
+          }
+
+          if (!error && ruleScriptConfig && !ruleScriptConfig.scriptId) {
+            logger.debug(
+              `${logMsgPrefix}: Skipping 'runscript' response action for alert [${alertData.alertId}]: No script defined for OS type [${alertData.hostOsType}]`
+            );
+          }
+        }
+      }
       break;
 
     default:
