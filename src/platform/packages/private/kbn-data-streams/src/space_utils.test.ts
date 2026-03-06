@@ -84,10 +84,6 @@ describe('space_utils', () => {
       expect(() => throwOnIdWithPathTraversal('uuid-4a5b-c6d7')).not.toThrow();
       expect(() => throwOnIdWithPathTraversal('space::doc-id')).not.toThrow();
     });
-
-    it('should mention path traversal in the error message', () => {
-      expect(() => throwOnIdWithPathTraversal('a/b')).toThrow(/path traversal/);
-    });
   });
 
   describe('generateSpacePrefixedId', () => {

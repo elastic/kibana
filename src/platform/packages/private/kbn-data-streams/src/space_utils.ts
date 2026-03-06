@@ -47,8 +47,7 @@ export function throwOnIdWithPathTraversal(id: string): void {
   const forbidden = FORBIDDEN_ID_CHARS.filter((char) => id.includes(char));
   if (forbidden.length > 0) {
     throw new Error(
-      `Invalid document ID: IDs cannot contain '${forbidden.join("', '")}'. ` +
-        `These characters can enable path traversal attacks.`
+      `Invalid document ID: IDs cannot contain '${FORBIDDEN_ID_CHARS.join("', '")}'.`
     );
   }
 }

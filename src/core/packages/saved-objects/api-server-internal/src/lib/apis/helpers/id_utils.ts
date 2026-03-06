@@ -30,7 +30,7 @@ export const assertValidId = (id: string): void => {
   const forbidden = FORBIDDEN_ID_CHARS.filter((char) => id.includes(char));
   if (forbidden.length > 0) {
     throw SavedObjectsErrorHelpers.createBadRequestError(
-      `Invalid saved object ID: IDs cannot contain '${forbidden.join("', '")}'`
+      `Invalid saved object ID: IDs cannot contain '${FORBIDDEN_ID_CHARS.join("', '")}'.`
     );
   }
 };
