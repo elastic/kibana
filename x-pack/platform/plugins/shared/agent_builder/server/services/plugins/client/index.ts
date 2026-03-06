@@ -6,7 +6,7 @@
  */
 
 export { createClient, type PluginClient } from './client';
-export { parsedArchiveToCreateRequest } from './converters';
+export { parsedArchiveToCreateRequest, toPluginDefinition } from './converters';
 export type {
   PluginDocument,
   PersistedPluginDefinition,

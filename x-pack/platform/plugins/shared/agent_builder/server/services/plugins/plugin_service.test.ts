@@ -218,4 +218,22 @@ describe('PluginServiceImpl', () => {
       ).rejects.toThrow('Download failed');
     });
   });
+
+  describe('deletePlugin', () => {
+    it('delegates to client.delete', async () => {
+      mockClient.delete.mockResolvedValue(undefined);
+
+      await service.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
+
+      expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
+    });
+
+    it('propagates errors from client.delete', async () => {
+      mockClient.delete.mockRejectedValue(new Error('Not found'));
+
+      await expect(
+        service.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
+      ).rejects.toThrow('Not found');
+    });
+  });
 });

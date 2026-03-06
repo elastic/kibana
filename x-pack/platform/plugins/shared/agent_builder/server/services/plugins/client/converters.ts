@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
+import type { ParsedPluginArchive, PluginDefinition } from '@kbn/agent-builder-common';
 import type { PluginProperties } from './storage';
 import { unmanagedAssetsToEs, unmanagedAssetsFromEs } from './storage';
 import type {
@@ -100,6 +100,19 @@ export const parsedArchiveToCreateRequest = ({
     unmanaged_assets: unmanagedAssets,
   };
 };
+
+export const toPluginDefinition = (persisted: PersistedPluginDefinition): PluginDefinition => ({
+  id: persisted.id,
+  name: persisted.name,
+  version: persisted.version,
+  description: persisted.description,
+  manifest: persisted.manifest,
+  source_url: persisted.source_url,
+  skill_ids: persisted.skill_ids,
+  unmanaged_assets: persisted.unmanaged_assets,
+  created_at: persisted.created_at,
+  updated_at: persisted.updated_at,
+});
 
 export const updateRequestToEs = ({
   current,

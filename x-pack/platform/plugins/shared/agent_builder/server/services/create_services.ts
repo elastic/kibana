@@ -22,6 +22,7 @@ import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import { createMeteringService, type MeteringService } from './metering';
+import { PluginServiceImpl } from './plugins';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -183,6 +184,12 @@ export class ServiceManager {
       meteringService: this.services.metering,
     });
 
+    const plugins = new PluginServiceImpl({
+      logger: logger.get('plugins'),
+      elasticsearch,
+      spaces,
+    });
+
     this.internalStart = {
       tools,
       agents,
@@ -198,6 +205,7 @@ export class ServiceManager {
       featureFlags,
       uiSettings,
       savedObjects,
+      plugins,
     };
 
     return this.internalStart;

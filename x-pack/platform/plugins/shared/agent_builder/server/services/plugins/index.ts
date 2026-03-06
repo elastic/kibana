@@ -6,4 +6,4 @@
  */
 
 export { PluginServiceImpl, type PluginService } from './plugin_service';
-export { type PluginClient, type PersistedPluginDefinition } from './client';
+export { type PluginClient, type PersistedPluginDefinition, toPluginDefinition } from './client';

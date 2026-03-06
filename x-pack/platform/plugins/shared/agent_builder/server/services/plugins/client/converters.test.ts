@@ -13,6 +13,7 @@ import {
   createRequestToEs,
   updateRequestToEs,
   parsedArchiveToCreateRequest,
+  toPluginDefinition,
 } from './converters';
 
 const createPluginProperties = (overrides?: Partial<PluginProperties>): PluginProperties => ({
@@ -382,6 +383,46 @@ describe('plugin converters', () => {
       expect(result.skill_ids).toBe(current.skill_ids);
       expect(result.unmanaged_assets).toBe(current.unmanaged_assets);
       expect(result.updated_at).toBe('2025-07-01T00:00:00.000Z');
+    });
+  });
+
+  describe('toPluginDefinition', () => {
+    it('converts a PersistedPluginDefinition to a PluginDefinition', () => {
+      const persisted = fromEs(createPluginDocument());
+      const result = toPluginDefinition(persisted);
+
+      expect(result).toEqual({
+        id: 'plugin-1',
+        name: 'test-plugin',
+        version: '1.0.0',
+        description: 'A test plugin',
+        manifest: {
+          author: { name: 'Test Author', email: 'test@example.com' },
+          homepage: 'https://example.com',
+          repository: 'https://github.com/test/plugin',
+          license: 'MIT',
+          keywords: ['test', 'plugin'],
+        },
+        source_url: 'https://github.com/test/plugin/archive/main.zip',
+        skill_ids: ['skill-1', 'skill-2'],
+        unmanaged_assets: {
+          commands: ['commands/cmd1.md'],
+          agents: [],
+          hooks: [],
+          mcpServers: ['mcp-config.json'],
+          outputStyles: [],
+          lspServers: [],
+        },
+        created_at: '2025-01-01T00:00:00.000Z',
+        updated_at: '2025-01-01T00:00:00.000Z',
+      });
+    });
+
+    it('handles optional source_url being undefined', () => {
+      const persisted = fromEs(createPluginDocument({ source_url: undefined }));
+      const result = toPluginDefinition(persisted);
+
+      expect(result.source_url).toBeUndefined();
     });
   });
 });

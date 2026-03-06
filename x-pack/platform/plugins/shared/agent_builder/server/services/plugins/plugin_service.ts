@@ -19,6 +19,7 @@ export interface PluginService {
     request: KibanaRequest;
     url: string;
   }): Promise<PersistedPluginDefinition>;
+  deletePlugin(options: { request: KibanaRequest; pluginId: string }): Promise<void>;
 }
 
 interface PluginServiceDeps {
@@ -70,5 +71,16 @@ export class PluginServiceImpl implements PluginService {
     });
 
     return client.create(createRequest);
+  }
+
+  async deletePlugin({
+    request,
+    pluginId,
+  }: {
+    request: KibanaRequest;
+    pluginId: string;
+  }): Promise<void> {
+    const client = await this.getScopedClient({ request });
+    await client.delete(pluginId);
   }
 }

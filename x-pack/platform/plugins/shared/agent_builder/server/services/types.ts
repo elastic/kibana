@@ -31,6 +31,7 @@ import type { AnalyticsService } from '../telemetry';
 import type { AuditLogService } from '../audit';
 import type { AgentExecutionService, TaskHandler } from './execution';
 import type { MeteringService } from './metering';
+import type { PluginService } from './plugins';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -56,6 +57,7 @@ export interface InternalStartServices {
   savedObjects: SavedObjectsServiceStart;
   execution: AgentExecutionService;
   taskHandler: TaskHandler;
+  plugins: PluginService;
 }
 
 export interface ServiceSetupDeps {

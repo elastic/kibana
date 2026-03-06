@@ -109,9 +109,9 @@ export interface PluginDefinition {
   version: string;
   description: string;
   manifest: PluginManifestMetadata;
-  sourceUrl?: string;
-  skillIds: string[];
-  unmanagedAssets: UnmanagedPluginAssets;
-  createdAt: string;
-  updatedAt: string;
+  source_url?: string;
+  skill_ids: string[];
+  unmanaged_assets: UnmanagedPluginAssets;
+  created_at: string;
+  updated_at: string;
 }
