@@ -45,6 +45,12 @@ export interface DataStreamDefinition<
    *  - api.IndicesPutIndexTemplateRequest
    *  - api.IndicesIndexTemplate
    *  - api.IndicesIndexTemplateSummary
+   *
+   * Lifecycle behavior:
+   *  - `template.lifecycle` is optional.
+   *  - If omitted, no lifecycle policy is configured by this definition.
+   *  - If you add, remove, or change `template.lifecycle`, increment `version` so the
+   *    updated template is applied.
    */
   template: Pick<api.IndicesIndexTemplateSummary, 'aliases' | 'lifecycle'> & {
     /** @default 100 */
