@@ -1219,6 +1219,7 @@
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",
     "@langchain/aws": "1.2.3",
+    "@langchain/classic": "1.0.9",
     "@langchain/core": "1.1.26",
     "@langchain/google-common": "2.1.19",
     "@langchain/google-genai": "2.1.19",

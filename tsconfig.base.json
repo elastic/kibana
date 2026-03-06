@@ -2601,7 +2601,12 @@
       "zod": ["typings/zod/v3"],
       "zod/v4": ["typings/zod/v4"],
       "vega-lite": ["typings/vega/vega_lite"],
-      "vega-tooltip": ["typings/vega/vega_tooltip"]
+      "vega-tooltip": ["typings/vega/vega_tooltip"],
+      "@langchain/langgraph/prebuilt": ["node_modules/@langchain/langgraph/dist/prebuilt"],
+      "@langchain/classic/chains": ["node_modules/@langchain/classic/dist/chains"],
+      "@langchain/classic/evaluation": ["node_modules/@langchain/classic/dist/evaluation"],
+      "@langchain/classic/document_loaders/fs/directory": ["node_modules/@langchain/classic/dist/document_loaders/fs/directory"],
+      "@langchain/classic/document_loaders/fs/text": ["node_modules/@langchain/classic/dist/document_loaders/fs/text"]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
