@@ -4,15 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { type FC, type PropsWithChildren } from 'react';
+import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { FieldsSelectorModal } from './fields_selector_modal';
 import { useFieldsModal } from '../hooks/use_fields_modal';
+import { useStyles } from '../hooks/use_styles';
 import { useDataViewContext } from '../hooks/data_view_context';
 
 const ASSET_INVENTORY_FIELDS_SELECTOR_OPEN_BUTTON = 'assetInventoryFieldsSelectorOpenButton';
+
+const GroupSelectorWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const styles = useStyles();
+
+  return (
+    <EuiFlexItem grow={false} className={styles.groupBySelector}>
+      {children}
+    </EuiFlexItem>
+  );
+};
 
 export const AdditionalControls = ({
   total,
@@ -20,6 +31,7 @@ export const AdditionalControls = ({
   columns,
   onAddColumn,
   onRemoveColumn,
+  groupSelectorComponent,
   onResetColumns,
 }: {
   total: number;
@@ -27,6 +39,7 @@ export const AdditionalControls = ({
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
+  groupSelectorComponent?: JSX.Element;
   onResetColumns: () => void;
 }) => {
   const { isFieldSelectorModalVisible, closeFieldsSelectorModal, openFieldsSelectorModal } =
@@ -46,27 +59,28 @@ export const AdditionalControls = ({
           onResetColumns={onResetColumns}
         />
       )}
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <span className="assetInventoryDataTableTotal">{`${getAbbreviatedNumber(
-            total
-          )} ${title}`}</span>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="tableOfContents"
-            onClick={openFieldsSelectorModal}
-            size="xs"
-            color="text"
-            data-test-subj={ASSET_INVENTORY_FIELDS_SELECTOR_OPEN_BUTTON}
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.assetInventory.dataTable.fieldsButton"
-              defaultMessage="Fields"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={0}>
+        <span className="assetInventoryDataTableTotal">{`${getAbbreviatedNumber(
+          total
+        )} ${title}`}</span>
+      </EuiFlexItem>
+      <EuiFlexItem grow={0}>
+        <EuiButtonEmpty
+          iconType="tableOfContents"
+          onClick={openFieldsSelectorModal}
+          size="xs"
+          color="text"
+          data-test-subj={ASSET_INVENTORY_FIELDS_SELECTOR_OPEN_BUTTON}
+        >
+          <FormattedMessage
+            id="xpack.securitySolution.assetInventory.dataTable.fieldsButton"
+            defaultMessage="Fields"
+          />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      {groupSelectorComponent && (
+        <GroupSelectorWrapper>{groupSelectorComponent}</GroupSelectorWrapper>
+      )}
     </>
   );
 };

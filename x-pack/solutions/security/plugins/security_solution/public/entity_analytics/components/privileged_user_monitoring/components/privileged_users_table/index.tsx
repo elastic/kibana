@@ -68,7 +68,7 @@ export const PrivilegedUsersTable: React.FC<{ spaceId: string }> = ({ spaceId })
 
   const openUserFlyout = useOpenUserFlyout();
 
-  const columns = buildPrivilegedUsersTableColumns(openUserFlyout, euiTheme);
+  const columns = buildPrivilegedUsersTableColumns(openUserFlyout);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const { visibleRecords, isLoading, hasError, refetch, inspect, hasNextPage } =
     usePrivilegedUsersTableData(spaceId, currentPage, toggleStatus);

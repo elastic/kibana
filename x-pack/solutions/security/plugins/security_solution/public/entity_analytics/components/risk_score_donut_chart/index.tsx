@@ -19,7 +19,7 @@ import type { SeverityCount } from '../severity/types';
 const DONUT_HEIGHT = 120;
 
 const DonutContainer = styled(EuiFlexItem)`
-  padding-right: ${({ theme: { euiTheme } }) => euiTheme.size.xxl};
+  padding-right: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   padding-left: ${({ theme: { euiTheme } }) => euiTheme.size.m};
 `;
 

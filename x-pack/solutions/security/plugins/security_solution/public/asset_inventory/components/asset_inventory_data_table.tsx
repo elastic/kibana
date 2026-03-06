@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,15 +16,12 @@ import {
   type UnifiedDataTableSettings,
   type UnifiedDataTableSettingsColumn,
   type CustomCellRenderer,
-  type CustomGridColumnsConfiguration,
-  type DataGridCellValueElementProps,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING, formatFieldValue } from '@kbn/discover-utils';
+import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   type EuiDataGridCellValueElementProps,
-  type EuiDataGridControlColumn,
   type EuiDataGridStyle,
   EuiProgress,
 } from '@elastic/eui';
@@ -41,15 +38,9 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
-import { getEmptyTagValue } from '../../common/components/empty_value';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_criticality/asset_criticality_badge';
-
-import type { inputsModel } from '../../common/store';
-import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
-import { InspectButton } from '../../common/components/inspect';
-import { LastUpdated } from '../../entity_analytics/components/home/last_updated';
 
 import { AdditionalControls } from './additional_controls';
 import { RiskBadge } from './risk_badge';
@@ -124,12 +115,12 @@ const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
   },
 });
 
-export interface AssetInventoryDefaultColumn {
+interface AssetInventoryDefaultColumn {
   id: string;
   width?: number;
 }
 
-const builtInDefaultColumns: AssetInventoryDefaultColumn[] = [
+const defaultColumns: AssetInventoryDefaultColumn[] = [
   { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
   { id: ASSET_FIELDS.ENTITY_ID },
   { id: ASSET_FIELDS.ENTITY_TYPE },
@@ -140,36 +131,12 @@ export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
-  onDocumentOpen?: (doc: DataTableRecord) => void;
-  onDocumentClose?: () => void;
-  getLeadingControlColumns?: (rows: DataTableRecord[]) => EuiDataGridControlColumn[];
-  rowTypeLabel?: string;
-  columnHeaderOverrides?: Record<string, string>;
-  inspectQueryId?: string;
-  inspectTitle?: string;
-  setQuery?: GlobalTimeArgs['setQuery'];
-  deleteQuery?: GlobalTimeArgs['deleteQuery'];
-  showLastUpdated?: boolean;
-  defaultColumns?: AssetInventoryDefaultColumn[];
-  additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
 }
 
 export const AssetInventoryDataTable = ({
   state,
   height,
   groupSelectorComponent,
-  onDocumentOpen,
-  onDocumentClose,
-  getLeadingControlColumns,
-  rowTypeLabel = title,
-  columnHeaderOverrides,
-  inspectQueryId,
-  inspectTitle,
-  setQuery,
-  deleteQuery,
-  showLastUpdated,
-  defaultColumns = builtInDefaultColumns,
-  additionalCustomRenderers,
 }: AssetInventoryDataTableProps) => {
   const {
     pageSize,
@@ -192,26 +159,18 @@ export const AssetInventoryDataTable = ({
   });
 
   const openTableFlyout = (doc?: DataTableRecord | undefined) => {
-    if (doc) {
-      setExpandedDoc(doc);
-      if (onDocumentOpen) {
-        onDocumentOpen(doc);
-      } else if (doc.raw._source) {
-        const source = doc.raw._source as GenericEntityRecord;
-        openDynamicFlyout({
-          entityDocId: doc.raw._id,
-          entityType: source.entity?.EngineMetadata?.Type,
-          entityName: source.entity?.name,
-          scopeId: ASSET_INVENTORY_TABLE_ID,
-          contextId: ASSET_INVENTORY_TABLE_ID,
-        });
-      }
+    if (doc && doc.raw._source) {
+      const source = doc.raw._source as GenericEntityRecord;
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
+      openDynamicFlyout({
+        entityDocId: doc.raw._id,
+        entityType: source.entity?.EngineMetadata?.Type,
+        entityName: source.entity?.name,
+        scopeId: ASSET_INVENTORY_TABLE_ID,
+        contextId: ASSET_INVENTORY_TABLE_ID,
+      });
     } else {
-      if (onDocumentClose) {
-        onDocumentClose();
-      } else if (!onDocumentOpen) {
-        closeDynamicFlyout();
-      }
+      closeDynamicFlyout();
       setExpandedDoc(undefined);
     }
   };
@@ -223,7 +182,6 @@ export const AssetInventoryDataTable = ({
     fetchNextPage: loadMore,
     isFetching: isFetchingGridData,
     isLoading: isLoadingGridData,
-    refetch,
   } = useFetchGridData({
     query,
     sort,
@@ -233,34 +191,6 @@ export const AssetInventoryDataTable = ({
 
   const rows = getRowsFromPages(rowsData?.pages);
   const totalHits = rowsData?.pages[0].total || 0;
-
-  const inspectData = useMemo<inputsModel.InspectQuery | null>(
-    () => (rowsData?.pages[0]?.inspect as inputsModel.InspectQuery) ?? null,
-    [rowsData?.pages]
-  );
-
-  useEffect(() => {
-    if (inspectQueryId && setQuery) {
-      setQuery({
-        id: inspectQueryId,
-        inspect: inspectData,
-        loading: isLoadingGridData,
-        refetch,
-      });
-    }
-    return () => {
-      if (inspectQueryId && deleteQuery) {
-        deleteQuery({ id: inspectQueryId });
-      }
-    };
-  }, [inspectQueryId, setQuery, deleteQuery, inspectData, isLoadingGridData, refetch]);
-
-  const [lastUpdatedAt, setLastUpdatedAt] = useState(Date.now());
-  useEffect(() => {
-    if (rowsData?.pages?.length && !isLoadingGridData) {
-      setLastUpdatedAt(Date.now());
-    }
-  }, [rowsData?.pages, isLoadingGridData]);
 
   const [localStorageColumns, setLocalStorageColumns] = useLocalStorage(
     LOCAL_STORAGE_COLUMNS_KEY,
@@ -278,18 +208,13 @@ export const AssetInventoryDataTable = ({
     }
   );
 
-  const mergedColumnHeaders = useMemo(
-    () => ({ ...columnHeaders, ...columnHeaderOverrides }),
-    [columnHeaderOverrides]
-  );
-
   const settings = useMemo(() => {
     return {
       columns: Object.keys(persistedSettings?.columns as UnifiedDataTableSettings).reduce(
         (columnSettings, columnId) => {
           const newColumn: UnifiedDataTableSettingsColumn = {
             ..._.pick(persistedSettings?.columns?.[columnId], ['width']),
-            display: mergedColumnHeaders?.[columnId],
+            display: columnHeaders?.[columnId],
           };
 
           return { ...columnSettings, [columnId]: newColumn };
@@ -297,19 +222,9 @@ export const AssetInventoryDataTable = ({
         {} as UnifiedDataTableSettings['columns']
       ),
     };
-  }, [persistedSettings, mergedColumnHeaders]);
+  }, [persistedSettings]);
 
   const { dataView, dataViewIsLoading } = useDataViewContext();
-
-  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
-    const config: CustomGridColumnsConfiguration = {
-      alerts: ({ column }) => ({ ...column, isExpandable: false }),
-    };
-    if (dataView.timeFieldName) {
-      config[dataView.timeFieldName] = ({ column }) => ({ ...column, display: undefined });
-    }
-    return config;
-  }, [dataView.timeFieldName]);
 
   const {
     uiActions,
@@ -404,32 +319,7 @@ export const AssetInventoryDataTable = ({
     setPersistedSettings(newGrid);
   };
 
-  const externalCustomRenderers = useMemo(() => {
-    const nullSafeRenderers: CustomCellRenderer = Object.fromEntries(
-      currentColumns.map((columnId) => [
-        columnId,
-        ({ row, dataView, fieldFormats }: DataGridCellValueElementProps) => {
-          const value = row.flattened[columnId];
-          if (value === null || value === undefined) {
-            return getEmptyTagValue();
-          }
-          const field = dataView.fields.getByName(columnId);
-          return <>{formatFieldValue(value, row.raw, fieldFormats, dataView, field, 'text')}</>;
-        },
-      ])
-    );
-
-    return {
-      ...nullSafeRenderers,
-      ...customCellRenderer(rows),
-      ...(additionalCustomRenderers ? additionalCustomRenderers(rows) : {}),
-    };
-  }, [rows, currentColumns, additionalCustomRenderers]);
-
-  const leadingControlColumns = useMemo(
-    () => getLeadingControlColumns?.(rows),
-    [getLeadingControlColumns, rows]
-  );
+  const externalCustomRenderers = useMemo(() => customCellRenderer(rows), [rows]);
 
   const onResetColumns = () => {
     setLocalStorageColumns(defaultColumns.map((c) => c.id));
@@ -456,22 +346,13 @@ export const AssetInventoryDataTable = ({
   const externalAdditionalControls = (
     <AdditionalControls
       total={totalHits}
-      title={rowTypeLabel}
+      title={title}
       columns={currentColumns}
       onAddColumn={handleAddColumn}
       onRemoveColumn={handleRemoveColumn}
       onResetColumns={onResetColumns}
+      groupSelectorComponent={groupSelectorComponent}
     />
-  );
-
-  const externalAdditionalControlsRight = (
-    <>
-      {inspectQueryId && (
-        <InspectButton queryId={inspectQueryId} title={inspectTitle ?? ''} />
-      )}
-      {showLastUpdated && <LastUpdated updatedAt={lastUpdatedAt} />}
-      {groupSelectorComponent}
-    </>
   );
 
   const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
@@ -522,12 +403,9 @@ export const AssetInventoryDataTable = ({
             onFetchMoreRecords={loadMore}
             externalCustomRenderers={externalCustomRenderers}
             externalAdditionalControls={externalAdditionalControls}
-            externalAdditionalControlsRight={externalAdditionalControlsRight}
             gridStyleOverride={gridStyle}
             rowLineHeightOverride="24px"
             dataGridDensityState={DataGridDensity.EXPANDED}
-            externalControlColumns={leadingControlColumns}
-            customGridColumnsConfiguration={customGridColumnsConfiguration}
           />
         )}
       </div>

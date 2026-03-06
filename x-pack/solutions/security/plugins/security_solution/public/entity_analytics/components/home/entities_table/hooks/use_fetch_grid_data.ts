@@ -14,31 +14,31 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
-import { useMemo } from 'react';
-import { useKibana } from '../../common/lib/kibana';
+import { useContext, useMemo } from 'react';
+import { useKibana } from '../../../../../common/lib/kibana';
 import {
-  ASSET_FIELDS,
-  MAX_ASSETS_TO_LOAD,
+  ENTITY_FIELDS,
+  ENTITY_TYPE_FILTER,
+  MAX_ENTITIES_TO_LOAD,
   QUERY_KEY_GRID_DATA,
-  QUERY_KEY_ASSET_INVENTORY,
+  QUERY_KEY_ENTITY_ANALYTICS,
 } from '../constants';
 import { getRuntimeMappingsFromSort, getMultiFieldsSort } from './fetch_utils';
-import { useDataViewContext } from './data_view_context';
-import { addEmptyDataFilterQuery } from '../utils/add_empty_data_filter';
+import { DataViewContext } from '..';
 
-interface UseAssetsOptions extends BaseEsQuery {
+interface UseEntitiesOptions extends BaseEsQuery {
   sort: string[][];
   enabled: boolean;
   pageSize: number;
 }
 
-const ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
-  ASSET_FIELDS.ENTITY_ID,
-  ASSET_FIELDS.ENTITY_NAME,
+const ENTITY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
+  ENTITY_FIELDS.ENTITY_ID,
+  ENTITY_FIELDS.ENTITY_NAME,
 ];
 
-const getAssetsQuery = (
-  { query, sort }: UseAssetsOptions,
+const getEntitiesQuery = (
+  { query, sort }: UseEntitiesOptions,
   pageParam: unknown,
   indexPattern?: string
 ) => {
@@ -47,27 +47,23 @@ const getAssetsQuery = (
   }
 
   return {
-    index: indexPattern,
+    index: [indexPattern],
     sort: getMultiFieldsSort(sort),
-    runtime_mappings: getRuntimeMappingsFromSort(
-      ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS,
-      sort
-    ),
-    size: MAX_ASSETS_TO_LOAD,
+    runtime_mappings: getRuntimeMappingsFromSort(ENTITY_TABLE_RUNTIME_MAPPING_FIELDS, sort),
+    size: MAX_ENTITIES_TO_LOAD,
     ignore_unavailable: true,
     query: {
       ...query,
       bool: {
         ...query?.bool,
-        filter: [...(query?.bool?.filter ?? [])],
-        must_not: addEmptyDataFilterQuery([...(query?.bool?.must_not ?? [])]),
+        filter: [...(query?.bool?.filter ?? []), ENTITY_TYPE_FILTER],
       },
     },
     ...(pageParam ? { from: pageParam } : {}),
   };
 };
 
-interface Asset {
+interface Entity {
   '@timestamp': string;
   name: string;
   risk: number;
@@ -75,39 +71,41 @@ interface Asset {
   category: string;
 }
 
-type LatestAssetsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type LatestAssetsResponse = IKibanaSearchResponse<estypes.SearchResponse<Asset, never>>;
+type LatestEntitiesRequest = IKibanaSearchRequest<estypes.SearchRequest>;
+type LatestEntitiesResponse = IKibanaSearchResponse<estypes.SearchResponse<Entity, never>>;
 
-export function useFetchGridData(options: UseAssetsOptions) {
+export function useFetchGridData(options: UseEntitiesOptions) {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  const { dataView } = useDataViewContext();
+  const { dataView } = useContext(DataViewContext);
 
   const dataViewIndexPattern = useMemo(() => {
     return dataView?.getIndexPattern();
   }, [dataView]);
 
   return useInfiniteQuery(
-    [QUERY_KEY_ASSET_INVENTORY, QUERY_KEY_GRID_DATA, { params: options }],
+    [QUERY_KEY_ENTITY_ANALYTICS, QUERY_KEY_GRID_DATA, { params: options }],
     async ({ pageParam }) => {
+      const queryParams = getEntitiesQuery(options, pageParam, dataViewIndexPattern);
       const {
+        rawResponse,
         rawResponse: { hits },
       } = await lastValueFrom(
-        data.search.search<LatestAssetsRequest, LatestAssetsResponse>({
-          params: getAssetsQuery(
-            options,
-            pageParam,
-            dataViewIndexPattern
-          ) as LatestAssetsRequest['params'],
+        data.search.search<LatestEntitiesRequest, LatestEntitiesResponse>({
+          params: queryParams as LatestEntitiesRequest['params'],
         })
       );
 
       return {
         page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
+        inspect: {
+          dsl: [JSON.stringify(queryParams)],
+          response: [JSON.stringify(rawResponse)],
+        },
       };
     },
     {

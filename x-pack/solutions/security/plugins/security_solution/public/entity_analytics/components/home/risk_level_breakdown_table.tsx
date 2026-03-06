@@ -84,6 +84,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
             defaultMessage="Risk score"
           />
         ),
+        align: 'right',
         render: (scoreRange: string) => (
           <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.medium }}>
             {scoreRange}
@@ -95,10 +96,10 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
         name: (
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.numberOfEntities"
-            defaultMessage="Number of entities"
+            defaultMessage="Entities"
           />
         ),
-        dataType: 'number',
+        align: 'right',
         render: (count: number) => (
           <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
             {count.toLocaleString()}

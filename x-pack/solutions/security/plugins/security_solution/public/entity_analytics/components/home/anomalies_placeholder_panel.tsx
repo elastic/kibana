@@ -6,26 +6,20 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiImage } from '@elastic/eui';
+import { EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import placeholderImage from '../../../common/images/placeholder.png';
 
-export const AnomaliesPlaceholderPanel = () => {
+export const EntityAnalyticsRecentAnomalies = () => {
   return (
-    <EuiPanel data-test-subj="anomalies-placeholder-panel">
-      <EuiText color="subdued" textAlign="center">
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.homePage.anomaliesPlaceholder"
-          defaultMessage="Anomaly explorer"
-        />
-      </EuiText>
-      <EuiImage
-        data-test-subj="anomalies-placeholder-image"
-        hasShadow
-        size="fullWidth"
-        src={placeholderImage}
-        alt="Anomaly explorer placeholder"
-      />
-    </EuiPanel>
+    <EuiFlexItem data-test-subj="recent-anomalies-panel">
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.homePage.recentAnomalies"
+            defaultMessage="Recent anomalies"
+          />
+        </h3>
+      </EuiTitle>
+    </EuiFlexItem>
   );
 };

@@ -6,38 +6,31 @@
  */
 import React, { useState, useEffect } from 'react';
 import type { Filter } from '@kbn/es-query';
-import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
-import { ASSET_FIELDS, DEFAULT_TABLE_SECTION_HEIGHT } from '../constants';
-import { GroupWrapper } from './grouping/asset_inventory_grouping';
-import { useAssetInventoryGrouping } from './grouping/use_asset_inventory_grouping';
-import { AssetInventoryDataTable } from './asset_inventory_data_table';
+import { GroupWrapper } from '@kbn/cloud-security-posture';
+import type { EntityURLStateResult } from './hooks/use_entity_url_state';
+import {
+  DEFAULT_TABLE_SECTION_HEIGHT,
+  TEST_SUBJ_GROUPING,
+  TEST_SUBJ_GROUPING_LOADING,
+} from './constants';
+import { useEntityGrouping } from './grouping/use_entity_grouping';
 
-export interface AssetInventoryTableSectionProps {
-  state: AssetInventoryURLStateResult;
+const ENTITY_ANALYTICS_TEST_SUBJECTS = {
+  grouping: TEST_SUBJ_GROUPING,
+  groupingLoading: TEST_SUBJ_GROUPING_LOADING,
+};
+import { EntitiesDataTable } from './entities_data_table';
+
+export interface EntitiesTableSectionProps {
+  state: EntityURLStateResult;
 }
 
-/**
- * Recursive component hierarchy
- *
- * AssetInventoryTableSection (renders either/or one of the children)
- * |-- AssetInventoryDataTable (no grouping)
- * |-- GroupWithURLPagination (grouping level = 0, renders both children)
- *     |-- GroupWrapper
- *     |-- GroupContent
- *         |-- GroupWithLocalPagination (grouping level = 1, renders both children)
- *             |-- GroupWrapper
- *             |-- GroupContent (renders)
- *                 |-- DataTableWithLocalPagination
- *                     |-- AssetInventoryDataTable (grouping level = 2)
- */
-export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSectionProps) => {
-  const { grouping } = useAssetInventoryGrouping({ state });
+export const EntitiesTableSection = ({ state }: EntitiesTableSectionProps) => {
+  const { grouping } = useEntityGrouping({ state });
   const selectedGroup = grouping.selectedGroups[0];
 
   if (selectedGroup === 'none') {
-    return (
-      <AssetInventoryDataTable state={state} groupSelectorComponent={grouping.groupSelector} />
-    );
+    return <EntitiesDataTable state={state} groupSelectorComponent={grouping.groupSelector} />;
   }
 
   return (
@@ -51,7 +44,7 @@ export const AssetInventoryTableSection = ({ state }: AssetInventoryTableSection
 };
 
 interface GroupWithURLPaginationProps {
-  state: AssetInventoryURLStateResult;
+  state: EntityURLStateResult;
   selectedGroup: string;
   selectedGroupOptions: string[];
   groupSelectorComponent?: JSX.Element;
@@ -63,16 +56,12 @@ const GroupWithURLPagination = ({
   selectedGroupOptions,
   groupSelectorComponent,
 }: GroupWithURLPaginationProps) => {
-  const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
+  const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
     groupFilters: [],
   });
 
-  /**
-   * This is used to reset the active page index when the selected group changes
-   * It is needed because the grouping number of pages can change according to the selected group
-   */
   useEffect(() => {
     state.onChangePage(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -99,47 +88,19 @@ const GroupWithURLPagination = ({
       selectedGroup={selectedGroup}
       groupingLevel={0}
       groupSelectorComponent={groupSelectorComponent}
+      testSubjects={ENTITY_ANALYTICS_TEST_SUBJECTS}
     />
   );
 };
 
 interface GroupContentProps {
   currentGroupFilters: Filter[];
-  state: AssetInventoryURLStateResult;
+  state: EntityURLStateResult;
   groupingLevel: number;
   selectedGroupOptions: string[];
   parentGroupFilters?: string;
   groupSelectorComponent?: JSX.Element;
 }
-
-/**
- * This function is used to modify the filters for the asset inventory grouping
- * It is needed because the asset.criticality field has a soft delete mechanism
- * So asset.criticality = "deleted" should be excluded from the grouping
- * (treated as a missing value)
- */
-const groupFilterMap = (filter: Filter | null): Filter | null => {
-  const query = filter?.query;
-  if (query?.bool?.should?.[0]?.bool?.must_not?.exists?.field === ASSET_FIELDS.ASSET_CRITICALITY) {
-    return {
-      meta: filter?.meta ?? { alias: null, disabled: false, negate: false },
-      query: {
-        bool: {
-          filter: {
-            bool: {
-              should: [
-                { term: { [ASSET_FIELDS.ASSET_CRITICALITY]: 'deleted' } },
-                { bool: { must_not: { exists: { field: ASSET_FIELDS.ASSET_CRITICALITY } } } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
-        },
-      },
-    };
-  }
-  return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
-};
 
 const filterTypeGuard = (filter: Filter | null): filter is Filter => filter !== null;
 
@@ -148,6 +109,11 @@ const mergeCurrentAndParentFilters = (
   parentGroupFilters: string | undefined
 ) => {
   return [...currentGroupFilters, ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])];
+};
+
+const groupFilterMap = (filter: Filter | null): Filter | null => {
+  const query = filter?.query;
+  return query?.match_phrase || query?.bool?.should || query?.bool?.filter ? filter : null;
 };
 
 const GroupContent = ({
@@ -207,16 +173,12 @@ const GroupWithLocalPagination = ({
 
   const groupFilters = parentGroupFilters ? JSON.parse(parentGroupFilters) : [];
 
-  const { groupData, grouping, isFetching } = useAssetInventoryGrouping({
+  const { groupData, grouping, isFetching } = useEntityGrouping({
     state: { ...state, pageIndex: subgroupPageIndex, pageSize: subgroupPageSize },
     selectedGroup,
     groupFilters,
   });
 
-  /**
-   * This is used to reset the active page index when the selected group changes
-   * It is needed because the grouping number of pages can change according to the selected group
-   */
   useEffect(() => {
     setSubgroupPageIndex(0);
   }, [selectedGroup]);
@@ -243,12 +205,13 @@ const GroupWithLocalPagination = ({
       selectedGroup={selectedGroup}
       groupingLevel={groupingLevel}
       groupSelectorComponent={groupSelectorComponent}
+      testSubjects={ENTITY_ANALYTICS_TEST_SUBJECTS}
     />
   );
 };
 
-interface DataTableWithLocalPagination {
-  state: AssetInventoryURLStateResult;
+interface DataTableWithLocalPaginationProps {
+  state: EntityURLStateResult;
   currentGroupFilters: Filter[];
   parentGroupFilters?: string;
 }
@@ -264,7 +227,7 @@ const DataTableWithLocalPagination = ({
   state,
   currentGroupFilters,
   parentGroupFilters,
-}: DataTableWithLocalPagination) => {
+}: DataTableWithLocalPaginationProps) => {
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
 
@@ -274,7 +237,7 @@ const DataTableWithLocalPagination = ({
     .map(getDataGridFilter)
     .filter((filter): filter is NonNullable<Filter['query']> => Boolean(filter));
 
-  const newState: AssetInventoryURLStateResult = {
+  const newState: EntityURLStateResult = {
     ...state,
     query: {
       ...state.query,
@@ -289,5 +252,5 @@ const DataTableWithLocalPagination = ({
     onChangeItemsPerPage: setTablePageSize,
   };
 
-  return <AssetInventoryDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
+  return <EntitiesDataTable state={newState} height={DEFAULT_TABLE_SECTION_HEIGHT} />;
 };

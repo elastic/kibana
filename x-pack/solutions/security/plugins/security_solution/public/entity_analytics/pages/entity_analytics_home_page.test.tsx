@@ -44,26 +44,18 @@ jest.mock('../components/home/combined_risk_donut_chart', () => ({
 
 jest.mock('../components/home/anomalies_placeholder_panel', () => ({
   AnomaliesPlaceholderPanel: () => (
-    <div data-test-subj="anomalies-placeholder-panel">{'Anomalies Placeholder'}</div>
+    <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
   ),
 }));
 
-jest.mock('../../asset_inventory/components/asset_inventory_table_section', () => ({
-  AssetInventoryTableSection: () => (
+jest.mock('../components/home/entities_table', () => ({
+  EntitiesTableSection: () => (
     <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
   ),
-}));
-
-jest.mock('../components/home/use_entity_store_data_view', () => ({
-  useEntityStoreDataView: jest.fn(() => ({
-    dataView: { id: 'test-entity-store', fields: [] },
-    isLoading: false,
-    error: undefined,
-  })),
-}));
-
-jest.mock('../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_inventory_url_state', () => ({
-  useAssetInventoryURLState: jest.fn(() => ({
+  DataViewContext: {
+    Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  },
+  useEntityURLState: jest.fn(() => ({
     sort: [],
     filters: [],
     pageFilters: [],
@@ -83,6 +75,16 @@ jest.mock('../../asset_inventory/hooks/use_asset_inventory_url_state/use_asset_i
     getRowsFromPages: jest.fn(() => []),
   })),
 }));
+
+jest.mock('../components/home/use_entity_store_data_view', () => ({
+  useEntityStoreDataView: jest.fn(() => ({
+    dataView: { id: 'test-entity-store', fields: [] },
+    isLoading: false,
+    error: undefined,
+  })),
+}));
+
+// useEntityURLState is already mocked inside the entities_table mock above
 
 jest.mock('../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn(() => 'default'),
@@ -161,7 +163,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByTestId('anomalies-placeholder-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('recent-anomalies-panel')).toBeInTheDocument();
   });
 
   it('renders the entities table', () => {

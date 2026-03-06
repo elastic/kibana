@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AnomaliesPlaceholderPanel } from './anomalies_placeholder_panel';
+import { EntityAnalyticsRecentAnomalies } from './anomalies_placeholder_panel';
 import { TestProviders } from '../../../common/mock';
 
 describe('AnomaliesPlaceholderPanel', () => {
   it('should render the placeholder panel', () => {
     render(
       <TestProviders>
-        <AnomaliesPlaceholderPanel />
+        <EntityAnalyticsRecentAnomalies />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('anomalies-placeholder-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('recent-anomalies-panel')).toBeInTheDocument();
     expect(screen.getByText('Anomaly explorer')).toBeInTheDocument();
   });
 });

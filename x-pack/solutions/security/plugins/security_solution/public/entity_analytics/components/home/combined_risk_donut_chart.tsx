@@ -52,7 +52,7 @@ export const CombinedRiskDonutChart = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={4}>
             <RiskLevelBreakdownTable severityCount={severityCount} loading={loading} />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>

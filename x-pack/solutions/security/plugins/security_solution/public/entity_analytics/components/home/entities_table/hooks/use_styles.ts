@@ -39,13 +39,12 @@ export const useStyles = () => {
       border-bottom: ${euiTheme.border.width.thick} solid ${euiTheme.colors.fullShade};
     }
     & .euiButtonIcon[data-test-subj='docTableExpandToggleColumn'] {
-      color: ${euiTheme.colors.primary};
+      color: ${euiTheme.colors.text};
     }
 
     & .euiDataGridRowCell {
       font-size: ${euiTheme.size.m};
 
-      // Vertically center content
       .euiDataGridRowCell__content {
         display: flex;
         align-items: center;
@@ -58,7 +57,7 @@ export const useStyles = () => {
       flex-grow: 0;
       text-align: left;
     }
-    & .assetInventoryDataTableTotal {
+    & .entityAnalyticsDataTableTotal {
       font-size: ${euiTheme.size.m};
       font-weight: ${euiTheme.font.weight.bold};
       border-right: ${euiTheme.border.thin};
@@ -73,6 +72,8 @@ export const useStyles = () => {
 
     & .unifiedDataTable__cellValue {
       font-family: ${euiTheme.font.family};
+      display: flex;
+      width: 200px;
     }
     & .unifiedDataTable__inner .euiDataGrid__controls {
       border-top: none;
@@ -80,15 +81,13 @@ export const useStyles = () => {
     & .euiDataGrid__leftControls {
       flex-grow: 1;
     }
-  `;
-
-  const groupBySelector = css`
-    margin-left: auto;
+    & [data-test-subj='dataGridHeaderCell-actions'] {
+      align-items: center !important;
+    }
   `;
 
   return {
     gridStyle,
-    groupBySelector,
     gridContainer,
     gridProgressBar,
   };
