@@ -191,15 +191,15 @@ export interface WorkflowExecutionDto {
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
-  error: SerializedError | null;
-  finishedAt: string;
+  error?: SerializedError;
+  finishedAt?: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
-  duration: number | null;
+  duration?: number;
   executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;

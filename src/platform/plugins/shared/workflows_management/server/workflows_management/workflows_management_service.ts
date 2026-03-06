@@ -51,12 +51,8 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
 
-import {
-  getWorkflowExecution,
-  transformToWorkflowExecutionDetailDto,
-} from './lib/get_workflow_execution';
+import { transformToWorkflowExecutionDetailDto } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
-import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 
 import type {
   DeleteWorkflowsResponse,
@@ -875,8 +871,10 @@ export class WorkflowsService {
 
     const aggs = statsResponse.aggregations;
 
+    const workflowExecutionEngine = await this.getWrorkflowExecutionEngine();
+
     // Get execution history stats for the last 30 days
-    const executionStats = await this.getExecutionHistoryStats(spaceId);
+    const executionStats = await workflowExecutionEngine.getExecutionHistoryStats(spaceId);
 
     return {
       workflows: {
@@ -885,67 +883,6 @@ export class WorkflowsService {
       },
       executions: executionStats,
     };
-  }
-
-  private async getExecutionHistoryStats(spaceId: string) {
-    try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const response = await this.esClient.search({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        size: 0,
-        query: {
-          bool: {
-            must: [
-              {
-                range: {
-                  createdAt: {
-                    gte: thirtyDaysAgo.toISOString(),
-                  },
-                },
-              },
-              { term: { spaceId } },
-            ],
-          },
-        },
-        aggs: {
-          daily_stats: {
-            date_histogram: {
-              field: 'createdAt',
-              calendar_interval: 'day',
-              format: 'yyyy-MM-dd',
-            },
-            aggs: {
-              completed: {
-                filter: { term: { status: 'completed' } },
-              },
-              failed: {
-                filter: { term: { status: 'failed' } },
-              },
-              cancelled: {
-                filter: { term: { status: 'cancelled' } },
-              },
-            },
-          },
-        },
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const buckets = (response.aggregations as any)?.daily_stats?.buckets || [];
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return buckets.map((bucket: any) => ({
-        date: bucket.key_as_string,
-        timestamp: bucket.key,
-        completed: bucket.completed.doc_count,
-        failed: bucket.failed.doc_count,
-        cancelled: bucket.cancelled.doc_count,
-      }));
-    } catch (error) {
-      this.logger.error('Failed to get execution history stats', error);
-      return [];
-    }
   }
 
   public async getWorkflowAggs(fields: string[], spaceId: string): Promise<WorkflowAggsDto> {
@@ -1023,14 +960,6 @@ export class WorkflowsService {
       stepExecutions,
       this.logger
     );
-    return getWorkflowExecution({
-      esClient: this.esClient,
-      logger: this.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      stepsExecutionIndex: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      workflowExecutionId: executionId,
-      spaceId,
-    });
   }
 
   public async getWorkflowExecutions(
@@ -1105,20 +1034,6 @@ export class WorkflowsService {
         page,
       })
     );
-
-    return searchWorkflowExecutions({
-      esClient: this.esClient,
-      logger: this.logger,
-      workflowExecutionIndex: WORKFLOWS_EXECUTIONS_INDEX,
-      query: {
-        bool: {
-          must,
-        },
-      },
-      size,
-      from,
-      page,
-    });
   }
 
   public async getWorkflowExecutionHistory(
