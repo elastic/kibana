@@ -75,11 +75,6 @@ const isCloudConnectorEnabledForProvider = ({
 }) => {
   const providerConfig = config.providers[provider];
   const cloudConnectorEnabledVersion = providerConfig.cloudConnectorEnabledVersion;
-  const allowedProviders = [AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER];
-
-  if (!allowedProviders.includes(provider)) {
-    return false;
-  }
 
   return !!(
     cloudConnectorsFeatureEnabled &&

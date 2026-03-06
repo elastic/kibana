@@ -9,15 +9,10 @@ import { useMemo, useCallback } from 'react';
 
 import type { NewPackagePolicy, RegistryVarGroup } from '../../common';
 import {
-  AWS_ACCOUNT_TYPE_VAR_NAME,
-  AZURE_ACCOUNT_TYPE_VAR_NAME,
-  GCP_ACCOUNT_TYPE_VAR_NAME,
-  SINGLE_ACCOUNT,
-} from '../../common';
-import {
   getCloudConnectorOption,
   getCloudConnectorVars,
   getIacTemplateUrlFromVarGroupSelection,
+  getAccountTypeFromVarGroupOrInputs,
   type VarGroupSelection,
 } from '../../common/services/cloud_connectors';
 import type { AccountType, CloudProvider } from '../types';
@@ -30,8 +25,8 @@ export interface CloudConnectorInfo {
   isSelected: boolean;
   /** The cloud provider (e.g., 'aws', 'azure') if cloud connector is selected */
   cloudProvider?: CloudProvider;
-  /** The account type (e.g., 'single-account', 'organization-account') derived from input vars */
-  accountType?: AccountType;
+  /** The account type (e.g., 'single-account', 'organization-account') derived from input vars or var_group scope */
+  accountType: AccountType;
   /** IaC template URL from the selected var_group option */
   iacTemplateUrl?: string;
   /** Set of variable names handled by cloud connector (should be hidden from regular var fields) */
@@ -65,12 +60,6 @@ export interface UseVarGroupCloudConnectorProps {
  * - The set of vars handled by cloud connector (to hide from regular form)
  * - A callback compatible with CloudConnectorSetup
  */
-const ACCOUNT_TYPE_VAR_NAMES: Record<string, string> = {
-  aws: AWS_ACCOUNT_TYPE_VAR_NAME,
-  azure: AZURE_ACCOUNT_TYPE_VAR_NAME,
-  gcp: GCP_ACCOUNT_TYPE_VAR_NAME,
-};
-
 export const useVarGroupCloudConnector = ({
   varGroups,
   varGroupSelections,
@@ -95,18 +84,16 @@ export const useVarGroupCloudConnector = ({
     [varGroups, varGroupSelections]
   );
 
-  const accountType = useMemo(() => {
-    const provider = cloudConnectorOption.provider;
-    if (!provider) return undefined;
-    const varName = ACCOUNT_TYPE_VAR_NAMES[provider];
-    if (!varName) return undefined;
-    for (const input of packagePolicy.inputs ?? []) {
-      if (input.enabled && input.vars?.[varName]?.value) {
-        return input.vars[varName].value as AccountType;
-      }
-    }
-    return SINGLE_ACCOUNT as AccountType;
-  }, [cloudConnectorOption.provider, packagePolicy.inputs]);
+  const accountType = useMemo(
+    () =>
+      getAccountTypeFromVarGroupOrInputs(
+        cloudConnectorOption.provider,
+        varGroups,
+        cloudConnectorVars,
+        packagePolicy.inputs
+      ),
+    [cloudConnectorOption.provider, varGroups, cloudConnectorVars, packagePolicy.inputs]
+  );
 
   // Create an UpdatePolicy callback compatible with CloudConnectorSetup
   const handleCloudConnectorUpdate: UpdatePolicy = useCallback(

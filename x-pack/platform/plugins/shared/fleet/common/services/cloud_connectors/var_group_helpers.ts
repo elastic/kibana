@@ -6,8 +6,15 @@
  */
 
 import { isCloudProvider, type CloudProvider } from '../../types';
+import type { AccountType } from '../../types/models/cloud_connector';
 import type { NewPackagePolicy, NewPackagePolicyInput } from '../../types';
 import type { RegistryVarGroup } from '../../types/models/package_spec';
+import {
+  AWS_ACCOUNT_TYPE_VAR_NAME,
+  AZURE_ACCOUNT_TYPE_VAR_NAME,
+  GCP_ACCOUNT_TYPE_VAR_NAME,
+  SINGLE_ACCOUNT,
+} from '../../constants/cloud_connector';
 
 import { getSelectedOption, type VarGroupSelection } from '../var_group_helpers';
 
@@ -117,6 +124,44 @@ export const getIacTemplateUrlFromVarGroupSelection = (
     }
   }
   return undefined;
+};
+
+const ACCOUNT_TYPE_VAR_NAMES: Record<string, string> = {
+  aws: AWS_ACCOUNT_TYPE_VAR_NAME,
+  azure: AZURE_ACCOUNT_TYPE_VAR_NAME,
+  gcp: GCP_ACCOUNT_TYPE_VAR_NAME,
+};
+
+/**
+ * Resolves the account type from var_group scope or package policy inputs.
+ *
+ * When var_groups are defined, the account type var must be within the selected option's
+ * vars scope to be read. When var_groups are undefined (legacy integrations), reads
+ * directly from package policy inputs as a fallback. Always defaults to 'single-account'.
+ *
+ * @param provider - The cloud provider (aws, azure, gcp)
+ * @param varGroups - The var_groups from package info
+ * @param cloudConnectorVars - Set of var names scoped to the selected var_group option
+ * @param inputs - The package policy inputs
+ * @returns The resolved account type, always defaults to 'single-account'
+ */
+export const getAccountTypeFromVarGroupOrInputs = (
+  provider: CloudProvider | undefined,
+  varGroups: RegistryVarGroup[] | undefined,
+  cloudConnectorVars: Set<string>,
+  inputs: NewPackagePolicyInput[] | undefined
+): AccountType => {
+  const varName = provider ? ACCOUNT_TYPE_VAR_NAMES[provider] : undefined;
+
+  if (varName && !(varGroups && !cloudConnectorVars.has(varName))) {
+    for (const input of inputs ?? []) {
+      if (input.enabled && input.vars?.[varName]?.value) {
+        return input.vars[varName].value as AccountType;
+      }
+    }
+  }
+
+  return SINGLE_ACCOUNT as AccountType;
 };
 
 /**
