@@ -13,7 +13,18 @@ import { getSecondaryTrendPalettes } from './helpers';
 
 const lightTheme = { darkMode: false } as CoreTheme;
 const darkTheme = { darkMode: true } as CoreTheme;
-
+const comparedToPaletteLight = {
+  palette: [
+    euiLightVars.euiColorBackgroundLightDanger,
+    euiLightVars.euiColorBackgroundLightText,
+    euiLightVars.euiColorBackgroundLightSuccess,
+  ],
+  textPalette: [
+    euiLightVars.euiColorTextDanger,
+    euiLightVars.euiColorTextParagraph,
+    euiLightVars.euiColorTextSuccess,
+  ],
+};
 const makeDynamicTrend = (
   paletteId: string,
   reversed = false
@@ -37,7 +48,6 @@ describe('getSecondaryTrendPalettes', () => {
 
   it('falls back to default config when secondaryTrend is undefined', () => {
     const result = getSecondaryTrendPalettes('dynamic', undefined, lightTheme);
-    expect(result).toBeDefined();
     expect(result!.palette).toHaveLength(3);
     expect(result!.textPalette).toHaveLength(3);
   });
@@ -49,16 +59,8 @@ describe('getSecondaryTrendPalettes', () => {
         makeDynamicTrend(KbnPalette.CompareTo),
         lightTheme
       )!;
-      expect(result.palette).toEqual([
-        euiLightVars.euiColorBackgroundLightDanger,
-        euiLightVars.euiColorBackgroundLightText,
-        euiLightVars.euiColorBackgroundLightSuccess,
-      ]);
-      expect(result.textPalette).toEqual([
-        euiLightVars.euiColorTextDanger,
-        euiLightVars.euiColorTextParagraph,
-        euiLightVars.euiColorTextSuccess,
-      ]);
+      expect(result.palette).toEqual(comparedToPaletteLight.palette);
+      expect(result.textPalette).toEqual(comparedToPaletteLight.textPalette);
     });
 
     it('uses dark theme tokens when darkMode is true', () => {
@@ -112,39 +114,15 @@ describe('getSecondaryTrendPalettes', () => {
     });
   });
 
-  describe('Temperature palette', () => {
-    it('returns correct EUI tokens', () => {
-      const result = getSecondaryTrendPalettes(
-        'dynamic',
-        makeDynamicTrend(KbnPalette.Temperature),
-        lightTheme
-      )!;
-      expect(result.palette).toEqual([
-        euiLightVars.euiColorBackgroundLightPrimary,
-        euiLightVars.euiColorBackgroundLightText,
-        euiLightVars.euiColorBackgroundLightDanger,
-      ]);
-      expect(result.textPalette).toEqual([
-        euiLightVars.euiColorTextPrimary,
-        euiLightVars.euiColorTextParagraph,
-        euiLightVars.euiColorTextDanger,
-      ]);
-    });
-  });
-
   describe('unknown palette', () => {
-    it('falls back to getKbnPalettes and uses textParagraph for text', () => {
+    it('falls back to CompareTo palette', () => {
       const result = getSecondaryTrendPalettes(
         'dynamic',
         makeDynamicTrend(KbnPalette.Cool),
         lightTheme
       )!;
-      expect(result.palette).toHaveLength(3);
-      expect(result.textPalette).toEqual([
-        euiLightVars.euiColorTextParagraph,
-        euiLightVars.euiColorTextParagraph,
-        euiLightVars.euiColorTextParagraph,
-      ]);
+      expect(result.palette).toEqual(comparedToPaletteLight.palette);
+      expect(result.textPalette).toEqual(comparedToPaletteLight.textPalette);
     });
   });
 });

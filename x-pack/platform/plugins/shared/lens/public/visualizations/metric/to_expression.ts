@@ -26,8 +26,7 @@ import {
   getColorMode,
   getDefaultConfigForMode,
   getSecondaryLabelSelected,
-  getSecondaryTrendPalette,
-  getSecondaryTrendTextPalette,
+  getSecondaryTrendPalettes,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
@@ -169,6 +168,12 @@ export const toExpression = (
       ? state.secondaryTrend
       : getDefaultConfigForMode(secondaryDynamicColorMode);
 
+  const secondaryTrendPalettes = getSecondaryTrendPalettes(
+    secondaryDynamicColorMode,
+    secondaryTrendConfig,
+    theme.getTheme()
+  );
+
   const hasMetricIcon = hasIcon(state.icon);
   // If an icon is present but no iconAlign is set (legacy state), default to 'left' alignment;
   // otherwise, use the configured or default alignment
@@ -192,16 +197,8 @@ export const toExpression = (
       secondaryTrendConfig.type === 'dynamic'
         ? getSecondaryDynamicTrendBaselineValue(isMetricNumeric, secondaryTrendConfig.baselineValue)
         : undefined,
-    secondaryTrendPalette: getSecondaryTrendPalette(
-      secondaryDynamicColorMode,
-      secondaryTrendConfig,
-      theme.getTheme()
-    ),
-    secondaryTrendTextPalette: getSecondaryTrendTextPalette(
-      secondaryDynamicColorMode,
-      secondaryTrendConfig,
-      theme.getTheme()
-    ),
+    secondaryTrendPalette: secondaryTrendPalettes?.palette,
+    secondaryTrendTextPalette: secondaryTrendPalettes?.textPalette,
     max: state.maxAccessor,
     breakdownBy:
       state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
