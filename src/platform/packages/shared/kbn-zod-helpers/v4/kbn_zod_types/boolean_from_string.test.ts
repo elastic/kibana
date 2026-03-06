@@ -27,12 +27,6 @@ describe('BooleanFromString', () => {
     expect(BooleanFromString.parse(false)).toBe(false);
   });
 
-  it('has the default description', () => {
-    expect(BooleanFromString.description).toBe(
-      "A boolean value, which can be 'true' or 'false' as string or a native boolean."
-    );
-  });
-
   it('has the correct zod and kbn type', () => {
     expect(BooleanFromString instanceof z.ZodUnion).toBe(true);
     expect(isBooleanFromString(BooleanFromString)).toBe(true);

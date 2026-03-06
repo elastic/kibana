@@ -23,13 +23,13 @@ describe('ArrayFromString', () => {
     expect(result).toEqual([]);
   });
 
-  it('should return the input as is when it is not a string', () => {
+  it('should return the input as is when it is already a string array', () => {
     const input = ['a', 'b', 'c'];
     const result = ArrayFromString(itemsSchema).parse(input);
     expect(result).toEqual(input);
   });
 
-  it('should throw an error when input is not a string or an array', () => {
+  it('should throw an error when input is not a string or a string array', () => {
     expect(() => ArrayFromString(itemsSchema).parse(123)).toThrow();
   });
 });
