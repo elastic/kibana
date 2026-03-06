@@ -70,22 +70,40 @@ You can optionally use non-default ports with `--http-port <port>` or `--grpc-po
 
 ## Running Evaluations
 
-### Start Scout Server
+### 1) One-time setup
 
 ```bash
-node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+node scripts/evals init
 ```
 
-### Run the full suite
+If you choose EIS/Cloud Connected Mode, `init` prints an export command for
+`KIBANA_TESTING_AI_CONNECTORS`. Run that export in your shell before `start`/`run`.
+
+### 2) Start full eval stack
+
+Use `start` to launch the full stack (Scout server, EDOT collector, and EIS CCM) and run the suite.
+
+```bash
+node scripts/evals start \
+  --suite observability-ai \
+  --judge <connector-id> \
+  --project <connector-id>
+```
+
+### 3) Iterative runs (without restart)
+
+After the stack is running, use `run` for faster iteration on the full suite or specific specs.
+
+Run the full suite:
 
 ```bash
 node scripts/evals run \
   --suite observability-ai \
-  --evaluation-connector-id <connector-id> \
+  --judge <connector-id> \
   --project <connector-id>
 ```
 
-### Run specific evaluations
+Run a specific evaluation:
 
 ```bash
 node scripts/evals run \
@@ -93,6 +111,40 @@ node scripts/evals run \
   --judge <connector-id> \
   --project <connector-id> \
   ai_insights/alert_insight.spec.ts
+```
+
+### Alternative: separate terminals
+
+If you prefer to manage services manually, start Scout in one terminal and run evals in another.
+
+Terminal 1:
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet evals_tracing
+```
+
+Terminal 2:
+
+```bash
+node scripts/evals run \
+  --suite observability-ai \
+  --judge <connector-id> \
+  --project <connector-id>
+```
+
+### Stop background services
+
+`node scripts/evals start` runs Scout and EDOT as background daemons.
+
+```bash
+node scripts/evals stop
+```
+
+Stop only one service:
+
+```bash
+node scripts/evals stop --service scout
+node scripts/evals stop --service edot
 ```
 
 ### CLI Options
