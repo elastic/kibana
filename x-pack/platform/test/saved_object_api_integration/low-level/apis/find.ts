@@ -47,8 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(response.status).to.eql(200, JSON.stringify(response.body));
         // Sort by title to ensure deterministic ordering regardless of ES score tiebreaking
-        const savedObjects = JSON.parse(response.text).saved_objects.sort(
-          (a: any, b: any) => a.attributes.title.localeCompare(b.attributes.title)
+        const savedObjects = JSON.parse(response.text).saved_objects.sort((a: any, b: any) =>
+          a.attributes.title.localeCompare(b.attributes.title)
         );
         expect(savedObjects.length).to.be(2);
         expect(savedObjects[0].attributes.comments[0].user).to.be('bob');
@@ -71,8 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(response.status).to.eql(200, JSON.stringify(response.body));
         // Sort by title to ensure deterministic ordering regardless of ES score tiebreaking
-        const savedObjects = JSON.parse(response.text).saved_objects.sort(
-          (a: any, b: any) => a.attributes.title.localeCompare(b.attributes.title)
+        const savedObjects = JSON.parse(response.text).saved_objects.sort((a: any, b: any) =>
+          a.attributes.title.localeCompare(b.attributes.title)
         );
         expect(savedObjects.length).to.be(2);
         expect(savedObjects[0].attributes.comments[1].message).to.contain('kibana');
@@ -94,8 +94,8 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(response.status).to.eql(200, JSON.stringify(response.body));
         // Sort by title to ensure deterministic ordering regardless of ES score tiebreaking
-        const savedObjects = JSON.parse(response.text).saved_objects.sort(
-          (a: any, b: any) => a.attributes.title.localeCompare(b.attributes.title)
+        const savedObjects = JSON.parse(response.text).saved_objects.sort((a: any, b: any) =>
+          a.attributes.title.localeCompare(b.attributes.title)
         );
         expect(savedObjects.length).to.be(2);
         expect(savedObjects[0].attributes.comments[0].user).to.be('charlie');
