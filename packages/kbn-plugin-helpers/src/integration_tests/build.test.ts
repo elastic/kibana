@@ -106,9 +106,8 @@ describe('scripts/generate_plugin', () => {
     ]
   `);
 
-    expect(
-      loadJsonFile(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'))
-    ).toMatchInlineSnapshot(`
+    expect(loadJsonFile(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
+      .toMatchInlineSnapshot(`
     Object {
       "description": "",
       "id": "fooTestPlugin",
