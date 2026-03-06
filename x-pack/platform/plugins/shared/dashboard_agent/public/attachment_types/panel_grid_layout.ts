@@ -78,9 +78,7 @@ const DEFAULT_W = 24;
 const DEFAULT_H = 9;
 const PANELS_PER_ROW = Math.floor(COLUMNS / DEFAULT_W);
 
-const resolveFallbackGrid = (
-  index: number,
-): DashboardPanel['grid'] => ({
+const resolveFallbackGrid = (index: number): DashboardPanel['grid'] => ({
   x: (index % PANELS_PER_ROW) * DEFAULT_W,
   y: Math.floor(index / PANELS_PER_ROW) * DEFAULT_H,
   w: DEFAULT_W,
@@ -104,7 +102,7 @@ export const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => 
           title: panel.title,
           uid: panel.panelId,
         }),
-         grid: panel.grid ?? resolveFallbackGrid(index),
+        grid: panel.grid ?? resolveFallbackGrid(index),
       });
     }
     return acc;
