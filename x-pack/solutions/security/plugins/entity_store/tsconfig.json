@@ -36,6 +36,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/std",
     "@kbn/es-query",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/streamlang"
   ]
 }

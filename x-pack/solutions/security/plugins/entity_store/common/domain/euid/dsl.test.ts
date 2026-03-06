@@ -123,45 +123,38 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 
   describe('user', () => {
-    it('returns filter with term on user.entity.id when present', () => {
+    it('returns filter with term on user.email when present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
-        user: { entity: { id: 'user-entity-1' } },
+        user: { email: 'alice@example.com' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.entity.id': 'user-entity-1' } }],
+          filter: [{ term: { 'user.email': 'alice@example.com' } }],
         },
       });
     });
 
-    it('returns filter with terms on user.name and host.entity.id when composed id is used', () => {
+    it('returns filter with term on user.name and must_not on higher-ranked identity fields when user.name is present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
-        host: { entity: { id: 'host-e1' } },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.name': 'alice' } }, { term: { 'host.entity.id': 'host-e1' } }],
-          must_not: [{ exists: { field: 'user.entity.id' } }],
+          filter: [{ term: { 'user.name': 'alice' } }],
+          must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
         },
       });
     });
 
-    it('returns filter with term on user.id when only user.id is present', () => {
+    it('returns filter with term on user.id and must_not on higher-ranked identity fields when only user.id is present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', { user: { id: 'user-id-42' } });
 
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'user.id': 'user-id-42' } }],
-          must_not: [
-            { exists: { field: 'user.entity.id' } },
-            { exists: { field: 'user.name' } },
-            { exists: { field: 'host.entity.id' } },
-            { exists: { field: 'host.id' } },
-            { exists: { field: 'host.name' } },
-          ],
+          must_not: [{ exists: { field: 'user.email' } }],
         },
       });
     });
@@ -170,15 +163,14 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(getEuidDslFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.entity.id when both user.entity.id and user.name@host.entity.id are present', () => {
+    it('precedence: uses user.email when both user.email and user.id are present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
-        user: { entity: { id: 'ue1' }, name: 'alice' },
-        host: { entity: { id: 'he1' } },
+        user: { email: 'alice@example.com', id: 'user-42' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.entity.id': 'ue1' } }],
+          filter: [{ term: { 'user.email': 'alice@example.com' } }],
         },
       });
     });
@@ -224,19 +216,81 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 });
 
+const userIsNotEmptyClause = (field: string) => ({
+  bool: {
+    must: [{ exists: { field } }, { bool: { must_not: { match: { [field]: '' } } } }],
+  },
+});
+
 describe('getEuidDslDocumentsContainsIdFilter', () => {
-  it('user: returns should with all user identity fields', () => {
+  it('user: returns bool with documentsFilter and should with all user identity fields', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
     expect(result).toEqual({
       bool: {
-        should: [
-          { exists: { field: 'user.entity.id' } },
-          { exists: { field: 'user.id' } },
-          { exists: { field: 'user.name' } },
-          { exists: { field: 'user.email' } },
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must: [
+                      { match: { 'event.kind': 'asset' } },
+                      {
+                        bool: {
+                          should: [
+                            userIsNotEmptyClause('user.email'),
+                            userIsNotEmptyClause('user.id'),
+                            userIsNotEmptyClause('user.name'),
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must: [
+                      { terms: { 'event.category': ['iam'] } },
+                      {
+                        bool: {
+                          should: [
+                            { match: { 'event.type': 'user' } },
+                            { match: { 'event.type': 'creation' } },
+                            { match: { 'event.type': 'deletion' } },
+                            { match: { 'event.type': 'group' } },
+                          ],
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            userIsNotEmptyClause('user.email'),
+                            userIsNotEmptyClause('user.id'),
+                            userIsNotEmptyClause('user.name'),
+                          ],
+                        },
+                      },
+                      { bool: { must_not: { match: { 'event.kind': 'enrichment' } } } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              should: [
+                { exists: { field: 'user.email' } },
+                { exists: { field: 'user.id' } },
+                { exists: { field: 'user.name' } },
+                { exists: { field: 'client.user.email' } },
+                { exists: { field: 'source.user.email' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
         ],
-        minimum_should_match: 1,
       },
     });
   });

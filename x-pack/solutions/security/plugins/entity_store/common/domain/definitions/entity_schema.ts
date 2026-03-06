@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;
@@ -47,6 +48,11 @@ const calculatedIdentityFieldLogicSchema = z.object({
   // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
   // ALL THE FIELDS MUST BE OF MAPPING TYPE 'keyword'
   euidFields: z.array(z.array(z.union([euidFieldSchema, euidSeparatorSchema]))),
+
+  // Optional document-level filter (Condition from @kbn/streamlang). When set, only documents
+  // matching this filter are considered for this entity type. Translated to DSL and ESQL
+  // via conditionToQueryDsl and conditionToESQL.
+  documentsFilter: z.optional(streamlangConditionSchema),
 });
 
 export const entitySchema = z.object({

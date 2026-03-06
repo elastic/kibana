@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
@@ -38,7 +39,7 @@ export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  return {
+  const containsIdBool: QueryDslQueryContainer = {
     bool: {
       should: identityField.requiresOneOfFields.map((field) => ({
         exists: { field },
@@ -46,6 +47,18 @@ export function getEuidDslDocumentsContainsIdFilter(
       minimum_should_match: 1,
     },
   };
+
+  const documentsFilter = identityField.documentsFilter;
+  if (documentsFilter) {
+    const documentsFilterDsl = conditionToQueryDsl(documentsFilter) as QueryDslQueryContainer;
+    return {
+      bool: {
+        filter: [documentsFilterDsl, containsIdBool],
+      },
+    };
+  }
+
+  return containsIdBool;
 }
 
 /**

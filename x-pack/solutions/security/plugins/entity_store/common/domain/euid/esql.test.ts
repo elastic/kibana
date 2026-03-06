@@ -86,30 +86,29 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
   });
 
   describe('user', () => {
-    it('returns filter with equality on user.entity.id when present', () => {
+    it('returns filter with equality on user.email when present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
-        user: { entity: { id: 'user-entity-1' } },
+        user: { email: 'alice@example.com' },
       });
 
-      expect(result).toBe('((user.entity.id == "user-entity-1"))');
+      expect(result).toBe('((user.email == "alice@example.com"))');
     });
 
-    it('returns filter with equalities on user.name and host.entity.id and null/empty check when composed id is used', () => {
+    it('returns filter with equality on user.name and null/empty checks on higher-ranked identity fields when user.name is present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'alice' },
-        host: { entity: { id: 'host-e1' } },
       });
 
       expect(result).toBe(
-        '((user.name == "alice") AND (host.entity.id == "host-e1") AND (user.entity.id IS NULL OR user.entity.id == ""))'
+        '((user.name == "alice") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == ""))'
       );
     });
 
-    it('returns filter with equality on user.id and null/empty checks when only user.id is present', () => {
+    it('returns filter with equality on user.id and null/empty check on higher-ranked identity field when only user.id is present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', { user: { id: 'user-id-42' } });
 
       expect(result).toBe(
-        '((user.id == "user-id-42") AND (user.entity.id IS NULL OR user.entity.id == "") AND (user.name IS NULL OR user.name == "") AND (host.entity.id IS NULL OR host.entity.id == "") AND (host.id IS NULL OR host.id == "") AND (host.name IS NULL OR host.name == ""))'
+        '((user.id == "user-id-42") AND (user.email IS NULL OR user.email == ""))'
       );
     });
 
@@ -117,13 +116,12 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       expect(getEuidEsqlFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.entity.id when both user.entity.id and user.name@host.entity.id are present', () => {
+    it('precedence: uses user.email when both user.email and user.id are present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
-        user: { entity: { id: 'ue1' }, name: 'alice' },
-        host: { entity: { id: 'he1' } },
+        user: { email: 'alice@example.com', id: 'user-42' },
       });
 
-      expect(result).toBe('((user.entity.id == "ue1"))');
+      expect(result).toBe('((user.email == "alice@example.com"))');
     });
   });
 
@@ -170,6 +168,17 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     const expected =
       '(host.entity.id IS NOT NULL AND host.entity.id != "") OR (host.id IS NOT NULL AND host.id != "") OR (host.name IS NOT NULL AND host.name != "") OR (host.hostname IS NOT NULL AND host.hostname != "")';
     expect(result).toBe(expected);
+  });
+
+  it('returns documents filter AND contains-id expression for user', () => {
+    const result = getEuidEsqlDocumentsContainsIdFilter('user');
+
+    expect(result).toMatch(/event\.kind/);
+    expect(result).toMatch(/event\.category/);
+    expect(result).toMatch(/AND\s+\(/);
+    expect(result).toMatch(/user\.email IS NOT NULL AND user\.email != ""/);
+    expect(result).toMatch(/user\.id IS NOT NULL AND user\.id != ""/);
+    expect(result).toMatch(/user\.name IS NOT NULL AND user\.name != ""/);
   });
 });
 

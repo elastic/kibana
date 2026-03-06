@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import {
+  getCommonFieldDescriptions,
+  getEntityFieldsDescriptions,
+  isNotEmptyCondition,
+} from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
@@ -13,16 +17,63 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
   identityField: {
-    requiresOneOfFields: ['user.entity.id', 'user.id', 'user.name', 'user.email'],
+    requiresOneOfFields: [
+      'user.email',
+      'user.id',
+      'user.name',
+      'client.user.email',
+      'source.user.email',
+    ],
+    /**
+     * UEBA user documents filter: only documents that are either
+     * (A) event.kind == "asset" with at least one of user.email/user.id/user.name not empty, or
+     * (B) event.category contains "iam", event.type in ("user","creation","deletion","group"),
+     *     same user-identity present, and event.kind != "enrichment".
+     */
+    documentsFilter: {
+      or: [
+        {
+          and: [
+            { field: 'event.kind', eq: 'asset' },
+            {
+              or: [
+                isNotEmptyCondition('user.email'),
+                isNotEmptyCondition('user.id'),
+                isNotEmptyCondition('user.name'),
+              ],
+            },
+          ],
+        },
+        {
+          and: [
+            { field: 'event.category', includes: 'iam' },
+            {
+              or: [
+                { field: 'event.type', eq: 'user' },
+                { field: 'event.type', eq: 'creation' },
+                { field: 'event.type', eq: 'deletion' },
+                { field: 'event.type', eq: 'group' },
+              ],
+            },
+            {
+              or: [
+                isNotEmptyCondition('user.email'),
+                isNotEmptyCondition('user.id'),
+                isNotEmptyCondition('user.name'),
+              ],
+            },
+            { field: 'event.kind', neq: 'enrichment' },
+          ],
+        },
+      ],
+    },
     euidFields: [
-      [{ field: 'user.entity.id' }],
-      [{ field: 'user.name' }, { separator: '@' }, { field: 'host.entity.id' }],
-      [{ field: 'user.name' }, { separator: '@' }, { field: 'host.id' }],
-      [{ field: 'user.name' }, { separator: '@' }, { field: 'host.name' }],
-      [{ field: 'user.id' }],
       [{ field: 'user.email' }],
-      [{ field: 'user.name' }, { separator: '@' }, { field: 'user.domain' }],
+      [{ field: 'user.id' }],
+      // TODO  ADD user.domain IS NOT NULL AND namespace == "entityanalytics_ad": entity_key = "{user.name}@{user.domain}@active_directory"
       [{ field: 'user.name' }],
+      [{ field: 'client.user.email' }],
+      [{ field: 'source.user.email' }],
     ],
   },
   entityTypeFallback: 'Identity',
@@ -30,6 +81,13 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   fields: [
     newestValue({ destination: 'entity.name', source: 'user.name' }),
     oldestValue({ source: 'user.entity.id' }),
+
+    collect({ source: 'event.kind' }),
+    collect({ source: 'event.category' }),
+    collect({ source: 'event.type' }),
+
+    collect({ source: 'client.user.email' }),
+    collect({ source: 'source.user.email' }),
 
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),

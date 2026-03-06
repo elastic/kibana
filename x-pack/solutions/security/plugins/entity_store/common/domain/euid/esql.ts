@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { conditionToESQL } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
@@ -77,9 +78,17 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  return identityField.requiresOneOfFields
+  const containsIdExpression = identityField.requiresOneOfFields
     .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
     .join(' OR ');
+
+  const documentsFilter = identityField.documentsFilter;
+  if (documentsFilter) {
+    const documentsFilterEsql = conditionToESQL(documentsFilter);
+    return `(${documentsFilterEsql}) AND (${containsIdExpression})`;
+  }
+
+  return containsIdExpression;
 }
 
 /**
