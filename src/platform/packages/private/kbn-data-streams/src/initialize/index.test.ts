@@ -653,6 +653,5 @@ describe('initialize - versioning logic', () => {
         data_retention: '30d',
       });
     });
-
   });
 });
