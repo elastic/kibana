@@ -10,7 +10,11 @@
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { render, screen, act } from '@testing-library/react';
 import React from 'react';
-import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
+import {
+  FullScreenWaterfall,
+  FULL_TRACE_WATERFALL_RENDER_DELAY_MS,
+  type FullScreenWaterfallProps,
+} from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 
@@ -83,8 +87,14 @@ describe('FullScreenWaterfall', () => {
     expect(screen.queryByTestId('logsFlyout')).not.toBeInTheDocument();
   });
 
-  it('should display the full trace waterfall', () => {
+  it('delays rendering the full trace waterfall on standard open to preserve the flyout animation', () => {
     render(<FullScreenWaterfall {...defaultProps} />);
+
+    expect(screen.queryByTestId('fullTraceWaterfall')).not.toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(FULL_TRACE_WATERFALL_RENDER_DELAY_MS);
+    });
 
     expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
   });
@@ -98,6 +108,12 @@ describe('FullScreenWaterfall', () => {
   });
 
   describe('animation suppression', () => {
+    it('renders the full trace waterfall immediately when restoring previously-open state', () => {
+      render(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
+
+      expect(screen.getByTestId('fullTraceWaterfall')).toBeInTheDocument();
+    });
+
     it('injects a style scoped to traceWaterfallFlyout when skipOpenAnimation is true', () => {
       render(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
 

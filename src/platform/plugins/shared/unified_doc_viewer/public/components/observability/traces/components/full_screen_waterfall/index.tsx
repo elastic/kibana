@@ -11,6 +11,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiSkeletonText,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -24,6 +25,7 @@ import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
 
 export const EUI_FLYOUT_BODY_OVERFLOW_CLASS = 'euiFlyoutBody__overflow';
+export const FULL_TRACE_WATERFALL_RENDER_DELAY_MS = 150;
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -130,6 +132,22 @@ export const FullScreenWaterfall = ({
   }, []);
 
   const [scrollElement, setScrollElement] = useState<Element | null>(null);
+  const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
+
+  useEffect(() => {
+    if (skipOpenAnimation) {
+      setIsWaterfallReady(true);
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setIsWaterfallReady(true);
+    }, FULL_TRACE_WATERFALL_RENDER_DELAY_MS);
+
+    return () => {
+      window.clearTimeout(timerId);
+    };
+  }, [skipOpenAnimation]);
 
   const traceWaterfallTitleId = useGeneratedHtmlId({
     prefix: 'traceWaterfallTitle',
@@ -191,7 +209,7 @@ export const FullScreenWaterfall = ({
           Issue: https://github.com/elastic/kibana/issues/248307
           */}
         <div ref={waterfallContainerRef}>
-          {scrollElement && serviceName ? (
+          {isWaterfallReady && scrollElement && serviceName ? (
             <FullTraceWaterfall
               traceId={traceId}
               rangeFrom={rangeFrom}
@@ -201,6 +219,8 @@ export const FullScreenWaterfall = ({
               onNodeClick={onNodeClick}
               onErrorClick={onErrorClick}
             />
+          ) : serviceName ? (
+            <EuiSkeletonText lines={4} />
           ) : null}
         </div>
       </EuiFlyoutBody>
