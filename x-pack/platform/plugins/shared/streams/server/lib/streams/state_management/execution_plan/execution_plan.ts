@@ -493,12 +493,16 @@ export class ExecutionPlan {
         return streamName ? getSegments(streamName).length - 1 : 0;
       },
       (action) =>
-        upsertEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          name: action.request.name,
-          query: action.request.query,
-        })
+        retryTransientEsErrors(
+          () =>
+            upsertEsqlView({
+              esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+              logger: this.dependencies.logger,
+              name: action.request.name,
+              query: action.request.query,
+            }),
+          { logger: this.dependencies.logger }
+        )
     );
   }
 
@@ -509,11 +513,15 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.map((action) =>
-        deleteEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          name: action.request.name,
-        })
+        retryTransientEsErrors(
+          () =>
+            deleteEsqlView({
+              esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+              logger: this.dependencies.logger,
+              name: action.request.name,
+            }),
+          { logger: this.dependencies.logger }
+        )
       )
     );
   }
