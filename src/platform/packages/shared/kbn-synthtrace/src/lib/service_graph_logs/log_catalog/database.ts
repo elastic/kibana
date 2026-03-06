@@ -78,7 +78,6 @@ export const DATABASE: Record<
       },
     },
   },
-
   mongodb: {
     infra: {
       healthy: [
@@ -99,6 +98,7 @@ export const DATABASE: Record<
     app: {
       success: {
         go: [`level=info msg="insert ok" collection={table}`],
+        python: [`INFO     app.mongo  document found collection={table} rid={request_id}`],
         node: [
           `{"level":"info","msg":"document found","collection":"{table}","reqId":"{request_id}"}`,
         ],
@@ -110,6 +110,12 @@ export const DATABASE: Record<
           ],
           error: [
             `level=error msg="mongo: context deadline exceeded" op=find collection={table} rid={request_id}`,
+          ],
+        },
+        python: {
+          warn: [`WARNING  app.mongo  pymongo pool saturation host={db_host} rid={request_id}`],
+          error: [
+            `ERROR    app.mongo  pymongo.errors.ServerSelectionTimeoutError host={db_host} collection={table} rid={request_id}`,
           ],
         },
         node: {
@@ -144,6 +150,7 @@ export const DATABASE: Record<
     app: {
       success: {
         go: [`level=info msg="es search hit" index={table} hits=1`],
+        python: [`INFO     app.search  es search hit index={table} hits=1 rid={request_id}`],
         node: [`{"level":"info","msg":"es search hit","index":"{table}","hits":1}`],
       },
       db_timeout: {
@@ -151,6 +158,14 @@ export const DATABASE: Record<
           warn: [`level=warn msg="es: connection pool saturation" idle=0 total=5 host={db_host}`],
           error: [
             `level=error msg="es: context deadline exceeded" op=search index={table} rid={request_id}`,
+          ],
+        },
+        python: {
+          warn: [
+            `WARNING  app.search  elasticsearch pool saturation host={db_host} rid={request_id}`,
+          ],
+          error: [
+            `ERROR    app.search  elastic_transport.ConnectionTimeout host={db_host} index={table} rid={request_id}`,
           ],
         },
         node: {

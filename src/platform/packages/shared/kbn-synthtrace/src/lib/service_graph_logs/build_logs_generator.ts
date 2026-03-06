@@ -37,8 +37,21 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
   manifest: LogsManifest;
 } {
   const { serviceGraph, failures, volume, noise, seed, cycleMs, cycleOriginMs } = config;
+
+  if (serviceGraph.services.length === 0) {
+    throw new Error('buildLogsGenerator requires at least one service');
+  }
+
   const entryService: ServiceNamesOf<TServiceGraph> =
-    config.entryService ?? serviceGraph.services[0]?.name;
+    config.entryService ?? serviceGraph.services[0].name;
+
+  if (!serviceGraph.services.some((svc) => svc.name === entryService)) {
+    throw new Error(
+      `Unknown entryService: "${entryService}". Valid services: ${serviceGraph.services
+        .map((s) => s.name)
+        .join(', ')}`
+    );
+  }
 
   const tickSpreadMs = config.tickSpreadMs ?? config.tickIntervalMs;
 
@@ -61,7 +74,7 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
     cycleOriginMs,
   };
 
-  let nextTickAt = -Infinity;
+  let lastTimestamp = -Infinity;
 
   const manifest: LogsManifest = {
     services: serviceGraph.services,
@@ -70,8 +83,12 @@ export function buildLogsGenerator<TServiceGraph extends ServiceGraph = ServiceG
   };
 
   const generator = (timestamp: number, index: number) => {
-    if (timestamp < nextTickAt) return [];
-    nextTickAt = timestamp + config.tickIntervalMs;
+    if (timestamp < lastTimestamp) {
+      throw new Error(
+        `generator() must be called with non-decreasing timestamps (got ${timestamp}, expected >= ${lastTimestamp})`
+      );
+    }
+    lastTimestamp = timestamp;
 
     const tickState = resolveTickState({ ctx, timestamp });
     const docs = [

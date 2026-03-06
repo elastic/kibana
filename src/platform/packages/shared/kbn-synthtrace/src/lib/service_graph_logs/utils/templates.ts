@@ -66,8 +66,8 @@ export function pickHealthyMessage({
   }
 
   const rt = runtime ?? pickRuntime(seed);
-  const always = SERVICE.request.success.always[rt] ?? SERVICE.request.success.always.go!;
-  const applicable: string[] = [...(always ?? [])];
+  const always = SERVICE.request.success.always[rt] ?? SERVICE.request.success.always.go ?? [];
+  const applicable: string[] = [...always];
 
   for (const dep of infraDeps ?? []) {
     const pool =

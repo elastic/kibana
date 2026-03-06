@@ -39,6 +39,7 @@ export const INFRA_FAIL_CONDITION = {
   database: 'db_timeout',
   message_queue: 'broker_down',
   cache: 'eviction',
+  kubernetes: 'crash_loop_backoff',
   host: 'resource_pressure',
 } as const;
 

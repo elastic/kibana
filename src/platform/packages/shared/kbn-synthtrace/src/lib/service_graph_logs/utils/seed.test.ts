@@ -10,8 +10,9 @@
 import { deriveSeed, resolveEffectiveSeed } from './seed';
 
 describe('resolveEffectiveSeed', () => {
-  it('combines seed + index + timestamp', () => {
-    expect(resolveEffectiveSeed(42, 3, 1_000)).toBe(1_045);
+  it('combines seed + index (timestamp is ignored when seed is explicit)', () => {
+    expect(resolveEffectiveSeed(42, 3, 1_000)).toBe(45);
+    expect(resolveEffectiveSeed(42, 3, 999_999)).toBe(45);
   });
 
   it('falls back to timestamp when seed is undefined', () => {

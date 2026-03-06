@@ -32,8 +32,14 @@ function resolveServiceFailures(
       if (!failure) continue;
       const infraDep = dep as InfraDependency;
       for (const svc of serviceGraph.services) {
-        if (!svc.infraDeps.includes(infraDep)) continue;
+        if (!svc.infraDeps.includes(infraDep)) {
+          continue;
+        }
         const existing = resolved[svc.name];
+        // Don't let an infra cascade overwrite a failure that was explicitly set via failures.services.
+        if (existing !== undefined && existing.sourceDep === undefined) {
+          continue;
+        }
         const isWorse =
           !existing || ERROR_TYPE_STATUS[failure.errorType] > ERROR_TYPE_STATUS[existing.errorType];
         if (isWorse) {

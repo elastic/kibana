@@ -78,13 +78,10 @@ const CORE_SERVICES = [
       },
     },
     serviceLogs: {
-      success: [
-        'Payment processed successfully',
-        'Payment completed',
+      success: ['Payment processed successfully', 'Payment completed'],
+      error: [
         'Payment gateway rejected transaction: insufficient funds',
         'Duplicate payment detected: idempotency key already used',
-      ],
-      error: [
         'Payment processing failed: downstream acquirer timeout after 30s',
         'Payment persistence failed: database transaction rolled back after timeout',
         'Event publish failed: unable to reach Kafka broker after 3 retries',

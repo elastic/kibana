@@ -79,6 +79,7 @@ export const CLAIMS_APP = defineMockApp({
         return {
           volume: {
             'claim-intake': { spikes: [{ scale: 5 }] },
+            'fraud-check': { spikes: [{ scale: 5 }] },
             'policy-lookup': { every: 10 },
             'notification-dispatch': { every: 20 },
           },

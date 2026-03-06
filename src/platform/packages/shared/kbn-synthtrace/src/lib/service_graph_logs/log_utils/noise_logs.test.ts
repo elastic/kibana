@@ -52,17 +52,18 @@ describe('generateInfraNoiseLog', () => {
   });
 
   it('emits non-info level when degraded=true (warn or error per HEALTH_PROBS.failing)', () => {
-    const levels = [0, 1, 2, 3, 4].map((s) => {
+    const levels = [0, 1, 2, 3, 4].map((seed) => {
       const doc = generateInfraNoiseLog({
         dep: 'postgres',
-        seed: s,
+        seed,
         degraded: true,
         service: K8S_SERVICE,
         timestamp: TIMESTAMP,
       });
+      expect(doc).not.toBeNull();
       return doc!['log.level'];
     });
-    expect(levels.some((l) => l === 'warn' || l === 'error')).toBe(true);
+    expect(levels.every((l) => l === 'warn' || l === 'error')).toBe(true);
   });
 });
 

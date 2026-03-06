@@ -51,8 +51,8 @@ describe('parseOpts', () => {
     expect(() => parseOpts({ baselineMinutes: '-1' })).toThrow(/baselineMinutes/);
   });
 
-  it('throws on zero or negative baseRate', () => {
-    expect(() => parseOpts({ baseRate: '0' })).toThrow(/baseRate/);
+  it.each(['0', '-1'])('throws on invalid baseRate=%s', (baseRate) => {
+    expect(() => parseOpts({ baseRate })).toThrow(/baseRate/);
   });
 });
 

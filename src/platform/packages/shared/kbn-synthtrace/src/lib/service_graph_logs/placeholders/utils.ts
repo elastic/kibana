@@ -29,7 +29,7 @@ export function toGrpcSvc(name: string): string {
   // Class name: PascalCase of full service name + "Service"
   const className = toPascalCase(name) + 'Service';
   // Method name: last word of the service name, PascalCased
-  // e.g. "fraud-check" → "Check", "policy-lookup" → "Lookup", "payment-processor" → "Process"
+  // e.g. "fraud-check" → "Check", "policy-lookup" → "Lookup", "payment-processor" → "Processor"
   const lastWord = name.split(/[-_]/).pop() ?? name;
   const method = lastWord.charAt(0).toUpperCase() + lastWord.slice(1);
   return `/${snake}.v1.${className}/${method}`;

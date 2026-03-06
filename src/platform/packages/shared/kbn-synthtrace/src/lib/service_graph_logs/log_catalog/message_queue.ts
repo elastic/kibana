@@ -35,14 +35,14 @@ export const MESSAGE_QUEUE: Record<
     app: {
       success: {
         go: [
-          `{"level":"info","msg":"message produced","topic":"{table}","partition":0,"offset":1024}`,
+          `{"level":"info","msg":"message produced","topic":"{topic}","partition":0,"offset":1024}`,
         ],
-        python: [`INFO     app.kafka  message produced topic={table} partition=0 offset=1024`],
+        python: [`INFO     app.kafka  message produced topic={topic} partition=0 offset=1024`],
         java: [
-          `[{thread}] INFO  {app_pkg}.KafkaProducer - produced topic={table} partition=0 offset=1024`,
+          `[{thread}] INFO  {app_pkg}.KafkaProducer - produced topic={topic} partition=0 offset=1024`,
         ],
         node: [
-          `{"level":"info","msg":"message produced","topic":"{table}","partition":0,"offset":1024}`,
+          `{"level":"info","msg":"message produced","topic":"{topic}","partition":0,"offset":1024}`,
         ],
       },
     },

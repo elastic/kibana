@@ -15,7 +15,7 @@ export function resolveEffectiveSeed(
   timestamp?: number
 ): number {
   if (seed != null) {
-    return seed + index + (timestamp ?? 0);
+    return seed + index;
   }
   return (timestamp ?? Date.now()) + index;
 }
@@ -36,6 +36,9 @@ export function deriveSeed(baseSeed: number, name: string): number {
  * e.g. weight=2.3 → always 2, +1 with 30% probability per tick.
  */
 export const probabilisticCount = (weight: number, rng: () => number): number => {
+  if (!Number.isFinite(weight) || weight <= 0) {
+    return 0;
+  }
   const intPart = Math.floor(weight);
   return intPart + (rng() < weight - intPart ? 1 : 0);
 };

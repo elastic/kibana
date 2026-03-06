@@ -21,7 +21,6 @@ import {
   type ServicePhaseOptions,
 } from './shared';
 import { DEP_TO_CATEGORY, INFRA_FAIL_CONDITION } from '../constants';
-import type { InfraCategory } from '../constants';
 
 /** Probability a ghost-mention doc fires on any given tick when no explicit `rate` is configured. */
 const DEFAULT_GHOST_MENTION_RATE = 0.05;
@@ -98,10 +97,7 @@ export function generateInfraNoiseLog({
 
   // Use an offset seed so the level roll is independent from the message-pick seed.
   const level = resolveLogLevelFromSeed(degraded, seed);
-  const condition =
-    level === 'info'
-      ? 'healthy'
-      : INFRA_FAIL_CONDITION[category as Exclude<InfraCategory, 'kubernetes'>];
+  const condition = level === 'info' ? 'healthy' : INFRA_FAIL_CONDITION[category];
 
   const metadata = cachedMetadata ?? getOrBuildMetadata(service, seed);
   const message = pickInfraMessage({
@@ -143,6 +139,10 @@ export function generateNoiseDocs({
       ([dep, service]): InfraEmitter => ({ kind: 'infra', dep, service })
     ),
   ];
+
+  if (pool.length === 0) {
+    return [];
+  }
 
   const docs: Array<Partial<LogDocument>> = [];
   for (let i = 0; i < count; i++) {
