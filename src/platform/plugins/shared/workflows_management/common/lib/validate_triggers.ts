@@ -37,10 +37,9 @@ export function validateTriggerConditionsForWorkflow(
     const trigger = triggers[i];
     const type = trigger?.type;
     if (typeof type === 'string' && !isTriggerType(type)) {
-      const condition =
-        trigger && 'with' in trigger
-          ? (trigger.with as { condition?: string } | undefined)?.condition
-          : undefined;
+      const onBlock =
+        trigger && 'on' in trigger ? (trigger as { on?: { condition?: string } }).on : undefined;
+      const condition = onBlock?.condition;
       if (condition != null && condition !== '') {
         const conditionStr = typeof condition === 'string' ? condition : String(condition);
         const definition = getTriggerDefinition(type);
