@@ -14,6 +14,7 @@ import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { sampleSize as lodashSampleSize } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import {
   FEATURES_SOFT_DELETE_DATASETS,
@@ -168,7 +169,11 @@ evaluate.describe('Streams features soft delete', () => {
     return {
       name: 'llm_soft_delete_compliance',
       kind: 'LLM' as const,
-      evaluate: async ({ output }: { output: SoftDeleteTaskOutput }) => {
+      evaluate: async ({
+        output,
+      }: {
+        output: SoftDeleteTaskOutput & { traceId: string | null };
+      }) => {
         const { initialFeatures, deletedFeatures, followUpRuns } = output;
 
         if (deletedFeatures.length === 0) {
@@ -292,6 +297,9 @@ evaluate.describe('Streams features soft delete', () => {
           esClient,
           inferenceClient,
           evaluationConnector,
+          evaluators,
+          traceEsClient,
+          log,
           logger,
           executorClient,
         }) => {
@@ -324,7 +332,7 @@ evaluate.describe('Streams features soft delete', () => {
                   'stream_name' | 'delete_count' | 'follow_up_runs' | 'sample_document_count'
                 >;
               }) => {
-                return runSoftDeleteExperiment({
+                const result = await runSoftDeleteExperiment({
                   esClient,
                   streamName: input.stream_name,
                   deleteCount: input.delete_count,
@@ -333,9 +341,17 @@ evaluate.describe('Streams features soft delete', () => {
                   logger,
                   sampleSize: input.sample_document_count,
                 });
+                const traceId = getCurrentTraceId();
+                return { ...result, traceId };
               },
             },
-            [createSoftDeleteSemanticEvaluator({ inferenceClient: evaluatorInferenceClient })]
+            [
+              createSoftDeleteSemanticEvaluator({ inferenceClient: evaluatorInferenceClient }),
+              evaluators.traceBasedEvaluators.inputTokens,
+              evaluators.traceBasedEvaluators.outputTokens,
+              evaluators.traceBasedEvaluators.cachedTokens,
+              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+            ]
           );
         }
       );
