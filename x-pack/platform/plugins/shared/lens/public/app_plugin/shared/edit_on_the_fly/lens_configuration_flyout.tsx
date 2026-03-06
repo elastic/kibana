@@ -33,6 +33,7 @@ import {
   useLensDispatch,
   selectHideTextBasedEditor,
 } from '../../../state_management';
+import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   getAbsoluteDateRange,
@@ -222,12 +223,29 @@ export function LensEditConfigurationFlyout({
     setESQLQueryState(state);
   }, []);
 
-  const onApply = useCallback(() => {
+  const onApply = useCallback(async () => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
     }
+
+    let attributesToSave: TypedLensSerializedState['attributes'];
+    try {
+      // Run the apply callback first so auto-save operations (e.g. linked annotations)
+      // complete before the visualization is persisted via saveByRef.
+      const updatedAttributes = await onApplyCallback?.(currentAttributes);
+      attributesToSave = updatedAttributes ?? currentAttributes;
+    } catch (err) {
+      coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.translate('xpack.lens.config.applyError', {
+          defaultMessage: 'Failed to apply changes',
+        }),
+      });
+      return;
+    }
+
     if (savedObjectId) {
-      saveByRef?.(currentAttributes);
+      const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
+      saveByRef?.(serializedAttrs);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -244,8 +262,6 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(currentAttributes);
-    // Remove the user's preferred chart type from sessionStorage
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
@@ -256,6 +272,7 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     currentAttributes,
+    coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
   ]);
