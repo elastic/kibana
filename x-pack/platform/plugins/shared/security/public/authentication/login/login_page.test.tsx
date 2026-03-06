@@ -377,7 +377,7 @@ describe('LoginPage', () => {
       httpMock.get.mockResolvedValue(createLoginState());
       window.location.href = `http://some-host/bar?msg=SESSION_IDLE_TIMEOUT`;
 
-      const wrapper = shallow(
+      renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -387,16 +387,11 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock();
-      });
-
-      const { message } = wrapper.find(LoginForm).props();
-      expect(message).toEqual({
-        type: MessageType.Info,
-        content: 'Your session has timed out due to inactivity. Please log in again.',
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(
+          screen.getByText('Your session has timed out due to inactivity. Please log in again.')
+        ).toBeInTheDocument();
       });
     });
 
@@ -405,7 +400,7 @@ describe('LoginPage', () => {
       httpMock.get.mockResolvedValue(createLoginState());
       window.location.href = `http://some-host/bar?msg=SESSION_LIFESPAN_TIMEOUT`;
 
-      const wrapper = shallow(
+      renderPage(
         <LoginPage
           http={httpMock}
           notifications={coreStartMock.notifications}
@@ -415,17 +410,13 @@ describe('LoginPage', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-        resetHttpMock();
-      });
-
-      const { message } = wrapper.find(LoginForm).props();
-      expect(message).toEqual({
-        type: MessageType.Info,
-        content:
-          'Your session has expired because it reached the maximum lifespan. Please log in again.',
+      await waitFor(() => {
+        expect(screen.getByTestId('loginSubmit')).toBeInTheDocument();
+        expect(
+          screen.getByText(
+            'Your session has expired because it reached the maximum lifespan. Please log in again.'
+          )
+        ).toBeInTheDocument();
       });
     });
 
