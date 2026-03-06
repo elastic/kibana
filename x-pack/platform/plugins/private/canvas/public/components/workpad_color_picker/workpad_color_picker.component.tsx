@@ -40,5 +40,3 @@ export const WorkpadColorPicker = (props: Props) => {
     />
   );
 };
-
-WorkpadColorPicker.propTypes = ColorPickerPopover.propTypes;
