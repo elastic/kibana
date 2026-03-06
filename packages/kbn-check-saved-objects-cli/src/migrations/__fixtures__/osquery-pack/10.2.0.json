@@ -40,7 +40,9 @@
           "interval": "3600",
           "timeout": 60,
           "platform": "linux",
-          "version": "4.7.0"
+          "version": "4.7.0",
+          "schedule_id": "b5e8f3a2-1c4d-4e6f-9a2b-3d7c8e9f0a1b",
+          "start_date": "2024-01-01T00:00:00.000Z"
         }
       ]
     }
