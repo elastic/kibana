@@ -75,7 +75,6 @@ export function OpenInDiscover({
         isDisabled={isDisabled}
         iconType="discoverApp"
         href={discoverHref}
-        fullWidth={true}
       >
         {label}
       </EuiButton>
