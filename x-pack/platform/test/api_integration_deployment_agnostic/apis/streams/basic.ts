@@ -10,6 +10,7 @@ import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { get, omit } from 'lodash';
 import type { JsonObject } from '@kbn/utility-types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -36,6 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const status = 'enabled' as RoutingStatus;
 
   interface Resources {
@@ -76,6 +78,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       viewerApiClient = await createStreamsRepositoryViewerClient(roleScopedSupertest);
+      if (!isServerless) {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+        });
+      }
+    });
+
+    after(async () => {
+      if (!isServerless) {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        });
+      }
     });
 
     describe('initially', () => {
