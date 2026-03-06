@@ -241,7 +241,7 @@ export async function compressTar({
   createRootDirectory,
   rootDirectoryName,
 }: CompressTarOptions) {
-  const folder = rootDirectoryName ?? basename(source);
+  const folder = rootDirectoryName || basename(source);
 
   let fileCount = 0;
   const packStream = tarFsPack(source, {
