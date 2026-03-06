@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSX, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -18,10 +18,10 @@ import type {
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
-  SolutionNavigationDefinitions,
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 
 /** @internal */
 export type InternalChromeSetup = ChromeSetup;
@@ -29,72 +29,10 @@ export type InternalChromeSetup = ChromeSetup;
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
   /**
-   * Used only by the rendering service to render the header UI
-   * @internal
-   *
-   * @remarks
-   * Header that is used with the "classic" navigation.
-   * It includes the header and the overlay classic navigation.
-   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getClassicHeaderComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the header UI
-   * @internal
-   *
-   * @remarks
-   * Header that is used with the "project" navigation (solution and serverless)
-   * It includes the header.
-   * It doesn't include the banner or the chromeless header state, which are rendered separately by the layout service.
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getProjectHeaderComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the project side navigation UI
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getProjectSideNavComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the header banner UI
-   * @internal
-   *
-   * @remarks
-   * Can be used by layout service to render a banner separate from the header.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getHeaderBanner(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the chromeless header UI
-   * @internal
-   *
-   * @remarks
-   * Includes global loading indicator for chromeless state.
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getChromelessHeader(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the project app menu UI
-   * @internal
-   *
-   * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
-   */
-  getProjectAppMenuComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to render the sidebar UI
+   * Deps passed to `ChromeComponentsProvider` by the layout service.
    * @internal
    */
-  getSidebarComponent(): JSX.Element;
+  componentDeps: ChromeComponentsDeps;
 
   /**
    * Used only by the rendering service to render the global footer UI (devbar)
@@ -107,14 +45,6 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   project: {
-    /**
-     * Sets the project home href string.
-     * @param homeHref
-     *
-     * Use {@link ServerlessPluginStart.setProjectHome} to set project home.
-     */
-    setHome(homeHref: string): void;
-
     /**
      * Sets the cloud's URLs.
      * @param cloudUrls
@@ -133,16 +63,14 @@ export interface InternalChromeStart extends ChromeStart {
       ChildrenId extends string = Id
     >(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
-      config?: { dataTestSubj?: string }
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
     ): void;
 
-    getNavigationTreeUi$: () => Observable<NavigationTreeDefinitionUI>;
-
-    /**
-     * Returns an observable of the active nodes in the project navigation.
-     */
-    getActiveNavigationNodes$(): Observable<ChromeProjectNavigationNode[][]>;
+    getNavigation$(): Observable<{
+      solutionId: SolutionId;
+      navigationTree: NavigationTreeDefinitionUI;
+      activeNodes: ChromeProjectNavigationNode[][];
+    }>;
 
     /** Get an Observable of the current project breadcrumbs */
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
@@ -158,22 +86,5 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
-
-    /**
-     * Update the solution navigation definitions.
-     *
-     * @param solutionNavs The solution navigation definitions to update.
-     * @param replace Flag to indicate if the previous solution navigation definitions should be replaced.
-     * If `false`, the new solution navigation definitions will be merged with the existing ones.
-     */
-    updateSolutionNavigations(solutionNavs: SolutionNavigationDefinitions, replace?: boolean): void;
-
-    /**
-     * Change the active solution navigation.
-     *
-     * @param id The id of the active solution navigation. If `null` is provided, the solution navigation
-     * will be replaced with the legacy Kibana navigation.
-     */
-    changeActiveSolutionNavigation(id: SolutionId | null): void;
   };
 }

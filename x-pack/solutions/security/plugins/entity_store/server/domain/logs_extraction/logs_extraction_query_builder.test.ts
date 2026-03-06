@@ -11,10 +11,10 @@ import {
   buildRemainingLogsCountQuery,
 } from './logs_extraction_query_builder';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import { EntityType } from '../../../common/domain/definitions/entity_schema';
+import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 
 describe('buildLogsExtractionEsqlQuery', () => {
-  Object.values(EntityType.Values).forEach((type) => {
+  Object.values(EntityType.enum).forEach((type) => {
     it(`generates the expected query for ${type} entity description`, () => {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns: ['test-index-*'],
@@ -104,7 +104,7 @@ describe('buildCcsLogsExtractionEsqlQuery', () => {
 });
 
 describe('buildRemainingLogsCountQuery', () => {
-  Object.values(EntityType.Values).forEach((type) => {
+  ALL_ENTITY_TYPES.forEach((type) => {
     it(`generates the expected query for ${type} entity type`, () => {
       const query = buildRemainingLogsCountQuery({
         indexPatterns: ['test-index-*'],
