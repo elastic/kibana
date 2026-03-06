@@ -42,7 +42,7 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
   const agentsRaw = hitFields.agents ?? source.agents;
   const agentsList = Array.isArray(agentsRaw) ? agentsRaw : [];
 
-  const actionId = get('action_id') as string;
+  const actionId = (get('action_id') as string | undefined) ?? '';
   const packName = get('pack_name') as string | undefined;
   const packId = get('pack_id') as string | undefined;
 

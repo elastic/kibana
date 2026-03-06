@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 
 import { PLUGIN_ID } from '../../../common';
@@ -34,6 +34,8 @@ import { mergeRows } from './merge_rows';
 import { buildPackLookup } from './pack_lookup';
 import { mapLiveHitToRow } from './map_live_hit_to_row';
 import type { LiveActionHit } from './map_live_hit_to_row';
+
+const VALID_SOURCE_FILTERS = new Set(['live', 'rule', 'scheduled']);
 
 export interface ScheduledExecutionBucket {
   key: [string, number];
@@ -74,6 +76,7 @@ const extractPackIdFromBucket = (bucket: ScheduledExecutionBucket): string | und
   bucket.pack_id_hit?.hits?.hits?.[0]?._source?.pack_id;
 
 export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
+  const logger: Logger = osqueryContext.logFactory.get('unifiedHistory');
   router.versioned
     .get({
       access: 'public',
@@ -94,7 +97,19 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               nextPage: schema.maybe(schema.string()),
               kuery: schema.maybe(schema.string()),
               userIds: schema.maybe(schema.string()),
-              sourceFilters: schema.maybe(schema.string()),
+              sourceFilters: schema.maybe(
+                schema.string({
+                  validate: (value) => {
+                    const tokens = value.split(',').filter(Boolean);
+                    const invalid = tokens.filter((t) => !VALID_SOURCE_FILTERS.has(t));
+                    if (invalid.length) {
+                      return `invalid sourceFilter values: ${invalid.join(
+                        ', '
+                      )}. Allowed: live, rule, scheduled`;
+                    }
+                  },
+                })
+              ),
               startDate: schema.maybe(schema.string()),
               endDate: schema.maybe(schema.string()),
             }),
@@ -341,10 +356,11 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           return response.ok({ body });
         } catch (err) {
           const error = err as Error;
+          logger.error(`Failed to fetch unified history: ${error.message}`);
 
           return response.customError({
             statusCode: 500,
-            body: { message: error.message },
+            body: { message: 'Failed to fetch query history' },
           });
         }
       }

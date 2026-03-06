@@ -11,13 +11,15 @@ paths:
         osquery executions. The response uses cursor-based pagination.
       operationId: OsqueryGetUnifiedHistory
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
+      x-labels: [ ]
+      #      x-labels: [serverless, ess]
       parameters:
         - name: pageSize
           in: query
           required: false
           schema:
-            description: 'The number of results to return per page. The default is 20.'
+            description: 'The number of results to return per page.'
             type: integer
             minimum: 1
             maximum: 100

@@ -54,7 +54,8 @@ export const buildScheduledResponsesQuery = ({
     filters.push({ range: { '@timestamp': rangeFilter } });
   }
 
-  const aggSize = Math.max(scheduledOffset + pageSize + 1, 10000);
+  const MAX_AGG_BUCKETS = 65536;
+  const aggSize = Math.min(Math.max(scheduledOffset + pageSize + 1, 10000), MAX_AGG_BUCKETS);
 
   return {
     body: {

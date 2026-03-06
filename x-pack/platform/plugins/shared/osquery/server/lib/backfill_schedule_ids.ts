@@ -27,6 +27,11 @@ import {
 } from '../utils/get_internal_saved_object_client';
 import { convertSOQueriesToPackConfig, policyHasPack, makePackKey } from '../routes/pack/utils';
 
+/**
+ * One-time migration that assigns stable `schedule_id` + `start_date` to every
+ * pack query that doesn't already have them. The task marks itself as completed
+ * after the first successful run; subsequent executions are no-ops.
+ */
 export const backfillScheduleIds = async ({
   coreStart,
   osqueryContext,
