@@ -8,6 +8,7 @@
 import kbnDatemath from '@kbn/datemath';
 import { getSampleDocuments } from '@kbn/ai-tools';
 import { tags } from '@kbn/scout';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import { type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
@@ -91,8 +92,11 @@ evaluate.describe('Streams features duplication (harness)', () => {
           esClient,
           inferenceClient,
           evaluationConnector,
+          evaluators,
           logger,
           executorClient,
+          traceEsClient,
+          log,
         }) => {
           const evaluatorInferenceClient = inferenceClient.bindTo({
             connectorId: evaluationConnector.id,
@@ -120,7 +124,7 @@ evaluate.describe('Streams features duplication (harness)', () => {
               }: {
                 input: { stream_name: string; runs: number; sample_document_count: number };
               }) => {
-                return runRepeatedFeatureIdentification({
+                const result = await runRepeatedFeatureIdentification({
                   esClient,
                   streamName: input.stream_name,
                   runs: input.runs,
@@ -128,12 +132,17 @@ evaluate.describe('Streams features duplication (harness)', () => {
                   logger,
                   sampleSize: input.sample_document_count,
                 });
+                return { ...result, traceId: getCurrentTraceId() };
               },
             },
             [
               featureDuplicationEvaluator,
               createSemanticUniquenessEvaluator({ inferenceClient: evaluatorInferenceClient }),
               createIdConsistencyEvaluator({ inferenceClient: evaluatorInferenceClient }),
+              evaluators.traceBasedEvaluators.inputTokens,
+              evaluators.traceBasedEvaluators.outputTokens,
+              evaluators.traceBasedEvaluators.cachedTokens,
+              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
             ]
           );
         }

@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiLoadingElastic,
   EuiProgress,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,8 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { processCondition, toDataTableRecordWithIndex } from './utils';
+import { useQueryStreamHint } from '../../../hooks/use_query_stream_hint';
+import { QueryStreamHintCallout } from '../../query_streams/query_stream_hint_callout';
 import { RowSelectionContext } from '../shared/preview_table';
 import { useQueryStreamCreation } from './query_stream_creation_context';
 
@@ -359,6 +362,7 @@ const QueryStreamPreviewPanel = ({
   const [viewMode, setViewMode] = useState<PreviewTableMode>('summary');
   const { fieldTypes, dataView: streamDataView } = useStreamDataViewFieldTypes(streamName);
   const hasDocuments = !isEmpty(documents);
+  const queryStreamHint = useQueryStreamHint(documentsError);
 
   const [sorting, setSorting] = useState<{
     fieldName?: string;
@@ -406,7 +410,17 @@ const QueryStreamPreviewPanel = ({
             })}
           </h2>
         }
-        body={documentsError.message}
+        body={
+          <>
+            <p>{documentsError.message}</p>
+            {queryStreamHint && (
+              <>
+                <EuiSpacer size="s" />
+                <QueryStreamHintCallout hint={queryStreamHint} />
+              </>
+            )}
+          </>
+        }
       />
     );
   } else if (!hasDocuments) {
