@@ -85,6 +85,7 @@ dependsOn:
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-saved-objects-server-mocks'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -97,6 +98,7 @@ fileGroups:
     - server/**/*.json
     - public/**/*
     - common/**/*
+    - test/**/*
     - '!target/**/*'
 tasks:
   jest:

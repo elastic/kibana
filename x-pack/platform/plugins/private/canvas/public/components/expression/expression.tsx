@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useRef } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiPanel,
   EuiButton,
@@ -208,18 +207,4 @@ export const Expression: FC<Props> = ({
     // Portal is required to show above the navigation
     return <EuiPortal>{expressionPanel}</EuiPortal>;
   }
-};
-
-Expression.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  functionDefinitions: PropTypes.array,
-  // @ts-expect-error upgrade typescript v5.9.3
-  formState: PropTypes.object,
-  // @ts-expect-error upgrade typescript v5.9.3
-  updateValue: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
-  setExpression: PropTypes.func,
-  // @ts-expect-error upgrade typescript v5.9.3
-  done: PropTypes.func,
-  error: PropTypes.string,
 };

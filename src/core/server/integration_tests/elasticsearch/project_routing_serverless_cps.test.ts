@@ -487,6 +487,48 @@ describe('project_routing on serverless CPS', () => {
       expect(response.responses[0].hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
+
+    it('injects project_routing as query param via high-level client.msearch()', async () => {
+      // The CPS request handler must inject project_routing as a query param, not in the body,
+      // because msearch uses NDJSON format and injecting into the body would corrupt the request.
+      const response = await client.msearch({
+        searches: [
+          { index: TEST_INDEX },
+          { query: { match_all: {} } },
+          { index: TEST_INDEX },
+          { query: { term: { category: 'alpha' } } },
+        ],
+      });
+
+      const expectedMsearchQueries = 2;
+      expect(response.responses.length).toBe(expectedMsearchQueries);
+      expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+    });
+  });
+
+  describe('msearch_template API with project_routing', () => {
+    it('injects project_routing as query param via high-level client.msearchTemplate()', async () => {
+      // First, create a search template to use
+      await client.putScript({
+        id: 'cps-test-template',
+        script: {
+          lang: 'mustache',
+          source: JSON.stringify({ query: { match_all: {} } }),
+        },
+      });
+
+      try {
+        const response = await client.msearchTemplate({
+          search_templates: [{ index: TEST_INDEX }, { id: 'cps-test-template', params: {} }],
+        });
+
+        expect(response.responses.length).toBe(1);
+        expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      } finally {
+        await client.deleteScript({ id: 'cps-test-template' }).catch(() => {});
+      }
+    });
   });
 
   describe('count API with project_routing', () => {
