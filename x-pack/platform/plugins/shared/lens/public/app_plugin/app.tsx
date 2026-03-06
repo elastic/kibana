@@ -33,6 +33,7 @@ import {
   useLensDispatch,
   selectSavedObjectFormat,
   updateIndexPatterns,
+  updateVisualizationState,
   selectActiveDatasourceId,
   selectFramePublicAPI,
   selectIsManaged,
@@ -47,6 +48,7 @@ import {
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
   isLegacyEditorEmbeddable,
@@ -307,6 +309,31 @@ export function App({
   const runSave = useCallback(
     async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+
+      if (visualization.activeId === 'lnsXY') {
+        try {
+          const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+            visualization.state,
+            lensAppServices.eventAnnotationService
+          );
+          if (updatedVizState !== visualization.state) {
+            dispatch(
+              updateVisualizationState({
+                visualizationId: visualization.activeId,
+                newState: updatedVizState,
+              })
+            );
+          }
+        } catch (err) {
+          notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+            title: i18n.translate('xpack.lens.app.saveLinkedAnnotationsError', {
+              defaultMessage: 'Failed to save linked annotation changes',
+            }),
+          });
+          return;
+        }
+      }
+
       const prevVisState =
         persistedDoc?.visualizationType === visualization.activeId
           ? persistedDoc?.state.visualization
@@ -364,6 +391,7 @@ export function App({
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
+      notifications.toasts,
     ]
   );
 

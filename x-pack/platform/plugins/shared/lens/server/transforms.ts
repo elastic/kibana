@@ -6,7 +6,6 @@
  */
 
 import { lensApiStateSchema, type LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { schema } from '@kbn/config-schema';
@@ -24,10 +23,10 @@ import {
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { isByRefLensConfig } from '../common/transforms/utils';
-import { lensItemDataSchemaV2 } from './content_management';
 import { LENS_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransformIn } from '../common/transforms/transform_in';
 import { getTransformOut } from '../common/transforms/transform_out';
+import type { LensTransforms } from '../common/transforms/types';
 
 /**
  * Triggers that Lens visualizations support, derived from visualization definitions:
@@ -50,12 +49,13 @@ export function registerLensEmbeddableTransforms(
   builder: LensConfigBuilder
 ) {
   embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
-    getTransforms: (drilldownTransforms: DrilldownTransforms) => ({
-      transformIn: getTransformIn(builder, drilldownTransforms.transformIn),
-      transformOut: getTransformOut(builder, drilldownTransforms.transformOut),
-    }),
-    getSchema: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
-      return builder.isEnabled ? getLensPanelSchema(getDrilldownsSchema) : undefined;
+    getTransforms: (drilldownTransforms) =>
+      ({
+        transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),
+        transformOut: getTransformOut(builder, drilldownTransforms.transformOut, false),
+      } satisfies LensTransforms),
+    getSchema: (getDrilldownsSchema) => {
+      return getLensPanelSchema(getDrilldownsSchema);
     },
     throwOnUnmappedPanel: (config: LensSerializedAPIConfig) => {
       if (isByRefLensConfig(config)) return;
@@ -69,13 +69,6 @@ export function registerLensEmbeddableTransforms(
   });
 }
 
-const legacyPanelAttributesSchema = lensItemDataSchemaV2.extends({
-  // Why are these added to the panel attributes?
-  // See https://github.com/elastic/kibana/issues/250115
-  id: schema.maybe(schema.string()),
-  type: schema.maybe(schema.literal('lens')),
-});
-
 const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ({
   references: schema.maybe(referencesSchema),
   ...serializedTimeRangeSchema.getPropSchemas(),
@@ -84,19 +77,37 @@ const getSharedPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
 });
 
 const getLensByValuePanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object({
-    attributes: schema.oneOf([lensApiStateSchema, legacyPanelAttributesSchema]),
-    ...getSharedPanelSchema(getDrilldownsSchema),
-  });
+  schema.object(
+    {
+      attributes: lensApiStateSchema,
+      ...getSharedPanelSchema(getDrilldownsSchema),
+    },
+    {
+      meta: {
+        description: 'Lens by-value embeddable schema',
+      },
+    }
+  );
 
 const getLensByRefPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.object({
-    ref_id: schema.string(),
-    ...getSharedPanelSchema(getDrilldownsSchema),
-  });
+  schema.object(
+    {
+      ref_id: schema.string(),
+      ...getSharedPanelSchema(getDrilldownsSchema),
+    },
+    {
+      meta: {
+        description: 'Lens by-ref embeddable schema',
+      },
+    }
+  );
 
-const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
-  schema.oneOf([
-    getLensByValuePanelSchema(getDrilldownsSchema),
-    getLensByRefPanelSchema(getDrilldownsSchema),
-  ]);
+export const getLensPanelSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) =>
+  schema.oneOf(
+    [getLensByValuePanelSchema(getDrilldownsSchema), getLensByRefPanelSchema(getDrilldownsSchema)],
+    {
+      meta: {
+        description: 'Lens embeddable schema',
+      },
+    }
+  );
