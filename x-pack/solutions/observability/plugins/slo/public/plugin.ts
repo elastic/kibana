@@ -18,23 +18,11 @@ import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { lazy } from 'react';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
-import type { Reference } from '@kbn/content-management-utils';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
-import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
-import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
-import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
-import type {
-  GroupOverviewCustomState,
-  OverviewEmbeddableState,
-  SingleOverviewCustomState,
-} from '../common/embeddables/overview/types';
-import type { ErrorBudgetEmbeddableState } from '../common/embeddables/error_budget/types';
+import { registerEmbeddables } from './register_embeddables';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
@@ -46,7 +34,6 @@ import type {
   SLOPublicSetup,
   SLOPublicStart,
 } from './types';
-import { registerSloUiActions } from './ui_actions/register_ui_actions';
 import { SloTelemetryService } from './services/telemetry';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 
@@ -137,90 +124,12 @@ export class SLOPlugin
     };
     registerRules();
 
-    const registerEmbeddables = async () => {
-      const licensing = plugins.licensing;
-      const license = await firstValueFrom(licensing.license$);
-
-      const hasPlatinumLicense = license.hasAtLeast('platinum');
-      if (hasPlatinumLicense) {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-
-        pluginsStart.presentationUtil.registerPanelPlacementSettings(
-          SLO_OVERVIEW_EMBEDDABLE_ID,
-          (serializedState?: OverviewEmbeddableState) => {
-            if (
-              (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
-              (serializedState as GroupOverviewCustomState)?.group_filters
-            ) {
-              return { placementSettings: { width: 24, height: 8 } };
-            }
-            return { placementSettings: { width: 12, height: 8 } };
-          }
-        );
-        pluginsStart.presentationUtil.registerPanelPlacementSettings(
-          SLO_BURN_RATE_EMBEDDABLE_ID,
-          () => {
-            return { placementSettings: { width: 14, height: 7 } };
-          }
-        );
-
-        plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
-          const { getOverviewEmbeddableFactory } = await import(
-            './embeddable/slo/overview/slo_embeddable_factory'
-          );
-          return getOverviewEmbeddableFactory({ coreStart, pluginsStart, sloClient });
-        });
-
-        plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
-          const { getAlertsEmbeddableFactory } = await import(
-            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-          );
-
-          return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
-        });
-
-        plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
-          const { getErrorBudgetEmbeddableFactory } = await import(
-            './embeddable/slo/error_budget/error_budget_react_embeddable_factory'
-          );
-          return getErrorBudgetEmbeddableFactory({
-            coreStart,
-            pluginsStart,
-            sloClient,
-          });
-        });
-
-        plugins.embeddable.registerReactEmbeddableFactory(SLO_BURN_RATE_EMBEDDABLE_ID, async () => {
-          const { getBurnRateEmbeddableFactory } = await import(
-            './embeddable/slo/burn_rate/burn_rate_react_embeddable_factory'
-          );
-          return getBurnRateEmbeddableFactory({
-            coreStart,
-            pluginsStart,
-            sloClient,
-          });
-        });
-
-        registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, sloClient);
-
-        plugins.embeddable.registerLegacyURLTransform(
-          SLO_ERROR_BUDGET_ID,
-          async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
-            const { getTransformOut } = await import(
-              '../common/embeddables/error_budget/transforms/get_transform_out'
-            );
-            const transformOut = getTransformOut(transformDrilldownsOut);
-            return (
-              storedState: object,
-              panelReferences?: Reference[],
-              containerReferences?: Reference[],
-              id?: string
-            ) => transformOut(storedState as ErrorBudgetEmbeddableState, panelReferences);
-          }
-        );
-      }
-    };
-    registerEmbeddables();
+    registerEmbeddables({
+      core,
+      plugins,
+      sloClient,
+      kibanaVersion,
+    });
 
     return {
       sloDetailsLocator,
