@@ -167,16 +167,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getRunningJobsTooltip(inProgressCount, isCrawler)}
             >
-              <EuiBadge>
-                {getRunningJobsBadgeLabel(inProgressCount, isCrawler)}
-              </EuiBadge>
+              <EuiBadge>{getRunningJobsBadgeLabel(inProgressCount, isCrawler)}</EuiBadge>
             </EuiToolTip>
 
             {!isCrawler && (
               <EuiToolTip anchorProps={tooltipAncherProps} content={getIdleJobsTooltip(idleCount)}>
-                <EuiBadge>
-                  {getIdleJobsLabel(idleCount)}
-                </EuiBadge>
+                <EuiBadge>{getIdleJobsLabel(idleCount)}</EuiBadge>
               </EuiToolTip>
             )}
 
@@ -184,9 +180,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               anchorProps={tooltipAncherProps}
               content={getOrphanedJobsTooltip(orphanedCount, isCrawler)}
             >
-              <EuiBadge>
-                {getOrphanedJobsLabel(orphanedCount, isCrawler)}
-              </EuiBadge>
+              <EuiBadge>{getOrphanedJobsLabel(orphanedCount, isCrawler)}</EuiBadge>
             </EuiToolTip>
 
             <EuiToolTip
