@@ -38,10 +38,10 @@ jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_fetch_slo_definitions');
 jest.mock('../../hooks/use_fetch_slo_templates');
 jest.mock('../../hooks/use_fetch_slo_template_tags');
-jest.mock('./components/slo_management_table', () => ({
+jest.mock('./components/slo_definitions/slo_management_table', () => ({
   SloManagementTable: () => <div data-test-subj="sloManagementTable">SLO Management Table</div>,
 }));
-jest.mock('./components/slo_management_outdated_filter_callout', () => ({
+jest.mock('./components/slo_definitions/slo_management_outdated_filter_callout', () => ({
   SloOutdatedFilterCallout: () => null,
 }));
 jest.mock('./components/header_control/header_control', () => ({
@@ -70,6 +70,12 @@ const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
 const useFetchSloTemplatesMock = useFetchSloTemplates as jest.Mock;
 const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 
+const MockSearchBar = (props: Record<string, unknown>) => (
+  <div data-test-subj="sloTemplatesSearchBar">
+    {typeof props.renderQueryInputAppend === 'function' && props.renderQueryInputAppend()}
+  </div>
+);
+
 describe('SloManagementPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -77,6 +83,7 @@ describe('SloManagementPage', () => {
       services: {
         http: { basePath: { prepend: (path: string) => path } },
         application: { navigateToUrl: mockNavigateToUrl },
+        unifiedSearch: { ui: { SearchBar: MockSearchBar } },
         serverless: undefined,
       },
     });
@@ -101,10 +108,10 @@ describe('SloManagementPage', () => {
     });
   });
 
-  it('renders with SLOs tab selected by default', () => {
+  it('renders with definitions tab selected by default', () => {
     render(<SloManagementPage />);
 
-    expect(screen.getByTestId('managementTabSlos')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('managementTabDefinitions')).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('managementTabTemplates')).toHaveAttribute('aria-selected', 'false');
     expect(screen.getByTestId('sloManagementTable')).toBeTruthy();
   });
@@ -117,10 +124,10 @@ describe('SloManagementPage', () => {
     expect(mockHistoryPush).toHaveBeenCalledWith('/management/templates');
   });
 
-  it('navigates to slos tab when clicked', () => {
+  it('navigates to definitions tab when clicked', () => {
     render(<SloManagementPage />);
 
-    fireEvent.click(screen.getByTestId('managementTabSlos'));
+    fireEvent.click(screen.getByTestId('managementTabDefinitions'));
 
     expect(mockHistoryPush).toHaveBeenCalledWith('/management');
   });

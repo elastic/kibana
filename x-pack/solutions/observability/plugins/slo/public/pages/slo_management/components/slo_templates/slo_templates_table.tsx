@@ -60,7 +60,7 @@ export function SloTemplatesTable({ state, onStateChange, onTemplateSelect }: Pr
   const actions: Array<DefaultItemAction<SLOTemplateResponse>> = [
     {
       name: i18n.translate('xpack.slo.sloTemplatesTable.actions.createSlo', {
-        defaultMessage: 'Create',
+        defaultMessage: 'Create from template',
       }),
       description: i18n.translate('xpack.slo.sloTemplatesTable.actions.createSloDescription', {
         defaultMessage: 'Create SLO from this template',

@@ -28,6 +28,13 @@ const useFetchSloTemplateTagsMock = useFetchSloTemplateTags as jest.Mock;
 const mockNavigateToUrl = jest.fn();
 const mockOnStateChange = jest.fn();
 
+const MockSearchBar = (props: Record<string, unknown>) => (
+  <div data-test-subj="sloTemplatesSearchBar">
+    <input data-test-subj="sloTemplatesSearchInput" />
+    {typeof props.renderQueryInputAppend === 'function' && props.renderQueryInputAppend()}
+  </div>
+);
+
 const defaultProps = {
   state: DEFAULT_STATE,
   onStateChange: mockOnStateChange,
@@ -40,6 +47,7 @@ describe('SloTemplatesTable', () => {
       services: {
         http: { basePath: { prepend: (path: string) => path } },
         application: { navigateToUrl: mockNavigateToUrl },
+        unifiedSearch: { ui: { SearchBar: MockSearchBar } },
       },
     });
     usePermissionsMock.mockReturnValue({
@@ -121,7 +129,7 @@ describe('SloTemplatesTable', () => {
     expect(screen.getByText(/An error occurred while retrieving SLO templates/)).toBeTruthy();
   });
 
-  it('renders the search bar', () => {
+  it('renders the search bar with tag filter', () => {
     useFetchSloTemplatesMock.mockReturnValue({
       data: { total: 1, page: 1, perPage: 20, results: [{ templateId: 't1', name: 'Test' }] },
       isLoading: false,
@@ -130,7 +138,7 @@ describe('SloTemplatesTable', () => {
 
     render(<SloTemplatesTable {...defaultProps} />);
 
-    expect(screen.getByTestId('sloTemplatesSearchInput')).toBeTruthy();
+    expect(screen.getByTestId('sloTemplatesSearchBar')).toBeTruthy();
     expect(screen.getByTestId('sloTemplatesFilterByTag')).toBeTruthy();
   });
 });
