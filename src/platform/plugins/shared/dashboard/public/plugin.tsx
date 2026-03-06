@@ -78,6 +78,7 @@ import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
+import { startDashboardVisibilityTracking } from './dashboard_api/performance/query_performance_tracking';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -249,6 +250,7 @@ export class DashboardPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         performance.mark(DASHBOARD_DURATION_START_MARK);
+        startDashboardVisibilityTracking();
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const [{ mountApp }] = await Promise.all([

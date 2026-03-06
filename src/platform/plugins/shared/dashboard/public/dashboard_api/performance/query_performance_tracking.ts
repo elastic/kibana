@@ -33,6 +33,34 @@ export interface PerformanceState {
 }
 
 let isFirstDashboardLoadOfSession = true;
+let wasBackgrounded = false;
+let visibilityCleanup: (() => void) | null = null;
+
+export const startDashboardVisibilityTracking = (): void => {
+  // Clean up any existing listener and reset flag
+  stopDashboardVisibilityTracking();
+  wasBackgrounded = false;
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      wasBackgrounded = true;
+    }
+  };
+
+  // If tab is already hidden when tracking starts, set flag
+  if (document.visibilityState === 'hidden') {
+    wasBackgrounded = true;
+  }
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  visibilityCleanup = () =>
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+};
+
+export const stopDashboardVisibilityTracking = (): void => {
+  visibilityCleanup?.();
+  visibilityCleanup = null;
+};
 
 const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   sessionFirstLoad: 0, // on first time the SO is loaded
@@ -44,7 +72,7 @@ export function startQueryPerformanceTracking(
   dashboard: PresentationContainer,
   performanceState: PerformanceState
 ) {
-  return dashboard.children$
+  const subscription = dashboard.children$
     .pipe(
       skipWhile((children) => {
         // Don't track render-status when the dashboard is still adding embeddables.
@@ -115,6 +143,13 @@ export function startQueryPerformanceTracking(
         });
       }
     });
+
+  return {
+    unsubscribe: () => {
+      subscription.unsubscribe();
+      stopDashboardVisibilityTracking();
+    },
+  };
 }
 
 function reportPerformanceMetrics({
@@ -152,6 +187,8 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
+    key5: 'was_backgrounded',
+    value5: wasBackgrounded ? 1 : 0,
     key8: 'mean_panel_prerender',
     value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',

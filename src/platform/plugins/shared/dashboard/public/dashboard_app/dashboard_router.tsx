@@ -35,6 +35,7 @@ import {
   createDashboardListingFilterUrl,
 } from '../utils/urls';
 import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
+import { startDashboardVisibilityTracking } from '../dashboard_api/performance/query_performance_tracking';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -101,6 +102,7 @@ export async function mountApp({
     // from the listing page or another dashboard, so we need to set the mark here.
     if (performance.getEntriesByName('dashboard_duration_start', 'mark').length === 0) {
       performance.mark(DASHBOARD_DURATION_START_MARK);
+      startDashboardVisibilityTracking();
     }
 
     const routeParams = parse(routeProps.history.location.search);
