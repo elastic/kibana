@@ -67,6 +67,8 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         return displayEventName(item);
       case DOCUMENT_TYPE_ENTITY:
         return displayEntityName(item);
+      default:
+        return '-';
     }
   }, [item]);
 
