@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ToolType, platformCoreTools } from '@kbn/agent-builder-common';
 import type { WorkflowToolConfig } from '@kbn/agent-builder-common/tools';

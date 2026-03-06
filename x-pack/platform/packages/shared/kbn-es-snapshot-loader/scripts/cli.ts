@@ -10,10 +10,12 @@ import { run } from '@kbn/dev-cli-runner';
 import { createKibanaClient } from '@kbn/kibana-api-cli';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  createFsRepository,
   createGcsRepository,
   createUrlRepository,
   type RepositoryStrategy,
 } from '../src/repository';
+import { createSnapshot } from '../src/create';
 import { restoreSnapshot } from '../src/restore';
 import { replaySnapshot } from '../src/replay';
 
@@ -22,10 +24,13 @@ interface CommonFlags {
   'snapshot-name'?: string;
   'kibana-url'?: string;
   'es-url'?: string;
+  'es-api-key'?: string;
   'repo-type'?: string;
   'gcs-bucket'?: string;
   'gcs-base-path'?: string;
   'gcs-client'?: string;
+  'fs-location'?: string;
+  'fs-compress'?: boolean;
 }
 
 function parseCommaSeparatedList(value: string | undefined): string[] | undefined {
@@ -36,14 +41,14 @@ function parseCommaSeparatedList(value: string | undefined): string[] | undefine
     .filter(Boolean);
 }
 
-function createEsClientFromUrl(esUrl: string): Client {
+function createEsClientFromUrl(esUrl: string, apiKey?: string): Client {
   const url = new URL(esUrl);
   const username = url.username;
   const password = url.password;
 
   return new Client({
     node: `${url.protocol}//${url.host}${url.pathname}`,
-    auth: username && password ? { username, password } : undefined,
+    auth: apiKey ? { apiKey } : username && password ? { username, password } : undefined,
   });
 }
 
@@ -65,8 +70,15 @@ async function createEsClientFromKibana({
 }
 
 async function getEsClient(flags: CommonFlags, log: ToolingLog): Promise<Client> {
-  const { 'es-url': esUrl, 'kibana-url': kibanaUrl } = flags;
-  if (esUrl) return createEsClientFromUrl(esUrl);
+  const { 'es-url': esUrl, 'es-api-key': esApiKey, 'kibana-url': kibanaUrl } = flags;
+
+  if (esApiKey && !esUrl) {
+    throw new Error(
+      '--es-api-key requires --es-url. API key auth is not supported when connecting through Kibana (--kibana-url).'
+    );
+  }
+
+  if (esUrl) return createEsClientFromUrl(esUrl, esApiKey);
   return createEsClientFromKibana({ kibanaUrl, log, signal: new AbortController().signal });
 }
 
@@ -78,30 +90,45 @@ function resolveRepositoryFromFlags(flags: CommonFlags): RepositoryStrategy {
   const gcsBucket = flags['gcs-bucket'];
   const gcsBasePath = flags['gcs-base-path'];
   const gcsClient = flags['gcs-client'];
+  const fsLocation = flags['fs-location'];
+  const fsCompress = flags['fs-compress'];
 
-  if (repoType !== 'url' && repoType !== 'gcs') {
-    throw new Error(`--repo-type must be one of: url, gcs`);
+  if (repoType !== 'url' && repoType !== 'gcs' && repoType !== 'fs') {
+    throw new Error(`--repo-type must be one of: url, gcs, fs`);
   }
 
   const hasGcsFlag = Boolean(gcsBucket || gcsBasePath || gcsClient);
-  if (hasGcsFlag && snapshotUrl) {
-    throw new Error('Cannot use both --snapshot-url and --gcs-* flags');
+  const hasFsFlag = Boolean(fsLocation || fsCompress);
+  if (hasFsFlag && repoType !== 'fs') {
+    throw new Error('--fs-* flags require --repo-type fs');
+  }
+  if (hasGcsFlag && repoType !== 'gcs') {
+    throw new Error('--gcs-* flags require --repo-type gcs');
   }
 
   if (repoType === 'gcs' && !gcsBucket) {
     throw new Error('--gcs-bucket is required when using --repo-type gcs');
   }
+  if (repoType === 'fs' && !fsLocation) {
+    throw new Error('--fs-location is required when using --repo-type fs');
+  }
 
-  if (gcsBucket || repoType === 'gcs') {
+  if (repoType === 'gcs') {
     return createGcsRepository({
       bucket: gcsBucket!,
       basePath: gcsBasePath,
       client: gcsClient,
     });
   }
+  if (repoType === 'fs') {
+    return createFsRepository({
+      location: fsLocation!,
+      compress: fsCompress,
+    });
+  }
 
   if (!snapshotUrl) {
-    throw new Error('--snapshot-url is required unless using --repo-type gcs');
+    throw new Error('--snapshot-url is required unless using --repo-type gcs or fs');
   }
 
   return createUrlRepository(snapshotUrl);
@@ -109,7 +136,7 @@ function resolveRepositoryFromFlags(flags: CommonFlags): RepositoryStrategy {
 
 const COMMON_FLAGS_HELP = `
     --repo-type         Repository type to use
-                        Options: url, gcs
+                        Options: url, gcs, fs
                         Default: url
 
     --snapshot-url      URL to the snapshot directory (for --repo-type url)
@@ -121,14 +148,26 @@ const COMMON_FLAGS_HELP = `
     --gcs-base-path     Optional base path within the GCS bucket
 
     --gcs-client        Optional Elasticsearch GCS client name
+                        Requires target Elasticsearch GCS client credentials
+                        pre-configured in keystore
+
+    --fs-location       Filesystem snapshot path (required for --repo-type fs)
+                        Target Elasticsearch must allow this path in path.repo
+
+    --fs-compress       Enable compression for fs repository snapshots
 
                         Cannot use both --snapshot-url and --gcs-* flags
+                        Cannot use both --snapshot-url and --fs-* flags
+                        Cannot use both --gcs-* and --fs-* flags
 
     --snapshot-name     Snapshot name to restore/replay
                         Default: latest SUCCESS snapshot in the repository
 
     --es-url            Elasticsearch URL with credentials
                         Example: http://elastic:changeme@localhost:9200
+
+    --es-api-key        Elasticsearch API key (base64 encoded)
+                        When provided, overrides credentials in --es-url
 
     --kibana-url        Kibana URL (ES requests proxied through Kibana)
                         Example: http://localhost:5601
@@ -140,6 +179,7 @@ ES Snapshot Loader - Load Elasticsearch snapshots for testing
 Usage: node scripts/es_snapshot_loader <command> [options]
 
 Commands:
+  create     Create a snapshot in a writable repository (gcs/fs)
   restore    Restore a snapshot directly to Elasticsearch
              Supports index renaming (--rename-pattern/--rename-replacement)
              and graceful no-match handling (--allow-no-matches)
@@ -151,7 +191,9 @@ Run 'node scripts/es_snapshot_loader <command> --help' for more information.
 export function runCli(): void {
   const subcommand = process.argv[2];
 
-  if (subcommand === 'restore') {
+  if (subcommand === 'create') {
+    runCreateCli();
+  } else if (subcommand === 'restore') {
     runRestoreCli();
   } else if (subcommand === 'replay') {
     runReplayCli();
@@ -159,6 +201,93 @@ export function runCli(): void {
     process.stdout.write(USAGE_HELP);
     process.exit(subcommand === '--help' || subcommand === '-h' ? 0 : 1);
   }
+}
+
+function runCreateCli(): void {
+  process.argv = [process.argv[0], process.argv[1], ...process.argv.slice(3)];
+
+  run(
+    async ({ log, flags }) => {
+      const {
+        'snapshot-name': snapshotName,
+        indices: indicesFlag,
+        'ignore-unavailable': ignoreUnavailable,
+      } = flags as CommonFlags & {
+        indices?: string;
+        'ignore-unavailable'?: boolean;
+      };
+
+      if (!snapshotName) {
+        throw new Error('--snapshot-name is required');
+      }
+
+      const repository = resolveRepositoryFromFlags(flags as CommonFlags);
+      if (repository.type === 'url') {
+        throw new Error('URL repositories are read-only and do not support snapshot creation');
+      }
+
+      const esClient = await getEsClient(flags as CommonFlags, log);
+      const indices = parseCommaSeparatedList(indicesFlag);
+
+      log.info(`Snapshot Create`);
+      log.info(`===============`);
+      log.info(`Repository type: ${repository.type}`);
+      log.info(`Snapshot name: ${snapshotName}`);
+      if (indices) log.info(`Index patterns: ${indices.join(', ')}`);
+      if (ignoreUnavailable) log.info(`Ignore unavailable: true`);
+
+      const result = await createSnapshot({
+        esClient,
+        log,
+        repository,
+        snapshotName,
+        indices,
+        ignoreUnavailable,
+      });
+
+      if (result.success) {
+        log.success(`Snapshot creation completed successfully`);
+        log.info(`Snapshot: ${result.snapshotName}`);
+        log.info(`Captured indices: ${result.indices.length}`);
+        result.indices.forEach((idx) => log.info(`  - ${idx}`));
+      } else {
+        result.errors.forEach((err) => log.error(`  ${err}`));
+        throw new Error(`Snapshot creation failed: ${result.errors.join('; ')}`);
+      }
+    },
+    {
+      description: 'Create an Elasticsearch snapshot in a writable repository',
+      flags: {
+        string: [
+          'repo-type',
+          'snapshot-url',
+          'snapshot-name',
+          'kibana-url',
+          'es-url',
+          'es-api-key',
+          'gcs-bucket',
+          'gcs-base-path',
+          'gcs-client',
+          'fs-location',
+          'indices',
+        ],
+        boolean: ['ignore-unavailable', 'fs-compress'],
+        help: `
+      Usage: node scripts/es_snapshot_loader create [options]
+      ${COMMON_FLAGS_HELP}
+      --indices             Comma-separated index patterns to snapshot
+                            Default: all indices
+
+      --ignore-unavailable  Ignore missing indices while creating snapshot
+
+      Notes:
+        --snapshot-name is required for create
+        --repo-type url is not supported for create (read-only repository type)
+        `,
+        allowUnexpected: false,
+      },
+    }
+  );
 }
 
 function runRestoreCli(): void {
@@ -221,14 +350,16 @@ function runRestoreCli(): void {
           'snapshot-name',
           'kibana-url',
           'es-url',
+          'es-api-key',
           'gcs-bucket',
           'gcs-base-path',
           'gcs-client',
+          'fs-location',
           'indices',
           'rename-pattern',
           'rename-replacement',
         ],
-        boolean: ['allow-no-matches'],
+        boolean: ['allow-no-matches', 'fs-compress'],
         help: `
       Usage: node scripts/es_snapshot_loader restore [options]
       ${COMMON_FLAGS_HELP}
@@ -314,12 +445,15 @@ function runReplayCli(): void {
           'snapshot-name',
           'kibana-url',
           'es-url',
+          'es-api-key',
           'gcs-bucket',
           'gcs-base-path',
           'gcs-client',
+          'fs-location',
           'patterns',
           'concurrency',
         ],
+        boolean: ['fs-compress'],
         help: `
       Usage: node scripts/es_snapshot_loader replay [options]
       ${COMMON_FLAGS_HELP}
