@@ -59,23 +59,10 @@ Remember:
 
 ## Step 4: Create Tests
 
-Two types of tests are required:
+Add tests following the existing examples:
 
-### Connector spec tests
-If you created a custom connector spec (non-MCP path), add unit tests for each action in `src/platform/packages/shared/kbn-connector-specs/src/specs/{connector_name}/{connector_name}.test.ts`. See existing specs like `google_drive/google_drive.test.ts` for the pattern: mock the HTTP client, call each action, and assert on the request parameters and response shape.
-
-### Workflow behavioral tests
-Add a `workflows.test.ts` next to your `data_type.ts` in `x-pack/platform/plugins/shared/data_sources/server/sources/{source_name}/workflows.test.ts`. These tests run your workflow YAMLs through the real workflow execution engine with mocked connector boundaries.
-
-Follow the existing pattern (e.g., `google_drive/workflows.test.ts`, `slack/workflows.test.ts`):
-1. Import `loadWorkflowsThroughProductionPath` and `ProcessedWorkflow` from `../workflow_test_helpers`
-2. Import `WorkflowRunFixture` from `@kbn/workflows-execution-engine/integration_tests/workflow_run_fixture`
-3. Import your data source object from `./data_type`
-4. In `beforeAll`, call `loadWorkflowsThroughProductionPath(yourDataSource, { stackConnectorId: CONNECTOR_NAME })` to load workflows through the real production code path
-5. Add a test that asserts all workflows pass validation without liquid template errors
-6. For each workflow, add a test that runs it via `fixture.runWorkflow()` with representative inputs and asserts:
-   - The workflow completes successfully
-   - The expected connector actions are called with the correct parameters (assert the full `subActionParams` object, including optional params with their default values)
+1. **Connector spec tests** (custom connector path only) — See `google_drive/google_drive.test.ts` in `kbn-connector-specs` for the pattern.
+2. **Workflow behavioral tests** — Add `workflows.test.ts` next to `data_type.ts`. See `google_drive/workflows.test.ts` or `slack/workflows.test.ts` for the pattern.
 
 You do not need to execute the tests — just create the files.
 
