@@ -9,7 +9,6 @@ import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
 import type { estypes } from '@elastic/elasticsearch';
-import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
@@ -22,13 +21,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   getExceptions,
   getRuleRangeTuples,
-  hasTimestampFields,
   isMachineLearningParams,
   isEsqlParams,
-  isThreatParams,
   getDisabledActionsWarningText,
-  checkForFrozenIndices,
 } from './utils/utils';
+import { runExecutionValidation } from './validation';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
@@ -178,12 +175,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
-          const {
-            savedObjectsClient,
-            scopedClusterClient,
-            ruleMonitoringService,
-            ruleResultService,
-          } = services;
+          const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
 
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
@@ -221,7 +213,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
 
-          let frozenIndicesQueriedCount = 0;
           const wrapperWarnings = [];
           const wrapperErrors = [];
 
@@ -293,95 +284,21 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // as `index`
           agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
-          // check if rule has permissions to access given index pattern
-          // move this collection of lines into a function in utils
-          // so that we can use it in create rules route, bulk, etc.
-          let skipExecution: boolean = false;
+          const validationResult = await runExecutionValidation({
+            params,
+            inputIndex,
+            ruleName: rule.name,
+            scopedClusterClient: services.scopedClusterClient,
+            runtimeMappings,
+            primaryTimestamp,
+            secondaryTimestamp,
+            ruleExecutionLogger,
+            isServerless: isServerless ?? false,
+          });
 
-          if (!isMachineLearningParams(params)) {
-            const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
-
-            try {
-              const indexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
-                inputIndex
-              );
-
-              if (indexPatternsWithMatches.length === 0) {
-                const warningMessage = `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`;
-                wrapperWarnings.push(warningMessage);
-                skipExecution = true;
-              }
-            } catch (exc) {
-              wrapperWarnings.push(`Encountered an error validating index patterns: ${exc}`);
-            }
-
-            if (isThreatParams(params)) {
-              try {
-                const threatIndexPatternsWithMatches =
-                  await indexPatterns.getIndexPatternsWithMatches(params.threatIndex);
-
-                if (threatIndexPatternsWithMatches.length === 0) {
-                  const warningMessage = `Unable to find matching threat indicator indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching threat index is created or the rule is disabled.`;
-                  wrapperWarnings.push(warningMessage);
-                  skipExecution = true;
-                }
-              } catch (exc) {
-                wrapperWarnings.push(
-                  `Encountered an error validating threat index patterns: ${exc}`
-                );
-              }
-            }
-
-            if (!skipExecution) {
-              try {
-                const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
-                  services.scopedClusterClient.asCurrentUser.fieldCaps(
-                    {
-                      index: inputIndex,
-                      fields: secondaryTimestamp
-                        ? [primaryTimestamp, secondaryTimestamp]
-                        : [primaryTimestamp],
-                      include_unmapped: true,
-                      runtime_mappings: runtimeMappings,
-                      ignore_unavailable: true,
-                    },
-                    { meta: true }
-                  )
-                );
-
-                const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
-                  timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: fieldCapsResponse,
-                  ruleExecutionLogger,
-                });
-                if (missingTimestampWarning) {
-                  wrapperWarnings.push(missingTimestampWarning);
-                }
-              } catch (exc) {
-                wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
-              }
-            }
-
-            if (!isServerless) {
-              try {
-                const frozenIndices = await checkForFrozenIndices({
-                  inputIndices: inputIndex,
-                  internalEsClient: services.scopedClusterClient.asInternalUser,
-                  currentUserEsClient: services.scopedClusterClient.asCurrentUser,
-                  to: params.to,
-                  from: params.from,
-                  primaryTimestamp,
-                  secondaryTimestamp,
-                });
-
-                if (frozenIndices.length > 0) {
-                  frozenIndicesQueriedCount = frozenIndices.length;
-                }
-              } catch (exc) {
-                wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
-              }
-            }
-          }
+          const skipExecution = validationResult.skipExecution ?? false;
+          const frozenIndicesQueriedCount = validationResult.frozenIndicesQueriedCount ?? 0;
+          wrapperWarnings.push(...validationResult.warnings);
 
           const {
             tuples,
