@@ -6,6 +6,8 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
+import { flow } from 'lodash';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import type {
   FieldStatisticsTableEmbeddableState,
   StoredFieldStatisticsTableEmbeddableState,
@@ -13,9 +15,14 @@ import type {
 import { FIELD_STATS_DATA_VIEW_REF_NAME } from './constants';
 
 export function transformOut(
-  state: StoredFieldStatisticsTableEmbeddableState,
+  storedState: StoredFieldStatisticsTableEmbeddableState,
   references?: Reference[]
 ): FieldStatisticsTableEmbeddableState {
+  const transformsFlow = flow(
+    transformTitlesOut<StoredFieldStatisticsTableEmbeddableState>,
+    transformTimeRangeOut<StoredFieldStatisticsTableEmbeddableState>
+  );
+  const state = transformsFlow(storedState);
   const dataViewIdRef = references?.find((ref) => ref.name === FIELD_STATS_DATA_VIEW_REF_NAME);
   return {
     ...state,

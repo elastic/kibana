@@ -14,8 +14,8 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import {
