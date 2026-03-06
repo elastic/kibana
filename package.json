@@ -1280,7 +1280,7 @@
     "@turf/helpers": "6.0.1",
     "@turf/length": "6.0.2",
     "@xstate/react": "6.0.0",
-    "@xyflow/react": "12.10.0",
+    "@xyflow/react": "12.10.1",
     "adm-zip": "0.5.16",
     "ai": "5.0.102",
     "ajv": "8.17.1",
