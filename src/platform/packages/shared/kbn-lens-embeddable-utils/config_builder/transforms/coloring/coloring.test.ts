@@ -788,6 +788,7 @@ describe('Color util transforms', () => {
           { type: 'colorCode', value: '#ff0000' },
           { type: 'from_palette', index: 2, palette: 'no_default' },
         ],
+        sort: 'desc',
         unassignedColor: { type: 'colorCode', value: '#00ff00' },
       };
 

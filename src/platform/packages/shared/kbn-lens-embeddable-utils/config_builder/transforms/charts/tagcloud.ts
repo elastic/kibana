@@ -120,6 +120,7 @@ function getTagcloudTagBy(
   }
 
   const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
+
   return {
     ...(isTextBasedLayer(layer)
       ? getValueApiColumn(visualization.tagAccessor, layer)
