@@ -36,7 +36,6 @@ export function ServiceMapMinimap() {
       background-color: ${euiTheme.colors.backgroundBasePlain};
       border-radius: ${euiTheme.border.radius.medium};
       border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
-      box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.colors.shadow};
     `,
     [euiTheme]
   );
