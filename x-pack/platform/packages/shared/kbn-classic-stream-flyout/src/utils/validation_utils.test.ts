@@ -6,11 +6,10 @@
  */
 
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 
 import {
   hasEmptyWildcards,
-  hasInvalidFormat,
-  hasUppercaseCharacters,
   validateStreamName,
   type StreamNameValidator,
 } from './validation_utils';
@@ -50,145 +49,6 @@ describe('validation_utils', () => {
     });
   });
 
-  describe('hasInvalidFormat', () => {
-    describe('reserved names', () => {
-      it('returns true for "." (dot)', () => {
-        expect(hasInvalidFormat('.')).toBe(true);
-      });
-
-      it('returns true for ".." (double dot)', () => {
-        expect(hasInvalidFormat('..')).toBe(true);
-      });
-    });
-
-    describe('invalid prefixes', () => {
-      it('returns true when stream name starts with "-"', () => {
-        expect(hasInvalidFormat('-logs')).toBe(true);
-      });
-
-      it('returns true when stream name starts with "_"', () => {
-        expect(hasInvalidFormat('_logs')).toBe(true);
-      });
-
-      it('returns true when stream name starts with "+"', () => {
-        expect(hasInvalidFormat('+logs')).toBe(true);
-      });
-
-      it('returns true when stream name starts with ".ds-"', () => {
-        expect(hasInvalidFormat('.ds-logs')).toBe(true);
-      });
-
-      it('returns false when stream name contains but does not start with invalid prefix', () => {
-        expect(hasInvalidFormat('logs-_data')).toBe(false);
-        expect(hasInvalidFormat('logs.ds-data')).toBe(false);
-      });
-    });
-
-    describe('invalid characters', () => {
-      it('returns true when stream name contains backslash', () => {
-        expect(hasInvalidFormat('logs\\data')).toBe(true);
-      });
-
-      it('returns true when stream name contains forward slash', () => {
-        expect(hasInvalidFormat('logs/data')).toBe(true);
-      });
-
-      it('returns true when stream name contains asterisk', () => {
-        expect(hasInvalidFormat('logs*data')).toBe(true);
-      });
-
-      it('returns true when stream name contains question mark', () => {
-        expect(hasInvalidFormat('logs?data')).toBe(true);
-      });
-
-      it('returns true when stream name contains double quote', () => {
-        expect(hasInvalidFormat('logs"data')).toBe(true);
-      });
-
-      it('returns true when stream name contains less than', () => {
-        expect(hasInvalidFormat('logs<data')).toBe(true);
-      });
-
-      it('returns true when stream name contains greater than', () => {
-        expect(hasInvalidFormat('logs>data')).toBe(true);
-      });
-
-      it('returns true when stream name contains pipe', () => {
-        expect(hasInvalidFormat('logs|data')).toBe(true);
-      });
-
-      it('returns true when stream name contains comma', () => {
-        expect(hasInvalidFormat('logs,data')).toBe(true);
-      });
-
-      it('returns true when stream name contains hash', () => {
-        expect(hasInvalidFormat('logs#data')).toBe(true);
-      });
-
-      it('returns true when stream name contains colon', () => {
-        expect(hasInvalidFormat('logs:data')).toBe(true);
-      });
-
-      it('returns true when stream name contains space', () => {
-        expect(hasInvalidFormat('logs data')).toBe(true);
-      });
-
-      it('returns true when stream name contains multiple invalid characters', () => {
-        expect(hasInvalidFormat('logs*/data#test')).toBe(true);
-      });
-    });
-
-    describe('valid stream names', () => {
-      it('returns false for simple valid name', () => {
-        expect(hasInvalidFormat('logs')).toBe(false);
-      });
-
-      it('returns false for name with hyphens', () => {
-        expect(hasInvalidFormat('logs-myapp-data')).toBe(false);
-      });
-
-      it('returns false for name with dots (not at start or reserved)', () => {
-        expect(hasInvalidFormat('logs.apache.access')).toBe(false);
-      });
-
-      it('returns false for name with underscores (not at start)', () => {
-        expect(hasInvalidFormat('logs_myapp_v2')).toBe(false);
-      });
-
-      it('returns false for name with numbers', () => {
-        expect(hasInvalidFormat('logs-v2-2024')).toBe(false);
-      });
-
-      it('returns false for name starting with valid dot prefix', () => {
-        expect(hasInvalidFormat('.logs')).toBe(false);
-      });
-
-      it('returns false for complex valid name', () => {
-        expect(hasInvalidFormat('logs-myapp.apache_access-v2-prod')).toBe(false);
-      });
-
-      it('returns false for empty string', () => {
-        expect(hasInvalidFormat('')).toBe(false);
-      });
-    });
-  });
-
-  describe('hasUppercaseCharacters', () => {
-    it('returns true when stream name contains uppercase characters', () => {
-      expect(hasUppercaseCharacters('Logs-myapp-data')).toBe(true);
-      expect(hasUppercaseCharacters('logs-Myapp-data')).toBe(true);
-      expect(hasUppercaseCharacters('logs-myapp-DATA')).toBe(true);
-    });
-
-    it('returns false when stream name is lowercase', () => {
-      expect(hasUppercaseCharacters('logs-myapp-data')).toBe(false);
-    });
-
-    it('returns false for empty string', () => {
-      expect(hasUppercaseCharacters('')).toBe(false);
-    });
-  });
-
   describe('validateStreamName', () => {
     const mockTemplate: IndexTemplate = {
       name: 'test-template',
@@ -213,6 +73,20 @@ describe('validation_utils', () => {
         });
       });
 
+      it('returns invalidFormat error when stream name contains hash', async () => {
+        const result = await validateStreamName('logs#data', mockTemplate);
+        expect(result).toEqual({
+          errorType: 'invalidFormat',
+        });
+      });
+
+      it('returns invalidFormat error when stream name contains colon', async () => {
+        const result = await validateStreamName('logs:data', mockTemplate);
+        expect(result).toEqual({
+          errorType: 'invalidFormat',
+        });
+      });
+
       it('returns invalidFormat error when stream name starts with invalid prefix', async () => {
         const result = await validateStreamName('-logs', mockTemplate);
         expect(result).toEqual({
@@ -227,11 +101,23 @@ describe('validation_utils', () => {
         });
       });
 
-      it('returns notLowercase error when stream name contains uppercase characters', async () => {
+      it('returns uppercase error when stream name contains uppercase characters', async () => {
         const result = await validateStreamName('Logs-myapp-data', mockTemplate);
         expect(result).toEqual({
-          errorType: 'notLowercase',
+          errorType: 'uppercase',
         });
+      });
+
+      it('returns tooLong error when stream name exceeds max length', async () => {
+        const tooLongName = 'a'.repeat(MAX_STREAM_NAME_LENGTH + 1);
+        const result = await validateStreamName(tooLongName, mockTemplate);
+        expect(result).toEqual({ errorType: 'tooLong' });
+      });
+
+      it('returns no error for stream name at max length', async () => {
+        const maxLengthName = 'a'.repeat(MAX_STREAM_NAME_LENGTH);
+        const result = await validateStreamName(maxLengthName, mockTemplate);
+        expect(result).toEqual({ errorType: null });
       });
 
       it('returns no error for valid stream name', async () => {
@@ -337,7 +223,7 @@ describe('validation_utils', () => {
         const result = await validateStreamName('Logs-myapp', mockTemplate, mockValidator);
 
         expect(result).toEqual({
-          errorType: 'notLowercase',
+          errorType: 'uppercase',
         });
         expect(mockValidator).not.toHaveBeenCalled();
       });
@@ -403,12 +289,6 @@ describe('validation_utils', () => {
       it('handles empty string', async () => {
         const result = await validateStreamName('', mockTemplate);
         expect(result).toEqual({ errorType: 'empty' });
-      });
-
-      it('handles very long valid stream name', async () => {
-        const longName = 'logs-' + 'a'.repeat(250);
-        const result = await validateStreamName(longName, mockTemplate);
-        expect(result).toEqual({ errorType: null });
       });
     });
   });

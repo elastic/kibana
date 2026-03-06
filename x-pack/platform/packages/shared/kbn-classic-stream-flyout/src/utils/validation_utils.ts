@@ -6,6 +6,7 @@
  */
 
 import type { TemplateListItem as IndexTemplate } from '@kbn/index-management-shared-types';
+import { validateStreamName as validateSchemaStreamName } from '@kbn/streams-schema';
 
 /**
  * Checks if a stream name has unfilled wildcards (contains *)
@@ -15,68 +16,13 @@ export const hasEmptyWildcards = (streamName: string): boolean => {
 };
 
 /**
- * Characters that are not allowed in data stream names
- */
-const INVALID_CHARACTERS = ['\\', '/', '*', '?', '"', '<', '>', '|', ',', '#', ':', ' '];
-
-/**
- * Prefixes that data stream names cannot start with
- */
-const INVALID_PREFIXES = ['-', '_', '+', '.ds-'];
-
-/**
- * Reserved names that cannot be used as data stream names
- */
-const RESERVED_NAMES = ['.', '..'];
-
-/**
- * Checks if a data stream name has an invalid format according to Elasticsearch naming rules.
- *
- * Rules:
- * - Cannot include: \, /, *, ?, ", <, >, |, ,, #, :, or a space character
- * - Cannot start with: -, _, +, or .ds-
- * - Cannot be: . or ..
- *
- * @param streamName The data stream name to validate
- * @returns true if the stream name format is INVALID, false if valid
- */
-export const hasInvalidFormat = (streamName: string): boolean => {
-  // Check for reserved names
-  if (RESERVED_NAMES.includes(streamName)) {
-    return true;
-  }
-
-  // Check for invalid prefixes
-  for (const prefix of INVALID_PREFIXES) {
-    if (streamName.startsWith(prefix)) {
-      return true;
-    }
-  }
-
-  // Check for invalid characters
-  for (const char of INVALID_CHARACTERS) {
-    if (streamName.includes(char)) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-/**
- * Checks if a stream name contains any uppercase characters.
- */
-export const hasUppercaseCharacters = (streamName: string): boolean => {
-  return streamName !== streamName.toLowerCase();
-};
-
-/**
  * Validation error types for stream name validation
  */
 export type ValidationErrorType =
   | 'empty'
   | 'invalidFormat'
-  | 'notLowercase'
+  | 'uppercase'
+  | 'tooLong'
   | 'duplicate'
   | 'higherPriority'
   | null;
@@ -119,14 +65,23 @@ export const validateStreamName = async (
     return { errorType: 'empty' };
   }
 
-  // Check for invalid format
-  if (hasInvalidFormat(streamName)) {
-    return { errorType: 'invalidFormat' };
-  }
-
-  // Stream names must be lowercase
-  if (hasUppercaseCharacters(streamName)) {
-    return { errorType: 'notLowercase' };
+  // Validate stream name against Elasticsearch naming requirements
+  const schemaValidation = validateSchemaStreamName(streamName);
+  if (!schemaValidation.valid) {
+    switch (schemaValidation.error) {
+      case 'tooLong':
+        return { errorType: 'tooLong' };
+      case 'uppercase':
+        return { errorType: 'uppercase' };
+      case 'invalidCharacter':
+      case 'invalidPrefix':
+      case 'reservedName':
+        return { errorType: 'invalidFormat' };
+      case 'empty':
+      default:
+        // Should already be caught above, but keep it defensive
+        return { errorType: 'empty' };
+    }
   }
 
   // Run the external validator if provided

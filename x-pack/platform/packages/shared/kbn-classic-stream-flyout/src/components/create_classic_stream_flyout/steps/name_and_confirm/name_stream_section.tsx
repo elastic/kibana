@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
 import type { ValidationErrorType } from '../../../../utils';
 import { StreamNameInput } from '../../../stream_name_input';
@@ -66,13 +67,22 @@ const getValidationErrorMessage = (
     );
   }
 
-  if (validationError === 'notLowercase') {
+  if (validationError === 'uppercase') {
     return i18n.translate(
-      'xpack.createClassicStreamFlyout.nameAndConfirmStep.notLowercaseValidationError',
+      'xpack.createClassicStreamFlyout.nameAndConfirmStep.uppercaseValidationError',
       {
-        defaultMessage: 'Stream name must be lowercase.',
+        defaultMessage: 'Stream name cannot contain uppercase characters.',
       }
     );
+  }
+
+  if (validationError === 'tooLong') {
+    return i18n.translate('xpack.createClassicStreamFlyout.nameAndConfirmStep.tooLongError', {
+      defaultMessage: 'Stream name cannot be longer than {maxLength} characters.',
+      values: {
+        maxLength: MAX_STREAM_NAME_LENGTH,
+      },
+    });
   }
 
   if (validationError === 'duplicate') {

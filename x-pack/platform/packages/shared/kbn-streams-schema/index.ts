@@ -169,6 +169,8 @@ export type {
 export { emptyAssets } from './src/helpers/empty_assets';
 export {
   validateStreamName,
+  type StreamNameValidationError,
+  type StreamNameValidationResult,
   MAX_STREAM_NAME_LENGTH,
   INVALID_STREAM_NAME_CHARACTERS,
 } from './src/helpers/stream_name_validation';

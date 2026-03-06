@@ -8,6 +8,7 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent } from '@testing-library/react';
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { NameStreamSection } from './name_stream_section';
 
 const defaultProps = {
@@ -157,12 +158,22 @@ describe('NameStreamSection', () => {
       expect(getByText(/It cannot start with/i)).toBeInTheDocument();
     });
 
-    it('displays notLowercase validation error message', () => {
+    it('displays uppercase validation error message', () => {
       const { getByText } = renderComponent({
-        validationError: 'notLowercase',
+        validationError: 'uppercase',
       });
 
-      expect(getByText('Stream name must be lowercase.')).toBeInTheDocument();
+      expect(getByText('Stream name cannot contain uppercase characters.')).toBeInTheDocument();
+    });
+
+    it('displays tooLong validation error message', () => {
+      const { getByText } = renderComponent({
+        validationError: 'tooLong',
+      });
+
+      expect(
+        getByText(`Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`)
+      ).toBeInTheDocument();
     });
 
     it('displays duplicate validation error message', () => {
@@ -192,7 +203,8 @@ describe('NameStreamSection', () => {
 
       expect(queryByText(/You must specify a valid text string/i)).not.toBeInTheDocument();
       expect(queryByText(/Stream name cannot include/i)).not.toBeInTheDocument();
-      expect(queryByText(/must be lowercase/i)).not.toBeInTheDocument();
+      expect(queryByText(/uppercase/i)).not.toBeInTheDocument();
+      expect(queryByText(/cannot be longer than/i)).not.toBeInTheDocument();
       expect(queryByText(/already exists/i)).not.toBeInTheDocument();
       expect(queryByText(/higher priority/i)).not.toBeInTheDocument();
     });
