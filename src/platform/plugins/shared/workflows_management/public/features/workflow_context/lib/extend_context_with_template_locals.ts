@@ -262,9 +262,9 @@ function getCachedYamlString(doc: Document): string | null {
  * autocomplete so they share the same context logic.
  *
  * For block scalars the offset mapping extracts the raw YAML slice (header +
- * indented content) via `Document.toString({ lineWidth: 0 })` and
+ * indented content) via `Document.toString({ lineWidth: -1 })` and
  * `Scalar.range`, since `Scalar.source` equals the resolved value and lacks
- * the header/indent information needed for accurate mapping. `lineWidth: 0`
+ * the header/indent information needed for accurate mapping. `lineWidth: -1`
  * is required to prevent flow-scalar folding that would shift byte offsets
  * relative to the original parse. The toString result is cached per Document
  * instance via a WeakMap to avoid repeated serialisation.
