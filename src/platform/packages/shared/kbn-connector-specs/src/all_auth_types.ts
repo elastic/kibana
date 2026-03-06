@@ -8,6 +8,7 @@
  */
 
 export * from './auth_types/api_key_header';
+export { AzureSharedKeyAuth } from './auth_types/azure_shared_key';
 export * from './auth_types/bearer';
 export * from './auth_types/basic';
 export * from './auth_types/none';

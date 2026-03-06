@@ -166,3 +166,38 @@ export const PFX_AUTH_VERIFICATION_MODE_LABEL = i18n.translate(
     defaultMessage: 'Verification mode',
   }
 );
+
+export const AZURE_SHARED_KEY_AUTH_LABEL = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.label',
+  {
+    defaultMessage: 'Azure Shared Key',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_NAME_LABEL = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountName.label',
+  {
+    defaultMessage: 'Storage account name',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_NAME_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountName.requiredMessage',
+  {
+    defaultMessage: 'Storage account name is required',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_KEY_LABEL = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountKey.label',
+  {
+    defaultMessage: 'Storage account key',
+  }
+);
+
+export const AZURE_SHARED_KEY_ACCOUNT_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.azureSharedKeyAuth.accountKey.requiredMessage',
+  {
+    defaultMessage: 'Storage account key is required',
+  }
+);

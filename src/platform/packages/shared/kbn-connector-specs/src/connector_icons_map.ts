@@ -104,6 +104,10 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.azure-blob',
+    lazy(() => import(/* webpackChunkName: "connectorIconazureblob" */ './specs/azure_blob/icon')),
+  ],
+  [
     '.firecrawl',
     lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
   ],
