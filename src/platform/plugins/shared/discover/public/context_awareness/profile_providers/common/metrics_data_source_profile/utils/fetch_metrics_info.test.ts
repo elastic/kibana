@@ -131,4 +131,66 @@ describe('fetchMetricsInfo', () => {
       })
     );
   });
+
+  describe('when fetch fails (EBT discover_metrics_info_fetch_failed)', () => {
+    it('invokes onFetchFailed with payload and rethrows', async () => {
+      const error = new Error('search failed');
+      mockGetESQLResults.mockRejectedValue(error);
+
+      const onFetchFailed = jest.fn();
+
+      await expect(
+        fetchMetricsInfo({
+          esqlQuery: 'TS metrics-* | METRICS_INFO',
+          search: mockSearch,
+          dataView: dataViewWithTimefieldMock,
+          uiSettings: mockUiSettings,
+          onFetchFailed,
+        })
+      ).rejects.toThrow('search failed');
+
+      expect(onFetchFailed).toHaveBeenCalledTimes(1);
+      expect(onFetchFailed).toHaveBeenCalledWith({
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        dataViewId: dataViewWithTimefieldMock.id,
+        errorMessage: 'search failed',
+      });
+    });
+
+    it('invokes onFetchFailed with stringified errorMessage when rejection is not an Error instance', async () => {
+      mockGetESQLResults.mockRejectedValue('string error');
+
+      const onFetchFailed = jest.fn();
+
+      await expect(
+        fetchMetricsInfo({
+          esqlQuery: 'TS metrics-* | METRICS_INFO',
+          search: mockSearch,
+          dataView: dataViewWithTimefieldMock,
+          uiSettings: mockUiSettings,
+          onFetchFailed,
+        })
+      ).rejects.toBe('string error');
+
+      expect(onFetchFailed).toHaveBeenCalledTimes(1);
+      expect(onFetchFailed).toHaveBeenCalledWith({
+        esqlQuery: 'TS metrics-* | METRICS_INFO',
+        dataViewId: dataViewWithTimefieldMock.id,
+        errorMessage: 'string error',
+      });
+    });
+
+    it('does not call onFetchFailed when it is not provided and still rejects', async () => {
+      mockGetESQLResults.mockRejectedValue(new Error('fail'));
+
+      await expect(
+        fetchMetricsInfo({
+          esqlQuery: 'TS metrics-* | METRICS_INFO',
+          search: mockSearch,
+          dataView: dataViewWithTimefieldMock,
+          uiSettings: mockUiSettings,
+        })
+      ).rejects.toThrow('fail');
+    });
+  });
 });

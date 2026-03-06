@@ -54,6 +54,16 @@ jest.mock('../../../../../application/main/state_management/redux', () => ({
   useInternalStateDispatch: jest.fn(),
 }));
 
+jest.mock('../../../../../hooks/use_discover_services', () => ({
+  useDiscoverServices: () => ({
+    ebtManager: {
+      createScopedEBTManager: () => ({
+        reportMetricsInfoFetchFailed: jest.fn(),
+      }),
+    },
+  }),
+}));
+
 const mockDispatch = jest.fn();
 const mockUpdateAppStateAction = jest.fn((payload) => ({ type: 'updateAppState', payload }));
 
