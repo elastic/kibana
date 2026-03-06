@@ -21,7 +21,7 @@ import {
   types,
   type StorageSettings,
 } from '../../..';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
@@ -783,6 +783,80 @@ describe('StorageIndexAdapter', () => {
               versioning,
             })
         ).toThrow(`The field "${VERSION_FIELD}" is reserved`);
+      });
+
+      it('throws when a top-level schema property is missing from mappings', () => {
+        const settings = {
+          name: 'bad_index',
+          schema: { properties: { name: types.keyword() } },
+        } satisfies StorageSettings;
+
+        const versioning = defineVersioning(
+          z.object({ name: z.string(), missing: z.number() })
+        ).build();
+
+        expect(
+          () => new StorageIndexAdapter(esClient, loggerMock, settings, { versioning })
+        ).toThrow('Versioning schema properties [missing]');
+      });
+
+      it('throws when a nested schema property is missing from mappings', () => {
+        const settings = {
+          name: 'bad_index',
+          schema: {
+            properties: {
+              name: types.keyword(),
+              metadata: types.object({
+                properties: { createdAt: { type: 'date' as const } },
+              }),
+            },
+          },
+        } satisfies StorageSettings;
+
+        const versioning = defineVersioning(
+          z.object({
+            name: z.string(),
+            metadata: z.object({
+              createdAt: z.string(),
+              updatedAt: z.string(),
+            }),
+          })
+        ).build();
+
+        expect(
+          () => new StorageIndexAdapter(esClient, loggerMock, settings, { versioning })
+        ).toThrow('Versioning schema properties [metadata.updatedAt]');
+      });
+
+      it('passes validation when nested properties are all mapped', () => {
+        const settings = {
+          name: 'good_index',
+          schema: {
+            properties: {
+              name: types.keyword(),
+              metadata: types.object({
+                properties: {
+                  createdAt: { type: 'date' as const },
+                  tags: { type: 'keyword' as const },
+                },
+              }),
+            },
+          },
+        } satisfies StorageSettings;
+
+        const versioning = defineVersioning(
+          z.object({
+            name: z.string(),
+            metadata: z.object({
+              createdAt: z.string(),
+              tags: z.array(z.string()),
+            }),
+          })
+        ).build();
+
+        expect(
+          () => new StorageIndexAdapter(esClient, loggerMock, settings, { versioning })
+        ).not.toThrow();
       });
     });
   });

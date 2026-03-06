@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { defineVersioning, StorageSchemaVersioning } from './schema_versioning';
+import { z } from '@kbn/zod/v4';
+import {
+  defineVersioning,
+  getSchemapaths,
+  StorageSchemaVersioning,
+} from './schema_versioning';
 
 describe('defineVersioning', () => {
   const v1Schema = z.object({ foo: z.string() });
@@ -188,5 +192,66 @@ describe('StorageSchemaVersioning', () => {
       const result = await mixedVersioning.migrate({ a: 5 }, 1);
       expect(result).toEqual({ a: 5, b: '5', c: true });
     });
+  });
+});
+
+describe('getSchemapaths', () => {
+  const flat = z.object({ foo: z.string(), bar: z.number() });
+
+  it('extracts flat paths from a plain ZodObject', () => {
+    expect(getSchemapaths(flat)).toEqual(['foo', 'bar']);
+  });
+
+  it('extracts nested paths as dotted strings', () => {
+    const nested = z.object({
+      name: z.string(),
+      metadata: z.object({ createdAt: z.string(), tags: z.array(z.string()) }),
+    });
+    expect(getSchemapaths(nested)).toEqual([
+      'name',
+      'metadata',
+      'metadata.createdAt',
+      'metadata.tags',
+    ]);
+  });
+
+  it('extracts deeply nested paths', () => {
+    const deep = z.object({
+      level1: z.object({ level2: z.object({ leaf: z.boolean() }) }),
+    });
+    expect(getSchemapaths(deep)).toEqual([
+      'level1',
+      'level1.level2',
+      'level1.level2.leaf',
+    ]);
+  });
+
+  it('unwraps common Zod wrappers', () => {
+    const expected = ['foo', 'bar'];
+    expect(getSchemapaths(flat.refine(() => true))).toEqual(expected);
+    expect(getSchemapaths(flat.superRefine(() => {}))).toEqual(expected);
+    expect(getSchemapaths(flat.optional())).toEqual(expected);
+    expect(getSchemapaths(flat.nullable())).toEqual(expected);
+    expect(getSchemapaths(flat.default({ foo: '', bar: 0 }))).toEqual(expected);
+    expect(getSchemapaths(flat.catch({ foo: '', bar: 0 }))).toEqual(expected);
+    expect(getSchemapaths(flat.readonly())).toEqual(expected);
+    expect(getSchemapaths(flat.brand('MyBrand'))).toEqual(expected);
+    expect(getSchemapaths(z.lazy(() => flat))).toEqual(expected);
+    expect(getSchemapaths(flat.optional().nullable().default({ foo: '', bar: 0 }).readonly())).toEqual(expected);
+  });
+
+  it('unwraps ZodIntersection (.and)', () => {
+    expect(getSchemapaths(z.object({ foo: z.string() }).and(z.object({ bar: z.number() })))).toEqual(['foo', 'bar']);
+  });
+
+  it('unwraps ZodPipeline (.pipe)', () => {
+    expect(getSchemapaths(z.record(z.string(), z.unknown()).pipe(flat))).toEqual(['foo', 'bar']);
+  });
+
+  it('returns null for transforms and non-object schemas', () => {
+    expect(getSchemapaths(flat.transform((v) => v))).toBeNull();
+    expect(getSchemapaths(z.string())).toBeNull();
+    expect(getSchemapaths(z.number())).toBeNull();
+    expect(getSchemapaths(z.array(z.string()))).toBeNull();
   });
 });
