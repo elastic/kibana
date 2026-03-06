@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { ESSearchClient, LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import type { SnapshotRequest } from '../../../../common/http_api';
 import type { InfraSource } from '../../../lib/sources';
@@ -53,6 +54,11 @@ export const getNodes = async (
   compositeSize: number,
   logQueryFields?: LogQueryFields
 ) => {
+  const hasLogRate = snapshotRequest.metrics.some((metric) => metric.type === 'logRate');
+  if (hasLogRate && !snapshotRequest.includeTimeseries) {
+    throw Boom.badRequest('logRate metric is not supported without time series');
+  }
+
   let nodes;
 
   if (snapshotRequest.metrics.find((metric) => metric.type === 'logRate')) {
