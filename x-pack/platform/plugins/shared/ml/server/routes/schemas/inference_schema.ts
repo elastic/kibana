@@ -80,9 +80,9 @@ export const inferTrainedModelBody = schema.object({
 
 export const pipelineSimulateBody = schema.object({
   pipeline: schema.any(),
-  docs: schema.arrayOf(schema.any()),
+  docs: schema.arrayOf(schema.any(), { maxSize: 10000 }),
 });
-export const pipelineDocs = schema.arrayOf(schema.string());
+export const pipelineDocs = schema.arrayOf(schema.string(), { maxSize: 10000 });
 
 export const stopDeploymentSchema = schema.object({
   ...modelIdSchemaBasic,
@@ -98,7 +98,7 @@ export const createIngestPipelineSchema = schema.object({
   pipelineName: schema.string(),
   pipeline: schema.maybe(
     schema.object({
-      processors: schema.arrayOf(schema.any()),
+      processors: schema.arrayOf(schema.any(), { maxSize: 10000 }),
       description: schema.maybe(schema.string()),
     })
   ),

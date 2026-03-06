@@ -465,7 +465,10 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
           response: {
             200: {
               body: () =>
-                schema.object({ count: schema.number(), buckets: schema.arrayOf(schema.any()) }),
+                schema.object({
+                  count: schema.number(),
+                  buckets: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+                }),
             },
           },
         },
