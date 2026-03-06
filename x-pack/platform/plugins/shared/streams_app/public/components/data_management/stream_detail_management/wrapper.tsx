@@ -170,6 +170,7 @@ export function Wrapper({
                     <DiscoverBadgeButton
                       stream={definition.stream}
                       hasDataStream={definition.data_stream_exists}
+                      indexMode={definition.index_mode}
                       spellOut
                     />
                   )}
