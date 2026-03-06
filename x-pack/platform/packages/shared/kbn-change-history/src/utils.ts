@@ -6,7 +6,7 @@
  */
 
 import crypto from 'node:crypto';
-import flatten, { unflatten } from 'flat';
+import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
 import type {
   ChangeTrackingDataMaskingFields,
   ChangeTrackingDiff,
@@ -54,12 +54,10 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
   // Flatten both objects and work out diff
   const { a, b, ignoreFields } = opts;
   const stats = result.stats;
-  const options = { safe: true };
-  const flatA = flatten(a ?? {}, options) as Record<string, any>;
-  const flatB = flatten(b ?? {}, options) as Record<string, any>;
+  const flatA = flatten(a ?? {});
+  const flatB = flatten(b ?? {});
   const allKeys = new Set([...Object.keys(flatA), ...Object.keys(flatB)]);
-  const flatFilter =
-    (ignoreFields && (flatten(ignoreFields, options) as Record<string, any>)) || undefined;
+  const flatFilter = (ignoreFields && flatten(ignoreFields)) || undefined;
   // TODO: Might need better array comparison here though this works for now
   const arrayDeepEquals = (a1: any[] | ArrayBufferView, a2: any[] | ArrayBufferView) =>
     JSON.stringify(a1) === JSON.stringify(a2);
@@ -140,8 +138,8 @@ export function maskSensitiveFields(
   if (!maskFields) {
     return { masked, snapshot };
   }
-  const flatSnapshot = flatten(snapshot, { safe: true }) as Record<string, any>;
-  const flatMaskings = flatten(maskFields, { safe: true }) as Record<string, boolean>;
+  const flatSnapshot = flatten(snapshot);
+  const flatMaskings = flatten(maskFields);
   const isMasked = (key: string) =>
     Object.entries(flatMaskings).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
 
