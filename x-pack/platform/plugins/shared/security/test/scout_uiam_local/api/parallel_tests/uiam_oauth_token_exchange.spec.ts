@@ -20,7 +20,6 @@ apiTest.describe(
     let oauthAccessToken: string;
 
     apiTest.beforeAll(async ({ kbnUrl, config: { organizationId, projectType } }) => {
-      // The audience must match what Kibana's getServerBaseURL() returns (protocol://hostname:port).
       const audience = new URL(kbnUrl.get()).origin;
 
       oauthAccessToken = await createUiamOAuthAccessToken({
@@ -57,8 +56,6 @@ apiTest.describe(
           },
         });
 
-        console.log('response', response);
-
         expect(response.statusCode).toBe(200);
       }
     );
@@ -78,8 +75,9 @@ apiTest.describe(
     });
 
     apiTest('should reject an invalid OAuth token on MCP endpoint', async ({ apiClient }) => {
-      // Use a tampered token — remove the last character to make it invalid.
-      const invalidToken = oauthAccessToken.slice(0, -1);
+      const mid = Math.floor(oauthAccessToken.length / 2);
+      const invalidToken =
+        oauthAccessToken.slice(0, mid) + 'CORRUPTED' + oauthAccessToken.slice(mid);
 
       const response = await apiClient.post(MCP_ENDPOINT, {
         headers: {
@@ -125,7 +123,6 @@ apiTest.describe(
           },
         });
 
-        // ES will reject the invalid token.
         expect(response.statusCode).toBe(401);
       }
     );

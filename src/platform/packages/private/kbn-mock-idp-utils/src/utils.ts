@@ -408,9 +408,7 @@ export async function createUiamSessionTokens({
  * Creates a UIAM OAuth access token that can be used to test the OAuth token exchange flow.
  *
  * Unlike {@link createUiamSessionTokens}, this creates a token with `typ: 'oauth-access-token'`
- * that includes OAuth-specific claims (audience, scope, client_id, connection_id). The UIAM
- * `_authenticate` endpoint requires the `audience` query parameter for OAuth tokens and validates
- * it against the token's `aud` claim.
+ * that includes OAuth-specific claims (audience, scope, client_id, connection_id).
  */
 export async function createUiamOAuthAccessToken({
   username,
