@@ -1,6 +1,0 @@
-graph LR
-    A[CSV Upload] --> D[Asset Criticality Index]
-    B[API Upsert] --> D
-    C[Bulk Upload] --> D
-    D -->|Lookup during scoring| E[Risk Engine]
-    E -->|Bayesian update| F[Modified Risk Score]
