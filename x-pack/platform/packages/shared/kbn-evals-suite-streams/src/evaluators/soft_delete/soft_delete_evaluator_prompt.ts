@@ -7,8 +7,8 @@
 
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod/v4';
-import systemPromptText from './features_soft_delete_evaluator_system_prompt.text';
-import userPromptText from './features_soft_delete_evaluator_user_prompt.text';
+import systemPromptText from './soft_delete_evaluator_system_prompt.text';
+import userPromptText from './soft_delete_evaluator_user_prompt.text';
 
 export const SoftDeleteCompliancePrompt = createPrompt({
   name: 'soft_delete_compliance_analysis',
