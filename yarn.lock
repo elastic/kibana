@@ -4830,6 +4830,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-history@link:x-pack/platform/packages/shared/kbn-change-history":
+  version "0.0.0"
+  uid ""
+
 "@kbn/chart-expressions-common@link:src/platform/packages/shared/chart-expressions-common":
   version "0.0.0"
   uid ""
@@ -14005,6 +14009,11 @@
   resolved "https://registry.yarnpkg.com/@types/file-saver/-/file-saver-2.0.7.tgz#8dbb2f24bdc7486c54aa854eb414940bbd056f7d"
   integrity sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==
 
+"@types/flat@5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@types/flat/-/flat-5.0.5.tgz#2304df0b2b1e6dde50d81f029593e0a1bc2474d3"
+  integrity sha512-nPLljZQKSnac53KDUDzuzdRfGI0TDb5qPrb+SrQyN3MtdQrOnGsKniHN1iYZsJEBIVQve94Y6gNz22sgISZq+Q==
+
 "@types/flot@0.0.31":
   version "0.0.31"
   resolved "https://registry.yarnpkg.com/@types/flot/-/flot-0.0.31.tgz#0daca37c6c855b69a0a7e2e37dd0f84b3db8c8c1"
@@ -21680,7 +21689,7 @@ flat-cache@^3.0.4:
     flatted "^3.1.0"
     rimraf "^3.0.2"
 
-flat@^5.0.2:
+flat@5.0.2, flat@^5.0.2:
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/flat/-/flat-5.0.2.tgz#8ca6fe332069ffa9d324c327198c598259ceb241"
   integrity sha512-b6suED+5/3rTpUBdG1gupIl8MPFCAMA0QXwmljLhvCUKcUvdE4gWky9zpuGCcXHOsz4J9wPGNWq6OKpmIzz3hQ==
@@ -33715,7 +33724,7 @@ uglify-js@^3.1.4:
   resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.19.3.tgz#82315e9bbc6f2b25888858acd1fff8441035b77f"
   integrity sha512-v3Xu+yuwBXisp6QYTcH4UbH+xYJXqnq2m/LtQVWKWzYc1iehYnLixoQDN9FH6/j9/oybfd6W9Ghwkl8+UMKTKQ==
 
-ulid@^3.0.1:
+ulid@3.0.2, ulid@^3.0.1:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/ulid/-/ulid-3.0.2.tgz#b6a1f2a3de7852e39aa86bf497a8e33b1867c984"
   integrity sha512-yu26mwteFYzBAot7KVMqFGCVpsF6g8wXfJzQUHvu1no3+rRRSFcSV2nKeYvNPLD2J4b08jYBDhHUjeH0ygIl9w==
