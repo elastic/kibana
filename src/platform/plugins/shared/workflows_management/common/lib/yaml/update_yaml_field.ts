@@ -30,8 +30,11 @@ export function updateYamlField(yamlString: string, fieldPath: string, value: un
     // If the field doesn't exist, it will be added
     doc.setIn(pathArray, value);
 
-    // Convert back to string, preserving formatting
-    return doc.toString();
+    // Convert back to string, preserving formatting.
+    // lineWidth: -1 disables automatic line folding which would otherwise break
+    // Liquid template expressions (e.g. ${{steps.foo.output.bar}}) by splitting
+    // them across lines with YAML escape continuations.
+    return doc.toString({ lineWidth: -1 });
   } catch (error) {
     // If parsing fails, return original YAML
     // This should not happen in normal operation, but provides a fallback

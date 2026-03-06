@@ -8,8 +8,9 @@
  */
 
 import type { Liquid } from 'liquidjs';
+import { parseDocument, visit } from 'yaml';
+import type { Scalar } from 'yaml';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
-import { extractLiquidErrorPosition } from './extract_liquid_error_position';
 
 export interface LiquidValidationError {
   message: string;
@@ -42,27 +43,94 @@ function convertOffsetToLineColumn(text: string, offset: number): { line: number
   };
 }
 
-export function validateLiquidTemplate(yamlString: string): LiquidValidationError[] {
-  try {
-    const liquid = getLiquidInstance();
-    liquid.parse(yamlString);
-    return [];
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
-    const position = extractLiquidErrorPosition(yamlString, errorMessage);
-    const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+const LIQUID_PATTERN = /\{\{|\{%/;
 
-    const startPos = convertOffsetToLineColumn(yamlString, position.start);
-    const endPos = convertOffsetToLineColumn(yamlString, position.end);
-
-    return [
-      {
-        message: customerFacingErrorMessage,
-        startLine: startPos.line,
-        startColumn: startPos.column,
-        endLine: endPos.line,
-        endColumn: endPos.column,
-      },
-    ];
+/**
+ * Attempts to pinpoint the specific error token within the YAML node's raw text,
+ * falling back to the full node range if no specific token can be identified.
+ */
+function findErrorRange(
+  rawSlice: string,
+  nodeStart: number,
+  nodeEnd: number,
+  errorMessage: string
+): { start: number; end: number } {
+  const filterMatch = errorMessage.match(/undefined filter:\s*([a-zA-Z_]\w*)/);
+  if (filterMatch) {
+    const filterName = filterMatch[1];
+    const filterRegex = new RegExp(`\\|\\s*${filterName}\\b`);
+    const pipeMatch = filterRegex.exec(rawSlice);
+    if (pipeMatch) {
+      const idx = rawSlice.indexOf(filterName, pipeMatch.index);
+      if (idx !== -1) {
+        return { start: nodeStart + idx, end: nodeStart + idx + filterName.length };
+      }
+    }
   }
+
+  const tagMatch = errorMessage.match(/tag ['"](.*?)['"] not found/);
+  if (tagMatch) {
+    const tagName = tagMatch[1];
+    const idx = rawSlice.indexOf(tagName);
+    if (idx !== -1) {
+      return { start: nodeStart + idx, end: nodeStart + idx + tagName.length };
+    }
+  }
+
+  return { start: nodeStart, end: nodeEnd };
+}
+
+/**
+ * Validates Liquid template syntax in YAML string values.
+ *
+ * Parses the YAML document and validates each resolved string value individually,
+ * rather than running the Liquid parser on the raw YAML text. This avoids false
+ * positives from YAML formatting artifacts (e.g. line-folding escape continuations)
+ * that the Liquid parser cannot understand.
+ */
+export function validateLiquidTemplate(yamlString: string): LiquidValidationError[] {
+  let doc;
+  try {
+    doc = parseDocument(yamlString);
+  } catch {
+    // YAML syntax errors are caught by the dedicated YAML syntax validator.
+    return [];
+  }
+
+  const liquid = getLiquidInstance();
+  const errors: LiquidValidationError[] = [];
+
+  visit(doc, {
+    Scalar(_key, node: Scalar) {
+      if (_key === 'key') return;
+      if (typeof node.value !== 'string') return;
+
+      const value = node.value;
+      if (!LIQUID_PATTERN.test(value)) return;
+
+      try {
+        liquid.parse(value);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
+        const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+
+        const [rangeStart, valueEnd] = node.range ?? [0, 0, 0];
+        const rawSlice = yamlString.substring(rangeStart, valueEnd);
+        const { start, end } = findErrorRange(rawSlice, rangeStart, valueEnd, errorMessage);
+
+        const startPos = convertOffsetToLineColumn(yamlString, start);
+        const endPos = convertOffsetToLineColumn(yamlString, end);
+
+        errors.push({
+          message: customerFacingErrorMessage,
+          startLine: startPos.line,
+          startColumn: startPos.column,
+          endLine: endPos.line,
+          endColumn: endPos.column,
+        });
+      }
+    },
+  });
+
+  return errors;
 }
