@@ -48,7 +48,7 @@ type InitialValue<TState extends object, TKey extends keyof TState> =
   | TState[TKey]
   | (() => TState[TKey]);
 
-type ShouldIgnoreRestoredValue<TState extends object, TKey extends keyof TState> = (
+type ShouldIgnoredRestoredValue<TState extends object, TKey extends keyof TState> = (
   restoredValue: TState[TKey]
 ) => boolean;
 
@@ -146,12 +146,12 @@ export const createRestorableStateProvider = <TState extends object>() => {
     initialState: Partial<TState> | undefined,
     key: TKey,
     initialValue: InitialValue<TState, TKey>,
-    shouldIgnoreRestoredValue?: ShouldIgnoreRestoredValue<TState, TKey>
+    shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>
   ): TState[TKey] => {
     if (
       initialState &&
       key in initialState &&
-      !shouldIgnoreRestoredValue?.(initialState[key] as TState[TKey])
+      !shouldIgnoredRestoredValue?.(initialState[key] as TState[TKey])
     ) {
       return initialState[key] as TState[TKey];
     }
@@ -165,11 +165,11 @@ export const createRestorableStateProvider = <TState extends object>() => {
     key: TKey,
     initialValue: InitialValue<TState, TKey>,
     refreshValue: Dispatch<TState[TKey]>,
-    shouldIgnoreRestoredValue?: ShouldIgnoreRestoredValue<TState, TKey>
+    shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>
   ) => {
     const { initialStateRefresh$ } = useContext(context);
     const latestInitialValue = useLatest(initialValue);
-    const latestShouldIgnoreRestoredValue = useLatest(shouldIgnoreRestoredValue);
+    const latestShouldIgnoredRestoredValue = useLatest(shouldIgnoredRestoredValue);
     const stableRefreshValue = useStableFunction(refreshValue);
 
     useEffect(() => {
@@ -180,7 +180,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
               initialState,
               key,
               latestInitialValue.current,
-              latestShouldIgnoreRestoredValue.current
+              latestShouldIgnoredRestoredValue.current
             )
           )
         )
@@ -192,7 +192,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
     }, [
       initialStateRefresh$,
       key,
-      latestShouldIgnoreRestoredValue,
+      latestShouldIgnoredRestoredValue,
       latestInitialValue,
       stableRefreshValue,
     ]);
@@ -202,14 +202,14 @@ export const createRestorableStateProvider = <TState extends object>() => {
     key: TKey,
     initialValue: InitialValue<TState, TKey>,
     options?: {
-      shouldIgnoreRestoredValue?: ShouldIgnoreRestoredValue<TState, TKey>;
+      shouldIgnoredRestoredValue?: ShouldIgnoredRestoredValue<TState, TKey>;
       shouldStoreDefaultValueRightAway?: boolean;
     }
   ) => {
-    const { shouldIgnoreRestoredValue, shouldStoreDefaultValueRightAway } = options || {};
+    const { shouldIgnoredRestoredValue, shouldStoreDefaultValueRightAway } = options || {};
     const { initialState$, onInitialStateChange } = useContext(context);
     const [value, _setValue] = useState(() =>
-      getInitialValue(initialState$.getValue(), key, initialValue, shouldIgnoreRestoredValue)
+      getInitialValue(initialState$.getValue(), key, initialValue, shouldIgnoredRestoredValue)
     );
 
     const setValue = useStableFunction<Dispatch<SetStateAction<TState[TKey]>>>((newValue) => {
@@ -233,7 +233,7 @@ export const createRestorableStateProvider = <TState extends object>() => {
       }
     });
 
-    useInitialStateRefresh(key, initialValue, _setValue, shouldIgnoreRestoredValue);
+    useInitialStateRefresh(key, initialValue, _setValue, shouldIgnoredRestoredValue);
 
     return [value, setValue] as const;
   };

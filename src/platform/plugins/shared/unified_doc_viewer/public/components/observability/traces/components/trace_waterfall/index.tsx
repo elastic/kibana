@@ -65,7 +65,7 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
 
   const [restoredTraceId, setRestoredTraceId] = useRestorableState('restoredTraceId', null);
 
-  const shouldIgnoreRestoredValue = useCallback(
+  const shouldIgnoredRestoredValue = useCallback(
     () => restoredTraceId != null && restoredTraceId !== traceId,
     [restoredTraceId, traceId]
   );
@@ -73,19 +73,19 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useRestorableState(
     'showFullScreenWaterfall',
     false,
-    { shouldIgnoreRestoredValue }
+    { shouldIgnoredRestoredValue }
   );
   const [activeFlyoutType, setActiveFlyoutType] = useRestorableState('activeFlyoutType', null, {
-    shouldIgnoreRestoredValue,
+    shouldIgnoredRestoredValue,
   });
   const [activeSection, setActiveSection] = useRestorableState('activeSection', undefined, {
-    shouldIgnoreRestoredValue,
+    shouldIgnoredRestoredValue,
   });
   const [activeDocId, setActiveDocId] = useRestorableState('activeDocId', null, {
-    shouldIgnoreRestoredValue,
+    shouldIgnoredRestoredValue,
   });
   const [activeDocIndex, setActiveDocIndex] = useRestorableState('activeDocIndex', undefined, {
-    shouldIgnoreRestoredValue,
+    shouldIgnoredRestoredValue,
   });
 
   useEffect(() => {
