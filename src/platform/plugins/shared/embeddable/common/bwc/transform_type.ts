@@ -61,7 +61,7 @@ export function transformType(type: string) {
   }
 
   if (type === 'SLO_EMBEDDABLE') {
-    return 'slo';
+    return 'slo_overview';
   }
 
   if (type === 'SLO_ALERTS_EMBEDDABLE') {
