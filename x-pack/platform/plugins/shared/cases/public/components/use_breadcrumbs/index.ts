@@ -13,16 +13,22 @@ import type { ICasesDeepLinkId } from '../../common/navigation';
 import { CasesDeepLinkId } from '../../common/navigation';
 import { useApplication } from '../../common/lib/kibana/use_application';
 
-const casesBreadcrumbTitle: Record<ICasesDeepLinkId, string> = {
-  [CasesDeepLinkId.cases]: i18n.translate('xpack.cases.breadcrumbs.all_cases', {
-    defaultMessage: 'Cases',
-  }),
-  [CasesDeepLinkId.casesCreate]: i18n.translate('xpack.cases.breadcrumbs.create_case', {
-    defaultMessage: 'Create',
-  }),
-  [CasesDeepLinkId.casesConfigure]: i18n.translate('xpack.cases.breadcrumbs.settings', {
-    defaultMessage: 'Settings',
-  }),
+const getCasesBreadcrumbTitle = (deepLinkId: ICasesDeepLinkId): string => {
+  const titles: Record<ICasesDeepLinkId, string> = {
+    [CasesDeepLinkId.cases]: i18n.translate('xpack.cases.breadcrumbs.all_cases', {
+      defaultMessage: 'Cases',
+    }),
+    [CasesDeepLinkId.casesCreate]: i18n.translate('xpack.cases.breadcrumbs.create_case', {
+      defaultMessage: 'Create',
+    }),
+    [CasesDeepLinkId.casesConfigure]: i18n.translate('xpack.cases.breadcrumbs.settings', {
+      defaultMessage: 'Settings',
+    }),
+    [CasesDeepLinkId.casesTemplates]: i18n.translate('xpack.cases.breadcrumbs.templates', {
+      defaultMessage: 'Templates',
+    }),
+  };
+  return titles[deepLinkId];
 };
 
 function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): string[] {
@@ -83,7 +89,7 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
     applyBreadcrumbs([
       { text: appTitle, href: getAppUrl() },
       {
-        text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
+        text: getCasesBreadcrumbTitle(CasesDeepLinkId.cases),
         ...(pageDeepLink !== CasesDeepLinkId.cases
           ? {
               href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
@@ -93,7 +99,7 @@ export const useCasesBreadcrumbs = (pageDeepLink: ICasesDeepLinkId) => {
       ...(pageDeepLink !== CasesDeepLinkId.cases
         ? [
             {
-              text: casesBreadcrumbTitle[pageDeepLink],
+              text: getCasesBreadcrumbTitle(pageDeepLink),
             },
           ]
         : []),
@@ -114,11 +120,40 @@ export const useCasesTitleBreadcrumbs = (caseTitle: string) => {
     const casesBreadcrumbs: ChromeBreadcrumb[] = [
       { text: appTitle, href: getAppUrl() },
       {
-        text: casesBreadcrumbTitle[CasesDeepLinkId.cases],
+        text: getCasesBreadcrumbTitle(CasesDeepLinkId.cases),
         href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
       },
     ];
     applyBreadcrumbs(casesBreadcrumbs, [titleBreadcrumb]);
     KibanaServices.get().serverless?.setBreadcrumbs([titleBreadcrumb]);
   }, [caseTitle, appTitle, getAppUrl, applyBreadcrumbs]);
+};
+
+export const useCasesTemplatesBreadcrumbs = (templateTitle?: string) => {
+  const { appId, appTitle } = useApplication();
+  const { getAppUrl } = useNavigation(appId);
+  const applyBreadcrumbs = useApplyBreadcrumbs();
+
+  useEffect(() => {
+    const breadcrumbs: ChromeBreadcrumb[] = [
+      { text: appTitle, href: getAppUrl() },
+      {
+        text: getCasesBreadcrumbTitle(CasesDeepLinkId.cases),
+        href: getAppUrl({ deepLinkId: CasesDeepLinkId.cases }),
+      },
+      {
+        text: getCasesBreadcrumbTitle(CasesDeepLinkId.casesTemplates),
+        ...(templateTitle
+          ? { href: getAppUrl({ deepLinkId: CasesDeepLinkId.casesTemplates }) }
+          : {}),
+      },
+    ];
+
+    if (templateTitle) {
+      breadcrumbs.push({ text: templateTitle });
+    }
+
+    applyBreadcrumbs(breadcrumbs);
+    KibanaServices.get().serverless?.setBreadcrumbs(templateTitle ? [{ text: templateTitle }] : []);
+  }, [templateTitle, appTitle, getAppUrl, applyBreadcrumbs]);
 };

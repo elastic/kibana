@@ -18,6 +18,7 @@ import { getOwnerDefaultValue } from '../../../create/utils';
 import { useCasesTemplatesNavigation } from '../../../../common/navigation';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
 import { useCasesLocalStorage } from '../../../../common/use_cases_local_storage';
+import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
 
 import * as i18n from '../../translations';
 
@@ -25,6 +26,8 @@ import * as i18n from '../../translations';
 export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
+  useCasesTemplatesBreadcrumbs(i18n.ADD_TEMPLATE_TITLE);
+
   const form = useForm<YamlEditorFormValues>({
     defaultValues: {
       definition: exampleTemplateDefinition,

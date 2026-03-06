@@ -35,6 +35,10 @@ jest.mock('../../../../common/navigation', () => ({
   }),
 }));
 
+jest.mock('../../../use_breadcrumbs', () => ({
+  useCasesTemplatesBreadcrumbs: jest.fn(),
+}));
+
 describe('CreateTemplatePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();

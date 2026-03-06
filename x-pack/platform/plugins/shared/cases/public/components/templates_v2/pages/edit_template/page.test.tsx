@@ -40,6 +40,10 @@ jest.mock('../../../../common/use_cases_local_storage', () => ({
   useCasesLocalStorage: () => ['', jest.fn()],
 }));
 
+jest.mock('../../../use_breadcrumbs', () => ({
+  useCasesTemplatesBreadcrumbs: jest.fn(),
+}));
+
 const mockTemplateFormLayout = jest.fn();
 jest.mock('../../components/template_form_layout', () => ({
   TemplateFormLayout: (props: { title: string; isLoading?: boolean }) =>

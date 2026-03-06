@@ -19,7 +19,8 @@ import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
-  chatExperience: AIChatExperience = AIChatExperience.Classic
+  chatExperience: AIChatExperience = AIChatExperience.Classic,
+  templatesEnabled: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -63,7 +64,7 @@ export const createNavigationTree = (
       icon: 'bullseye',
       link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
     },
-    defaultNavigationTree.cases(),
+    defaultNavigationTree.cases(templatesEnabled),
     defaultNavigationTree.entityAnalytics(),
     defaultNavigationTree.explore(),
     defaultNavigationTree.investigations(),

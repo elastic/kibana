@@ -8,7 +8,7 @@
 import { getCasesDeepLinks } from './deep_links';
 
 describe('getCasesDeepLinks', () => {
-  it('it returns the deep links', () => {
+  it('it returns the deep links with templates by default', () => {
     const deepLinks = getCasesDeepLinks({});
     expect(deepLinks).toEqual({
       id: 'cases',
@@ -24,6 +24,11 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_configure',
           path: '/cases/configure',
           title: 'Settings',
+        },
+        {
+          id: 'cases_templates',
+          path: '/cases/templates',
+          title: 'Templates',
         },
       ],
     });
@@ -45,6 +50,11 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_configure',
           path: '/test/configure',
           title: 'Settings',
+        },
+        {
+          id: 'cases_templates',
+          path: '/test/templates',
+          title: 'Templates',
         },
       ],
     });
@@ -82,6 +92,11 @@ describe('getCasesDeepLinks', () => {
           path: '/cases/configure',
           title: 'Settings',
           order: 8002,
+        },
+        {
+          id: 'cases_templates',
+          path: '/cases/templates',
+          title: 'Templates',
         },
       ],
     });
@@ -121,6 +136,11 @@ describe('getCasesDeepLinks', () => {
           path: '/cases/configure',
           title: 'Settings',
         },
+        {
+          id: 'cases_templates',
+          path: '/cases/templates',
+          title: 'Templates',
+        },
       ],
     });
   });
@@ -155,7 +175,44 @@ describe('getCasesDeepLinks', () => {
           path: '/cases/configure',
           title: 'My new settings title',
         },
+        {
+          id: 'cases_templates',
+          path: '/cases/templates',
+          title: 'Templates',
+        },
       ],
     });
+  });
+
+  it('it includes templates link when templatesEnabled is true', () => {
+    const deepLinks = getCasesDeepLinks({ templatesEnabled: true });
+    expect(deepLinks).toEqual({
+      id: 'cases',
+      path: '/cases',
+      title: 'Cases',
+      deepLinks: [
+        {
+          id: 'cases_create',
+          path: '/cases/create',
+          title: 'Create',
+        },
+        {
+          id: 'cases_configure',
+          path: '/cases/configure',
+          title: 'Settings',
+        },
+        {
+          id: 'cases_templates',
+          path: '/cases/templates',
+          title: 'Templates',
+        },
+      ],
+    });
+  });
+
+  it('it excludes templates link when templatesEnabled is false', () => {
+    const deepLinks = getCasesDeepLinks({ templatesEnabled: false });
+    expect(deepLinks.deepLinks).toHaveLength(2);
+    expect(deepLinks.deepLinks.map((link) => link.id)).toEqual(['cases_create', 'cases_configure']);
   });
 });

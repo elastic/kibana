@@ -15,6 +15,7 @@ import { useGetTemplate } from '../../hooks/use_get_template';
 import { useUpdateTemplate } from '../../hooks/use_update_template';
 import { TemplateFormLayout } from '../../components/template_form_layout';
 import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { useCasesTemplatesBreadcrumbs } from '../../../use_breadcrumbs';
 import * as i18n from '../../translations';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -25,6 +26,8 @@ export const EditTemplatePage: FC<EditTemplatePageProps> = () => {
   const { data: template, isLoading } = useGetTemplate(templateId);
   const { mutateAsync, isLoading: isSaving } = useUpdateTemplate();
   const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+
+  useCasesTemplatesBreadcrumbs(template?.name ?? i18n.EDIT_TEMPLATE_TITLE);
 
   // Server version as initial value - useDebouncedYamlEdit will use WIP from storage if exists
   const serverDefinition = useMemo(() => {
