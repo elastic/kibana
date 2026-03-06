@@ -30,15 +30,10 @@ const DOCUMENTATION_LINK = 'https://ela.st/docs-service-map-no-metrics-available
 
 function MessagingEdgeNoMetricsMessage() {
   return (
-    <EuiText
-      color="subdued"
-      size="s"
-      style={{ maxWidth: 360 }}
-      data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage"
-    >
+    <EuiText color="subdued" size="s" data-test-subj="apmServiceMapMessagingEdgeNoMetricsMessage">
       <FormattedMessage
         id="xpack.apm.serviceMap.edgeContents.messagingEdgeNoMetricsMessage"
-        defaultMessage="No metrics available. Grouped dependencies and inferred messaging consumer connections do not have associated span metrics. See {documentation} for more information."
+        defaultMessage="No metrics available. See {documentation}."
         values={{
           documentation: (
             <EuiLink
