@@ -591,10 +591,10 @@
             "section": "def-public.DocViewerProps",
             "text": "DocViewerProps"
           },
-          ", \"initialDocViewerState\" | \"onInitialDocViewerStateChange\" | \"onUpdateSelectedTabId\">"
+          ", \"initialTabId\" | \"initialDocViewerState\" | \"onInitialDocViewerStateChange\" | \"onUpdateSelectedTabId\">"
         ],
         "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -618,7 +618,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 42,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -634,7 +634,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 43,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -650,7 +650,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 44,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -667,7 +667,7 @@
               ".Width<string | number> | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 45,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -683,7 +683,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 46,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -699,7 +699,7 @@
               "\"push\" | \"overlay\" | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 47,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -715,33 +715,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 48,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.FlyoutCustomBody",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "FlyoutCustomBody",
-            "description": [],
-            "signature": [
-              "React.ComponentType<{ actions: Pick<",
-              "DocViewRenderProps",
-              ", \"filter\" | \"onAddColumn\" | \"onRemoveColumn\">; doc: ",
-              {
-                "pluginId": "@kbn/discover-utils",
-                "scope": "common",
-                "docId": "kibKbnDiscoverUtilsPluginApi",
-                "section": "def-common.DataTableRecord",
-                "text": "DataTableRecord"
-              },
-              "; renderDefaultContent: () => React.ReactNode; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 49,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -761,7 +735,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 54,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -800,7 +774,7 @@
               ") | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 58,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -813,7 +787,7 @@
             "label": "isEsqlQuery",
             "description": [],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 59,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -829,7 +803,7 @@
               "string[]"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 60,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -852,7 +826,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 61,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -874,7 +848,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 62,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -897,7 +871,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 63,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -919,6 +893,22 @@
               }
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.hideFilteringOnComputedColumns",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideFilteringOnComputedColumns",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
@@ -926,13 +916,15 @@
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomHeader",
             "type": "Function",
             "tags": [],
-            "label": "onAddColumn",
+            "label": "renderCustomHeader",
             "description": [],
             "signature": [
-              "(column: string) => void"
+              "((props: ",
+              "DocViewRenderProps",
+              ") => React.ReactElement<any>) | undefined"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
             "lineNumber": 65,
@@ -942,88 +934,17 @@
             "children": [
               {
                 "parentPluginId": "unifiedDocViewer",
-                "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn.$1",
-                "type": "string",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.renderCustomHeader.$1",
+                "type": "Object",
                 "tags": [],
-                "label": "column",
+                "label": "props",
                 "description": [],
                 "signature": [
-                  "string"
+                  "DocViewRenderProps"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
                 "lineNumber": 65,
-                "columnNumber": 17,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.onClose",
-            "type": "Function",
-            "tags": [],
-            "label": "onClose",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 66,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.onFilter",
-            "type": "Function",
-            "tags": [],
-            "label": "onFilter",
-            "description": [],
-            "signature": [
-              "DocViewFilterFn",
-              " | undefined"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 67,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.onRemoveColumn",
-            "type": "Function",
-            "tags": [],
-            "label": "onRemoveColumn",
-            "description": [],
-            "signature": [
-              "(column: string) => void"
-            ],
-            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 68,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "unifiedDocViewer",
-                "id": "def-public.UnifiedDocViewerFlyoutProps.onRemoveColumn.$1",
-                "type": "string",
-                "tags": [],
-                "label": "column",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 68,
-                "columnNumber": 20,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1050,7 +971,7 @@
               " | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 69,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1073,7 +994,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-                "lineNumber": 69,
+                "lineNumber": 66,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1084,32 +1005,107 @@
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.initialTabId",
-            "type": "string",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onClose",
+            "type": "Function",
             "tags": [],
-            "label": "initialTabId",
+            "label": "onClose",
             "description": [],
             "signature": [
-              "string | undefined"
+              "() => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 70,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "unifiedDocViewer",
-            "id": "def-public.UnifiedDocViewerFlyoutProps.hideFilteringOnComputedColumns",
-            "type": "CompoundType",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn",
+            "type": "Function",
             "tags": [],
-            "label": "hideFilteringOnComputedColumns",
+            "label": "onAddColumn",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "(column: string) => void"
             ],
             "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
-            "lineNumber": 71,
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.onAddColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+                "lineNumber": 68,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onRemoveColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "onRemoveColumn",
+            "description": [],
+            "signature": [
+              "(column: string) => void"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedDocViewer",
+                "id": "def-public.UnifiedDocViewerFlyoutProps.onRemoveColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "column",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+                "lineNumber": 69,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyoutProps.onFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onFilter",
+            "description": [],
+            "signature": [
+              "DocViewFilterFn",
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_flyout/doc_viewer_flyout.tsx",
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
