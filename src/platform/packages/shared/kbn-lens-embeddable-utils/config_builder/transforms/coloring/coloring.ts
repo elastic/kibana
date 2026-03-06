@@ -9,6 +9,7 @@
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 
+import type { GradientColorMode } from '@kbn/coloring/src/shared_components/color_mapping/config/types';
 import type {
   AllColoringTypes,
   ColorByValueAbsolute,
@@ -19,7 +20,6 @@ import type {
   StaticColorType,
 } from '../../schema/color';
 import type { SerializableValueType } from '../../schema/serializedValue';
-import type { GradientColorMode } from '../../../../kbn-coloring/src/shared_components/color_mapping/config/types';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
 const LENS_DEFAULT_COLOR_MAPPING_PALETTE = 'default';
