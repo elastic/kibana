@@ -2,7 +2,8 @@
 # Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'
@@ -39,7 +40,8 @@ viewer:
         - '*'
   run_as: []
 editor:
-  cluster: []
+  cluster:
+    - 'read_project_routing'
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'
