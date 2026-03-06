@@ -3646,14 +3646,14 @@
           {
             "parentPluginId": "lists",
             "id": "def-server.CreateExceptionListItemOptions.entries",
-            "type": "Array",
+            "type": "Any",
             "tags": [],
             "label": "entries",
             "description": [
               "an array with the exception list item entries"
             ],
             "signature": [
-              "({ value: string; type: \"match\"; field: string; operator: \"included\" | \"excluded\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"list\"; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; field: string; operator: \"included\" | \"excluded\"; } | { type: \"exists\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"nested\"; entries: ({ value: string; type: \"match\"; field: string; operator: \"included\" | \"excluded\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"exists\"; field: string; operator: \"included\" | \"excluded\"; })[]; field: string; } | { value: string; type: \"wildcard\"; field: string; operator: \"included\" | \"excluded\"; })[]"
+              "z.infer<any>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "lineNumber": 247,
@@ -4041,14 +4041,14 @@
           {
             "parentPluginId": "lists",
             "id": "def-server.UpdateExceptionListItemOptions.entries",
-            "type": "Array",
+            "type": "Any",
             "tags": [],
             "label": "entries",
             "description": [
               "item exception entries logic"
             ],
             "signature": [
-              "({ value: string; type: \"match\"; field: string; operator: \"included\" | \"excluded\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"list\"; list: { id: string; type: \"boolean\" | \"geo_shape\" | \"shape\" | \"geo_point\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\"; }; field: string; operator: \"included\" | \"excluded\"; } | { type: \"exists\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"nested\"; entries: ({ value: string; type: \"match\"; field: string; operator: \"included\" | \"excluded\"; } | { value: string[]; type: \"match_any\"; field: string; operator: \"included\" | \"excluded\"; } | { type: \"exists\"; field: string; operator: \"included\" | \"excluded\"; })[]; field: string; } | { value: string; type: \"wildcard\"; field: string; operator: \"included\" | \"excluded\"; })[]"
+              "z.infer<any>"
             ],
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
             "lineNumber": 318,
