@@ -56,8 +56,8 @@ dependsOn:
   - '@kbn/react-kibana-context-theme'
   - '@kbn/search-types'
   - '@kbn/server-route-repository-utils'
-  - '@kbn/core-chrome-browser'
   - '@kbn/scout-oblt'
+  - '@kbn/core-chrome-browser'
 tags:
   - plugin
   - prod
