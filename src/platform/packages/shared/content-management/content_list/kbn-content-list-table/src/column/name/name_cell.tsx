@@ -88,7 +88,7 @@ export const NameCell = memo(
     // Memoized so `StarButton` receives a stable css reference across re-renders.
     const inlineStarCss = useMemo(
       () => css`
-        margin-top: -${euiTheme.size.xxs};
+        margin-top: -${euiTheme.size.m};
         margin-bottom: -${euiTheme.size.s};
       `,
       [euiTheme]

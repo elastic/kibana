@@ -9,12 +9,31 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import { useContentListFilters } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
 import { StarredCell } from './starred_cell';
 
 const DEFAULT_WIDTH = '40px';
+
+/**
+ * Column header for `Column.Starred`.
+ *
+ * Renders a filled star when `filters.starredOnly` is active, and an empty
+ * star otherwise, giving the header a live indicator of the filter state.
+ */
+const StarredColumnHeader = () => {
+  const { filters } = useContentListFilters();
+  return (
+    <EuiIcon
+      type={filters.starredOnly ? 'starFilled' : 'starEmpty'}
+      size="m"
+      aria-label="Starred"
+    />
+  );
+};
 
 /**
  * Props for the `Column.Starred` preset component.
@@ -43,7 +62,8 @@ export const buildStarredColumn = (
 
   return {
     field: 'id',
-    name: '',
+    name: <StarredColumnHeader />,
+    align: 'center' as const,
     sortable: false,
     width,
     'data-test-subj': 'content-list-table-column-starred',
