@@ -32,11 +32,6 @@ export interface EsqlResultColumn {
   type: 'date' | 'keyword';
 }
 
-type AsyncEsqlResponse = {
-  id: string;
-  is_running: boolean;
-} & EsqlTable;
-
 export type EsqlResultRow = Array<string | null>;
 
 export interface EsqlTable {
@@ -82,18 +77,20 @@ export const performEsqlRequest = async ({
       request_type: 'findMatches',
     });
     const asyncSearchStarted = performance.now();
-    const asyncEsqlResponse = (await esClient.esql.asyncQuery({
+    const asyncEsqlResponse = await esClient.esql.asyncQuery({
       ...requestBody,
       ...requestQueryParams,
-    })) as unknown as AsyncEsqlResponse;
+    });
     setLatestRequestDuration(asyncSearchStarted, loggedRequests);
 
-    queryId = asyncEsqlResponse.id;
-    const isRunning = asyncEsqlResponse.is_running;
-
-    if (!isRunning) {
-      return asyncEsqlResponse;
+    if (!asyncEsqlResponse.is_running) {
+      return asyncEsqlResponse as EsqlTable;
     }
+
+    if (!asyncEsqlResponse.id) {
+      throw new Error('Async ES|QL query is running but no query ID was returned');
+    }
+    queryId = asyncEsqlResponse.id;
 
     // Poll for long-executing query
     while (true) {
@@ -104,13 +101,13 @@ export const performEsqlRequest = async ({
         description: i18n.ESQL_POLL_REQUEST_DESCRIPTION,
       });
       const pollStarted = performance.now();
-      const pollResponse = (await esClient.esql.asyncQueryGet({
+      const pollResponse = await esClient.esql.asyncQueryGet({
         id: queryId,
-      })) as unknown as AsyncEsqlResponse;
+      });
       setLatestRequestDuration(pollStarted, loggedRequests);
 
       if (!pollResponse.is_running) {
-        return pollResponse;
+        return pollResponse as EsqlTable;
       }
 
       pollCount++;
