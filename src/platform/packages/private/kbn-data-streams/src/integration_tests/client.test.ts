@@ -36,47 +36,12 @@ describe('DataStreamClient', () => {
       mappings: myTestDocMappings,
     },
   };
-
-  const lifecycleTestDataStream: DataStreamDefinition<MappingsDefinition> = {
-    name: 'lifecycle-test-data-stream',
-    version: 1,
-    template: {
-      mappings: myTestDocMappings,
-      lifecycle: {
-        data_retention: '1s',
-      },
-    },
-  };
-
-  const lifecycleVersionedDataStreamV1: DataStreamDefinition<MappingsDefinition> = {
-    name: 'lifecycle-versioned-test-data-stream',
-    version: 1,
-    template: {
-      mappings: myTestDocMappings,
-      lifecycle: {
-        data_retention: '30d',
-      },
-    },
-  };
-
-  const lifecycleVersionedDataStreamV2: DataStreamDefinition<MappingsDefinition> = {
-    ...lifecycleVersionedDataStreamV1,
-    version: 2,
-    template: {
-      ...lifecycleVersionedDataStreamV1.template,
-      lifecycle: {
-        data_retention: '1s',
-      },
-    },
-  };
+  const dataStreamsToCleanup: string[] = [];
+  dataStreamsToCleanup.push(testDataStream.name);
 
   const cleanup = async () => {
     const client = esServer.getClient();
-    for (const name of [
-      testDataStream.name,
-      lifecycleTestDataStream.name,
-      lifecycleVersionedDataStreamV1.name,
-    ]) {
+    for (const name of dataStreamsToCleanup) {
       await client.indices.deleteDataStream({ name }).catch(() => {});
       await client.indices.deleteIndexTemplate({ name }).catch(() => {});
     }
@@ -175,6 +140,17 @@ describe('DataStreamClient', () => {
   describe('lifecycle operations', () => {
     let lifecycleClient: DataStreamClient<MappingsDefinition>;
     let esClient: Client;
+    const lifecycleTestDataStream: DataStreamDefinition<MappingsDefinition> = {
+      name: 'lifecycle-test-data-stream',
+      version: 1,
+      template: {
+        mappings: myTestDocMappings,
+        lifecycle: {
+          data_retention: '1s',
+        },
+      },
+    };
+    dataStreamsToCleanup.push(lifecycleTestDataStream.name);
 
     beforeEach(async () => {
       esClient = esServer.getClient();
@@ -768,6 +744,49 @@ describe('DataStreamClient', () => {
   });
 
   describe('initialize', () => {
+    const lifecycleVersionedDataStreamV1: DataStreamDefinition<MappingsDefinition> = {
+      name: 'lifecycle-versioned-test-data-stream',
+      version: 1,
+      template: {
+        mappings: myTestDocMappings,
+        lifecycle: {
+          data_retention: '30d',
+        },
+      },
+    };
+    dataStreamsToCleanup.push(lifecycleVersionedDataStreamV1.name);
+
+    const lifecycleVersionedDataStreamV2: DataStreamDefinition<MappingsDefinition> = {
+      ...lifecycleVersionedDataStreamV1,
+      version: 2,
+      template: {
+        ...lifecycleVersionedDataStreamV1.template,
+        lifecycle: {
+          data_retention: '1s',
+        },
+      },
+    };
+
+    const lifecycleAddedDataStreamV1: DataStreamDefinition<MappingsDefinition> = {
+      name: 'lifecycle-added-test-data-stream',
+      version: 1,
+      template: {
+        mappings: myTestDocMappings,
+      },
+    };
+    dataStreamsToCleanup.push(lifecycleAddedDataStreamV1.name);
+
+    const lifecycleAddedDataStreamV2: DataStreamDefinition<MappingsDefinition> = {
+      ...lifecycleAddedDataStreamV1,
+      version: 2,
+      template: {
+        ...lifecycleAddedDataStreamV1.template,
+        lifecycle: {
+          data_retention: '30d',
+        },
+      },
+    };
+
     async function assertStateOfIndexTemplate() {
       const esClient = esServer.getClient();
       const {
@@ -1057,6 +1076,17 @@ describe('DataStreamClient', () => {
       });
 
       const {
+        data_streams: [dataStream],
+      } = await elasticsearchClient.indices.getDataStream({
+        name: lifecycleVersionedDataStreamV2.name,
+      });
+      expect(dataStream.lifecycle).toEqual(
+        expect.objectContaining({
+          data_retention: '1s',
+        })
+      );
+
+      const {
         index_templates: [v2Template],
       } = await elasticsearchClient.indices.getIndexTemplate({
         name: lifecycleVersionedDataStreamV2.name,
@@ -1072,6 +1102,77 @@ describe('DataStreamClient', () => {
           previousVersions: [1],
         })
       );
+    });
+
+    test('does not call data stream lifecycle APIs when creating a new data stream', async () => {
+      const elasticsearchClient = esServer.getClient();
+      const lifecycleOnCreateDataStream: DataStreamDefinition<MappingsDefinition> = {
+        name: 'lifecycle-on-create-test-data-stream',
+        version: 1,
+        template: {
+          mappings: myTestDocMappings,
+          lifecycle: {
+            data_retention: '30d',
+          },
+        },
+      };
+      dataStreamsToCleanup.push(lifecycleOnCreateDataStream.name);
+
+      const putDataLifecycleSpy = jest.spyOn(elasticsearchClient.indices, 'putDataLifecycle');
+      const deleteDataLifecycleSpy = jest.spyOn(elasticsearchClient.indices, 'deleteDataLifecycle');
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleOnCreateDataStream,
+      });
+
+      expect(putDataLifecycleSpy).not.toHaveBeenCalled();
+      expect(deleteDataLifecycleSpy).not.toHaveBeenCalled();
+    });
+
+    test('applies lifecycle policy to an existing data stream when added in a new version', async () => {
+      const elasticsearchClient = esServer.getClient();
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleAddedDataStreamV1,
+      });
+
+      const {
+        data_streams: [beforeUpdate],
+      } = await elasticsearchClient.indices.getDataStream({
+        name: lifecycleAddedDataStreamV1.name,
+      });
+      expect(beforeUpdate).not.toHaveProperty('lifecycle');
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleAddedDataStreamV2,
+      });
+
+      const {
+        data_streams: [afterUpdate],
+      } = await elasticsearchClient.indices.getDataStream({
+        name: lifecycleAddedDataStreamV2.name,
+      });
+      expect(afterUpdate.lifecycle).toEqual(
+        expect.objectContaining({
+          data_retention: '30d',
+        })
+      );
+
+      const explainAfterUpdate = await elasticsearchClient.indices.explainDataLifecycle({
+        index: lifecycleAddedDataStreamV2.name,
+        include_defaults: true,
+      });
+      expect(
+        Object.values(explainAfterUpdate.indices).every(
+          (indexState) => indexState.managed_by_lifecycle
+        )
+      ).toBe(true);
     });
 
     test('removes lifecycle policy when it is removed in a new version', async () => {
@@ -1102,6 +1203,23 @@ describe('DataStreamClient', () => {
       } = await elasticsearchClient.indices.getIndexTemplate({
         name: lifecycleRemovedDefinition.name,
       });
+
+      const {
+        data_streams: [updatedDataStream],
+      } = await elasticsearchClient.indices.getDataStream({
+        name: lifecycleRemovedDefinition.name,
+      });
+      expect(updatedDataStream).not.toHaveProperty('lifecycle');
+
+      const explainAfterUpdate = await elasticsearchClient.indices.explainDataLifecycle({
+        index: lifecycleRemovedDefinition.name,
+        include_defaults: true,
+      });
+      expect(
+        Object.values(explainAfterUpdate.indices).every(
+          (indexState) => !indexState.managed_by_lifecycle
+        )
+      ).toBe(true);
 
       expect(updatedTemplate.index_template.template).not.toHaveProperty('lifecycle');
       expect(updatedTemplate.index_template.template?.lifecycle).toBeUndefined();
