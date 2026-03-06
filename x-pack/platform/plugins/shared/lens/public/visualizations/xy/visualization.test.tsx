@@ -909,6 +909,255 @@ describe('xy_visualization', () => {
       });
     });
 
+    it('hides X axis title when adding date histogram (undefined setting)', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: undefined,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // X axis title should be hidden for date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('hides X axis title when switching from non-histogram to date histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto for non-histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should change to None when switching to date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('shows X axis title when switching from date histogram to non-histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true }, // Was None for date histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldDateCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should change to Auto when switching away from date histogram
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves user choice of None for non-histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true }, // User set None for non-histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve user's choice of None
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: false,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves user choice of Auto for date histogram', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // User set Auto for date histogram
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldDateCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should preserve user's choice of Auto
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('preserves custom title when switching between field types', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'date',
+        isBucketed: true,
+        scale: 'interval',
+        label: 'Date Histogram',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Was Auto (visible)
+          xTitle: 'My Custom Title', // User has set a custom title
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: 'oldStringCol',
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'dateCol',
+      });
+
+      // Should preserve visibility setting when custom title is set
+      expect(result.axisTitlesVisibilitySettings).toEqual({
+        x: true,
+        yLeft: true,
+        yRight: true,
+      });
+    });
+
+    it('does not change settings for non-date histogram with undefined setting', () => {
+      mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: true,
+        scale: 'ordinal',
+        label: 'Top Values',
+      } as OperationDescriptor);
+
+      const result = xyVisualization.setDimension({
+        frame,
+        prevState: {
+          ...exampleState(),
+          axisTitlesVisibilitySettings: undefined,
+          layers: [
+            {
+              layerId: 'first',
+              layerType: layerTypes.DATA,
+              seriesType: 'area',
+              xAccessor: undefined,
+              accessors: ['b'],
+            },
+          ],
+        },
+        layerId: 'first',
+        groupId: 'x',
+        columnId: 'stringCol',
+      });
+
+      // Should not change settings for non-date histogram (defaults to Auto)
+      expect(result.axisTitlesVisibilitySettings).toBeUndefined();
+    });
+
     it('should add a dimension to a reference layer', () => {
       expect(
         xyVisualization.setDimension({
@@ -3847,7 +4096,7 @@ describe('xy_visualization', () => {
     });
 
     describe('annotations layer', () => {
-      it('should return no action for by-value annotation layer', () => {
+      it('should return no action for by-value annotation layer when not saveable', () => {
         const annotationLayer: XYByValueAnnotationLayerConfig = {
           layerId: 'annotation',
           layerType: layerTypes.ANNOTATIONS,
@@ -3868,6 +4117,33 @@ describe('xy_visualization', () => {
             jest.fn()
           )
         ).toEqual([]);
+      });
+
+      it('should show save to library action for by-value annotation layer when saveable', () => {
+        const annotationLayer: XYByValueAnnotationLayerConfig = {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotations: [exampleAnnotation2],
+          ignoreGlobalFilters: true,
+          indexPatternId: 'myIndexPattern',
+        };
+
+        const baseState = exampleState();
+        const actions = xyVisualization.getSupportedActionsForLayer?.(
+          'annotation',
+          {
+            ...baseState,
+            layers: [annotationLayer],
+          },
+          jest.fn(),
+          jest.fn(),
+          true
+        );
+        expect(
+          actions?.some(
+            (action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary'
+          )
+        ).toBeTruthy();
       });
 
       describe('by-ref layer', () => {
@@ -3904,16 +4180,6 @@ describe('xy_visualization', () => {
           ).toMatchInlineSnapshot(`
             Array [
               Object {
-                "data-test-subj": "lnsXY_annotationLayer_saveToLibrary",
-                "description": "Saves annotation group as separate saved object",
-                "displayName": "Save to library",
-                "execute": [Function],
-                "icon": "save",
-                "isCompatible": true,
-                "order": 100,
-                "showOutsideList": false,
-              },
-              Object {
                 "data-test-subj": "lnsXY_annotationLayer_unlinkFromLibrary",
                 "description": "Saves the annotation group as a part of the Lens Saved Object",
                 "displayName": "Unlink from library",
@@ -3936,7 +4202,7 @@ describe('xy_visualization', () => {
           `);
         });
 
-        it('should hide save action if not saveable', () => {
+        it('should not show save to library action for by-ref layer', () => {
           const baseState = exampleState();
           expect(
             xyVisualization
@@ -3948,7 +4214,7 @@ describe('xy_visualization', () => {
                 },
                 jest.fn(),
                 jest.fn(),
-                false
+                true
               )
               .some((action) => action['data-test-subj'] === 'lnsXY_annotationLayer_saveToLibrary')
           ).toBeFalsy();
