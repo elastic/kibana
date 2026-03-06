@@ -22,7 +22,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { Reference } from '@kbn/content-management-utils';
 import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
