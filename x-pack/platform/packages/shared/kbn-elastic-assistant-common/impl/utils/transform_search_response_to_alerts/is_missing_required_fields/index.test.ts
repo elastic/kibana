@@ -9,7 +9,7 @@ import { ALERT_RULE_EXECUTION_UUID } from '@kbn/rule-data-utils';
 import { omit } from 'lodash/fp';
 
 import { isMissingRequiredFields } from '.';
-import { getResponseMock } from '../../../../../../__mocks__/attack_discovery_alert_document_response';
+import { getResponseMock } from '../../../mock/attack_discovery_alert_document_response';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
@@ -17,7 +17,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_TITLE,
-} from '../../../../schedules/fields/field_names';
+} from '../../../schedules/field_names';
 
 describe('isMissingRequiredFields', () => {
   const getHit = () => {
