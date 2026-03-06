@@ -34,6 +34,34 @@ export interface RuleGenerationTaskOutput {
   error?: string;
 }
 
+// ---------------------------------------------------------------------------
+// Skip stats registry — accumulated per dataset, consumed by the reporter
+// ---------------------------------------------------------------------------
+
+export interface DatasetSkipSummary {
+  datasetName: string;
+  totalExamples: number;
+  succeeded: number;
+  missingIndexSkips: number;
+  otherFailures: number;
+  otherFailureReasons: string[];
+}
+
+const datasetSkipSummaries = new Map<string, DatasetSkipSummary>();
+
+export function getDatasetSkipSummaries(): DatasetSkipSummary[] {
+  return Array.from(datasetSkipSummaries.values());
+}
+
+export function clearDatasetSkipSummaries(): void {
+  datasetSkipSummaries.clear();
+}
+
+const MAX_REASON_LENGTH = 120;
+function truncate(s: string): string {
+  return s.length > MAX_REASON_LENGTH ? `${s.slice(0, MAX_REASON_LENGTH)}...` : s;
+}
+
 type RuleExample = Example<{ prompt: string }, ReferenceRule, Record<string, unknown> | null>;
 
 const NEGATIVE_CASE_NA = {
@@ -53,6 +81,13 @@ const MISSING_INDEX_NA = {
   label: 'N/A' as const,
   explanation:
     'Not applicable: rule generation failed due to missing index — not a model quality issue',
+};
+
+const AGENT_ERROR_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation:
+    'Not applicable: rule generation failed due to an agent/environment error — not a model quality issue',
 };
 
 /**
@@ -107,6 +142,27 @@ function skipMissingIndexFailures(
       const error = (args.output as RuleGenerationTaskOutput)?.error;
       if (error && /could not discover a suitable index/i.test(error)) {
         return MISSING_INDEX_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
+/**
+ * Wraps an evaluator so it returns N/A when rule generation failed for any
+ * reason other than a missing index. These are agent/environment errors
+ * (e.g. "Last action is not a generate_query action") that should not
+ * penalise model quality scores.
+ */
+function skipAgentErrors(
+  evaluator: Evaluator<RuleExample, RuleGenerationTaskOutput>
+): Evaluator<RuleExample, RuleGenerationTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      const output = args.output as RuleGenerationTaskOutput;
+      if (output?.error && !/could not discover a suitable index/i.test(output.error)) {
+        return AGENT_ERROR_NA;
       }
       return evaluator.evaluate(args);
     },
@@ -407,26 +463,29 @@ export function createEvaluateDataset({
     },
   });
 
+  const skip = (e: Evaluator<RuleExample, RuleGenerationTaskOutput>) =>
+    skipAgentErrors(skipMissingIndexFailures(e));
+
   const allEvaluators: Array<Evaluator<RuleExample, RuleGenerationTaskOutput>> = [
     // CODE — deterministic
-    skipMissingIndexFailures(skipNegativeCases(createQuerySyntaxValidityEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createFieldCoverageEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createRuleTypeLanguageEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createMitreAccuracyEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createSeverityValidityEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createRiskScoreValidityEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createIntervalFormatEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createLookbackGapEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createSeverityMatchEvaluator())),
-    skipMissingIndexFailures(skipNegativeCases(createRiskScoreMatchEvaluator())),
+    skip(skipNegativeCases(createQuerySyntaxValidityEvaluator())),
+    skip(skipNegativeCases(createFieldCoverageEvaluator())),
+    skip(skipNegativeCases(createRuleTypeLanguageEvaluator())),
+    skip(skipNegativeCases(createMitreAccuracyEvaluator())),
+    skip(skipNegativeCases(createSeverityValidityEvaluator())),
+    skip(skipNegativeCases(createRiskScoreValidityEvaluator())),
+    skip(skipNegativeCases(createIntervalFormatEvaluator())),
+    skip(skipNegativeCases(createLookbackGapEvaluator())),
+    skip(skipNegativeCases(createSeverityMatchEvaluator())),
+    skip(skipNegativeCases(createRiskScoreMatchEvaluator())),
     // LLM — ES|QL functional equivalence via @kbn/evals built-in evaluator
-    skipMissingIndexFailures(skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator))),
+    skip(skipNonEsqlReferences(skipNegativeCases(esqlEquivalenceEvaluator))),
     // Intentionally disabled for speed: these LLM evaluators add significant latency per example.
     // Re-enable when running thorough multi-model comparisons.
-    // skipMissingIndexFailures(skipNegativeCases(createRuleNameEvaluator(evaluators))),
-    // skipMissingIndexFailures(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
+    // skip(skipNegativeCases(createRuleNameEvaluator(evaluators))),
+    // skip(skipNegativeCases(createRuleDescriptionEvaluator(evaluators))),
     // Rejection — scores 1 when model correctly refuses a negative case, N/A otherwise
-    skipMissingIndexFailures(createRejectionEvaluator()),
+    skip(createRejectionEvaluator()),
   ];
 
   return async function evaluateDataset({
@@ -435,8 +494,10 @@ export function createEvaluateDataset({
     dataset: EvaluationDataset<RuleExample>;
   }): Promise<void> {
     let totalExamples = 0;
+    let succeeded = 0;
     let missingIndexFailures = 0;
     let otherFailures = 0;
+    const otherFailureReasons: string[] = [];
 
     await executorClient.runExperiment(
       {
@@ -458,11 +519,13 @@ export function createEvaluateDataset({
                 );
               } else {
                 otherFailures++;
+                otherFailureReasons.push(truncate(taskResult.error ?? 'No rule returned'));
                 log.warning(`[Task] No rule generated. Error: ${taskResult.error}`);
               }
               return { error: taskResult.error || 'No rule returned from agent' };
             }
 
+            succeeded++;
             log.info(SEP);
             log.success(`Generated rule: "${taskResult.generatedRule.name}"`);
             log.info(JSON.stringify(taskResult.generatedRule, null, 2));
@@ -497,27 +560,34 @@ export function createEvaluateDataset({
             return taskResult;
           } catch (error) {
             otherFailures++;
-            log.error(
-              `Error generating rule: ${error instanceof Error ? error.message : String(error)}`
-            );
-            return { error: error instanceof Error ? error.message : 'Unknown error' };
+            const msg = error instanceof Error ? error.message : String(error);
+            otherFailureReasons.push(truncate(msg));
+            log.error(`Error generating rule: ${msg}`);
+            return { error: msg || 'Unknown error' };
           }
         },
       },
       allEvaluators
     );
 
-    const scored = totalExamples - missingIndexFailures;
-    const missingNote =
-      missingIndexFailures > 0 ? ` (${missingIndexFailures} skipped due to missing indices)` : '';
-    const failNote = otherFailures > 0 ? ` (${otherFailures} failed for other reasons)` : '';
-    log.info(
-      `[Summary] ${dataset.name}: ${scored}/${totalExamples} examples scored${missingNote}${failNote}`
-    );
-    if (missingIndexFailures > 0 && scored === 0) {
-      log.warning(
-        `[Summary] All examples in "${dataset.name}" were skipped due to missing indices — no evaluation scores were produced. Ensure the required index patterns exist in Elasticsearch.`
-      );
+    datasetSkipSummaries.set(dataset.name, {
+      datasetName: dataset.name,
+      totalExamples,
+      succeeded,
+      missingIndexSkips: missingIndexFailures,
+      otherFailures,
+      otherFailureReasons,
+    });
+
+    if (missingIndexFailures > 0 || otherFailures > 0) {
+      const parts = [
+        `${succeeded} succeeded`,
+        missingIndexFailures > 0 ? `${missingIndexFailures} skipped (missing index)` : undefined,
+        otherFailures > 0 ? `${otherFailures} failed (agent error)` : undefined,
+      ].filter(Boolean);
+      log.warning(`[Summary] ${dataset.name}: ${totalExamples} total — ${parts.join(', ')}`);
+    } else {
+      log.info(`[Summary] ${dataset.name}: ${totalExamples} total — ${succeeded} succeeded`);
     }
   };
 }
