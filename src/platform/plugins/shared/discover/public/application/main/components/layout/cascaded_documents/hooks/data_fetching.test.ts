@@ -35,7 +35,7 @@ describe('data_fetching related hooks', () => {
 
     const defaultQueryMeta: ESQLStatsQueryMeta = {
       groupByFields: [{ field: 'category', type: 'column' }],
-      appliedFunctions: [{ identifier: 'count', aggregation: 'count' }],
+      appliedFunctions: [{ identifier: 'count', aggregation: 'count', returnType: 'long' }],
     };
 
     const defaultSelectedCascadeGroups = ['category'];
@@ -120,8 +120,8 @@ describe('data_fetching related hooks', () => {
       const queryMetaWithMultipleFunctions: ESQLStatsQueryMeta = {
         groupByFields: [{ field: 'category', type: 'column' }],
         appliedFunctions: [
-          { identifier: 'count', aggregation: 'count' },
-          { identifier: 'sum', aggregation: 'sum' },
+          { identifier: 'count', aggregation: 'count', returnType: 'long' },
+          { identifier: 'sum', aggregation: 'sum', returnType: 'long' },
         ],
       };
 
@@ -148,8 +148,8 @@ describe('data_fetching related hooks', () => {
       const queryMetaWithMultipleFunctions: ESQLStatsQueryMeta = {
         groupByFields: [{ field: 'category', type: 'column' }],
         appliedFunctions: [
-          { identifier: 'count', aggregation: 'count' },
-          { identifier: 'ext', aggregation: 'ext' },
+          { identifier: 'count', aggregation: 'count', returnType: 'long' },
+          { identifier: 'ext', aggregation: 'values', returnType: 'unknown' },
         ],
       };
 

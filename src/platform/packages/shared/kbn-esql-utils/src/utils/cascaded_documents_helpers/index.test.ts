@@ -67,10 +67,10 @@ describe('cascaded documents helpers utils', () => {
         },
       ]);
       expect(result.appliedFunctions).toEqual([
-        { identifier: 'Visits', aggregation: 'COUNT' },
-        { identifier: 'Unique', aggregation: 'COUNT_DISTINCT' },
-        { identifier: 'p95', aggregation: 'PERCENTILE' },
-        { identifier: 'median', aggregation: 'MEDIAN' },
+        { identifier: 'Visits', aggregation: 'COUNT', returnType: 'long' },
+        { identifier: 'Unique', aggregation: 'COUNT_DISTINCT', returnType: 'long' },
+        { identifier: 'p95', aggregation: 'PERCENTILE', returnType: 'double' },
+        { identifier: 'median', aggregation: 'MEDIAN', returnType: 'double' },
       ]);
     });
 
@@ -110,10 +110,10 @@ describe('cascaded documents helpers utils', () => {
         },
       ]);
       expect(result.appliedFunctions).toEqual([
-        { identifier: 'unique_visitors', aggregation: 'COUNT_DISTINCT' },
-        { identifier: 'total_visits', aggregation: 'SUM' },
-        { identifier: 'p95_bytes_url', aggregation: 'PERCENTILE' },
-        { identifier: 'median_bytes_url', aggregation: 'MEDIAN' },
+        { identifier: 'unique_visitors', aggregation: 'COUNT_DISTINCT', returnType: 'long' },
+        { identifier: 'total_visits', aggregation: 'SUM', returnType: 'unknown' },
+        { identifier: 'p95_bytes_url', aggregation: 'PERCENTILE', returnType: 'double' },
+        { identifier: 'median_bytes_url', aggregation: 'MEDIAN', returnType: 'double' },
       ]);
     });
 
@@ -143,8 +143,8 @@ describe('cascaded documents helpers utils', () => {
       ]);
 
       expect(result.appliedFunctions).toEqual([
-        { identifier: 'count', aggregation: 'SUM' },
-        { identifier: 'Trend', aggregation: 'VALUES' },
+        { identifier: 'count', aggregation: 'SUM', returnType: 'unknown' },
+        { identifier: 'Trend', aggregation: 'VALUES', returnType: 'unknown' },
       ]);
     });
 
@@ -170,8 +170,8 @@ describe('cascaded documents helpers utils', () => {
       ]);
 
       expect(result.appliedFunctions).toEqual([
-        { identifier: 'count', aggregation: 'COUNT' },
-        { identifier: 'average', aggregation: 'AVG' },
+        { identifier: 'count', aggregation: 'COUNT', returnType: 'long' },
+        { identifier: 'average', aggregation: 'AVG', returnType: 'double' },
       ]);
     });
 
@@ -206,7 +206,9 @@ describe('cascaded documents helpers utils', () => {
 
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([{ field: 'casted', type: 'inlineCast' }]);
-      expect(result.appliedFunctions).toEqual([{ identifier: 'count', aggregation: 'COUNT' }]);
+      expect(result.appliedFunctions).toEqual([
+        { identifier: 'count', aggregation: 'COUNT', returnType: 'long' },
+      ]);
     });
 
     it('should return the appropriate metadata despite there being a keep, as long as it specifies the current group field', () => {
@@ -217,10 +219,10 @@ describe('cascaded documents helpers utils', () => {
       const result = getESQLStatsQueryMeta(queryString);
       expect(result.groupByFields).toEqual([{ field: 'response.keyword', type: 'column' }]);
       expect(result.appliedFunctions).toEqual([
-        { aggregation: 'COUNT', identifier: 'Visits' },
-        { aggregation: 'COUNT_DISTINCT', identifier: 'Unique' },
-        { aggregation: 'PERCENTILE', identifier: 'p95' },
-        { aggregation: 'MEDIAN', identifier: 'median' },
+        { aggregation: 'COUNT', identifier: 'Visits', returnType: 'long' },
+        { aggregation: 'COUNT_DISTINCT', identifier: 'Unique', returnType: 'long' },
+        { aggregation: 'PERCENTILE', identifier: 'p95', returnType: 'double' },
+        { aggregation: 'MEDIAN', identifier: 'median', returnType: 'double' },
       ]);
     });
   });
