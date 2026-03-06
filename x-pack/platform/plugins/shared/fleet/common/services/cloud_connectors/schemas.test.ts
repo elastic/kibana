@@ -233,9 +233,9 @@ describe('Cloud Connector Schemas', () => {
       });
 
       it('should return gcp_credentials_cloud_connector_id for its primary key', () => {
-        expect(
-          getCredentialKeyFromVarName('gcp', 'gcp_credentials_cloud_connector_id')
-        ).toBe('gcp_credentials_cloud_connector_id');
+        expect(getCredentialKeyFromVarName('gcp', 'gcp_credentials_cloud_connector_id')).toBe(
+          'gcp_credentials_cloud_connector_id'
+        );
       });
     });
 
