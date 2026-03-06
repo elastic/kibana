@@ -20,7 +20,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core-application-browser",
-    "@kbn/core-application-browser-internal",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-application-common",
     "@kbn/core-chrome-app-menu-components",
