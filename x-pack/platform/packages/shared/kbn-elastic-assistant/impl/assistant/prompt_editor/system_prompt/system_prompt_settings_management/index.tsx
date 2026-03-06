@@ -227,6 +227,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          tableCaption={i18n.SYSTEM_PROMPTS_TABLE_CAPTION}
           columns={columns}
           items={systemPromptSettings}
           onTableChange={onTableChange}

@@ -146,6 +146,12 @@ const ContextEditorComponent: React.FC<Props> = ({
         search={search}
         selection={selectionValue}
         sorting={sorting}
+        tableCaption={i18n.translate(
+          'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.contextEditorTableCaption',
+          {
+            defaultMessage: 'Context editor',
+          }
+        )}
         onTableChange={onTableChange}
       />
     </Wrapper>
