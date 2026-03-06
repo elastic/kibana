@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
@@ -18,27 +18,39 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import {
+  METRICS_INFO_FETCH_FAILED_DATA_VIEW_ID,
+  METRICS_INFO_FETCH_FAILED_ESQL_QUERY,
+  METRICS_INFO_FETCH_FAILED_ERROR_MESSAGE,
+} from '../../../../../ebt_manager/discover_ebt_manager_registrations';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { fetchMetricsInfo } from '../utils/fetch_metrics_info';
 
 /**
  * Triggers a METRICS_INFO fetch when in Metrics Experience (non-transformational ES|QL, chart visible).
- * Inlined here as it is only used by this chart section.
+ * EBT discover_metrics_info_fetch_failed is triggered from fetch_metrics_info.ts on failure.
  */
 function useMetricsInfoFetch(
   fetchParams: ChartSectionProps['fetchParams'],
   services: ChartSectionProps['services'],
   isComponentVisible: boolean
 ): void {
+  const { ebtManager } = useDiscoverServices();
   const esql =
     fetchParams.query && isOfAggregateQueryType(fetchParams.query)
       ? fetchParams.query.esql
       : undefined;
   const shouldFetch =
     isComponentVisible && !!esql && !!fetchParams.isESQLQuery && !hasTransformationalCommand(esql);
+
+  const scopedEbtManager = useMemo(
+    () => ebtManager.createScopedEBTManager(),
+    [ebtManager]
+  );
 
   useEffect(() => {
     if (!shouldFetch || !fetchParams.dataView) {
@@ -58,6 +70,17 @@ function useMetricsInfoFetch(
       filters: fetchParams.filters ?? [],
       variables: fetchParams.esqlVariables,
       uiSettings: services.uiSettings,
+      onFetchFailed: (payload) => {
+        scopedEbtManager.reportMetricsInfoFetchFailed({
+          [METRICS_INFO_FETCH_FAILED_ESQL_QUERY]: payload.esqlQuery,
+          ...(payload.dataViewId != null && {
+            [METRICS_INFO_FETCH_FAILED_DATA_VIEW_ID]: payload.dataViewId,
+          }),
+          ...(payload.errorMessage != null && {
+            [METRICS_INFO_FETCH_FAILED_ERROR_MESSAGE]: payload.errorMessage,
+          }),
+        });
+      },
     }).catch(() => {});
   }, [
     shouldFetch,
@@ -72,6 +95,7 @@ function useMetricsInfoFetch(
     fetchParams.timeRange,
     services.data.search.search,
     services.uiSettings,
+    scopedEbtManager,
   ]);
 }
 
