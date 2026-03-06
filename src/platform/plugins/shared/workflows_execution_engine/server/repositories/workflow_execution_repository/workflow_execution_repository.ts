@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from './constants';
@@ -17,7 +17,8 @@ import { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 export class WorkflowExecutionRepository {
   constructor(
     private readonly dataStreamClient: WorkflowExecutionDataStreamClient,
-    private readonly esClient: ElasticsearchClient
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger
   ) {}
 
   /**
@@ -73,6 +74,66 @@ export class WorkflowExecutionRepository {
     await this.dataStreamClient.create({
       documents: [workflowExecution as Record<string, unknown>],
     });
+  }
+
+  public async getExecutionHistoryStats(spaceId: string) {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const response = await this.dataStreamClient.search({
+        size: 0,
+        query: {
+          bool: {
+            must: [
+              {
+                range: {
+                  createdAt: {
+                    gte: thirtyDaysAgo.toISOString(),
+                  },
+                },
+              },
+              { term: { spaceId } },
+            ],
+          },
+        },
+        aggs: {
+          daily_stats: {
+            date_histogram: {
+              field: 'createdAt',
+              calendar_interval: 'day',
+              format: 'yyyy-MM-dd',
+            },
+            aggs: {
+              completed: {
+                filter: { term: { status: 'completed' } },
+              },
+              failed: {
+                filter: { term: { status: 'failed' } },
+              },
+              cancelled: {
+                filter: { term: { status: 'cancelled' } },
+              },
+            },
+          },
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const buckets = (response.aggregations as any)?.daily_stats?.buckets || [];
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return buckets.map((bucket: any) => ({
+        date: bucket.key_as_string,
+        timestamp: bucket.key,
+        completed: bucket.completed.doc_count,
+        failed: bucket.failed.doc_count,
+        cancelled: bucket.cancelled.doc_count,
+      }));
+    } catch (error) {
+      this.logger.error('Failed to get execution history stats', error);
+      return [];
+    }
   }
 
   public async reindexCompletedWorkflowExecutionsFrom(params: {

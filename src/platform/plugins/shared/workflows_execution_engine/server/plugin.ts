@@ -34,6 +34,7 @@ import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
+import { getExecutionHistoryStatsFn } from './repositories/functions/get_execution_history_stats';
 import { getStepExecutionsFn } from './repositories/functions/get_step_executions';
 import { getWorkflowExecutionFn } from './repositories/functions/get_workflow_executions';
 import { searchWorkflowExecutionsFn } from './repositories/functions/search_workflow_executions';
@@ -868,6 +869,7 @@ export class WorkflowsExecutionEnginePlugin
         executionStateRepository,
         stepExecutionRepositoryPromise
       ),
+      getExecutionHistoryStats: getExecutionHistoryStatsFn(workflowExecutionRepositoryPromise),
     };
   }
 

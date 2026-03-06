@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getExecutionHistoryStatsFn } from './get_execution_history_stats';
-export { getWorkflowExecutionFn } from './get_workflow_executions';
-export { getStepExecutionsFn } from './get_step_executions';
-export { searchWorkflowExecutionsFn } from './search_workflow_executions';
+import type { WorkflowExecutionRepository } from '../workflow_execution_repository/workflow_execution_repository';
+
+export function getExecutionHistoryStatsFn(
+  workflowExecutionRepositoryPromise: Promise<WorkflowExecutionRepository>
+) {
+  return async (spaceId: string) => {
+    const workflowExecutionRepository = await workflowExecutionRepositoryPromise;
+    return workflowExecutionRepository.getExecutionHistoryStats(spaceId);
+  };
+}
