@@ -9,6 +9,8 @@ import {
   getEuidEsqlEvaluation,
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlFilterBasedOnDocument,
+  getFieldEvaluationsEsql,
+  getFieldEvaluationsSourcesFilterEsql,
 } from './esql';
 
 const normalize = (s: string) =>
@@ -86,29 +88,42 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
   });
 
   describe('user', () => {
-    it('returns filter with equality on user.email when present', () => {
+    it('returns filter with equality on user.email and entity.namespace when present (event.module sets namespace)', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { email: 'alice@example.com' },
+        event: { module: 'okta' },
+      });
+
+      expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
+    });
+
+    it('returns undefined when user.email is present but event.module is null (entity.namespace not set)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
       });
 
-      expect(result).toBe('((user.email == "alice@example.com"))');
+      expect(result).toBeUndefined();
     });
 
-    it('returns filter with equality on user.name and null/empty checks on higher-ranked identity fields when user.name is present', () => {
+    it('returns filter with equality on user.name and entity.namespace and null/empty checks on higher-ranked identity fields when user.name is present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'alice' },
+        event: { module: 'azure' },
       });
 
       expect(result).toBe(
-        '((user.name == "alice") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == ""))'
+        '((user.name == "alice") AND (entity.namespace == "entra_id") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == ""))'
       );
     });
 
-    it('returns filter with equality on user.id and null/empty check on higher-ranked identity field when only user.id is present', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('user', { user: { id: 'user-id-42' } });
+    it('returns filter with equality on user.id and entity.namespace and null/empty check on higher-ranked identity field when only user.id is present', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('user', {
+        user: { id: 'user-id-42' },
+        event: { module: 'o365' },
+      });
 
       expect(result).toBe(
-        '((user.id == "user-id-42") AND (user.email IS NULL OR user.email == ""))'
+        '((user.id == "user-id-42") AND (entity.namespace == "microsoft_365") AND (user.email IS NULL OR user.email == ""))'
       );
     });
 
@@ -116,12 +131,13 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       expect(getEuidEsqlFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.email when both user.email and user.id are present', () => {
+    it('precedence: uses user.email and entity.namespace when both user.email and user.id are present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com', id: 'user-42' },
+        event: { module: 'entityanalytics_okta' },
       });
 
-      expect(result).toBe('((user.email == "alice@example.com"))');
+      expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
     });
   });
 
@@ -179,6 +195,37 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     expect(result).toMatch(/user\.email IS NOT NULL AND user\.email != ""/);
     expect(result).toMatch(/user\.id IS NOT NULL AND user\.id != ""/);
     expect(result).toMatch(/user\.name IS NOT NULL AND user\.name != ""/);
+  });
+});
+
+describe('getFieldEvaluationsEsql', () => {
+  it('returns empty string for entity types without field evaluations', () => {
+    expect(getFieldEvaluationsEsql('generic')).toBe(undefined);
+    expect(getFieldEvaluationsEsql('host')).toBe(undefined);
+    expect(getFieldEvaluationsEsql('service')).toBe(undefined);
+  });
+
+  it('returns EVAL fragment for user entity.namespace from event.module', () => {
+    const result = getFieldEvaluationsEsql('user');
+    expect(result).toContain('entity.namespace = CASE(');
+    expect(result).toContain('event.module');
+    expect(result).toContain('"okta"');
+    expect(result).toContain('"entra_id"');
+    expect(result).toContain('"microsoft_365"');
+  });
+});
+
+describe('getFieldEvaluationsSourcesFilterEsql', () => {
+  it('returns empty string for entity types without field evaluations', () => {
+    expect(getFieldEvaluationsSourcesFilterEsql('generic')).toBe(undefined);
+    expect(getFieldEvaluationsSourcesFilterEsql('host')).toBe(undefined);
+  });
+
+  it('returns NOT NULL and not empty condition for user event.module', () => {
+    const result = getFieldEvaluationsSourcesFilterEsql('user');
+    expect(result).toContain('event.module');
+    expect(result).toMatch(/IS NOT NULL/);
+    expect(result).toMatch(/!= ""/);
   });
 });
 

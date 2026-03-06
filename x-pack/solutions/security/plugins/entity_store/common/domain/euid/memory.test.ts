@@ -87,96 +87,81 @@ describe('getEuidFromObject', () => {
   });
 
   describe('user', () => {
-    it('uses user.entity.id when present', () => {
-      expect(getEuidFromObject('user', { user: { entity: { id: 'user-entity-1' } } })).toBe(
-        'user:user-entity-1'
+    const withNamespace = (doc: object, module: string = 'okta') => ({
+      ...doc,
+      event: { module },
+    });
+
+    it('uses user.email + "@" + entity.namespace when user.email and event.module are present', () => {
+      expect(
+        getEuidFromObject('user', withNamespace({ user: { email: 'alice@example.com' } }))
+      ).toBe('user:alice@example.com@okta');
+    });
+
+    it('maps event.module okta and entityanalytics_okta to namespace okta', () => {
+      expect(
+        getEuidFromObject('user', {
+          user: { email: 'a@b.com' },
+          event: { module: 'entityanalytics_okta' },
+        })
+      ).toBe('user:a@b.com@okta');
+    });
+
+    it('maps event.module azure and entityanalytics_entra_id to namespace entra_id', () => {
+      expect(
+        getEuidFromObject('user', {
+          user: { email: 'a@b.com' },
+          event: { module: 'azure' },
+        })
+      ).toBe('user:a@b.com@entra_id');
+    });
+
+    it('maps event.module o365 and o365_metrics to namespace microsoft_365', () => {
+      expect(
+        getEuidFromObject('user', {
+          user: { email: 'a@b.com' },
+          event: { module: 'o365_metrics' },
+        })
+      ).toBe('user:a@b.com@microsoft_365');
+    });
+
+    it('uses event.module as entity.namespace when not in mapping (else rule)', () => {
+      expect(
+        getEuidFromObject('user', {
+          user: { email: 'a@b.com' },
+          event: { module: 'custom_module' },
+        })
+      ).toBe('user:a@b.com@custom_module');
+    });
+
+    it('returns undefined when user.email is present but event.module is null (entity.namespace null)', () => {
+      expect(getEuidFromObject('user', { user: { email: 'dev@example.com' } })).toBeUndefined();
+    });
+
+    it('uses user.name + "@" + entity.namespace when user.name and event.module are present', () => {
+      expect(getEuidFromObject('user', withNamespace({ user: { name: 'alice' } }))).toBe(
+        'user:alice@okta'
       );
     });
 
-    it('uses user.name + "@" + host.entity.id when user.entity.id is missing', () => {
-      expect(
-        getEuidFromObject('user', {
-          user: { name: 'alice' },
-          host: { entity: { id: 'host-e1' } },
-        })
-      ).toBe('user:alice@host-e1');
-    });
-
-    it('uses user.name + "@" + host.id when prior combination is missing', () => {
-      expect(
-        getEuidFromObject('user', {
-          user: { name: 'bob' },
-          host: { id: 'host-1' },
-        })
-      ).toBe('user:bob@host-1');
-    });
-
-    it('uses user.name + "@" + host.name when prior combinations are missing', () => {
-      expect(
-        getEuidFromObject('user', {
-          user: { name: 'charlie' },
-          host: { name: 'workstation' },
-        })
-      ).toBe('user:charlie@workstation');
-    });
-
-    it('uses user.id when prior combinations are missing', () => {
-      expect(getEuidFromObject('user', { user: { id: 'user-id-42' } })).toBe('user:user-id-42');
-    });
-
-    it('uses user.email when prior combinations are missing', () => {
-      expect(getEuidFromObject('user', { user: { email: 'dev@example.com' } })).toBe(
-        'user:dev@example.com'
+    it('uses user.id + "@" + entity.namespace when user.id and event.module are present', () => {
+      expect(getEuidFromObject('user', withNamespace({ user: { id: 'user-id-42' } }))).toBe(
+        'user:user-id-42@okta'
       );
     });
 
-    it('uses user.name + "@" + user.domain when prior combinations are missing', () => {
-      expect(getEuidFromObject('user', { user: { name: 'dave', domain: 'corp.com' } })).toBe(
-        'user:dave@corp.com'
-      );
+    it('precedence: user.email@entity.namespace over user.id@entity.namespace', () => {
+      const obj = withNamespace({
+        user: { email: 'alice@example.com', id: 'user-42' },
+      });
+      expect(getEuidFromObject('user', obj)).toBe('user:alice@example.com@okta');
     });
 
-    it('uses user.name alone when prior combinations are missing', () => {
-      expect(getEuidFromObject('user', { user: { name: 'eve' } })).toBe('user:eve');
-    });
-
-    it('precedence: user.entity.id over user.name@host.entity.id', () => {
-      const obj = {
-        user: { entity: { id: 'ue1' }, name: 'alice' },
-        host: { entity: { id: 'he1' } },
-      };
-      expect(getEuidFromObject('user', obj)).toBe('user:ue1');
-    });
-
-    it('precedence: user.name@host.entity.id over user.name@host.id', () => {
-      const obj = {
-        user: { name: 'alice' },
-        host: { entity: { id: 'he1' }, id: 'h1' },
-      };
-      expect(getEuidFromObject('user', obj)).toBe('user:alice@he1');
-    });
-
-    it('precedence: user.name@host.name over user.id', () => {
-      const obj = {
-        user: { name: 'bob', id: 'u42' },
-        host: { name: 'workstation' },
-      };
-      expect(getEuidFromObject('user', obj)).toBe('user:bob@workstation');
-    });
-
-    it('precedence: user.id over user.email', () => {
-      const obj = { user: { id: 'u42', email: 'dev@example.com' } };
-      expect(getEuidFromObject('user', obj)).toBe('user:u42');
-    });
-
-    it('precedence: user.email over user.name@user.domain', () => {
-      const obj = { user: { email: 'dev@example.com', name: 'dave', domain: 'corp.com' } };
-      expect(getEuidFromObject('user', obj)).toBe('user:dev@example.com');
-    });
-
-    it('precedence: user.name@user.domain over user.name alone', () => {
-      const obj = { user: { name: 'eve', domain: 'corp.com' } };
-      expect(getEuidFromObject('user', obj)).toBe('user:eve@corp.com');
+    it('precedence: user.email over user.name@entity.namespace', () => {
+      const obj = withNamespace({
+        user: { email: 'dev@example.com', name: 'dave', domain: 'corp.com' },
+      });
+      expect(getEuidFromObject('user', obj)).toBe('user:dev@example.com@okta');
     });
   });
 

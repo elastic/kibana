@@ -177,21 +177,24 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
 "SET unmapped_fields=\\"nullify\\";
     FROM remote:logs-*
     METADATA _index
-  | WHERE ((user.entity.id IS NOT NULL AND user.entity.id != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (user.email IS NOT NULL AND user.email != \\"\\"))
+  | WHERE (((user.email IS NOT NULL AND user.email != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (client.user.email IS NOT NULL AND client.user.email != \\"\\") OR (source.user.email IS NOT NULL AND source.user.email != \\"\\")) AND (\`event.kind\` == \\"asset\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND \`event.kind\` != \\"enrichment\\") AND ((event.module IS NOT NULL AND event.module != \\"\\")))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
-      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"user:\\", CASE((user.entity.id IS NOT NULL AND user.entity.id != \\"\\"), user.entity.id,
-(user.name IS NOT NULL AND user.name != \\"\\" AND host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), CONCAT(user.name, \\"@\\", host.entity.id),
-(user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\"), CONCAT(user.name, \\"@\\", host.id),
-(user.name IS NOT NULL AND user.name != \\"\\" AND host.name IS NOT NULL AND host.name != \\"\\"), CONCAT(user.name, \\"@\\", host.name),
-(user.id IS NOT NULL AND user.id != \\"\\"), user.id,
-(user.email IS NOT NULL AND user.email != \\"\\"), user.email,
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\"), CONCAT(user.name, \\"@\\", user.domain),
-(user.name IS NOT NULL AND user.name != \\"\\"), user.name, NULL))
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")| EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
+(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
+(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace),
+(client.user.email IS NOT NULL AND client.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(client.user.email, \\"@\\", entity.namespace),
+(source.user.email IS NOT NULL AND source.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(source.user.email, \\"@\\", entity.namespace), NULL))
     | STATS
       @timestamp = MAX(@timestamp),
       recent.entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
       entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  user.entity.id = FIRST(TO_STRING(user.entity.id), @timestamp) WHERE user.entity.id IS NOT NULL,
+ event.module = TOP(MV_DEDUPE(TO_STRING(event.module)), 10) WHERE event.module IS NOT NULL,
+ event.kind = TOP(MV_DEDUPE(TO_STRING(event.kind)), 10) WHERE event.kind IS NOT NULL,
+ event.category = TOP(MV_DEDUPE(TO_STRING(event.category)), 10) WHERE event.category IS NOT NULL,
+ event.type = TOP(MV_DEDUPE(TO_STRING(event.type)), 10) WHERE event.type IS NOT NULL,
+ client.user.email = TOP(MV_DEDUPE(TO_STRING(client.user.email)), 10) WHERE client.user.email IS NOT NULL,
+ source.user.email = TOP(MV_DEDUPE(TO_STRING(source.user.email)), 10) WHERE source.user.email IS NOT NULL,
  user.domain = TOP(MV_DEDUPE(TO_STRING(user.domain)), 10) WHERE user.domain IS NOT NULL,
  user.email = TOP(MV_DEDUPE(TO_STRING(user.email)), 10) WHERE user.email IS NOT NULL,
  user.name = TOP(MV_DEDUPE(TO_STRING(user.name)), 10) WHERE user.name IS NOT NULL,
@@ -251,6 +254,12 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
                 AND recent.entity.EngineMetadata.UntypedId > \\"cursor-id\\")
     | KEEP entity.name,
  user.entity.id,
+ event.module,
+ event.kind,
+ event.category,
+ event.type,
+ client.user.email,
+ source.user.email,
  user.domain,
  user.email,
  user.name,
@@ -1666,22 +1675,25 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
 exports[`buildLogsExtractionEsqlQuery generates the expected query for user entity description 1`] = `
 "FROM test-index-*
     METADATA _index
-  | WHERE ((user.entity.id IS NOT NULL AND user.entity.id != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (user.email IS NOT NULL AND user.email != \\"\\"))
+  | WHERE (((user.email IS NOT NULL AND user.email != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (client.user.email IS NOT NULL AND client.user.email != \\"\\") OR (source.user.email IS NOT NULL AND source.user.email != \\"\\")) AND (\`event.kind\` == \\"asset\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND \`event.kind\` != \\"enrichment\\") AND ((event.module IS NOT NULL AND event.module != \\"\\")))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
-      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.entity.id IS NOT NULL AND user.entity.id != \\"\\"), user.entity.id,
-(user.name IS NOT NULL AND user.name != \\"\\" AND host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), CONCAT(user.name, \\"@\\", host.entity.id),
-(user.name IS NOT NULL AND user.name != \\"\\" AND host.id IS NOT NULL AND host.id != \\"\\"), CONCAT(user.name, \\"@\\", host.id),
-(user.name IS NOT NULL AND user.name != \\"\\" AND host.name IS NOT NULL AND host.name != \\"\\"), CONCAT(user.name, \\"@\\", host.name),
-(user.id IS NOT NULL AND user.id != \\"\\"), user.id,
-(user.email IS NOT NULL AND user.email != \\"\\"), user.email,
-(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\"), CONCAT(user.name, \\"@\\", user.domain),
-(user.name IS NOT NULL AND user.name != \\"\\"), user.name, NULL)
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")| EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)
+  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
+(user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
+(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace),
+(client.user.email IS NOT NULL AND client.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(client.user.email, \\"@\\", entity.namespace),
+(source.user.email IS NOT NULL AND source.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(source.user.email, \\"@\\", entity.namespace), NULL)
   | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  recent.user.entity.id = FIRST(TO_STRING(user.entity.id), @timestamp) WHERE user.entity.id IS NOT NULL,
+ recent.event.module = TOP(MV_DEDUPE(TO_STRING(event.module)), 10) WHERE event.module IS NOT NULL,
+ recent.event.kind = TOP(MV_DEDUPE(TO_STRING(event.kind)), 10) WHERE event.kind IS NOT NULL,
+ recent.event.category = TOP(MV_DEDUPE(TO_STRING(event.category)), 10) WHERE event.category IS NOT NULL,
+ recent.event.type = TOP(MV_DEDUPE(TO_STRING(event.type)), 10) WHERE event.type IS NOT NULL,
+ recent.client.user.email = TOP(MV_DEDUPE(TO_STRING(client.user.email)), 10) WHERE client.user.email IS NOT NULL,
+ recent.source.user.email = TOP(MV_DEDUPE(TO_STRING(source.user.email)), 10) WHERE source.user.email IS NOT NULL,
  recent.user.domain = TOP(MV_DEDUPE(TO_STRING(user.domain)), 10) WHERE user.domain IS NOT NULL,
  recent.user.email = TOP(MV_DEDUPE(TO_STRING(user.email)), 10) WHERE user.email IS NOT NULL,
  recent.user.name = TOP(MV_DEDUPE(TO_STRING(user.name)), 10) WHERE user.name IS NOT NULL,
@@ -1740,6 +1752,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
       ON recent.entity.id == entity.id
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  user.entity.id = COALESCE(user.entity.id, recent.user.entity.id),
+ event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 9),
+ event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 9),
+ event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 9),
+ event.type = MV_SLICE(MV_UNION(recent.event.type, event.type), 0, 9),
+ client.user.email = MV_SLICE(MV_UNION(recent.client.user.email, client.user.email), 0, 9),
+ source.user.email = MV_SLICE(MV_UNION(recent.source.user.email, source.user.email), 0, 9),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
  user.name = MV_SLICE(MV_UNION(recent.user.name, user.name), 0, 9),
@@ -1799,6 +1817,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
   | KEEP entity.name,
  user.entity.id,
+ event.module,
+ event.kind,
+ event.category,
+ event.type,
+ client.user.email,
+ source.user.email,
  user.domain,
  user.email,
  user.name,
@@ -1887,8 +1911,8 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
 exports[`buildRemainingLogsCountQuery generates the expected query for user entity type 1`] = `
 "FROM test-index-*
     METADATA _index
-  | WHERE ((user.entity.id IS NOT NULL AND user.entity.id != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (user.email IS NOT NULL AND user.email != \\"\\"))
+  | WHERE (((user.email IS NOT NULL AND user.email != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (client.user.email IS NOT NULL AND client.user.email != \\"\\") OR (source.user.email IS NOT NULL AND source.user.email != \\"\\")) AND (\`event.kind\` == \\"asset\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND \`event.kind\` != \\"enrichment\\") AND ((event.module IS NOT NULL AND event.module != \\"\\")))
       AND @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
-      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")| EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)
   | STATS document_count = COUNT()"
 `;

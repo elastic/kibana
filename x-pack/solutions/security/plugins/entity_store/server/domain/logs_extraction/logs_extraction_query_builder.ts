@@ -15,6 +15,7 @@ import {
 import {
   getEuidEsqlEvaluation,
   getEuidEsqlDocumentsContainsIdFilter,
+  getFieldEvaluationsEsql,
 } from '../../../common/domain/euid/esql';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -90,9 +91,7 @@ function buildExtractionSourceClause(params: {
   return (
     `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}` +
-    // Where clause captures the full window that we will process
-    // We are including timestamp boundaries to ensure we are not missing any logs
-    // that contain the same timestamp (e.g. pagination recovery)
+    // Where clause: documents contain id (and field-evaluation sources when present), timestamp window
     `
   | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
       AND ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
@@ -109,6 +108,7 @@ export function buildRemainingLogsCountQuery(params: {
 }): string {
   return (
     buildExtractionSourceClause(params) +
+    buildFieldEvaluations(params.type) +
     `
   | STATS document_count = COUNT()`
   );
@@ -126,6 +126,7 @@ export function buildLogsExtractionEsqlQuery({
 }: LogsExtractionQueryParams): string {
   return (
     buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId }) +
+    buildFieldEvaluations(type) +
     // Early construct the id (based on euid logic) so we can run stats per entity (equivalent to GROUP BY)
     `
   | EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
@@ -195,6 +196,7 @@ export function buildCcsLogsExtractionEsqlQuery({
   return (
     `SET unmapped_fields="nullify";
     ${buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })}` +
+    buildFieldEvaluations(type) +
     // Using the same structure as the main logs extraction re-use fields to perform the aggregation
     `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
       withTypeId: true,
@@ -383,4 +385,17 @@ export function extractPaginationParams(
     timestampCursor,
     idCursor,
   };
+}
+
+/**
+ * Builds the ESQL fragment that evaluates identityField.fieldEvaluations (EVAL only).
+ * Source fields are already required in the main filter, so only documents with source set reach this step.
+ * Returns empty string when there are no field evaluations.
+ */
+function buildFieldEvaluations(type: EntityType): string {
+  const fieldEvaluationsEsql = getFieldEvaluationsEsql(type);
+  if (!fieldEvaluationsEsql) {
+    return '';
+  }
+  return `| EVAL ${fieldEvaluationsEsql}`;
 }

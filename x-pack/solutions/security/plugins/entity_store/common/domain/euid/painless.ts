@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
+import type { EntityType, EuidAttribute, FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, isEuidSeparator } from './commons';
 
@@ -48,6 +48,45 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @returns A Painless evaluation string that computes the entity id.
  */
+function destinationToVarName(destination: string): string {
+  return destination.replace(/\./g, '_');
+}
+
+function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
+  preamble: string;
+  evaluatedVars: Map<string, string>;
+} {
+  const evaluatedVars = new Map<string, string>();
+  const parts: string[] = [];
+  for (const ev of evaluations) {
+    const varName = destinationToVarName(ev.destination);
+    evaluatedVars.set(ev.destination, varName);
+    const srcEsc = escapePainlessField(ev.source);
+    const sourceNotEmpty = `doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != ""`;
+    const stmts: string[] = [
+      `String ${varName} = null`,
+      `if (${sourceNotEmpty}) {`,
+      `  String _src = doc['${srcEsc}'].value`,
+    ];
+    let first = true;
+    for (const rule of ev.rules) {
+      if (rule.when === 'one_of') {
+        const conds = rule.in.map((v) => `_src == "${escapePainlessString(v)}"`).join(' || ');
+        const prefix = first ? '  if ' : '  else if ';
+        stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(rule.then)}"; }`);
+        first = false;
+      } else if (rule.when === 'else') {
+        stmts.push(`  else { ${varName} = _src; }`);
+        first = false;
+      }
+    }
+    stmts.push('}');
+    parts.push(stmts.join(' '));
+  }
+  const preamble = parts.join(' ');
+  return { preamble, evaluatedVars };
+}
+
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
 
@@ -55,25 +94,48 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
+  const evaluatedVars = new Map<string, string>();
+  let preamble = '';
+  if (identityField.fieldEvaluations?.length) {
+    const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
+    preamble = result.preamble + ' ';
+    result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
+  }
+
+  const fieldCondition = (field: string): string => {
+    const varName = evaluatedVars.get(field);
+    if (varName) return `${varName} != null`;
+    return painlessFieldNonEmpty(field);
+  };
+
+  const fieldValueExpr = (field: string): string => {
+    const varName = evaluatedVars.get(field);
+    if (varName) return varName;
+    return `doc['${escapePainlessField(field)}'].value`;
+  };
+
   if (identityField.euidFields.length === 1) {
     const first = identityField.euidFields[0][0];
     if (isEuidSeparator(first)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     const field = first.field;
-    const condition = painlessFieldNonEmpty(field);
-    const valueExpr = `doc['${escapePainlessField(field)}'].value`;
-    return `if (${condition}) { return "${entityType}:" + ${valueExpr}; } return null;`;
+    const condition = fieldCondition(field);
+    const valueExpr = fieldValueExpr(field);
+    return `${preamble}if (${condition}) { return "${entityType}:" + ${valueExpr}; } return null;`;
   }
 
   const prefix = `"${entityType}:"`;
   const clauses = identityField.euidFields.map((composedField) => {
-    const condition = buildPainlessCondition(composedField);
-    const valueExpr = buildPainlessValueExpr(composedField);
+    const condition = composedField
+      .filter(isEuidField)
+      .map((a) => fieldCondition(a.field))
+      .join(' && ');
+    const valueExpr = buildPainlessValueExprWithEvaluated(composedField, fieldValueExpr);
     return `if (${condition}) { return ${prefix} + ${valueExpr}; }`;
   });
 
-  return clauses.join(' ') + ' return null;';
+  return preamble + clauses.join(' ') + ' return null;';
 }
 
 function painlessFieldNonEmpty(field: string): string {
@@ -81,18 +143,16 @@ function painlessFieldNonEmpty(field: string): string {
   return `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
 }
 
-function buildPainlessCondition(composedField: EuidAttribute[]): string {
-  const fieldAttrs = composedField.filter((attr) => isEuidField(attr));
-  return fieldAttrs.map((a) => painlessFieldNonEmpty(a.field)).join(' && ');
-}
-
-function buildPainlessValueExpr(composedField: EuidAttribute[]): string {
+function buildPainlessValueExprWithEvaluated(
+  composedField: EuidAttribute[],
+  fieldValueExpr: (field: string) => string
+): string {
   if (composedField.length === 1 && isEuidField(composedField[0])) {
-    return `doc['${escapePainlessField(composedField[0].field)}'].value`;
+    return fieldValueExpr(composedField[0].field);
   }
   const parts = composedField.map((attr) => {
     if (isEuidField(attr)) {
-      return `doc['${escapePainlessField(attr.field)}'].value`;
+      return fieldValueExpr(attr.field);
     }
     return `"${escapePainlessString(attr.separator)}"`;
   });

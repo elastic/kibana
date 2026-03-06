@@ -123,37 +123,59 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 
   describe('user', () => {
-    it('returns filter with term on user.email when present', () => {
+    it('returns filter with term on user.email and entity.namespace when present (event.module sets namespace)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
+        event: { module: 'okta' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.email': 'alice@example.com' } }],
+          filter: [
+            { term: { 'user.email': 'alice@example.com' } },
+            { term: { 'entity.namespace': 'okta' } },
+          ],
         },
       });
     });
 
-    it('returns filter with term on user.name and must_not on higher-ranked identity fields when user.name is present', () => {
+    it('returns undefined when user.email is present but event.module is missing (entity.namespace not set)', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { email: 'alice@example.com' },
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('returns filter with term on user.name and entity.namespace and must_not on higher-ranked identity fields when user.name is present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
+        event: { module: 'azure' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.name': 'alice' } }],
+          filter: [
+            { term: { 'user.name': 'alice' } },
+            { term: { 'entity.namespace': 'entra_id' } },
+          ],
           must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
         },
       });
     });
 
-    it('returns filter with term on user.id and must_not on higher-ranked identity fields when only user.id is present', () => {
-      const result = getEuidDslFilterBasedOnDocument('user', { user: { id: 'user-id-42' } });
+    it('returns filter with term on user.id and entity.namespace and must_not on higher-ranked identity fields when only user.id is present', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { id: 'user-id-42' },
+        event: { module: 'o365' },
+      });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.id': 'user-id-42' } }],
+          filter: [
+            { term: { 'user.id': 'user-id-42' } },
+            { term: { 'entity.namespace': 'microsoft_365' } },
+          ],
           must_not: [{ exists: { field: 'user.email' } }],
         },
       });
@@ -163,14 +185,18 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(getEuidDslFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.email when both user.email and user.id are present', () => {
+    it('precedence: uses user.email and entity.namespace when both user.email and user.id are present', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com', id: 'user-42' },
+        event: { module: 'entityanalytics_okta' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'user.email': 'alice@example.com' } }],
+          filter: [
+            { term: { 'user.email': 'alice@example.com' } },
+            { term: { 'entity.namespace': 'okta' } },
+          ],
         },
       });
     });

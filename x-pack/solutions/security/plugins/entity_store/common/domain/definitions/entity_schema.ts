@@ -37,6 +37,19 @@ const euidSeparatorSchema = z.object({
   separator: z.string(),
 });
 
+// Field evaluation rules: pre-evaluate a field before euid generation (first match wins).
+// Source fields are required in the main query filter so only documents with source set reach evaluation.
+const fieldEvaluationRuleSchema = z.discriminatedUnion('when', [
+  z.object({ when: z.literal('one_of'), in: z.array(z.string()), then: z.string() }),
+  z.object({ when: z.literal('else'), copyValueFrom: z.literal('source') }),
+]);
+
+const fieldEvaluationSchema = z.object({
+  destination: z.string(),
+  source: z.string(),
+  rules: z.array(fieldEvaluationRuleSchema),
+});
+
 // Any field used in the euid calculation must be mapped in the fields array,
 // otherwise we won't have guarantees of field being available
 const calculatedIdentityFieldLogicSchema = z.object({
@@ -48,6 +61,10 @@ const calculatedIdentityFieldLogicSchema = z.object({
   // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
   // ALL THE FIELDS MUST BE OF MAPPING TYPE 'keyword'
   euidFields: z.array(z.array(z.union([euidFieldSchema, euidSeparatorSchema]))),
+
+  // Optional pre-evaluated fields (e.g. entity.namespace from event.module). Applied before
+  // euid generation and translated to ESQL, Painless, and in-memory.
+  fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
 
   // Optional document-level filter (Condition from @kbn/streamlang). When set, only documents
   // matching this filter are considered for this entity type. Translated to DSL and ESQL
@@ -74,3 +91,5 @@ export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; /
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
+export type FieldEvaluationRule = z.infer<typeof fieldEvaluationRuleSchema>;
+export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;

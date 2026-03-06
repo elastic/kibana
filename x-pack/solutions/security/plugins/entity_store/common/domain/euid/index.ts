@@ -12,5 +12,8 @@ export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,
   getEuidEsqlFilterBasedOnDocument,
+  getFieldEvaluationsEsql,
+  getFieldEvaluationsSourcesFilterEsql,
 } from './esql';
+export { applyFieldEvaluations } from './field_evaluations';
 export { getEuidSourceFields, type IdentitySourceFields } from './identity_fields';

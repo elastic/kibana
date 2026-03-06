@@ -7,6 +7,7 @@
 
 import { conditionToESQL } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
+import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
@@ -16,6 +17,7 @@ import {
   isEuidField,
   isEuidSeparator,
 } from './commons';
+import { applyFieldEvaluations } from './field_evaluations';
 
 /**
  * Constructs an ESQL filter for the provided entity type and document.
@@ -37,6 +39,51 @@ import {
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
  */
+function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
+  const { destination, source, rules } = evaluation;
+  const caseParts: string[] = [];
+  for (const rule of rules) {
+    if (rule.when === 'one_of') {
+      const conditions = rule.in.map((v) => `${source} == "${escapeEsqlString(v)}"`).join(' OR ');
+      caseParts.push(`(${conditions}), "${escapeEsqlString(rule.then)}"`);
+    } else if (rule.when === 'else') {
+      caseParts.push(source);
+    }
+  }
+  return `${destination} = CASE(${caseParts.join(', ')})`;
+}
+
+function escapeEsqlString(s: string): string {
+  return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
+ * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
+ * Use in a pipeline as | EVAL <result>. Returns empty string when there are no field evaluations.
+ */
+export function getFieldEvaluationsEsql(entityType: EntityType) {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const evaluations = identityField.fieldEvaluations;
+  if (!evaluations || evaluations.length === 0) {
+    return undefined;
+  }
+  return evaluations.map(buildOneFieldEvaluationEsql).join(',\n ');
+}
+
+/**
+ * Returns an ESQL WHERE condition requiring all identityField.fieldEvaluations source fields to be NOT NULL and not empty.
+ * Use in the main query filter so only documents with source data reach the EVAL step (performance).
+ */
+export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const evaluations = identityField.fieldEvaluations;
+  if (!evaluations || evaluations.length === 0) {
+    return undefined;
+  }
+  const conditions = evaluations.map((e) => `(${esqlIsNotNullOrEmpty(e.source)})`).join(' AND ');
+  return conditions;
+}
+
 export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
   if (!doc) {
     return undefined;
@@ -44,6 +91,10 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    doc = { ...doc, ...evaluated };
+  }
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;
@@ -78,17 +129,26 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const containsIdExpression = identityField.requiresOneOfFields
-    .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
-    .join(' OR ');
+  const filters = [
+    identityField.requiresOneOfFields
+      .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
+      .join(' OR '),
+  ];
 
-  const documentsFilter = identityField.documentsFilter;
-  if (documentsFilter) {
-    const documentsFilterEsql = conditionToESQL(documentsFilter);
-    return `(${documentsFilterEsql}) AND (${containsIdExpression})`;
+  if (identityField.documentsFilter) {
+    filters.push(conditionToESQL(identityField.documentsFilter));
   }
 
-  return containsIdExpression;
+  const evaluationSourceFilter = getFieldEvaluationsSourcesFilterEsql(entityType);
+  if (evaluationSourceFilter) {
+    filters.push(evaluationSourceFilter);
+  }
+
+  if (filters.length === 1) {
+    return filters[0];
+  }
+
+  return filters.map((filter) => `(${filter})`).join(' AND ');
 }
 
 /**

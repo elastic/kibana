@@ -8,6 +8,7 @@
 import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getDocument, getFieldValue, isEuidField } from './commons';
+import { applyFieldEvaluations } from './field_evaluations';
 
 /**
  * Constructs an entity id from the provided entity type and document.
@@ -35,6 +36,10 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    doc = { ...doc, ...evaluated };
+  }
   const composedId = getComposedFieldValues(doc, identityField.euidFields);
   if (composedId.length === 0) {
     return undefined;

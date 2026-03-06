@@ -10,6 +10,7 @@ import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
+import { applyFieldEvaluations } from './field_evaluations';
 
 /**
  * Returns a DSL filter that matches documents containing at least one
@@ -102,6 +103,10 @@ export function getEuidDslFilterBasedOnDocument(
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    doc = { ...doc, ...evaluated };
+  }
   const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
   if (fieldsToBeFilteredOn.rankingPosition === -1) {
     return undefined;

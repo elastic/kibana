@@ -17,12 +17,34 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
   identityField: {
+    // TODO the filter is very complex right now. Can we simplify it?
     requiresOneOfFields: [
       'user.email',
       'user.id',
       'user.name',
       'client.user.email',
       'source.user.email',
+    ],
+    euidFields: [
+      [{ field: 'user.email' }, { separator: '@' }, { field: 'entity.namespace' }],
+      [{ field: 'user.id' }, { separator: '@' }, { field: 'entity.namespace' }],
+      // TODO  ADD user.domain IS NOT NULL AND namespace == "entityanalytics_ad": entity_key = "{user.name}@{user.domain}@active_directory"
+      [{ field: 'user.name' }, { separator: '@' }, { field: 'entity.namespace' }],
+      [{ field: 'client.user.email' }, { separator: '@' }, { field: 'entity.namespace' }],
+      [{ field: 'source.user.email' }, { separator: '@' }, { field: 'entity.namespace' }],
+    ],
+    fieldEvaluations: [
+      {
+        destination: 'entity.namespace',
+        source: 'event.module',
+        rules: [
+          { when: 'one_of', in: ['okta', 'entityanalytics_okta'], then: 'okta' },
+          { when: 'one_of', in: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
+          { when: 'one_of', in: ['o365', 'o365_metrics'], then: 'microsoft_365' },
+          { when: 'one_of', in: ['entityanalytics_ad'], then: 'active_directory' },
+          { when: 'else', copyValueFrom: 'source' },
+        ],
+      },
     ],
     /**
      * UEBA user documents filter: only documents that are either
@@ -67,14 +89,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         },
       ],
     },
-    euidFields: [
-      [{ field: 'user.email' }],
-      [{ field: 'user.id' }],
-      // TODO  ADD user.domain IS NOT NULL AND namespace == "entityanalytics_ad": entity_key = "{user.name}@{user.domain}@active_directory"
-      [{ field: 'user.name' }],
-      [{ field: 'client.user.email' }],
-      [{ field: 'source.user.email' }],
-    ],
   },
   entityTypeFallback: 'Identity',
   indexPatterns: [],
@@ -82,6 +96,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ destination: 'entity.name', source: 'user.name' }),
     oldestValue({ source: 'user.entity.id' }),
 
+    collect({ source: 'event.module' }),
     collect({ source: 'event.kind' }),
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),
