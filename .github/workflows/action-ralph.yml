@@ -115,58 +115,59 @@ jobs:
               COMMAND_MODE="review"
             fi
           fi
-          echo "command_mode=${COMMAND_MODE}" >> "$GITHUB_OUTPUT"
-          echo "default_branch=${{ github.event.repository.default_branch || 'main' }}" >> "$GITHUB_OUTPUT"
+
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
+          IS_PR="false"
+          IS_FORK_PR="false"
+          PR_NUMBER=""
+          PR_BRANCH=""
+          PR_HEAD_REPO=""
+
           if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
-            echo "is_pr=true" >> "$GITHUB_OUTPUT"
+            IS_PR="true"
             if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
-              echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
+              IS_FORK_PR="false"
             else
-              echo "is_fork_pr=true" >> "$GITHUB_OUTPUT"
+              IS_FORK_PR="true"
             fi
-            echo "pr_number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-            echo "pr_branch=${{ github.event.pull_request.head.ref }}" >> "$GITHUB_OUTPUT"
-            echo "pr_head_repo=${{ github.event.pull_request.head.repo.full_name }}" >> "$GITHUB_OUTPUT"
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            PR_BRANCH="${{ github.event.pull_request.head.ref }}"
+            PR_HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
           elif [ "${{ github.event_name }}" = "issue_comment" ]; then
-            # issue_comment fires for both issues and PRs; detect which
             PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" 2>/dev/null || echo "")
             if [ -n "$PR_JSON" ]; then
               PR_BRANCH=$(echo "$PR_JSON" | jq -r '.head.ref')
               PR_HEAD_REPO=$(echo "$PR_JSON" | jq -r '.head.repo.full_name')
-              echo "is_pr=true" >> "$GITHUB_OUTPUT"
+              IS_PR="true"
               if [ "$PR_HEAD_REPO" = "${{ github.repository }}" ]; then
-                echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
+                IS_FORK_PR="false"
               else
-                echo "is_fork_pr=true" >> "$GITHUB_OUTPUT"
+                IS_FORK_PR="true"
               fi
-              echo "pr_number=${{ github.event.issue.number }}" >> "$GITHUB_OUTPUT"
-              echo "pr_branch=${PR_BRANCH}" >> "$GITHUB_OUTPUT"
-              echo "pr_head_repo=${PR_HEAD_REPO}" >> "$GITHUB_OUTPUT"
-            else
-              echo "is_pr=false" >> "$GITHUB_OUTPUT"
-              echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
-              echo "pr_number=" >> "$GITHUB_OUTPUT"
-              echo "pr_branch=" >> "$GITHUB_OUTPUT"
-              echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
+              PR_NUMBER="${{ github.event.issue.number }}"
             fi
-          else
-            echo "is_pr=false" >> "$GITHUB_OUTPUT"
-            echo "is_fork_pr=false" >> "$GITHUB_OUTPUT"
-            echo "pr_number=" >> "$GITHUB_OUTPUT"
-            echo "pr_branch=" >> "$GITHUB_OUTPUT"
-            echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
           fi
 
-          IS_PR=$(grep '^is_pr=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
           if [ "$IS_PR" = "true" ]; then
-            CHECKOUT_REF=$(grep '^pr_branch=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
-            CHECKOUT_REPO=$(grep '^pr_head_repo=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
+            CHECKOUT_REF="$PR_BRANCH"
+            CHECKOUT_REPO="$PR_HEAD_REPO"
           else
-            CHECKOUT_REF=$(grep '^default_branch=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
+            CHECKOUT_REF="$DEFAULT_BRANCH"
             CHECKOUT_REPO="${{ github.repository }}"
           fi
-          echo "checkout_ref=${CHECKOUT_REF:-main}" >> "$GITHUB_OUTPUT"
-          echo "checkout_repo=${CHECKOUT_REPO:-${{ github.repository }}}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "command_mode=${COMMAND_MODE}"
+            echo "default_branch=${DEFAULT_BRANCH}"
+            echo "is_pr=${IS_PR}"
+            echo "is_fork_pr=${IS_FORK_PR}"
+            echo "pr_number=${PR_NUMBER}"
+            echo "pr_branch=${PR_BRANCH}"
+            echo "pr_head_repo=${PR_HEAD_REPO}"
+            echo "checkout_ref=${CHECKOUT_REF}"
+            echo "checkout_repo=${CHECKOUT_REPO}"
+          } >> "$GITHUB_OUTPUT"
 
   # ---------------------------------------------------------------------------
   # Phase B: Run the OpenCode agent in a spec-driven loop (inner ralph loop).
