@@ -9,12 +9,12 @@ import type { Logger } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AlertInstanceContext, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
 import {
+  type AttackDiscoveryAlertDocument,
   CreateAttackDiscoveryAlertsParams as CreateAttackDiscoveryAlertsParamsSchema,
   type CreateAttackDiscoveryAlertsParams,
 } from '@kbn/elastic-assistant-common';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
-import type { AttackDiscoveryAlertDocument } from '../schedules/types';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../schedules/constants';
 import { ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID } from './constants';
 import { attackDiscoveryDataGeneratorExecutor } from './executor';
@@ -55,7 +55,10 @@ export const getAttackDiscoveryDataGeneratorRuleType = ({
       },
     },
     schemas: {
-      params: { type: 'zod', schema: CreateAttackDiscoveryAlertsParamsSchema },
+      params: {
+        type: 'zod',
+        schema: CreateAttackDiscoveryAlertsParamsSchema,
+      },
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

@@ -15,6 +15,7 @@ import {
   type TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { PaletteOutput } from '@kbn/coloring';
 import type {
   PartitionState,
   PartitionStateESQL,
@@ -54,6 +55,7 @@ import {
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
+  isLegacyColorPalette,
 } from '../coloring';
 
 type PartitionLens = Extract<
@@ -292,15 +294,20 @@ function buildVisualizationState(
   const primaryGroups = (config.group_by ?? []).map((_, index) =>
     getAccessorName('group_by', index)
   );
+  const { colorMapping, ...sharedState } = computeSharedPartitionLayerState(config);
+  const isLegacyColor = isLegacyColorPalette(colorMapping);
+
   if (isAPIPieChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }), // legacy colors are included outside of the layer
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }), // modern colors are included at the layer level
           categoryDisplay: convertAPICategoryDisplayOption(config.label_position),
           ...getEmptySizeRatioFromDonutHoleOption(config.donut_hole),
         },
@@ -311,12 +318,14 @@ function buildVisualizationState(
   if (isAPITreemapChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -326,12 +335,14 @@ function buildVisualizationState(
   if (isAPIWaffleChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
           primaryGroups,
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -341,6 +352,7 @@ function buildVisualizationState(
   if (isAPIMosaicChartLayer(config)) {
     return {
       shape: config.type,
+      ...(isLegacyColor && { ...colorMapping }),
       layers: [
         {
           metrics,
@@ -351,7 +363,8 @@ function buildVisualizationState(
             ) ?? [],
           // there's no multiple metrics support in mosaic charts
           allowMultipleMetrics: false,
-          ...computeSharedPartitionLayerState(config),
+          ...sharedState,
+          ...(!isLegacyColor && { ...colorMapping }),
           categoryDisplay: 'default',
         },
       ],
@@ -378,7 +391,7 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
       datasourceStates: layers,
       ...(internalReferences.length ? { internalReferences } : {}),
       visualization: visualizationState,
-      ...(Object.keys(adHocDataViews).length ? { adHocDataViews } : {}),
+      adHocDataViews,
     },
     references,
   };
@@ -518,9 +531,10 @@ function convertLensStateToAPIGrouping(
   vizLayer: LensPartitionLayerState,
   layer: DataSourceStateLayer,
   groupByAccessors: string[],
-  groupIndexForColorMapping: number
+  groupIndexForColorMapping: number,
+  legacyPalette?: PaletteOutput
 ) {
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
+  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>
@@ -559,7 +573,8 @@ function fromLensStateToAPIGroups(
     vizLayer,
     layer,
     groupByAccessors,
-    groupIndexForColorMapping
+    groupIndexForColorMapping,
+    visualization.palette
   );
   return groups?.length ? groups : undefined;
 }

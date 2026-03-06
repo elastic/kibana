@@ -217,13 +217,13 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: my-data-source.sources.notion.search');
+    expect(createdYaml).toContain('name: my-data-source.test_type.source.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-data-source.search',
+        id: 'my-data-source.test_type.source.search',
         type: 'workflow',
         description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
@@ -241,6 +241,62 @@ tags:
         toolIds: ['tool-1'],
         kscIds: ['ksc-1'],
       })
+    );
+  });
+
+  it('should preserve underscores in slugified workflow names and tool IDs', async () => {
+    const actionTypeId = '.notion';
+    const mockStackConnector = { id: 'ksc-1', actionTypeId };
+    const mockWorkflow = { id: 'workflow-1', name: 'Test Workflow' };
+    const mockTool = createMockedTool({ id: 'tool-1' });
+    const mockSavedObject = {
+      id: 'connector-1',
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'Notion_Source',
+        type: 'test_type',
+        workflowIds: ['workflow-1'],
+        toolIds: ['tool-1'],
+        kscIds: ['ksc-1'],
+      },
+    };
+    const mockDataSource = {
+      stackConnectors: [{ type: actionTypeId, config: {} }],
+      workflows: { directory: '/path/to/workflows' },
+    } as Partial<DataSource>;
+
+    mockLoadWorkflows.mockResolvedValue([
+      {
+        content: `name: sources.notion.search
+description: Search Notion content
+tags:
+  - agent-builder-tool`,
+        shouldGenerateABTool: true,
+      },
+    ]);
+
+    mockActionsClient.create.mockResolvedValue(mockStackConnector);
+    mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
+    mockToolRegistry.create.mockResolvedValue(mockTool);
+    mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
+
+    await createDataSourceAndRelatedResources({
+      name: 'Notion_Source',
+      type: 'test_type',
+      credentials: 'secret-token-123',
+      savedObjectsClient: mockSavedObjectsClient,
+      request: mockRequest,
+      logger: mockLogger,
+      workflowManagement: mockWorkflowManagement as any,
+      actions: mockActions as any,
+      dataSource: mockDataSource as any,
+      agentBuilder: mockAgentBuilder as any,
+    });
+
+    const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
+    expect(createdYaml).toContain('name: notion_source.test_type.source.search');
+    expect(mockToolRegistry.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'notion_source.test_type.source.search' })
     );
   });
 
@@ -395,7 +451,7 @@ tags:
             description: 'List repository issues List issues',
           },
         ],
-        namespace: 'test_type.my-mcp-connector',
+        namespace: 'my-mcp-connector.test_type',
       });
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
@@ -493,7 +549,7 @@ tags:
               hasAuth: true,
               authType: 'bearer',
             },
-            importedTools: [{ name: 'get_file_contents', description: 'Get file contents' }],
+            importedTools: [{ name: 'nonexistent_tool', description: 'Tool that does not exist' }],
           },
         ],
         workflows: { directory: '/path/to/workflows' },

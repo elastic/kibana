@@ -7,6 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  PageObjects,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
+} from '@kbn/scout';
+import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
+import { TracesExperiencePage } from './page_objects';
+
+export interface TracesExperienceTestFixtures extends ScoutParallelTestFixtures {
+  pageObjects: PageObjects & {
+    tracesExperience: TracesExperiencePage;
+  };
+}
+
+export const spaceTest = spaceBaseTest.extend<
+  TracesExperienceTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async (
+    {
+      pageObjects,
+      page,
+    }: {
+      pageObjects: TracesExperienceTestFixtures['pageObjects'];
+      page: TracesExperienceTestFixtures['page'];
+    },
+    use: (pageObjects: TracesExperienceTestFixtures['pageObjects']) => Promise<void>
+  ) => {
+    const extendedPageObjects = {
+      ...pageObjects,
+      tracesExperience: createLazyPageObject(TracesExperiencePage, page),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
+
 export { TRACES, RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from './constants';
-export { simpleTrace } from './synthtrace/simple_trace';
+export { setupTracesExperience, teardownTracesExperience } from './setup';
 export { richTrace, traceCorrelatedLogs } from './synthtrace/complete_traces_experience';
