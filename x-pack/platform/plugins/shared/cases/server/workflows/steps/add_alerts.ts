@@ -47,7 +47,8 @@ export const addAlertsStepDefinition = (
         return updatedCase as AddAlertsStepOutput['case'];
       },
       {
-        onError: (_error, input: AddAlertsStepInput) => new Error(ADD_ALERTS_FAILED_MESSAGE(input.case_id)),
+        onError: (_error, input: AddAlertsStepInput) =>
+          new Error(ADD_ALERTS_FAILED_MESSAGE(input.case_id)),
       }
     ),
   });

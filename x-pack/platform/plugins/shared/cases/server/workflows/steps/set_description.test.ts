@@ -17,9 +17,7 @@ describe('setDescriptionStepDefinition', () => {
   it('updates case description', async () => {
     const description = 'Updated description';
     const get = jest.fn();
-    const bulkUpdate = jest
-      .fn()
-      .mockResolvedValue([{ ...createCaseResponseFixture, description }]);
+    const bulkUpdate = jest.fn().mockResolvedValue([{ ...createCaseResponseFixture, description }]);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);

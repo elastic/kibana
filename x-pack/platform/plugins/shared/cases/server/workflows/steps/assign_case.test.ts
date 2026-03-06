@@ -17,9 +17,7 @@ describe('assignCaseStepDefinition', () => {
   it('updates case assignees', async () => {
     const assignees = [{ uid: 'user-1' }];
     const get = jest.fn();
-    const bulkUpdate = jest
-      .fn()
-      .mockResolvedValue([{ ...createCaseResponseFixture, assignees }]);
+    const bulkUpdate = jest.fn().mockResolvedValue([{ ...createCaseResponseFixture, assignees }]);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);

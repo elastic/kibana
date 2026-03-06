@@ -43,7 +43,8 @@ export const addEventsStepDefinition = (
         return updatedCase as AddEventsStepOutput['case'];
       },
       {
-        onError: (_error, input: AddEventsStepInput) => new Error(ADD_EVENTS_FAILED_MESSAGE(input.case_id)),
+        onError: (_error, input: AddEventsStepInput) =>
+          new Error(ADD_EVENTS_FAILED_MESSAGE(input.case_id)),
       }
     ),
   });

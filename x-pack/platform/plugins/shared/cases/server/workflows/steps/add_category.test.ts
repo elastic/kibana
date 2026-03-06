@@ -17,9 +17,7 @@ describe('addCategoryStepDefinition', () => {
   it('updates case category', async () => {
     const category = 'Malware';
     const get = jest.fn();
-    const bulkUpdate = jest
-      .fn()
-      .mockResolvedValue([{ ...createCaseResponseFixture, category }]);
+    const bulkUpdate = jest.fn().mockResolvedValue([{ ...createCaseResponseFixture, category }]);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
