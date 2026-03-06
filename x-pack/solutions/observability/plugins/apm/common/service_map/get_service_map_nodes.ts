@@ -27,7 +27,7 @@ import { FORBIDDEN_SERVICE_NAMES } from './constants';
 
 // Exports helper functions for use in React Flow transformation
 
-export const isMessagingExitSpan = (node?: ConnectionNode): boolean => {
+export const isMessagingExitSpan = (node?: ConnectionNode): node is ExternalConnectionNode => {
   return node !== undefined && isExitSpan(node) && node[SPAN_TYPE] === 'messaging';
 };
 
