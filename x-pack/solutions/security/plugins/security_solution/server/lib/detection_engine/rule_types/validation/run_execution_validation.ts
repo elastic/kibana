@@ -9,7 +9,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RuleParams } from '../../rule_schema';
-import { hasTimestampFields, isMachineLearningParams, isThreatParams, checkForFrozenIndices } from '../utils/utils';
+import {
+  hasTimestampFields,
+  isMachineLearningParams,
+  isThreatParams,
+  checkForFrozenIndices,
+} from '../utils/utils';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export interface RunExecutionValidationParams {
@@ -75,8 +80,9 @@ export const runExecutionValidation = async (
 
   if (isThreatParams(params)) {
     try {
-      const threatIndexPatternsWithMatches =
-        await indexPatterns.getIndexPatternsWithMatches(params.threatIndex);
+      const threatIndexPatternsWithMatches = await indexPatterns.getIndexPatternsWithMatches(
+        params.threatIndex
+      );
 
       if (threatIndexPatternsWithMatches.length === 0) {
         warnings.push(
