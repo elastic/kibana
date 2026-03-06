@@ -6,11 +6,11 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { byTestId } from '@kbn/ux-plugin/e2e/journeys/utils';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { v4 as uuidv4 } from 'uuid';
 import { getReasonMessage } from '@kbn/synthetics-plugin/server/alert_rules/status_rule/message_utils';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
+import { byTestId } from '../../page_objects/utils';
 import { SyntheticsServices } from '../services/synthetics_services';
 
 journey(`DefaultStatusAlert`, async ({ page, params }) => {
