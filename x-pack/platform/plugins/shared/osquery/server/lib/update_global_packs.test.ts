@@ -244,13 +244,13 @@ describe('updateGlobalPacksCreateCallback', () => {
 
     expect(result.inputs[0].config?.osquery?.value?.packs?.['default-embedded-pack']).toEqual({
       shard: 100,
+      pack_id: 'pack-so-id-4',
       queries: {
         query1: {
           name: 'test-query',
           query: 'SELECT * FROM listening_ports;',
           interval: 1800,
           space_id: 'default',
-          pack_id: 'pack-so-id-4',
         },
       },
     });
