@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { SplunkResourceType } from './vendor/common/splunk.gen';
@@ -292,7 +292,7 @@ export const SiemMigrationResourceContent = z.object({
   /**
    * The resource arbitrary metadata.
    */
-  metadata: z.object({}).optional(),
+  metadata: z.object({}).catchall(z.unknown()).optional(),
 });
 
 /**
