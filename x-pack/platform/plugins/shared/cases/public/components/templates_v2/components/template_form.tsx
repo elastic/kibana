@@ -17,6 +17,7 @@ import {
 import { TemplateYamlEditorBase } from './template_yaml_editor';
 import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
 import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
+import { useFieldNameValidation } from '../hooks/use_field_name_validation';
 
 export interface YamlEditorFormValues {
   definition: string;
@@ -69,6 +70,7 @@ export const TemplateYamlEditor = ({
   const {
     containerRef,
     accordionRef,
+    editorRef,
     containerBounds,
     accordionHeight,
     portalNode,
@@ -78,6 +80,8 @@ export const TemplateYamlEditor = ({
     handleEditorMount,
     handleErrorClick,
   } = useValidationAccordionPositioning();
+
+  useFieldNameValidation(editorRef.current, value);
 
   const schemas = useMemo(() => {
     const jsonSchema = getTemplateDefinitionJsonSchema();

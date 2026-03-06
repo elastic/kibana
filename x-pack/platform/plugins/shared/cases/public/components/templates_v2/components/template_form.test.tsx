@@ -20,8 +20,15 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
+jest.mock('../hooks/use_field_name_validation', () => ({
+  useFieldNameValidation: jest.fn(),
+}));
+
 describe('TemplateFormFields', () => {
   const mockOnChange = jest.fn();
+  const mockUseFieldNameValidation = jest.requireMock(
+    '../hooks/use_field_name_validation'
+  ).useFieldNameValidation;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,5 +71,32 @@ describe('TemplateFormFields', () => {
     );
 
     expect(screen.getByTitle('Template saved')).toBeInTheDocument();
+  });
+
+  it('calls useFieldNameValidation hook with editor and value', () => {
+    const yamlValue = 'fields:\n  - name: field1\n    type: keyword';
+    renderFields(yamlValue);
+
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, yamlValue);
+  });
+
+  it('calls useFieldNameValidation hook when value changes', async () => {
+    const { rerender } = render(
+      <TestProviders>
+        <TemplateYamlEditor value="initial: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'initial: value');
+
+    rerender(
+      <TestProviders>
+        <TemplateYamlEditor value="updated: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'updated: value');
+    });
   });
 });
