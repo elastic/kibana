@@ -24,6 +24,7 @@ import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
+import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -90,6 +91,12 @@ export function AttacksGroupTakeActionItems({
 
   const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
 
+  const { items: runWorkflowItems, panels: runWorkflowPanels } =
+    useAttackRunWorkflowContextMenuItems({
+      attacksForWorkflowRun: attacksWithTimelineAlerts,
+      closePopover,
+    });
+
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
     attacksWithTimelineAlerts,
     closePopover,
@@ -122,6 +129,7 @@ export function AttacksGroupTakeActionItems({
     () => ({
       id: 0,
       items: [
+        ...runWorkflowItems,
         ...workflowItems,
         ...assignItems,
         ...tagsItems,
@@ -131,6 +139,7 @@ export function AttacksGroupTakeActionItems({
       ],
     }),
     [
+      runWorkflowItems,
       workflowItems,
       assignItems,
       tagsItems,
@@ -141,8 +150,8 @@ export function AttacksGroupTakeActionItems({
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () => [defaultPanel, ...workflowPanels, ...assignPanels, ...tagsPanels],
-    [workflowPanels, assignPanels, defaultPanel, tagsPanels]
+    () => [defaultPanel, ...runWorkflowPanels, ...workflowPanels, ...assignPanels, ...tagsPanels],
+    [runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
   );
 
   return <EuiContextMenu initialPanelId={defaultPanel.id} panels={panels} />;

@@ -135,4 +135,23 @@ describe('UpdateAttacksModal', () => {
     const updateButton = screen.getByTestId(UPDATE_ATTACKS_MODAL_UPDATE_ATTACKS_AND_ALERTS_TEST_ID);
     expect(updateButton).toHaveTextContent(/mark alert & discoveries/i);
   });
+
+  it('should render custom labels when provided', () => {
+    render(
+      <UpdateAttacksModal
+        {...defaultProps}
+        customLabels={{
+          title: 'Custom title',
+          body: 'Custom body',
+          attackOnly: 'Run workflow on attack only',
+          attackAndAlert: 'Run workflow on attack and alerts',
+        }}
+      />
+    );
+
+    expect(screen.getByText('Custom title')).toBeInTheDocument();
+    expect(screen.getByText('Custom body')).toBeInTheDocument();
+    expect(screen.getByText('Run workflow on attack only')).toBeInTheDocument();
+    expect(screen.getByText('Run workflow on attack and alerts')).toBeInTheDocument();
+  });
 });

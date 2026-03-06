@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MsearchRequestItem, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { get, isString } from 'lodash';
 import { expandFlattenedAlert } from '@kbn/alerting-plugin/server/alerts_client/lib';
 import type { AlertHit, CombinedSummarizedAlerts } from '@kbn/alerting-plugin/server/types';
@@ -105,20 +106,66 @@ async function fetchAlerts(
   }
 
   try {
-    const body: Record<string, unknown> = {
-      docs: alertIds.map(({ _id, _index }) => ({ _id, _index })),
-    };
+    const alertIdsByIndex = alertIds.reduce((acc, { _id, _index }) => {
+      const ids = acc.get(_index);
+      if (ids) {
+        ids.add(_id);
+      } else {
+        acc.set(_index, new Set([_id]));
+      }
+      return acc;
+    }, new Map<string, Set<string>>());
 
-    const response = await esClient.mget<Alert>(body);
+    const groupedIndices = Array.from(alertIdsByIndex.entries());
+    const searches: MsearchRequestItem[] = groupedIndices.flatMap(([_index, ids]) => [
+      { index: _index },
+      {
+        query: {
+          ids: {
+            values: Array.from(ids),
+          },
+        },
+        size: ids.size,
+        track_total_hits: false,
+      },
+    ]);
+
+    const msearchResponse = await esClient.msearch<Alert>({
+      searches,
+    });
+
+    const groupedSearchResults = msearchResponse.responses.map((response, index) => {
+      if ('error' in response) {
+        throw new Error(
+          `Failed to fetch alerts in index ${groupedIndices[index][0]}: ${response.error.type}: ${response.error.reason}`
+        );
+      }
+
+      return {
+        index: groupedIndices[index][0],
+        hits: response.hits.hits,
+      };
+    });
+
+    const hitsByRequestedIndexAndId = groupedSearchResults.reduce((acc, result) => {
+      for (const hit of result.hits) {
+        const key = `${result.index}:${hit._id}`;
+        const existingHits = acc.get(key) ?? [];
+        existingHits.push(hit);
+        acc.set(key, existingHits);
+      }
+      return acc;
+    }, new Map<string, SearchHit<Alert>[]>());
 
     const alerts: AlertHit[] = [];
-    for (let i = 0; i < response.docs.length; i++) {
-      const doc = response.docs[i];
-      if ('found' in doc && doc.found && '_source' in doc && doc._source) {
-        let alert = doc._source;
+    for (const requestedAlert of alertIds) {
+      const key = `${requestedAlert._index}:${requestedAlert._id}`;
+      const matchingHits = hitsByRequestedIndexAndId.get(key);
+      const hit = matchingHits?.[0];
 
+      if (hit?._source) {
+        let alert = hit._source;
         const ruleTypeId = get(alert, 'kibana.alert.rule.rule_type_id') as string;
-
         const registeredRuleType = ruleTypeRegistryMap.get(ruleTypeId || QUERY_RULE_TYPE_ID); // Default to 'siem.queryRule' if undefined
         // Format alert using the registered rule type's formatAlert function if available,
         if (registeredRuleType?.alerts?.formatAlert) {
@@ -126,10 +173,13 @@ async function fetchAlerts(
         }
 
         const expandedAlert = expandFlattenedAlert(alert) as Alert;
-
-        alerts.push({ _id: doc._id, _index: doc._index, ...expandedAlert });
+        alerts.push({
+          _id: hit._id ?? requestedAlert._id,
+          _index: hit._index ?? requestedAlert._index,
+          ...expandedAlert,
+        });
       } else {
-        logger.warn(`Alert not found: ${alertIds[i]._id} in index ${alertIds[i]._index}`);
+        logger.warn(`Alert not found: ${requestedAlert._id} in index ${requestedAlert._index}`);
       }
     }
 

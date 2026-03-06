@@ -13,6 +13,7 @@ import { getMockAttackDiscoveryAlerts } from '../../../../attack_discovery/pages
 import { useViewInAiAssistant } from '../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant';
 import { useAttacksPrivileges } from '../../../hooks/attacks/bulk_actions/use_attacks_privileges';
 import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
+import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
 jest.mock(
@@ -21,6 +22,9 @@ jest.mock(
 jest.mock('../../../hooks/attacks/bulk_actions/use_attacks_privileges');
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
+);
+jest.mock(
+  '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items'
 );
 jest.mock('../../../../common/components/user_privileges', () => ({
   useUserPrivileges: () => ({
@@ -43,6 +47,10 @@ const mockUseViewInAiAssistant = useViewInAiAssistant as jest.MockedFunction<
 const mockUseAttackViewInAiAssistantContextMenuItems =
   useAttackViewInAiAssistantContextMenuItems as jest.MockedFunction<
     typeof useAttackViewInAiAssistantContextMenuItems
+  >;
+const mockUseAttackRunWorkflowContextMenuItems =
+  useAttackRunWorkflowContextMenuItems as jest.MockedFunction<
+    typeof useAttackRunWorkflowContextMenuItems
   >;
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 
@@ -75,6 +83,17 @@ describe('AttacksGroupTakeActionItems', () => {
           'data-test-subj': 'viewInAiAssistant',
         },
       ],
+    });
+    mockUseAttackRunWorkflowContextMenuItems.mockReturnValue({
+      items: [
+        {
+          name: 'Run workflow',
+          key: 'run-attack-workflow-action',
+          panel: 'BULK_RUN_WORKFLOW_PANEL_ID',
+          'data-test-subj': 'run-attack-workflow-action',
+        },
+      ],
+      panels: [],
     });
   });
 
@@ -151,6 +170,13 @@ describe('AttacksGroupTakeActionItems', () => {
     it('should render the `Investigate in timeline` action item', async () => {
       const { findByText } = renderAttack(mockAttack);
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
+    });
+  });
+
+  describe('run workflow', () => {
+    it('should render the `Run workflow` action item', async () => {
+      const { findByText } = renderAttack(mockAttack);
+      expect(await findByText('Run workflow')).toBeInTheDocument();
     });
   });
 
