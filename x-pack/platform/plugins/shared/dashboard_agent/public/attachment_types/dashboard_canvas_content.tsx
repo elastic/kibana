@@ -351,38 +351,38 @@ export const DashboardCanvasContent = ({
   const { euiTheme } = useEuiTheme();
   const data = attachment.data;
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-  const [linkedSavedDashboardExists, setLinkedSavedDashboardExists] = useState(false);
+  // const [linkedSavedDashboardExists, setLinkedSavedDashboardExists] = useState(false);
   const styles = useMemo(() => getDashboardCanvasContentStyles({ euiTheme }), [euiTheme]);
   const linkedSavedObjectId = attachment.origin?.savedObjectId;
 
-  useEffect(
-    function checkLinkedSavedDashboardExists() {
-      let canceled = false;
+  // useEffect(
+  //   function checkLinkedSavedDashboardExists() {
+  //     let canceled = false;
 
-      if (!linkedSavedObjectId) {
-        setLinkedSavedDashboardExists(false);
-        return;
-      }
+  //     if (!linkedSavedObjectId) {
+  //       setLinkedSavedDashboardExists(false);
+  //       return;
+  //     }
 
-      setLinkedSavedDashboardExists(false);
-      doesSavedDashboardExist(linkedSavedObjectId)
-        .then((exists) => {
-          if (!canceled) {
-            setLinkedSavedDashboardExists(exists);
-          }
-        })
-        .catch(() => {
-          if (!canceled) {
-            setLinkedSavedDashboardExists(false);
-          }
-        });
+  //     setLinkedSavedDashboardExists(false);
+  //     doesSavedDashboardExist(linkedSavedObjectId)
+  //       .then((exists) => {
+  //         if (!canceled) {
+  //           setLinkedSavedDashboardExists(exists);
+  //         }
+  //       })
+  //       .catch(() => {
+  //         if (!canceled) {
+  //           setLinkedSavedDashboardExists(false);
+  //         }
+  //       });
 
-      return () => {
-        canceled = true;
-      };
-    },
-    [linkedSavedObjectId, doesSavedDashboardExist]
-  );
+  //     return () => {
+  //       canceled = true;
+  //     };
+  //   },
+  //   [linkedSavedObjectId, doesSavedDashboardExist]
+  // );
 
   const initialDashboardInput = useMemo(() => createDashboardRendererInitialInput(data), [data]);
 
