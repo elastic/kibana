@@ -6,49 +6,14 @@
  */
 
 import React from 'react';
-import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
-import {
-  findCasesStepCommonDefinition,
-  FindCasesStepTypeId,
-} from '../../common/workflows/steps/find_cases';
-import * as i18n from './translations';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { findCasesStepCommonDefinition } from '../../common/workflows/steps/find_cases';
 
-export const findCasesStepDefinition: PublicStepDefinition = {
+export const findCasesStepDefinition = createPublicStepDefinition({
   ...findCasesStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
       default: icon,
     }))
   ),
-  label: i18n.FIND_CASES_STEP_LABEL,
-  description: i18n.FIND_CASES_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.FIND_CASES_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Basic case search
-\`\`\`yaml
-- name: find_cases
-  type: ${FindCasesStepTypeId}
-  with:
-    owner: "securitySolution"
-    search: "critical incident"
-\`\`\``,
-      `## Filter and sort found cases
-\`\`\`yaml
-- name: find_open_cases
-  type: ${FindCasesStepTypeId}
-  with:
-    owner: "securitySolution"
-    status: "open"
-    severity: ["high", "critical"]
-    tags: ["investigation"]
-    sortField: "updatedAt"
-    sortOrder: "desc"
-    page: 1
-    perPage: 20
-\`\`\``,
-    ],
-  },
-  actionsMenuGroup: ActionsMenuGroup.kibana,
-};
+});

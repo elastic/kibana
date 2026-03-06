@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { createUpdateCasesStepDefinition } from './update_cases';
+import { updateCasesStepDefinition } from './update_cases';
 
 describe('createUpdateCasesStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
-    const definition = createUpdateCasesStepDefinition();
-
-    expect(definition.id).toBe('cases.updateCases');
-    expect(definition.actionsMenuGroup).toBe('kibana');
-    expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
+    expect(updateCasesStepDefinition.id).toBe('cases.updateCases');
+    expect(updateCasesStepDefinition.category).toBe('kibana');
+    expect(updateCasesStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 });

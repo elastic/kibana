@@ -6,9 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
 
 export const SetCustomFieldStepTypeId = 'cases.setCustomField';
 
@@ -33,6 +35,32 @@ export const setCustomFieldStepCommonDefinition: CommonStepDefinition<
   SetCustomFieldStepOutputSchema
 > = {
   id: SetCustomFieldStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.SET_CUSTOM_FIELD_STEP_LABEL,
+  description: i18n.SET_CUSTOM_FIELD_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set text custom field
+\`\`\`yaml
+- name: set_text_custom_field
+  type: ${SetCustomFieldStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    field_name: "priority_reason"
+    value: "investigate immediately"
+\`\`\``,
+      `## Set toggle custom field
+\`\`\`yaml
+- name: set_toggle_custom_field
+  type: ${SetCustomFieldStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    field_name: "is_automated"
+    value: true
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseCategories,
@@ -20,6 +21,7 @@ import {
   String,
   StringArray,
 } from '../../bundled-types.gen';
+import * as i18n from '../translations';
 
 export const FindCasesStepTypeId = 'cases.findCases';
 
@@ -83,6 +85,36 @@ export const findCasesStepCommonDefinition: CommonStepDefinition<
   FindCasesStepOutputSchema
 > = {
   id: FindCasesStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.FIND_CASES_STEP_LABEL,
+  description: i18n.FIND_CASES_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.FIND_CASES_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Basic case search
+\`\`\`yaml
+- name: find_cases
+  type: ${FindCasesStepTypeId}
+  with:
+    owner: "securitySolution"
+    search: "critical incident"
+\`\`\``,
+      `## Filter and sort found cases
+\`\`\`yaml
+- name: find_open_cases
+  type: ${FindCasesStepTypeId}
+  with:
+    owner: "securitySolution"
+    status: "open"
+    severity: ["high", "critical"]
+    tags: ["investigation"]
+    sortField: "updatedAt"
+    sortOrder: "desc"
+    page: 1
+    perPage: 20
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };

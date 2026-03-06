@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSetCustomFieldStepDefinition } from './set_custom_field';
+import { setCustomFieldStepDefinition } from './set_custom_field';
 import { getCaseConfigure } from '../containers/configure/api';
 import type { CasesConfigurationUI } from '../../common/ui';
 
@@ -61,7 +61,7 @@ describe('createSetCustomFieldStepDefinition', () => {
       },
     ] as CasesConfigurationUI[]);
 
-    const definition = createSetCustomFieldStepDefinition();
+    const definition = setCustomFieldStepDefinition;
     const inputHandlers = (definition.editorHandlers?.input ?? {}) as Record<
       string,
       { selection?: SelectionHandler }
@@ -77,7 +77,7 @@ describe('createSetCustomFieldStepDefinition', () => {
     const { definition } = setup();
 
     expect(definition.id).toBe('cases.setCustomField');
-    expect(definition.actionsMenuGroup).toBe('kibana');
+    expect(definition.category).toBe('kibana');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

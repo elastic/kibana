@@ -6,10 +6,6 @@
  */
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
-import { createUpdateCasesStepDefinition } from './update_cases';
-import { createSetCustomFieldStepDefinition } from './set_custom_field';
-import { addCommentStepDefinition } from './add_comment';
-import { findCasesStepDefinition } from './find_cases';
 
 import type { CasesPublicSetupDependencies } from '../types';
 
@@ -36,10 +32,18 @@ export function registerCasesSteps(
     import('./add_comment').then((m) => m.addCommentStepDefinition)
   );
 
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./update_cases').then((m) => m.updateCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_custom_field').then((m) => m.setCustomFieldStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./find_cases').then((m) => m.findCasesStepDefinition)
+  );
+
   // Leaving this in for now. We need to get support for reflective value lookup first.
   // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
-  workflowsExtensions.registerStepDefinition(createUpdateCasesStepDefinition());
-  workflowsExtensions.registerStepDefinition(createSetCustomFieldStepDefinition());
-  workflowsExtensions.registerStepDefinition(addCommentStepDefinition);
-  workflowsExtensions.registerStepDefinition(findCasesStepDefinition);
 }

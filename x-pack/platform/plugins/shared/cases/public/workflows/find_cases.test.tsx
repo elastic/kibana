@@ -10,7 +10,7 @@ import { findCasesStepDefinition } from './find_cases';
 describe('findCasesStepDefinition', () => {
   it('returns a public step definition with expected metadata', () => {
     expect(findCasesStepDefinition.id).toBe('cases.findCases');
-    expect(findCasesStepDefinition.actionsMenuGroup).toBe('kibana');
+    expect(findCasesStepDefinition.category).toBe('kibana');
     expect(findCasesStepDefinition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 });
