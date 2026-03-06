@@ -24,7 +24,7 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
-        "lineNumber": 245,
+        "lineNumber": 236,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
-            "lineNumber": 247,
+            "lineNumber": 238,
             "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
@@ -71,7 +71,7 @@
           "(props: React.PropsWithChildren<Services>) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
-        "lineNumber": 212,
+        "lineNumber": 203,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -87,7 +87,7 @@
               "React.PropsWithChildren<Services>"
             ],
             "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
-            "lineNumber": 213,
+            "lineNumber": 204,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -273,7 +273,7 @@
           "() => Services | undefined"
         ],
         "path": "src/platform/packages/shared/content-management/kbn-content-management-tags/src/services.tsx",
-        "lineNumber": 326,
+        "lineNumber": 317,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
