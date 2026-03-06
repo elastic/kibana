@@ -10,6 +10,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
@@ -31,7 +32,12 @@ export const initComponent = memoize(
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const inputProps = persistableStateAttachmentState as unknown as ChangePointDetectionProps;
+        const rawState = persistableStateAttachmentState as unknown as Record<string, unknown>;
+        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+        const inputProps = {
+          ...(persistableStateAttachmentState as unknown as ChangePointDetectionProps),
+          timeRange,
+        };
 
         const listItems = [
           {

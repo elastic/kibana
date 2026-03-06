@@ -10,6 +10,7 @@ import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type {
@@ -24,8 +25,12 @@ export const initComponent = memoize(
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
       });
-      const inputProps =
-        persistableStateAttachmentState as unknown as LogRateAnalysisEmbeddableWrapperProps;
+      const rawState = persistableStateAttachmentState as unknown as Record<string, unknown>;
+      const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+      const inputProps = {
+        ...(persistableStateAttachmentState as unknown as LogRateAnalysisEmbeddableWrapperProps),
+        timeRange,
+      };
 
       const listItems = [
         {
