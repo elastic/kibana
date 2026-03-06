@@ -26,17 +26,6 @@ export function extractDashboardState(
     const { pinned_panels, autoApplyFilters } = extractPinnedPanelsState(stateAsObject);
 
     if (pinned_panels) dashboardState.pinned_panels = pinned_panels;
-    if (
-      dashboardState.options?.auto_apply_filters === undefined &&
-      typeof autoApplyFilters === 'boolean'
-    ) {
-      // >9.4 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
-      dashboardState.options = {
-        ...DEFAULT_DASHBOARD_OPTIONS,
-        ...dashboardState.options,
-        auto_apply_filters: autoApplyFilters,
-      };
-    }
 
     if (typeof stateAsObject.description === 'string') {
       dashboardState.description = stateAsObject.description;
@@ -57,6 +46,10 @@ export function extractDashboardState(
       dashboardState.viewMode = stateAsObject.viewMode as ViewMode;
 
     const options = extractOptions(stateAsObject);
+    if (options.auto_apply_filters === undefined && typeof autoApplyFilters === 'boolean') {
+      // <9.4 dashboard.options.auto_apply_filters stored as control group `autoApplySelections` setting
+      options.auto_apply_filters = autoApplyFilters;
+    }
 
     dashboardState = {
       ...DEFAULT_DASHBOARD_STATE,
