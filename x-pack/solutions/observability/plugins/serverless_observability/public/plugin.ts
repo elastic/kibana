@@ -48,7 +48,6 @@ export class ServerlessObservabilityPlugin
     const { serverless, management, security } = setupDeps;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
-    const showEvals = Boolean(core.application.capabilities.evals?.show);
 
     const navigationTree$ = combineLatest([
       setupDeps.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
@@ -60,7 +59,6 @@ export class ServerlessObservabilityPlugin
           overviewAvailable: core.pricing.isFeatureAvailable('observability:complete_overview'),
           isCasesAvailable: Boolean(setupDeps.cases),
           showAiAssistant: chatExperience !== AIChatExperience.Agent,
-          showEvals,
         });
       })
     );

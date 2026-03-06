@@ -24,13 +24,11 @@ export const createNavigationTree = ({
   overviewAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
-  showEvals = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
-  showEvals?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -382,16 +380,6 @@ export const createNavigationTree = ({
           },
         ],
       },
-      ...filterForFeatureAvailability(
-        {
-          link: 'evals',
-          title: i18n.translate('xpack.serverlessObservability.nav.evals', {
-            defaultMessage: 'Evaluations',
-          }),
-          icon: 'beaker',
-        },
-        showEvals
-      ),
     ],
     footer: [
       {

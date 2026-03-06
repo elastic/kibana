@@ -32,18 +32,6 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('shows Evaluations when evals is enabled', () => {
-    const { body } = createNavigationTree({ showEvals: true });
-    const evalsNode = body.find((item) => item.link === 'evals');
-    expect(evalsNode).toBeDefined();
-  });
-
-  it('hides Evaluations when evals is disabled', () => {
-    const { body } = createNavigationTree({ showEvals: false });
-    const evalsNode = body.find((item) => item.link === 'evals');
-    expect(evalsNode).toBeUndefined();
-  });
-
   it('shows AI Assistant and hides Agents when AI Assistant is enabled', () => {
     const { body } = createNavigationTree({});
 
