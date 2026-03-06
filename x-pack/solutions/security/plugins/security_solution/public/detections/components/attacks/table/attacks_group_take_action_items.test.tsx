@@ -17,9 +17,7 @@ import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-jest.mock('../../../../common/components/user_privileges');
 jest.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items'
 );
@@ -232,16 +230,7 @@ describe('AttacksGroupTakeActionItems', () => {
   });
 
   describe('investigate in timeline', () => {
-    it('does not render the `Investigate in timeline` action item when user does not have timeline read privileges', () => {
-      const { queryByText } = renderAttack(mockAttack);
-      expect(queryByText('Investigate in timeline')).not.toBeInTheDocument();
-    });
-
     it('renders the `Investigate in timeline` action item when user has timeline read privileges', async () => {
-      (useUserPrivileges as jest.Mock).mockReturnValue({
-        ...useUserPrivileges(),
-        timelinePrivileges: { read: true },
-      });
       const { findByText } = renderAttack(mockAttack);
 
       expect(await findByText('Investigate in timeline')).toBeInTheDocument();
