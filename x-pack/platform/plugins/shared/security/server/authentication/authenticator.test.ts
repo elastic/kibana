@@ -1854,7 +1854,7 @@ describe('Authenticator', () => {
         it('expected message is attached to the URL when authentication provider redirects to login page', async () => {
           const request = httpServerMock.createKibanaRequest();
           const redirectUrl = '/mock-server-basepath/login?foo=bar';
-          const failureReason = new FailureClass();
+          const failureReason: SessionError = new FailureClass();
 
           mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
 
