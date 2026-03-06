@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
@@ -52,21 +51,18 @@ steps:
       message: "Hello from Scout API test 2"
 `;
 apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymentAgnostic }, () => {
-  let adminApiCredentials: RoleApiCredentials;
-  const createdIds: string[] = [];
+  let workflowsApi: WorkflowsApiService;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
-    adminApiCredentials = await requestAuth.getApiKey('admin');
+  apiTest.beforeAll(async ({ requestAuth, getWorkflowsApi }) => {
+    const adminApiCredentials = await requestAuth.getApiKey('admin');
+    workflowsApi = await getWorkflowsApi(adminApiCredentials);
   });
 
-  apiTest.afterAll(async ({ getWorkflowsApi }) => {
-    const workflowsApi = await getWorkflowsApi(adminApiCredentials);
-    for (const id of createdIds) {
-      await workflowsApi.bulkDelete([id]);
-    }
+  apiTest.afterAll(async () => {
+    workflowsApi.deleteAllCreatedWorkflows();
   });
 
-  async function runConcurrencyWorkflow(workflowsApi: WorkflowsApiService, workflowId: string) {
+  async function runConcurrencyWorkflow(workflowId: string) {
     const events = [
       { env: 'dev', problem: 'issue-1' },
       { env: 'prod', problem: 'issue-2' },
@@ -115,16 +111,12 @@ apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymen
 
   apiTest(
     'cancel-in-progress strategy cancels previous executions and completes the latest',
-    async ({ getWorkflowsApi }) => {
-      const workflowsApi = await getWorkflowsApi(adminApiCredentials);
+    async () => {
       const createdWorkflow = await workflowsApi.create(
         getConcurrencyWorkflowYaml('cancel-in-progress')
       );
 
-      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
-        workflowsApi,
-        createdWorkflow.id
-      );
+      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(createdWorkflow.id);
 
       Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
         expect(executions.length).toBeGreaterThan(0);
@@ -148,14 +140,10 @@ apiTest.describe('Workflow execution concurrency control', { tag: tags.deploymen
 
   apiTest(
     'drop strategy drops new executions until there is an already running execution',
-    async ({ getWorkflowsApi }) => {
-      const workflowsApi = await getWorkflowsApi(adminApiCredentials);
+    async () => {
       const createdWorkflow = await workflowsApi.create(getConcurrencyWorkflowYaml('drop'));
 
-      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
-        workflowsApi,
-        createdWorkflow.id
-      );
+      const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(createdWorkflow.id);
 
       Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
         expect(executions.length).toBeGreaterThan(0);

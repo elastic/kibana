@@ -12,6 +12,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import { apiTest } from '../../fixtures';
+import { waitForConditionOrThrow } from '../../fixtures/utils/wait_for_condition';
 import type { WorkflowsApiService } from '../../fixtures/workflows_api_service';
 
 const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 5;
@@ -57,6 +58,7 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
   let workflowId: string;
 
   apiTest.beforeAll(async ({ requestAuth, getWorkflowsApi }) => {
+    apiTest.setTimeout(60_000);
     adminApiCredentials = await requestAuth.getApiKey('admin');
     workflowsApi = await getWorkflowsApi(adminApiCredentials);
 
@@ -65,21 +67,20 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
   });
 
   apiTest.afterAll(async () => {
-    await workflowsApi.update(workflowId, { enabled: false });
-    await workflowsApi.bulkDelete([workflowId]);
+    await workflowsApi.deleteAllCreatedWorkflows();
   });
 
   apiTest('enabling a scheduled workflow triggers executions automatically', async () => {
-    apiTest.setTimeout(20_000);
-
     await workflowsApi.update(workflowId, { enabled: true });
 
-    // Wait long enough for at least 2 scheduled executions (5s interval + buffer)
-    await new Promise((resolve) => setTimeout(resolve, 16_000));
+    const { results } = await waitForConditionOrThrow({
+      action: () => workflowsApi.getExecutions(workflowId),
+      condition: ({ results: r }) => r.length > 2,
+      interval: 1000,
+      timeout: 20_000,
+      errorMessage: ({ results: r }) => `Expected > 2 executions, got ${r.length}`,
+    });
 
-    const { results } = await workflowsApi.getExecutions(workflowId);
-
-    expect(results.length).toBeGreaterThan(2);
     expect(results.length).toBeLessThan(5);
 
     const completedExecutions = await Promise.all(
@@ -95,20 +96,23 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
       const previousStart = new Date(
         completedExecutionsSorted[index - 1]?.startedAt ?? ''
       ).getTime();
-      expect(currentStart).toBeGreaterThan(
-        previousStart + SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000
+      expect(currentStart - previousStart).toBeGreaterThan(
+        SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000
       );
       expect(currentExecution?.status).toBe(ExecutionStatus.COMPLETED);
     }
   });
 
   apiTest('disabling a scheduled workflow stops new executions from firing', async () => {
-    apiTest.setTimeout(20_000);
-
     await workflowsApi.update(workflowId, { enabled: true });
 
-    // Wait for at least one execution
-    await new Promise((resolve) => setTimeout(resolve, 8_000));
+    await waitForConditionOrThrow({
+      action: () => workflowsApi.getExecutions(workflowId),
+      condition: ({ results: r }) => r.length >= 1,
+      interval: 1000,
+      timeout: 10_000,
+      errorMessage: 'No executions appeared after enabling the workflow',
+    });
 
     await workflowsApi.update(workflowId, { enabled: false });
 
@@ -129,8 +133,6 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
   apiTest(
     'scheduled executions do not overlap when a previous run is still in progress',
     async () => {
-      apiTest.setTimeout(30_000);
-
       // Each execution takes ~7s (two 3s waits + console step), scheduled every 5s.
       // If the scheduler is reentrant, it must wait for the previous run to finish
       // before starting the next one, so consecutive starts should be >5s apart.
@@ -138,8 +140,17 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
         LONG_RUNNING_SCHEDULED_WORKFLOW_YAML
       );
 
-      // Let the schedule fire multiple times while each run is still in progress
-      await new Promise((resolve) => setTimeout(resolve, 20_000));
+      await waitForConditionOrThrow({
+        action: () => workflowsApi.getExecutions(createdLongRunningWorkflow.id),
+        condition: ({ results: r }) =>
+          r.filter((e) => e.status === ExecutionStatus.COMPLETED).length >= 2,
+        interval: 2000,
+        timeout: 30_000,
+        errorMessage: ({ results: r }) =>
+          `Expected >= 2 completed executions, got ${
+            r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
+          }`,
+      });
       await workflowsApi.update(createdLongRunningWorkflow.id, { enabled: false });
       const { results } = await workflowsApi.getExecutions(createdLongRunningWorkflow.id);
 
@@ -161,8 +172,8 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
       for (let index = 1; index < completedExecutions.length; index++) {
         const currentStart = new Date(completedExecutions[index]?.startedAt ?? '').getTime();
         const previousStart = new Date(completedExecutions[index - 1]?.startedAt ?? '').getTime();
-        expect(currentStart).toBeGreaterThan(
-          previousStart + SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2 // multiply by 2 because the wait step takes 6s that will be added to the interval
+        expect(currentStart - previousStart).toBeGreaterThan(
+          SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2 // multiply by 2 because the wait step takes 6s that will be added to the interval
         );
       }
     }

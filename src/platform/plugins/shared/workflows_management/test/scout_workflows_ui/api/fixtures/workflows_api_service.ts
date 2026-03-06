@@ -11,6 +11,7 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { isTerminalStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { COMMON_HEADERS, WORKFLOWS_API_BASE } from './constants';
+import { waitForConditionOrThrow } from './utils/wait_for_condition';
 
 interface ApiClientOptions {
   headers?: Record<string, string>;
@@ -38,6 +39,7 @@ interface GetWorkflowExecutionOptions {
 
 export class WorkflowsApiService {
   private readonly headers: Record<string, string>;
+  private createdWorkflowIds: string[] = [];
 
   constructor(private readonly apiClient: ApiClient, credentials: RoleApiCredentials) {
     this.headers = { ...COMMON_HEADERS, ...credentials.apiKeyHeader };
@@ -50,7 +52,11 @@ export class WorkflowsApiService {
         responseType: 'json',
         body: { yaml },
       })
-      .then((response) => response.body as { id: string });
+      .then((response) => {
+        const id = (response.body as { id: string }).id;
+        this.createdWorkflowIds.push(id);
+        return { id };
+      });
   }
 
   async run({
@@ -69,20 +75,18 @@ export class WorkflowsApiService {
       .then((response) => response.body as { workflowExecutionId: string });
   }
 
-  async waitForTermination({
+  waitForTermination({
     workflowExecutionId,
   }: {
     workflowExecutionId: string;
   }): Promise<WorkflowExecutionDto | undefined> {
-    for (let i = 0; i < 20; i++) {
-      const execution = await this.getExecution(workflowExecutionId);
-      if (execution && isTerminalStatus(execution.status)) {
-        return execution;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
-
-    return this.getExecution(workflowExecutionId);
+    return waitForConditionOrThrow({
+      action: () => this.getExecution(workflowExecutionId),
+      condition: (execution) => !!execution && isTerminalStatus(execution.status ?? ''),
+      interval: 1000,
+      timeout: 20_000,
+      errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
+    });
   }
 
   async getExecution(
@@ -150,5 +154,13 @@ export class WorkflowsApiService {
         body: { ids: workflowIds },
       });
     }
+  }
+
+  deleteAllCreatedWorkflows() {
+    return this.apiClient.delete(WORKFLOWS_API_BASE, {
+      headers: this.headers,
+      responseType: 'json',
+      body: { ids: this.createdWorkflowIds },
+    });
   }
 }
