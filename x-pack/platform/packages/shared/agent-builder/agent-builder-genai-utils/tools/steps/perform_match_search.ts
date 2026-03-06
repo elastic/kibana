@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { MappingField } from '../utils/mappings';
-import { executeEsql, interpolateEsqlQuery } from '../utils/esql';
+import { executeEsql } from '../utils/esql';
 import { isCcsTarget } from '../utils/ccs';
 
 export interface MatchResult {
@@ -129,47 +129,58 @@ const buildMvAppendExpr = (fieldPaths: string[]): string => {
   return fieldPaths.reduce((acc, path) => `MV_APPEND(${acc}, ${path})`);
 };
 
-const extractSnippets = async ({
-  docId,
+const extractSnippetsBatch = async ({
+  docIds,
   index,
   term,
   fields,
   esClient,
   logger,
 }: {
-  docId: string;
+  docIds: string[];
   index: string;
   term: string;
   fields: MappingField[];
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<string[]> => {
+}): Promise<Map<string, string[]>> => {
+  const result = new Map<string, string[]>();
+  if (docIds.length === 0) return result;
+
   const fieldPaths = fields.map((field) => field.path);
   const mvAppendExpr = buildMvAppendExpr(fieldPaths);
 
   const snippetCount = rerankSnippets ? snippetRankWindowSize : numSnippets;
 
-  const esqlQuery = interpolateEsqlQuery(
-    `FROM ${index} METADATA _id | WHERE _id == ?docId | EVAL doc = MV_DEDUPE(${mvAppendExpr}) | EVAL snippets = TOP_SNIPPETS(doc, ?term, {"num_snippets": ${snippetCount}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP snippets`,
-    { docId, term }
-  );
+  const idList = docIds.map((id) => `"${escapeEsqlString(id)}"`).join(', ');
+  const escapedTerm = escapeEsqlString(term);
 
-  logger.info(`TOP_SNIPPETS query for doc="${docId}": ${esqlQuery}`);
+  const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | EVAL doc = MV_DEDUPE(${mvAppendExpr}) | EVAL snippets = TOP_SNIPPETS(doc, "${escapedTerm}", {"num_snippets": ${snippetCount}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP _id, snippets`;
+
+  logger.info(`TOP_SNIPPETS batch query for ${docIds.length} docs: ${esqlQuery}`);
 
   const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
 
-  const snippets: string[] = [];
+  // Response columns are [_id, snippets]; group snippets by doc ID
   for (const row of esqlResponse.values) {
-    const value = row[0];
-    if (Array.isArray(value)) {
-      for (const item of value) {
+    const docId = row[0];
+    const snippet = row[1];
+    if (typeof docId !== 'string') continue;
+
+    if (!result.has(docId)) {
+      result.set(docId, []);
+    }
+    const snippets = result.get(docId)!;
+    if (Array.isArray(snippet)) {
+      for (const item of snippet) {
         if (typeof item === 'string') snippets.push(item);
       }
-    } else if (typeof value === 'string') {
-      snippets.push(value);
+    } else if (typeof snippet === 'string') {
+      snippets.push(snippet);
     }
   }
-  return snippets;
+
+  return result;
 };
 
 const rerankDocuments = async ({
@@ -311,53 +322,54 @@ export const performMatchSearch = async ({
   const hitsByDocId = new Map(response.hits.hits.map((hit) => [hit._id!, hit]));
 
   if (useSnippets) {
+    let rawSnippetsByDocId = new Map<string, string[]>();
+    try {
+      rawSnippetsByDocId = await extractSnippetsBatch({
+        docIds: hitOrder,
+        index,
+        term,
+        fields,
+        esClient,
+        logger,
+      });
+    } catch (error) {
+      logger.info(
+        `TOP_SNIPPETS batch query failed: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+
     const snippetsByDocId = new Map<string, string[]>();
 
     for (const docId of hitOrder) {
-      try {
-        const rawSnippets = await extractSnippets({
-          docId,
-          index,
-          term,
-          fields,
-          esClient,
-          logger,
-        });
+      const rawSnippets = rawSnippetsByDocId.get(docId) ?? [];
 
-        const seen = new Set<string>();
-        const uniqueSnippets = rawSnippets.filter((s) => {
-          if (seen.has(s)) return false;
-          seen.add(s);
-          return true;
-        });
+      const seen = new Set<string>();
+      const uniqueSnippets = rawSnippets.filter((s) => {
+        if (seen.has(s)) return false;
+        seen.add(s);
+        return true;
+      });
 
-        let finalSnippets = uniqueSnippets;
-        if (rerankSnippets && uniqueSnippets.length > 0) {
-          try {
-            const entries: SnippetEntry[] = uniqueSnippets.map((s) => ({ docId, snippet: s }));
-            const reranked = await rerankSnippetEntries({ entries, term, esClient, logger });
-            logger.info(
-              `RERANK snippets for doc="${docId}": ${uniqueSnippets.length} candidates -> ${reranked.length} returned`
-            );
-            finalSnippets = reranked.map((e) => e.snippet);
-          } catch (error) {
-            logger.info(
-              `RERANK snippets failed for doc="${docId}", keeping original order: ${
-                error instanceof Error ? error.message : String(error)
-              }`
-            );
-            finalSnippets = uniqueSnippets.slice(0, numSnippets);
-          }
+      let finalSnippets = uniqueSnippets;
+      if (rerankSnippets && uniqueSnippets.length > 0) {
+        try {
+          const entries: SnippetEntry[] = uniqueSnippets.map((s) => ({ docId, snippet: s }));
+          const reranked = await rerankSnippetEntries({ entries, term, esClient, logger });
+          logger.info(
+            `RERANK snippets for doc="${docId}": ${uniqueSnippets.length} candidates -> ${reranked.length} returned`
+          );
+          finalSnippets = reranked.map((e) => e.snippet);
+        } catch (error) {
+          logger.info(
+            `RERANK snippets failed for doc="${docId}", keeping original order: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          finalSnippets = uniqueSnippets.slice(0, numSnippets);
         }
-
-        snippetsByDocId.set(docId, finalSnippets);
-      } catch (error) {
-        logger.info(
-          `TOP_SNIPPETS failed for doc="${docId}": ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
       }
+
+      snippetsByDocId.set(docId, finalSnippets);
     }
 
     const results: MatchResult[] = hitOrder.map((docId) => ({
