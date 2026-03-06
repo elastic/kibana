@@ -6,7 +6,8 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { AgentType } from '@kbn/agent-builder-common';
+import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
@@ -32,6 +33,14 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     labels: document._source.labels,
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
+    visibility: document._source.visibility ?? AgentVisibility.Public,
+    created_by:
+      document._source.created_by_id || document._source.created_by_name
+        ? {
+            id: document._source.created_by_id,
+            username: document._source.created_by_name ?? 'unknown',
+          }
+        : undefined,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
@@ -42,10 +51,12 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
 
 export const createRequestToEs = ({
   profile,
+  user,
   space,
   creationDate,
 }: {
   profile: AgentCreateRequest;
+  user: UserIdAndName;
   space: string;
   creationDate: Date;
 }): AgentProperties => {
@@ -58,6 +69,9 @@ export const createRequestToEs = ({
     labels: profile.labels,
     avatar_color: profile.avatar_color,
     avatar_symbol: profile.avatar_symbol,
+    visibility: profile.visibility ?? AgentVisibility.Public,
+    created_by_id: user.id,
+    created_by_name: user.username,
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
@@ -80,16 +94,17 @@ export const updateRequestToEs = ({
   updateDate: Date;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
+  const { configuration, ...restUpdate } = update;
 
   const updated: AgentProperties = {
     ...currentProps,
-    ...update,
+    ...restUpdate,
     id: agentId,
     // Explicitly omit configuration to ensure migration
     configuration: undefined,
     config: {
       ...currentConfig,
-      ...update.configuration,
+      ...configuration,
     },
     updated_at: updateDate.toISOString(),
   };

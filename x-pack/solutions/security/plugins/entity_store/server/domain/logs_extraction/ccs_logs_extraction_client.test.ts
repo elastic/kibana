@@ -9,7 +9,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { CcsLogsExtractionClient } from '.';
-import type { CRUDClient } from '../crud_client';
+import type { CRUDClient } from '../crud';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import {

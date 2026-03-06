@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentType } from '@kbn/agent-builder-common';
+import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
@@ -27,6 +27,9 @@ describe('fromEs', () => {
         labels: ['foo', 'bar'],
         avatar_color: 'blue',
         avatar_symbol: 'star',
+        visibility: AgentVisibility.Shared,
+        created_by_id: 'user-id-1',
+        created_by_name: 'test-user',
         config: {
           instructions: 'instructions',
           tools: [{ tool_ids: ['id_1', 'id_2'] }],
@@ -58,6 +61,8 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
+      visibility: AgentVisibility.Shared,
+      created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
 
@@ -88,6 +93,8 @@ describe('fromEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'blue',
       avatar_symbol: 'star',
+      visibility: AgentVisibility.Shared,
+      created_by: { id: 'user-id-1', username: 'test-user' },
     });
   });
 
@@ -100,6 +107,21 @@ describe('fromEs', () => {
     const definition = fromEs(document);
 
     expect(definition.id).toEqual('_id');
+  });
+
+  it('defaults ownership and visibility for legacy documents without new fields', () => {
+    const document = getSampleDoc();
+    // @ts-ignore simulating legacy document
+    delete document._source.visibility;
+    // @ts-ignore simulating legacy document
+    delete document._source.created_by_id;
+    // @ts-ignore simulating legacy document
+    delete document._source.created_by_name;
+
+    const definition = fromEs(document);
+
+    expect(definition.visibility).toEqual(AgentVisibility.Public);
+    expect(definition.created_by).toBeUndefined();
   });
 });
 
@@ -126,6 +148,7 @@ describe('createRequestToEs', () => {
 
     const docProperties = createRequestToEs({
       profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
       space: 'space-2',
       creationDate: date,
     });
@@ -147,6 +170,9 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'user-id',
+      created_by_name: 'test-user',
       created_at: expect.any(String),
       updated_at: expect.any(String),
     });
@@ -182,6 +208,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: updateDate,
     };
@@ -218,6 +247,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'red',
       avatar_symbol: 'triangle',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });
@@ -245,6 +277,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: updateDate,
     };
@@ -281,6 +316,9 @@ describe('updateRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'yellow',
       avatar_symbol: 'square',
+      visibility: AgentVisibility.Public,
+      created_by_id: 'test-user-id',
+      created_by_name: 'test-user',
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });

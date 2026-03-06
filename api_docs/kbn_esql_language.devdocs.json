@@ -3817,7 +3817,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/definitions/constants.ts",
-        "lineNumber": 154,
+        "lineNumber": 85,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

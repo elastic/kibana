@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
   ChromeHelpExtension,
   ChromeGlobalHelpExtensionMenuLink,
@@ -35,7 +34,7 @@ import type {
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
 import { css } from '@emotion/react';
-import { HeaderExtension } from './header_extension';
+import type { ChromeApplicationContext } from '../context';
 import { isModifiedOrPrevented } from './nav_link';
 
 const buildDefaultContentLinks = ({
@@ -68,7 +67,7 @@ const buildDefaultContentLinks = ({
 ];
 
 interface Props {
-  navigateToUrl: InternalApplicationStart['navigateToUrl'];
+  navigateToUrl: ChromeApplicationContext['navigateToUrl'];
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
@@ -124,15 +123,6 @@ export const HeaderHelpMenu = ({
 
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
-
-  const helpExtensionLegacyContent = helpExtension?.content;
-  const helpExtensionMount = useCallback(
-    (domNode: HTMLDivElement) => {
-      const unmount = helpExtensionLegacyContent?.(domNode, { hideHelpMenu: closeMenu });
-      return unmount ?? (() => {});
-    },
-    [helpExtensionLegacyContent, closeMenu]
-  );
 
   const createOnClickHandler = useCallback(
     (href: string) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -198,7 +188,7 @@ export const HeaderHelpMenu = ({
 
   let customContent: React.ReactNode = null;
   if (helpExtension) {
-    const { appName, links, content, reactContent } = helpExtension;
+    const { appName, links, content } = helpExtension;
 
     const customLinks =
       links &&
@@ -234,12 +224,7 @@ export const HeaderHelpMenu = ({
         }
       });
 
-    let extensionContent: React.ReactNode = null;
-    if (reactContent) {
-      extensionContent = reactContent({ hideHelpMenu: closeMenu });
-    } else if (content) {
-      extensionContent = <HeaderExtension extension={helpExtensionMount} />;
-    }
+    const extensionContent = content?.({ hideHelpMenu: closeMenu }) ?? null;
 
     customContent = (
       <>

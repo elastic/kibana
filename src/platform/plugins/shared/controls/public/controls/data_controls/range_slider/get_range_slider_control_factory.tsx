@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, combineLatest, debounceTime, map, merge, of, skip } from 'rxjs';
 
 import {
-  apiCanPinPanels,
+  apiHasPinnedPanels,
   apiHasSections,
   apiPublishesViewMode,
   fetch$,
@@ -210,7 +210,7 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
         ? parentApi.viewMode$
         : new BehaviorSubject<boolean>(true);
 
-      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,

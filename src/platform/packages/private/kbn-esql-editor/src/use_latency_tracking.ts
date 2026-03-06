@@ -185,7 +185,7 @@ export const useValidationLatencyTracking = ({
   );
 
   const trackValidationLatencyEnd = useCallback(
-    (active: boolean) => {
+    (active: boolean, callbacksDuration?: number) => {
       if (!active) {
         return;
       }
@@ -198,6 +198,7 @@ export const useValidationLatencyTracking = ({
       telemetryService.trackValidationLatency({
         ...result,
         sessionId: sessionIdRef.current,
+        callbacksDuration,
       });
     },
     [sessionIdRef, telemetryService]

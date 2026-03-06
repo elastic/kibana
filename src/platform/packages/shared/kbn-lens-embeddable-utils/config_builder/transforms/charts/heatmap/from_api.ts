@@ -167,7 +167,7 @@ export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWitho
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

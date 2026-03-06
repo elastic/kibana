@@ -1842,7 +1842,7 @@
           "\nThis is a local type equivalent to {@link UiSettingsType} for flexibility."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"select\" | \"image\" | \"array\" | \"json\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"array\" | \"select\" | \"image\" | \"json\" | \"markdown\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/types/setting_type.ts",
         "lineNumber": 12,

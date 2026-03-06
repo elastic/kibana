@@ -141,6 +141,7 @@ export const createContextAwarenessMocks = ({
             });
             return prevValue.docViewsRegistry(registry);
           },
+          renderHeader: () => <div data-test-subj="customDocViewerHeader">Custom Header</div>,
         };
       },
     } as DocumentProfileProvider['profile'],

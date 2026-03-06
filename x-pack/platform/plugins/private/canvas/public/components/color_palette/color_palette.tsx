@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import chroma from 'chroma-js';
 import { readableColor } from '../../lib/readable_color';
@@ -72,11 +71,4 @@ export const ColorPalette: FC<Props> = ({
       </ItemGrid>
     </div>
   );
-};
-
-ColorPalette.propTypes = {
-  colors: PropTypes.array,
-  colorsPerRow: PropTypes.number,
-  onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
 };

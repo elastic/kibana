@@ -9,5 +9,15 @@
 
 // Fast local confidence gate: run quick checks on current pending local changes
 // to address failures before PR CI.
-process.argv.push('--ref', 'HEAD', '--include-untracked');
+const argv = process.argv.slice(2);
+const hasFlag = (flag: string) => argv.some((arg) => arg === flag || arg.startsWith(`${flag}=`));
+
+if (!hasFlag('--ref')) {
+  process.argv.push('--ref', 'HEAD');
+}
+
+if (!hasFlag('--include-untracked') && !hasFlag('--no-include-untracked')) {
+  process.argv.push('--include-untracked');
+}
+
 require('./precommit_hook');

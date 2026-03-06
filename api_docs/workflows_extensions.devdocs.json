@@ -284,7 +284,7 @@
           "\nDocumentation information for a workflow step."
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -302,7 +302,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -320,7 +320,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -338,7 +338,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

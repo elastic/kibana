@@ -21,7 +21,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -181,6 +181,12 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  /**
+   * Optional render function to display a custom header section above the tabs
+   * @param props The doc view render props
+   * @returns A React element to render above the tabs
+   */
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**

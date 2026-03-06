@@ -190,12 +190,44 @@ Embeddable serialized state can not be modified with breaking changes. Fields ca
 #### snake_case
 Kibana's REST APIs require snake_case. Therefore, embeddable serialized state must be in snake_case.
 
-#### Minimize required fields
-Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable. Where possible, avoid a required field by specifying a default.
+#### Avoid duplicating state
+Avoid unnecessary information to keep public REST APIs concise. Do not store duplicate information. Derived fields can be created in public when initializing an embeddable.
 
 #### Apply defaults in your schema
-POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. Any key that has a `defaultValue` must not be wrapped
-in a `schema.maybe`, as this will cause the defaults not to be applied at validation time.
+POST, PUT, and GET requests should return complete data. Apply defaults in your embeddable schemas by using the `defaultValue` key. 
+
+Any key that has a `defaultValue` should not be wrapped
+in a `schema.maybe`, as this will cause the defaults to not be applied at validation time.
+
+When a field is required with a default, instead of failing the request for not supplying a required field, route validation supplies the default value to the handler. 
+
+```
+//
+// Use this pattern
+//
+// When route validation recieves "{}", validation passes "{ foo: '' }" to handler
+//
+const myEmbeddlabeStateSchema = schema: schema.object({
+  foo: schema.string({
+    defaultValue: ''
+  }),
+});
+```
+
+When a field is optional with a default, route validation does not supply the default value to the handler.
+
+```
+//
+// Avoid this pattern
+//
+// When route validation recieves "{}", validation passes "{}" to route handler
+//
+const myEmbeddlabeStateSchema = schema: schema.object({
+  foo: schema.maybe(schema.string({
+    defaultValue: ''
+  })),
+});
+```
 
 #### Derive types from schemas
 Derive Embeddable state typescript types from REST API schemas to ensure type consistency.

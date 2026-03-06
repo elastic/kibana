@@ -240,7 +240,7 @@
             "label": "anonymizationFields",
             "description": [],
             "signature": [
-              "{ id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[] | undefined"
+              "z.infer<any>[] | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 288,
@@ -1463,11 +1463,7 @@
             "label": "onNewReplacements",
             "description": [],
             "signature": [
-              "((newReplacements: ",
-              "objectOutputType",
-              "<{}, ",
-              "ZodString",
-              ", \"strip\">) => void) | undefined"
+              "((newReplacements: z.infer<any>) => void) | undefined"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 301,
@@ -1478,15 +1474,12 @@
               {
                 "parentPluginId": "elasticAssistant",
                 "id": "def-server.AssistantToolParams.onNewReplacements.$1",
-                "type": "CompoundType",
+                "type": "Any",
                 "tags": [],
                 "label": "newReplacements",
                 "description": [],
                 "signature": [
-                  "objectOutputType",
-                  "<{}, ",
-                  "ZodString",
-                  ", \"strip\">"
+                  "z.infer<any>"
                 ],
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
                 "lineNumber": 301,
@@ -1501,15 +1494,12 @@
           {
             "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.replacements",
-            "type": "CompoundType",
+            "type": "Any",
             "tags": [],
             "label": "replacements",
             "description": [],
             "signature": [
-              "objectOutputType",
-              "<{}, ",
-              "ZodString",
-              ", \"strip\"> | undefined"
+              "any"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 302,
@@ -1526,19 +1516,7 @@
             "description": [],
             "signature": [
               "KibanaRequest",
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; message?: string | undefined; size?: number | undefined; allow?: string[] | undefined; conversationId?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allowReplacement?: string[] | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; screenContext?: { timeZone?: string | undefined; } | undefined; promptIds?: { promptId: string; promptGroupId: string; } | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; start?: string | undefined; end?: string | undefined; filter?: ",
-              "objectOutputType",
-              "<{}, ",
-              "ZodUnknown",
-              ", \"strip\"> | undefined; connectorName?: string | undefined; model?: string | undefined; replacements?: ",
-              "objectOutputType",
-              "<{}, ",
-              "ZodString",
-              ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { subAction: \"invokeAI\" | \"invokeStream\"; anonymizationFields: { id: string; field: string; namespace?: string | undefined; timestamp?: string | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; provider?: \"Other\" | \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; defaultSystemPromptId?: string | undefined; }; endpointIds: string[]; insightType: \"custom\" | \"incompatible_antivirus\" | \"policy_response_failure\"; model?: string | undefined; replacements?: ",
-              "objectOutputType",
-              "<{}, ",
-              "ZodString",
-              ", \"strip\"> | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; }, any>"
+              "<unknown, unknown, any, any>"
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "lineNumber": 303,

@@ -8,6 +8,7 @@
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
+import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { GcsConfig } from '../../../src/data_generators/replay';
 import {
@@ -93,7 +94,7 @@ evaluate.describe(
 
         evaluate(
           'feature extraction',
-          async ({ executorClient, evaluators, inferenceClient, logger }) => {
+          async ({ executorClient, evaluators, inferenceClient, logger, traceEsClient, log }) => {
             await executorClient.runExperiment(
               {
                 dataset: {
@@ -125,13 +126,19 @@ evaluate.describe(
                     signal: new AbortController().signal,
                   });
 
-                  return features;
+                  return { features, traceId: getCurrentTraceId() };
                 },
               },
-              createFeatureExtractionEvaluators({
-                criteriaFn: evaluators.criteria.bind(evaluators),
-                criteria: scenario.output.criteria,
-              })
+              [
+                ...createFeatureExtractionEvaluators({
+                  criteriaFn: evaluators.criteria.bind(evaluators),
+                  criteria: scenario.output.criteria,
+                }),
+                evaluators.traceBasedEvaluators.inputTokens,
+                evaluators.traceBasedEvaluators.outputTokens,
+                evaluators.traceBasedEvaluators.cachedTokens,
+                createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+              ]
             );
           }
         );

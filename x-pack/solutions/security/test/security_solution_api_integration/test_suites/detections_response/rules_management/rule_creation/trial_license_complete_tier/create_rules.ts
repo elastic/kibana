@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(rule?.execution_summary?.last_execution.status).toBe('partial failure');
           expect(rule?.execution_summary?.last_execution.message).toContain(
-            'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["does-not-exist-*"] was found. This warning will continue to appear until a matching index is created or this rule is disabled.'
+            `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
           );
         });
 

@@ -8,8 +8,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
 
 /**
@@ -21,7 +21,8 @@ import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
  *
  * See README.md for usage instructions.
  */
-apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/256140
+apiTest.describe.skip('dashboard REST schema', { tag: tags.stateful.all }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {

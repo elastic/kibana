@@ -225,3 +225,26 @@ steps:
     type: console
     with:
       message: "{{ event. }}"`;
+
+/**
+ * Valid workflow that includes YAML comment lines with liquid variable syntax.
+ * Used to verify that commented-out liquid expressions do not produce false
+ * validation errors.
+ */
+export const getWorkflowWithCommentedVariablesYaml = (name: string) => `
+name: ${name}
+description: Workflow with commented liquid variables
+enabled: true
+# This comment references {{ steps.foo.output }}
+triggers:
+  - type: manual
+inputs:
+  - name: message
+    type: string
+    default: "hello"
+steps:
+  # {{ some_old_variable | json }}
+  - name: hello_world_step
+    type: console  # previously used {{ steps.old.output }}
+    with:
+      message: "{{ inputs.message }}"`;

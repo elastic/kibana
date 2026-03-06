@@ -20,6 +20,7 @@ project:
 dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/dev-utils'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package

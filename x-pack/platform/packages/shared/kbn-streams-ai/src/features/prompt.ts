@@ -40,10 +40,10 @@ const featuresSchema = {
           },
           properties: {
             type: 'object',
-            description:
-              'Stable, low-cardinality identifying properties. Must contain at least one key/value.',
             properties: {},
             minProperties: 1,
+            description:
+              'Core identifying properties of the feature (e.g. {"name": "order-service"}). Empty properties are invalid — every feature must have at least one stable identifying property.',
             additionalProperties: true,
           },
           confidence: {
@@ -73,6 +73,44 @@ const featuresSchema = {
               type: 'string',
             },
             description: 'The tags that describe the feature.',
+          },
+          filter: {
+            type: 'object',
+            properties: {
+              field: {
+                type: 'string',
+                description: 'Field name for single equality filter.',
+              },
+              eq: {
+                type: 'string',
+                description:
+                  'Equality value for single filter. For numbers/booleans, string representation is allowed.',
+              },
+              and: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    eq: { type: 'string' },
+                  },
+                  required: ['field', 'eq'],
+                },
+              },
+              or: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    field: { type: 'string' },
+                    eq: { type: 'string' },
+                  },
+                  required: ['field', 'eq'],
+                },
+              },
+            },
+            description:
+              'Optional condition used to scope filtering to the corresponding feature. Allowed forms: single equality `{field, eq}` or one-level `{and: [...]}` / `{or: [...]}` of equality conditions.',
           },
           meta: {
             type: 'object',

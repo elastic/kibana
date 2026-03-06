@@ -36,6 +36,7 @@ const groupBySchema = schema.oneOf([
   schema.literal('slo.tags'),
   schema.literal('status'),
   schema.literal('slo.indicator.type'),
+  schema.literal('_index'), // remote cluster
 ]);
 
 const GroupOverviewCustomSchema = schema.object({

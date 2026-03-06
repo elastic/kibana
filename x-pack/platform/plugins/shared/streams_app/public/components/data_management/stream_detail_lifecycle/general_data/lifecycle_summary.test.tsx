@@ -137,6 +137,7 @@ describe('LifecycleSummary', () => {
       },
       effective_settings: {},
       inherited_fields: {},
+      data_stream_exists: true,
       dashboards: [],
       queries: [],
       rules: [],

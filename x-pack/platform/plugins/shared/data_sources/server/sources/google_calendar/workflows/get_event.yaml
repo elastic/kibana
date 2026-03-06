@@ -1,0 +1,50 @@
+version: '1'
+name: 'sources.google_calendar.get_event'
+description: Retrieve full details of a specific Google Calendar event by its ID. Returns comprehensive metadata including summary, description, location, start/end times, organizer, attendees with response status, recurrence info, conference/hangout links, and attachments.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: eventId
+    type: string
+    description: The ID of the event to retrieve. Use event IDs from search or list results.
+  - name: calendarId
+    type: string
+    required: false
+    default: primary
+    description: "Calendar ID containing the event. Use 'primary' for the user's primary calendar, or a person's email address to access their calendar."
+steps:
+  - name: get_event
+    type: google_calendar.getEvent
+    connector-id: <%= google_calendar-stack-connector-id %>
+    with:
+      eventId: "${{inputs.eventId}}"
+      calendarId: "${{inputs.calendarId}}"
+  - name: map_result
+    type: data.map
+    items: ${{ steps.get_event.output }}
+    with:
+      fields:
+        id: "${{ item.id }}"
+        summary: "${{ item.summary }}"
+        description: "${{ item.description }}"
+        location: "${{ item.location }}"
+        start: "${{ item.start }}"
+        end: "${{ item.end }}"
+        status: "${{ item.status }}"
+        htmlLink: "${{ item.htmlLink }}"
+        organizer: "${{ item.organizer }}"
+        creator: "${{ item.creator }}"
+        attendees:
+          $map: { items: "${{ item.attendees }}", item: "att" }
+          email: "${{ att.email }}"
+          displayName: "${{ att.displayName }}"
+          responseStatus: "${{ att.responseStatus }}"
+        recurrence: "${{ item.recurrence }}"
+        recurringEventId: "${{ item.recurringEventId }}"
+        conferenceData: "${{ item.conferenceData }}"
+        hangoutLink: "${{ item.hangoutLink }}"
+        # attachments: "${{ item.attachments }}"
+        created: "${{ item.created }}"
+        updated: "${{ item.updated }}"

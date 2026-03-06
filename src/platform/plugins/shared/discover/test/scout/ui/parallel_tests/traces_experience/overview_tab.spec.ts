@@ -9,11 +9,38 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { PageObjects } from '@kbn/scout';
 import {
   spaceTest,
+  TRACES,
+  RICH_TRACE,
+  MINIMAL_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
 } from '../../fixtures/traces_experience';
+
+type DiscoverPage = PageObjects['discover'];
+
+const queryModes = [
+  {
+    name: 'Classic',
+    filterMinimal: (discover: DiscoverPage) =>
+      discover.writeAndSubmitKqlQuery(`transaction.name: "${MINIMAL_TRACE.TRANSACTION_NAME}"`),
+    filterRichSpan: (discover: DiscoverPage) =>
+      discover.writeAndSubmitKqlQuery(`span.name: "${RICH_TRACE.INTERNAL_SPAN_NAME}"`),
+  },
+  {
+    name: 'ES|QL',
+    filterMinimal: (discover: DiscoverPage) =>
+      discover.writeAndSubmitEsqlQuery(
+        `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${MINIMAL_TRACE.TRANSACTION_NAME}"`
+      ),
+    filterRichSpan: (discover: DiscoverPage) =>
+      discover.writeAndSubmitEsqlQuery(
+        `${TRACES.ESQL_QUERY} | WHERE span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`
+      ),
+  },
+];
 
 spaceTest.describe(
   'Traces in Discover - Overview tab',
@@ -34,44 +61,67 @@ spaceTest.describe(
       await teardownTracesExperience(scoutSpace);
     });
 
-    spaceTest('should show Overview tab in the document flyout', async ({ pageObjects }) => {
-      await spaceTest.step('open first document in flyout', async () => {
-        await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);
-      });
+    for (const mode of queryModes) {
+      spaceTest(
+        `${mode.name} mode - should render always-visible sections and hide conditional ones for a minimal document`,
+        async ({ pageObjects }) => {
+          await spaceTest.step(`${mode.name} mode - filter for minimal trace`, async () => {
+            await mode.filterMinimal(pageObjects.discover);
+          });
 
-      await spaceTest.step('verify Overview tab is present', async () => {
-        await expect(pageObjects.tracesExperience.flyout.overviewTab).toBeVisible();
-      });
-    });
+          await spaceTest.step('open Overview tab', async () => {
+            await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+          });
 
-    spaceTest('should render the Similar Spans section', async ({ pageObjects }) => {
-      await spaceTest.step('open Overview tab', async () => {
-        await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
-      });
+          await spaceTest.step('verify About section is visible', async () => {
+            await expect(pageObjects.tracesExperience.flyout.aboutSection).toBeVisible();
+          });
 
-      await spaceTest.step('verify Similar Spans section is visible', async () => {
-        await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible();
-      });
-    });
+          await spaceTest.step('verify Similar Spans section is visible', async () => {
+            await expect(pageObjects.tracesExperience.flyout.similarSpansSection).toBeVisible();
+          });
 
-    spaceTest('should render the Trace Summary section', async ({ pageObjects }) => {
-      await spaceTest.step('open Overview tab', async () => {
-        await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
-      });
+          await spaceTest.step('verify Trace Summary section is visible', async () => {
+            await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible();
+          });
 
-      await spaceTest.step('verify Trace Summary section is visible', async () => {
-        await expect(pageObjects.tracesExperience.flyout.traceSummarySection).toBeVisible();
-      });
-    });
+          await spaceTest.step('verify Logs section is visible', async () => {
+            await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible();
+          });
 
-    spaceTest('should render the Logs section', async ({ pageObjects }) => {
-      await spaceTest.step('open Overview tab', async () => {
-        await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
-      });
+          await spaceTest.step('verify Errors section is hidden', async () => {
+            await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeHidden();
+          });
 
-      await spaceTest.step('verify Logs section is visible', async () => {
-        await expect(pageObjects.tracesExperience.flyout.logsSection).toBeVisible();
-      });
-    });
+          await spaceTest.step('verify Span Links section is hidden', async () => {
+            await expect(pageObjects.tracesExperience.flyout.spanLinksSection).toBeHidden();
+          });
+        }
+      );
+
+      spaceTest(
+        `${mode.name} mode - should render conditional sections for a document with errors and span links`,
+        async ({ pageObjects }) => {
+          await spaceTest.step(
+            `${mode.name} mode - filter for span with errors and span links`,
+            async () => {
+              await mode.filterRichSpan(pageObjects.discover);
+            }
+          );
+
+          await spaceTest.step('open Overview tab', async () => {
+            await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+          });
+
+          await spaceTest.step('verify Errors section is visible', async () => {
+            await expect(pageObjects.tracesExperience.flyout.errorsSection).toBeVisible();
+          });
+
+          await spaceTest.step('verify Span Links section is visible', async () => {
+            await expect(pageObjects.tracesExperience.flyout.spanLinksSection).toBeVisible();
+          });
+        }
+      );
+    }
   }
 );

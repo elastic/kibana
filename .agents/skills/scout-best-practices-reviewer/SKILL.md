@@ -9,6 +9,8 @@ description: Review Scout UI/API tests (including Scout test migrations) for bes
 
 Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
 
+**Solution-specific skills may extend this skill** with additional review criteria. Check if one exists for your solution (e.g., Security Solution has one at `<plugin>/.agents/skills/scout-best-practices-reviewer/`). Run the general review first, then apply solution-specific checks.
+
 Important: Do not post GitHub comments unless explicitly stated.
 
 ### Inputs

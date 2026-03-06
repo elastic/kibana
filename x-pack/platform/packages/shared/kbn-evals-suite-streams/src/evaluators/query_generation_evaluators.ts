@@ -33,7 +33,8 @@ const createQueryGenerationCodeEvaluator = (
   name: 'query_generation_code_evaluator',
   kind: 'CODE' as const,
   evaluate: async ({ output, input }) => {
-    const queries = Array.isArray(output) ? output : [output];
+    const rawQueries = (output as Record<string, unknown>)?.queries ?? output;
+    const queries = Array.isArray(rawQueries) ? rawQueries : [rawQueries];
 
     if (queries.length === 0 || !queries[0] || !queries[0].esql) {
       return {
@@ -145,6 +146,7 @@ export const createQueryGenerationEvaluators = (
     createScenarioCriteriaLlmEvaluator({
       criteriaFn,
       criteria,
+      transformOutput: (output) => (output as Record<string, unknown>)?.queries ?? output,
     }),
   ];
 };

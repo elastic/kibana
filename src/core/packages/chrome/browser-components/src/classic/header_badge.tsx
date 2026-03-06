@@ -17,6 +17,7 @@ interface Props {
   badge$: Observable<ChromeBadge | undefined>;
 }
 
+// TODO: Remove once chrome.setBadge() is consolidated into setBreadcrumbsBadges() — https://github.com/elastic/kibana/issues/256050
 export const HeaderBadge = ({ badge$ }: Props) => {
   const badge = useObservable(badge$, undefined);
 

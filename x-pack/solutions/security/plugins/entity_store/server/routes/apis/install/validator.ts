@@ -14,7 +14,7 @@ import { parseDurationToMs } from '../../../infra/time';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
-} from '../../../domain/definitions/saved_objects';
+} from '../../../domain/saved_objects';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h

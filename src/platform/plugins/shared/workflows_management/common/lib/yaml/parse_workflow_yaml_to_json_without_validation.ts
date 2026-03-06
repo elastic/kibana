@@ -14,6 +14,7 @@ type ParseYamlToJSONWithoutValidationResult =
   | {
       success: false;
       error: Error;
+      document: Document;
     }
   | {
       success: true;
@@ -24,17 +25,28 @@ type ParseYamlToJSONWithoutValidationResult =
 /**
  * Parse a YAML string to a JSON object. This function is dangerous because it does not use schema to validate the resulting JSON object.
  * @param yamlString - The YAML string to parse.
- * @returns The JSON object and the YAML document.
+ * @returns The JSON object and the YAML document. The document is always
+ *   available regardless of success/failure because `parseDocument` is
+ *   error-tolerant.
  */
 export function parseYamlToJSONWithoutValidation(
   yamlString: string
 ): ParseYamlToJSONWithoutValidationResult {
-  try {
-    // mapAsMap: true prevents console warning about collection values being stringified
-    // TypeScript types don't include this option, but it exists at runtime
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const doc = parseDocument(yamlString, { mapAsMap: true } as any);
+  /*
+  Previously parseDocument was inside the try.
+  The yaml library's parseDocument is designed to be error-tolerant (it stores errors on the Document, it does not throw).
+  The risk of an actual throw is near-zero and the benefit (always having a Document) outweighs it: moving it outside means 
+  a truly pathological input that causes parseDocument itself to throw (not just produce document errors) would now 
+  propagate as an unhandled exception instead of returning { success: false }.
+  
+*/
 
+  // mapAsMap: true prevents console warning about collection values being stringified
+  // TypeScript types don't include this option, but it exists at runtime
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const doc = parseDocument(yamlString, { mapAsMap: true } as any);
+
+  try {
     return {
       success: true,
       // mapAsMap: false ensures plain objects are returned instead of Map instances
@@ -46,6 +58,7 @@ export function parseYamlToJSONWithoutValidation(
     return {
       success: false,
       error,
+      document: doc,
     };
   }
 }

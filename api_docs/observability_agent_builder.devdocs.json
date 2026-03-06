@@ -322,6 +322,23 @@
       },
       {
         "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-public.OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.host\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-public.OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -366,6 +383,23 @@
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
         "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-public.OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.transaction\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -888,15 +922,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<string, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " | undefined, any, any, ",
+          "<string, any, any, any, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1180,6 +1206,23 @@
       },
       {
         "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.host\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-common.OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -1224,6 +1267,23 @@
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
         "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAgentBuilder",
+        "id": "def-common.OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"observability.transaction\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

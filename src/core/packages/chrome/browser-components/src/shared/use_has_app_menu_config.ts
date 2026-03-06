@@ -8,18 +8,15 @@
  */
 
 import { useMemo } from 'react';
-import { EMPTY, map, type Observable } from 'rxjs';
+import { map } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { useChromeComponentsDeps } from '../context';
 
-/** Whether the app menu observable has items configured */
-export function useHasAppMenuConfig(
-  appMenu$: Observable<AppMenuConfig | undefined> | undefined
-): boolean {
+/** Whether the current app menu has items configured */
+export function useHasAppMenuConfig(): boolean {
+  const { appMenu$ } = useChromeComponentsDeps();
   const hasConfig$ = useMemo(
-    () =>
-      appMenu$?.pipe(map((config) => !!config && !!config.items && config.items.length > 0)) ??
-      EMPTY,
+    () => appMenu$.pipe(map((config) => !!config && !!config.items && config.items.length > 0)),
     [appMenu$]
   );
   return useObservable(hasConfig$, false);

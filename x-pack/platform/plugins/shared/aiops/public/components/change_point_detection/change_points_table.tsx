@@ -326,13 +326,14 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
           <EuiEmptyPrompt
             iconType="search"
             title={
-              <h2>
+              <h3>
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.fetchingChangePointsTitle"
                   defaultMessage="Fetching change points..."
                 />
-              </h2>
+              </h3>
             }
+            titleSize="xs"
           />
         ) : (
           <NoDataFoundWarning />

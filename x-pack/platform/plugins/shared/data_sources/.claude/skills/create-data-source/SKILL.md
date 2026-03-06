@@ -57,10 +57,41 @@ Remember:
 - Use `<%= your-source-stack-connector-id %>` for connector-id, where your-source is the id of the newly created data source type
 - Use `${{ inputs.param_name }}` for input references
 
-## Step 4: Tell the user you're done
+## Step 4: Write Documentation
+
+Create a connector doc page in `docs/reference/connectors-kibana/{name}-action-type.md`.
+
+### Prerequisites
+
+This step requires documentation skills from https://github.com/elastic/elastic-docs-skills. Check availability by invoking `docs-check-style` (use the Skill tool). If it fails with "skill not found", stop and tell the user:
+
+> Documentation skills are not installed. Please install them:
+>
+> ```bash
+> curl -sSL https://raw.githubusercontent.com/elastic/elastic-docs-skills/main/install.sh | bash
+> ```
+>
+> Then re-run this step.
+
+### Write the doc page
+
+1. Read 1–2 existing connector docs from `docs/reference/connectors-kibana/` as templates (for example, `zendesk-action-type.md`, `jira-cloud-action-type.md`). Follow the same structure.
+2. Write the new doc page. Use `docs-syntax-help` if unsure about MyST Markdown syntax.
+3. Run these skills on the new file and fix any issues:
+   - `frontmatter-description` — generate the `description` frontmatter field
+   - `page-opening-optimizer` — verify H1 and opening paragraph
+   - `applies-to-tagging` — validate `applies_to` block
+   - `docs-check-style` — check Elastic style guide compliance
+
+### Update navigation and listings
+
+1. Add an entry in `docs/reference/toc.yml` under the data and context sources connectors section.
+2. Add a row in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`.
+
+## Step 5: Tell the user you're done
 
 You do not need to execute tests, linting, type-checking, etc.
-Once you are done developing the connector and data source, let the user review your work before next steps.
+Once you are done developing the connector, data source, and documentation, let the user review your work before next steps.
 
 ## Important Notes
 

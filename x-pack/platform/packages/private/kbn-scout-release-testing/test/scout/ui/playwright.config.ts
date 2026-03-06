@@ -8,5 +8,5 @@
 import { createPlaywrightConfig } from '@kbn/scout';
 
 export default createPlaywrightConfig({
-  testDir: './discovery_tests',
+  testDir: './dashboard_tests',
 });

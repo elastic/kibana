@@ -28,9 +28,9 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { AppCategory } from '@kbn/core-application-common';
 import type { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import type { ChromeApplicationContext } from '../context';
 import {
   createEuiListItem,
   createRecentNavLink,
@@ -99,7 +99,7 @@ function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
 }
 
 interface Props {
-  appId$: InternalApplicationStart['currentAppId$'];
+  appId$: ChromeApplicationContext['currentAppId$'];
   basePath: HttpStart['basePath'];
   id: string;
   isNavOpen: boolean;
@@ -108,8 +108,8 @@ interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   closeNav: () => void;
-  navigateToApp: InternalApplicationStart['navigateToApp'];
-  navigateToUrl: InternalApplicationStart['navigateToUrl'];
+  navigateToApp: ChromeApplicationContext['navigateToApp'];
+  navigateToUrl: ChromeApplicationContext['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   button: EuiCollapsibleNavProps['button'];
 }

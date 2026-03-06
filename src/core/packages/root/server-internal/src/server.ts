@@ -126,6 +126,11 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
+    const serviceVersion =
+      env.packageInfo.buildFlavor === 'serverless'
+        ? env.packageInfo.buildShaShort
+        : env.packageInfo.version;
+    this.loggingSystem.setGlobalContext({ service: { version: serviceVersion } });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);

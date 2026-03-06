@@ -108,6 +108,7 @@ export interface InMemoryConnector<
   secrets: Secrets;
   config: Config;
   exposeConfig?: boolean;
+  isDynamic?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;

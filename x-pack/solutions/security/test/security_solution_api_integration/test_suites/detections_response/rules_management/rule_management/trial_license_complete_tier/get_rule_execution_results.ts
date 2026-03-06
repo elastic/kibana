@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].security_status).to.eql('partial failure');
       expect(
         response.body.events[0].security_message.startsWith(
-          'This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ["no-name-index"] was found.'
+          `Unable to find matching indices for rule ${rule.name}. This warning will persist until one of the following occurs: a matching index is created or the rule is disabled.`
         )
       ).to.eql(true);
     });

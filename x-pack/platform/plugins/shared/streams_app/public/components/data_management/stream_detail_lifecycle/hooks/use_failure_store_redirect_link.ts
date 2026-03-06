@@ -26,7 +26,7 @@ export const useFailureStoreRedirectLink = ({ streamName }: { streamName: string
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
-        query: { esql: esqlQuery || '' },
+        query: { esql: esqlQuery ? `${esqlQuery} | SORT @timestamp DESC` : '' },
         timeRange: {
           from: 'now-24h',
           to: 'now',
