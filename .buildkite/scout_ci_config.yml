@@ -4,6 +4,7 @@ plugins:
     - data_views
     - console
     - discover_enhanced
+    - exploratory_view
     - index_management
     - maps
     - observability_onboarding
