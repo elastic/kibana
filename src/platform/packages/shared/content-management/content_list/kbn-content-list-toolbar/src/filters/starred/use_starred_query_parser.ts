@@ -8,6 +8,7 @@
  */
 
 import { useMemo } from 'react';
+import { Query } from '@elastic/eui';
 import { useFilterDisplay } from '@kbn/content-list-provider';
 import type { QueryParser, QueryParserResult } from '../query_parser';
 
@@ -30,16 +31,13 @@ export const useStarredQueryParser = (): QueryParser | null => {
 
     return {
       parse(queryText: string): QueryParserResult {
-        const hasClause = /\bis:starred\b/i.test(queryText);
-
-        const searchQuery = queryText
-          .replace(/\bis:starred\b/gi, '')
-          .replace(/\s{2,}/g, ' ')
-          .trim();
+        const query = Query.parse(queryText);
+        const hasClause = query.hasIsClause('starred');
+        const searchQuery = hasClause ? query.removeIsClause('starred').text : queryText;
 
         return {
           searchQuery,
-          filters: { starredOnly: hasClause || undefined },
+          filters: { starredOnly: hasClause },
         };
       },
     };

@@ -19,7 +19,7 @@ import { mockFavoritesClient } from './services';
 interface MockFindItemsFilters {
   search?: string;
   tag?: { include?: string[]; exclude?: string[] };
-  favoritesOnly?: boolean;
+  starredOnly?: boolean;
   users?: string[];
 }
 
@@ -110,8 +110,8 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       );
     }
 
-    // Apply favorites filter (mock extension, not in ActiveFilters)
-    if ((filters as { favoritesOnly?: boolean }).favoritesOnly) {
+    // Apply starred filter.
+    if (filters.starredOnly) {
       const favorites = await mockFavoritesClient.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
@@ -469,8 +469,8 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
     }
 
-    // Apply favorites filter
-    if (filters.favoritesOnly) {
+    // Apply starred filter.
+    if (filters.starredOnly) {
       const favorites = await mockFavoritesClient.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }

@@ -98,7 +98,7 @@ export const NameCell = memo(
       <div>
         <div css={showStarred ? titleRowCss : undefined}>
           <Title item={item} />
-          {showStarred && <StarButton id={item.id} css={inlineStarCss} />}
+          {showStarred && <StarButton id={item.id} wrapperCss={inlineStarCss} />}
         </div>
         {showDescription && <Description item={item} />}
         {hasTags && <Tags tagIds={tagIds} onTagClick={onTagClick} />}

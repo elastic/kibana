@@ -56,6 +56,11 @@ export interface ColumnNamespace {
   Name: (props: NameColumnProps) => ReactNode;
   UpdatedAt: (props: UpdatedAtColumnProps) => ReactNode;
   Actions: (props: ActionsColumnProps) => ReactNode;
+  /**
+   * Pre-built star-toggle column for favoritable items.
+   *
+   * @param props - {@link StarredColumnProps}
+   */
   Starred: (props: StarredColumnProps) => ReactNode;
 }
 

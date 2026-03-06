@@ -12,6 +12,7 @@ import type { SerializedStyles } from '@emotion/react';
 import { FavoriteButton } from '@kbn/content-management-favorites-public';
 import { useContentListConfig } from '@kbn/content-list-provider';
 
+/** Props for the {@link StarButton} component. */
 export interface StarButtonProps {
   /** Item ID to star/unstar. */
   id: string;
@@ -21,23 +22,24 @@ export interface StarButtonProps {
    * Optional Emotion styles applied to a wrapping `span`.
    * Use for margin adjustments when rendered inline (e.g. inside {@link NameCell}).
    */
-  css?: SerializedStyles;
+  wrapperCss?: SerializedStyles;
 }
 
 /**
  * Thin wrapper around `FavoriteButton` that renders `null` when
  * `supports.starred` is false. Shared by `StarredCell` and `NameCell`.
  */
-export const StarButton = ({ id, className, css: cssProp }: StarButtonProps) => {
+export const StarButton = (props: StarButtonProps) => {
+  const { id, className, wrapperCss } = props;
   const { supports } = useContentListConfig();
 
   if (!supports.starred) {
     return null;
   }
 
-  if (cssProp) {
+  if (wrapperCss) {
     return (
-      <span css={cssProp}>
+      <span css={wrapperCss}>
         <FavoriteButton {...{ id, className }} />
       </span>
     );
