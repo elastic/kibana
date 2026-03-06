@@ -51,7 +51,7 @@ export const RuleFormFlyout: React.FC<RuleFormFlyoutProps> = ({
       type={push ? 'push' : 'overlay'}
       onClose={onClose || (() => {})}
       aria-labelledby={FLYOUT_TITLE_ID}
-      size="s"
+      size="560px"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
