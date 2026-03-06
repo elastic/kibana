@@ -6,32 +6,34 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { useProcessData } from '../hooks/use_process_data';
 import { SessionPreview } from './session_preview';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import React from 'react';
-import { DocumentDetailsContext } from '../../shared/context';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
-import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from '../../../flyout/document_details/shared/hooks/use_rule_details_link';
 
 jest.mock('../hooks/use_process_data');
-jest.mock('../../shared/hooks/use_rule_details_link');
+jest.mock('../../../flyout/document_details/shared/hooks/use_rule_details_link');
 
-const panelContextValue = {
-  eventId: 'event id',
-  indexName: 'indexName',
-  browserFields: {},
-  dataFormattedForFieldBrowser: [],
-} as unknown as DocumentDetailsContext;
+const hit = {
+  id: '1',
+  raw: {},
+  flattened: {
+    'event.kind': 'signal',
+  },
+  isAnchor: false,
+} as unknown as DataTableRecord;
 
-const renderSessionPreview = () =>
+const renderSessionPreview = ({
+  disableNavigation = false,
+}: { disableNavigation?: boolean } = {}) =>
   render(
     <TestProviders>
       <TestProvider>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <SessionPreview />
-        </DocumentDetailsContext.Provider>
+        <SessionPreview disableNavigation={disableNavigation} hit={hit} />
       </TestProvider>
     </TestProviders>
   );
@@ -71,11 +73,11 @@ describe('SessionPreview', () => {
     jest.mocked(useProcessData).mockReturnValue({
       processName: 'process1',
       userName: 'user1',
-      startAt: null,
-      ruleName: null,
-      ruleId: null,
-      command: null,
-      workdir: null,
+      startAt: '',
+      ruleName: '',
+      ruleId: '',
+      command: '',
+      workdir: '',
     });
     (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
 
@@ -88,5 +90,24 @@ describe('SessionPreview', () => {
     expect(screen.queryByText('with rule')).not.toBeInTheDocument();
     expect(screen.queryByTestId(SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByText('by')).not.toBeInTheDocument();
+  });
+
+  it('does not render rule details link when navigation is disabled', () => {
+    jest.mocked(useProcessData).mockReturnValue({
+      processName: 'process1',
+      userName: 'user1',
+      startAt: '2022-01-01T00:00:00.000Z',
+      ruleName: 'rule1',
+      ruleId: 'id',
+      command: '',
+      workdir: '',
+    });
+    (useRuleDetailsLink as jest.Mock).mockReturnValue(null);
+
+    renderSessionPreview({ disableNavigation: true });
+
+    expect(useRuleDetailsLink).toHaveBeenCalledWith({ ruleId: null });
+    expect(screen.queryByTestId(SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(screen.getByText('rule1')).toBeInTheDocument();
   });
 });
