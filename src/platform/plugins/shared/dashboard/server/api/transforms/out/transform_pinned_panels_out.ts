@@ -77,7 +77,7 @@ export function transformPinnedPanelsOut(
     }
     return controls;
   }
-  return;
+  return [];
 }
 
 /**

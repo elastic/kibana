@@ -175,6 +175,7 @@ describe('stripUnmappedKeys', () => {
           uid: 'panel1',
         },
         {
+          collapsed: false,
           grid: { y: 0 },
           panels: [
             {

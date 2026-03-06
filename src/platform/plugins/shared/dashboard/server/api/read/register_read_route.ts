@@ -10,10 +10,12 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { stripUnmappedKeys } from '../scope_tooling';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -24,6 +26,13 @@ export function registerReadRoute(
     path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
     ...routeConfig,
+  });
+
+  // Do not call getDashboardStateSchema when registering route.
+  // Route is registered during setup and before all plugins have reigistered embeddable schemas.
+  // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
+  const getCachedDashboardStateSchema = once(() => {
+    return getDashboardStateSchema(isDashboardAppRequest);
   });
 
   readRoute.addVersion(
@@ -48,7 +57,12 @@ export function registerReadRoute(
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(ctx, req.params.id, isDashboardAppRequest);
+        const result = await read(
+          ctx,
+          getCachedDashboardStateSchema(),
+          req.params.id,
+          isDashboardAppRequest
+        );
         const { data, warnings } = !isDashboardAppRequest
           ? stripUnmappedKeys(result.data)
           : { data: result.data, warnings: [] };

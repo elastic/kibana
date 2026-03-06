@@ -8,8 +8,8 @@
  */
 
 import type { PinnedControlState } from '@kbn/controls-schemas';
-import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
 jest.mock('../../../kibana_services', () => ({
   ...jest.requireActual('../../../kibana_services'),
@@ -20,7 +20,7 @@ jest.mock('../../../kibana_services', () => ({
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       pinned_panels: [
         {
           config: { anyKey: 'some value' },
@@ -33,6 +33,7 @@ describe('transformDashboardIn', () => {
       description: 'description',
       query: { query: 'test', language: 'KQL' },
       options: {
+        ...DEFAULT_DASHBOARD_OPTIONS,
         hide_panel_titles: true,
         use_margins: false,
         sync_colors: false,
@@ -100,7 +101,7 @@ describe('transformDashboardIn', () => {
   });
 
   it('should not provide default values for optional properties', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
     };
 
@@ -124,7 +125,7 @@ describe('transformDashboardIn', () => {
   });
 
   it('should transform project_routing to attributes', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
       project_routing: '_alias:_origin',
     };
@@ -135,7 +136,7 @@ describe('transformDashboardIn', () => {
   });
 
   it('should not include projectRouting in attributes when it is undefined', () => {
-    const dashboardState: DashboardState = {
+    const dashboardState = {
       title: 'title',
     };
 

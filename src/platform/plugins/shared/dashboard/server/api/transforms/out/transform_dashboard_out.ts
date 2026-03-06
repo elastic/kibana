@@ -20,7 +20,7 @@ export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references?: SavedObjectReference[],
   isDashboardAppRequest: boolean = false
-): DashboardState | Partial<DashboardState> {
+): Partial<Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }> {
   const {
     pinned_panels,
     controlGroupInput: legacyControls,

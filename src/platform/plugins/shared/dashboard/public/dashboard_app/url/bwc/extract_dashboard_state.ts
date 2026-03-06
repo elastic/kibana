@@ -14,7 +14,7 @@ import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
-import { DEFAULT_DASHBOARD_STATE } from '@kbn/dashboard-plugin/public/dashboard_api/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 
 export function extractDashboardState(
   state?: unknown
@@ -31,7 +31,11 @@ export function extractDashboardState(
       typeof autoApplyFilters === 'boolean'
     ) {
       // >9.4 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
-      dashboardState.options = { ...DEFAULT_DASHBOARD_OPTIONS, ...dashboardState.options, auto_apply_filters: autoApplyFilters };
+      dashboardState.options = {
+        ...DEFAULT_DASHBOARD_OPTIONS,
+        ...dashboardState.options,
+        auto_apply_filters: autoApplyFilters,
+      };
     }
 
     if (typeof stateAsObject.description === 'string') {

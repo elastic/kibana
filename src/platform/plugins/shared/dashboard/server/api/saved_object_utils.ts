@@ -12,7 +12,7 @@ import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-ob
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { DashboardState } from './types';
 import { transformDashboardOut } from './transforms';
-import { getDashboardStateSchema } from './dashboard_state_schemas';
+import type { getDashboardStateSchema } from './dashboard_state_schemas';
 
 export function getDashboardMeta(
   savedObject:
@@ -46,11 +46,9 @@ export function getDashboardCRUResponseBody(
   try {
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
-    dashboardState = dashboardStateSchema.validate(transformDashboardOut(
-      savedObject.attributes,
-      savedObject.references,
-      isDashboardAppRequest
-    ));
+    dashboardState = dashboardStateSchema.validate(
+      transformDashboardOut(savedObject.attributes, savedObject.references, isDashboardAppRequest)
+    );
   } catch (transformOutError) {
     throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
   }

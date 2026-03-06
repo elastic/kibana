@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_DASHBOARD_OPTIONS } from '@kbn/dashboard-plugin/common/constants';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import type { DashboardState } from '../../common';
 import type { DashboardReadResponseBody } from '../../server';
 
@@ -18,7 +18,7 @@ export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   panels: [],
   pinned_panels: [],
   options: {
-    ...DEFAULT_DASHBOARD_OPTIONS
+    ...DEFAULT_DASHBOARD_OPTIONS,
   },
   title: '',
   tags: [],

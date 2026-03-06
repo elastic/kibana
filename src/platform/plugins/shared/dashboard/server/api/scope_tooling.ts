@@ -22,7 +22,7 @@ function isPinnedPanel(
   return !('grid' in panel);
 }
 
-export function stripUnmappedKeys(dashboardState: DashboardState) {
+export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
   const warnings: string[] = [];
   const { pinned_panels, panels, ...rest } = dashboardState;
 

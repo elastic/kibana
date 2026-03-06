@@ -14,7 +14,7 @@ import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
 import type { AccessControlClient } from '@kbn/content-management-access-control-public';
 import type { SavedObjectAccessControl } from '@kbn/core/server';
-import { DEFAULT_DASHBOARD_STATE } from '@kbn/dashboard-plugin/public/dashboard_api/default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {

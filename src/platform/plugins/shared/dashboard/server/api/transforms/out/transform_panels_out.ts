@@ -29,6 +29,7 @@ export function transformPanelsOut(
     const { i: sectionId, ...restOfGrid } = grid;
     sectionsMap[sectionId] = {
       ...restOfSection,
+      collapsed: restOfSection.collapsed ?? false,
       grid: restOfGrid,
       panels: [],
       uid: sectionId,
