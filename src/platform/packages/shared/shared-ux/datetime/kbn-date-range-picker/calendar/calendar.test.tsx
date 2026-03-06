@@ -7,59 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const mockScrollToIndex = jest.fn();
+
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import type { DateRange } from 'react-day-picker';
 
-import { Calendar, TODAY_INDEX } from './calendar';
-
-const mockTodayIndex = TODAY_INDEX;
-
-const mockScrollToIndex = jest.fn();
+import { Calendar } from './calendar';
 
 jest.mock('./calendar_view', () => ({
-  CalendarView: ({ month }: { month: Date }) => (
-    <div data-test-subj="calendarView">{month.toISOString().slice(0, 7)}</div>
-  ),
+  CalendarView: ({ month }: { month: Date }) => {
+    const year = month.getFullYear();
+    const monthNum = String(month.getMonth() + 1).padStart(2, '0');
+
+    return (
+      <div data-test-subj="calendar-view" data-month={`${year}-${monthNum}`}>
+        {month.toLocaleString('default', { month: 'long', year: 'numeric' })}
+      </div>
+    );
+  },
 }));
 
 jest.mock('react-virtuoso', () => {
   const mockReact = jest.requireActual('react');
+  const { TODAY_INDEX } = jest.requireActual('./calendar.constants');
+
+  const VISIBLE_RANGE = {
+    PAST_MONTHS: { startIndex: TODAY_INDEX - 10, endIndex: TODAY_INDEX - 5 },
+    TODAY_VISIBLE: { startIndex: TODAY_INDEX - 1, endIndex: TODAY_INDEX + 1 },
+    FUTURE_MONTHS: { startIndex: TODAY_INDEX + 5, endIndex: TODAY_INDEX + 10 },
+  };
+
   return {
-    Virtuoso: mockReact.forwardRef((props: Record<string, Function>, ref: { current: unknown }) => {
-      if (ref && typeof ref !== 'function') {
-        ref.current = {
-          scrollToIndex: mockScrollToIndex,
-          autoscrollToBottom: () => {},
-          getState: () => {},
-          scrollBy: () => {},
-          scrollIntoView: () => {},
-          scrollTo: () => {},
-        };
-      }
+    Virtuoso: mockReact.forwardRef(function MockVirtuoso(
+      props: {
+        itemContent: (index: number) => React.ReactNode;
+        rangeChanged?: (range: { startIndex: number; endIndex: number }) => void;
+      },
+      ref: React.Ref<unknown>
+    ) {
+      mockReact.useImperativeHandle(ref, () => ({
+        scrollToIndex: (...args: unknown[]) => mockScrollToIndex(...args),
+      }));
+
       return (
-        <div data-test-subj="virtuosoMock">
-          <button data-test-subj="startReached" onClick={() => props.startReached?.(0)} />
-          <button data-test-subj="endReached" onClick={() => props.endReached?.(0)} />
+        <div data-test-subj="virtuoso">
+          {props.itemContent(TODAY_INDEX)}
           <button
-            data-test-subj="visibleToday"
-            onClick={() =>
-              props.rangeChanged?.({ startIndex: mockTodayIndex - 1, endIndex: mockTodayIndex + 1 })
-            }
+            data-test-subj="simulate-scroll-future"
+            onClick={() => props.rangeChanged?.(VISIBLE_RANGE.FUTURE_MONTHS)}
           />
           <button
-            data-test-subj="hiddenToday"
-            onClick={() =>
-              props.rangeChanged?.({
-                startIndex: mockTodayIndex + 10,
-                endIndex: mockTodayIndex + 20,
-              })
-            }
+            data-test-subj="simulate-scroll-past"
+            onClick={() => props.rangeChanged?.(VISIBLE_RANGE.PAST_MONTHS)}
           />
-          <div data-test-subj="itemContent">
-            {props.itemContent?.(mockTodayIndex, undefined, undefined)}
-          </div>
+          <button
+            data-test-subj="simulate-scroll-today"
+            onClick={() => props.rangeChanged?.(VISIBLE_RANGE.TODAY_VISIBLE)}
+          />
         </div>
       );
     }),
@@ -73,85 +79,71 @@ describe('Calendar', () => {
   };
 
   beforeEach(() => {
-    mockScrollToIndex.mockClear();
+    jest.clearAllMocks();
   });
 
-  it('renders months through Virtuoso itemContent using current-month anchor', () => {
+  it('renders for the current month', () => {
     renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-    expect(screen.getByTestId('calendarView')).toBeInTheDocument();
+    const calendarView = screen.getByTestId('calendar-view');
+
+    expect(calendarView).toBeInTheDocument();
+
+    const now = new Date();
+    const expectedMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    expect(calendarView).toHaveAttribute('data-month', expectedMonth);
   });
 
-  it('shows Today button when current date/month is outside visible range', () => {
-    renderWithEuiTheme(<Calendar {...defaultProps} />);
+  describe('Today button visibility', () => {
+    it('does not show Today button when today is visible', () => {
+      renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-    fireEvent.click(screen.getByTestId('hiddenToday'));
+      expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+    });
 
-    expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+    it('shows Today button when scrolled into past months', () => {
+      renderWithEuiTheme(<Calendar {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('simulate-scroll-future'));
+
+      expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+    });
+
+    it('shows Today button when scrolled into future months', () => {
+      renderWithEuiTheme(<Calendar {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+
+      expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+    });
+
+    it('hides Today button when scrolling back to today', () => {
+      renderWithEuiTheme(<Calendar {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+
+      expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('simulate-scroll-today'));
+
+      expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+    });
   });
 
-  it('hides Today button when current date/month is inside visible range', () => {
-    renderWithEuiTheme(<Calendar {...defaultProps} />);
+  describe('Today button interaction', () => {
+    it('calls scrollToIndex when Today button is clicked', () => {
+      renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-    fireEvent.click(screen.getByTestId('hiddenToday'));
-    expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+      fireEvent.click(screen.getByRole('button', { name: 'Today' }));
 
-    fireEvent.click(screen.getByTestId('visibleToday'));
-    expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
-  });
-
-  it('clicking Today calls scrollToIndex with smooth behavior', () => {
-    renderWithEuiTheme(<Calendar {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('hiddenToday'));
-    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
-
-    expect(mockScrollToIndex).toHaveBeenCalledWith(
-      expect.objectContaining({
-        behavior: 'smooth',
-        align: 'center',
-      })
-    );
-  });
-
-  it('loads more past months when startReached is triggered', () => {
-    const { rerender } = renderWithEuiTheme(<Calendar {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('startReached'));
-
-    rerender(<Calendar {...defaultProps} />);
-    expect(screen.getByTestId('virtuosoMock')).toBeInTheDocument();
-  });
-
-  it('loads more future months when endReached is triggered', () => {
-    const { rerender } = renderWithEuiTheme(<Calendar {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('endReached'));
-
-    rerender(<Calendar {...defaultProps} />);
-    expect(screen.getByTestId('virtuosoMock')).toBeInTheDocument();
-  });
-
-  it('does not load more months while scrolling to today', () => {
-    renderWithEuiTheme(<Calendar {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('hiddenToday'));
-    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
-
-    fireEvent.click(screen.getByTestId('startReached'));
-    fireEvent.click(screen.getByTestId('endReached'));
-
-    expect(screen.getByTestId('virtuosoMock')).toBeInTheDocument();
-  });
-
-  it('resets scroll flag when today becomes visible after clicking Today', () => {
-    renderWithEuiTheme(<Calendar {...defaultProps} />);
-
-    fireEvent.click(screen.getByTestId('hiddenToday'));
-    fireEvent.click(screen.getByRole('button', { name: 'Today' }));
-
-    fireEvent.click(screen.getByTestId('visibleToday'));
-
-    expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+      expect(mockScrollToIndex).toHaveBeenCalledWith(
+        expect.objectContaining({
+          behavior: 'smooth',
+          align: 'center',
+        })
+      );
+    });
   });
 });

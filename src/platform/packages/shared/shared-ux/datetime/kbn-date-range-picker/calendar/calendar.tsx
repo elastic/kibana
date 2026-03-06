@@ -15,16 +15,16 @@ import type { DateRange } from 'react-day-picker';
 import { CalendarView } from './calendar_view';
 import { calendarStyles } from './calendar.styles';
 import { calendarTexts } from '../translations';
+import {
+  getScrollDirection,
+  getMonthFromIndex,
+  getTodayPosition,
+  getScrollDirectionIcon,
+  type ScrollDirection,
+} from './calendar.utils';
+import { TODAY_INDEX, MONTHS_TO_LOAD } from './calendar.constants';
 
-const MONTHS_TO_LOAD = 12;
-/**
- * Base index representing "today" (current month).
- * Using a high value allows prepending past months without going negative.
- * Technically, negative indices will work but will also trigger a Virtuoso console warning.
- */
-export const TODAY_INDEX = 100000;
-
-export type ScrollDirection = 'forward' | 'backward' | 'none';
+const HALF_MONTHS_TO_LOAD = MONTHS_TO_LOAD / 2;
 
 interface CalendarProps {
   range: DateRange | undefined;
@@ -38,37 +38,30 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const [scrollDirection, setScrollDirection] = useState<ScrollDirection>('none');
-  const [firstItemIndex, setFirstItemIndex] = useState(TODAY_INDEX - MONTHS_TO_LOAD / 2);
+  const [firstItemIndex, setFirstItemIndex] = useState(TODAY_INDEX - HALF_MONTHS_TO_LOAD);
   const [totalCount, setTotalCount] = useState(MONTHS_TO_LOAD);
 
-  // Prepend MONTHS_TO_LOAD months
   const handleStartReached = useCallback(() => {
     setFirstItemIndex((prev) => prev - MONTHS_TO_LOAD);
     setTotalCount((prev) => prev + MONTHS_TO_LOAD);
   }, []);
 
-  // Append MONTHS_TO_LOAD months
   const handleEndReached = useCallback(() => {
     setTotalCount((prev) => prev + MONTHS_TO_LOAD);
   }, []);
 
   const handleRangeChanged = useCallback((visibleRange: ListRange) => {
-    const { startIndex, endIndex } = visibleRange;
-    const hasScrolledIntoFuture = endIndex < TODAY_INDEX;
-    const hasScrolledIntoPast = startIndex > TODAY_INDEX;
-
-    if (hasScrolledIntoFuture) {
-      setScrollDirection('forward');
-    } else if (hasScrolledIntoPast) {
-      setScrollDirection('backward');
-    } else {
-      setScrollDirection('none');
-    }
+    const direction = getScrollDirection(
+      visibleRange.startIndex,
+      visibleRange.endIndex,
+      TODAY_INDEX
+    );
+    setScrollDirection(direction);
   }, []);
 
   const scrollToToday = useCallback(() => {
     virtuosoRef.current?.scrollToIndex({
-      index: TODAY_INDEX - firstItemIndex,
+      index: getTodayPosition(firstItemIndex, TODAY_INDEX),
       behavior: 'smooth',
       align: 'center',
     });
@@ -76,18 +69,16 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
 
   const renderMonth = useCallback(
     (index: number) => {
-      const today = new Date();
-      const month = new Date(today.getFullYear(), today.getMonth() + (index - TODAY_INDEX), 1);
+      const month = getMonthFromIndex(index, TODAY_INDEX);
       return <CalendarView month={month} range={range} setRange={onRangeChange} />;
     },
     [range, onRangeChange]
   );
 
-  // Scroll current month into center on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       virtuosoRef.current?.scrollToIndex({
-        index: MONTHS_TO_LOAD / 2,
+        index: HALF_MONTHS_TO_LOAD,
         behavior: 'auto',
         align: 'center',
       });
@@ -95,6 +86,8 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const iconType = getScrollDirectionIcon(scrollDirection);
 
   return (
     <div css={styles.container}>
@@ -112,13 +105,7 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
         <EuiButtonEmpty
           css={styles.todayButton}
           size="s"
-          iconType={
-            scrollDirection === 'backward'
-              ? 'sortUp'
-              : scrollDirection === 'forward'
-              ? 'sortDown'
-              : undefined
-          }
+          iconType={iconType}
           onClick={scrollToToday}
         >
           {calendarTexts.todayButton}
