@@ -11,41 +11,79 @@ import {
   getEsqlViewName,
   getSegments,
   getWiredStreamViewQuery,
-  LOGS_ECS_STREAM_NAME,
-  LOGS_OTEL_STREAM_NAME,
+  ROOT_STREAM_NAMES,
   Streams,
 } from '@kbn/streams-schema';
 import { processInDepthOrder } from '../helpers/process_in_depth_order';
 import { createStreamsStorageClient } from '../storage/streams_storage_client';
 import { getEsqlView, upsertEsqlView } from './manage_esql_views';
 
-const MANDATORY_STREAM_NAMES = [LOGS_OTEL_STREAM_NAME, LOGS_ECS_STREAM_NAME] as const;
-
-async function sentinelViewsExist({
+async function enabledRootStreamsMissingViews({
   esClient,
   logger,
+  enabledRootNames,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  enabledRootNames: string[];
 }): Promise<boolean> {
+  if (enabledRootNames.length === 0) {
+    return false;
+  }
+
   const results = await Promise.all(
-    MANDATORY_STREAM_NAMES.map(async (streamName) => {
+    enabledRootNames.map(async (streamName) => {
       try {
         await getEsqlView({ esClient, logger, name: getEsqlViewName(streamName) });
-        return true;
-      } catch {
         return false;
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return true;
+        }
+        if (error instanceof Error && error.message.includes('not found')) {
+          return true;
+        }
+        throw error;
       }
     })
   );
-  return results.every(Boolean);
+  return results.some(Boolean);
+}
+
+/**
+ * Determines which ROOT_STREAM_NAMES exist as wired streams in storage.
+ * Uses targeted single-document lookups instead of loading all streams.
+ */
+async function getEnabledRootNames({
+  storageClient,
+}: {
+  storageClient: ReturnType<typeof createStreamsStorageClient>;
+}): Promise<string[]> {
+  const enabledRootNames: string[] = [];
+  for (const name of ROOT_STREAM_NAMES) {
+    try {
+      const response = await storageClient.get({ id: name });
+      if (response._source && Streams.WiredStream.Definition.is(response._source)) {
+        enabledRootNames.push(name);
+      }
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        continue;
+      }
+      throw error;
+    }
+  }
+  return enabledRootNames;
 }
 
 /**
  * Backfills ES|QL views for all wired streams that are missing them.
  *
- * Mandatory stream check: if both $.logs.otel and $.logs.ecs views already exist, we consider
- * the cluster up-to-date and skip the backfill entirely.
+ * Uses a series of increasingly expensive checks to avoid unnecessary work:
+ * 1. Check if .kibana_streams index exists (HEAD request)
+ * 2. Check which root streams exist via targeted lookups (1-3 GET-by-ID)
+ * 3. Check if those roots already have views (1-3 GET view)
+ * 4. Only then load all wired streams for the actual backfill
  */
 export async function backfillWiredStreamViews({
   esClient,
@@ -61,34 +99,38 @@ export async function backfillWiredStreamViews({
     return;
   }
 
-  const viewsAlreadyExist = await sentinelViewsExist({ esClient, logger });
-  if (viewsAlreadyExist) {
-    logger.debug('Wired stream ES|QL views already exist, skipping startup backfill.');
+  const storageClient = createStreamsStorageClient(esClient, logger);
+
+  const indexExists = await storageClient.existsIndex();
+  if (!indexExists) {
+    logger.debug(
+      'Streams storage index not found — streams not yet enabled, skipping view backfill.'
+    );
     return;
   }
 
-  logger.info(
-    'Wired stream ES|QL views are missing. Running startup backfill to create them for all existing streams.'
-  );
-
-  const storageClient = createStreamsStorageClient(esClient, logger);
-
-  let streamsSearchResponse;
-  try {
-    streamsSearchResponse = await storageClient.search({
-      size: 10000,
-      sort: [{ name: 'asc' }],
-      track_total_hits: false,
-    });
-  } catch (error) {
-    if (isNotFoundError(error)) {
-      logger.debug(
-        'Streams storage index (.kibana_streams) not found — streams not yet enabled, skipping view backfill.'
-      );
-      return;
-    }
-    throw error;
+  const enabledRootNames = await getEnabledRootNames({ storageClient });
+  if (enabledRootNames.length === 0) {
+    logger.debug('No root streams found in storage, skipping view backfill.');
+    return;
   }
+
+  const hasMissingViews = await enabledRootStreamsMissingViews({
+    esClient,
+    logger,
+    enabledRootNames,
+  });
+
+  if (!hasMissingViews) {
+    logger.debug('All enabled root stream views already exist, skipping startup backfill.');
+    return;
+  }
+
+  const streamsSearchResponse = await storageClient.search({
+    size: 10000,
+    sort: [{ name: 'asc' }],
+    track_total_hits: false,
+  });
 
   const wiredStreams = streamsSearchResponse.hits.hits
     .map((hit) => hit._source)
@@ -99,13 +141,19 @@ export async function backfillWiredStreamViews({
     return;
   }
 
-  logger.info(`Backfilling ES|QL views for ${wiredStreams.length} wired stream(s).`);
+  const wiredStreamNames = new Set(wiredStreams.map((def) => def.name));
+
+  logger.info(
+    `Some enabled root streams are missing ES|QL views. Backfilling views for ${wiredStreams.length} wired stream(s).`
+  );
 
   await processInDepthOrder(
     wiredStreams,
     (def) => getSegments(def.name).length - 1,
     (def) => {
-      const directChildren = (def.ingest.wired.routing ?? []).map((r) => r.destination);
+      const directChildren = (def.ingest.wired.routing ?? [])
+        .map((r) => r.destination)
+        .filter((dest) => wiredStreamNames.has(dest));
       return upsertEsqlView({
         esClient,
         logger,
