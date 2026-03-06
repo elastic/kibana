@@ -41,7 +41,6 @@ export async function runWorkflow({
     nodesFactory,
     workflowExecutionGraph,
     workflowTaskManager,
-    workflowExecutionRepository,
     executionStateRepository,
     esClient,
   } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
@@ -59,7 +58,6 @@ export async function runWorkflow({
       workflowRuntime,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
-      workflowExecutionRepository,
       executionStateRepository,
       workflowLogger,
       nodesFactory,

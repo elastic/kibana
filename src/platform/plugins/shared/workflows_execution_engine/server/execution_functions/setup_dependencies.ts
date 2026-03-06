@@ -45,22 +45,11 @@ export async function setupDependencies(
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
   const executionStateRepository = new ExecutionStateRepository(internalEsClient);
-  const workflowExecutionRepository = await createWorkflowExecutionRepository(
-    coreStart.dataStreams,
-    internalEsClient,
-    logger
-  );
-  const stepExecutionRepository = await createStepExecutionRepository(
-    coreStart.dataStreams,
-    internalEsClient
-  );
 
   const executions = await executionStateRepository.getWorkflowExecutions(
     new Set([workflowRunId]),
     spaceId
   );
-
-
   const workflowExecution = executions[workflowRunId];
 
   if (!workflowExecution) {
@@ -156,9 +145,7 @@ export async function setupDependencies(
     workflowLogger,
     workflowTaskManager,
     nodesFactory,
-    workflowExecutionRepository,
     esClient,
     executionStateRepository,
-    stepExecutionRepository,
   };
 }

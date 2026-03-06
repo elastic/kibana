@@ -39,7 +39,6 @@ export async function resumeWorkflow({
     workflowExecutionGraph,
     esClient,
     workflowTaskManager,
-    workflowExecutionRepository,
     executionStateRepository,
   } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
 
@@ -49,7 +48,6 @@ export async function resumeWorkflow({
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
-    workflowExecutionRepository,
     executionStateRepository,
     workflowLogger,
     nodesFactory,

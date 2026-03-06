@@ -9,14 +9,13 @@
 
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;
@@ -24,7 +23,6 @@ export interface WorkflowExecutionLoopParams {
   stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
   workflowLogger: IWorkflowEventLogger;
-  workflowExecutionRepository: WorkflowExecutionRepository;
   executionStateRepository: ExecutionStateRepository;
   nodesFactory: NodesFactory;
   esClient: ElasticsearchClient;
