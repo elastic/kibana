@@ -4,16 +4,24 @@ navigation_title: Feature flags
 
 # Feature flags [scout-feature-flags]
 
-Some Kibana features are gated behind feature flags or experimental configuration. Scout provides two ways to enable them: **at runtime** via feature flags (without restarting the server) and **at server startup** (via custom server configurations).
+Some Kibana features are gated behind feature flags or experimental configuration. Scout provides two ways to enable them: **at runtime** via feature flags (without restarting the server) and **at server startup** (via custom server configurations). The table below compares the two approaches.
 
 ## When to use runtime versus server-level flags [scout-feature-flags-when-to-use]
 
-- **Runtime** (`apiServices.core.settings()`): **preferred** for most feature flags. No server restart, flags can be toggled per suite, and your tests keep sharing the default servers with other suites in CI.
-- **Test servers startup** (custom config `serverArgs`): only when the setting must be present at boot time or is not supported by the runtime settings API. Reach out to the AppEx QA team first (see below).
+|  | Runtime flags | Custom server configs |
+|---|---|---|
+| **API** | `apiServices.core.settings()` | `ScoutServerConfig` config set |
+| **Restart required** | No — applied while running | Yes — must be present at boot |
+| **Elastic Cloud (QA)** | Supported | Not supported — local only |
+| **CI cost** | Low — shares default servers | Higher — dedicated server instance |
+| **Toggle per suite** | Yes | No — fixed at server start |
+| **When to use** | **Preferred** for most flags | Settings required at boot (e.g., route registration) |
+
+For custom server configs, reach out to the AppEx QA team before creating one (see [below](#scout-feature-flags-custom-servers)).
 
 ## Enabling feature flags at runtime [scout-feature-flags-runtime]
 
-Use `apiServices.core.settings()` to toggle feature flags while the server is running. This calls Kibana's internal [config overrides API](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#config-overrides) (Elasticians only). Changes take effect immediately (no restart needed).
+Use `apiServices.core.settings()` to toggle feature flags while the server is running. Under the hood, this calls Kibana's [config overrides API](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#config-overrides) (Elasticians only), which forces flag values directly — bypassing the feature flag provider — so the same test code works locally and on Elastic Cloud (QA).
 
 ::::::{note}
 Feature flag overrides are **server-wide**: they apply to the entire Kibana instance, not to a single space or worker. In [parallel suites](./parallelism.md) all workers share the same server, so a flag set by one worker is visible to every other worker. For parallel tests, enable flags in the **[global setup hook](./global-setup-hook.md)** so they are set once before any worker starts.
@@ -64,19 +72,19 @@ test.describe('Browse integration', { tag: tags.stateful.classic }, () => {
 });
 ```
 
-When using `feature_flags.overrides`, the keys must match the feature flag IDs registered by the owning plugin in Kibana core.
+When using `feature_flags.overrides`, the keys must match the feature flag IDs registered by the owning plugin. Overrides bypass variation and type validation, so ensure the values match what the consuming code expects.
 
 ## Custom server configs (reach out to AppEx QA first) [scout-feature-flags-custom-servers]
 
-Some settings cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets**.
+Some settings — such as those used during the plugin `setup` lifecycle (e.g., HTTP route registration) — cannot be changed at runtime and must be present when Kibana starts. For these cases Scout supports **custom server configuration sets** that manage a local Kibana process.
 
 ::::::{warning}
-⚠️ Each custom config set requires its own dedicated server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case.
+⚠️ Each custom config set requires its own dedicated local server instance, which adds CI cost. **Reach out to the AppEx QA team before creating one** to make sure it is the right approach for your use case. If the flag you need can be toggled at runtime, prefer the [runtime approach](#scout-feature-flags-runtime) instead — it works everywhere, including Cloud.
 ::::::
 
 ### How custom configs work [scout-feature-flags-custom-configs-how]
 
-By default, Scout starts servers using the `default` configuration set. Custom configs live under:
+By default, Scout starts a local server using the `default` configuration set. Custom configs live under:
 
 ```text
 src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/<name>/
@@ -87,7 +95,7 @@ Inside that directory, create one config file per architecture + domain combinat
 Scout detects a custom config in two ways:
 
 1. **Path convention**: name your test directory `test/scout_<name>/` instead of `test/scout/` and Scout automatically maps it to the `<name>` config set.
-2. **Explicit flag**: pass `--serverConfigSet <name>` when starting the server.
+2. **Explicit flag**: pass `--serverConfigSet <name>` when starting the local server.
 
 ### Example [scout-feature-flags-custom-config-example]
 
@@ -112,7 +120,7 @@ export const servers: ScoutServerConfig = {
 };
 ```
 
-[Start the server](./run-tests.md#scout-run-tests-server-config-set) with the custom config:
+[Start the local server](./run-tests.md#scout-run-tests-server-config-set) with the custom config:
 
 ```bash
 node scripts/scout.js start-server --arch serverless --domain security_complete --serverConfigSet uiam_local
