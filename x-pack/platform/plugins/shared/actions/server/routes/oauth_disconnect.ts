@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios from 'axios';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ILicenseState } from '../lib';
@@ -16,15 +15,12 @@ import type { ActionsPluginsStart } from '../plugin';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
-import { request } from '../lib/axios_utils';
-import type { ActionsConfigurationUtilities } from '../actions_config';
 
 export const oauthDisconnectRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
   licenseState: ILicenseState,
   logger: Logger,
-  coreSetup: CoreSetup<ActionsPluginsStart>,
-  configurationUtilities: ActionsConfigurationUtilities
+  coreSetup: CoreSetup<ActionsPluginsStart>
 ) => {
   router.post(
     {
@@ -98,56 +94,6 @@ export const oauthDisconnectRoute = (
           }),
           logger: routeLogger,
         });
-
-        // For EARS connectors, revoke tokens at the provider before deleting them locally
-        const rawAction = await encryptedSavedObjects
-          .getClient({ includedHiddenTypes: ['action'] })
-          .getDecryptedAsInternalUser<{ secrets: { authType?: string; provider?: string } }>(
-            'action',
-            connectorId
-          );
-        const { authType, provider } = rawAction.attributes.secrets;
-
-        if (authType === 'ears' && provider) {
-          const earsBaseUrl = configurationUtilities.getEarsUrl();
-          if (earsBaseUrl) {
-            const revokeUrl = `${earsBaseUrl.replace(/\/$/, '')}/${provider}/oauth/revoke`;
-            const { connectorToken } = await userConnectorTokenClient.getOAuthPersonalToken({
-              connectorId,
-              profileUid,
-            });
-
-            if (connectorToken?.credentials) {
-              const { accessToken, refreshToken } = connectorToken.credentials;
-              const rawAccessToken = accessToken.replace(/^Bearer\s+/i, '');
-              const axiosInstance = axios.create();
-              const tokensToRevoke = [rawAccessToken, ...(refreshToken ? [refreshToken] : [])];
-
-              const results = await Promise.allSettled(
-                tokensToRevoke.map((token) =>
-                  request({
-                    axios: axiosInstance,
-                    url: revokeUrl,
-                    method: 'post',
-                    logger: routeLogger,
-                    data: { token },
-                    headers: { 'Content-Type': 'application/json' },
-                    configurationUtilities,
-                    validateStatus: () => true,
-                  })
-                )
-              );
-
-              results.forEach((result, i) => {
-                if (result.status === 'rejected') {
-                  routeLogger.warn(
-                    `Failed to revoke EARS token[${i}] for connector ${connectorId}: ${result.reason}`
-                  );
-                }
-              });
-            }
-          }
-        }
 
         await userConnectorTokenClient.deleteConnectorTokens({ connectorId, profileUid });
 

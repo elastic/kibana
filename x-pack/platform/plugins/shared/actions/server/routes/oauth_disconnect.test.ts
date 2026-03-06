@@ -9,22 +9,12 @@ jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 jest.mock('../lib/user_connector_token_client');
-jest.mock('axios', () => ({
-  create: jest.fn().mockReturnValue({}),
-}));
-
-jest.mock('../lib/axios_utils', () => ({
-  request: jest.fn(),
-}));
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthDisconnectRoute } from './oauth_disconnect';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
-import { request as mockRequestImport } from '../lib/axios_utils';
-
-const mockRequest = mockRequestImport as jest.Mock;
 
 const MockUserConnectorTokenClient = UserConnectorTokenClient as jest.MockedClass<
   typeof UserConnectorTokenClient
@@ -34,23 +24,14 @@ const mockLogger = loggingSystemMock.create().get();
 
 const mockConnectorTokenClientInstance = {
   deleteConnectorTokens: jest.fn(),
-  getOAuthPersonalToken: jest.fn(),
-};
-
-const mockEncryptedActionClient = {
-  getDecryptedAsInternalUser: jest.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
-  getClient: jest.fn(),
+  getClient: jest.fn().mockReturnValue({}),
 };
 
 const mockActionsClient = {
   get: jest.fn(),
-};
-
-const mockConfigurationUtilities = {
-  getEarsUrl: jest.fn(),
 };
 
 const createMockCoreSetup = () => ({
@@ -89,24 +70,7 @@ describe('oauthDisconnectRoute', () => {
     (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
 
     (mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
-
-    // Default: non-EARS connector
-    mockEncryptedActionClient.getDecryptedAsInternalUser.mockResolvedValue({
-      attributes: { secrets: {} },
-    });
-    mockEncryptedSavedObjectsClient.getClient.mockImplementation(
-      ({ includedHiddenTypes }: { includedHiddenTypes: string[] }) => {
-        if (includedHiddenTypes.includes('action')) return mockEncryptedActionClient;
-        return {};
-      }
-    );
-
-    mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-      hasErrors: false,
-      connectorToken: null,
-    });
-
-    mockConfigurationUtilities.getEarsUrl.mockReturnValue(undefined);
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({});
 
     MockUserConnectorTokenClient.mockImplementation(
       () => mockConnectorTokenClientInstance as never
@@ -115,13 +79,7 @@ describe('oauthDisconnectRoute', () => {
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
     const licenseState = licenseStateMock.create();
-    oauthDisconnectRoute(
-      router,
-      licenseState,
-      mockLogger,
-      coreSetup as never,
-      mockConfigurationUtilities as never
-    );
+    oauthDisconnectRoute(router, licenseState, mockLogger, coreSetup as never);
     return router.post.mock.calls[0];
   };
 
@@ -268,9 +226,7 @@ describe('oauthDisconnectRoute', () => {
   });
 
   it('creates UserConnectorTokenClient with the correct saved objects clients', async () => {
-    const mockEncryptedClient = {
-      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({ attributes: { secrets: {} } }),
-    };
+    const mockEncryptedClient = { getDecryptedAsInternalUser: jest.fn() };
     const mockUnsecuredClient = { find: jest.fn() };
 
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue(mockEncryptedClient);
@@ -314,211 +270,8 @@ describe('oauthDisconnectRoute', () => {
 
   it('calls verifyAccessAndContext with the license state', () => {
     const licenseState = licenseStateMock.create();
-    oauthDisconnectRoute(
-      router,
-      licenseState,
-      mockLogger,
-      createMockCoreSetup() as never,
-      mockConfigurationUtilities as never
-    );
+    oauthDisconnectRoute(router, licenseState, mockLogger, createMockCoreSetup() as never);
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
-  });
-
-  describe('EARS token revocation', () => {
-    const earsBaseUrl = 'https://ears.example.com';
-    const provider = 'google';
-
-    beforeEach(() => {
-      mockActionsClient.get.mockResolvedValue({ id: 'connector-1' });
-      mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
-      mockEncryptedActionClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: { secrets: { authType: 'ears', provider } },
-      });
-      mockConfigurationUtilities.getEarsUrl.mockReturnValue(earsBaseUrl);
-      mockRequest.mockResolvedValue({});
-    });
-
-    it('revokes access and refresh tokens before deleting for EARS connectors', async () => {
-      mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-        hasErrors: false,
-        connectorToken: {
-          credentials: {
-            accessToken: 'Bearer myaccesstoken',
-            refreshToken: 'myrefreshtoken',
-          },
-        },
-      });
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({
-        params: { connectorId: 'connector-1' },
-      });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      const expectedRevokeUrl = `${earsBaseUrl}/${provider}/oauth/revoke`;
-      expect(mockRequest).toHaveBeenCalledTimes(2);
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expectedRevokeUrl, data: { token: 'myaccesstoken' } })
-      );
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expectedRevokeUrl, data: { token: 'myrefreshtoken' } })
-      );
-      expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalled();
-      expect(res.noContent).toHaveBeenCalled();
-    });
-
-    it('revokes only the access token when there is no refresh token', async () => {
-      mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-        hasErrors: false,
-        connectorToken: {
-          credentials: {
-            accessToken: 'Bearer myaccesstoken',
-          },
-        },
-      });
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({
-        params: { connectorId: 'connector-1' },
-      });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      expect(mockRequest).toHaveBeenCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ data: { token: 'myaccesstoken' } })
-      );
-    });
-
-    it('strips the Bearer prefix from the access token when revoking', async () => {
-      mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-        hasErrors: false,
-        connectorToken: {
-          credentials: { accessToken: 'Bearer rawtoken123' },
-        },
-      });
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({ params: { connectorId: 'connector-1' } });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ data: { token: 'rawtoken123' } })
-      );
-    });
-
-    it('skips revocation when EARS URL is not configured', async () => {
-      mockConfigurationUtilities.getEarsUrl.mockReturnValue(undefined);
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({
-        params: { connectorId: 'connector-1' },
-      });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      expect(mockRequest).not.toHaveBeenCalled();
-      expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalled();
-    });
-
-    it('skips revocation when there is no stored token', async () => {
-      mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-        hasErrors: false,
-        connectorToken: null,
-      });
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({
-        params: { connectorId: 'connector-1' },
-      });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      expect(mockRequest).not.toHaveBeenCalled();
-      expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalled();
-    });
-
-    it('does not revoke tokens for non-EARS connectors', async () => {
-      mockEncryptedActionClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: { secrets: { authType: 'oauth2' } },
-      });
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({
-        params: { connectorId: 'connector-1' },
-      });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      expect(mockRequest).not.toHaveBeenCalled();
-      expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalled();
-    });
-
-    it('warns but still deletes tokens when EARS revocation fails', async () => {
-      mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-        hasErrors: false,
-        connectorToken: {
-          credentials: {
-            accessToken: 'Bearer myaccesstoken',
-            refreshToken: 'myrefreshtoken',
-          },
-        },
-      });
-      mockRequest.mockRejectedValue(new Error('EARS revoke failed'));
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({
-        params: { connectorId: 'connector-1' },
-      });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to revoke EARS token')
-      );
-      expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalled();
-      expect(res.noContent).toHaveBeenCalled();
-    });
-
-    it('builds the revoke URL using the EARS base URL and provider', async () => {
-      mockConfigurationUtilities.getEarsUrl.mockReturnValue('https://ears.example.com/');
-      mockConnectorTokenClientInstance.getOAuthPersonalToken.mockResolvedValue({
-        hasErrors: false,
-        connectorToken: {
-          credentials: { accessToken: 'Bearer token' },
-        },
-      });
-
-      const [, handler] = registerRoute();
-      const context = createMockContext();
-      const req = httpServerMock.createKibanaRequest({ params: { connectorId: 'connector-1' } });
-      const res = httpServerMock.createResponseFactory();
-
-      await handler(context, req, res);
-
-      // Trailing slash on base URL should be stripped
-      expect(mockRequest).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: `https://ears.example.com/${provider}/oauth/revoke`,
-        })
-      );
-    });
   });
 });
