@@ -20,21 +20,45 @@ export interface SnoozeConditionEvalResult {
 }
 
 /**
+ * Converts a field value to a canonical string for comparison with snapshot/target
+ * values (which are always strings per the API schema).
+ *
+ * Returns `undefined` for unsupported types, causing the condition to bail out
+ * (treat as "not met").
+ *
+ * Supported types:
+ * - `string`  -- returned as-is (keyword fields like `kibana.alert.severity`)
+ * - `number`  -- `String(value)` for finite values; `undefined` for NaN/Infinity
+ * - `boolean` -- `"true"` / `"false"`
+ * - `Date`    -- `.toISOString()` (canonical ISO 8601)
+ * - `null` / `undefined` -- `undefined`
+ * - objects, arrays, symbols, functions -- `undefined`
+ */
+export function toComparableString(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : undefined;
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? undefined : value.toISOString();
+  }
+  return undefined;
+}
+
+/**
  * Evaluates whether a single `SnoozeCondition` is satisfied by the current alert data.
  *
- * **Limitation**: Field values are coerced to strings via `String()` before comparison.
- * This works reliably for primitive values (string, number, boolean) which are the
- * expected types for monitored fields like `kibana.alert.severity`. Complex values
- * (objects, arrays) will stringify to `[object Object]` or comma-joined elements,
- * making condition matches effectively impossible for non-primitive fields.
+ * Field values are normalized to canonical strings via {@link toComparableString}
+ * before comparison. This handles string, number, boolean, and Date types reliably.
+ * Complex values (objects, arrays) are unsupported and cause the condition to bail
+ * out (not met).
  */
 function evaluateSingleCondition(
   condition: NonNullable<SnoozedInstanceConfig['conditions']>[number],
   currentAlertData: Record<string, unknown>
 ): { met: boolean; reason: string } {
   const currentValue = get(currentAlertData, condition.field);
-  // Coerce to string for comparison -- see JSDoc above for limitations on non-primitive values.
-  const currentStr = currentValue != null ? String(currentValue) : undefined;
+  const currentStr = toComparableString(currentValue);
 
   switch (condition.type) {
     case 'severity_change':
