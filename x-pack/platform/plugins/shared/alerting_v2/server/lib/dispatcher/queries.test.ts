@@ -70,7 +70,7 @@ describe('getDispatchableAlertEventsQuery', () => {
 });
 
 describe('getAlertEpisodeSuppressionsQuery', () => {
-  it('builds a WHERE clause matching each episode rule_id and group_hash', () => {
+  it('uses CONCAT + IN to filter by (rule_id, group_hash) pairs', () => {
     const episodes = [
       createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1' }),
       createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2' }),
@@ -78,8 +78,23 @@ describe('getAlertEpisodeSuppressionsQuery', () => {
 
     const req = getAlertEpisodeSuppressionsQuery(episodes);
 
-    expect(req.query).toContain('rule_id == "rule-1" AND group_hash == "hash-1"');
-    expect(req.query).toContain('rule_id == "rule-2" AND group_hash == "hash-2"');
+    expect(req.query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(req.query).toContain('rule-1::hash-1');
+    expect(req.query).toContain('rule-2::hash-2');
+  });
+
+  it('deduplicates episodes with the same rule_id and group_hash', () => {
+    const episodes = [
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', episode_id: 'ep-1' }),
+      createAlertEpisode({ rule_id: 'rule-1', group_hash: 'hash-1', episode_id: 'ep-2' }),
+      createAlertEpisode({ rule_id: 'rule-2', group_hash: 'hash-2', episode_id: 'ep-3' }),
+    ];
+
+    const req = getAlertEpisodeSuppressionsQuery(episodes);
+
+    const matches = req.query.match(/rule-1::hash-1/g);
+    expect(matches).toHaveLength(1);
+    expect(req.query).toContain('rule-2::hash-2');
   });
 
   it('queries the alert actions data stream', () => {
@@ -148,7 +163,20 @@ describe('getAlertEpisodeSuppressionsQuery', () => {
       createAlertEpisode({ rule_id: 'only-rule', group_hash: 'only-hash' }),
     ]);
 
-    expect(req.query).toContain('rule_id == "only-rule" AND group_hash == "only-hash"');
+    expect(req.query).toContain('only-rule::only-hash');
+  });
+
+  it('builds successfully with a large number of episodes', () => {
+    const episodes = Array.from({ length: 500 }, (_, i) =>
+      createAlertEpisode({ rule_id: `rule-${i}`, group_hash: `hash-${i}` })
+    );
+
+    const req = getAlertEpisodeSuppressionsQuery(episodes);
+
+    expect(req).toHaveProperty('query');
+    expect(req.query).toContain('CONCAT(rule_id, "::", group_hash)');
+    expect(req.query).toContain('rule-0::hash-0');
+    expect(req.query).toContain('rule-499::hash-499');
   });
 });
 
