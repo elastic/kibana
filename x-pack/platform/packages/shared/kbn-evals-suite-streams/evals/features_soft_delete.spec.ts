@@ -13,14 +13,14 @@ import { identifyFeatures, type DeletedFeatureSummary, type IgnoredFeature } fro
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { sampleSize as lodashSampleSize } from 'lodash';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, ToolChoice } from '@kbn/inference-common';
 import { evaluate } from '../src/evaluate';
 import {
   FEATURES_SOFT_DELETE_DATASETS,
   type FeaturesSoftDeleteEvaluationDataset,
 } from './features_soft_delete_datasets';
 import { indexSynthtraceScenario } from './synthtrace_helpers';
-import { SOFT_DELETE_COMPLIANCE_SYSTEM_PROMPT } from './features_soft_delete_evaluator_prompt';
+import { SoftDeleteCompliancePrompt } from './features_soft_delete_evaluator_prompt';
 
 evaluate.describe.configure({ timeout: 600_000 });
 
@@ -160,57 +160,6 @@ evaluate.describe('Streams features soft delete', () => {
     };
   }
 
-  const SOFT_DELETE_COMPLIANCE_OUTPUT_SCHEMA = {
-    type: 'object',
-    properties: {
-      violations: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            run_index: {
-              type: 'number',
-              description: 'The zero-based index of the follow-up run where the violation occurred',
-            },
-            deleted_feature: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', description: 'The id of the deleted feature' },
-                title: { type: 'string', description: 'The title of the deleted feature' },
-                type: { type: 'string', description: 'The type of the deleted feature' },
-                subtype: { type: 'string', description: 'The subtype of the deleted feature' },
-              },
-              required: ['id', 'title', 'type', 'subtype'],
-            },
-            regenerated_feature: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', description: 'The id of the regenerated feature' },
-                title: { type: 'string', description: 'The title of the regenerated feature' },
-                type: { type: 'string', description: 'The type of the regenerated feature' },
-                subtype: { type: 'string', description: 'The subtype of the regenerated feature' },
-              },
-              required: ['id', 'title', 'type', 'subtype'],
-            },
-            reason: {
-              type: 'string',
-              description:
-                'One sentence explaining why the regenerated feature is semantically the same as the deleted one',
-            },
-          },
-          required: ['run_index', 'deleted_feature', 'regenerated_feature', 'reason'],
-        },
-        description:
-          'Features from follow-up runs that semantically match a deleted feature. Empty if the LLM fully respected the soft-delete list.',
-      },
-      explanation: {
-        type: 'string',
-        description: 'Brief summary of your analysis',
-      },
-    },
-    required: ['violations', 'explanation'],
-  } as const;
-
   function createSoftDeleteSemanticEvaluator({
     inferenceClient,
   }: {
@@ -269,18 +218,23 @@ evaluate.describe('Streams features soft delete', () => {
           })),
         }));
 
-        const result = await inferenceClient.output({
-          id: 'soft_delete_compliance_analysis',
-          system: SOFT_DELETE_COMPLIANCE_SYSTEM_PROMPT,
-          input: JSON.stringify({
-            deleted_features: deletedFeatures,
-            follow_up_runs: followUpRunsGrouped,
-          }),
-          schema: SOFT_DELETE_COMPLIANCE_OUTPUT_SCHEMA,
-          retry: { onValidationError: 3 },
+        const response = await inferenceClient.prompt({
+          prompt: SoftDeleteCompliancePrompt,
+          input: {
+            deleted_features: JSON.stringify(deletedFeatures),
+            follow_up_runs: JSON.stringify(followUpRunsGrouped),
+          },
+          toolChoice: {
+            function: 'analyze',
+          } as ToolChoice,
         });
 
-        const { violations, explanation } = result.output;
+        const toolCall = response.toolCalls[0];
+        if (!toolCall) {
+          throw new Error('No tool call found in LLM response');
+        }
+
+        const { violations, explanation } = toolCall.function.arguments;
 
         const perRunScores = followUpRuns.map((run, runIndex) => {
           const runViolationCount = violations.filter((v) => v.run_index === runIndex).length;
