@@ -5,179 +5,103 @@
  * 2.0.
  */
 
-// /*
-//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-//  * or more contributor license agreements. Licensed under the Elastic License
-//  * 2.0; you may not use this file except in compliance with the Elastic License
-//  * 2.0.
-//  */
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createFormWrapper } from '../../test_utils';
+import { AttacmentRunbookGroup } from './attachment_runbook_group';
 
-// import React from 'react';
-// import { render, screen } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
-// import { createFormWrapper } from '../../test_utils';
-// import { AttacmentRunbookGroup } from './attachment_runbook_group';
+const getRunbookModal = () => {
+  const heading = screen.getByRole('heading', { name: 'Add Runbook' });
+  const modal = heading.closest('[role="dialog"]');
 
-// describe('AttacmentRunbookGroup', () => {
-//   it('renders the field group with title', () => {
-//     const Wrapper = createFormWrapper();
+  if (!modal) {
+    throw new Error('Runbook modal container not found');
+  }
 
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
+  return modal as HTMLElement;
+};
 
-//     expect(screen.getByText('Attachments')).toBeInTheDocument();
-//   });
+const addRunbookText = async (text: string) => {
+  const user = userEvent.setup();
 
-//   it('renders the name field', () => {
-//     const Wrapper = createFormWrapper();
+  await user.click(screen.getByTestId('addRunbookButton'));
 
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
+  const modal = getRunbookModal();
+  const editor = within(modal).getByLabelText('Runbook');
+  await user.type(editor, text);
+  await user.click(within(modal).getByRole('button', { name: 'Add Runbook' }));
+};
 
-//     expect(screen.getByText('Name')).toBeInTheDocument();
-//     expect(screen.getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
-//   });
+describe('AttacmentRunbookGroup', () => {
+  it('renders attachments title and add runbook button initially', () => {
+    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
-//   it('renders the labels field', () => {
-//     const Wrapper = createFormWrapper();
+    expect(screen.getByText('Attachments')).toBeInTheDocument();
+    expect(screen.getByTestId('addRunbookButton')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Edit Runbook')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Delete Runbook')).not.toBeInTheDocument();
+  });
 
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
+  it('opens and closes runbook modal from add button', async () => {
+    const user = userEvent.setup();
+    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
-//     expect(screen.getByText('Labels')).toBeInTheDocument();
-//   });
+    await user.click(screen.getByTestId('addRunbookButton'));
+    expect(screen.getByRole('heading', { name: 'Add Runbook' })).toBeInTheDocument();
 
-//   it('renders the add description button initially', () => {
-//     const Wrapper = createFormWrapper();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('heading', { name: 'Add Runbook' })).not.toBeInTheDocument();
+  });
 
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
+  it('saves runbook, hides add button, and shows panel with first line title', async () => {
+    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
-//     expect(screen.getByText('Add description')).toBeInTheDocument();
-//   });
+    await addRunbookText('First line title\nSecond line');
 
-//   it('renders the description field when add description is clicked', async () => {
-//     const Wrapper = createFormWrapper();
+    expect(screen.queryByTestId('addRunbookButton')).not.toBeInTheDocument();
+    expect(screen.getByText('Runbook')).toBeInTheDocument();
+    expect(screen.getByText('First line title')).toBeInTheDocument();
+    expect(screen.getByLabelText('Edit Runbook')).toBeInTheDocument();
+    expect(screen.getByLabelText('Delete Runbook')).toBeInTheDocument();
+  });
 
-//     render(
-//       <Wrapper>
-//         <RuleDetail sFieldGroup />
-//       </Wrapper>
-//     );
+  it('reopens modal from edit and keeps existing runbook value', async () => {
+    const user = userEvent.setup();
+    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
-//     await userEvent.click(screen.getByText('Add description'));
+    await addRunbookText('Existing runbook title');
+    await user.click(screen.getByLabelText('Edit Runbook'));
 
-//     expect(screen.getByText('Description')).toBeInTheDocument();
-//   });
+    const modal = getRunbookModal();
+    expect(within(modal).getByLabelText('Runbook')).toHaveValue('Existing runbook title');
+  });
 
-//   it('renders the enabled field', () => {
-//     const Wrapper = createFormWrapper();
+  it('shows delete confirmation and keeps runbook when delete is canceled', async () => {
+    const user = userEvent.setup();
+    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
+    await addRunbookText('Runbook to keep');
+    await user.click(screen.getByLabelText('Delete Runbook'));
 
-//     expect(screen.getByText('Enabled')).toBeInTheDocument();
-//     expect(screen.getByRole('switch')).toBeInTheDocument();
-//   });
+    expect(screen.getByText('Are you sure you want to delete a runbook?')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
-//   it('renders the kind field', () => {
-//     const Wrapper = createFormWrapper();
+    expect(screen.getByText('Runbook to keep')).toBeInTheDocument();
+    expect(screen.queryByTestId('addRunbookButton')).not.toBeInTheDocument();
+  });
 
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
+  it('deletes runbook after confirmation and shows add runbook button again', async () => {
+    const user = userEvent.setup();
+    render(<AttacmentRunbookGroup />, { wrapper: createFormWrapper() });
 
-//     // "Rule kind" appears in both label and legend (for screen readers)
-//     expect(screen.getAllByText('Rule kind').length).toBeGreaterThanOrEqual(1);
-//     expect(screen.getByText('Alert')).toBeInTheDocument();
-//     expect(screen.getByText('Monitor')).toBeInTheDocument();
-//   });
+    await addRunbookText('Runbook to delete');
+    await user.click(screen.getByLabelText('Delete Runbook'));
+    await user.click(screen.getByRole('button', { name: 'Delete runbook' }));
 
-//   it('allows entering a name', async () => {
-//     const Wrapper = createFormWrapper();
-
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
-
-//     const nameInput = screen.getByRole('textbox', { name: 'Name' });
-//     await userEvent.type(nameInput, 'My Test Rule');
-
-//     expect(nameInput).toHaveValue('My Test Rule');
-//   });
-
-//   it('allows toggling enabled state', async () => {
-//     const Wrapper = createFormWrapper();
-
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
-
-//     const toggle = screen.getByRole('switch');
-//     expect(toggle).toBeChecked();
-
-//     await userEvent.click(toggle);
-
-//     expect(toggle).not.toBeChecked();
-//   });
-
-//   it('allows switching rule kind', async () => {
-//     const Wrapper = createFormWrapper();
-
-//     render(
-//       <Wrapper>
-//         <AttacmentRunbookGroup />
-//       </Wrapper>
-//     );
-
-//     // Default is 'alert', so Alert button should be selected
-//     const monitorButton = screen.getByText('Monitor');
-//     await userEvent.click(monitorButton);
-
-//     // The button group should now have Monitor selected
-//     expect(monitorButton.closest('button')).toHaveClass('euiButtonGroupButton-isSelected');
-//   });
-
-//   it('renders with pre-filled values', () => {
-//     const Wrapper = createFormWrapper({
-//       metadata: {
-//         name: 'Pre-filled Rule',
-//         enabled: false,
-//       },
-//       kind: 'signal',
-//     });
-
-//     render(
-//       <Wrapper>
-//         <RuleDetailsFieldGroup />
-//       </Wrapper>
-//     );
-
-//     expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Pre-filled Rule');
-//     // Monitor should be selected (signal kind displays as "Monitor")
-//     expect(screen.getByText('Monitor').closest('button')).toHaveClass(
-//       'euiButtonGroupButton-isSelected'
-//     );
-//   });
-// });
+    expect(screen.queryByText('Runbook to delete')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Edit Runbook')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Delete Runbook')).not.toBeInTheDocument();
+    expect(screen.getByTestId('addRunbookButton')).toBeInTheDocument();
+  });
+});
