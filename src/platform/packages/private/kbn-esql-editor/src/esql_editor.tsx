@@ -896,12 +896,8 @@ const ESQLEditorInternal = function ESQLEditor({
         markers.push(...underlinedMessages);
       }
 
-<<<<<<< perf-journey-improvements
-      trackValidationLatencyEnd(active);
-      performance.mark('esql-validation-complete');
-=======
       trackValidationLatencyEnd(active, callbacksDuration);
->>>>>>> main
+      performance.mark('esql-validation-complete');
 
       if (active) {
         const uniqueWarnings = filterDuplicatedWarnings(allWarnings);
