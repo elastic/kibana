@@ -30,10 +30,10 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\""
+          "\"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
-        "lineNumber": 53,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -146,7 +146,7 @@
           "\"enterpriseSearchAnalytics\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
-        "lineNumber": 31,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -163,7 +163,7 @@
           "\"enterpriseSearch\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
-        "lineNumber": 28,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -180,7 +180,7 @@
           "\"enterpriseSearchApplications\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
-        "lineNumber": 30,
+        "lineNumber": 29,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -197,7 +197,7 @@
           "\"enterpriseSearchContent\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/deep_links.ts",
-        "lineNumber": 29,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -231,7 +231,7 @@
           "\"searchSynonyms\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -248,7 +248,7 @@
           "\"searchGettingStarted\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -265,7 +265,7 @@
           "\"searchHomepage\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -282,7 +282,7 @@
           "\"elasticsearchIndexManagement\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -299,7 +299,7 @@
           "\"elasticsearchIndices\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -316,7 +316,7 @@
           "\"searchQueryRules\""
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -334,23 +334,6 @@
         ],
         "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
         "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/deeplinks-search",
-        "id": "def-common.SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID",
-        "description": [],
-        "signature": [
-          "\"searchInferenceEndpoints\""
-        ],
-        "path": "src/platform/packages/shared/deeplinks/search/constants.ts",
-        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
