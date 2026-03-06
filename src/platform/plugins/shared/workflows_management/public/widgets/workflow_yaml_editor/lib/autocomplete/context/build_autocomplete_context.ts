@@ -19,6 +19,8 @@ import {
   isInScheduledTriggerWithBlock,
   isInStepsContext,
   isInTriggersContext,
+  isInWorkflowInputsByPosition,
+  isInWorkflowInputsPath,
 } from './triggers_utils';
 import { getPathAtOffset } from '../../../../../../common/lib/yaml';
 import { getSchemaAtPath } from '../../../../../../common/lib/zod';
@@ -40,6 +42,7 @@ export function buildAutocompleteContext({
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
+  const workflows = editorState?.workflows;
   const workflowGraph = editorState?.computed?.workflowGraph;
   const yamlDocument = editorState?.computed?.yamlDocument;
   const workflowLookup = editorState?.computed?.workflowLookup;
@@ -92,7 +95,13 @@ export function buildAutocompleteContext({
   const parseResult = parseLineForCompletion(lineUpToCursor);
 
   if (workflowDefinition && workflowGraph) {
-    contextSchema = getContextSchemaForPath(workflowDefinition, workflowGraph, path, yamlDocument);
+    contextSchema = getContextSchemaForPath(
+      workflowDefinition,
+      workflowGraph,
+      path,
+      yamlDocument,
+      absoluteOffset
+    );
   }
 
   if (parseResult?.fullKey) {
@@ -143,11 +152,16 @@ export function buildAutocompleteContext({
     isInScheduledTriggerWithBlock: _isInScheduledTriggerWithBlock,
     isInTriggersContext: isInTriggersContext(path),
     isInStepsContext: isInStepsContext(path),
+    isInWorkflowInputsContext:
+      isInWorkflowInputsPath(path) || isInWorkflowInputsByPosition(focusedStepInfo, absoluteOffset),
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
-
-    // workflow definition (for JSON Schema autocompletion)
+    workflows: workflows ?? {
+      workflows: {},
+      totalWorkflows: 0,
+    },
+    currentWorkflowId: editorState?.workflow?.id ?? null,
     workflowDefinition: workflowDefinition ?? null,
   };
 }

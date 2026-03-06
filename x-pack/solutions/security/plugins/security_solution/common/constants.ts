@@ -215,9 +215,6 @@ export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as con
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
-/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
-export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
-
 /** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
 export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
   'securitySolution:suppressionBehaviorOnAlertClosure' as const;
@@ -260,6 +257,13 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 /** This Kibana Advanced Setting allows users to exclude selected data tiers from search during rule execution */
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
+
+/** This Kibana Advanced Setting allows users to include only selected data stream namespaces in search during rule execution */
+export const INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION =
+  'securitySolution:includedDataStreamNamespacesForRuleExecution' as const;
+
+/** The default value for the included data stream namespaces setting (empty = no filter) */
+export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
 /** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
 export const ENABLE_GRAPH_VISUALIZATION_SETTING =

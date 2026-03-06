@@ -35,24 +35,5 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
-
-    collect({
-      source: `service.entity.relationships.communicates_with`,
-      destination: 'entity.relationships.communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.depends_on`,
-      destination: 'entity.relationships.depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.dependent_of`,
-      destination: 'entity.relationships.dependent_of',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

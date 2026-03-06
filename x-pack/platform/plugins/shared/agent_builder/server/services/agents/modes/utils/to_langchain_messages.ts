@@ -7,7 +7,12 @@
 
 import type { BaseMessage, HumanMessage } from '@langchain/core/messages';
 import { AIMessage, ToolMessage } from '@langchain/core/messages';
-import type { AssistantResponse, ToolCallWithResult } from '@kbn/agent-builder-common';
+import type {
+  AssistantResponse,
+  ConversationRoundStep,
+  ToolCallStep,
+  ToolCallWithResult,
+} from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, isToolCallStep } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -80,10 +85,9 @@ export const roundToLangchain = async (
 
   // steps
   if (!ignoreSteps) {
-    for (const step of round.steps) {
-      if (isToolCallStep(step)) {
-        messages.push(...(await createToolCallMessages(step, { resultTransformer })));
-      }
+    const groups = groupToolCallSteps(round.steps);
+    for (const group of groups) {
+      messages.push(...(await createGroupedToolCallMessages(group, { resultTransformer })));
     }
   }
 
@@ -129,7 +133,82 @@ const formatAssistantResponse = ({ response }: { response: AssistantResponse }):
 };
 
 /**
- * Creates tool call messages.
+ * Groups consecutive tool call steps by `tool_call_group_id`.
+ * Steps sharing the same group ID are grouped together (parallel calls).
+ * Steps without a group ID are each in their own group (backward compat).
+ */
+export const groupToolCallSteps = (steps: ConversationRoundStep[]): ToolCallStep[][] => {
+  const groups: ToolCallStep[][] = [];
+  let currentGroup: ToolCallStep[] = [];
+  let currentGroupId: string | undefined;
+
+  for (const step of steps) {
+    if (!isToolCallStep(step)) {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+        currentGroup = [];
+        currentGroupId = undefined;
+      }
+      continue;
+    }
+
+    const { tool_call_group_id: groupId } = step;
+
+    if (groupId && groupId === currentGroupId) {
+      currentGroup.push(step);
+    } else {
+      if (currentGroup.length > 0) {
+        groups.push(currentGroup);
+      }
+      currentGroup = [step];
+      currentGroupId = groupId;
+    }
+  }
+
+  if (currentGroup.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+};
+
+/**
+ * Creates langchain messages for a group of tool call steps.
+ * For parallel groups (multiple steps), produces one AIMessage with all tool_calls
+ * followed by one ToolMessage per tool call.
+ */
+const createGroupedToolCallMessages = async (
+  toolCalls: ToolCallWithResult[],
+  { resultTransformer }: { resultTransformer?: ToolCallResultTransformer } = {}
+): Promise<BaseMessage[]> => {
+  const aiMessage = new AIMessage({
+    content: '',
+    tool_calls: toolCalls.map((toolCall) => ({
+      id: toolCall.tool_call_id,
+      name: sanitizeToolId(toolCall.tool_id),
+      args: toolCall.params,
+      type: 'tool_call' as const,
+    })),
+  });
+
+  const toolMessages: ToolMessage[] = [];
+  for (const toolCall of toolCalls) {
+    const processedResults = resultTransformer
+      ? await resultTransformer(toolCall)
+      : toolCall.results;
+    toolMessages.push(
+      new ToolMessage({
+        tool_call_id: toolCall.tool_call_id,
+        content: JSON.stringify({ results: processedResults }),
+      })
+    );
+  }
+
+  return [aiMessage, ...toolMessages];
+};
+
+/**
+ * Creates tool call messages for a single tool call.
  * When `resultTransformer` is provided, results will be passed through it.
  */
 export const createToolCallMessages = async (

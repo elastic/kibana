@@ -28,6 +28,7 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowIdDecorations,
 } from './decorations';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
@@ -66,10 +67,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
-import {
-  buildExecutionContext,
-  type ExecutionContext,
-} from '../lib/execution_context/build_execution_context';
+import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
+import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
@@ -77,6 +76,7 @@ import {
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
@@ -364,6 +364,9 @@ export const WorkflowYAMLEditor = ({
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
+        const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
+        registerMonacoConnectorHandler(workflowExecuteHandler);
+
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
 
@@ -444,6 +447,12 @@ export const WorkflowYAMLEditor = ({
     readOnly: isExecutionYaml,
   });
 
+  useWorkflowIdDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
   const updateContainerPosition = (
     stepInfo: StepInfo,
     _editor: monaco.editor.IStandaloneCodeEditor
@@ -500,7 +509,14 @@ export const WorkflowYAMLEditor = ({
         return;
       }
       if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
-        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+        const triggerDefinition = triggerSchemas.getTriggerDefinition(action.id);
+        insertTriggerSnippet(
+          model,
+          yamlDocumentCurrent,
+          action.id,
+          editor,
+          triggerDefinition?.snippets?.condition
+        );
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }

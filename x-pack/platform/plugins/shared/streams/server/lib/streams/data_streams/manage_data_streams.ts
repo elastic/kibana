@@ -15,6 +15,7 @@ import type {
 import type { Streams } from '@kbn/streams-schema';
 import type {
   IndicesDataStreamFailureStore,
+  IndicesPutDataLifecycleRequest,
   IndicesSimulateTemplateTemplate,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
@@ -183,12 +184,14 @@ export async function updateDataStreamsLifecycle({
         },
       });
     } else if (isDslLifecycle(lifecycle)) {
+      const dslDownsampling = lifecycle.dsl.downsample;
       await retryTransientEsErrors(
         () =>
           esClient.indices.putDataLifecycle({
             name: names,
             data_retention: lifecycle.dsl.data_retention,
-          }),
+            ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
+          } as IndicesPutDataLifecycleRequest),
         { logger }
       );
 
@@ -224,12 +227,14 @@ export async function updateDataStreamsLifecycle({
 
           const templateLifecycle = getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
+            const templateDownsampling = templateLifecycle.dsl.downsample;
             await retryTransientEsErrors(
               () =>
                 esClient.indices.putDataLifecycle({
                   name,
                   data_retention: templateLifecycle.dsl.data_retention,
-                }),
+                  ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
+                } as IndicesPutDataLifecycleRequest),
               { logger }
             );
           } else {
@@ -279,11 +284,12 @@ export async function putDataStreamsSettings({
       settings,
     })
   );
-  const errors = response.data_streams
+  const dataStreamErrors = response.data_streams
     .filter(({ error }) => Boolean(error))
-    .map(({ error }) => error);
-  if (errors.length) {
-    throw new Error(errors.join('\n'));
+    .map(({ error }) => (typeof error === 'string' ? error : JSON.stringify(error)));
+  if (dataStreamErrors.length) {
+    const joined = dataStreamErrors.join('\n');
+    throw new Error(joined);
   }
 }
 

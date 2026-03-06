@@ -24,7 +24,7 @@ export const filterSchema = schema.object(
       },
     }),
   },
-  { meta: { id: 'filterSimpleSchema' } }
+  { meta: { id: 'filterSimple', title: 'Simple Filter' } }
 );
 
 export const filterWithLabelSchema = schema.object(
@@ -44,7 +44,7 @@ export const filterWithLabelSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'filterWithLabelSchema' } }
+  { meta: { id: 'filterWithLabel', title: 'Filter with Label' } }
 );
 
 export type LensApiFilterType = typeof filterSchema.type;
@@ -60,7 +60,7 @@ const FilterQueryType = schema.object(
     range: schema.maybe(schema.any({})),
     terms: schema.maybe(schema.any({})),
   },
-  { meta: { id: 'filterQueryTypeSchema' } }
+  { meta: { id: 'filterQueryType', title: 'Filter Query Type' } }
 );
 
 /**
@@ -78,7 +78,7 @@ export const unifiedSearchFilterSchema = schema.oneOf(
       language: schema.maybe(schema.oneOf([schema.literal('kuery'), schema.literal('lucene')])),
     }),
   ],
-  { meta: { id: 'searchFilterSchema' } }
+  { meta: { id: 'searchFilter', title: 'Search Filter' } }
 );
 
 export type UnifiedSearchFilterType = TypeOf<typeof unifiedSearchFilterSchema>;

@@ -4,8 +4,7 @@ steps:
     agents:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
@@ -18,10 +17,9 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      machineType: c4d-standard-8
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-8
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
@@ -33,10 +31,9 @@ steps:
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
-      machineType: c4d-standard-2
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     timeout_in_minutes: 60
     key: checks
@@ -48,10 +45,9 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
-      machineType: c4d-standard-16
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-16
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -63,12 +59,25 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
-      machineType: c4d-standard-32
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-32
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting_with_types
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
+    label: 'Linting (with oxlint)'
+    agents:
+      machineType: n2d-standard-16
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c
+      diskSizeGb: 105
+    key: linting_with_oxlint
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -78,10 +87,9 @@ steps:
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
     label: 'Check OAS Snapshot'
     agents:
-      machineType: c4d-standard-2
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -92,10 +100,9 @@ steps:
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
-      machineType: c4d-highmem-4
-      diskType: hyperdisk-balanced
+      machineType: n2d-highmem-4
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
@@ -113,9 +120,8 @@ steps:
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
-      JEST_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_types'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      FTR_CONFIGS_DEPS: 'build,quick_checks,checks,linting,linting_with_types,check_types'
+      FTR_CONFIGS_DEPS: 'build'
     retry:
       automatic:
         - exit_status: '*'
@@ -130,7 +136,7 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_types'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
     retry:
       automatic:
@@ -155,16 +161,9 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: build_api_docs
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
     timeout_in_minutes: 60
     retry:
       automatic:

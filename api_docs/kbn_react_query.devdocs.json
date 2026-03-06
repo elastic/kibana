@@ -13909,7 +13909,7 @@
               "\nIf set, the component will only re-render if any of the listed properties change.\nWhen set to `['data', 'error']`, the component will only re-render when the `data` or `error` properties change.\nWhen set to `'all'`, the component will re-render whenever a query is updated.\nBy default, access to properties will be tracked, and the component will only re-render when one of the tracked properties change."
             ],
             "signature": [
-              "\"all\" | (\"error\" | \"status\" | \"data\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"fetchStatus\" | \"isInitialLoading\" | \"refetch\" | \"isRefetching\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isStale\")[] | undefined"
+              "\"all\" | (\"error\" | \"data\" | \"status\" | \"remove\" | \"isError\" | \"isLoading\" | \"isSuccess\" | \"failureCount\" | \"failureReason\" | \"isPaused\" | \"fetchStatus\" | \"isInitialLoading\" | \"refetch\" | \"isRefetching\" | \"isFetching\" | \"isLoadingError\" | \"dataUpdatedAt\" | \"errorUpdateCount\" | \"errorUpdatedAt\" | \"isRefetchError\" | \"fetchNextPage\" | \"fetchPreviousPage\" | \"hasNextPage\" | \"hasPreviousPage\" | \"isFetchingNextPage\" | \"isFetchingPreviousPage\" | \"isFetched\" | \"isFetchedAfterMount\" | \"isPlaceholderData\" | \"isPreviousData\" | \"isStale\")[] | undefined"
             ],
             "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
             "lineNumber": 124,
@@ -14036,6 +14036,10 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/management/components/endpoint_runscript_script_selector/endpoint_runscript_script_selector.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -14309,11 +14313,11 @@
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
               },
               {
                 "plugin": "dataSources",
-                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_stack_connector.ts"
+                "path": "x-pack/platform/plugins/shared/data_sources/public/application/hooks/use_connectors.ts"
               },
               {
                 "plugin": "maintenanceWindows",
@@ -14390,10 +14394,6 @@
               {
                 "plugin": "streamsApp",
                 "path": "x-pack/platform/plugins/shared/streams_app/public/hooks/use_fetch_significant_events.ts"
-              },
-              {
-                "plugin": "streamsApp",
-                "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_systems/stream_systems/hooks/use_stream_systems.ts"
               },
               {
                 "plugin": "streamsApp",
@@ -14516,12 +14516,12 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_rule_management_filters.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
               },
               {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
+                "plugin": "@kbn/cloud-security-posture",
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14529,15 +14529,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/use_fetch_coverage_overview_query.ts"
               },
               {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_misconfiguration_preview.ts"
-              },
-              {
-                "plugin": "@kbn/cloud-security-posture",
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/hooks/use_vulnerabilities_preview.ts"
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query.ts"
               },
               {
                 "plugin": "@kbn/cloud-security-posture",
@@ -14590,6 +14586,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/ml_popover/hooks/use_security_jobs.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management/logic/use_find_rules.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16558,7 +16558,7 @@
         "label": "NetworkMode",
         "description": [],
         "signature": [
-          "\"always\" | \"online\" | \"offlineFirst\""
+          "\"online\" | \"always\" | \"offlineFirst\""
         ],
         "path": "node_modules/@tanstack/query-core/build/lib/types.d.ts",
         "lineNumber": 28,

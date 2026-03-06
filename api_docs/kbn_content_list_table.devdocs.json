@@ -156,7 +156,7 @@
         "tags": [],
         "label": "NameCell",
         "description": [
-          "\nDefault rich renderer for the name column that includes:\n- Clickable title (with href or onClick).\n- Description (if available and showDescription is true).\n\nMemoized to prevent unnecessary re-renders when parent table re-renders."
+          "\nDefault rich renderer for the name column that includes:\n- Clickable title (with href or onClick).\n- Description (if available and `showDescription` is true).\n- Tag badges (if available and `showTags` is true).\n\nWhen `showTags` is true, clicking a tag badge toggles a filter on the\ncontent list (include on click, exclude on modifier+click). Provide\n`onTagClick` to override this behavior.\n\nMemoized to prevent unnecessary re-renders when parent table re-renders."
         ],
         "signature": [
           "React.NamedExoticComponent<",
@@ -167,7 +167,7 @@
             "section": "def-public.NameCellProps",
             "text": "NameCellProps"
           },
-          "> & { readonly type: ({ item, showDescription }: ",
+          "> & { readonly type: ({ item, showDescription, showTags, onTagClick }: ",
           {
             "pluginId": "@kbn/content-list-table",
             "scope": "public",
@@ -178,7 +178,7 @@
           ") => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
-        "lineNumber": 34,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -187,6 +187,52 @@
           {
             "parentPluginId": "@kbn/content-list-table",
             "id": "def-public.NameCell.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.NameCellTags",
+        "type": "Function",
+        "tags": [],
+        "label": "NameCellTags",
+        "description": [
+          "\nRenders tag badges below the title/description in the name cell.\n\nProvides a built-in click handler that toggles tag filters on the\ncontent list state:\n- **Click**: toggles the tag as an include filter.\n- **Modifier+click** (Cmd on macOS, Ctrl on Windows/Linux): toggles\n  the tag as an exclude filter.\n\nConsumers can override this behavior via the `onTagClick` prop."
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.NameCellTagsProps",
+            "text": "NameCellTagsProps"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/cell_tags.tsx",
+        "lineNumber": 37,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellTags.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -307,7 +353,7 @@
           {
             "parentPluginId": "@kbn/content-list-table",
             "id": "def-public.ActionNamespace.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -318,7 +364,33 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ActionNamespace.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.ActionProps",
+                    "text": "ActionProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 67,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/content-list-table",
@@ -525,7 +597,7 @@
               "Render type: `'icon'` (compact) or `'button'` (full)."
             ],
             "signature": [
-              "\"icon\" | \"button\" | undefined"
+              "\"button\" | \"icon\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
             "lineNumber": 44,
@@ -543,7 +615,7 @@
               "Icon/button color (matches EUI button color palette)."
             ],
             "signature": [
-              "\"text\" | \"primary\" | \"success\" | \"warning\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined"
+              "\"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"risk\" | \"neutral\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
             "lineNumber": 46,
@@ -847,7 +919,7 @@
           {
             "parentPluginId": "@kbn/content-list-table",
             "id": "def-public.ColumnNamespace.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -858,7 +930,33 @@
             "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ColumnNamespace.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.ColumnProps",
+                    "text": "ColumnProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+                "lineNumber": 54,
+                "columnNumber": 4,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/content-list-table",
@@ -1497,7 +1595,7 @@
         "label": "NameCellProps",
         "description": [],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1510,10 +1608,10 @@
             "label": "item",
             "description": [],
             "signature": [
-              "Record<string, unknown> & { id: string; title: string; description?: string | undefined; type?: string | undefined; updatedAt?: Date | undefined; }"
+              "Record<string, unknown> & { id: string; title: string; description?: string | undefined; type?: string | undefined; updatedAt?: Date | undefined; tags?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1533,10 +1631,159 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
-            "lineNumber": 19,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellProps.showTags",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showTags",
+            "description": [
+              "\nWhether to show tags below the title/description.\nRequires `item.tags` to contain tag IDs and a tags service\nto be configured on the `ContentListProvider`.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellProps.onTagClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onTagClick",
+            "description": [
+              "\nOptional click handler for tag badges.\nWhen omitted, the built-in handler in {@link NameCellTags} toggles\ninclude/exclude filters via `useContentListFilters`."
+            ],
+            "signature": [
+              "((tag: ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.Tag",
+                "text": "Tag"
+              },
+              ", withModifierKey: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_cell.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.NameCellTagsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NameCellTagsProps",
+        "description": [],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/cell_tags.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellTagsProps.tagIds",
+            "type": "Array",
+            "tags": [],
+            "label": "tagIds",
+            "description": [
+              "Tag IDs to render."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/cell_tags.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameCellTagsProps.onTagClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onTagClick",
+            "description": [
+              "\nOptional override for the tag click handler.\nWhen omitted, the built-in handler toggles include/exclude\nfilters via {@link useTagFilterToggle}."
+            ],
+            "signature": [
+              "((tag: ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.Tag",
+                "text": "Tag"
+              },
+              ", withModifierKey: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/cell_tags.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.NameCellTagsProps.onTagClick.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "tag",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-management-tags",
+                    "scope": "public",
+                    "docId": "kibKbnContentManagementTagsPluginApi",
+                    "section": "def-public.Tag",
+                    "text": "Tag"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/cell_tags.tsx",
+                "lineNumber": 23,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.NameCellTagsProps.onTagClick.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "withModifierKey",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/cell_tags.tsx",
+                "lineNumber": 23,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1634,6 +1881,52 @@
           },
           {
             "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.showTags",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showTags",
+            "description": [
+              "\nWhether to show tags below the title/description.\nRequires `item.tags` to contain tag IDs and a tags service\nto be configured on the `ContentListProvider`.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.NameColumnProps.onTagClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onTagClick",
+            "description": [
+              "\nOptional click handler for tag badges.\nCalled with the tag and a boolean indicating whether a modifier key\n(Cmd on Mac, Ctrl on Windows/Linux) was held during the click.\nOnly effective when `showTags` is `true`."
+            ],
+            "signature": [
+              "((tag: ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.Tag",
+                "text": "Tag"
+              },
+              ", withModifierKey: boolean) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
             "id": "def-public.NameColumnProps.render",
             "type": "Function",
             "tags": [],
@@ -1653,7 +1946,7 @@
               "<Record<string, unknown>>) => React.ReactNode) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 48,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1676,7 +1969,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-                "lineNumber": 49,
+                "lineNumber": 64,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1948,7 +2241,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-        "lineNumber": 119,
+        "lineNumber": 137,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

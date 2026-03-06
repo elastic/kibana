@@ -650,7 +650,7 @@
             "label": "direction",
             "description": [],
             "signature": [
-              "\"column\" | \"row\""
+              "\"row\" | \"column\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_ccm_promotional_callout.tsx",
             "lineNumber": 29,
@@ -854,7 +854,7 @@
             "label": "direction",
             "description": [],
             "signature": [
-              "\"column\" | \"row\""
+              "\"row\" | \"column\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_promotional_callout.tsx",
             "lineNumber": 32,
@@ -1043,7 +1043,7 @@
             "label": "direction",
             "description": [],
             "signature": [
-              "\"column\" | \"row\""
+              "\"row\" | \"column\""
             ],
             "path": "src/platform/packages/shared/kbn-search-api-panels/components/eis_update_callout.tsx",
             "lineNumber": 55,

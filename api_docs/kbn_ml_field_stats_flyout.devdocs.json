@@ -637,7 +637,7 @@
           "EuiTextTruncateProps",
           ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
           "EuiToolTipProps",
-          ", \"content\" | \"children\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & BaseOption<T>) | (",
+          ", \"children\" | \"content\">> | undefined; } & React.HTMLAttributes<HTMLLIElement> & BaseOption<T>) | (",
           "DisambiguateSet",
           "<",
           "EuiSelectableLIOption",

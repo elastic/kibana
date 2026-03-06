@@ -89,9 +89,13 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
     before(() => {
       login();
       visit(EXCEPTIONS_URL);
+      waitForExceptionsTableToBeLoaded();
+      cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
 
       // Make sure we have Endpoint Security Exception List
       importExceptionLists(ENDPOINT_LIST_TO_IMPORT_FILENAME);
+      validateImportExceptionListWentSuccessfully();
+      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
     });
 
     it('Should not allow to import or create a second Endpoint Security Exception List', () => {

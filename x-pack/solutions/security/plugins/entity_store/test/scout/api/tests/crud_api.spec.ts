@@ -8,7 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
-import { hashEuid } from '../../../../server/domain/crud_client/utils';
+import { hashEuid } from '../../../../server/domain/crud/utils';
 import { getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
@@ -74,11 +74,10 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
   });
 
   apiTest('Should require a force flag', async ({ apiClient, esClient }) => {
+    // Send a field that exists on generic definition but has allowAPIUpdate: false (e.g. entity.name)
     const entityObj: Entity = {
       entity: {
         id: 'required-id-force',
-      },
-      host: {
         name: 'needs-force-flag',
       },
     };

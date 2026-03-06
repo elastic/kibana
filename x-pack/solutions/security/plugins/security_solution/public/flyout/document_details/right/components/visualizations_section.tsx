@@ -8,15 +8,15 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
-import { ExpandableSection } from '../../../shared/components/expandable_section';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'visualizations';
 
