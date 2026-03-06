@@ -1358,6 +1358,20 @@
         },
         "file": {
           "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "Ext": {
+              "properties": {
+                "device": {
+                  "properties": {
+                    "bus_type": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
             "ctime": {
               "type": "date"
             },
@@ -1959,6 +1973,14 @@
             "args": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "command_line": {
+              "type": "wildcard",
+              "fields": {
+                "text": {
+                  "type": "match_only_text"
+                }
+              }
             },
             "entity_id": {
               "ignore_above": 1024,
