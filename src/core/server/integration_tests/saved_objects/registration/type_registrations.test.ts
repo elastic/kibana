@@ -25,6 +25,7 @@ const previouslyRegisteredTypes = [
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
+  'anonymization-salt',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
@@ -61,9 +62,12 @@ const previouslyRegisteredTypes = [
   'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
   'entity-analytics-monitoring-entity-source',
+  'watchlist-config',
   'entity-definition',
   'privmon-api-key',
   'entity-discovery-api-key',
+  'entity-engine-descriptor-v2',
+  'entity-store-global-state',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -113,6 +117,7 @@ const previouslyRegisteredTypes = [
   'maintenance-window',
   'map',
   'maps-telemetry',
+  'markdown',
   'metrics-data-source',
   'metrics-explorer-view',
   'ml-job',
@@ -181,6 +186,7 @@ const previouslyRegisteredTypes = [
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',
+  'trial-companion-nba-milestone',
 ].sort();
 
 describe('SO type registrations', () => {

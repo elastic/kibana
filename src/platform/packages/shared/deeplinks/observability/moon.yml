@@ -19,6 +19,7 @@ project:
     sourceRoot: src/platform/packages/shared/deeplinks/observability
 dependsOn:
   - '@kbn/utility-types'
+  - '@kbn/es-query'
 tags:
   - shared-common
   - package

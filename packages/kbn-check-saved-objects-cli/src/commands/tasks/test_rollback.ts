@@ -9,7 +9,7 @@
 
 import type { ListrTask } from 'listr2';
 import { getKibanaMigratorTestKit } from '@kbn/migrator-test-kit';
-import type { Task, TaskContext } from '../types';
+import { encryptionOverrides, type Task, type TaskContext } from '../types';
 import { getPreviousVersionType } from '../../migrations';
 import { checkDocuments } from './check_documents';
 
@@ -21,18 +21,27 @@ export const testRollback: Task = async (ctx, task) => {
   );
 
   const { runMigrations: performRollback, savedObjectsRepository } = await getKibanaMigratorTestKit(
-    { types: previousVersionTypes }
+    {
+      types: previousVersionTypes,
+      encryptionExtensionFactory: ctx.encryptedSavedObjects
+        ? (typeRegistry) =>
+            ctx.encryptedSavedObjects!.__testCreateDangerousExtension(
+              typeRegistry,
+              encryptionOverrides
+            )
+        : undefined,
+    }
   );
 
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: `Run rollback migration on updated types: '${ctx.updatedTypes
+      title: `Run rollback migration on updated types: '${updatedTypes
         .map(({ name }) => name)
         .join(', ')}'`,
       task: async () => await performRollback(),
     },
     {
-      title: `Ensure SO API-retrieved SOs match previous version fixtures`,
+      title: `Ensure API-retrieved SOs match previous version fixtures`,
       task: checkDocuments({
         repository: savedObjectsRepository,
         types: previousVersionTypes,

@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { ResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../../common/siem_migrations/constants';
@@ -59,6 +59,7 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
               }
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+              const { experimentalFeatures } = ctx.securitySolution.getConfig();
               await siemMigrationAuditLogger.logAddRules({
                 migrationId,
                 count: rulesCount,
@@ -75,7 +76,10 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
 
               // Create identified resource documents without content to keep track of them
               const resourceIdentifier = new RuleResourceIdentifier(
-                firstOriginalRule.vendor as ResourceSupportedVendor
+                firstOriginalRule.vendor as ResourceSupportedVendor,
+                {
+                  experimentalFeatures,
+                }
               );
               const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
 

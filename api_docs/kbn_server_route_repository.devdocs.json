@@ -24,6 +24,8 @@
           "<TRouteHandlerResources, TRouteCreateOptions>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/create_server_route_factory.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -43,6 +45,8 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/decode_request_params.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,6 +61,8 @@
               "Partial<{ path: any; query: any; body: any; }>"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/decode_request_params.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -72,6 +78,8 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/decode_request_params.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,6 +101,8 @@
           "; pathname: string; version: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/format_request.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,6 +117,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/format_request.ts",
+            "lineNumber": 12,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,6 +134,8 @@
               "Record<string, any>"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/format_request.ts",
+            "lineNumber": 12,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,6 +157,8 @@
           "; pathname: string; version: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/parse_endpoint.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +173,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/parse_endpoint.ts",
+            "lineNumber": 14,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -183,15 +201,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<string, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " | undefined, any, any, any>>; logger: ",
+          "<string, any, any, any, any>>; logger: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "common",
@@ -202,6 +212,8 @@
           "; dependencies: TDependencies; runDevModeChecks: boolean; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -213,6 +225,8 @@
             "label": "{\n  core,\n  repository,\n  logger,\n  dependencies,\n  runDevModeChecks,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+            "lineNumber": 47,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -228,6 +242,8 @@
                   "<{}, unknown>"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "lineNumber": 48,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -247,17 +263,11 @@
                     "section": "def-common.ServerRoute",
                     "text": "ServerRoute"
                   },
-                  "<string, ",
-                  {
-                    "pluginId": "@kbn/server-route-repository-utils",
-                    "scope": "common",
-                    "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-                    "section": "def-common.RouteParamsRT",
-                    "text": "RouteParamsRT"
-                  },
-                  " | undefined, any, any, any>; }"
+                  "<string, any, any, any, any>; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "lineNumber": 49,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -278,6 +288,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "lineNumber": 50,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -292,6 +304,8 @@
                   "TDependencies"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "lineNumber": 51,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -303,6 +317,8 @@
                 "label": "runDevModeChecks",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "lineNumber": 52,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -323,6 +339,8 @@
           "(params: KibanaRequestParams) => Partial<{ path: any; body: any; query: any; }>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/strip_nullish_request_parameters.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,6 +355,8 @@
               "KibanaRequestParams"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/strip_nullish_request_parameters.ts",
+            "lineNumber": 18,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -365,6 +385,8 @@
           " extends CoreRouteHandlerResources"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 293,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -385,6 +407,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 294,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -409,6 +433,8 @@
           "<TServerRouteRepository, TAdditionalClientOptions>"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 259,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -441,6 +467,8 @@
               "<TServerRouteRepository, TEndpoint>>"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 263,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -455,6 +483,8 @@
                   "TEndpoint"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 264,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -480,6 +510,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 265,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -520,6 +552,8 @@
               "<TReturnType> : never : never"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+            "lineNumber": 271,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -534,6 +568,8 @@
                   "TEndpoint"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 272,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -559,6 +595,8 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+                "lineNumber": 273,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -588,15 +626,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, infer TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " | undefined, any, any, ",
+          "<any, infer TRouteParamsRT extends unknown, any, any, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -604,17 +634,11 @@
             "section": "def-common.ServerRouteCreateOptions",
             "text": "ServerRouteCreateOptions"
           },
-          " | undefined> ? TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
+          " | undefined> ? TRouteParamsRT extends any ? ClientRequestParamsOfType<TRouteParamsRT> : TRouteParamsRT extends undefined ? {} : never : never"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 238,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -635,25 +659,11 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, infer TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " | undefined, any, any, any> ? TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {} : never"
+          "<any, infer TRouteParamsRT extends unknown, any, any, any> ? TRouteParamsRT extends any ? DecodedRequestParamsOfType<TRouteParamsRT> : {} : never"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 229,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -672,6 +682,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 297,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -687,6 +699,8 @@
           "keyof TServerRouteRepository & string"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 217,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -712,6 +726,8 @@
           "<any, any>; }"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -741,6 +757,8 @@
           " | undefined; } | undefined> ? TWrappedResponseType : TReturnType : never"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 220,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -753,23 +771,11 @@
         "label": "RouteParamsRT",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.IoTsParamsObject",
-            "text": "IoTsParamsObject"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.ZodParamsObject",
-            "text": "ZodParamsObject"
-          }
+          "any"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -784,15 +790,7 @@
         "signature": [
           "{ endpoint: TEndpoint; handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>; security: ",
           "RouteSecurity",
-          "; } & (TRouteParamsRT extends ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " ? { params: TRouteParamsRT; } : {}) & (TRouteCreateOptions extends ",
+          "; } & (TRouteParamsRT extends any ? { params: TRouteParamsRT; } : {}) & (TRouteCreateOptions extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -803,6 +801,8 @@
           " ? { options: TRouteCreateOptions; } : {})"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 175,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -823,15 +823,7 @@
             "section": "def-common.ServerRoute",
             "text": "ServerRoute"
           },
-          "<string, ",
-          {
-            "pluginId": "@kbn/server-route-repository-utils",
-            "scope": "common",
-            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
-            "section": "def-common.RouteParamsRT",
-            "text": "RouteParamsRT"
-          },
-          " | undefined, any, any, ",
+          "<string, any, any, any, ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -842,6 +834,8 @@
           " | undefined>; }"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
+        "lineNumber": 188,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -856,48 +850,56 @@
         "label": "passThroughValidationObject",
         "description": [],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/server-route-repository",
             "id": "def-server.passThroughValidationObject.body",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "body",
             "description": [],
             "signature": [
-              "KbnPassThroughAny"
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
             "id": "def-server.passThroughValidationObject.params",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "params",
             "description": [],
             "signature": [
-              "KbnPassThroughAny"
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/server-route-repository",
             "id": "def-server.passThroughValidationObject.query",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "query",
             "description": [],
             "signature": [
-              "KbnPassThroughAny"
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

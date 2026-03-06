@@ -62,7 +62,19 @@ interface SplunkXmlElement extends XmlElement {
  *
  *
  **/
-export class SplunkXmlDashboardParser extends XmlParser {
+export class SplunkXmlDashboardParser extends XmlParser implements SplunkXmlDashboardParser {
+  public async getVersion() {
+    const root = await this.parse();
+    const dashboard = this.findDeep(root, 'dashboard') as XmlElement;
+    const form = this.findDeep(root, 'form') as XmlElement;
+
+    const el = dashboard || form;
+    if (!el) {
+      return `Unsupported root tag`;
+    }
+    return el.$?.version;
+  }
+
   public async extractPanels(): Promise<ParsedPanel[]> {
     const root = await this.parse();
     const panels: ParsedPanel[] = [];

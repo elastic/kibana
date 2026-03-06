@@ -32,6 +32,16 @@ export interface StreamRoutingInput {
   definition: Streams.WiredStream.GetResponse;
 }
 
+export interface BulkForkItem {
+  name: string;
+  condition: Condition;
+}
+
+export interface BulkForkResult {
+  name: string;
+  success: boolean;
+}
+
 export interface StreamRoutingContext {
   currentRuleId: string | null;
   definition: Streams.WiredStream.GetResponse;
@@ -41,18 +51,29 @@ export interface StreamRoutingContext {
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
   isRefreshing: boolean;
+  isConditionEditorValid: boolean;
+  bulkFork: {
+    items: BulkForkItem[];
+    results: BulkForkResult[];
+  } | null;
 }
 
 export type StreamRoutingEvent =
-  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
+  | { type: 'childStreams.mode.changeToIngestMode' }
+  | { type: 'childStreams.mode.changeToQueryMode' }
+  | { type: 'queryStream.create' }
+  | { type: 'queryStream.cancel' }
+  | { type: 'queryStream.save'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
   | { type: 'routingRule.edit'; id: string }
   | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
+  | { type: 'routingRule.bulkFork'; items: BulkForkItem[] }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
+  | { type: 'routingRule.setConditionEditorValidity'; isValid: boolean }
   | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
   | { type: 'routingSamples.setSelectedPreview'; preview: RoutingSamplesContext['selectedPreview'] }
   | {
@@ -63,7 +84,9 @@ export type StreamRoutingEvent =
       toggle?: boolean;
     }
   | { type: 'routingRule.reviewSuggested'; id: string }
+  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
   | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
   | { type: 'suggestion.changeName'; name: string }
   | { type: 'suggestion.changeCondition'; condition: Condition }
-  | { type: 'suggestion.saveSuggestion' };
+  | { type: 'suggestion.saveSuggestion' }
+  | { type: 'bulkFork.acknowledge' };

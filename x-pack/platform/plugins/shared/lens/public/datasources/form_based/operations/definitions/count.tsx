@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { snakeCase } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
 import {
@@ -184,14 +184,15 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     if (column.params?.emptyAsNull === false || column.timeShift) return;
 
     const field = indexPattern.getFieldByName(column.sourceField);
-    let esql = '';
     if (!field || field?.type === 'document') {
-      esql = `COUNT(*)`;
-    } else {
-      esql = `COUNT(${sanitazeESQLInput(field.name)})`;
+      return { template: 'COUNT(*)' };
     }
-
-    return esql;
+    // Use columnId to make param name unique
+    const paramKey = `field_${snakeCase(columnId)}`;
+    return {
+      template: `COUNT(??${paramKey})`,
+      params: { [paramKey]: field.name },
+    };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);

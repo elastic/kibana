@@ -49,5 +49,7 @@
     "@kbn/connector-schemas",
     "@kbn/management-settings-ids",
     "@kbn/ai-assistant-common",
+    "@kbn/workflows",
+    "@kbn/usage-api-plugin",
   ]
 }

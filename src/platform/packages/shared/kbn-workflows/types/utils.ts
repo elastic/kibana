@@ -13,23 +13,26 @@ import type {
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
+  StepStabilityLevel,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
+import { getBuiltInStepDefinition } from '../spec/builtin_step_definitions';
 import type {
+  BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   MergeStep,
   ParallelStep,
   Step,
-  TriggerType,
   WaitStep,
   WorkflowYaml,
 } from '../spec/schema';
-import { BuiltInStepTypes, TriggerTypes } from '../spec/schema';
+import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
+import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
+import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -75,7 +78,6 @@ export function isCancelableStatus(status: ExecutionStatus) {
 
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
-export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
@@ -98,3 +100,9 @@ export const isDynamicConnector = (
 
 export const isHttpMethod = (method: string): method is HttpMethod =>
   KNOWN_HTTP_METHODS.includes(method as HttpMethod);
+
+export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
+  BuiltInStepProperties.includes(property as BuiltInStepProperty);
+
+export const getBuiltInStepStability = (type: string): StepStabilityLevel | undefined =>
+  getBuiltInStepDefinition(type)?.stability;

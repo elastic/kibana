@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
@@ -114,6 +114,7 @@ export const Command = z.enum([
   'scan',
   'runscript',
   'cancel',
+  'memory-dump',
 ]);
 export type CommandEnum = typeof Command.enum;
 export const CommandEnum = Command.enum;
@@ -301,10 +302,10 @@ export const ResponseActionDetails = z.object({
       })
     )
     .optional(),
-  /** 
+  /**
       * The outputs of the response action for each agent ID that it was sent to. Content different depending on the
 response action command and will only be present for agents that have responded to the response action
- 
+
       */
   outputs: z
     .object({})

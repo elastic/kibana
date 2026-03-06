@@ -6,15 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
-} from '../../../types';
+} from '@elastic/esql/types';
 import {
   isFunctionExpression,
   isFieldExpression,
@@ -24,8 +22,10 @@ import {
   isLiteral,
   isAssignment,
   isColumn,
-} from '../../../ast/is';
-import { Walker } from '../../../ast/walker';
+  Walker,
+} from '@elastic/esql';
+import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
+import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
@@ -70,11 +70,7 @@ export const getPosition = (command: ESQLAstAllCommands, innerText: string): Car
     return 'expression_after_assignment';
   }
 
-  if (
-    isFunctionExpression(lastCommandArg) &&
-    lastCommandArg.name === 'where' &&
-    !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)
-  ) {
+  if (isWhereExpression(lastCommandArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
     return 'after_where';
   }
 

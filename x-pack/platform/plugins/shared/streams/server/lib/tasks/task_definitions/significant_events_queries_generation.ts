@@ -8,29 +8,33 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import {
-  TaskStatus,
   getStreamTypeFromDefinition,
   type SignificantEventsQueriesGenerationResult,
-  type System,
 } from '@kbn/streams-schema';
-import pLimit from 'p-limit';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { getErrorMessage } from '../../streams/errors/parse_error';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
 import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
 import { cancellableTask } from '../cancellable_task';
 import { generateSignificantEventDefinitions } from '../../significant_events/generate_significant_events';
+import { isDefinitionNotFoundError } from '../../streams/errors/definition_not_found_error';
 
 export interface SignificantEventsQueriesGenerationTaskParams {
   connectorId: string;
   start: number;
   end: number;
-  systems?: System[];
   sampleDocsSize?: number;
+  streamName: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
   'streams_significant_events_queries_generation';
+
+export function getSignificantEventsQueriesGenerationTaskId(streamName: string) {
+  return `${SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE}_${streamName}`;
+}
 
 export function createStreamsSignificantEventsQueriesGenerationTask(taskContext: TaskContext) {
   return {
@@ -43,17 +47,22 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 throw new Error('Request is required to run this task');
               }
 
-              const { connectorId, start, end, systems, sampleDocsSize, _task } = runContext
+              const { connectorId, start, end, sampleDocsSize, streamName, _task } = runContext
                 .taskInstance.params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
-              const { stream: name } = _task;
 
-              const { taskClient, scopedClusterClient, streamsClient, inferenceClient, soClient } =
-                await taskContext.getScopedClients({
-                  request: runContext.fakeRequest,
-                });
+              const {
+                taskClient,
+                streamsClient,
+                inferenceClient,
+                soClient,
+                featureClient,
+                scopedClusterClient,
+              } = await taskContext.getScopedClients({
+                request: runContext.fakeRequest,
+              });
 
               try {
-                const stream = await streamsClient.getStream(name);
+                const stream = await streamsClient.getStream(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
 
@@ -64,110 +73,69 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 const { significantEventsPromptOverride } = await promptsConfigService.getPrompt();
 
-                // If no systems are passed, generate for all data
-                // If systems are passed, generate for each system with concurrency limit
-                const systemsToProcess: Array<System | undefined> =
-                  systems && systems.length > 0 ? systems : [undefined];
-
-                // Process systems with concurrency limit to avoid overwhelming the LLM provider
-                const CONCURRENCY_LIMIT = 3;
-                const limiter = pLimit(CONCURRENCY_LIMIT);
-
-                const resultsArray = await Promise.all(
-                  systemsToProcess.map((system) =>
-                    limiter(() =>
-                      generateSignificantEventDefinitions(
-                        {
-                          definition: stream,
-                          connectorId,
-                          start,
-                          end,
-                          system,
-                          sampleDocsSize,
-                          systemPromptOverride: significantEventsPromptOverride,
-                        },
-                        {
-                          inferenceClient,
-                          esClient,
-                          logger: taskContext.logger.get('significant_events_generation'),
-                          signal: runContext.abortController.signal,
-                        }
-                      )
-                    )
-                  )
+                const result = await generateSignificantEventDefinitions(
+                  {
+                    definition: stream,
+                    connectorId,
+                    start,
+                    end,
+                    systemPrompt: significantEventsPromptOverride,
+                  },
+                  {
+                    inferenceClient,
+                    esClient,
+                    featureClient,
+                    logger: taskContext.logger.get('significant_events_generation'),
+                    signal: runContext.abortController.signal,
+                  }
                 );
 
-                // Combine results from all parallel generations in a single pass
-                const combinedResults =
-                  resultsArray.reduce<SignificantEventsQueriesGenerationResult>(
-                    (acc, result) => {
-                      acc.queries.push(...result.queries);
-                      acc.tokensUsed.prompt += result.tokensUsed.prompt;
-                      acc.tokensUsed.completion += result.tokensUsed.completion;
-                      return acc;
-                    },
-                    { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
-                  );
-
                 taskContext.telemetry.trackSignificantEventsQueriesGenerated({
-                  count: combinedResults.queries.length,
-                  systems_count: systems?.length ?? 0,
+                  count: result.queries.length,
                   stream_name: stream.name,
                   stream_type: getStreamTypeFromDefinition(stream),
-                  input_tokens_used: combinedResults.tokensUsed.prompt,
-                  output_tokens_used: combinedResults.tokensUsed.completion,
+                  input_tokens_used: result.tokensUsed.prompt,
+                  output_tokens_used: result.tokensUsed.completion,
+                  tool_usage: result.toolUsage,
                 });
 
-                await taskClient.update<
+                await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >({
-                  ..._task,
-                  status: TaskStatus.Completed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                      systems,
-                      sampleDocsSize,
-                    },
-                    payload: combinedResults,
-                  },
-                });
+                >(_task, { connectorId, start, end, sampleDocsSize, streamName }, result);
               } catch (error) {
+                if (isDefinitionNotFoundError(error)) {
+                  taskContext.logger.debug(
+                    `Stream ${streamName} was deleted before significant events queries generation task started, skipping`
+                  );
+                  return getDeleteTaskRunResult();
+                }
+
                 // Get connector info for error enrichment
                 const connector = await inferenceClient.getConnectorById(connectorId);
 
                 const errorMessage = isInferenceProviderError(error)
                   ? formatInferenceProviderError(error, connector)
-                  : error.message;
+                  : getErrorMessage(error);
 
                 if (
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
                   `Task ${runContext.taskInstance.id} failed: ${errorMessage}`
                 );
 
-                await taskClient.update<SignificantEventsQueriesGenerationTaskParams>({
-                  ..._task,
-                  status: TaskStatus.Failed,
-                  task: {
-                    params: {
-                      connectorId,
-                      start,
-                      end,
-                      systems,
-                      sampleDocsSize,
-                    },
-                    error: errorMessage,
-                  },
-                });
+                await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
+                  _task,
+                  { connectorId, start, end, sampleDocsSize, streamName },
+                  errorMessage
+                );
+
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

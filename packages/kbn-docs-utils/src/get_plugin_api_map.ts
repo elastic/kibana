@@ -18,6 +18,7 @@ import type {
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
+  UnnamedExportsByPlugin,
 } from './types';
 import { removeBrokenLinks } from './utils';
 import type { AdoptionTrackedAPIStats } from './types';
@@ -25,6 +26,7 @@ import type { AdoptionTrackedAPIStats } from './types';
 export function getPluginApiMap(
   project: Project,
   plugins: PluginOrPackage[],
+  allPlugins: PluginOrPackage[],
   log: ToolingLog,
   { collectReferences, pluginFilter }: { collectReferences: boolean; pluginFilter?: string[] }
 ): {
@@ -33,13 +35,28 @@ export function getPluginApiMap(
   referencedDeprecations: ReferencedDeprecationsByPlugin;
   unreferencedDeprecations: UnreferencedDeprecationsByPlugin;
   adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+  unnamedExports: UnnamedExportsByPlugin;
 } {
   log.debug('Building plugin API map, getting missing comments, and collecting deprecations...');
   const pluginApiMap: { [key: string]: PluginApi } = {};
+  const unnamedExports: UnnamedExportsByPlugin = {};
+
   plugins.forEach((plugin) => {
     const captureReferences =
       collectReferences && (!pluginFilter || pluginFilter.indexOf(plugin.id) >= 0);
-    pluginApiMap[plugin.id] = getPluginApi(project, plugin, plugins, log, captureReferences);
+
+    // Pass allPlugins for cross-reference resolution (links to other packages)
+    const { pluginApi, warnings } = getPluginApi(
+      project,
+      plugin,
+      allPlugins,
+      log,
+      captureReferences
+    );
+    pluginApiMap[plugin.id] = pluginApi;
+    if (warnings.unnamedExports.length > 0) {
+      unnamedExports[plugin.id] = warnings.unnamedExports;
+    }
   });
 
   // Mapping of plugin id to the missing source API id to all the plugin API items that referenced this item.
@@ -61,6 +78,7 @@ export function getPluginApiMap(
     referencedDeprecations,
     unreferencedDeprecations,
     adoptionTrackedAPIs,
+    unnamedExports,
   };
 }
 

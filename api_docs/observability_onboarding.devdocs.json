@@ -12,6 +12,8 @@
         "label": "AppContext",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,6 +25,8 @@
             "label": "isDev",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -34,6 +38,8 @@
             "label": "isCloud",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,6 +51,8 @@
             "label": "isServerless",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -56,6 +64,8 @@
             "label": "stackVersion",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -70,6 +80,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -84,6 +96,8 @@
         "label": "ConfigSchema",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -98,6 +112,8 @@
               "{ enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,6 +128,8 @@
               "{ enabled: boolean; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -126,9 +144,33 @@
         "label": "ObservabilityOnboardingAppServices",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "observabilityOnboarding",
             "id": "def-public.ObservabilityOnboardingAppServices.application",
@@ -140,6 +182,8 @@
               "ApplicationStart"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -154,6 +198,56 @@
               "HttpSetup"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.notifications",
+            "type": "Object",
+            "tags": [],
+            "label": "notifications",
+            "description": [],
+            "signature": [
+              "NotificationsStart"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.pricing",
+            "type": "Object",
+            "tags": [],
+            "label": "pricing",
+            "description": [],
+            "signature": [
+              "PricingServiceStart"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.rendering",
+            "type": "Object",
+            "tags": [],
+            "label": "rendering",
+            "description": [],
+            "signature": [
+              "RenderingService"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -214,6 +308,8 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -234,6 +330,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -254,6 +352,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -268,6 +368,8 @@
               "DocLinksStart"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -282,6 +384,8 @@
               "ChromeStart"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -296,6 +400,8 @@
               "FeatureFlagsStart"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,6 +450,31 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityOnboarding",
+            "id": "def-public.ObservabilityOnboardingAppServices.streams",
+            "type": "Object",
+            "tags": [],
+            "label": "streams",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "streams",
+                "scope": "public",
+                "docId": "kibStreamsPluginApi",
+                "section": "def-public.StreamsPluginStart",
+                "text": "StreamsPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/index.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -365,6 +496,8 @@
         "void"
       ],
       "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/plugin.ts",
+      "lineNumber": 49,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -388,6 +521,8 @@
           "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly serverless: Readonly<{} & { enabled: true; }>; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/config.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,6 +537,8 @@
       "label": "ObservabilityOnboardingPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/types.ts",
+      "lineNumber": 44,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -416,6 +553,8 @@
       "label": "ObservabilityOnboardingPluginStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/types.ts",
+      "lineNumber": 46,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -440,6 +579,8 @@
           "\"observabilityOnboarding\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_onboarding/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -455,6 +596,8 @@
           "\"observabilityOnboarding\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_onboarding/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

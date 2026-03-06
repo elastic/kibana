@@ -109,6 +109,30 @@ async function reauthorizeAndStartTransform({
     return { transformId, success: false, error: err };
   }
 }
+const reauthorizeTransformFromMetadata = ({
+  transformMetadata,
+  esClient,
+  logger,
+  secondaryAuth,
+  username,
+}: {
+  transformMetadata: FleetTransformMetadata;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  secondaryAuth?: SecondaryAuthorizationHeader;
+  username?: string;
+}) => {
+  const { transformId, unattended, ...meta } = transformMetadata;
+  return reauthorizeAndStartTransform({
+    esClient,
+    logger,
+    transformId,
+    secondaryAuth: meta?.run_as_kibana_system ? undefined : secondaryAuth,
+    meta: { ...meta, last_authorized_by: username },
+    shouldStopBeforeStart: unattended,
+  });
+};
+
 export async function handleTransformReauthorizeAndStart({
   esClient,
   savedObjectsClient,
@@ -145,15 +169,14 @@ export async function handleTransformReauthorizeAndStart({
       ),
     { logger, additionalResponseStatuses: [400] }
   );
-  const transformsMetadata: FleetTransformMetadata[] = transformInfos.transforms
-    .map<FleetTransformMetadata>((transform) => {
+  const transformsMetadata: FleetTransformMetadata[] =
+    transformInfos.transforms.map<FleetTransformMetadata>((transform) => {
       return {
         ...transform._meta,
         transformId: transform?.id,
         unattended: Boolean(transform.settings?.unattended),
       };
-    })
-    .filter((t) => t?.run_as_kibana_system === false);
+    });
 
   const shouldInstallSequentially =
     uniqBy(transformsMetadata, 'order').length === transforms.length;
@@ -167,14 +190,13 @@ export async function handleTransformReauthorizeAndStart({
       (t) => t.order,
     ]);
 
-    for (const { transformId, unattended, ...meta } of sortedTransformsMetadata) {
-      const authorizedTransform = await reauthorizeAndStartTransform({
+    for (const transformMetadata of sortedTransformsMetadata) {
+      const authorizedTransform = await reauthorizeTransformFromMetadata({
+        transformMetadata,
         esClient,
         logger,
-        transformId,
         secondaryAuth,
-        meta: { ...meta, last_authorized_by: username },
-        shouldStopBeforeStart: unattended,
+        username,
       });
 
       authorizedTransforms.push(authorizedTransform);
@@ -183,14 +205,13 @@ export async function handleTransformReauthorizeAndStart({
     // Else, create & start all the transforms at once for speed
     authorizedTransforms = await pMap(
       transformsMetadata,
-      async ({ transformId, unattended, ...meta }) =>
-        reauthorizeAndStartTransform({
+      async (transformMetadata) =>
+        reauthorizeTransformFromMetadata({
+          transformMetadata,
           esClient,
           logger,
-          transformId,
           secondaryAuth,
-          meta: { ...meta, last_authorized_by: username },
-          shouldStopBeforeStart: unattended,
+          username,
         }),
       {
         concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,

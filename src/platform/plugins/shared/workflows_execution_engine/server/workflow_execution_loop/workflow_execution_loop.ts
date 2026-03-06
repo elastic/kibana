@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import { ExecutionStatus } from '@kbn/workflows';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
@@ -33,6 +34,10 @@ import type { WorkflowExecutionLoopParams } from './types';
  * - Any other non-RUNNING status is reached
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
+  // Create an abort controller to signal the persistence loop to exit immediately
+  // when execution completes (instead of waiting for the next 500ms flush cycle)
+  const persistenceAbortController = new AbortController();
+
   params.taskAbortController.signal.addEventListener('abort', () => {
     params.workflowExecutionState.updateWorkflowExecution({
       cancelRequested: true,
@@ -40,17 +45,39 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       cancellationReason: 'Task aborted',
       status: ExecutionStatus.CANCELLED,
     });
+    // Also abort persistence loop when task is aborted
+    persistenceAbortController.abort();
   });
 
   try {
-    await Promise.all([executionFlowLoop(params), persistenceLoop(params)]);
+    // Run execution and persistence loops in parallel
+    // When execution finishes, signal persistence loop to exit immediately
+    await Promise.all([
+      executionFlowLoop(params).finally(() => {
+        // Signal persistence loop to stop waiting and exit
+        persistenceAbortController.abort();
+      }),
+      persistenceLoop(params, persistenceAbortController.signal),
+    ]);
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error as Error);
   } finally {
+    const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params);
+    finalFlushSpan?.end();
   }
 
   // Final save to ensure workflow state is persisted after execution loop
+  const finalSaveSpan = apm.startSpan('final save state', 'workflow', 'persistence');
   await params.workflowRuntime.saveState();
+  finalSaveSpan?.end();
+
+  // Flush the final state (including terminal status) to Elasticsearch
+  const finalStateFlushSpan = apm.startSpan('final state flush', 'workflow', 'persistence');
+  await params.workflowExecutionState.flush();
+  finalStateFlushSpan?.end();
+
+  const finalLogFlushSpan = apm.startSpan('final flush logs', 'workflow', 'logging');
   await params.workflowLogger.flushEvents();
+  finalLogFlushSpan?.end();
 }

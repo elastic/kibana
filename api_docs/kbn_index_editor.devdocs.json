@@ -22,6 +22,8 @@
           ") => void"
         ],
         "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/register_trigger_actions.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/register_trigger_actions.ts",
+            "lineNumber": 13,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,6 +69,8 @@
           ") => void"
         ],
         "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/events_registration.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -96,6 +102,8 @@
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/events_registration.ts",
+            "lineNumber": 27,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -112,6 +120,8 @@
         "label": "EditLookupIndexContentContext",
         "description": [],
         "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,6 +136,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,6 +149,8 @@
             "label": "doesIndexExist",
             "description": [],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -148,6 +162,8 @@
             "label": "canEditIndex",
             "description": [],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -159,6 +175,8 @@
             "label": "triggerSource",
             "description": [],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,6 +191,8 @@
               "((result: { indexName: string | null; indexCreatedDuringFlyout: boolean; indexHasNewFields: boolean; }) => void) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -184,6 +204,8 @@
                 "label": "result",
                 "description": [],
                 "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "lineNumber": 29,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -198,6 +220,8 @@
                       "string | null"
                     ],
                     "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "lineNumber": 30,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -211,6 +235,8 @@
                       "Indicates if the index was created"
                     ],
                     "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "lineNumber": 31,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -224,6 +250,8 @@
                       "Indicates if new fields have been added to the index"
                     ],
                     "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "lineNumber": 33,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -243,6 +271,8 @@
               "((indexName: string, esqlQuery: string) => Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -257,6 +287,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -272,6 +304,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "lineNumber": 36,
+                "columnNumber": 47,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -290,6 +324,8 @@
         "label": "EditLookupIndexFlyoutDeps",
         "description": [],
         "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -304,6 +340,8 @@
               "CoreStart"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -324,6 +362,8 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -335,17 +375,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -417,11 +455,13 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -452,6 +492,8 @@
               "; }"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -512,6 +554,8 @@
               "[]; }"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -526,6 +570,8 @@
               "FileUploadPluginStartApi"
             ],
             "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -546,49 +592,14 @@
           "\"ACTION_EDIT_LOOKUP_INDEX\""
         ],
         "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/index-editor",
-        "id": "def-public.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
-        "type": "string",
-        "tags": [],
-        "label": "EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
-        "description": [],
-        "signature": [
-          "\"EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID\""
-        ],
-        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/index-editor",
-        "id": "def-public.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER",
-        "type": "Object",
-        "tags": [],
-        "label": "EDIT_LOOKUP_INDEX_CONTENT_TRIGGER",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/ui-actions-browser",
-            "scope": "common",
-            "docId": "kibKbnUiActionsBrowserPluginApi",
-            "section": "def-common.Trigger",
-            "text": "Trigger"
-          }
-        ],
-        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "server": {
     "classes": [],

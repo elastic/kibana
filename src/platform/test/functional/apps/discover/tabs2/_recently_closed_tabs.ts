@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esql = getService('esql');
   const monacoEditor = getService('monacoEditor');
   const dataViews = getService('dataViews');
-  const testSubjects = getService('testSubjects');
 
   const untitledTabLabel = 'Untitled';
   const firstTabLabel = 'My first tab';
@@ -28,6 +27,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('recently closed tabs', function () {
     beforeEach(async () => {
       await unifiedTabs.clearRecentlyClosedTabs();
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     it('should start with no recently closed tabs', async () => {
@@ -384,7 +387,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(recentlyClosedTabs).to.eql([]);
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await discover.getSavedSearchTitle()).to.be(firstSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await discover.ensureNoUnsavedChangesIndicator();
       });
 
       const query = 'machine.os: "ios"';
@@ -397,7 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const recentlyClosedTabs = await unifiedTabs.getRecentlyClosedTabTitles();
         expect(recentlyClosedTabs).to.eql([]);
         expect(await discover.getHitCount()).to.be('2,784');
-        await testSubjects.existOrFail('unsavedChangesBadge');
+        await discover.ensureHasUnsavedChangesIndicator();
       });
 
       await discover.saveSearch(secondSession, true);
@@ -410,7 +413,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);
         expect(await discover.getSavedSearchTitle()).to.be(secondSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await discover.ensureNoUnsavedChangesIndicator();
       });
 
       await discover.loadSavedSearch(firstSession);
@@ -423,7 +426,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('14,004');
         expect(await queryBar.getQueryString()).to.be('');
         expect(await discover.getSavedSearchTitle()).to.be(firstSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await discover.ensureNoUnsavedChangesIndicator();
       });
 
       await discover.loadSavedSearch(secondSession);
@@ -436,7 +439,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('2,784');
         expect(await queryBar.getQueryString()).to.be(query);
         expect(await discover.getSavedSearchTitle()).to.be(secondSession);
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        await discover.ensureNoUnsavedChangesIndicator();
       });
     });
   });

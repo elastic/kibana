@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import apm from 'elastic-apm-node';
 import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
-import { isPackageLimited } from '../../../common/services';
+
 import type {
   PackagePolicy,
   FullAgentPolicyInput,
@@ -17,15 +19,22 @@ import type {
   PackageInfo,
   PackagePolicyInput,
   NewPackagePolicyInput,
+  PackagePolicySOAttributes,
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  FLEET_ENDPOINT_PACKAGE,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../common/constants/epm';
+import { _compilePackagePolicyInputs, getPackagePolicySavedObjectType } from '../package_policy';
+import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { appContextService } from '../app_context';
+import { FleetError } from '../../errors';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -36,15 +45,15 @@ export function getInputId(
   packagePolicyId?: string,
   packageInfo?: PackageInfo
 ): string {
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
+  // Only the endpoint (Elastic Defend) package uses a simplified ID format for backward compatibility.
+  // All other packages (including other limited packages) use the standard format with type and policy template.
+  const useSimplifiedId = packageInfo?.name === FLEET_ENDPOINT_PACKAGE;
 
-  return appendInputId
-    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+  return useSimplifiedId
+    ? packagePolicyId || 'default'
+    : `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
-      }`
-    : packagePolicyId || 'default';
+      }`;
 }
 
 export const storedPackagePolicyToAgentInputs = (
@@ -99,6 +108,7 @@ export const storedPackagePolicyToAgentInputs = (
           version: packagePolicy.package.version ?? packageInfo?.version,
           ...(input.policy_template ? { policy_template: input.policy_template } : {}),
           ...(packageInfo?.release ? { release: packageInfo.release } : {}),
+          agentVersion: packageInfo?.conditions?.agent?.version,
         },
       };
     }
@@ -152,16 +162,27 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
-              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-                // otelcol inputs are not going to have the data_stream type and dataset in
-                // the compiled stream, get them directly from the user-defined variables.
-                const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
-                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+              const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+              if (dsTypeVar) {
                 fullStream.data_stream = {
                   ...fullStream.data_stream,
-                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
-                  ...(datasetVar ? { dataset: datasetVar } : {}),
+                  type: dsTypeVar,
                 };
+              }
+
+              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+                if (datasetVar) {
+                  fullStream.data_stream = {
+                    ...fullStream.data_stream,
+                    dataset: datasetVar,
+                  };
+                }
+
+                const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
+                if (useAPMVar !== undefined) {
+                  fullStream[USE_APM_VAR_NAME] = useAPMVar;
+                }
               }
 
               streamsOriginalIdsMap?.set(fullStream.id, streamId);
@@ -173,12 +194,38 @@ export const getFullInputStreams = (
   };
 };
 
+export const recompileInputsWithAgentVersion = async (
+  packageInfo: PackageInfo,
+  packagePolicy: PackagePolicy,
+  agentVersion: string,
+  soClient: SavedObjectsClientContract
+): Promise<PackagePolicyInput[]> => {
+  const logger = appContextService.getLogger();
+  const assetsMap = await getAgentTemplateAssetsMap({
+    logger,
+    packageInfo: packageInfo!,
+    savedObjectsClient: soClient,
+  });
+
+  const inputs = _compilePackagePolicyInputs(
+    packageInfo!,
+    packagePolicy.vars || {},
+    packagePolicy.inputs,
+    assetsMap,
+    agentVersion
+  );
+  return inputs;
+};
+
 export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
   agentPolicyOutputId: string = DEFAULT_OUTPUT.name,
   agentPolicyNamespace?: string,
-  globalDataTags?: GlobalDataTag[]
+  globalDataTags?: GlobalDataTag[],
+  agentVersion?: string,
+  soClient?: SavedObjectsClientContract,
+  hasAgentVersionConditions?: boolean
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -197,9 +244,49 @@ export const storedPackagePoliciesToAgentInputs = async (
         ? globalDataTagsToAddFields(filteredGlobalDataTags)
         : undefined;
 
+    let packagePolicyWithUpdatedInputs = packagePolicy;
+    // recompile inputs to apply agent version conditions
+    if (
+      agentVersion &&
+      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+      hasAgentVersionConditions
+    ) {
+      const span = apm.startSpan(
+        `read packagePolicySO inputs_for_versions ${packageInfo!.name}-${
+          packageInfo!.version
+        } ${agentVersion}`,
+        'full-agent-policy'
+      );
+      const packagePolicySO = await soClient?.get<PackagePolicySOAttributes>(
+        await getPackagePolicySavedObjectType(),
+        packagePolicy.id
+      );
+      const inputsForVersions = packagePolicySO?.attributes.inputs_for_versions;
+      const hasVersionSpecificInputs =
+        inputsForVersions && Object.keys(inputsForVersions).length > 0;
+
+      if (hasVersionSpecificInputs) {
+        // Package has version conditions - we should have compiled inputs for this version
+        const versionInputs = inputsForVersions[agentVersion];
+        if (!versionInputs) {
+          span?.end();
+          throw new FleetError(
+            `Missing inputs_for_versions for agent version ${agentVersion} in package policy ${packagePolicy.id}. ` +
+              `Available versions: ${Object.keys(inputsForVersions).join(', ')}`
+          );
+        }
+        packagePolicyWithUpdatedInputs = {
+          ...packagePolicy,
+          inputs: versionInputs,
+        };
+      }
+      // If no version-specific inputs exist, package doesn't have version conditions - use default inputs
+      span?.end();
+    }
+
     fullInputs.push(
       ...storedPackagePolicyToAgentInputs(
-        packagePolicy,
+        packagePolicyWithUpdatedInputs,
         packageInfo,
         agentPolicyOutputId,
         agentPolicyNamespace,

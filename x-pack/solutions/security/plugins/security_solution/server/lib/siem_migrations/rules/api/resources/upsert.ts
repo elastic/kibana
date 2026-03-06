@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { partition } from 'lodash';
 import { isResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
@@ -59,6 +59,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const { experimentalFeatures } = ctx.securitySolution.getConfig();
 
             await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
@@ -90,7 +91,9 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             }
 
             if (rule.original_rule.vendor === 'splunk') {
-              const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
+              const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor, {
+                experimentalFeatures,
+              });
               const identifiedMissingResources = await resourceIdentifier.fromResources(resources);
               const resourcesToCreate =
                 identifiedMissingResources.map<CreateSiemMigrationResourceInput>((resource) => ({

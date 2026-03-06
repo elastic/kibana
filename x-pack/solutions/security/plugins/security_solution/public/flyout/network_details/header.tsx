@@ -27,6 +27,8 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
   flowTarget: FlowTargetSourceDest;
 }
 
+const urlParamOverride = { timeline: { isOpen: false } };
+
 /**
  *  Header component for the network details flyout
  */
@@ -41,6 +43,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
           path={href}
           target={'_blank'}
           external={false}
+          override={urlParamOverride}
         >
           <FlyoutTitle
             title={ip}

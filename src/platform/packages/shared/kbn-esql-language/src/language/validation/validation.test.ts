@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { EsqlFieldType } from '@kbn/esql-types';
-import type { SupportedDataType, FunctionDefinition, ESQLMessage, EditorError } from '../../..';
+import type { ESQLMessage, EditorError } from '@elastic/esql/types';
+import type { SupportedDataType, FunctionDefinition } from '../../..';
 import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '../../..';
 import { getFunctionSignatures } from '../../commands/definitions/utils';
 import { scalarFunctionDefinitions } from '../../commands/definitions/generated/scalar_functions';
@@ -250,7 +251,7 @@ describe('validation logic', () => {
     });
 
     // The following block tests a case that is allowed in Kibana
-    // by suppressing the parser error in src/platform/packages/shared/kbn-esql-language/src/parser/esql_error_listener.ts
+    // by suppressing the parser error in https://github.com/elastic/esql-js/blob/main/src/parser/core/esql_error_listener.ts
     describe('EMPTY query does NOT produce syntax error', () => {
       testErrorsAndWarnings('', []);
       testErrorsAndWarnings(' ', []);
@@ -913,6 +914,16 @@ describe('validation logic', () => {
 
       expect(errorsNoPolicies.some((e) => e.code === 'unknownIndex')).toBe(true);
       expect(errorsNoPolicies.some((e) => e.code === 'unknownPolicy')).toBe(false);
+    });
+
+    it('should no flag Promql metrics/labels as unknown after a pipe', async () => {
+      const callbacks = getCallbackMocks();
+      const { errors } = await validateQuery(
+        'Promql step="5m" sum(doubleField) | KEEP step',
+        callbacks
+      );
+
+      expect(errors.some((e) => e.code === 'unknownColumn')).toBe(false);
     });
   });
 });

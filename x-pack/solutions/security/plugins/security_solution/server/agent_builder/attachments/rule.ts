@@ -8,8 +8,10 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
+
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
@@ -49,9 +51,16 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
         },
       };
     },
-    getTools: () => [platformCoreTools.generateEsql, platformCoreTools.productDocumentation],
+    getTools: () => [
+      platformCoreTools.generateEsql,
+      platformCoreTools.productDocumentation,
+      SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
+    ],
     getAgentDescription: () => {
-      const description = `You have access to a rule or query.
+      const description = `You have access to a rule, query, or migration rule.
+
+      If this is a migration rule, it includes both the old rule and the new rule.
 
 {ruleData}
 

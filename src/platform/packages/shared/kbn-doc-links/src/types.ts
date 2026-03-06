@@ -58,6 +58,7 @@ export interface DocLinks {
     readonly cloudConnect: string;
     readonly connectToAutoops: string;
     readonly deploymentSignup: string;
+    readonly cloudPricing: string;
   };
   readonly console: {
     readonly guide: string;
@@ -452,6 +453,7 @@ export interface DocLinks {
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
     elasticServerlessSearchManagedLlmUsageCost: string;
+    downsamplingConcepts: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;

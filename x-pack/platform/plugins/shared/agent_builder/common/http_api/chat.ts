@@ -6,9 +6,11 @@
  */
 
 import type {
+  ConversationAction,
   ConversationRound,
   AgentCapabilities,
   AssistantResponse,
+  RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -26,6 +28,10 @@ export interface ChatRequestBodyPayload {
   input?: string;
   prompts?: Record<string, PromptResponse>;
   browser_api_tools?: BrowserApiToolMetadata[];
+  configuration_overrides?: RuntimeAgentConfigurationOverrides;
+  action?: ConversationAction;
+  /** Force a specific execution mode. When omitted, the server auto-detects. */
+  _execution_mode?: 'local' | 'task_manager';
 }
 
 export type ChatResponse = Omit<

@@ -8,7 +8,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import fetch from 'node-fetch';
 
 interface EnableStreamsOptions {
   kibanaUrl: string;

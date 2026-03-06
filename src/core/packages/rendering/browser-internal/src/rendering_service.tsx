@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, pairwise, startWith } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -26,11 +25,12 @@ import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import type { LayoutService } from '@kbn/core-chrome-layout';
-import { getLayoutVersion, getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
+import { getLayoutDebugFlag } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
-import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 import { GlobalRedirectAppLink } from '@kbn/global-redirect-app-links';
 import type { CoreEnv } from '@kbn/core-base-browser-internal';
+import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -38,8 +38,8 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
-  coreEnv: CoreEnv;
   chrome: InternalChromeStart;
+  coreEnv: CoreEnv;
 }
 
 export interface RenderingServiceRenderCoreDeps {
@@ -87,35 +87,27 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags } = renderCoreDeps;
-    const layoutType = getLayoutVersion(featureFlags);
+    const { featureFlags } = renderCoreDeps;
     const debugLayout = getLayoutDebugFlag(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
 
-    const body = document.querySelector('body')!;
-    chrome
-      .getBodyClasses$()
-      .pipe(startWith<string[]>([]), pairwise())
-      .subscribe(([previousClasses, newClasses]) => {
-        body.classList.remove(...previousClasses);
-        body.classList.add(...newClasses);
-      });
-
-    const layout: LayoutService =
-      layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout })
-        : new LegacyFixedLayout(renderCoreDeps);
+    const layout: LayoutService = new GridLayout(renderCoreDeps, { debug: debugLayout });
 
     const Layout = layout.getComponent();
 
-    ReactDOM.render(
+    const element = (
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
         <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
-      </KibanaRootContextProvider>,
-      targetDomElement
+      </KibanaRootContextProvider>
     );
+
+    if (startServices.coreEnv.isCoreRenderingInReactConcurrentMode) {
+      createRoot(targetDomElement).render(element);
+    } else {
+      ReactDOM.render(element, targetDomElement);
+    }
   }
 
   // Memoized context wrapper component to prevent recreation on each addContext call
@@ -140,6 +132,7 @@ export class RenderingService implements IRenderingService {
         theme={deps.theme}
         userProfile={deps.userProfile}
         coreEnv={deps.coreEnv}
+        chrome={deps.chrome}
       >
         {children}
       </KibanaRenderContextProvider>

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect } from 'react';
-import { EuiButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import React, { type ComponentProps, useCallback, useEffect } from 'react';
+import { EuiButton, EuiButtonIcon, EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
-import { RobotIcon } from '../../application/components/common/icons/robot';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
@@ -29,7 +28,7 @@ export function AgentBuilderNavControl() {
 
   const { show: hasShowPrivilege } = useUiPrivileges();
 
-  const toggleFlyout = useCallback(() => {
+  const toggleSidebar = useCallback(() => {
     agentBuilder.toggleConversationFlyout();
   }, [agentBuilder]);
 
@@ -54,10 +53,10 @@ export function AgentBuilderNavControl() {
     (event: KeyboardEvent) => {
       if (isSemicolon(event) && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        toggleFlyout();
+        toggleSidebar();
       }
     },
-    [toggleFlyout]
+    [toggleSidebar]
   );
 
   if (!hasShowPrivilege) {
@@ -72,35 +71,54 @@ export function AgentBuilderNavControl() {
     </div>
   );
 
+  const AgentBuilderButton: React.FC<
+    ComponentProps<typeof EuiButton> & ComponentProps<typeof EuiButtonIcon>
+  > = (props) => (
+    <>
+      <EuiShowFor sizes={['m', 'l', 'xl']}>
+        <EuiButton {...props} data-test-subj="AgentBuilderNavControlButton" />
+      </EuiShowFor>
+      <EuiShowFor sizes={['xs', 's']}>
+        <EuiButtonIcon
+          {...props}
+          display="base"
+          data-test-subj="AgentBuilderNavControlButtonIcon"
+        />
+      </EuiShowFor>
+    </>
+  );
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <EuiToolTip content={tooltipContent}>
-        <EuiButton
+        <AgentBuilderButton
           aria-label={buttonLabel}
-          data-test-subj="AgentBuilderNavControlButton"
           onClick={() => {
-            toggleFlyout();
+            toggleSidebar();
           }}
           color="primary"
           size="s"
           fullWidth={false}
           minWidth={0}
+          iconType="productAgent"
         >
-          <RobotIcon size="m" />
           <FormattedMessage
             id="xpack.agentBuilder.navControl.linkLabel"
             defaultMessage="AI Agent"
           />
-        </EuiButton>
+        </AgentBuilderButton>
       </EuiToolTip>
     </>
   );
 }
 
-const buttonLabel = i18n.translate('xpack.agentBuilder.navControl.openTheAgentBuilderFlyoutLabel', {
-  defaultMessage: 'Open Agent Builder',
-});
+const buttonLabel = i18n.translate(
+  'xpack.agentBuilder.navControl.openTheAgentBuilderSidebarLabel',
+  {
+    defaultMessage: 'Open Agent Builder',
+  }
+);
 
 const shortcutLabel = i18n.translate('xpack.agentBuilder.navControl.keyboardShortcutTooltip', {
   values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },

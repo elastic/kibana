@@ -24,6 +24,8 @@
           "; }, baseHref: string) => string"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,6 +37,8 @@
             "label": "{ reportType, allSeries }",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+            "lineNumber": 45,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -49,6 +53,8 @@
                   "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
                 ],
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+                "lineNumber": 45,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -70,6 +76,8 @@
                   "[]"
                 ],
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+                "lineNumber": 45,
+                "columnNumber": 60,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -86,6 +94,8 @@
               "string"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -107,6 +117,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/index.tsx",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,6 +133,8 @@
               "ExploratoryViewPageProps"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/index.tsx",
+            "lineNumber": 40,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,6 +156,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/index.tsx",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -156,6 +172,8 @@
               "FilterValueLabelProps"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/index.tsx",
+            "lineNumber": 18,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -175,6 +193,8 @@
           "(query: Record<string, any>) => string"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/url.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,6 +209,8 @@
               "Record<string, any>"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/url.ts",
+            "lineNumber": 15,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -210,6 +232,8 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/index.tsx",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -224,6 +248,8 @@
               "SelectableUrlListProps"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/index.tsx",
+            "lineNumber": 30,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -245,6 +271,8 @@
           "<string>"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/url.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -259,6 +287,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/utils/url.ts",
+            "lineNumber": 11,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -277,6 +307,8 @@
         "label": "ConfigProps",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "lineNumber": 140,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -298,6 +330,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 141,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -319,6 +353,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -333,6 +369,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -347,6 +385,8 @@
         "label": "ExploratoryEmbeddableProps",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -361,6 +401,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -375,6 +417,8 @@
               "JSX.Element | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -396,6 +440,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -417,6 +463,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -438,6 +486,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -452,6 +502,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -466,6 +518,8 @@
               "{ from: string; to: string; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -482,6 +536,8 @@
               ", string>> | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -496,6 +552,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -510,6 +568,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -525,6 +585,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,6 +601,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -553,6 +617,8 @@
               "((param: { range: number[]; }) => void) | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -564,6 +630,8 @@
                 "label": "param",
                 "description": [],
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                "lineNumber": 41,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -578,6 +646,8 @@
                       "number[]"
                     ],
                     "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                    "lineNumber": 41,
+                    "columnNumber": 26,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -597,6 +667,8 @@
               "((loading: boolean) => void) | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -611,6 +683,8 @@
                   "boolean"
                 ],
                 "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+                "lineNumber": 42,
+                "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -629,6 +703,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -644,6 +720,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -658,6 +736,8 @@
               "\"heatmap\" | \"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -672,6 +752,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -686,6 +768,8 @@
               "string | JSX.Element | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -702,6 +786,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -716,6 +802,8 @@
               "\"right\" | \"center\" | \"left\" | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -730,6 +818,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -744,6 +834,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -758,6 +850,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -772,6 +866,8 @@
               "number | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -786,6 +882,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -800,6 +898,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -815,6 +915,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -829,6 +931,8 @@
         "label": "ExploratoryViewPublicPluginsSetup",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -849,6 +953,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -869,6 +975,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -889,6 +997,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -909,6 +1019,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -930,6 +1042,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -944,6 +1058,8 @@
         "label": "ExploratoryViewPublicPluginsStart",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -964,6 +1080,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -987,6 +1105,8 @@
               "; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1007,6 +1127,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1027,6 +1149,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1047,6 +1171,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1067,6 +1193,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1087,6 +1215,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1107,6 +1237,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1141,6 +1273,8 @@
               "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1161,6 +1295,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1221,6 +1357,8 @@
               "[]; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1242,6 +1380,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1262,6 +1402,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1282,6 +1424,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1302,6 +1446,8 @@
               }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1323,6 +1469,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1344,6 +1492,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1358,6 +1508,8 @@
         "label": "SeriesConfig",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "lineNumber": 79,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1369,6 +1521,8 @@
             "label": "reportType",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1399,6 +1553,8 @@
               ">"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1421,6 +1577,8 @@
               ">[]"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1435,6 +1593,8 @@
               "string[]"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1449,6 +1609,8 @@
               "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1463,6 +1625,8 @@
               "(string | { field: string; nested?: string | undefined; isNegated?: boolean | undefined; })[]"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1484,6 +1648,8 @@
               "[]"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1522,6 +1688,8 @@
               ")[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1560,6 +1728,8 @@
               ")[] | undefined; })[]"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1574,6 +1744,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1592,6 +1764,8 @@
               "[]; columnType?: string | undefined; })[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1606,6 +1780,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1617,6 +1793,8 @@
             "label": "hasOperationType",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1638,6 +1816,8 @@
               "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1652,6 +1832,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1673,6 +1855,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1687,6 +1871,8 @@
               "{ query: string; language: \"kuery\"; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1701,6 +1887,8 @@
         "label": "SeriesUrl",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1712,6 +1900,8 @@
             "label": "name",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1726,6 +1916,8 @@
               "{ to: string; from: string; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1740,6 +1932,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1761,6 +1955,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1782,6 +1978,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1796,6 +1994,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1810,6 +2010,8 @@
               "\"uptime\" | \"alerts\" | \"apm\" | \"synthetics\" | \"ux\" | \"infra_logs\" | \"infra_metrics\" | \"mobile\""
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1825,6 +2027,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1840,6 +2044,8 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,6 +2060,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1868,6 +2076,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1882,6 +2092,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 128,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1896,6 +2108,8 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1910,6 +2124,8 @@
         "label": "UrlFilter",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+        "lineNumber": 132,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1921,6 +2137,8 @@
             "label": "field",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1935,6 +2153,8 @@
               "(string | number)[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1949,6 +2169,8 @@
               "(string | number)[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1963,6 +2185,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1977,6 +2201,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1993,6 +2219,8 @@
         "label": "ReportTypes",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2010,6 +2238,8 @@
           "\"ALL_VALUES\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/url_constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2032,6 +2262,8 @@
           "[]"
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_series_storage.tsx",
+        "lineNumber": 195,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2047,6 +2279,8 @@
           "\"/app/exploratory-view\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2062,6 +2296,8 @@
           "\"ENVIRONMENT_ALL\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 213,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2077,6 +2313,8 @@
           "\"FILTER_RECORDS\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 194,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2092,6 +2330,8 @@
           "\"operation\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 196,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2107,6 +2347,8 @@
           "\"___records___\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 85,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2122,6 +2364,8 @@
           "\"RecordsPercentage\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 86,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2137,6 +2381,8 @@
           "\"REPORT_METRIC_FIELD\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 199,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2152,6 +2398,8 @@
           "\"TERMS_COLUMN\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 195,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2167,6 +2415,8 @@
           "\"USE_BREAK_DOWN_COLUMN\""
         ],
         "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "lineNumber": 193,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2188,6 +2438,8 @@
         "<T>) => void; }"
       ],
       "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+      "lineNumber": 75,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2232,6 +2484,8 @@
         ") => React.JSX.Element | null; }"
       ],
       "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
+      "lineNumber": 76,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",

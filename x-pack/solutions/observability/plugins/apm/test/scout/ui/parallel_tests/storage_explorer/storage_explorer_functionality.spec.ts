@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { PRODUCTION_ENVIRONMENT } from '../../fixtures/constants';
 
 const timeRange = {
   rangeFrom: testData.START_DATE,
   rangeTo: testData.END_DATE,
 };
 
-test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
+test.describe('Storage Explorer - Admin User', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     // Use privileged user (admin) to ensure we have all necessary permissions
     await browserAuth.loginAsAdmin();
@@ -42,7 +44,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       await expect(storageExplorerPage.servicesTableLoadedIndicator).toBeVisible();
 
       // Change the environment to production to work better in MKI environment
-      await page.getByTestId('comboBoxSearchInput').fill('production');
+      await page.getByTestId('comboBoxSearchInput').fill(PRODUCTION_ENVIRONMENT);
       await page.getByTestId('comboBoxSearchInput').press('Enter');
       await expect(page.getByTestId('StorageExplorerDownloadReportButton')).toBeEnabled();
 
@@ -88,13 +90,13 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       const urlParams = new URLSearchParams({
         rangeFrom: timeRange.rangeFrom,
         rangeTo: timeRange.rangeTo,
-        environment: 'production',
+        environment: PRODUCTION_ENVIRONMENT,
       });
 
       await page.goto(`${baseUrl}?${urlParams.toString()}`);
       await waitForApmSettingsHeaderLink(page);
 
-      await expect(page).toHaveURL(/.*environment=production.*/);
+      await expect(page).toHaveURL(new RegExp(`.*environment=${PRODUCTION_ENVIRONMENT}.*`));
       await expect(storageExplorerPage.pageTitle).toBeVisible();
     });
   });

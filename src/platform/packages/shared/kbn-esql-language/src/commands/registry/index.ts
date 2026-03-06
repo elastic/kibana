@@ -16,6 +16,8 @@ import { renameCommand } from './rename';
 import { changePointCommand } from './change_point';
 import { completionCommand } from './completion';
 import { dissectCommand } from './dissect';
+import { uriPartsCommand } from './uri_parts';
+import { registeredDomainCommand } from './registered_domain';
 import { enrichCommand } from './enrich';
 import { evalCommand } from './eval';
 import { fromCommand } from './from';
@@ -32,8 +34,10 @@ import { timeseriesCommand } from './timeseries';
 import { whereCommand } from './where';
 import { fuseCommand } from './fuse';
 import { rerankCommand } from './rerank';
+import { promqlCommand } from './promql';
 import { mergeCommandWithGeneratedCommandData } from './elastisearch_command_data_loader';
 import { setCommand } from './set';
+import { mmrCommand } from './mmr';
 
 const esqlCommandRegistry = new CommandRegistry();
 
@@ -45,6 +49,8 @@ const baseCommands = [
   changePointCommand,
   completionCommand,
   dissectCommand,
+  uriPartsCommand,
+  registeredDomainCommand,
   enrichCommand,
   evalCommand,
   fromCommand,
@@ -63,6 +69,8 @@ const baseCommands = [
   whereCommand,
   fuseCommand,
   rerankCommand,
+  promqlCommand,
+  mmrCommand,
 ];
 
 baseCommands.forEach((command) => {

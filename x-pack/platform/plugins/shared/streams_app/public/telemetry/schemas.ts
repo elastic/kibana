@@ -24,7 +24,6 @@ import type {
   WiredStreamsStatusChangedProps,
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
-  StreamsDescriptionGeneratedProps,
   StreamsTabVisitedProps,
 } from './types';
 
@@ -410,33 +409,6 @@ const streamsFeatureIdentificationDeletedSchema: RootSchema<StreamsFeatureIdenti
     },
   };
 
-const streamsDescriptionGeneratedSchema: RootSchema<StreamsDescriptionGeneratedProps> = {
-  stream_name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  stream_type: {
-    type: 'keyword',
-    _meta: {
-      description: 'The type of the stream: wired or classic',
-    },
-  },
-  input_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of input tokens used for the generation request',
-    },
-  },
-  output_tokens_used: {
-    type: 'long',
-    _meta: {
-      description: 'The number of output tokens used for the generation request',
-    },
-  },
-};
-
 const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
   stream_name: {
     type: 'keyword',
@@ -506,6 +478,12 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
           description: 'Whether the user can manage failure store',
         },
       },
+      create_snapshot_repository: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can create snapshot repositories',
+        },
+      },
     },
   },
 };
@@ -527,6 +505,5 @@ export {
   wiredStreamsStatusChangedSchema,
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
-  streamsDescriptionGeneratedSchema,
   streamsTabVisitedSchema,
 };

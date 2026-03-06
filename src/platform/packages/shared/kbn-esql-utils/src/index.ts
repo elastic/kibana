@@ -28,7 +28,6 @@ export {
   getKqlSearchQueries,
   getRemoteClustersFromESQLQuery,
   convertTimeseriesCommandToFrom,
-  hasDateBreakdown,
   hasOnlySourceCommand,
 } from './utils/query_parsing_helpers';
 export { getIndexPatternFromESQLQuery } from './utils/get_index_pattern_from_query';
@@ -57,12 +56,18 @@ export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
 export { extractCategorizeTokens } from './utils/extract_categorize_tokens';
 export { getLookupIndicesFromQuery } from './utils/get_lookup_indices';
 export {
+  type ESQLStatsQueryMeta,
   getESQLStatsQueryMeta,
   constructCascadeQuery,
-  mutateQueryStatsGrouping,
   appendFilteringWhereClauseForCascadeLayout,
 } from './utils/cascaded_documents_helpers';
+export {
+  getStatsGroupFieldType,
+  getFieldParamDefinition,
+} from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
+export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export { getEsqlControls } from './utils/get_esql_controls';
 
 // Callback functions
 export * from './utils/callbacks';

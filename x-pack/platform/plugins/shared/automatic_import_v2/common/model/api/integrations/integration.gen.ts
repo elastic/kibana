@@ -18,17 +18,57 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
 import {
+  LangSmithOptions,
   DataStream,
   AllIntegrationsResponseIntegration,
   InputType,
   IntegrationResponse,
 } from '../../common_attributes.gen';
 
+export type ApproveIntegrationRequest = z.infer<typeof ApproveIntegrationRequest>;
+export const ApproveIntegrationRequest = z
+  .object({
+    /**
+     * The version of the integration
+     */
+    version: NonEmptyString,
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
+  })
+  .strict();
+
+export type ApproveAutoImportIntegrationRequestParams = z.infer<
+  typeof ApproveAutoImportIntegrationRequestParams
+>;
+export const ApproveAutoImportIntegrationRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+});
+export type ApproveAutoImportIntegrationRequestParamsInput = z.input<
+  typeof ApproveAutoImportIntegrationRequestParams
+>;
+
+export type ApproveAutoImportIntegrationRequestBody = z.infer<
+  typeof ApproveAutoImportIntegrationRequestBody
+>;
+export const ApproveAutoImportIntegrationRequestBody = ApproveIntegrationRequest;
+export type ApproveAutoImportIntegrationRequestBodyInput = z.input<
+  typeof ApproveAutoImportIntegrationRequestBody
+>;
+
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
 >;
 export const CreateAutoImportIntegrationRequestBody = z
   .object({
+    /**
+     * The connector id
+     */
+    connectorId: NonEmptyString,
     /**
      * The integration id
      */
@@ -41,6 +81,10 @@ export const CreateAutoImportIntegrationRequestBody = z
      * The description of the integration
      */
     description: NonEmptyString,
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
     /**
      * The logo of the integration
      */
@@ -131,6 +175,10 @@ export const UpdateAutoImportIntegrationRequestBody = z
      * Integration logo image blob
      */
     logo: NonEmptyString.optional(),
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
     /**
      * The data streams of the integration
      */

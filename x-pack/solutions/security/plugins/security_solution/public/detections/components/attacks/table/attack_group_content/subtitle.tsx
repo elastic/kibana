@@ -11,6 +11,7 @@ import {
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
+import { TableId } from '@kbn/securitysolution-data-table';
 
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 import { useDateFormat } from '../../../../../common/lib/kibana';
@@ -68,6 +69,12 @@ export const Subtitle = React.memo<SubtitleProps>(({ attack, showAnonymized = fa
     showAnonymized,
   ]);
 
-  return <AttackDiscoveryMarkdownFormatter disableActions={true} markdown={subtitleMarkdownText} />;
+  return (
+    <AttackDiscoveryMarkdownFormatter
+      scopeId={TableId.alertsOnAttacksPage}
+      disableActions={showAnonymized}
+      markdown={subtitleMarkdownText}
+    />
+  );
 });
 Subtitle.displayName = 'Subtitle';

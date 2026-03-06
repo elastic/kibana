@@ -80,6 +80,7 @@ export function runCheckSavedObjectsCli() {
               ctx.kibanaServer = await setupKibana();
               const coreStart = await ctx.kibanaServer.start();
               ctx.registeredTypes = coreStart!.savedObjects.getTypeRegistry().getAllTypes();
+              ctx.encryptedSavedObjects = coreStart._plugins?.get('encryptedSavedObjects');
             },
             enabled: !server && !test,
           },
@@ -168,6 +169,11 @@ export function runCheckSavedObjectsCli() {
           ],
           { fallbackRenderer: 'simple', exitOnError: false }
         ).run(context);
+      }
+      if (exitCode) {
+        log.warning(
+          'Validation Failed. Please refer to our troubleshooting guide for more information: https://www.elastic.co/docs/extend/kibana/saved-objects/validate#troubleshooting'
+        );
       }
       process.exit(exitCode);
     },

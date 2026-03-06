@@ -16,6 +16,8 @@ You are given:
 
 ### Your Tasks
 
+Your job is to group fields and assign ECS names. Do not provide explanations or rationale - only output the structured JSON response.
+
 For every field in the log:
 
 1. **Identify fields that should be grouped** into a single semantic unit  
@@ -31,16 +33,18 @@ For every field in the log:
 3. For **each final field** (combined or uncombined):
 
    * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `message`).  
-     * **Important**: Avoid being overly specific with field names. When in doubt about what a field represents, map it to `message`. Try to make a choice for all the fields
+     * **Important**: Avoid being overly specific with field names. When in doubt about what a field represents, map it to `message`. Try to make a choice for all the fields.
 
 4. **Infer the log source**  
    * Set `log_source` to the most likely origin system (e.g., `System log`, `Nginx access log`).  
 
-Your job is not to detect the pattern of the log messages, this is already done - it's only about grouping and naming the fields. Use every field only once.
+Use every field only once.
 
 ---
 
 ### Output Format
+
+**IMPORTANT**: You MUST respond using the `validate_response_schema` tool. Do NOT provide explanations, rationale, or any text outside the tool call.
 
 Return a JSON object in the following format:
 
@@ -81,6 +85,7 @@ Return a JSON object in the following format:
 **Important notes**:
 * Use `columns` to list all source columns (combined or not) that map to this ECS field.
 * Each field should be mapped exactly once.
+* Do not add explanations or commentary.
 
 ---
 

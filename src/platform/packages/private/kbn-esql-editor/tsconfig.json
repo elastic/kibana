@@ -5,7 +5,7 @@
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-ui-types"
     ]
   },
   "include": [
@@ -38,8 +38,13 @@
     "@kbn/react-hooks",
     "@kbn/react-kibana-context-theme",
     "@kbn/calculate-width-from-char-count",
-    "@kbn/shared-ux-utility"
-  ],
+    "@kbn/kql",
+    "@kbn/ebt-tools",
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types",
+    "@kbn/aiops-utils",
+    "@kbn/esql-resource-browser",
+    "@kbn/data-views-plugin"  ],
   "exclude": [
     "target/**/*",
   ]

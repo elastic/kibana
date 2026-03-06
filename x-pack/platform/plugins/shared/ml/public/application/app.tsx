@@ -105,6 +105,7 @@ export const App: FC<AppProps> = ({
       triggersActionsUi: deps.triggersActionsUi,
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
+      kql: deps.kql,
       usageCollection: deps.usageCollection,
       mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
       spaces: deps.spaces,

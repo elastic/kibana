@@ -22,11 +22,22 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
-import { useIsDevMode } from '@kbn/react-env';
+import type { TypedLensSerializedState, SupportedDatasourceId } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
-import { useLensSelector, selectFramePublicAPI, useLensDispatch } from '../../../state_management';
-import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
+import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
+import { getLensFeatureFlags } from '../../../get_feature_flags';
+import {
+  useLensSelector,
+  selectFramePublicAPI,
+  useLensDispatch,
+  selectHideTextBasedEditor,
+} from '../../../state_management';
+import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
+import {
+  EXPRESSION_BUILD_ERROR_ID,
+  getAbsoluteDateRange,
+  getActiveDatasourceIdFromDoc,
+} from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -40,13 +51,12 @@ import { deleteUserChartTypeFromSessionStorage } from '../../../chart_type_sessi
 import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
-import { useEsqlConversion } from './use_esql_conversion';
+import { useEsqlConversionCheck } from './use_esql_conversion_check';
 
 export function LensEditConfigurationFlyout({
   attributes,
   coreStart,
   startDependencies,
-  datasourceId,
   updatePanelState,
   updateSuggestion,
   setCurrentAttributes,
@@ -58,7 +68,6 @@ export function LensEditConfigurationFlyout({
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
-  canEditTextBasedQuery,
   isNewPanel,
   hidesSuggestions,
   onApply: onApplyCallback,
@@ -73,13 +82,18 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceMap, visualizationMap } = useEditorFrameService();
 
+  // Derive datasourceId from attributes - this updates when converting between formBased and textBased
+  const datasourceId = getActiveDatasourceIdFromDoc(attributes) as SupportedDatasourceId;
+
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
+  const [esqlQueryState, setESQLQueryState] = useState<TextBasedQueryState | null>(null);
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
+  const hideTextBasedEditor = useLensSelector(selectHideTextBasedEditor);
 
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
@@ -144,13 +158,18 @@ export function LensEditConfigurationFlyout({
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
+      // Use the datasourceId from the previous attributes, not the current one
+      // This is important when canceling after a datasource conversion (e.g., formBased -> textBased)
+      const previousDatasourceId = getActiveDatasourceIdFromDoc(
+        previousAttrs
+      ) as SupportedDatasourceId;
       if (previousAttrs.visualizationType === visualization.activeId) {
-        const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
-          ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-              previousAttrs.state.datasourceStates[datasourceId],
+        const currentDatasourceState = datasourceMap[previousDatasourceId].injectReferencesToLayers
+          ? datasourceMap[previousDatasourceId]?.injectReferencesToLayers?.(
+              previousAttrs.state.datasourceStates[previousDatasourceId],
               previousAttrs.references
             )
-          : previousAttrs.state.datasourceStates[datasourceId];
+          : previousAttrs.state.datasourceStates[previousDatasourceId];
         updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
       } else {
         updateSuggestion?.(previousAttrs);
@@ -169,7 +188,6 @@ export function LensEditConfigurationFlyout({
     visualization.activeId,
     savedObjectId,
     datasourceMap,
-    datasourceId,
     updatePanelState,
     updateSuggestion,
     updateByRefInput,
@@ -178,17 +196,39 @@ export function LensEditConfigurationFlyout({
 
   const textBasedMode = isOfAggregateQueryType(attributes.state.query);
 
-  const currentAttributes = useCurrentAttributes({
-    textBasedMode,
-    initialAttributes: attributes,
-  });
+  const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
+    useCurrentAttributes({
+      textBasedMode,
+      initialAttributes: attributes,
+    });
 
-  const onApply = useCallback(() => {
+  const onTextBasedQueryStateChange = useCallback((state: TextBasedQueryState) => {
+    setESQLQueryState(state);
+  }, []);
+
+  const onApply = useCallback(async () => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
     }
+
+    let attributesToSave: TypedLensSerializedState['attributes'];
+    try {
+      // Run the apply callback first so auto-save operations (e.g. linked annotations)
+      // complete before the visualization is persisted via saveByRef.
+      const updatedAttributes = await onApplyCallback?.(currentAttributes);
+      attributesToSave = updatedAttributes ?? currentAttributes;
+    } catch (err) {
+      coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.translate('xpack.lens.config.applyError', {
+          defaultMessage: 'Failed to apply changes',
+        }),
+      });
+      return;
+    }
+
     if (savedObjectId) {
-      saveByRef?.(currentAttributes);
+      const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
+      saveByRef?.(serializedAttrs);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -205,8 +245,6 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(currentAttributes);
-    // Remove the user's preferred chart type from sessionStorage
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
@@ -217,6 +255,7 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     currentAttributes,
+    coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
   ]);
@@ -241,6 +280,12 @@ export function LensEditConfigurationFlyout({
     }
     if (!visualization.state || !visualization.activeId) {
       return false;
+    }
+    // For text-based mode, check if query has been successfully concluded (no runtime errors, and not pending)
+    if (textBasedMode && esqlQueryState) {
+      if (esqlQueryState.hasErrors || esqlQueryState.isQueryPendingSubmit) {
+        return false;
+      }
     }
     const visualizationErrors = getUserMessages(['visualization'], {
       severity: 'error',
@@ -275,7 +320,19 @@ export function LensEditConfigurationFlyout({
     visualization.activeId,
     visualization.state,
     getUserMessages,
+    textBasedMode,
+    esqlQueryState,
   ]);
+
+  // Tooltip message when Apply button is disabled due to an unrun ES|QL query
+  const applyButtonDisabledTooltip = useMemo(() => {
+    if (textBasedMode && esqlQueryState?.isQueryPendingSubmit) {
+      return i18n.translate('xpack.lens.config.applyFlyoutRunQueryTooltip', {
+        defaultMessage: 'Run the ES|QL query to apply changes',
+      });
+    }
+    return undefined;
+  }, [textBasedMode, esqlQueryState?.isQueryPendingSubmit]);
 
   const addLayerButton = useAddLayerButton(
     framePublicAPI,
@@ -300,23 +357,41 @@ export function LensEditConfigurationFlyout({
       : [];
   }, [activeVisualization, visualization.state]);
 
-  const isDevMode = useIsDevMode();
-
   const showConvertToEsqlButton = useMemo(() => {
-    return isDevMode && !textBasedMode;
-  }, [isDevMode, textBasedMode]);
+    return getLensFeatureFlags().enableEsqlConversion && !textBasedMode;
+  }, [textBasedMode]);
 
-  const { isConvertToEsqlButtonDisabled, convertToEsqlButtonTooltip, convertibleLayers } =
-    useEsqlConversion(
-      showConvertToEsqlButton,
-      { datasourceId, datasourceStates, layerIds, visualization, activeVisualization },
-      { framePublicAPI, coreStart, startDependencies }
-    );
+  const {
+    isConvertToEsqlButtonDisabled,
+    convertToEsqlButtonTooltip,
+    convertibleLayers,
+    attributes: esqlConvertAttributes,
+  } = useEsqlConversionCheck(
+    showConvertToEsqlButton,
+    { attributes: currentAttributes, datasourceId, layerIds, visualization, activeVisualization },
+    { framePublicAPI, coreStart, startDependencies }
+  );
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const closeModal = () => setIsModalVisible(false);
-  const showModal = () => setIsModalVisible(true);
+  const closeModal = useCallback(() => setIsModalVisible(false), []);
+  const showModal = useCallback(() => setIsModalVisible(true), []);
+
+  const handleConvertToEsql = useCallback(() => {
+    closeModal();
+
+    // This is just to satisfy TS, in practice we don't make the handler available
+    // unless esqlConvertAttributes is defined
+    if (!esqlConvertAttributes) return;
+
+    // Update local attributes state - this triggers re-render of get_edit_lens_configuration
+    // which will derive the new datasourceId ('textBased') from the updated attributes
+    // and recreate the Redux store with the correct datasource
+    setCurrentAttributes?.(esqlConvertAttributes);
+
+    // Also update the embeddable's attributes for persistence
+    updateSuggestion?.(esqlConvertAttributes);
+  }, [closeModal, setCurrentAttributes, updateSuggestion, esqlConvertAttributes]);
 
   if (isLoading) return null;
 
@@ -358,7 +433,7 @@ export function LensEditConfigurationFlyout({
   );
 
   // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
-  if (!canEditTextBasedQuery && hidesSuggestions) {
+  if (hideTextBasedEditor && hidesSuggestions) {
     return (
       <>
         {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
@@ -370,10 +445,10 @@ export function LensEditConfigurationFlyout({
           navigateToLensEditor={navigateToLensEditor}
           onApply={onApply}
           isScrollable
-          isNewPanel={isNewPanel}
           isSaveable={isSaveable}
           isReadOnly={isReadOnly}
           applyButtonLabel={applyButtonLabel}
+          applyButtonDisabledTooltip={applyButtonDisabledTooltip}
           toolbar={toolbar}
           layerTabs={layerTabs}
         >
@@ -384,7 +459,6 @@ export function LensEditConfigurationFlyout({
             attributes={attributes}
             coreStart={coreStart}
             startDependencies={startDependencies}
-            datasourceId={datasourceId}
             hasPadding
             framePublicAPI={framePublicAPI}
             setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
@@ -393,7 +467,7 @@ export function LensEditConfigurationFlyout({
             closeFlyout={closeFlyout}
             parentApi={parentApi}
             panelId={panelId}
-            canEditTextBasedQuery={canEditTextBasedQuery}
+            onTextBasedQueryStateChange={onTextBasedQueryStateChange}
           />
         </FlyoutWrapper>
       </>
@@ -411,27 +485,33 @@ export function LensEditConfigurationFlyout({
         onApply={onApply}
         isSaveable={isSaveable}
         isScrollable
-        isNewPanel={isNewPanel}
         isReadOnly={isReadOnly}
         applyButtonLabel={applyButtonLabel}
+        applyButtonDisabledTooltip={applyButtonDisabledTooltip}
         toolbar={toolbar}
         layerTabs={layerTabs}
       >
         <>
+          {/* Flex container for the flyout content layout.
+              Enables proper scroll behavior where accordion headers stay fixed
+              and only the accordion content areas scroll independently. */}
           <EuiFlexGroup
             css={css`
               block-size: 100%;
+              /* Reset min-block-size to allow flex items to shrink below content size */
               .euiFlexItem,
               .euiAccordion,
               .euiAccordion__triggerWrapper,
               .euiAccordion__childWrapper {
                 min-block-size: 0;
               }
+              /* Make accordions flex containers to enable content scrolling */
               .euiAccordion {
                 display: flex;
                 flex: 1;
                 flex-direction: column;
               }
+              /* When accordion is open, its content area takes remaining space */
               .euiAccordion-isOpen {
                 .euiAccordion__childWrapper {
                   // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
@@ -439,6 +519,8 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
+              /* Scrollable accordion content area with custom scrollbar styling.
+                 pointer-events handling allows drag-drop to work outside content bounds. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
                 overflow-y: auto !important;
@@ -450,6 +532,7 @@ export function LensEditConfigurationFlyout({
                   pointer-events: auto;
                 }
               }
+              /* Advanced options nested accordion should not scroll independently */
               .lnsIndexPatternDimensionEditor-advancedOptions {
                 .euiAccordion__childWrapper {
                   flex: none;
@@ -460,6 +543,7 @@ export function LensEditConfigurationFlyout({
             direction="column"
             gutterSize="none"
           >
+            {/* Container for ES|QL editor - fixed height, doesn't grow */}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 css={css`
@@ -472,6 +556,7 @@ export function LensEditConfigurationFlyout({
                 ref={editorContainer}
               />
             </EuiFlexItem>
+            {/* Visualization parameters accordion - grows when open to fill available space */}
             <EuiFlexItem
               grow={isLayerAccordionOpen ? 1 : false}
               css={css`
@@ -520,7 +605,6 @@ export function LensEditConfigurationFlyout({
                     getUserMessages={getUserMessages}
                     coreStart={coreStart}
                     startDependencies={startDependencies}
-                    datasourceId={datasourceId}
                     framePublicAPI={framePublicAPI}
                     setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
                     updateSuggestion={updateSuggestion}
@@ -528,8 +612,8 @@ export function LensEditConfigurationFlyout({
                     closeFlyout={closeFlyout}
                     parentApi={parentApi}
                     panelId={panelId}
-                    canEditTextBasedQuery={canEditTextBasedQuery}
                     editorContainer={editorContainer.current || undefined}
+                    onTextBasedQueryStateChange={onTextBasedQueryStateChange}
                   />
                 </>
               </EuiAccordion>
@@ -568,11 +652,11 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-          {isModalVisible ? (
+          {isModalVisible && esqlConvertAttributes ? (
             <ConvertToEsqlModal
               layers={convertibleLayers}
               onCancel={closeModal}
-              onConfirm={closeModal}
+              onConfirm={handleConvertToEsql}
             />
           ) : null}
         </>

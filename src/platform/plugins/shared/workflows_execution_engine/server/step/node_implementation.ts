@@ -12,9 +12,10 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
+import apm from 'elastic-apm-node';
 import type { SerializedError } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { ConnectorExecutor } from '../connector_executor';
-import { ExecutionError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
@@ -73,6 +74,27 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
+/**
+ * Node implementation with explicit cancellation cleanup.
+ *
+ * Steps that hold external resources (child workflow executions, long-running
+ * connections, etc.) implement this to perform teardown when cancelled.
+ * `onCancel` is called after the abort signal fires and the step is marked
+ * as cancelled — it fires in both the running and waiting states, giving
+ * the step a guaranteed cleanup entry point without re-invoking `run()`.
+ *
+ * Implementations must be idempotent.
+ */
+export interface CancellableNode {
+  onCancel(): Promise<void> | void;
+}
+
+export const isCancellableNode = (
+  node: NodeImplementation
+): node is NodeImplementation & CancellableNode => {
+  return typeof (node as unknown as CancellableNode).onCancel === 'function';
+};
+
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   implements NodeImplementation
 {
@@ -102,10 +124,24 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
+    // If the execution is already aborted, do not start the step, navigate to make the execution finish properly
+    if (this.stepExecutionRuntime.abortController.signal.aborted) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+      return;
+    }
+
     let input: any;
     this.stepExecutionRuntime.startStep();
     // flush event logs after start step
     await this.stepExecutionRuntime.flushEventLogs();
+
+    // Create APM span for step execution visibility in traces
+    const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
+    if (stepSpan) {
+      stepSpan.setLabel('step_name', this.step.name);
+      stepSpan.setLabel('step_type', this.step.type);
+      stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
+    }
 
     try {
       input = await this.getInput();
@@ -114,17 +150,34 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
       // Don't update step execution runtime if abort was initiated
       if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        if (stepSpan) {
+          stepSpan.setOutcome('unknown');
+          stepSpan.end();
+        }
         return;
       }
 
       if (result.error) {
         this.stepExecutionRuntime.failStep(new ExecutionError(result.error));
+        if (stepSpan) {
+          stepSpan.setOutcome('failure');
+        }
       } else {
         this.stepExecutionRuntime.finishStep(result.output);
+        if (stepSpan) {
+          stepSpan.setOutcome('success');
+        }
       }
     } catch (error) {
       const result = this.handleFailure(input, error);
       this.stepExecutionRuntime.failStep(result.error || error);
+      if (stepSpan) {
+        stepSpan.setOutcome('failure');
+      }
+    } finally {
+      if (stepSpan) {
+        stepSpan.end();
+      }
     }
 
     // flush event logs after finishing the step

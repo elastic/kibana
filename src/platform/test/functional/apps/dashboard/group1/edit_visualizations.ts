@@ -56,6 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         saveAsNew: true,
         redirectToOrigin: true,
       });
+      await dashboard.waitForRenderComplete();
     } else {
       await visualize.saveVisualizationAndReturn();
     }

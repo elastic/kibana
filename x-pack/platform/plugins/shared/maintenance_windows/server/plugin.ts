@@ -66,7 +66,7 @@ export class MaintenanceWindowsPlugin
 
     plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
-    registerSavedObject(core.savedObjects, this.logger);
+    registerSavedObject(core.savedObjects);
 
     initializeMaintenanceWindowEventsGenerator(
       this.logger,

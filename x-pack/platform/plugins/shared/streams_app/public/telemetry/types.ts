@@ -8,7 +8,7 @@
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
-type StreamType = 'wired' | 'classic' | 'unknown';
+type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
 
 type ConfigurationMode = 'interactive' | 'yaml';
 
@@ -130,13 +130,6 @@ interface StreamsFeatureIdentificationDeletedProps {
   stream_type: StreamType;
 }
 
-interface StreamsDescriptionGeneratedProps {
-  stream_name: string;
-  stream_type: StreamType;
-  input_tokens_used: number;
-  output_tokens_used: number;
-}
-
 interface StreamsProcessingSimulationSamplesFetchLatencyProps {
   stream_name: string;
   stream_type: StreamType;
@@ -163,6 +156,7 @@ interface StreamsTabVisitedProps {
     text_structure: boolean;
     read_failure_store: boolean;
     manage_failure_store: boolean;
+    create_snapshot_repository: boolean;
   };
 }
 
@@ -187,7 +181,6 @@ export {
   type WiredStreamsStatusChangedProps,
   type StreamsFeatureIdentificationSavedProps,
   type StreamsFeatureIdentificationDeletedProps,
-  type StreamsDescriptionGeneratedProps,
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
   type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,

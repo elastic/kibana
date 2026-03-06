@@ -67,10 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(errorEmbeddables.length).to.be(0);
     });
 
-    it('does not show the unsaved changes badge in edit mode', async () => {
+    it('does not show the unsaved changes notification in edit mode', async () => {
       await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.waitForRenderComplete();
-      await PageObjects.dashboard.expectMissingUnsavedChangesBadge();
+      await PageObjects.dashboard.ensureMissingUnsavedChangesNotification({ retry: true });
     });
   });
 }

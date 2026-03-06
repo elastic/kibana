@@ -13,13 +13,15 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
   ESQLFieldWithMetadata,
+  ESQLCallbacks,
+  EsqlView,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLLocation } from '../../types';
+import type { ESQLLocation, ESQLProperNode } from '@elastic/esql/types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
-import type { SuggestionCategory } from '../../shared/sorting/types';
+import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -35,7 +37,8 @@ export type ItemKind =
   | 'Text'
   | 'Reference'
   | 'Snippet'
-  | 'Issue';
+  | 'Issue'
+  | 'Folder';
 
 export interface ISuggestionItem {
   /* The label to show on the suggestion UI for the entry */
@@ -107,6 +110,8 @@ export type GetColumnsByTypeFn = (
     openSuggestions?: boolean;
     addComma?: boolean;
     variableType?: ESQLVariableType;
+    /** When true, prepends a "Browse fields" suggestion with current columns as preloaded fields. */
+    isFieldsBrowserEnabled?: boolean;
   }
 ) => Promise<ISuggestionItem[]>;
 
@@ -119,6 +124,7 @@ export interface ESQLUserDefinedColumn {
   type: SupportedDataType | 'unknown';
   userDefined: true;
   location: ESQLLocation; // TODO should this be optional?
+  isUnmappedField?: boolean;
 }
 
 export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
@@ -138,6 +144,32 @@ export interface ESQLCommandSummary {
    * A set of renamed columns pairs [oldName, newName]
    */
   renamedColumnsPairs?: Set<[string, string]>;
+
+  /**
+   * A set of fields used for grouping results in the query.
+   * Note that you don't only get the last grouping applied but all the groupings used in the query.
+   * The client must decide how to use this information.
+   * Example of grouping fields is foo in "STATS AVG(bar) BY foo".
+   */
+  grouping?: Set<FieldSummary>;
+
+  /**
+   * A set of fields used for aggregating results in the query.
+   * Example of aggregate fields is foo in "STATS foo = AVG(bar)".
+   */
+  aggregates?: Set<FieldSummary>;
+}
+
+export interface FieldSummary {
+  /**
+   * The field name, correctly formatted, extracted from the AST.
+   */
+  field: string;
+
+  /**
+   * AST argument node where the field was found.
+   */
+  arg: ESQLProperNode;
 }
 
 export interface ESQLPolicy {
@@ -155,6 +187,8 @@ export interface ICommandCallbacks {
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
+  canSuggestResourceBrowser?: () => Promise<boolean>;
 }
 
 export interface ICommandContext {
@@ -164,12 +198,15 @@ export interface ICommandContext {
   timeSeriesSources?: IndexAutocompleteItem[];
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
+  views?: EsqlView[];
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
   isCursorInSubquery?: boolean;
+  isFieldsBrowserEnabled?: boolean;
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy;
 }
 /**
  * This is a list of locations within an ES|QL query.
@@ -258,4 +295,20 @@ export enum Location {
    * In the COMPLETION command
    */
   COMPLETION = 'completion',
+
+  /**
+   * In the MMR command
+   */
+  MMR = 'mmr',
+
+  /**
+   * In the PROMQL command (PromQL query expression)
+   */
+  PROMQL = 'promql',
+}
+
+export enum UnmappedFieldsStrategy {
+  FAIL = 'FAIL',
+  NULLIFY = 'NULLIFY',
+  LOAD = 'LOAD',
 }

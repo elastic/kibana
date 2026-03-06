@@ -8,10 +8,11 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../hooks/use_expand_section';
+import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
+import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
 import { SessionPreviewContainer } from './session_preview_container';
-import { ExpandableSection } from './expandable_section';
+import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -23,7 +24,11 @@ const KEY = 'visualizations';
  * Visualizations section in overview. It contains analyzer preview and session view preview.
  */
 export const VisualizationsSection = memo(() => {
-  const expanded = useExpandSection({ title: KEY, defaultValue: false });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: false,
+  });
   const { dataAsNestedObject, getFieldsData, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
 
@@ -43,7 +48,8 @@ export const VisualizationsSection = memo(() => {
           defaultMessage="Visualizations"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       data-test-subj={VISUALIZATIONS_TEST_ID}
     >
       <SessionPreviewContainer />

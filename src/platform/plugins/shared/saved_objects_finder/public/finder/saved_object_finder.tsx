@@ -8,7 +8,6 @@
  */
 
 import { debounce } from 'lodash';
-import PropTypes from 'prop-types';
 import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
 import { getTagFindReferences, parseQuery } from '@kbn/saved-objects-management-plugin/public';
@@ -107,14 +106,6 @@ class SavedObjectFinderUiClass extends React.Component<
   SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>,
   SavedObjectFinderState
 > {
-  public static propTypes: Record<string, PropTypes.Validator<unknown>> = {
-    onChoose: PropTypes.func,
-    noItemsMessage: PropTypes.node,
-    savedObjectMetaData: PropTypes.array.isRequired,
-    initialPageSize: PropTypes.oneOf([5, 10, 15, 25]),
-    fixedPageSize: PropTypes.number,
-    showFilter: PropTypes.bool,
-  };
   private isComponentMounted: boolean = false;
 
   private debouncedFetch = debounce(async (query: Query) => {
@@ -406,6 +397,9 @@ class SavedObjectFinderUiClass extends React.Component<
             items={this.state.items}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
+            tableCaption={i18n.translate('savedObjectsFinder.tableCaption', {
+              defaultMessage: 'Saved objects search results',
+            })}
             noItemsMessage={this.props.noItemsMessage}
             search={search}
             pagination={pagination}

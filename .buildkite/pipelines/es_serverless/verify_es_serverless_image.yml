@@ -62,7 +62,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+      - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
         label: 'Scout Test Run Builder'
         agents:
           image: family/kibana-ubuntu-2404
@@ -76,23 +76,7 @@ steps:
           - build
         env:
           SERVERLESS_TESTS_ONLY: 'true'
-          SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
-        retry:
-          automatic:
-            - exit_status: '*'
-              limit: 1
-
-      - command: .buildkite/scripts/steps/test/scout_uiam_tests.sh
-        label: 'Scout UIAM Tests'
-        agents:
-          image: family/kibana-ubuntu-2404
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-4
-          diskSizeGb: 115
-        timeout_in_minutes: 15
-        depends_on:
-          - build
+          SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
         retry:
           automatic:
             - exit_status: '*'
@@ -126,7 +110,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 4
+        parallelism: 5
         retry:
           automatic:
             - exit_status: '-1'
@@ -143,7 +127,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 10
+        parallelism: 11
         retry:
           automatic:
             - exit_status: '-1'
@@ -160,7 +144,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 5
+        parallelism: 6
         retry:
           automatic:
             - exit_status: '-1'
@@ -194,7 +178,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -228,7 +212,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -245,7 +229,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 5
+        parallelism: 7
         retry:
           automatic:
             - exit_status: '-1'
@@ -279,7 +263,7 @@ steps:
           preemptible: true
         depends_on: build
         timeout_in_minutes: 60
-        parallelism: 1
+        parallelism: 2
         retry:
           automatic:
             - exit_status: '-1'
@@ -294,8 +278,9 @@ steps:
           provider: gcp
           enableNestedVirtualization: true
           machineType: n2-standard-4
+          diskSizeGb: 105
         depends_on: build
-        timeout_in_minutes: 60
+        timeout_in_minutes: 75
         parallelism: 12
         retry:
           automatic:

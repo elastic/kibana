@@ -168,23 +168,29 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     if (isLoading) {
-      return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
+      return (
+        <div data-test-subj={getTestId()}>
+          <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />
+        </div>
+      );
     }
 
     // Check if file is no longer available
     if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
       return (
-        <EuiText
-          size={textSize}
-          color="warning"
-          data-test-subj={getTestId('fileNoLongerAvailable')}
-        >
-          {FILE_NO_LONGER_AVAILABLE_MESSAGE}
-        </EuiText>
+        <div data-test-subj={getTestId()}>
+          <EuiText
+            size={textSize}
+            color="warning"
+            data-test-subj={getTestId('fileNoLongerAvailable')}
+          >
+            {FILE_NO_LONGER_AVAILABLE_MESSAGE}
+          </EuiText>
+        </div>
       );
     } else if (error) {
       return (
-        <EuiText size={textSize} color="warning">
+        <EuiText size={textSize} color="warning" data-test-subj={getTestId()}>
           <FormattedMessage
             id="xpack.securitySolution.responseActionFileDownloadLink.apiError"
             defaultMessage="Attempt to retrieve file download information failed."

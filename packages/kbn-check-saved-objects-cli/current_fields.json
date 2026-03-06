@@ -86,17 +86,21 @@
     "snoozeSchedule.skipRecurrences",
     "tags",
     "throttle",
+    "uiamApiKey",
     "updatedAt",
     "updatedBy"
   ],
   "alerting_rule_template": [
+    "description",
     "name",
     "ruleTypeId",
     "tags"
   ],
+  "anonymization-salt": [],
   "api_key_pending_invalidation": [
     "apiKeyId",
-    "createdAt"
+    "createdAt",
+    "uiamApiKey"
   ],
   "api_key_to_invalidate": [
     "apiKeyId",
@@ -322,14 +326,10 @@
     "version"
   ],
   "data_connector": [
-    "config",
-    "createdAt",
-    "features",
     "kscIds",
     "name",
     "toolIds",
     "type",
-    "updatedAt",
     "workflowIds"
   ],
   "data_stream-config": [
@@ -341,12 +341,7 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "metadata.created_at",
-    "metadata.sample_count",
-    "metadata.version",
-    "result",
-    "result.field_mapping",
-    "result.ingest_pipeline"
+    "result"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -364,8 +359,15 @@
     "error",
     "filter",
     "integrationName",
+    "integrations",
+    "integrations.syncData",
+    "integrations.syncData.lastFullSync",
+    "integrations.syncData.lastUpdateProcessed",
+    "integrations.syncMarkerIndex",
     "managed",
+    "managedVersion",
     "matchers",
+    "matchersModifiedByUser",
     "name",
     "type"
   ],
@@ -386,6 +388,30 @@
   "entity-discovery-api-key": [
     "apiKey"
   ],
+  "entity-engine-descriptor-v2": [
+    "error",
+    "error.action",
+    "error.message",
+    "logExtractionState",
+    "logExtractionState.additionalIndexPattern",
+    "logExtractionState.additionalIndexPatterns",
+    "logExtractionState.delay",
+    "logExtractionState.docsLimit",
+    "logExtractionState.fieldHistoryLength",
+    "logExtractionState.filter",
+    "logExtractionState.frequency",
+    "logExtractionState.lastExecutionTimestamp",
+    "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationId",
+    "logExtractionState.paginationTimestamp",
+    "logExtractionState.timeout",
+    "status",
+    "type",
+    "versionState",
+    "versionState.isMigratedFromV1",
+    "versionState.state",
+    "versionState.version"
+  ],
   "entity-engine-status": [
     "fieldHistoryLength",
     "filter",
@@ -394,6 +420,7 @@
     "timestampField",
     "type"
   ],
+  "entity-store-global-state": [],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",
@@ -559,6 +586,7 @@
     "download_source_id",
     "fleet_server_host_id",
     "global_data_tags",
+    "has_agent_version_conditions",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -696,6 +724,7 @@
     "download_source_id",
     "fleet_server_host_id",
     "global_data_tags",
+    "has_agent_version_conditions",
     "inactivity_timeout",
     "is_default",
     "is_default_fleet_server",
@@ -825,6 +854,7 @@
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
+    "download_source_auth_secret_storage_requirements_met",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "ilm_migration_status",
@@ -838,13 +868,10 @@
   ],
   "integration-config": [
     "created_by",
+    "created_by_profile_uid",
     "data_stream_count",
     "integration_id",
     "metadata",
-    "metadata.created_at",
-    "metadata.description",
-    "metadata.title",
-    "metadata.version",
     "status"
   ],
   "intercept_interaction_record": [],
@@ -897,6 +924,11 @@
     "title",
     "uiStateJSON",
     "version"
+  ],
+  "markdown": [
+    "content",
+    "description",
+    "title"
   ],
   "metrics-data-source": [],
   "metrics-explorer-view": [],
@@ -1040,6 +1072,7 @@
     "realmName",
     "realmType",
     "sessionId",
+    "status",
     "username"
   ],
   "search-telemetry": [],
@@ -1056,7 +1089,11 @@
     "provider"
   ],
   "security-rule": [
+    "name",
+    "risk_score",
     "rule_id",
+    "severity",
+    "tags",
     "version"
   ],
   "security-solution-signals-migration": [
@@ -1302,6 +1339,10 @@
   ],
   "telemetry": [],
   "threshold-explorer-view": [],
+  "trial-companion-nba-milestone": [
+    "dismiss",
+    "openTODOs"
+  ],
   "ui-metric": [
     "count"
   ],
@@ -1336,6 +1377,12 @@
     "kibanaSavedObjectMeta",
     "title",
     "version"
+  ],
+  "watchlist-config": [
+    "description",
+    "managed",
+    "name",
+    "riskModifier"
   ],
   "workplace_search_telemetry": []
 }

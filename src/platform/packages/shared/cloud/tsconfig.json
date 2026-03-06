@@ -22,6 +22,5 @@
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
     "@kbn/security-plugin-types-server",
-    "@kbn/react-kibana-context-render",
   ]
 }

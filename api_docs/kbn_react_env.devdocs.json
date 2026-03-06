@@ -16,6 +16,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/react/env/index.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -35,6 +37,8 @@
           "() => boolean"
         ],
         "path": "src/platform/packages/shared/react/env/index.tsx",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -54,6 +58,8 @@
           "() => string"
         ],
         "path": "src/platform/packages/shared/react/env/index.tsx",
+        "lineNumber": 23,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

@@ -48,6 +48,8 @@ interface AttackDetailsContainerProps {
   defaultFilters: Filter[];
   /** Whether the alerts table is in a loading state */
   isTableLoading: boolean;
+  /** The count of related alerts after all filters applied */
+  filteredAlertsCount: number;
 }
 
 /**
@@ -57,7 +59,14 @@ interface AttackDetailsContainerProps {
  * If attack is undefined, only the Alerts tab will be rendered.
  */
 export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
-  ({ attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized }) => {
+  ({
+    attack,
+    groupingFilters,
+    defaultFilters,
+    isTableLoading,
+    showAnonymized,
+    filteredAlertsCount,
+  }) => {
     const [selectedTabId, setSelectedTabId] = useLocalStorage<string>({
       defaultValue: ATTACK_SUMMARY_TAB,
       key: getSettingKey({
@@ -94,12 +103,12 @@ export const AttackDetailsContainer = React.memo<AttackDetailsContainerProps>(
           ),
           append: attack ? (
             <EuiNotificationBadge size="m" color="subdued">
-              {attack.alertIds.length}
+              {`${filteredAlertsCount}/${attack.alertIds.length}`}
             </EuiNotificationBadge>
           ) : undefined,
         },
       ],
-      [attack, groupingFilters, defaultFilters, isTableLoading, showAnonymized]
+      [attack, showAnonymized, groupingFilters, defaultFilters, isTableLoading, filteredAlertsCount]
     );
 
     const selectedTabContent = useMemo(() => {

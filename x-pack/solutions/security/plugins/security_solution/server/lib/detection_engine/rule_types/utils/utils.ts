@@ -7,12 +7,11 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, merge } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
@@ -31,11 +30,7 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  DocLinksServiceSetup,
-  ElasticsearchClient,
-  IUiSettingsClient,
-} from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -75,7 +70,6 @@ import type {
   EqlShellAlertLatest,
   WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
 import type {
   ExtraFieldsForShellAlert,
@@ -84,85 +78,21 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
-import {
-  SECURITY_NUM_EXCEPTION_ITEMS,
-  SECURITY_NUM_INDICES_MATCHING_PATTERN,
-  SECURITY_QUERY_SPAN_S,
-} from './apm_field_names';
+import { SECURITY_NUM_EXCEPTION_ITEMS, SECURITY_QUERY_SPAN_S } from './apm_field_names';
 import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
 
-export const hasReadIndexPrivileges = async (args: {
-  privileges: Privilege;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  uiSettingsClient: IUiSettingsClient;
-  docLinks: DocLinksServiceSetup;
-}): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
-  const apiKeyDocs = docLinks.links.alerting.authorization;
-  const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-  const indexNames = Object.keys(privileges.index);
-  const filteredIndexNames = isCcsPermissionWarningEnabled
-    ? indexNames
-    : indexNames.filter((indexName) => {
-        return !isCCSRemoteIndexName(indexName);
-      });
-  const [, indexesWithNoReadPrivileges] = partition(
-    filteredIndexNames,
-    (indexName) => privileges.index[indexName].read
-  );
-  let warningStatusMessage;
-
-  // Some indices have read privileges others do not.
-  if (indexesWithNoReadPrivileges.length > 0) {
-    const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: warningStatusMessage,
-    });
-  }
-  return warningStatusMessage;
-};
-
 export const hasTimestampFields = async (args: {
   timestampField: string;
-  // any is derived from here
-  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
-  inputIndices: string[];
+  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
-  const { ruleName } = ruleExecutionLogger.context;
+  const { timestampField, timestampFieldCapsResponse, ruleExecutionLogger } = args;
 
-  agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
-  });
-
-  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
-      inputIndices
-    )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${
-      ruleName === 'Endpoint Security'
-        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
-        : ''
-    }`;
-
-    await ruleExecutionLogger.logStatusChange({
-      newStatus: RuleExecutionStatusEnum['partial failure'],
-      message: errorString.trimEnd(),
-    });
-
-    return {
-      foundNoIndices: true,
-      warningMessage: errorString.trimEnd(),
-    };
-  } else if (
+  if (
     isEmpty(timestampFieldCapsResponse.body.fields) ||
     timestampFieldCapsResponse.body.fields[timestampField] == null ||
     timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices != null
@@ -434,7 +364,7 @@ export const getRuleRangeTuples = async ({
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
     ruleExecutionLogger.error(
-      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
+      `Error computing gap between rule runs\nError: could not parse rule interval "${JSON.stringify(
         interval
       )}"`
     );
@@ -657,6 +587,7 @@ export const createSearchAfterReturnType = ({
   errors,
   warningMessages,
   suppressedAlertsCount,
+  totalEventsFound,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -668,6 +599,7 @@ export const createSearchAfterReturnType = ({
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
   suppressedAlertsCount?: number | undefined;
+  totalEventsFound?: number | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -720,6 +652,7 @@ export const mergeReturns = (
       errors: existingErrors,
       warningMessages: existingWarningMessages,
       suppressedAlertsCount: existingSuppressedAlertsCount,
+      totalEventsFound: existingTotalEventsFound,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -733,6 +666,7 @@ export const mergeReturns = (
       errors: newErrors,
       warningMessages: newWarningMessages,
       suppressedAlertsCount: newSuppressedAlertsCount,
+      totalEventsFound: newTotalEventsFound,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -746,6 +680,7 @@ export const mergeReturns = (
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
       suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
+      totalEventsFound: (existingTotalEventsFound ?? 0) + (newTotalEventsFound ?? 0),
     };
   });
 };

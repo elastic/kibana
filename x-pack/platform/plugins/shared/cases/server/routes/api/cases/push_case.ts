@@ -32,6 +32,7 @@ export const pushCaseRoute: CaseRoute = createCasesRoute({
       const res: caseDomainV1.Case = await casesClient.cases.push({
         caseId: params.case_id,
         connectorId: params.connector_id,
+        pushType: 'manual',
       });
 
       return response.ok({

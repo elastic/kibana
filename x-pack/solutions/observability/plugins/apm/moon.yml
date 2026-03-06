@@ -137,7 +137,6 @@ dependsOn:
   - '@kbn/fields-metadata-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/apm-sources-access-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/object-utils'
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
@@ -149,9 +148,12 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
-  - '@kbn/control-group-renderer'
+  - '@kbn/controls-constants'
   - '@kbn/agent-builder-plugin'
   - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/kql'
+  - '@kbn/slo-plugin'
+  - '@kbn/slo-schema'
 tags:
   - plugin
   - prod

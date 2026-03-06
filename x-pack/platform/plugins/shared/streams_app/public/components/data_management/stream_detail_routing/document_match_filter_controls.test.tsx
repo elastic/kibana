@@ -27,11 +27,12 @@ describe('DocumentMatchFilterControls', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseStreamSamplesSelector.mockReturnValue('matched' as any);
   });
 
-  it('should disable filter controls when isDisabled is true', () => {
-    renderWithProviders(
+  it('should render nothing when isDisabled is true', () => {
+    const { container } = renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
         matchedDocumentPercentage={0.5}
@@ -39,26 +40,18 @@ describe('DocumentMatchFilterControls', () => {
       />
     );
 
-    const matchedButton = screen.getByTestId('routingPreviewMatchedFilterButton');
-    const unmatchedButton = screen.getByTestId('routingPreviewUnmatchedFilterButton');
-
-    expect(matchedButton).toBeDisabled();
-    expect(unmatchedButton).toBeDisabled();
+    expect(container).toBeEmptyDOMElement();
   });
 
-  it('should disable filter controls when matchedDocumentPercentage is undefined', () => {
-    renderWithProviders(
+  it('should render nothing when matchedDocumentPercentage is undefined', () => {
+    const { container } = renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
         matchedDocumentPercentage={undefined}
       />
     );
 
-    const matchedButton = screen.getByTestId('routingPreviewMatchedFilterButton');
-    const unmatchedButton = screen.getByTestId('routingPreviewUnmatchedFilterButton');
-
-    expect(matchedButton).toBeDisabled();
-    expect(unmatchedButton).toBeDisabled();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should enable filter controls when condition is set', () => {
@@ -77,11 +70,12 @@ describe('DocumentMatchFilterControls', () => {
     expect(unmatchedButton).not.toBeDisabled();
   });
 
-  it('should show filter tooltip', () => {
+  it('should show filter tooltip when controls are visible', () => {
     renderWithProviders(
       <DocumentMatchFilterControls
         onFilterChange={mockOnFilterChange}
         matchedDocumentPercentage={0.5}
+        isDisabled={false}
       />
     );
 
@@ -90,6 +84,7 @@ describe('DocumentMatchFilterControls', () => {
 
   it('should call onFilterChange when filter button is clicked', async () => {
     const user = userEvent.setup();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockUseStreamSamplesSelector.mockReturnValue('matched' as any);
 
     renderWithProviders(

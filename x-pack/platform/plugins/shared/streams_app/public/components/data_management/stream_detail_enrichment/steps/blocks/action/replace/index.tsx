@@ -43,13 +43,7 @@ export const ReplaceProcessorForm = () => {
 
   return (
     <>
-      <ProcessorFieldSelector
-        fieldKey="from"
-        helpText={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceFieldHelpText',
-          { defaultMessage: 'The field to apply the replacement to.' }
-        )}
-      />
+      <ProcessorFieldSelector fieldKey="from" helpText="" />
       <EuiFormRow
         label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.replacePatternLabel',

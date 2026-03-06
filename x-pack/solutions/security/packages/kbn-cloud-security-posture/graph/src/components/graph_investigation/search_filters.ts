@@ -16,6 +16,7 @@ import type { Filter, PhraseFilter } from '@kbn/es-query';
 import type {
   CombinedFilter,
   PhraseFilterMetaParams,
+  PhraseFilterValue,
 } from '@kbn/es-query/src/filters/build_filters';
 
 export const CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER = 'graph-investigation';
@@ -166,4 +167,46 @@ export const removeFilter = (filters: Filter[], key: string, value: string) => {
   }
 
   return filters;
+};
+
+/**
+ * Helper function to extract filter value(s) from a single filter.
+ * Handles both simple phrase filters and combined filters recursively.
+ */
+const getFilterValue = (
+  filter: Filter,
+  keys: string[]
+): PhraseFilterValue[] | PhraseFilterValue | null => {
+  if (isCombinedFilter(filter)) {
+    return filter.meta.params
+      .map((param) => getFilterValue(param, keys))
+      .filter((value): value is PhraseFilterValue | PhraseFilterValue[] => value !== null)
+      .flat();
+  }
+
+  return filter.meta.key && keys.includes(filter.meta.key)
+    ? (filter.meta.params as PhraseFilterMetaParams)?.query
+    : null;
+};
+
+/**
+ * Extracts all values from filters that match the specified keys.
+ * Handles both simple phrase filters and combined filters.
+ * Skips disabled filters.
+ *
+ * @param filters - The list of filters to extract values from.
+ * @param key - The key or array of keys to match against filter keys.
+ * @returns An array of all values from matching filters.
+ */
+export const getFilterValues = (
+  filters: Filter[],
+  key: string | readonly string[]
+): PhraseFilterValue[] => {
+  const keys = Array.isArray(key) ? key : [key];
+
+  return filters
+    .filter((filter) => !filter.meta.disabled)
+    .map((filter) => getFilterValue(filter, keys as string[]))
+    .filter((value): value is PhraseFilterValue | PhraseFilterValue[] => value !== null)
+    .flat();
 };

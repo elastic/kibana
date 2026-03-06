@@ -290,6 +290,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "uiamApiKey": {
+        "type": "binary"
+      },
       "updatedAt": {
         "type": "date"
       },
@@ -301,6 +304,9 @@
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
+      "description": {
+        "type": "text"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -318,6 +324,10 @@
       }
     }
   },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
@@ -325,6 +335,9 @@
       },
       "createdAt": {
         "type": "date"
+      },
+      "uiamApiKey": {
+        "type": "binary"
       }
     }
   },
@@ -1215,12 +1228,39 @@
       "integrationName": {
         "type": "keyword"
       },
+      "integrations": {
+        "dynamic": false,
+        "properties": {
+          "syncData": {
+            "dynamic": false,
+            "properties": {
+              "lastFullSync": {
+                "type": "date"
+              },
+              "lastUpdateProcessed": {
+                "type": "date"
+              }
+            },
+            "type": "object"
+          },
+          "syncMarkerIndex": {
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
       "managed": {
         "type": "boolean"
+      },
+      "managedVersion": {
+        "type": "integer"
       },
       "matchers": {
         "dynamic": false,
         "type": "object"
+      },
+      "matchersModifiedByUser": {
+        "type": "boolean"
       },
       "name": {
         "type": "keyword"
@@ -1279,6 +1319,80 @@
       }
     }
   },
+  "entity-engine-descriptor-v2": {
+    "dynamic": false,
+    "properties": {
+      "error": {
+        "properties": {
+          "action": {
+            "type": "keyword"
+          },
+          "message": {
+            "type": "text"
+          }
+        }
+      },
+      "logExtractionState": {
+        "properties": {
+          "additionalIndexPattern": {
+            "type": "keyword"
+          },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
+          "delay": {
+            "type": "keyword"
+          },
+          "docsLimit": {
+            "type": "integer"
+          },
+          "fieldHistoryLength": {
+            "type": "integer"
+          },
+          "filter": {
+            "type": "keyword"
+          },
+          "frequency": {
+            "type": "keyword"
+          },
+          "lastExecutionTimestamp": {
+            "type": "date"
+          },
+          "lookbackPeriod": {
+            "type": "keyword"
+          },
+          "paginationId": {
+            "type": "keyword"
+          },
+          "paginationTimestamp": {
+            "type": "date"
+          },
+          "timeout": {
+            "type": "keyword"
+          }
+        }
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "versionState": {
+        "properties": {
+          "isMigratedFromV1": {
+            "type": "boolean"
+          },
+          "state": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  },
   "entity-engine-status": {
     "dynamic": false,
     "properties": {
@@ -1301,6 +1415,11 @@
       "type": {
         "type": "keyword"
       }
+    }
+  },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {
     }
   },
   "epm-packages": {
@@ -1854,6 +1973,9 @@
         "index": false,
         "type": "flattened"
       },
+      "has_agent_version_conditions": {
+        "type": "boolean"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -2276,6 +2398,9 @@
       "global_data_tags": {
         "index": false,
         "type": "flattened"
+      },
+      "has_agent_version_conditions": {
+        "type": "boolean"
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2708,6 +2833,9 @@
           }
         }
       },
+      "download_source_auth_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "fleet_server_hosts": {
         "type": "keyword"
       },
@@ -2748,6 +2876,9 @@
     "dynamic": false,
     "properties": {
       "created_by": {
+        "type": "keyword"
+      },
+      "created_by_profile_uid": {
         "type": "keyword"
       },
       "data_stream_count": {
@@ -2917,6 +3048,21 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "index": false,
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -3390,6 +3536,9 @@
       "sessionId": {
         "type": "keyword"
       },
+      "status": {
+        "type": "keyword"
+      },
       "username": {
         "type": "keyword"
       }
@@ -3442,7 +3591,25 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "risk_score": {
+        "type": "float"
+      },
       "rule_id": {
+        "type": "keyword"
+      },
+      "severity": {
+        "type": "keyword"
+      },
+      "tags": {
         "type": "keyword"
       },
       "version": {
@@ -4296,6 +4463,16 @@
     "dynamic": false,
     "properties": {}
   },
+  "trial-companion-nba-milestone": {
+    "properties": {
+      "dismiss": {
+        "type": "boolean"
+      },
+      "openTODOs": {
+        "type": "integer"
+      }
+    }
+  },
   "ui-metric": {
     "properties": {
       "count": {
@@ -4401,6 +4578,23 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "watchlist-config": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "riskModifier": {
+        "type": "float"
       }
     }
   },

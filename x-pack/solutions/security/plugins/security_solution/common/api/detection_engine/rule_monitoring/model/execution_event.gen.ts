@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type LogLevel = z.infer<typeof LogLevel>;
 export const LogLevel = z.enum(['trace', 'debug', 'info', 'warn', 'error']);
@@ -45,4 +45,8 @@ export const RuleExecutionEvent = z.object({
   type: RuleExecutionEventType,
   execution_id: z.string().min(1),
   message: z.string(),
+  /**
+   * Event details. The details vary per event type.
+   */
+  details: z.object({}).catchall(z.unknown()).optional(),
 });

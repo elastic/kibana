@@ -59,7 +59,7 @@ async function getTestProps({
 
   if (resetTheHook) {
     // resets the state of buildEsqlFetchSubscribe hook so it takes the current app state as the initial one
-    stateContainer.savedSearchState.set(savedSearchMock);
+    stateContainer.dataState.cleanupEsql();
   }
 
   return {
@@ -112,7 +112,12 @@ const setupTest = async ({
     defaultFetchStatus,
     resetTheHook,
   });
-  props.stateContainer.actions.setDataView(dataViewMock);
+  const { stateContainer } = props;
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+      dataView: dataViewMock,
+    })
+  );
   return props;
 };
 
@@ -125,7 +130,11 @@ describe('buildEsqlFetchSubscribe', () => {
     replaceUrlState.mockClear();
 
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: ['field1', 'field2'] },
+    });
   });
 
   test('should not change viewMode to undefined (default) if it was AGGREGATED_LEVEL', async () => {
@@ -202,16 +211,16 @@ describe('buildEsqlFetchSubscribe', () => {
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
         tabId: 'the-saved-search-id-with-timefield',
-        appState: { columns: [] },
+        appState: { columns: ['field1'] },
       });
     });
   });
 
-  test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern is the same', async () => {
+  test('changing a ES|QL query with no transformational commands should not change state when loading and finished if index pattern and columns are the same', async () => {
     const { replaceUrlState, stateContainer } = await setupTest({});
     const documents$ = stateContainer.dataState.data$.documents$;
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -219,11 +228,11 @@ describe('buildEsqlFetchSubscribe', () => {
       result: [
         {
           id: '1',
-          raw: { field1: 1 },
-          flattened: { field1: 1 },
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1, field2: 2 },
         } as unknown as DataTableRecord,
       ],
-      // non transformational command
+      // non transformational command, same columns as msgComplete
       query: { esql: 'from the-data-view-title | where field1 > 0' },
     });
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
@@ -234,17 +243,17 @@ describe('buildEsqlFetchSubscribe', () => {
       result: [
         {
           id: '1',
-          raw: { field1: 1 },
-          flattened: { field1: 1 },
+          raw: { field1: 1, field2: 2 },
+          flattened: { field1: 1, field2: 2 },
         } as unknown as DataTableRecord,
       ],
-      // non transformational command
+      // non transformational command, different index
       query: { esql: 'from the-data-view-title2 | where field1 > 0' },
     });
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
         tabId: 'the-saved-search-id-with-timefield',
-        appState: { columns: [] },
+        appState: { columns: ['field1', 'field2'] },
       });
     });
   });
@@ -254,7 +263,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -297,7 +306,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -453,7 +462,11 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
     });
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: ['field1', 'field2'] },
+    });
   });
 
   test('it should overwrite existing state columns on transitioning from a query with non transformational commands to a query with transformational', async () => {
@@ -471,7 +484,12 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field2=1' },
     });
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: ['field1', 'field2'] },
+    });
+    replaceUrlState.mockClear();
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       result: [
@@ -514,7 +532,7 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
-    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
         appState: { columns: ['field1', 'field2'] },
@@ -560,7 +578,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next(msgComplete);
-    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
     replaceUrlState.mockClear();
 
     documents$.next({
@@ -574,7 +592,11 @@ describe('buildEsqlFetchSubscribe', () => {
       ],
       query: { esql: 'from the-data-view-* | keep field1' },
     });
-    stateContainer.actions.setDataView(dataViewAdHoc);
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.assignNextDataView)({
+        dataView: dataViewAdHoc,
+      })
+    );
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
 
     await waitFor(() => {
@@ -673,6 +695,59 @@ describe('buildEsqlFetchSubscribe', () => {
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern2' },
+    });
+  });
+
+  test('non-transformational query with columns above threshold should use summary view', async () => {
+    const { replaceUrlState, stateContainer } = await setupTest({});
+    const documents$ = stateContainer.dataState.data$.documents$;
+    replaceUrlState.mockClear();
+
+    const manyColumns = Object.fromEntries(
+      Array.from({ length: 11 }, (_, i) => [`field${i + 1}`, i + 1])
+    );
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: manyColumns,
+          flattened: manyColumns,
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title' },
+    });
+
+    expect(replaceUrlState).toHaveBeenCalledTimes(0);
+  });
+
+  test('non-transformational query with columns at or below threshold should show individual columns', async () => {
+    const { replaceUrlState, stateContainer } = await setupTest({});
+    const documents$ = stateContainer.dataState.data$.documents$;
+    replaceUrlState.mockClear();
+
+    const fewColumns = Object.fromEntries(
+      Array.from({ length: 5 }, (_, i) => [`field${i + 1}`, i + 1])
+    );
+    const expectedColumns = Array.from({ length: 5 }, (_, i) => `field${i + 1}`);
+
+    documents$.next({
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: fewColumns,
+          flattened: fewColumns,
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-title' },
+    });
+
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      tabId: 'the-saved-search-id-with-timefield',
+      appState: { columns: expectedColumns },
     });
   });
 

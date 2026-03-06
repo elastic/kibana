@@ -47,6 +47,7 @@ import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_t
 import { useMigrationDashboardDetailsFlyout } from '../../hooks/use_migration_dashboard_details_flyout';
 import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { useInstallMigrationDashboard } from '../../logic/use_install_migration_dashboard';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -166,6 +167,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
 
     const { mutateAsync: installMigrationDashboards } =
       useInstallMigrationDashboards(migrationStats);
+    const { mutateAsync: installMigrationDashboard } = useInstallMigrationDashboard(migrationId);
 
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
     const onStartMigrationWithSettings = useCallback(
@@ -215,16 +217,14 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       async (migrationDashboard: DashboardMigrationDashboard) => {
         setTableLoading(true);
         try {
-          await installMigrationDashboards({
-            ids: [migrationDashboard.id],
-          });
+          await installMigrationDashboard({ migrationDashboard });
         } catch (error) {
           addError(error, { title: logicI18n.INSTALL_MIGRATION_DASHBOARDS_FAILURE });
         } finally {
           setTableLoading(false);
         }
       },
-      [installMigrationDashboards, addError]
+      [installMigrationDashboard, addError]
     );
 
     const getMigrationDashboardsData = useCallback(
@@ -321,6 +321,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiBasicTable<DashboardMigrationDashboard>
+                  tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
                   loading={false}
                   items={migrationDashboards}
                   pagination={pagination}

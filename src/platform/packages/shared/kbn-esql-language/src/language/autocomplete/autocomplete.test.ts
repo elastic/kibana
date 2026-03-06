@@ -34,7 +34,7 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
-import { editorExtensions } from '../../__tests__/language/helpers';
+import { editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
@@ -89,8 +89,11 @@ describe('autocomplete', () => {
     },
   });
 
-  const sourceCommands = ['row', 'from', 'show', 'ts'];
-  const headerCommands = ['set'];
+  const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+  const headerCommands = esqlCommandRegistry
+    .getAllCommands()
+    .filter(({ metadata }) => metadata.type === 'header')
+    .map(({ name }) => name);
 
   const getSourceAndHeaderCommands = () => {
     return [
@@ -139,6 +142,18 @@ describe('autocomplete', () => {
     testSuggestions('from a metadata _id | /', commands);
     testSuggestions('from a | eval col0 = a | /', commands);
     testSuggestions('from a metadata _id | eval col0 = a | /', commands);
+
+    const promqlPipedQueries = [
+      'PROMQL index=metrics (sum by (instance) rate(http_requests_total[5m])) | /',
+      'PROMQL index=metrics sum by (instance) rate(http_requests_total[5m]) | /',
+      'PROMQL index=metrics (rate(http_requests_total[5m])) | /',
+      'PROMQL rate(http_requests_total[5m]) | /',
+      'PROMQL index=metrics col0=(rate(http_requests_total[5m])) | /',
+    ];
+
+    promqlPipedQueries.forEach((query) => {
+      testSuggestions(query, commands);
+    });
   });
 
   describe.each(['keep', 'drop'])('%s', (command) => {
@@ -291,7 +306,7 @@ describe('autocomplete', () => {
     });
 
     // FROM source
-    testSuggestions('FROM k/', ['index1', 'index2'], undefined, [
+    testSuggestions('FROM k/', ['index1', 'index2', ...views.map((v) => v.name)], undefined, [
       ,
       [
         { name: 'index1', hidden: false },
@@ -308,6 +323,7 @@ describe('autocomplete', () => {
 
     // EVAL argument
     testSuggestions('FROM index1 | EVAL b/', [
+      '= ',
       'col0 = ',
       ...getFieldNamesByType('any').map((name) => `${name} `),
       ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
@@ -577,6 +593,7 @@ describe('autocomplete', () => {
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -593,6 +610,7 @@ describe('autocomplete', () => {
         [
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -1091,6 +1109,41 @@ describe('autocomplete', () => {
         [{ text: 'field . name', rangeToReplace: { start: 14, end: 22 } }],
         undefined,
         [[{ name: 'field.name', type: 'double', userDefined: false }]]
+      );
+    });
+  });
+
+  describe('Unmmapped fields', () => {
+    describe('should suggest unmapped field after its first usage if unmapped is LOAD or NULLIFY', () => {
+      testSuggestions('SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        ...getFieldNamesByType('any'),
+        { text: 'unmappedField' },
+      ]);
+      testSuggestions(
+        'SET unmapped_fields = "NULLIFY"; FROM a | WHERE unmappedField > 0 | KEEP /',
+        [...getFieldNamesByType('any'), { text: 'unmappedField' }]
+      );
+    });
+    describe('should not suggest unmapped field after its first usage if unmapped is FAIL', () => {
+      testSuggestions('SET unmapped_fields = "FAIL"; FROM a | WHERE unmappedField > 0 | KEEP /', [
+        ...getFieldNamesByType('any'),
+      ]);
+    });
+    describe('unmapped fields should be considered in columnsAfter methods', () => {
+      // Don't suggest unmappedField because it was dropped
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  DROP unmappedField | KEEP /',
+        [...getFieldNamesByType('any')]
+      );
+      // Suggest only the unmappedField because it was kept
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0|  KEEP unmappedField | KEEP /',
+        [{ text: 'unmappedField' }]
+      );
+      // Don't suggest unmappedField because STATS destroyed all fields
+      testSuggestions(
+        'SET unmapped_fields = "LOAD"; FROM a | WHERE unmappedField > 0 | STATS col0 = AVG(3) | KEEP /',
+        [{ text: 'col0' }]
       );
     });
   });

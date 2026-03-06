@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -355,6 +355,7 @@ describe('Action Executor', () => {
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        signal: undefined,
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -399,8 +400,45 @@ describe('Action Executor', () => {
           'x-custom-header': 'custom-header-value',
         },
         ...(executeUnsecure ? {} : { source: SOURCE }),
+        signal: undefined,
       });
     });
+
+    if (!executeUnsecure) {
+      test(`successfully ${label} with abort signal`, async () => {
+        mockGetRequestBodyByte.mockReturnValue(300);
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+          connectorSavedObject
+        );
+        connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+        const abortController = new AbortController();
+        const executeParamsWithSignal = {
+          ...executeParams,
+          signal: abortController.signal,
+        };
+
+        await actionExecutor.execute(executeParamsWithSignal);
+
+        expect(connectorType.executor).toHaveBeenCalledWith(
+          expect.objectContaining({
+            actionId: CONNECTOR_ID,
+            services: expect.anything(),
+            config: {
+              bar: true,
+            },
+            secrets: {
+              baz: true,
+            },
+            params: { foo: true },
+            logger: loggerMock,
+            connectorUsageCollector: expect.any(ConnectorUsageCollector),
+            source: SOURCE,
+            signal: abortController.signal,
+          })
+        );
+      });
+    }
 
     for (const executionSource of [
       {
@@ -922,7 +960,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating connector type config: Required`,
+        message: `error validating connector type config: ✖ Invalid input: expected object, received undefined`,
         errorSource: TaskErrorSource.FRAMEWORK,
       });
     });
@@ -980,7 +1018,7 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating connector type config: Required`,
+        message: `error validating connector type config: ✖ Invalid input: expected object, received undefined`,
 
         errorSource: TaskErrorSource.FRAMEWORK,
       });
@@ -1015,7 +1053,8 @@ describe('Action Executor', () => {
         actionId: '1',
         status: 'error',
         retry: false,
-        message: `error validating action params: Field \"param1\": Required`,
+        message: `error validating action params: ✖ Invalid input: expected string, received undefined
+  → at param1`,
         errorSource: TaskErrorSource.USER,
       });
     });
@@ -1548,6 +1587,36 @@ describe('Action Executor', () => {
         await expect(() => actionExecutor.execute(executeParams)).rejects.toThrow('nope');
         expect(connectorType.executor).not.toHaveBeenCalled();
       }
+    });
+
+    test(`${label} classifies error as user-error when execution fails with "socket disconnected"`, async () => {
+      const err = createTaskRunError(
+        new Error('Client network socket disconnected before secure TLS connection was established')
+      );
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      (
+        connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+      ).mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: Client network socket disconnected before secure TLS connection was established; retry: true'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed', 'user-error'],
+      });
     });
   }
 });
@@ -2198,6 +2267,49 @@ describe('execute() - optional params validator', () => {
 
     await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
       'Connector type "test-without-executor" does not have an execute function and cannot be executed.'
+    );
+  });
+});
+
+describe('execute() - spaceId override', () => {
+  test('uses the provided spaceId instead of deriving from request', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute({
+      ...executeParams,
+      spaceId: 'override-space',
+    });
+
+    // spacesMock.getSpaceId should not be called when spaceId is provided
+    expect(spacesMock.getSpaceId).not.toHaveBeenCalled();
+
+    // The action should be fetched from the override space namespace
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'override-space' }
+    );
+  });
+
+  test('falls back to deriving spaceId from request when spaceId is not provided', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+    await actionExecutor.execute(executeParams);
+
+    // spacesMock.getSpaceId should be called when no spaceId override is provided
+    expect(spacesMock.getSpaceId).toHaveBeenCalled();
+
+    // The action should be fetched from the namespace derived from request
+    expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      'action',
+      CONNECTOR_ID,
+      { namespace: 'some-namespace' }
     );
   });
 });

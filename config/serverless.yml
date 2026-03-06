@@ -13,8 +13,6 @@ xpack.fleet.internal.useMeteringApi: true
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
 xpack.fleet.internal.registry.spec.min: '3.0'
 xpack.fleet.internal.registry.spec.max: '3.5'
-xpack.fleet.agentless.backgroundSync.enabled: true
-xpack.fleet.agentless.backgroundSync.interval: '1h'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -166,7 +164,6 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
-xpack.reindex_service.enabled: false
 advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
@@ -297,7 +294,3 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
-
-# Cross Project Search
-cps.enabled: true
-cps.cpsEnabled: false

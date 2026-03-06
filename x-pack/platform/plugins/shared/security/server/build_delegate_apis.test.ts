@@ -13,17 +13,26 @@ import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import { securityMock } from './mocks';
+import { getPrintableSessionId } from './session_management';
+import { sessionMock } from './session_management/session.mock';
 import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 describe('buildSecurityApi', () => {
   let authc: ReturnType<typeof authenticationServiceMock.createStart>;
   let auditService: ReturnType<typeof auditServiceMock.create>;
+  let session: ReturnType<typeof sessionMock.create>;
   let api: CoreSecurityDelegateContract;
 
   beforeEach(() => {
     authc = authenticationServiceMock.createStart();
     auditService = auditServiceMock.create();
-    api = buildSecurityApi({ getAuthc: () => authc, audit: auditService });
+    session = sessionMock.create();
+    api = buildSecurityApi({
+      getAuthc: () => authc,
+      getSession: () => session,
+      audit: auditService,
+      config: { uiam: { enabled: false } },
+    });
   });
 
   describe('authc.getCurrentUser', () => {
@@ -78,6 +87,111 @@ describe('buildSecurityApi', () => {
       const areAPIKeysEnabled = await authc.apiKeys.areAPIKeysEnabled();
 
       expect(areAPIKeysEnabled).toBe(false);
+    });
+  });
+
+  describe('authc.getRedactedSessionId', () => {
+    it('properly delegates to session.getSID and redacts the result', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const fullSid = '1234567890abcdefghijklmno';
+      session.getSID.mockResolvedValue(fullSid);
+
+      const result = await api.authc.getRedactedSessionId(request);
+
+      expect(session.getSID).toHaveBeenCalledTimes(1);
+      expect(session.getSID).toHaveBeenCalledWith(request);
+      expect(result).toBe(getPrintableSessionId(fullSid));
+    });
+
+    it('returns undefined when session.getSID resolves to undefined', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      session.getSID.mockResolvedValue(undefined);
+
+      const result = await api.authc.getRedactedSessionId(request);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('config.uiam', () => {
+    describe('when uiam is enabled', () => {
+      beforeEach(() => {
+        authc = authenticationServiceMock.createStart();
+        auditService = auditServiceMock.create();
+        session = sessionMock.create();
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          getSession: () => session,
+          audit: auditService,
+          config: { uiam: { enabled: true } },
+        });
+      });
+
+      it('should expose the uiam API', () => {
+        expect(api.authc.apiKeys.uiam).not.toBeNull();
+        expect(api.authc.apiKeys.uiam).toBeDefined();
+      });
+
+      it('should properly delegate grant to the service', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const grantParams = {
+          name: 'test-key',
+          expiration: '1d',
+        };
+
+        await api.authc.apiKeys.uiam!.grant(request, grantParams);
+
+        expect(authc.apiKeys.uiam!.grant).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.grant).toHaveBeenCalledWith(request, grantParams);
+      });
+
+      it('should properly delegate invalidate to the service', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const invalidateParams = {
+          id: 'key-id-1',
+        };
+
+        await api.authc.apiKeys.uiam!.invalidate(request, invalidateParams);
+
+        expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
+      });
+    });
+
+    describe('when uiam is disabled', () => {
+      beforeEach(() => {
+        authc = authenticationServiceMock.createStart();
+        auditService = auditServiceMock.create();
+        session = sessionMock.create();
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          getSession: () => session,
+          audit: auditService,
+          config: { uiam: { enabled: false } },
+        });
+      });
+
+      it('should set uiam to null', () => {
+        expect(api.authc.apiKeys.uiam).toBeNull();
+      });
+    });
+
+    describe('when uiam config is not provided', () => {
+      beforeEach(() => {
+        authc = authenticationServiceMock.createStart();
+        auditService = auditServiceMock.create();
+        session = sessionMock.create();
+        api = buildSecurityApi({
+          getAuthc: () => authc,
+          getSession: () => session,
+          audit: auditService,
+          config: {},
+        });
+      });
+
+      it('should set uiam to null', () => {
+        expect(api.authc.apiKeys.uiam).toBeNull();
+      });
     });
   });
 });

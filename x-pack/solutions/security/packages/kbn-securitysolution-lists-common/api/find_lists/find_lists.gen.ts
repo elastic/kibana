@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { List } from '../model/list_schemas.gen';
 
@@ -47,10 +47,10 @@ export const FindListsRequestQuery = z.object({
    * Returns the lists that come after the last lists returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
    */
   cursor: FindListsCursor.optional(),
-  /** 
+  /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
- 
+
       */
   filter: FindListsFilter.optional(),
 });

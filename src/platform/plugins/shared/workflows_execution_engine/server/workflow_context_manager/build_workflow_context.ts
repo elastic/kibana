@@ -8,32 +8,13 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowContext, WorkflowInput } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
-
-type WorkflowInputs = NonNullable<WorkflowContext['inputs']>;
-function applyInputDefaults(
-  workflowDefinitionInputs: WorkflowInput[] = [],
-  providedInputs: WorkflowInputs | undefined
-): WorkflowInputs | undefined {
-  const defaultInputs: WorkflowInputs = {};
-
-  for (const input of workflowDefinitionInputs) {
-    if (input.default !== undefined) {
-      defaultInputs[input.name] = input.default;
-    }
-  }
-
-  if (Object.keys(defaultInputs).length === 0) {
-    return providedInputs;
-  }
-
-  return {
-    ...defaultInputs,
-    ...(providedInputs || {}),
-  };
-}
 
 export function buildWorkflowContext(
   workflowExecution: EsWorkflowExecution,
@@ -47,10 +28,20 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
+  const normalizedInputsSchema = normalizeInputsToJsonSchema(
+    workflowExecution.workflowDefinition.inputs
+  );
+
+  // Extract parent workflow information from context if available
+  const parentWorkflowId = workflowExecution.context?.parentWorkflowId as string | undefined;
+  const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
+    | string
+    | undefined;
+  const parentDepth = workflowExecution.context?.parentDepth as number | undefined;
 
   const inputsWithDefaults = applyInputDefaults(
-    workflowExecution.workflowDefinition?.inputs,
-    workflowExecution.context?.inputs
+    workflowExecution.context?.inputs as Record<string, unknown> | undefined,
+    normalizedInputsSchema
   );
 
   return {
@@ -59,6 +50,8 @@ export function buildWorkflowContext(
       isTestRun: !!workflowExecution.isTestRun,
       startedAt: new Date(workflowExecution.startedAt),
       url: executionUrl,
+      executedBy: workflowExecution.executedBy ?? 'unknown',
+      triggeredBy: workflowExecution.triggeredBy,
     },
     workflow: {
       id: workflowExecution.workflowId,
@@ -71,5 +64,13 @@ export function buildWorkflowContext(
     event: workflowExecution.context?.event,
     inputs: inputsWithDefaults,
     now: new Date(),
+    parent:
+      parentWorkflowId && parentWorkflowExecutionId
+        ? {
+            workflowId: parentWorkflowId,
+            executionId: parentWorkflowExecutionId,
+            depth: parentDepth !== undefined ? parentDepth + 1 : 0,
+          }
+        : undefined,
   };
 }

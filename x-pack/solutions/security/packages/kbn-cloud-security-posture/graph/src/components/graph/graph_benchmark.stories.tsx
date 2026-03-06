@@ -6,17 +6,17 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css, ThemeProvider } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
-import { GraphPopover } from './graph_popover';
+import { GraphPopover } from '../popovers/primitives/graph_popover';
 import type { ExpandButtonClickCallback } from '../types';
-import { useGraphPopover } from './use_graph_popover';
-import { ExpandPopoverListItem } from '../styles';
+import { useGraphPopoverState } from '../popovers/primitives/use_graph_popover_state';
+import { PopoverListItem } from '../popovers/primitives/popover_list_item';
 import largeGraph700n from '../mock/large_graph_700n_900e.json';
 import largeGraph2000n from '../mock/large_graph_2000n_2000e.json';
 import { GraphPerfMonitor } from './graph_perf_monitor';
@@ -28,7 +28,7 @@ export default {
 } satisfies Meta<typeof Graph>;
 
 const useExpandButtonPopover = () => {
-  const { id, state, actions } = useGraphPopover('node-expand-popover');
+  const { id, state, actions } = useGraphPopoverState('node-expand-popover');
   const { openPopover, closePopover } = actions;
 
   const selectedNode = useRef<NodeProps | null>(null);
@@ -86,23 +86,19 @@ const useExpandButtonPopover = () => {
       closePopover={closePopoverHandler}
     >
       <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
-        <ExpandPopoverListItem
+        <PopoverListItem
           iconType="visTagCloud"
           label="Explore related entities"
           onClick={() => {}}
         />
-        <ExpandPopoverListItem
-          iconType="users"
-          label="Show actions by this entity"
-          onClick={() => {}}
-        />
-        <ExpandPopoverListItem
+        <PopoverListItem iconType="users" label="Show actions by this entity" onClick={() => {}} />
+        <PopoverListItem
           iconType="storage"
           label="Show actions on this entity"
           onClick={() => {}}
         />
         <EuiHorizontalRule margin="xs" />
-        <ExpandPopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
+        <PopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
       </EuiListGroup>
     </GraphPopover>
   ));
@@ -128,7 +124,7 @@ const useExpandButtonPopover = () => {
 };
 
 const useNodePopover = () => {
-  const { id, state, actions } = useGraphPopover('node-popover');
+  const { id, state, actions } = useGraphPopoverState('node-popover');
 
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
@@ -195,7 +191,7 @@ const Template = ({ nodes, edges }: GraphResponse) => {
   }, [expandButtonClickHandler, nodeClickHandler, nodes]);
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <GraphPerfMonitor />
       <Graph
         css={css`
@@ -208,7 +204,7 @@ const Template = ({ nodes, edges }: GraphResponse) => {
         isLocked={isPopoverOpen}
       />
       {popovers?.map((popover) => popover.Popover && <popover.Popover key={popover.id} />)}
-    </ThemeProvider>
+    </>
   );
 };
 

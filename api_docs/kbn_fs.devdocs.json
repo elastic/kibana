@@ -36,6 +36,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -52,6 +54,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -69,6 +73,8 @@
               "string | Uint8Array"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,6 +93,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -113,6 +121,8 @@
           "FileMetadata"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 215,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +139,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -146,6 +158,8 @@
               "string | Uint8Array"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 232,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,6 +178,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 233,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -192,6 +208,8 @@
           "Readable"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,6 +226,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -225,6 +245,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -246,6 +268,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -274,6 +298,8 @@
           "Writable"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,6 +316,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 104,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -307,6 +335,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -328,6 +358,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -353,6 +385,8 @@
           ", \"volume\"> | undefined) => Promise<void>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 159,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -369,6 +403,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -388,6 +424,8 @@
               ", \"volume\"> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -411,6 +449,8 @@
           ", \"volume\"> | undefined) => void"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 264,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -427,6 +467,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 276,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -446,6 +488,8 @@
               ", \"volume\"> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 276,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -465,6 +509,8 @@
           "(name: string, volume: string | undefined) => { fullPath: string; alias: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/utils.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -479,6 +525,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -494,6 +542,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/utils.ts",
+            "lineNumber": 15,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -515,6 +565,8 @@
           "(name: string, volume: string | undefined) => Promise<string | Buffer>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 115,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -531,6 +583,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 128,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -548,6 +602,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 128,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -571,6 +627,8 @@
           "(name: string, volume: string | undefined) => string | Buffer"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 245,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -587,6 +645,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 258,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -604,6 +664,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 258,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -625,6 +687,8 @@
           "(svgContent: Buffer) => Buffer"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/sanitizations/svg.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -639,6 +703,8 @@
               "Buffer"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/sanitizations/svg.ts",
+            "lineNumber": 26,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -666,6 +732,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -682,6 +750,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -699,6 +769,8 @@
               "WriteFileContent"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -717,6 +789,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -743,6 +817,8 @@
           "FileMetadata"
         ],
         "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+        "lineNumber": 180,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -759,6 +835,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -776,6 +854,8 @@
               "string | NodeJS.ArrayBufferView"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 197,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -794,6 +874,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-fs/lib.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

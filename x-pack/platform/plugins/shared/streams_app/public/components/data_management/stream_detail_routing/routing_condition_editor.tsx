@@ -13,7 +13,11 @@ import React, { useMemo } from 'react';
 import { useRoutingFieldSuggestions } from '../../../hooks/use_field_suggestions';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { useRoutingValueSuggestions } from '../../../hooks/use_value_suggestions';
-import { getFilterConditionField } from '../../../util/condition';
+import {
+  getFilterConditionField,
+  getFilterConditionOperator,
+  isArrayOperator,
+} from '../../../util/condition';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
 import { useStreamSamplesSelector } from './state_management/stream_routing_state_machine';
@@ -29,7 +33,10 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
   const { isSuggestionRouting, status } = props;
   const isEnabled = isRoutingEnabled(status);
   const fieldSuggestions = useRoutingFieldSuggestions();
-  const valueSuggestions = useRoutingValueSuggestions(getFilterConditionField(props.condition));
+  const operator = getFilterConditionOperator(props.condition);
+  const valueSuggestions = useRoutingValueSuggestions(getFilterConditionField(props.condition), {
+    flattenArrays: isArrayOperator(operator),
+  });
 
   // Get stream name for DataView field types
   const streamName = useStreamSamplesSelector(

@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasPrependWrapperRef, PublishesControlsLayout } from './types';
+import type { PublishesFocusedPanelId, PublishesLabel } from './types';
 
-export const apiPublishesControlsLayout = (api: unknown): api is PublishesControlsLayout => {
-  return Boolean(
-    (api as PublishesControlsLayout).layout$ &&
-      Object.keys((api as PublishesControlsLayout).layout$.getValue()).includes('controls')
-  );
-};
+export const apiPublishesFocusedPanelId = (api: unknown): api is PublishesFocusedPanelId =>
+  Boolean((api as PublishesFocusedPanelId).focusedPanelId$);
 
-export const apiHasPrependWrapperRef = (api: unknown): api is HasPrependWrapperRef =>
-  Boolean((api as HasPrependWrapperRef).prependWrapperRef);
+export const apiPublishesLabel = (api: unknown): api is PublishesLabel =>
+  Boolean((api as PublishesLabel).label$);

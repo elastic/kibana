@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
+  - '@kbn/i18n-react'
 tags:
   - shared-browser
   - package

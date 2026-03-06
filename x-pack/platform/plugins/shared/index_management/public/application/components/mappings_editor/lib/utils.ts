@@ -11,6 +11,7 @@ import { cloneDeep, isEmpty } from 'lodash';
 import type { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type {
   ChildFieldName,
   ComboBoxOption,
@@ -42,10 +43,6 @@ import {
 
 import type { TreeItem } from '../components/tree';
 import type { FieldConfig } from '../shared_imports';
-import {
-  ELSER_ON_EIS_INFERENCE_ENDPOINT_ID,
-  ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID,
-} from '../../../constants/mappings';
 import type { MappingsOptionData } from '../../../sections/home/index_list/details_page/update_elser_mappings/update_elser_mappings_modal';
 
 export const getUniqueId = () => uuidv4();
@@ -718,8 +715,8 @@ export function getStateWithCopyToFields(state: State): State {
       }
       field.source = source;
 
-      /* 
-        If no reference field is associated, 
+      /*
+        If no reference field is associated,
         no further processing is needed, so we can skip to the next one.
       */
       if (isEmpty(referenceField)) {
@@ -813,7 +810,7 @@ export function isLocalModel(
 }
 
 export const isElserOnMlNodeSemanticField = (field: NormalizedField) =>
-  field.source.inference_id === ELSER_ON_ML_NODE_INFERENCE_ENDPOINT_ID;
+  field.source.inference_id === defaultInferenceEndpoints.ELSER;
 
 export function hasElserOnMlNodeSemanticTextField(fields: NormalizedFields): boolean {
   return Object.values(fields.byId).some(isElserOnMlNodeSemanticField);
@@ -848,7 +845,7 @@ export const prepareFieldsForEisUpdate = (
     if (clonedField.source?.inference_id !== undefined) {
       clonedField.source = {
         ...clonedField.source,
-        inference_id: ELSER_ON_EIS_INFERENCE_ENDPOINT_ID,
+        inference_id: defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID,
       };
     }
     resultById[id] = clonedField;

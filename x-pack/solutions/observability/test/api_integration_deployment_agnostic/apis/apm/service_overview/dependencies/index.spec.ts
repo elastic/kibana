@@ -9,6 +9,7 @@ import type { DependencyNode } from '@kbn/apm-plugin/common/connections';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { NodeType } from '@kbn/apm-plugin/common/connections';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { roundNumber } from '../../utils/common';
 import { generateData, dataConfig } from './generate_data';
@@ -90,9 +91,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           currentStats: { latency },
         } = dependencies.serviceDependencies[0];
 
-        const { transaction } = dataConfig;
+        const { transaction, rate, errorRate } = dataConfig;
 
-        const expectedValue = transaction.duration * 1000;
+        // Example: ((20 successful + 5 errors) × span duration x 5 spans per metric x 1000 (convert to microseconds)) / ((20 successful + 5 errors) × 5 spans per metric) = 1000 ms
+        const expectedValue =
+          ((rate + errorRate) * transaction.duration * SPANS_PER_DESTINATION_METRIC * 1000) /
+          ((rate + errorRate) * SPANS_PER_DESTINATION_METRIC);
         expect(latency.value).to.be(expectedValue);
         expect(latency.timeseries?.every(({ y }) => y === expectedValue)).to.be(true);
       });
@@ -103,7 +107,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         } = dependencies.serviceDependencies[0];
         const { rate, errorRate } = dataConfig;
 
-        const expectedThroughput = rate + errorRate;
+        // Example: (20 successful + 5 errors) × 5 spans per metric = 125 spans per minute
+        const expectedThroughput = (rate + errorRate) * SPANS_PER_DESTINATION_METRIC;
         expect(roundNumber(throughput.value)).to.be(roundNumber(expectedThroughput));
         expect(
           throughput.timeseries?.every(
@@ -116,9 +121,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const {
           currentStats: { totalTime },
         } = dependencies.serviceDependencies[0];
-        const { rate, transaction, errorRate } = dataConfig;
+        const { rate, errorRate, transaction } = dataConfig;
 
-        const expectedValuePerBucket = (rate + errorRate) * transaction.duration * 1000;
+        // Example: (20 successful + 5 errors) × 5 spans per metric × 1000 transaction duration × 1000 (convert to microseconds)  = 125.000.000 us
+        const expectedValuePerBucket =
+          (rate + errorRate) * SPANS_PER_DESTINATION_METRIC * transaction.duration * 1000;
         expect(totalTime.value).to.be(expectedValuePerBucket * bucketSize);
         expect(
           totalTime.timeseries?.every(

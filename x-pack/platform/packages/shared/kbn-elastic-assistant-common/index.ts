@@ -57,6 +57,9 @@ export * from './constants';
 /** currently the same shape as "fields" property in the ES response */
 export { type MaybeRawData } from './impl/alerts/helpers/types';
 
+/** export Attack Discovery Alert Document type */
+export type { AttackDiscoveryAlertDocument } from './impl/schedules/types';
+
 /**
  * This query returns open and acknowledged (non-building block) alerts in the last 24 hours.
  *
@@ -95,9 +98,14 @@ export {
   transformInternalReplacements,
 } from './impl/utils/attack_discovery_helpers';
 
+export * from './impl/schedules/field_names';
+
 export { transformAttackDiscoveryAlertFromApi } from './impl/utils/transform_attack_discovery_alert_from_api';
 export { transformAttackDiscoveryAlertToApi } from './impl/utils/transform_attack_discovery_alert_to_api';
 export { transformAttackDiscoveryScheduleFromApi } from './impl/utils/transform_attack_discovery_schedule_from_api';
+export { transformSearchResponseToAlerts } from './impl/utils/transform_search_response_to_alerts';
+
+export * from './impl/connectors/outdated_connectors';
 export { transformAttackDiscoveryScheduleToApi } from './impl/utils/transform_attack_discovery_schedule_to_api';
 export { transformAttackDiscoveryScheduleCreatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_create_props_to_api';
 export { transformAttackDiscoveryScheduleUpdatePropsToApi } from './impl/utils/transform_attack_discovery_schedule_update_props_to_api';

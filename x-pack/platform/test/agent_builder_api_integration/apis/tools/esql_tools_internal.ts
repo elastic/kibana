@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
       tags: ['test'],
       configuration: {
         query: 'FROM my_cases | WHERE case_id == ?case_id',
-        params: { case_id: { type: 'keyword', description: 'Case ID' } },
+        params: { case_id: { type: 'string', description: 'Case ID' } },
       },
     };
 
@@ -103,17 +103,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(failureResult.reason.error.message).to.contain('not found');
       });
 
-      it('should handle an empty list of IDs', async () => {
-        const response = await supertest
+      it('should return 400 when ids array is empty', async () => {
+        await supertest
           .post('/internal/agent_builder/tools/_bulk_delete')
           .set('kbn-xsrf', 'kibana')
           .set('x-elastic-internal-origin', 'kibana')
           .send({ ids: [] })
-          .expect(200);
-
-        expect(response.body).to.have.property('results');
-        expect(response.body.results).to.be.an('array');
-        expect(response.body.results).to.have.length(0);
+          .expect(400);
       });
     });
   });

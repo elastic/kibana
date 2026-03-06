@@ -427,7 +427,7 @@ function isFakeRawRequest(request: RawRequest): request is FakeRawRequest {
  * @internal
  */
 export function isRealRequest(request: unknown): request is KibanaRequest | Request {
-  return isKibanaRequest(request) || isRealRawRequest(request);
+  return (isKibanaRequest(request) && !request.isFakeRequest) || isRealRawRequest(request);
 }
 
 function isCompleted(request: Request) {

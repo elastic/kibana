@@ -7,10 +7,12 @@
 
 export {
   AgentType,
+  AgentVisibility,
   agentBuilderDefaultAgentId,
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
+  type RuntimeAgentConfigurationOverrides,
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';

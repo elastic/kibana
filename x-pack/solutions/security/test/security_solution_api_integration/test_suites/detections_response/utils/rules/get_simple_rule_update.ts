@@ -17,6 +17,7 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1', enabled = false): RuleUpd
   description: 'Simple Rule Query',
   enabled,
   risk_score: 1,
+  version: 1,
   rule_id: ruleId,
   severity: 'high',
   index: ['auditbeat-*'],

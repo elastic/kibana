@@ -6,36 +6,34 @@
  */
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Streams, StreamQueryKql, System } from '@kbn/streams-schema';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import { compact, isEqual } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useStreamFeatures } from '../stream_detail_features/stream_features/hooks/use_stream_features';
-import { useKibana } from '../../hooks/use_kibana';
-import { EditSignificantEventFlyout } from './edit_significant_event_flyout';
+import React, { useMemo, useState } from 'react';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
+import { useKibana } from '../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../hooks/use_significant_events_api';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { LoadingPanel } from '../loading_panel';
+import { EditSignificantEventFlyout } from './add_significant_event_flyout/edit_significant_event_flyout';
 import type { Flow } from './add_significant_event_flyout/types';
-import { SignificantEventsTable } from './significant_events_table';
 import { EmptyState } from './empty_state';
-import {
-  OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM,
-  SELECTED_FEATURES_URL_PARAM,
-} from '../../constants';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
+import { SignificantEventsTable } from './significant_events_table';
 import { formatChangePoint } from './utils/change_point';
-import { useAIFeatures } from '../../hooks/use_ai_features';
 
 interface Props {
   definition: Streams.all.GetResponse;
-  refreshDefinition: () => void;
 }
 
-export function StreamDetailSignificantEventsView({ definition, refreshDefinition }: Props) {
-  const { timeState, setTime, refresh } = useTimefilter();
+export function StreamDetailSignificantEventsView({ definition }: Props) {
+  const { rangeFrom, rangeTo, startMs, endMs } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
   const {
     dependencies: {
       start: { unifiedSearch },
@@ -45,10 +43,9 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const aiFeatures = useAIFeatures();
 
   const xFormatter = useMemo(() => {
-    return niceTimeFormatter([timeState.start, timeState.end]);
-  }, [timeState.start, timeState.end]);
+    return niceTimeFormatter([startMs, endMs]);
+  }, [startMs, endMs]);
 
-  const { features, refreshFeatures, featuresLoading } = useStreamFeatures(definition.stream.name);
   const [query, setQuery] = useState<string>('');
   const significantEventsFetchState = useFetchSignificantEvents({
     name: definition.stream.name,
@@ -59,37 +56,10 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [initialFlow, setInitialFlow] = useState<Flow | undefined>('ai');
 
-  const [selectedFeatures, setSelectedFeatures] = useState<System[]>([]);
-  const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
-  const [dateRange, setDateRange] = useState<TimeRange>(timeState.timeRange);
+  const [queryToEdit, setQueryToEdit] = useState<StreamQuery | undefined>();
+  const [dateRange, setDateRange] = useState<TimeRange>({ from: rangeFrom, to: rangeTo });
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM) === 'true' && features.length > 0) {
-      setIsEditFlyoutOpen(true);
-
-      // Parse selected features from URL parameters
-      const selectedFeaturesParam = urlParams.get(SELECTED_FEATURES_URL_PARAM);
-
-      if (selectedFeaturesParam) {
-        const selectedFeatureNames = selectedFeaturesParam.split(',').filter((name) => name.trim());
-        setSelectedFeatures(
-          features.filter((feature) => selectedFeatureNames.includes(feature.name))
-        );
-      }
-
-      // Clean up the URL parameters after opening the flyout
-      const newUrl = new URL(window.location.href);
-      newUrl.searchParams.delete(OPEN_SIGNIFICANT_EVENTS_FLYOUT_URL_PARAM);
-      newUrl.searchParams.delete(SELECTED_FEATURES_URL_PARAM);
-      window.history.replaceState({}, '', newUrl.toString());
-    }
-  }, [features]);
-
-  if (
-    !significantEventsFetchState.data &&
-    (featuresLoading || significantEventsFetchState.isLoading)
-  ) {
+  if (!significantEventsFetchState.data && significantEventsFetchState.isLoading) {
     return <LoadingPanel size="xxl" />;
   }
 
@@ -98,15 +68,10 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
       setIsEditFlyoutOpen={setIsEditFlyoutOpen}
       isEditFlyoutOpen={isEditFlyoutOpen}
       definition={definition}
-      refreshDefinition={refreshDefinition}
       refresh={significantEventsFetchState.refetch}
       queryToEdit={queryToEdit}
       setQueryToEdit={setQueryToEdit}
       initialFlow={initialFlow}
-      selectedFeatures={selectedFeatures}
-      setSelectedFeatures={setSelectedFeatures}
-      features={features}
-      refreshFeatures={refreshFeatures}
       generateOnMount={generateOnMount}
       aiFeatures={aiFeatures}
     />
@@ -122,11 +87,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
     return (
       <>
         <EmptyState
-          features={features}
-          selectedFeatures={selectedFeatures}
-          onFeaturesChange={setSelectedFeatures}
-          definition={definition.stream}
-          refreshFeatures={refreshFeatures}
           onManualEntryClick={() => {
             setQueryToEdit(undefined);
             setInitialFlow('manual');
@@ -162,8 +122,8 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
 
                   if (isEqual(queryN.dateRange, dateRange)) {
                     refresh();
-                  } else {
-                    setTime(queryN.dateRange);
+                  } else if (queryN.dateRange) {
+                    updateTimeRange(queryN.dateRange);
                     setDateRange(queryN.dateRange);
                   }
                 }}
@@ -180,7 +140,6 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
                 size="s"
                 color="primary"
                 onClick={() => {
-                  setSelectedFeatures([]);
                   setIsEditFlyoutOpen(true);
                   setQueryToEdit(undefined);
                 }}
@@ -251,7 +210,7 @@ export function StreamDetailSignificantEventsView({ definition, refreshDefinitio
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {editFlyout(selectedFeatures.length > 0)}
+      {editFlyout(false)}
     </>
   );
 }

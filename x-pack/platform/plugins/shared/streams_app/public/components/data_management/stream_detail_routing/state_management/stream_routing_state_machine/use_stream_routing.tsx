@@ -8,10 +8,10 @@
 import type { Condition } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { createActorContext, useSelector } from '@xstate5/react';
+import { createActorContext, useSelector } from '@xstate/react';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo } from 'react';
-import { waitFor } from 'xstate5';
+import { waitFor } from 'xstate';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 import type { RoutingDefinitionWithUIAttributes } from '../../types';
 import type {
@@ -53,6 +53,13 @@ export const useStreamRoutingEvents = () => {
     }, DEBOUNCE_DELAY);
 
     return {
+      changeChildStreamsMode: (mode: 'ingestMode' | 'queryMode') => {
+        if (mode === 'ingestMode') {
+          service.send({ type: 'childStreams.mode.changeToIngestMode' });
+        } else {
+          service.send({ type: 'childStreams.mode.changeToQueryMode' });
+        }
+      },
       cancelChanges: () => {
         debouncedChangeRule.cancel();
         debouncedChangeSuggestionName.cancel();
@@ -72,7 +79,7 @@ export const useStreamRoutingEvents = () => {
       },
       removeRule: async () => {
         service.send({ type: 'routingRule.remove' });
-        await waitFor(service, (snapshot) => snapshot.matches({ ready: 'idle' }));
+        await waitFor(service, (snapshot) => snapshot.matches({ ready: { ingestMode: 'idle' } }));
       },
       reorderRules: (routing: RoutingDefinitionWithUIAttributes[]) => {
         service.send({ type: 'routingRule.reorder', routing });
@@ -86,17 +93,26 @@ export const useStreamRoutingEvents = () => {
         await waitFor(
           service,
           (snapshot) =>
-            snapshot.matches({ ready: 'idle' }) ||
-            snapshot.matches({ ready: { reviewSuggestedRule: 'reviewing' } })
+            snapshot.matches({ ready: { ingestMode: 'idle' } }) ||
+            snapshot.matches({ ready: { ingestMode: { reviewSuggestedRule: 'reviewing' } } })
         );
 
         const finalSnapshot = service.getSnapshot();
         return {
-          success: finalSnapshot.matches({ ready: 'idle' }),
+          success: finalSnapshot.matches({ ready: { ingestMode: 'idle' } }),
         };
+      },
+      bulkForkStreams: (items: Array<{ name: string; condition: Condition }>) => {
+        service.send({ type: 'routingRule.bulkFork', items });
+      },
+      acknowledgeBulkFork: () => {
+        service.send({ type: 'bulkFork.acknowledge' });
       },
       saveChanges: () => {
         service.send({ type: 'routingRule.save' });
+      },
+      setConditionEditorValidity: (isValid: boolean) => {
+        service.send({ type: 'routingRule.setConditionEditorValidity', isValid });
       },
       setDocumentMatchFilter: (filter: DocumentMatchFilterOptions) => {
         service.send({ type: 'routingSamples.setDocumentMatchFilter', filter });
@@ -121,6 +137,16 @@ export const useStreamRoutingEvents = () => {
       },
       saveEditedSuggestion: () => {
         service.send({ type: 'suggestion.saveSuggestion' });
+      },
+      // Query stream events
+      createQueryStream: () => {
+        service.send({ type: 'queryStream.create' });
+      },
+      cancelQueryStreamCreation: () => {
+        service.send({ type: 'queryStream.cancel' });
+      },
+      saveQueryStream: ({ name, esqlQuery }: { name: string; esqlQuery: string }) => {
+        service.send({ type: 'queryStream.save', name, esqlQuery });
       },
     };
   }, [service]);

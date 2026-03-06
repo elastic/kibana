@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
-import { suggestProcessingPipeline } from '@kbn/streams-ai';
+import { z } from '@kbn/zod/v4';
+import { suggestProcessingPipeline, type SuggestProcessingPipelineResult } from '@kbn/streams-ai';
 import { from, map, catchError } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { createSSEInternalError } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
-import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
+import {
+  Streams,
+  type FlattenRecord,
+  flattenRecord,
+  getStreamTypeFromDefinition,
+} from '@kbn/streams-schema';
 import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
 import type { InferenceClient } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -29,13 +33,17 @@ import {
   extractDissectPattern,
   groupMessagesByPattern as groupMessagesByDissectPattern,
 } from '@kbn/dissect-heuristics';
+import type { Logger } from '@kbn/logging';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import type { StreamsClient } from '../../../../lib/streams/client';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { simulateProcessing } from '../processing/simulation_handler';
 import { handleProcessingGrokSuggestions } from '../processing/grok_suggestions_handler';
 import { handleProcessingDissectSuggestions } from '../processing/dissect_suggestions_handler';
+import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -97,7 +105,7 @@ export const suggestIngestPipelineSchema = z.object({
 type SuggestProcessingPipelineResponse = Observable<
   ServerSentEventBase<
     'suggested_processing_pipeline',
-    { pipeline: Awaited<ReturnType<typeof suggestProcessingPipeline>> }
+    { pipeline: SuggestProcessingPipelineResult['pipeline'] }
   >
 >;
 
@@ -118,6 +126,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    telemetry,
   }): Promise<SuggestProcessingPipelineResponse> => {
     logger.debug('[suggest_pipeline] Request received');
     logger.debug(
@@ -141,7 +150,10 @@ export const suggestProcessingPipelineRoute = createServerRoute({
 
         const stream = await streamsClient.getStream(params.path.name);
         if (!Streams.ingest.all.Definition.is(stream)) {
-          throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
+          throw new StatusError(
+            'Processing suggestions are only available for ingest streams',
+            400
+          );
         }
 
         const abortController = new AbortController();
@@ -174,6 +186,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 fieldsMetadataClient,
                 signal: abortController.signal,
                 logger,
+              }).catch((error) => {
+                if (isNoLLMSuggestionsError(error)) {
+                  logger.debug('[suggest_pipeline] No LLM suggestions available for grok');
+                  return null;
+                }
+                throw error;
               })
             );
           }
@@ -194,6 +212,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
                 fieldsMetadataClient,
                 signal: abortController.signal,
                 logger,
+              }).catch((error) => {
+                if (isNoLLMSuggestionsError(error)) {
+                  logger.debug('[suggest_pipeline] No LLM suggestions available for dissect');
+                  return null;
+                }
+                throw error;
               })
             );
           }
@@ -220,11 +244,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           }
         }
 
-        return await suggestProcessingPipeline({
+        const maxSteps = 6; // Limit reasoning steps for latency and token cost
+        const startTime = Date.now();
+
+        const result = await suggestProcessingPipeline({
           definition: stream,
           inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
           parsingProcessor,
-          maxSteps: 4, // Limit reasoning steps for latency and token cost
+          maxSteps,
           signal: abortController.signal,
           documents: params.body.documents,
           esClient: scopedClusterClient.asCurrentUser,
@@ -240,13 +267,36 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               fieldsMetadataClient,
             }),
         });
+
+        const durationMs = Date.now() - startTime;
+
+        // Report telemetry for pipeline suggestion
+        telemetry.trackProcessingPipelineSuggested({
+          duration_ms: durationMs,
+          steps_used: result.metadata.stepsUsed,
+          success: result.pipeline !== null,
+          stream_name: stream.name,
+          stream_type: getStreamTypeFromDefinition(stream),
+        });
+
+        return result;
       })()
     ).pipe(
-      map((pipeline) => ({
+      map((result) => ({
         type: 'suggested_processing_pipeline' as const,
-        pipeline,
+        pipeline: result.pipeline,
       })),
       catchError((error) => {
+        if (isNoLLMSuggestionsError(error)) {
+          logger.debug('No LLM suggestions available for pipeline generation');
+          // Return null pipeline instead of error - frontend will handle this gracefully
+          return [
+            {
+              type: 'suggested_processing_pipeline' as const,
+              pipeline: null,
+            },
+          ];
+        }
         logger.error('Failed to generate pipeline suggestion:', error);
         // Convert error to SSE error event so it's sent to client with full message
         throw createSSEInternalError(error.message || 'Failed to generate pipeline suggestion');
@@ -284,10 +334,10 @@ async function processGrokPatterns({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'grok'; processor: GrokProcessor; parsedRate: number } | null> {
   const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
@@ -307,6 +357,7 @@ async function processGrokPatterns({
           body: {
             connector_id: connectorId,
             sample_messages: group.messages,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             review_fields: getGrokReviewFields(group.nodes as any, 10),
           },
         },
@@ -336,9 +387,8 @@ async function processGrokPatterns({
     if (result.status === 'fulfilled') {
       acc.push(result.value);
     } else {
-      // Re-throw the first error to fail the entire suggestion
       logger.error('[suggest_pipeline][grok] LLM review failed:', result.reason);
-      throw result.reason;
+      // Don't re-throw - allow partial success
     }
     return acc;
   }, []);
@@ -349,6 +399,19 @@ async function processGrokPatterns({
 
   // Merge all grok processors into one
   const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
+
+  // Filter out empty patterns that may come from the heuristics library
+  const filteredPatterns = combinedGrokProcessor.patterns.filter(
+    (pattern) => pattern.trim().length > 0
+  );
+
+  // If all patterns were empty, return null
+  if (filteredPatterns.length === 0) {
+    logger.debug(
+      '[suggest_pipeline][grok] All patterns were empty after filtering out empty string patterns'
+    );
+    return null;
+  }
 
   // Run simulation to verify grok patterns work
   const simulationResult = await simulateProcessing({
@@ -362,7 +425,7 @@ async function processGrokPatterns({
               action: 'grok',
               customIdentifier: SUGGESTED_GROK_PROCESSOR_ID,
               from: fieldName,
-              patterns: combinedGrokProcessor.patterns,
+              patterns: filteredPatterns,
             },
           ],
         },
@@ -381,7 +444,7 @@ async function processGrokPatterns({
     processor: {
       action: 'grok',
       from: fieldName,
-      patterns: combinedGrokProcessor.patterns as [string, ...string[]],
+      patterns: filteredPatterns as [string, ...string[]],
     },
     parsedRate,
   };
@@ -414,10 +477,10 @@ async function processDissectPattern({
   documents: FlattenRecord[];
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
-  streamsClient: any;
+  streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
-  logger: any;
+  logger: Logger;
 }): Promise<{ type: 'dissect'; processor: DissectProcessor; parsedRate: number } | null> {
   const SUGGESTED_DISSECT_PROCESSOR_ID = 'dissect-processor';
 

@@ -16,6 +16,8 @@ export enum AlertAuditAction {
   FIND = 'alert_find',
   DELETE = 'alert_delete',
   SCHEDULE_DELETE = 'alert_schedule_delete',
+  ACKNOWLEDGE = 'alert_acknowledge',
+  UNACKNOWLEDGE = 'alert_unacknowledge',
 }
 
 export const operationAlertAuditActionMap = {
@@ -23,6 +25,15 @@ export const operationAlertAuditActionMap = {
   [WriteOperations.Delete]: AlertAuditAction.DELETE,
   [ReadOperations.Find]: AlertAuditAction.FIND,
   [ReadOperations.Get]: AlertAuditAction.GET,
+};
+
+/**
+ * Maps workflow status values to specific audit actions.
+ * Falls back to the generic UPDATE action for unmapped statuses.
+ */
+export const workflowStatusAuditActionMap: Record<string, AlertAuditAction> = {
+  acknowledged: AlertAuditAction.ACKNOWLEDGE,
+  open: AlertAuditAction.UNACKNOWLEDGE,
 };
 
 type VerbsTuple = [string, string, string];
@@ -37,6 +48,8 @@ const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
     'scheduling deletion task for',
     'scheduled deletion task for',
   ],
+  alert_acknowledge: ['acknowledge', 'acknowledging', 'acknowledged'],
+  alert_unacknowledge: ['unacknowledge', 'unacknowledging', 'unacknowledged'],
 };
 
 const eventTypes: Record<AlertAuditAction, ArrayElement<EcsEvent['type']>> = {
@@ -45,6 +58,8 @@ const eventTypes: Record<AlertAuditAction, ArrayElement<EcsEvent['type']>> = {
   alert_find: 'access',
   alert_delete: 'deletion',
   alert_schedule_delete: 'deletion',
+  alert_acknowledge: 'change',
+  alert_unacknowledge: 'change',
 };
 
 export interface AlertAuditEventParams {

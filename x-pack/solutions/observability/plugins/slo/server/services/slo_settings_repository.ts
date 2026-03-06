@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS: SLOSettings = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
   staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+  staleInstancesCleanupEnabled: false,
 };
 
 export class DefaultSLOSettingsRepository implements SLOSettingsRepository {
@@ -60,6 +61,7 @@ export class DefaultSLOSettingsRepository implements SLOSettingsRepository {
         useAllRemoteClusters: stored.useAllRemoteClusters,
         selectedRemoteClusters: stored.selectedRemoteClusters,
         staleThresholdInHours: stored.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+        staleInstancesCleanupEnabled: stored.staleInstancesCleanupEnabled === true ? true : false,
       };
     } catch {
       // In case of corrupted saved object, return default settings
@@ -72,6 +74,7 @@ export class DefaultSLOSettingsRepository implements SLOSettingsRepository {
       useAllRemoteClusters: settings.useAllRemoteClusters,
       selectedRemoteClusters: settings.selectedRemoteClusters,
       staleThresholdInHours: settings.staleThresholdInHours,
+      staleInstancesCleanupEnabled: settings.staleInstancesCleanupEnabled,
     };
   }
 }

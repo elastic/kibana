@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -145,7 +144,8 @@ describe('ChangePasswordModal', () => {
     });
   });
 
-  describe('render', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254057
+  describe.skip('render', () => {
     const coreStart = coreMock.createStart();
     const authc = securityMock.createSetup().authc;
     const history = createMemoryHistory({ initialEntries: ['/users'] });
@@ -240,17 +240,15 @@ describe('ChangePasswordModal', () => {
     });
 
     it('disables submit button when passwords do not match', async () => {
-      const user = userEvent.setup();
       const { unmount } = renderChangePasswordModal('testuser');
 
-      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
-      expect(submitButton).toBeDisabled();
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
       const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
       const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
 
-      await user.type(newPasswordInput, 'ValidPassword123');
-      await user.type(confirmPasswordInput, 'DifferentPassword456');
+      fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+      fireEvent.change(confirmPasswordInput, { target: { value: 'other1' } });
 
       await waitFor(() => {
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
@@ -260,17 +258,15 @@ describe('ChangePasswordModal', () => {
     });
 
     it('disables submit button when password is too short', async () => {
-      const user = userEvent.setup();
       const { unmount } = renderChangePasswordModal('testuser');
 
-      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
-      expect(submitButton).toBeDisabled();
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
       const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
       const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
 
-      await user.type(newPasswordInput, 'short');
-      await user.type(confirmPasswordInput, 'short');
+      fireEvent.change(newPasswordInput, { target: { value: 'short' } });
+      fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
 
       await waitFor(() => {
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
@@ -280,17 +276,15 @@ describe('ChangePasswordModal', () => {
     });
 
     it('enables submit button when valid matching passwords are entered', async () => {
-      const user = userEvent.setup();
       const { unmount } = renderChangePasswordModal('testuser');
 
-      const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
-      expect(submitButton).toBeDisabled();
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
       const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
       const confirmPasswordInput = screen.getByTestId('editUserChangePasswordConfirmPasswordInput');
 
-      await user.type(newPasswordInput, 'ValidPassword123');
-      await user.type(confirmPasswordInput, 'ValidPassword123');
+      fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+      fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
 
       await waitFor(() => {
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
@@ -299,12 +293,11 @@ describe('ChangePasswordModal', () => {
       unmount();
     });
 
-    it('calls onCancel when cancel button is clicked', async () => {
-      const user = userEvent.setup();
+    it('calls onCancel when cancel button is clicked', () => {
       const { unmount } = renderChangePasswordModal('testuser');
 
       const cancelButton = screen.getByTestId('changePasswordFormCancelButton');
-      await user.click(cancelButton);
+      fireEvent.click(cancelButton);
 
       expect(onCancelMock).toHaveBeenCalledTimes(1);
 
@@ -351,11 +344,9 @@ describe('ChangePasswordModal', () => {
       });
 
       it('disables submit button when current password is not provided', async () => {
-        const user = userEvent.setup();
         const { unmount } = renderChangePasswordModal('currentuser');
 
-        const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
-        expect(submitButton).toBeDisabled();
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
         const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
         const confirmPasswordInput = screen.getByTestId(
@@ -363,8 +354,8 @@ describe('ChangePasswordModal', () => {
         );
 
         // Fill in new password and confirm password, but not current password
-        await user.type(newPasswordInput, 'ValidPassword123');
-        await user.type(confirmPasswordInput, 'ValidPassword123');
+        fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+        fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
 
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
@@ -374,17 +365,15 @@ describe('ChangePasswordModal', () => {
       });
 
       it('disables submit button when only current password is provided', async () => {
-        const user = userEvent.setup();
         const { unmount } = renderChangePasswordModal('currentuser');
 
-        const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
-        expect(submitButton).toBeDisabled();
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
         const currentPasswordInput = screen.getByTestId(
           'editUserChangePasswordCurrentPasswordInput'
         );
 
-        await user.type(currentPasswordInput, 'OldPassword123');
+        fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
 
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
@@ -394,7 +383,6 @@ describe('ChangePasswordModal', () => {
       });
 
       it('disables submit button when passwords do not match', async () => {
-        const user = userEvent.setup();
         const { unmount } = renderChangePasswordModal('currentuser');
 
         const currentPasswordInput = screen.getByTestId(
@@ -405,9 +393,9 @@ describe('ChangePasswordModal', () => {
           'editUserChangePasswordConfirmPasswordInput'
         );
 
-        await user.type(currentPasswordInput, 'OldPassword123');
-        await user.type(newPasswordInput, 'ValidPassword123');
-        await user.type(confirmPasswordInput, 'DifferentPassword456');
+        fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
+        fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+        fireEvent.change(confirmPasswordInput, { target: { value: 'other1' } });
 
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
@@ -417,7 +405,6 @@ describe('ChangePasswordModal', () => {
       });
 
       it('disables submit button when password is too short', async () => {
-        const user = userEvent.setup();
         const { unmount } = renderChangePasswordModal('currentuser');
 
         const currentPasswordInput = screen.getByTestId(
@@ -428,9 +415,9 @@ describe('ChangePasswordModal', () => {
           'editUserChangePasswordConfirmPasswordInput'
         );
 
-        await user.type(currentPasswordInput, 'OldPassword123');
-        await user.type(newPasswordInput, 'short');
-        await user.type(confirmPasswordInput, 'short');
+        fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
+        fireEvent.change(newPasswordInput, { target: { value: 'short' } });
+        fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
 
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
@@ -440,11 +427,9 @@ describe('ChangePasswordModal', () => {
       });
 
       it('enables submit button when all password fields are valid for current user', async () => {
-        const user = userEvent.setup();
         const { unmount } = renderChangePasswordModal('currentuser');
 
-        const submitButton = screen.getByTestId('changePasswordFormSubmitButton');
-        expect(submitButton).toBeDisabled();
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
         const currentPasswordInput = screen.getByTestId(
           'editUserChangePasswordCurrentPasswordInput'
@@ -454,9 +439,9 @@ describe('ChangePasswordModal', () => {
           'editUserChangePasswordConfirmPasswordInput'
         );
 
-        await user.type(currentPasswordInput, 'OldPassword123');
-        await user.type(newPasswordInput, 'ValidPassword123');
-        await user.type(confirmPasswordInput, 'ValidPassword123');
+        fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
+        fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
+        fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
 
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();

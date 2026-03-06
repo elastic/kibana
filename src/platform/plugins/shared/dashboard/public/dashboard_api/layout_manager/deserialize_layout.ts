@@ -14,21 +14,18 @@ import type { DashboardChildState, DashboardLayout } from './types';
 
 export function deserializeLayout(
   panels: DashboardState['panels'],
-  controls: DashboardState['controlGroupInput']
+  pinnedPanels: DashboardState['pinned_panels']
 ) {
   const childState: DashboardChildState = {};
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
-    controls: Object.values((controls ?? { controls: {} }).controls).reduce(
-      (prev, control, index) => {
-        const controlId = control.uid ?? v4();
-        const { width, grow, type, config } = control;
-        childState[controlId] = config; // push to child state
-        return { ...prev, [controlId]: { type, width, grow, order: index } };
-      },
-      {}
-    ),
+    pinnedPanels: (pinnedPanels ?? []).reduce((prev, panel, index) => {
+      const panelId = panel.uid ?? v4();
+      const { width, grow, type, config } = panel;
+      childState[panelId] = config; // push to child state
+      return { ...prev, [panelId]: { type, width, grow, order: index } };
+    }, {}),
   };
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {

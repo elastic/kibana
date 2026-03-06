@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 
 // Failing: See https://github.com/elastic/kibana/issues/247693
 test.describe.skip(
   'Custom Threshold Rule - Ad-hoc Data View',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const AD_HOC_DATA_VIEW_PATTERN = '.alerts-*';
 
@@ -75,6 +76,9 @@ test.describe.skip(
       // Verify the data view was selected
       const dataViewText = await pageObjects.rulesPage.dataViewExpression.textContent();
       expect(dataViewText).toContain(AD_HOC_DATA_VIEW_PATTERN);
+
+      // Wait for form to fully initialize with default criteria
+      await pageObjects.rulesPage.waitForFormReady();
 
       // Save the rule (navigates to rule details page)
       await pageObjects.rulesPage.saveRule();

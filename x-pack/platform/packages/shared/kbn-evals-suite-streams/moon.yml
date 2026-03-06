@@ -19,10 +19,10 @@ project:
     sourceRoot: x-pack/platform/packages/shared/kbn-evals-suite-streams
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/evals-phoenix-executor'
   - '@kbn/object-utils'
   - '@kbn/grok-heuristics'
   - '@kbn/tooling-log'
-  - '@kbn/sample-log-parser'
   - '@kbn/repo-info'
   - '@kbn/streams-ai'
   - '@kbn/datemath'
@@ -34,7 +34,9 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/core'
   - '@kbn/dissect-heuristics'
-  - '@kbn/sse-utils-client'
+  - '@kbn/inference-common'
+  - '@kbn/es-snapshot-loader'
+  - '@kbn/es-errors'
 tags:
   - functional-tests
   - package

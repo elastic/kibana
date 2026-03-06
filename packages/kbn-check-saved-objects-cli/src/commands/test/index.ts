@@ -9,6 +9,6 @@
 
 import { resolve } from 'path';
 
-export { TEST_TYPES } from './test_types';
+export { TEST_TYPES } from './types';
 export { getTestSnapshots } from './snapshots';
 export const BASELINE_MAPPINGS_TEST = resolve(__dirname, './baseline_mappings.json');

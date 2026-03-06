@@ -100,6 +100,7 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
       sync_cursor: true,
       sync_tooltips: false,
       hide_panel_titles: false,
+      hide_panel_borders: false,
     },
 
     tags: [],
@@ -174,9 +175,9 @@ export function getMockPanelsWithSections() {
 }
 
 export function getMockLayout() {
-  return deserializeLayout(getMockPanels(), { controls: [] }).layout;
+  return deserializeLayout(getMockPanels(), []).layout;
 }
 
 export function getMockLayoutWithSections() {
-  return deserializeLayout(getMockPanelsWithSections(), { controls: [] }).layout;
+  return deserializeLayout(getMockPanelsWithSections(), []).layout;
 }

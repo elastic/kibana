@@ -8,23 +8,21 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '../../../ast/location';
-import { isOptionNode } from '../../../ast/is';
-import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
-import * as mutate from '../../../ast/mutate';
-import { LeafPrinter } from '../../../pretty_print/leaf_printer';
+import { within, isOptionNode } from '@elastic/esql';
 import type {
   ESQLAstAllCommands,
   ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLSingleAstItem,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 
 import type { ICommand } from '../registry';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../types';
 import type { JoinCommandPosition, JoinStaticPosition } from './types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
+import { getLookupJoinSource } from '../../definitions/utils/sources';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O))?))?))?))?))?))?))?/i;
@@ -73,13 +71,12 @@ export const getLookupFields = async (
   if (!context) {
     return [];
   }
-  const summary = mutate.commands.join.summarizeCommand(command as ESQLAstJoinCommand);
-  const joinIndexPattern = LeafPrinter.print(summary.target.index);
-  const columns = await getColumnsForQuery(`FROM ${joinIndexPattern}`);
+  const joinTarget = getLookupJoinSource(command as ESQLAstJoinCommand);
+  const columns = await getColumnsForQuery(`FROM ${joinTarget}`);
 
-  if (lookupIndexFieldSet.key !== joinIndexPattern) {
+  if (joinTarget && lookupIndexFieldSet.key !== joinTarget) {
     lookupIndexFieldSet.set = new Set<string>(columns.map((c) => c.name));
-    lookupIndexFieldSet.key = joinIndexPattern;
+    lookupIndexFieldSet.key = joinTarget;
   }
 
   return columns;

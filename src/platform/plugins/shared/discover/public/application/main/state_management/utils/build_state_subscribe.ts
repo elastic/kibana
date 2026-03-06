@@ -12,12 +12,11 @@ import {
   internalStateActions,
   type InternalStateStore,
   type RuntimeStateManager,
+  selectTabRuntimeState,
   type TabState,
 } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
-import type { DiscoverStateContainer } from '../discover_state';
 import type { DiscoverAppState } from '../redux';
 import { isEqualState } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
@@ -40,27 +39,21 @@ export const buildStateSubscribe =
     dataState,
     internalState,
     runtimeStateManager,
-    savedSearchState,
     services,
-    setDataView,
     getCurrentTab,
   }: {
     dataState: DiscoverDataStateContainer;
     internalState: InternalStateStore;
     runtimeStateManager: RuntimeStateManager;
-    savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
-    setDataView: DiscoverStateContainer['actions']['setDataView'];
     getCurrentTab: () => TabState;
   }) =>
   async (nextState: DiscoverAppState) => {
     const prevState = getCurrentTab().previousAppState;
-    const savedSearch = savedSearchState.getState();
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextState.query, prevState.query);
 
     if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
-      savedSearchState.update({ nextState });
       addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
       return;
     }
@@ -82,7 +75,6 @@ export const buildStateSubscribe =
     if (isEsqlMode) {
       const isEsqlModePrev = isDataSourceType(prevState.dataSource, DataSourceType.Esql);
       if (!isEsqlModePrev) {
-        savedSearchState.update({ nextState });
         dataState.reset();
       }
     }
@@ -94,8 +86,6 @@ export const buildStateSubscribe =
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
 
-    let savedSearchDataView;
-
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
       const dataViewId = isDataSourceType(nextState.dataSource, DataSourceType.DataView)
@@ -104,7 +94,10 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        savedSearch,
+        currentDataView: selectTabRuntimeState(
+          runtimeStateManager,
+          getCurrentTab().id
+        )?.currentDataView$.getValue(),
         isEsqlMode,
         internalState,
         runtimeStateManager,
@@ -128,13 +121,14 @@ export const buildStateSubscribe =
         return;
       }
 
-      savedSearch.searchSource.setField('index', nextDataView);
       dataState.reset();
-      setDataView(nextDataView);
-      savedSearchDataView = nextDataView;
+      internalState.dispatch(
+        internalStateActions.assignNextDataView({
+          tabId: getCurrentTab().id,
+          dataView: nextDataView,
+        })
+      );
     }
-
-    savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
 
     if (dataSourceChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover

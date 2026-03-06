@@ -13,7 +13,6 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal/ai_agent_confirmation_modal';
-import { getIsAiAgentsEnabled } from '@kbn/ai-assistant-common/src/utils/get_is_ai_agents_enabled';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -68,11 +67,10 @@ const consumeSkipStepReachedOnce = (
 export const ChatExperience: React.FC = () => {
   const { fields, handleFieldChange, unsavedChanges } = useSettingsContext();
   const {
-    services: { settings, notifications, docLinks, application, featureFlags, analytics },
+    services: { settings, notifications, docLinks, application, analytics },
   } = useKibana();
 
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
-  const isAiAgentsEnabled = getIsAiAgentsEnabled(featureFlags);
   const field = fields[AI_CHAT_EXPERIENCE_TYPE];
   const canEditAdvancedSettings = Boolean(application.capabilities.advancedSettings?.save);
   const savedValue = isAIChatExperience(field?.savedValue) ? field.savedValue : undefined;
@@ -156,7 +154,7 @@ export const ChatExperience: React.FC = () => {
     [docLinks.links.agentBuilder.learnMore]
   );
 
-  if (!isAiAgentsEnabled || !field) {
+  if (!field) {
     return null;
   }
 

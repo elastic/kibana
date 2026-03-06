@@ -43,6 +43,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,6 +59,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,6 +82,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 46,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -100,6 +106,8 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 46,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -120,6 +128,8 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -136,6 +146,8 @@
               "{ (delta: number): void; <T>(delta: number, block: () => Promise<T>): Promise<T>; <T>(delta: number, block: () => T): T; }"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -150,6 +162,8 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 80,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -165,6 +179,8 @@
                   "(() => T | Promise<T>) | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 80,
+                "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -183,6 +199,8 @@
               "(...args: any[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -197,6 +215,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 106,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -215,6 +235,8 @@
               "(...args: any[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -229,6 +251,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 110,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -247,6 +271,8 @@
               "(...args: any[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -261,6 +287,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 114,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -279,6 +307,8 @@
               "(...args: any[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -293,6 +323,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 118,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -311,6 +343,8 @@
               "(...args: any[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -325,6 +359,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 122,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -343,6 +379,8 @@
               "(error: string | Error) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 126,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -357,6 +395,8 @@
                   "string | Error"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 126,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -375,6 +415,8 @@
               "(...args: any[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 130,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -389,6 +431,8 @@
                   "any[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 130,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -415,6 +459,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -439,6 +485,8 @@
               "[]) => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -460,6 +508,8 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 138,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -488,6 +538,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 142,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -513,6 +565,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -529,6 +583,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 150,
+                "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -554,6 +610,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -568,6 +626,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+                "lineNumber": 157,
+                "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -603,6 +663,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -617,6 +679,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -631,6 +695,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -645,6 +711,8 @@
                   "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -673,6 +741,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -693,6 +763,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
+                "lineNumber": 33,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -728,6 +800,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -742,6 +816,8 @@
               "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -756,6 +832,8 @@
               "{ write(msg: string): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -770,6 +848,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -790,6 +870,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "lineNumber": 91,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -816,6 +898,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -836,6 +920,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "lineNumber": 103,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -862,6 +948,8 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -876,6 +964,8 @@
                   "{ write(msg: string): void; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "lineNumber": 132,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -891,6 +981,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "lineNumber": 132,
+                "columnNumber": 58,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -912,6 +1004,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+                "lineNumber": 132,
+                "columnNumber": 74,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -935,6 +1029,8 @@
           "(defaultLogLevel: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -949,6 +1045,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+            "lineNumber": 52,
+            "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -968,6 +1066,8 @@
           "(name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\") => { name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -982,6 +1082,8 @@
               "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+            "lineNumber": 60,
+            "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1001,6 +1103,8 @@
           "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined; }) => \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1015,6 +1119,8 @@
               "Record<string, string | boolean | string[] | undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1027,6 +1133,8 @@
             "label": "options",
             "description": [],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+            "lineNumber": 16,
+            "columnNumber": 12,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1041,6 +1149,8 @@
                   "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\" | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+                "lineNumber": 16,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1062,6 +1172,8 @@
           "\nThe object shape passed to ToolingLog writers each time the log is used."
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1078,6 +1190,8 @@
               "\"info\" | \"error\" | \"success\" | \"warning\" | \"write\" | \"debug\" | \"verbose\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1091,6 +1205,8 @@
               "indentation intended when message written to a text log"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1107,6 +1223,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1123,6 +1241,8 @@
               "any[]"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1139,6 +1259,8 @@
               "string | string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1153,6 +1275,8 @@
         "label": "ToolingLogOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1169,6 +1293,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1192,6 +1318,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1208,6 +1336,8 @@
               "string | string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1222,6 +1352,8 @@
         "label": "ToolingLogTextWriterConfig",
         "description": [],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1238,6 +1370,8 @@
               "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1254,6 +1388,8 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1270,6 +1406,8 @@
               "{ write(s: string): void; }"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/tooling_log_text_writer.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1286,6 +1424,8 @@
           "\nAn object which received ToolingLog `Messages` and sends them to\nsome interface for collecting logs like stdio, or a file"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/writer.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1310,6 +1450,8 @@
               ") => boolean"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/writer.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1332,6 +1474,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tooling-log/src/writer.ts",
+                "lineNumber": 22,
+                "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1356,6 +1500,8 @@
           "\"info\""
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1371,6 +1517,8 @@
           "{ name: \"info\" | \"debug\" | \"verbose\" | \"silent\" | \"quiet\"; help: string; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1386,6 +1534,8 @@
           "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1401,6 +1551,8 @@
           "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

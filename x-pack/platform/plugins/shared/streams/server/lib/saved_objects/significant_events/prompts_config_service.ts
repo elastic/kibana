@@ -11,18 +11,18 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
 } from '@kbn/core/server';
-import { significantEventsSystemPromptTemplate } from '@kbn/streams-ai/src/significant_events/prompt';
-import { systemsSystemPromptTemplate } from '@kbn/streams-ai/src/systems/prompt';
-import { descriptionSystemPromptTemplate } from '@kbn/streams-ai/src/description/prompt';
+import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
+import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+import { descriptionPrompt } from '@kbn/streams-ai/src/description/prompt';
 import { streamsPromptsSOType } from './prompts_config';
 import type { PromptsConfigAttributes } from './prompts_config';
 
 export type { PromptsConfigAttributes };
 
 const defaultsPrompts = {
-  featurePromptOverride: systemsSystemPromptTemplate,
-  significantEventsPromptOverride: significantEventsSystemPromptTemplate,
-  descriptionPromptOverride: descriptionSystemPromptTemplate,
+  featurePromptOverride: featuresPrompt,
+  significantEventsPromptOverride: significantEventsPrompt,
+  descriptionPromptOverride: descriptionPrompt,
 };
 
 const SINGLETON_PROMPTS_ID = 'streams-prompts-config-id';
@@ -78,9 +78,12 @@ export class PromptsConfigService {
         descriptionPromptOverride:
           data.attributes.descriptionPromptOverride || defaultsPrompts.descriptionPromptOverride,
       };
-    } catch (err: any) {
+    } catch (err) {
       // saved objects client throws with statusCode 404 for not found
-      if (err?.output?.statusCode === 404 || err?.statusCode === 404) {
+      if (
+        (err as { output?: { statusCode?: number } })?.output?.statusCode === 404 ||
+        (err as { statusCode?: number })?.statusCode === 404
+      ) {
         // return the packaged default prompt on 404 as well
         return defaultsPrompts;
       }

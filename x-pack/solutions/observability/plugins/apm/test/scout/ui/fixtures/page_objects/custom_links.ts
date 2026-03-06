@@ -6,7 +6,8 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
 
@@ -52,6 +53,9 @@ export class CustomLinksPage {
   }
 
   async clickDelete() {
+    await expect(this.page.getByTestId('apmDeleteButtonDeleteButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
     await this.page.getByTestId('apmDeleteButtonDeleteButton').click();
   }
 
@@ -77,5 +81,57 @@ export class CustomLinksPage {
     const editButton = row.getByTestId('editCustomLink');
     await editButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await editButton.click();
+    await expect(this.page.getByTestId('apmCustomLinkFlyoutFooterCloseButton')).toBeVisible({
+      timeout: EXTENDED_TIMEOUT,
+    });
+  }
+
+  /**
+   * Explicitly adds a new filter row by clicking the "Add another filter" button.
+   * Throws an error if the button is disabled.
+   */
+  async addNewFilterRow() {
+    const addFilterButton = this.page.getByTestId(
+      'apmCustomLinkAddFilterButtonAddAnotherFilterButton'
+    );
+    await addFilterButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await expect(addFilterButton).toBeEnabled();
+    await addFilterButton.click();
+  }
+
+  /**
+   * Fills an existing empty filter row with the given key and value.
+   * Uses the explicit data-test-subj attribute for empty filter rows.
+   * Throws an error if no empty filter row is found.
+   */
+  async fillEmptyFilter(key: string, value: string) {
+    const emptyFilterSelect = this.page.getByTestId('apmCustomLinkFilterSelectEmpty');
+    await emptyFilterSelect.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await emptyFilterSelect.selectOption(key);
+
+    const valueInput = this.page.getByTestId(`${key}.value`);
+    await valueInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+
+    const valueComboBox = new EuiComboBoxWrapper(this.page, { dataTestSubj: `${key}.value` });
+    await valueComboBox.selectSingleOption(value);
+  }
+
+  /**
+   * Adds the first filter by filling the existing empty filter row.
+   * Use this when the form has just been opened and contains one empty filter row.
+   * This method does NOT click the "Add another filter" button.
+   */
+  async addFirstFilter(key: string, value: string) {
+    await this.fillEmptyFilter(key, value);
+  }
+
+  /**
+   * Adds an additional filter by explicitly clicking the "Add another filter" button,
+   * then filling the newly created empty filter row.
+   * Use this when you need to add a second, third, etc. filter.
+   */
+  async addAdditionalFilter(key: string, value: string) {
+    await this.addNewFilterRow();
+    await this.fillEmptyFilter(key, value);
   }
 }

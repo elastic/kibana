@@ -105,6 +105,26 @@ describe('getForeachStateSchema', () => {
     );
   });
 
+  it('should handle array foreach input', () => {
+    const stepContext = DynamicStepContextSchema.extend({
+      consts: z.object({
+        items: z.object({ name: z.string(), surname: z.string() }),
+      }),
+    });
+    const foreachStateSchema = getForeachStateSchema(stepContext, {
+      foreach: [{ name: 'item1' }, { name: 'item2' }, { name: 'item3' }],
+      type: 'foreach',
+      name: 'foreach-step',
+    });
+    expectZodSchemaEqual(
+      foreachStateSchema,
+      ForEachContextSchema.extend({
+        item: z.object({ name: z.string() }),
+        items: z.array(z.object({ name: z.string() })),
+      })
+    );
+  });
+
   it('should return an unknown schema with a description if the foreach parameter is not a valid JSON', () => {
     const stepContext = DynamicStepContextSchema.extend({
       consts: z.object({

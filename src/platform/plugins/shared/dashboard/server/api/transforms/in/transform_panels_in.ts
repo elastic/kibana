@@ -20,7 +20,10 @@ import type {
 import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../kibana_services';
 
-export function transformPanelsIn(widgets: Required<DashboardState>['panels']): {
+export function transformPanelsIn(
+  widgets: Required<DashboardState>['panels'],
+  isDashboardAppRequest: boolean = false
+): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -35,7 +38,7 @@ export function transformPanelsIn(widgets: Required<DashboardState>['panels']): 
       const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
-        const { storedPanel, references } = transformPanelIn(panel);
+        const { storedPanel, references } = transformPanelIn(panel, isDashboardAppRequest);
         panels.push({
           ...storedPanel,
           gridData: { ...storedPanel.gridData, sectionId: idx },
@@ -44,7 +47,7 @@ export function transformPanelsIn(widgets: Required<DashboardState>['panels']): 
       });
     } else {
       // widget is a panel
-      const { storedPanel, references } = transformPanelIn(widget);
+      const { storedPanel, references } = transformPanelIn(widget, isDashboardAppRequest);
       panels.push(storedPanel);
       panelReferences.push(...references);
     }
@@ -52,18 +55,28 @@ export function transformPanelsIn(widgets: Required<DashboardState>['panels']): 
   return { panelsJSON: JSON.stringify(panels), sections, references: panelReferences };
 }
 
-function transformPanelIn(panel: DashboardPanel): {
+function transformPanelIn(
+  panel: DashboardPanel,
+  isDashboardAppRequest: boolean
+): {
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
   const { uid, grid, config, ...restPanel } = panel;
   const idx = uid ?? uuidv4();
 
-  const transforms = embeddableService?.getTransforms(panel.type);
+  // Temporary escape hatch for lens as code
+  // TODO remove when lens as code transforms are ready for production
+  const transformType =
+    panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+  const transforms = embeddableService?.getTransforms(transformType);
 
-  if (transforms?.schema) {
+  // Dashboard application routes do not validate panel.config at route level
+  // Instead, panel.config must be validated in the handler
+  const panelSchema = transforms?.schema;
+  if (isDashboardAppRequest && panelSchema) {
     try {
-      transforms.schema.validate(config);
+      panelSchema.validate(config);
     } catch (error) {
       throw Boom.badRequest(
         `Panel config validation failed. Panel uid: ${uid}, type: ${restPanel.type}, validation error: ${error.message}`

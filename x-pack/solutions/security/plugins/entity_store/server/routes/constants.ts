@@ -6,6 +6,8 @@
  */
 
 import type { AuthzEnabled } from '@kbn/core/server';
+import type { z } from '@kbn/zod/v4';
+import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],
@@ -19,3 +21,21 @@ export const API_VERSIONS = {
     v2: '2',
   },
 };
+
+export type LogExtractionBodyParams = z.infer<typeof LogExtractionBodyParams>;
+// timeout: intentionally excluded from LogExtractionBodyParams
+// TODO: add timeout once we have a way to set it as a task override param
+export const LogExtractionBodyParams = LogExtractionConfig.pick({
+  filter: true,
+  fieldHistoryLength: true,
+  additionalIndexPatterns: true,
+  lookbackPeriod: true,
+  frequency: true,
+  delay: true,
+  docsLimit: true,
+}).partial();
+
+export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams>;
+export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
+  frequency: true,
+}).partial();

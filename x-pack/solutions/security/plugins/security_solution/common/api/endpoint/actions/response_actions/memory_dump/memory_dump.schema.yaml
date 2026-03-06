@@ -9,9 +9,7 @@ paths:
       operationId: EndpointGenerateMemoryDump
       description: Generates memory dumps on the targeted host.
       x-codegen-enabled: false
-#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-#      x-labels: [ ess, serverless ]
-      x-labels: []
+      x-labels: [ ess, serverless ]
       requestBody:
         required: true
         content:
@@ -36,6 +34,33 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/schema/common.schema.yaml#/components/schemas/ResponseActionCreateSuccessResponse'
+              examples:
+                MemoryDumpSuccessResponse:
+                  summary: Memory dump action successfully created
+                  value:
+                    data:
+                      id: "233db9ea-6733-4849-9226-5a7039c7161d"
+                      command: "memory-dump"
+                      agentType: "endpoint"
+                      isExpired: false
+                      isCompleted: false
+                      wasSuccessful: false
+                      status: "pending"
+                      startedAt: "2022-07-29T19:08:49.126Z"
+                      createdBy: "elastic"
+                      agents:
+                        - "ed518850-681a-4d60-bb98-e22640cae2a8"
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: "gke-node-1235412"
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      parameters:
+                        type: "process"
+                        entity_id: "abc123"
+                      outputs: { }
 
 components:
   x-codegen-enabled: false
