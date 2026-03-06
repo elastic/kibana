@@ -118,6 +118,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
     displayStops = result.displayStops;
   }
 
+  // Check if a legacy palette is used for terms coloring instead of a color mapping
   const isLegacyTermsMode =
     showColorByTerms &&
     !column.colorMapping &&
