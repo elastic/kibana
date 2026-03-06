@@ -32,6 +32,10 @@ import {
   getUpdatesEntityDefinitionComponentTemplate,
 } from './component_templates';
 import {
+  getHistorySnapshotIndexTemplateConfig,
+  getHistorySnapshotIndexTemplateId,
+} from './history_snapshot_index_template';
+import {
   getUpdatesEntityIndexTemplateConfig,
   getUpdatesIndexTemplateId,
 } from './updates_index_template';
@@ -101,6 +105,11 @@ async function installIndexTemplates(
     (async () => {
       await putIndexTemplate(esClient, getUpdatesEntityIndexTemplateConfig(namespace));
       logger.debug(`installed updates index template in ${namespace}`);
+    })(),
+
+    (async () => {
+      await putIndexTemplate(esClient, getHistorySnapshotIndexTemplateConfig(namespace));
+      logger.debug(`installed history snapshot index template in ${namespace}`);
     })(),
   ]);
 }
@@ -183,6 +192,10 @@ async function uninstallIndexTemplates(
     (async () => {
       await deleteIndexTemplate(esClient, getUpdatesIndexTemplateId(namespace));
       logger.debug(`deleted entity updates index template`);
+    })(),
+    (async () => {
+      await deleteIndexTemplate(esClient, getHistorySnapshotIndexTemplateId(namespace));
+      logger.debug(`deleted history snapshot index template`);
     })(),
   ]);
 }
