@@ -26,6 +26,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type {
   getExecutionHistoryStatsFn,
+  getRecentExecutionsForWorkflowsFn,
   getStepExecutionsFn,
   getWorkflowExecutionFn,
   searchWorkflowExecutionsFn,
@@ -68,6 +69,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   searchWorkflowExecutions: ReturnType<typeof searchWorkflowExecutionsFn>;
   getStepExecutions: ReturnType<typeof getStepExecutionsFn>;
   getExecutionHistoryStats: ReturnType<typeof getExecutionHistoryStatsFn>;
+  getRecentExecutionsForWorkflows: ReturnType<typeof getRecentExecutionsForWorkflowsFn>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

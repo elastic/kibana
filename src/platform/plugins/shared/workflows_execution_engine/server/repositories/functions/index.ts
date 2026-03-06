@@ -8,6 +8,7 @@
  */
 
 export { getExecutionHistoryStatsFn } from './get_execution_history_stats';
+export { getRecentExecutionsForWorkflowsFn } from './get_recent_executions_for_workflows';
 export { getWorkflowExecutionFn } from './get_workflow_executions';
 export { getStepExecutionsFn } from './get_step_executions';
 export { searchWorkflowExecutionsFn } from './search_workflow_executions';
