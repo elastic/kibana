@@ -221,8 +221,8 @@ interface DiscoverBadgeButtonBaseProps {
 }
 
 interface DiscoverBadgeButtonIngestProps extends DiscoverBadgeButtonBaseProps {
-  stream: Streams.ingest.all.Definition;
-  indexMode: IndicesIndexMode | undefined;
+  stream: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
+  indexMode: IndicesIndexMode;
 }
 
 interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
@@ -243,9 +243,10 @@ export function DiscoverBadgeButton({
       start: { share },
     },
   } = useKibana();
+  const isIngestStream = !Streams.QueryStream.Definition.is(stream);
   const esqlQuery = getDiscoverEsqlQuery({
     definition: stream,
-    indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
+    indexMode: isIngestStream ? indexMode : undefined,
     includeMetadata: Streams.WiredStream.Definition.is(stream),
   });
   const useUrl = share.url.locators.useUrl;
