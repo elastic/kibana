@@ -243,6 +243,7 @@ export const requiredFieldsForActions = [
   'kibana.alert.workflow_tags',
   'kibana.alert.workflow_assignee_ids',
   'kibana.alert.group.id',
+  'kibana.alert.attack_discovery.alert_ids',
   'kibana.alert.original_time',
   'kibana.alert.building_block_type',
   'kibana.alert.rule.from',
