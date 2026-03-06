@@ -8,6 +8,7 @@
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useMemo, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
