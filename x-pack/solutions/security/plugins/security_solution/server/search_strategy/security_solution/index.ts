@@ -30,7 +30,7 @@ export const securitySolutionSearchStrategyProvider = (
       const parsedRequest = searchStrategyRequestSchema.parse(request);
       const queryFactory = securitySolutionFactory[parsedRequest.factoryQueryType];
       // NOTE: without this parameter, .hits.hits can be empty
-      options.retrieveResults = true;
+      options.retrieveIntermediateResults = true;
       const dsl = queryFactory.buildDsl(parsedRequest);
 
       return es.search({ ...request, params: dsl }, options, deps).pipe(

@@ -90,7 +90,7 @@ export const logEntrySearchStrategyProvider = ({
               esRequest,
               {
                 ...options,
-                retrieveResults: true, // without it response will not contain progress information
+                retrieveIntermediateResults: true, // without it response will not contain progress information
               },
               dependencies
             )

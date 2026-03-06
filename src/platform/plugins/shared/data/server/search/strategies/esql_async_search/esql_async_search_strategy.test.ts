@@ -197,7 +197,9 @@ describe('ES|QL async search strategy', () => {
         const id = 'FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ==';
         const params = { query: 'from logs* | limit 10' };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-        await esSearch.search({ id, params }, { retrieveResults: true }, mockDeps).toPromise();
+        await esSearch
+          .search({ id, params }, { retrieveIntermediateResults: true }, mockDeps)
+          .toPromise();
 
         expect(mockApiCaller).toBeCalled();
         const request = mockApiCaller.mock.calls[0][0];
