@@ -42,6 +42,7 @@ import type { ConnectorInstanceConfig } from '@kbn/workflows/types/v1';
 import type {
   IWorkflowEventLoggerService,
   LogSearchResult,
+  WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
@@ -1034,14 +1035,6 @@ export class WorkflowsService {
         page,
       })
     );
-  }
-
-  public async getStepExecutions(
-    params: GetStepExecutionParams,
-    spaceId: string
-  ): Promise<EsWorkflowStepExecution[]> {
-    const workflowExecutionEngine = await this.getWrorkflowExecutionEngine();
-    return workflowExecutionEngine.getStepExecutions(params.executionId, spaceId);
   }
 
   public async getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult> {
