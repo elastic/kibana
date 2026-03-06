@@ -10,7 +10,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { ChromeComponentsProvider } from '../context';
 import { createMockChromeComponentsDeps } from '../test_helpers';
 import { ClassicHeader } from './header';
