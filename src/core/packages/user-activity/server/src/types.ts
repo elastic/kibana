@@ -57,7 +57,52 @@ export interface UserActivityEvent {
   action: UserActivityActionId;
   /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
+  /** ISO8601 timestamp of the event start time. */
+  start?: string;
+  /** ISO8601 timestamp of the event end time. */
+  end?: string;
+  /** Duration (in ns) between the event start and end timestamps. */
+  duration?: number;
 }
+
+/** @public */
+export interface UserActivityUserInputFilter {
+  /** Human-readable filter name/label. */
+  name?: string;
+  /** Filter query DSL. */
+  dslQuery?: Record<string, unknown>;
+  /** Whether the filter is enabled. */
+  enabled?: boolean;
+}
+
+/** @public */
+export interface UserActivityUserInputTimeRange {
+  /** ISO timestamp of the start of the selected timerange in the date picker. */
+  start?: string;
+  /** ISO timestamp of the end of the selected timerange in the date picker. */
+  end?: string;
+}
+
+/** @public */
+export interface UserActivityUserInputMetadata {
+  /** Which indices are affected by the user action. */
+  indices?: string[];
+  /** Time range selected by the user. */
+  time?: UserActivityUserInputTimeRange;
+  /** KQL/ES|QL query introduced by the user in the Global Query Bar. */
+  global_query?: string;
+  /** Array of non-indexed objects describing filters configured by the user. */
+  filters?: UserActivityUserInputFilter[];
+}
+
+/**
+ * Additional bucket of non-standard metadata specific to the user activity log.
+ * Includes standardized optional fields (e.g. `user_input`) for normalization.
+ * @public
+ */
+export type UserActivityMetadata = Record<string, unknown> & {
+  user_input?: UserActivityUserInputMetadata;
+};
 
 /** @public */
 export interface TrackUserActionParams {
@@ -67,6 +112,8 @@ export interface TrackUserActionParams {
   event: UserActivityEvent;
   /** Object attributes written to the log entry. */
   object: UserActivityObject;
+  /** Additional bucket of non-standard metadata. */
+  metadata?: UserActivityMetadata;
 }
 
 /**
