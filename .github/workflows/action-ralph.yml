@@ -70,6 +70,8 @@ jobs:
       pr_branch: ${{ steps.context.outputs.pr_branch }}
       pr_head_repo: ${{ steps.context.outputs.pr_head_repo }}
       default_branch: ${{ steps.context.outputs.default_branch }}
+      checkout_ref: ${{ steps.context.outputs.checkout_ref }}
+      checkout_repo: ${{ steps.context.outputs.checkout_repo }}
 
     steps:
       - name: Verify comment trigger (TOCTOU mitigation)
@@ -154,6 +156,17 @@ jobs:
             echo "pr_branch=" >> "$GITHUB_OUTPUT"
             echo "pr_head_repo=" >> "$GITHUB_OUTPUT"
           fi
+
+          IS_PR=$(grep '^is_pr=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
+          if [ "$IS_PR" = "true" ]; then
+            CHECKOUT_REF=$(grep '^pr_branch=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
+            CHECKOUT_REPO=$(grep '^pr_head_repo=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
+          else
+            CHECKOUT_REF=$(grep '^default_branch=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2)
+            CHECKOUT_REPO="${{ github.repository }}"
+          fi
+          echo "checkout_ref=${CHECKOUT_REF:-main}" >> "$GITHUB_OUTPUT"
+          echo "checkout_repo=${CHECKOUT_REPO:-${{ github.repository }}}" >> "$GITHUB_OUTPUT"
 
   # ---------------------------------------------------------------------------
   # Phase B: Run the OpenCode agent in a spec-driven loop (inner ralph loop).
@@ -325,10 +338,10 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch || 'main' }}
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
           fetch-depth: 1
           persist-credentials: false
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.pr_head_repo || github.repository || 'elastic/kibana' }}
+          repository: ${{ needs.prepare.outputs.checkout_repo }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -716,7 +729,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_branch || needs.prepare.outputs.default_branch || 'main' }}
           fetch-depth: 1
           token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || github.repository || 'elastic/kibana' }}
+          repository: ${{ needs.prepare.outputs.is_pr == 'true' && needs.prepare.outputs.is_fork_pr != 'true' && needs.prepare.outputs.pr_head_repo || needs.prepare.outputs.checkout_repo }}
 
       - name: Download agent changes
         uses: actions/download-artifact@v8
@@ -1003,10 +1016,10 @@ jobs:
       - name: Checkout PR source (read-only)
         uses: actions/checkout@v6
         with:
-          ref: ${{ needs.prepare.outputs.pr_branch }}
+          ref: ${{ needs.prepare.outputs.checkout_ref }}
           fetch-depth: 1
           persist-credentials: false
-          repository: ${{ needs.prepare.outputs.pr_head_repo }}
+          repository: ${{ needs.prepare.outputs.checkout_repo }}
 
       - name: Install OpenCode CLI
         run: npm install -g opencode-ai@1.2.15
