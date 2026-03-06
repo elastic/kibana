@@ -233,11 +233,20 @@ export function extendContextWithTemplateLocals(
 
 const yamlStringCache = new WeakMap<Document, string | null>();
 
+/**
+ * Returns a cached re-serialisation of the YAML document.
+ *
+ * `lineWidth: -1` disables flow-scalar folding so the output preserves the same
+ * byte offsets as the original parsed input. Without this, the default
+ * `lineWidth: 80` inserts escape continuations (`\\\n`) into long
+ * double-quoted strings, shifting every subsequent byte position and making
+ * `Scalar.range` offsets (from the original parse) slice the wrong region.
+ */
 function getCachedYamlString(doc: Document): string | null {
   let cached = yamlStringCache.get(doc);
   if (cached === undefined) {
     try {
-      cached = doc.toString();
+      cached = doc.toString({ lineWidth: -1 });
     } catch {
       cached = null;
     }
@@ -253,10 +262,12 @@ function getCachedYamlString(doc: Document): string | null {
  * autocomplete so they share the same context logic.
  *
  * For block scalars the offset mapping extracts the raw YAML slice (header +
- * indented content) via `Document.toString()` and `Scalar.range`, since
- * `Scalar.source` equals the resolved value and lacks the header/indent
- * information needed for accurate mapping. The toString result is cached per
- * Document instance via a WeakMap to avoid repeated serialisation.
+ * indented content) via `Document.toString({ lineWidth: 0 })` and
+ * `Scalar.range`, since `Scalar.source` equals the resolved value and lacks
+ * the header/indent information needed for accurate mapping. `lineWidth: 0`
+ * is required to prevent flow-scalar folding that would shift byte offsets
+ * relative to the original parse. The toString result is cached per Document
+ * instance via a WeakMap to avoid repeated serialisation.
  */
 export function getContextSchemaWithTemplateLocals(
   yamlDocument: Document,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document } from 'yaml';
+import { type Document, parseDocument } from 'yaml';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { getShape } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
@@ -408,6 +408,30 @@ describe('getContextSchemaWithTemplateLocals', () => {
       const shape = getShape(result);
       expect(shape).toHaveProperty('a');
       expect(shape).not.toHaveProperty('cap');
+    });
+
+    it('resolves block scalar offsets correctly when a preceding long quoted string would trigger line folding', () => {
+      const realGetScalarValueAtOffset = jest.requireActual<
+        typeof import('../../../../common/lib/yaml/get_scalar_value_at_offset')
+      >('../../../../common/lib/yaml/get_scalar_value_at_offset').getScalarValueAtOffset;
+      mockGetScalarValueAtOffset.mockImplementation(realGetScalarValueAtOffset);
+
+      const longValue = 'A'.repeat(120);
+      const yamlSource = `
+longkey: "${longValue}"
+template: |-
+  {% assign x = 1 %}{{ x }}
+
+`;
+
+      const doc = parseDocument(yamlSource);
+      const blockScalarOffset = yamlSource.indexOf('{{ x }}');
+      const result = getContextSchemaWithTemplateLocals(
+        doc,
+        blockScalarOffset,
+        DynamicStepContextSchema
+      );
+      expect(getShape(result)).toHaveProperty('x');
     });
   });
 });
