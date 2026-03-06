@@ -19,8 +19,7 @@ import { MAX_WORKFLOW_DEPTH } from './constants';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
-import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -35,8 +34,7 @@ export interface WorkflowExecuteStepImplInit {
   spaceId: string;
   request: KibanaRequest;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
-  workflowExecutionRepository: WorkflowExecutionRepository;
-  stepExecutionRepository: StepExecutionRepository;
+  executionStateRepository: ExecutionStateRepository;
   workflowLogger: IWorkflowEventLogger;
 }
 
@@ -49,20 +47,18 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
       node: _node,
       stepExecutionRuntime,
       workflowsExecutionEngine,
-      workflowExecutionRepository,
-      stepExecutionRepository,
+      executionStateRepository,
       workflowLogger,
     } = init;
     this.syncExecutor = new WorkflowExecuteSyncStrategy(
       workflowsExecutionEngine,
-      workflowExecutionRepository,
-      stepExecutionRepository,
+      executionStateRepository,
       stepExecutionRuntime,
       workflowLogger
     );
     this.asyncExecutor = new WorkflowExecuteAsyncStrategy(
       workflowsExecutionEngine,
-      workflowExecutionRepository,
+      executionStateRepository,
       stepExecutionRuntime,
       workflowLogger
     );

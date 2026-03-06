@@ -9,7 +9,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
-import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../../../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -19,7 +19,7 @@ import { toExecutionModel } from '../utils';
 export class WorkflowExecuteAsyncStrategy {
   constructor(
     private workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart,
-    private workflowExecutionRepository: WorkflowExecutionRepository,
+    private executionStateRepository: ExecutionStateRepository,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
@@ -52,11 +52,16 @@ export class WorkflowExecuteAsyncStrategy {
       this.workflowLogger.logInfo(`Started async sub-workflow execution: ${workflowExecutionId}`);
 
       // Fetch the execution to get startedAt timestamp
-      const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
-        workflowExecutionId,
+      const executions = await this.executionStateRepository.getWorkflowExecutions(
+        new Set([workflowExecutionId]),
         spaceId
       );
 
+      if (!(workflowExecutionId in executions)) {
+        throw new Error(`Sub-workflow execution ${workflowExecutionId} not found`);
+      }
+
+      const execution = executions[workflowExecutionId];
       // Return step output for the impl to persist
       const stepOutput: Record<string, unknown> = {
         workflowId: workflow.id,

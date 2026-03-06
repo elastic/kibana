@@ -14,8 +14,7 @@ import type { EsWorkflow } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
-import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../../../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -35,8 +34,7 @@ interface SubWorkflowWaitState {
 export class WorkflowExecuteSyncStrategy {
   constructor(
     private workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart,
-    private workflowExecutionRepository: WorkflowExecutionRepository,
-    private stepExecutionRepository: StepExecutionRepository,
+    private executionStateRepository: ExecutionStateRepository,
     private stepExecutionRuntime: StepExecutionRuntime,
     private workflowLogger: IWorkflowEventLogger
   ) {}
@@ -165,14 +163,16 @@ export class WorkflowExecuteSyncStrategy {
   ): Promise<StrategyResult> {
     try {
       // Fetch sub-workflow execution status
-      const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
-        state.executionId,
+      const executions = await this.executionStateRepository.getWorkflowExecutions(
+        new Set([state.executionId]),
         spaceId
       );
 
-      if (!execution) {
+      if (!(state.executionId in executions)) {
         throw new Error(`Sub-workflow execution ${state.executionId} not found`);
       }
+
+      const execution = executions[state.executionId];
 
       // Check if execution is complete
       if (isTerminalStatus(execution.status)) {
@@ -202,16 +202,16 @@ export class WorkflowExecuteSyncStrategy {
           );
         } else {
           // Fallback: Extract output from step executions (legacy behavior).
-          // Use getStepExecutionsByWorkflowExecution (mget by stepExecutionIds) for real-time
+          // Use getStepExecutions (mget by stepExecutionIds) for real-time
           // data; search is only visible after refresh. See get_workflow_execution.ts.
-          const stepExecutions =
-            await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
-              state.executionId,
-              execution.stepExecutionIds
-            );
-          // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId)
+          const stepExecutionsMap = await this.executionStateRepository.getStepExecutions(
+            new Set(execution.stepExecutionIds ?? []),
+            spaceId
+          );
+          const stepExecutions = Object.values(stepExecutionsMap);
+          // Convert EsWorkflowStepExecution to WorkflowStepExecutionDto (omit spaceId, type)
           const stepExecutionDtos: WorkflowStepExecutionDto[] = stepExecutions.map((exec) =>
-            omit(exec, ['spaceId'])
+            omit(exec, ['spaceId', 'type'])
           );
           output = this.getWorkflowOutput(stepExecutionDtos);
           this.workflowLogger.logDebug(

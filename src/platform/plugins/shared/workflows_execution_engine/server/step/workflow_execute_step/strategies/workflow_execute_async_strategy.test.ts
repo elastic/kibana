@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { WorkflowExecuteAsyncStrategy } from './workflow_execute_async_strategy';
-import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../../../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -29,7 +29,7 @@ const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
 describe('WorkflowExecuteAsyncStrategy', () => {
   let strategy: WorkflowExecuteAsyncStrategy;
   let mockEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-  let mockExecRepo: jest.Mocked<WorkflowExecutionRepository>;
+  let mockExecutionStateRepo: jest.Mocked<ExecutionStateRepository>;
   let mockStepRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockLogger: jest.Mocked<IWorkflowEventLogger>;
   let mockRequest: KibanaRequest;
@@ -39,10 +39,12 @@ describe('WorkflowExecuteAsyncStrategy', () => {
       executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'async-exec-1' }),
     } as any;
 
-    mockExecRepo = {
-      getWorkflowExecutionById: jest.fn().mockResolvedValue({
-        id: 'async-exec-1',
-        startedAt: '2024-01-01T00:00:00Z',
+    mockExecutionStateRepo = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
+        'async-exec-1': {
+          id: 'async-exec-1',
+          startedAt: '2024-01-01T00:00:00Z',
+        },
       }),
     } as any;
 
@@ -65,7 +67,7 @@ describe('WorkflowExecuteAsyncStrategy', () => {
 
     strategy = new WorkflowExecuteAsyncStrategy(
       mockEngine,
-      mockExecRepo,
+      mockExecutionStateRepo,
       mockStepRuntime,
       mockLogger
     );
@@ -111,8 +113,8 @@ describe('WorkflowExecuteAsyncStrategy', () => {
     });
   });
 
-  it('should omit startedAt when execution fetch returns null', async () => {
-    mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
+  it('should omit startedAt when execution fetch returns empty', async () => {
+    mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({});
 
     const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
