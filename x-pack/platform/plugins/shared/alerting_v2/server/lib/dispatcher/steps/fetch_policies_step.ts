@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { nodeBuilder } from '@kbn/es-query';
 import { inject, injectable } from 'inversify';
+import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type {
   NotificationPolicy,
   NotificationPolicyId,
@@ -13,16 +17,15 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
+import { EncryptedSavedObjectsClientToken } from './dispatch_step_tokens';
 
 @injectable()
 export class FetchPoliciesStep implements DispatcherStep {
   public readonly name = 'fetch_policies';
 
   constructor(
-    @inject(NotificationPolicySavedObjectServiceInternalToken)
-    private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
+    @inject(EncryptedSavedObjectsClientToken)
+    private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
@@ -38,21 +41,44 @@ export class FetchPoliciesStep implements DispatcherStep {
       return { type: 'continue', data: { policies: new Map() } };
     }
 
-    const result = await this.notificationPolicySavedObjectService.bulkGetByIds(uniquePolicyIds);
+    const filter = nodeBuilder.or(
+      uniquePolicyIds.map((id) =>
+        nodeBuilder.is(
+          `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.id`,
+          `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}:${id}`
+        )
+      )
+    );
+
+    const finder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          filter,
+        }
+      );
+
     const policies = new Map<NotificationPolicyId, NotificationPolicy>();
 
-    for (const doc of result) {
-      if ('error' in doc) continue;
+    for await (const response of finder.find()) {
+      for (const doc of response.saved_objects) {
+        if (doc.error) {
+          continue;
+        }
 
-      policies.set(doc.id, {
-        id: doc.id,
-        name: doc.attributes.name,
-        destinations: doc.attributes.destinations ?? [],
-        matcher: doc.attributes.matcher,
-        groupBy: doc.attributes.group_by ?? [],
-        throttle: doc.attributes.throttle,
-      });
+        policies.set(doc.id, {
+          id: doc.id,
+          name: doc.attributes.name,
+          destinations: doc.attributes.destinations ?? [],
+          matcher: doc.attributes.matcher,
+          groupBy: doc.attributes.group_by ?? [],
+          throttle: doc.attributes.throttle,
+          apiKey: doc.attributes.auth.apiKey,
+        });
+      }
     }
+
+    await finder.close();
 
     return { type: 'continue', data: { policies } };
   }

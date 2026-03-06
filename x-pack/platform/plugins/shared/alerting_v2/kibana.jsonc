@@ -15,7 +15,8 @@
       "spaces",
       "data",
       "security",
-      "encryptedSavedObjects"
+      "encryptedSavedObjects",
+      "workflowsManagement"
     ],
     "optionalPlugins": ["management"],
     "extraPublicDirs": []

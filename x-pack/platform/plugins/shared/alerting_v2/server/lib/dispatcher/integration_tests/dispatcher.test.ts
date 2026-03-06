@@ -7,27 +7,30 @@
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../../resources/alert_events';
+import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import type {
+  RuleSavedObjectAttributes,
+  NotificationPolicySavedObjectAttributes,
+} from '../../../saved_objects';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
+import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
   QueryService,
   type QueryServiceContract,
 } from '../../services/query_service/query_service';
+import { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
+import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import {
   StorageService,
   type StorageServiceContract,
 } from '../../services/storage_service/storage_service';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { NotificationPolicySavedObjectService } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
-import type { RulesSavedObjectServiceContract } from '../../services/rules_saved_object_service/rules_saved_object_service';
-import type {
-  RuleSavedObjectAttributes,
-  NotificationPolicySavedObjectAttributes,
-} from '../../../saved_objects';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
 import { DispatcherPipeline } from '../execution_pipeline';
 import {
@@ -333,6 +336,37 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
   },
 ];
 
+const createMockEsoClient = (
+  npSoService: NotificationPolicySavedObjectServiceContract
+): EncryptedSavedObjectsClient =>
+  ({
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(async () => {
+      const { saved_objects: allPolicies } = await npSoService.find({
+        page: 1,
+        perPage: 1000,
+      });
+      return {
+        async *find() {
+          yield {
+            saved_objects: allPolicies.map((doc) => ({
+              id: doc.id,
+              type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+              attributes: doc.attributes,
+              references: [],
+            })),
+          };
+        },
+        close: jest.fn(),
+      };
+    }),
+  } as unknown as EncryptedSavedObjectsClient);
+
+const createMockWorkflowsManagement = (): WorkflowsServerPluginSetup['management'] =>
+  ({
+    getWorkflow: jest.fn().mockResolvedValue(null),
+    runWorkflow: jest.fn().mockResolvedValue('exec-1'),
+  } as unknown as WorkflowsServerPluginSetup['management']);
+
 describe('DispatcherService integration tests', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -343,6 +377,8 @@ describe('DispatcherService integration tests', () => {
   let mockLoggerService: LoggerServiceContract;
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: NotificationPolicySavedObjectServiceContract;
+  let mockEsoClient: EncryptedSavedObjectsClient;
+  let mockWfm: WorkflowsServerPluginSetup['management'];
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -380,17 +416,19 @@ describe('DispatcherService integration tests', () => {
 
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
+    mockEsoClient = createMockEsoClient(npSoService);
+    mockWfm = createMockWorkflowsManagement();
 
     const pipeline = new DispatcherPipeline(mockLoggerService, [
       new FetchEpisodesStep(queryService),
       new FetchSuppressionsStep(queryService),
       new ApplySuppressionStep(),
       new FetchRulesStep(rulesSoService),
-      new FetchPoliciesStep(npSoService),
+      new FetchPoliciesStep(mockEsoClient),
       new EvaluateMatchersStep(),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
-      new DispatchStep(mockLoggerService),
+      new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
     ]);
     dispatcherService = new DispatcherService(pipeline);

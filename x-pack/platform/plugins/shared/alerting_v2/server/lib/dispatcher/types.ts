@@ -69,6 +69,8 @@ export interface NotificationPolicy {
   };
   /** Target destinations to dispatch matched episodes to */
   destinations: NotificationPolicyDestination[];
+  /** Decrypted base64-encoded API key (id:key) for authenticated workflow dispatch */
+  apiKey?: string;
 }
 
 export interface MatchedPair {

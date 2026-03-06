@@ -5,29 +5,123 @@
  * 2.0.
  */
 
+import type { Headers, FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import type { DispatcherPipelineState, DispatcherStep, DispatcherStepOutput } from '../types';
+import type {
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
+  NotificationGroup,
+} from '../types';
+import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+
+const DEFAULT_SPACE_ID = 'default';
 
 @injectable()
 export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  constructor(
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(WorkflowsManagementApiToken)
+    private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
+  ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatch = [] } = state;
+    const { dispatch = [], policies } = state;
 
     for (const group of dispatch) {
-      this.logger.debug({
-        message: () =>
-          `Dispatching notification group ${group.id} for policy ${group.policyId} with ${group.destinations.length} destination(s)`,
-      });
+      const policy = policies?.get(group.policyId);
+      const apiKey = policy?.apiKey;
+
+      if (!apiKey) {
+        this.logger.warn({
+          message: () =>
+            `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`,
+        });
+        continue;
+      }
+
+      const fakeRequest = this.craftFakeRequest(apiKey);
+
+      for (const destination of group.destinations) {
+        if (destination.type !== 'workflow') {
+          continue;
+        }
+
+        await this.dispatchWorkflow(group, destination.id, fakeRequest);
+      }
     }
 
     return { type: 'continue' };
+  }
+
+  private craftFakeRequest(apiKey: string): KibanaRequest {
+    const requestHeaders: Headers = {
+      authorization: `ApiKey ${apiKey}`,
+    };
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: requestHeaders,
+      path: '/',
+    };
+
+    return kibanaRequestFactory(fakeRawRequest);
+  }
+
+  private async dispatchWorkflow(
+    group: NotificationGroup,
+    workflowId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const workflow = await this.workflowsManagement.getWorkflow(workflowId, DEFAULT_SPACE_ID);
+
+    if (!workflow) {
+      this.logger.warn({
+        message: () => `Workflow ${workflowId} not found, skipping dispatch for group ${group.id}`,
+      });
+      return;
+    }
+
+    const model: WorkflowExecutionEngineModel = {
+      id: workflow.id,
+      name: workflow.name,
+      enabled: workflow.enabled,
+      definition: workflow.definition ?? undefined,
+      yaml: workflow.yaml,
+    };
+
+    const payload = {
+      id: group.id,
+      ruleId: group.ruleId,
+      policyId: group.policyId,
+      groupKey: group.groupKey,
+      episodes: group.episodes,
+    };
+
+    this.logger.debug({
+      message: () =>
+        `Dispatching notification group ${group.id} to workflow ${workflowId} for policy ${group.policyId}`,
+    });
+
+    const executionId = await this.workflowsManagement.runWorkflow(
+      model,
+      DEFAULT_SPACE_ID,
+      payload,
+      request
+    );
+
+    this.logger.debug({
+      message: () =>
+        `Workflow ${workflowId} execution started with id ${executionId} for group ${group.id}`,
+    });
   }
 }
