@@ -20,12 +20,14 @@ import {
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
+  useFetchContext,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
+import { rewriteFiltersForSloSummary } from '../../../../common/rewrite_slo_filters';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
@@ -209,6 +211,15 @@ export const getOverviewEmbeddableFactory = ({
             fetchSubscription.unsubscribe();
           };
         }, []);
+        const fetchContext = useFetchContext(api);
+        const mergedFilters = useMemo(
+          () => [
+            ...(toStoredFilters(groupFilters?.filters) ?? []),
+            ...rewriteFiltersForSloSummary(fetchContext.filters ?? []),
+          ],
+          [groupFilters?.filters, fetchContext.filters]
+        );
+
         const renderOverview = () => {
           if (overviewMode === 'groups') {
             const groupBy = groupFilters?.group_by ?? 'status';
@@ -237,7 +248,7 @@ export const getOverviewEmbeddableFactory = ({
                       groupBy={groupBy}
                       groups={groups}
                       kqlQuery={kqlQuery}
-                      filters={toStoredFilters(groupFilters?.filters) ?? []}
+                      filters={mergedFilters}
                       reloadSubject={reload$}
                     />
                   </EuiFlexItem>

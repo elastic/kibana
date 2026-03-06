@@ -60,7 +60,7 @@ export function useFetchSLOsOverview({
           ],
           dataView,
           {
-            ignoreFilterIfFieldNotInIndex: true,
+            ignoreFilterIfFieldNotInIndex: false,
           }
         )
       );
