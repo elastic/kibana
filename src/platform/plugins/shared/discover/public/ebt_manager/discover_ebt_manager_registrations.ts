@@ -33,6 +33,12 @@ export const CONTEXTUAL_PROFILE_ID = 'profileId';
 
 export const TABS_EVENT_TYPE = 'discover_tabs';
 
+/** METRICS_INFO request failed (Metrics experience). */
+export const METRICS_INFO_FETCH_FAILED_EVENT_TYPE = 'discover_metrics_info_fetch_failed';
+export const METRICS_INFO_FETCH_FAILED_ESQL_QUERY = 'esqlQuery';
+export const METRICS_INFO_FETCH_FAILED_DATA_VIEW_ID = 'dataViewId';
+export const METRICS_INFO_FETCH_FAILED_ERROR_MESSAGE = 'errorMessage';
+
 /**
  * This function is statically imported since analytics registrations must happen at setup,
  * while the EBT manager is loaded dynamically when needed to avoid page load bundle bloat
@@ -186,6 +192,32 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The keyboard key used for tab navigation',
+          optional: true,
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: METRICS_INFO_FETCH_FAILED_EVENT_TYPE,
+    schema: {
+      [METRICS_INFO_FETCH_FAILED_ESQL_QUERY]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The ES|QL query that was used for the failed METRICS_INFO request',
+        },
+      },
+      [METRICS_INFO_FETCH_FAILED_DATA_VIEW_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'Data view id for the failed request',
+          optional: true,
+        },
+      },
+      [METRICS_INFO_FETCH_FAILED_ERROR_MESSAGE]: {
+        type: 'keyword',
+        _meta: {
+          description: 'Error message from the failed METRICS_INFO request',
           optional: true,
         },
       },

@@ -30,6 +30,10 @@ import {
   FIELD_USAGE_FILTER_OPERATION,
   TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
+  METRICS_INFO_FETCH_FAILED_EVENT_TYPE,
+  METRICS_INFO_FETCH_FAILED_ESQL_QUERY,
+  METRICS_INFO_FETCH_FAILED_DATA_VIEW_ID,
+  METRICS_INFO_FETCH_FAILED_ERROR_MESSAGE,
 } from './discover_ebt_manager_registrations';
 import {
   analyzeMultiMatchTypesRequest,
@@ -78,6 +82,12 @@ interface TabsEventData {
 interface ContextualProfileResolvedEventData {
   [CONTEXTUAL_PROFILE_LEVEL]: ContextualProfileLevel;
   [CONTEXTUAL_PROFILE_ID]: string;
+}
+
+export interface MetricsInfoFetchFailedEventData {
+  [METRICS_INFO_FETCH_FAILED_ESQL_QUERY]: string;
+  [METRICS_INFO_FETCH_FAILED_DATA_VIEW_ID]?: string;
+  [METRICS_INFO_FETCH_FAILED_ERROR_MESSAGE]?: string;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -412,5 +422,12 @@ export class ScopedDiscoverEBTManager {
     };
 
     this.reportEvent(TABS_EVENT_TYPE, eventData);
+  }
+
+  public reportMetricsInfoFetchFailed(eventData: MetricsInfoFetchFailedEventData) {
+    if (!this.reportEvent) {
+      return;
+    }
+    this.reportEvent(METRICS_INFO_FETCH_FAILED_EVENT_TYPE, eventData);
   }
 }
