@@ -12,10 +12,9 @@ import {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from '@kbn/streams-ai/src/significant_events/types';
-import type { Evaluator } from '@kbn/evals';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { selectEvaluators } from '@kbn/evals';
-import type { EvaluationCriterion } from '@kbn/evals';
+import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
 
@@ -41,14 +40,25 @@ interface Query {
   evidence?: string[];
 }
 
+interface QueryGenerationTaskOutput {
+  queries: Query[];
+  traceId?: string | null;
+}
+
+type QueryGenerationOutput = Query[] | QueryGenerationTaskOutput;
+
+const getQueriesFromOutput = (output: QueryGenerationOutput): Query[] => {
+  return Array.isArray(output) ? output : output.queries;
+};
+
 const createQueryGenerationCodeEvaluator = (
   esClient: ElasticsearchClient,
   logger?: Logger
-): Evaluator<QueryGenerationEvaluationExample, Query[]> => ({
+): Evaluator<QueryGenerationEvaluationExample, QueryGenerationOutput> => ({
   name: 'query_generation_code_evaluator',
   kind: 'CODE' as const,
   evaluate: async ({ output, input }) => {
-    const queries = output;
+    const queries = getQueriesFromOutput(output ?? []);
 
     if (queries.length === 0 || !queries[0] || !queries[0].esql) {
       return {
@@ -157,9 +167,11 @@ export const createQueryGenerationEvaluators = (
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator<QueryGenerationEvaluationExample, Query[]>({
-      criteriaFn: (c) => criteriaFn(c) as Evaluator<QueryGenerationEvaluationExample, Query[]>,
+    createScenarioCriteriaLlmEvaluator<QueryGenerationEvaluationExample, QueryGenerationOutput>({
+      criteriaFn: (c) =>
+        criteriaFn(c) as Evaluator<QueryGenerationEvaluationExample, QueryGenerationOutput>,
       criteria,
+      transformOutput: (output) => getQueriesFromOutput(output),
     }),
   ];
 };

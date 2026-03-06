@@ -51,7 +51,24 @@ export interface FeatureIdentificationEvaluationDataset {
  * These verify objectively measurable properties without relying on an LLM judge.
  */
 
-type FeatureExtractionEvaluator = Evaluator<FeatureExtractionEvaluationExample, BaseFeature[]>;
+interface FeatureExtractionTaskOutput {
+  features: BaseFeature[];
+  traceId?: string | null;
+}
+
+type FeatureExtractionOutput = BaseFeature[] | FeatureExtractionTaskOutput;
+
+type FeatureExtractionEvaluator = Evaluator<
+  FeatureExtractionEvaluationExample,
+  FeatureExtractionOutput
+>;
+
+const getFeaturesFromOutput = (output: FeatureExtractionOutput | undefined): BaseFeature[] => {
+  if (!output) {
+    return [];
+  }
+  return Array.isArray(output) ? output : output.features ?? [];
+};
 
 /**
  * Validates that every feature's `type` is one of the valid feature types.
@@ -62,7 +79,7 @@ const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
   evaluate: async ({ output }) => {
-    const features = output ?? [];
+    const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
       return { score: 1, explanation: 'No features to validate (vacuously valid)' };
     }
@@ -189,7 +206,7 @@ const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
   evaluate: async ({ input, output }) => {
-    const features = output ?? [];
+    const features = getFeaturesFromOutput(output);
     const rawDocs: Array<Record<string, unknown>> = input.sample_documents.map((hit) => ({
       _id: hit._id,
       _source: hit._source,
@@ -308,7 +325,7 @@ const featureCountEvaluator = {
   name: 'feature_count',
   kind: 'CODE' as const,
   evaluate: async ({ output, expected }) => {
-    const count = output?.length ?? 0;
+    const count = getFeaturesFromOutput(output).length;
     const { min_features = -Infinity, max_features = Infinity } = expected;
 
     const issues: string[] = [];
@@ -341,7 +358,7 @@ const confidenceBoundsEvaluator = {
   evaluate: async ({ output, expected }) => {
     const { max_confidence = 100 } = expected;
 
-    const features = output ?? [];
+    const features = getFeaturesFromOutput(output);
     if (features.length === 0) {
       return {
         score: 1,
@@ -382,7 +399,7 @@ const typeAssertionsEvaluator = {
       return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
-    const features = output ?? [];
+    const features = getFeaturesFromOutput(output);
     const presentTypes = new Set(features.map((f) => f.type));
     const issues: string[] = [];
     let totalAssertions = 0;
@@ -443,10 +460,13 @@ export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator<FeatureExtractionEvaluationExample, BaseFeature[]>({
-      criteriaFn: (c) =>
-        criteriaFn(c) as Evaluator<FeatureExtractionEvaluationExample, BaseFeature[]>,
-      criteria,
-    }),
+    createScenarioCriteriaLlmEvaluator<FeatureExtractionEvaluationExample, FeatureExtractionOutput>(
+      {
+        criteriaFn: (c) =>
+          criteriaFn(c) as Evaluator<FeatureExtractionEvaluationExample, FeatureExtractionOutput>,
+        criteria,
+        transformOutput: (output) => getFeaturesFromOutput(output),
+      }
+    ),
   ];
 };
