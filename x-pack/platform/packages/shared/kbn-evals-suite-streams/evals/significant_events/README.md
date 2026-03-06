@@ -123,7 +123,7 @@ node scripts/evals run \
 | --- | --- |
 | `--suite` | Suite ID to run (use `streams/significant-events`) |
 | `--project` | Connector/model project to evaluate against |
-| `--judge` | Connector ID for the LLM judge (use Gemini 2.5 Pro for consistency) |
+| `--judge` | Connector ID for the LLM judge (use Gemini 3 Pro for consistency) |
 | `--repetitions` | Number of times to repeat each evaluation example (e.g., `3`) |
 | `--trace-es-url` | URL of the Elasticsearch cluster where traces are stored (e.g., `https://user:pass@trace-cluster:9200`) |
 | `--dry-run` | Preview the command without executing |
