@@ -26,18 +26,30 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
       // Get the userActivity service from core
       const [coreStart] = await core.getStartServices();
 
+      const start = Date.now();
       // Track the user action
       coreStart.userActivity.trackUserAction({
         event: {
           // using `as any` because we don't want to add this action to the public docs
           action: 'example_button_click' as any,
           type: 'change',
+          start: new Date(start).toISOString(),
+          end: new Date().toISOString(),
+          duration: (Date.now() - start) * 1_000_000,
         },
         object: {
           id: 'example-object-1',
           name: 'Example Object',
           type: 'example',
           tags: ['demo', 'user-activity'],
+        },
+        metadata: {
+          user_input: {
+            indices: ['logs-*'],
+            time: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-02T00:00:00.000Z' },
+            global_query: 'host.name: "web-01"',
+            filters: [{ name: 'Example filter', dslQuery: { match_all: {} }, enabled: true }],
+          },
         },
       });
 
