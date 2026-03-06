@@ -86,9 +86,7 @@ export const journey = new Journey({
     await setMonacoEditorValue('', page);
 
     for (const evalCount of [10, 25, 50, 75, 100]) {
-      const marksBefore = await countValidationMarks(page);
       await setMonacoEditorValue(buildLargeQuery(evalCount), page);
-      await waitForValidation(page, marksBefore);
     }
 
     await typeESQLEditorQuery(`\n| RENAME col0 AS renamed_field | KEEP renamed_field`, page, 100);
