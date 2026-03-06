@@ -727,7 +727,7 @@ jobs:
           curl -fsS -X POST "${NO_V1}/key/delete" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{key: $key}')" || echo "::warning::Failed to revoke short-lived key"
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
 
   # ---------------------------------------------------------------------------
   # Phase C: Apply changes and either push to the existing PR branch or
@@ -1180,7 +1180,7 @@ jobs:
           curl -fsS -X POST "${NO_V1}/key/delete" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{key: $key}')" || echo "::warning::Failed to revoke short-lived key"
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
 
   review_publish:
     name: "Review Phase C: Publish Comment"
