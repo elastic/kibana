@@ -89,6 +89,24 @@ Read `action-ralph/lessons_learned.md` for the full list. Critical items:
 - Use deterministic test isolation and cleanup in setup/teardown.
 - If using Jest fake timers, always restore real timers in `afterEach`.
 
+## Self-review task
+
+The spec includes a final "Self-review" task. When you reach it:
+
+1. **Start fresh** — treat the changes as if someone else wrote them. You have no memory of previous sessions.
+2. **Read the full diff** — run `git diff` and read every changed file end-to-end. Don't skim.
+3. **Evaluate against these criteria:**
+   - Best practices for the codebase (naming, patterns, imports, error handling)
+   - Code cleanliness — no leftover debug code, TODOs from the agent, commented-out code, or unnecessary changes
+   - Correctness — logic bugs, unhandled edge cases, missed requirements from the original prompt
+   - Consistency — naming, formatting, and style match the surrounding code
+   - Test coverage — are the changes adequately tested? Are tests meaningful (not just asserting `true`)?
+4. **Fix issues** — apply code fixes directly. This is not a read-only review.
+5. **Re-validate** — if you made any fixes, re-run the relevant local checks (jest for touched test files, eslint for touched source files, scoped type-check if types changed). Follow the same validation guidance as implementation tasks.
+6. **Document findings** — record what you reviewed and any fixes applied in `## Additional Context`. If everything looked good, say so explicitly.
+
+The self-review must always be the **last task** before setting status to `done`. If the planning task adds more implementation tasks, keep the self-review at the end.
+
 ## Additional Context usage
 Document in `## Additional Context`:
 - File paths and functions discovered

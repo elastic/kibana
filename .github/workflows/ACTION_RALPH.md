@@ -27,7 +27,8 @@ The core innovation borrowed from [joes-ralphies](https://github.com/joereuter/j
 2. The agent is invoked repeatedly, each time seeing the **protocol + spec** as its prompt.
 3. Each iteration, the agent picks the first unchecked task, executes it, updates the spec, and exits.
 4. The loop checks `## Status` -- if `done` or `aborted`, the loop exits. Otherwise, the next iteration runs with fresh context but the updated spec.
-5. Maximum iterations (default: 5) prevents runaway costs.
+5. The final task is always a **self-review**: the agent reviews all changes with fresh eyes, checks best practices, fixes any issues, and re-runs local checks if needed.
+6. Maximum iterations (default: 5) prevents runaway costs.
 
 This means the agent can plan its own work across sessions. Session 1 might investigate and expand the task list, session 2 implements, session 3 tests, etc.
 

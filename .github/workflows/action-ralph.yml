@@ -135,17 +135,19 @@ jobs:
             PR_BRANCH="${{ github.event.pull_request.head.ref }}"
             PR_HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
           elif [ "${{ github.event_name }}" = "issue_comment" ]; then
-            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" 2>/dev/null || echo "")
+            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" 2>/dev/null) || PR_JSON=""
             if [ -n "$PR_JSON" ]; then
-              PR_BRANCH=$(echo "$PR_JSON" | jq -r '.head.ref')
-              PR_HEAD_REPO=$(echo "$PR_JSON" | jq -r '.head.repo.full_name')
-              IS_PR="true"
-              if [ "$PR_HEAD_REPO" = "${{ github.repository }}" ]; then
-                IS_FORK_PR="false"
-              else
-                IS_FORK_PR="true"
+              PR_BRANCH=$(printf '%s' "$PR_JSON" | jq -r '.head.ref // empty')
+              PR_HEAD_REPO=$(printf '%s' "$PR_JSON" | jq -r '.head.repo.full_name // empty')
+              if [ -n "$PR_BRANCH" ] && [ -n "$PR_HEAD_REPO" ]; then
+                IS_PR="true"
+                if [ "$PR_HEAD_REPO" = "${{ github.repository }}" ]; then
+                  IS_FORK_PR="false"
+                else
+                  IS_FORK_PR="true"
+                fi
+                PR_NUMBER="${{ github.event.issue.number }}"
               fi
-              PR_NUMBER="${{ github.event.issue.number }}"
             fi
           fi
 
@@ -430,11 +432,12 @@ jobs:
 
           ## Tasks
           * [ ] Understand the request: ${PROMPT}
-          * [ ] Plan and expand this into concrete implementation tasks based on what you find. Keep in mind each task runs in a separate agent session with fresh context, so each should be self-contained. Include validation (run tests).
+          * [ ] Plan and expand this into concrete implementation tasks based on what you find. Keep in mind each task runs in a separate agent session with fresh context, so each should be self-contained. Include validation (run tests). Always keep the self-review task as the very last task.
           * [ ] (expanded tasks will be added here by the agent)
+          * [ ] Self-review: With fresh eyes, review ALL changes made during this spec. Run \`git diff\` to see every change, read through each file carefully, and evaluate: (1) are best practices followed, (2) is the code clean and idiomatic for the codebase, (3) are there any bugs, edge cases, or missed requirements, (4) is naming consistent and descriptive, (5) are there unnecessary changes or leftover debug code. Fix any issues found. If fixes are applied, re-run the relevant local checks (jest/lint/typecheck for touched files) to ensure nothing is broken. Document review findings in Additional Context.
 
           ## Definition of done
-          All requested changes are implemented, tests pass, and the spec status is set to "done".
+          All requested changes are implemented, tests pass, self-review is completed with no outstanding issues, and the spec status is set to "done".
 
           ## Additional Context
           (populated by the agent across iterations)
