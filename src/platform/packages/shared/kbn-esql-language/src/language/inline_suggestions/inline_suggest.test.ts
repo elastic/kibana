@@ -103,7 +103,7 @@ describe('inlineSuggest', () => {
   });
 
   it('should return suggestions when cursor is at the end of the query', async () => {
-    const result = await inlineSuggest('FROM logs* ', 'FROM logs* ', mockRange, mockCallbacks);
+    const result = await inlineSuggest('FROM logs*', 'FROM logs*', mockRange, mockCallbacks);
 
     expect(result.items.length).toBeGreaterThan(0);
     const suggestions = result.items.map((item) => item.insertText);

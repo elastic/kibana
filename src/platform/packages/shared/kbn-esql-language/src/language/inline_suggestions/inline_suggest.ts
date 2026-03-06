@@ -249,8 +249,7 @@ export async function inlineSuggest(
       callbacks
     );
 
-    // Fetch all suggestions — pass the user's query text so the centralized
-    // isSourceComplete check in getEditorExtensions can gate the HTTP call.
+    // Fetch all suggestions
     const allSuggestions = await fetchAllSuggestions(
       fromCommand,
       timeField,

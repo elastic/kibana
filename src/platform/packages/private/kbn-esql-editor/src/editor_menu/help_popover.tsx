@@ -147,9 +147,6 @@ export const HelpPopover: React.FC<{
       }
 
       try {
-        // Use the actual user query so the cursor-based isSourceComplete check
-        // works naturally, and the result shares the same cache key as the
-        // autocomplete pipeline (both extract the same index pattern).
         const query = currentQueryRef.current || queryForRecommendedQueries;
         const extensions = await getEditorExtensions(
           http,
@@ -158,6 +155,7 @@ export const HelpPopover: React.FC<{
         );
 
         if (cancelled) return;
+        // Only update state if the new data is actually different from the *last successfully set* data
         if (!isEqual(extensions.recommendedQueries, lastFetchedQueries.current)) {
           setSolutionsRecommendedQueries(extensions.recommendedQueries);
           lastFetchedQueries.current = extensions.recommendedQueries;

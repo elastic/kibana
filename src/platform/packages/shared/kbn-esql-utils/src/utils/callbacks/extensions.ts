@@ -80,6 +80,10 @@ const cachedGetEditorExtensions = cacheParametrizedAsyncFunction(
 
 /**
  * Fetches editor extensions from the registry based on the provided query string and active solution ID.
+ * @param queryString The query string to search for extensions.
+ * @param activeSolutionId The active solution ID to filter extensions.
+ * @param http The HTTP service to use for the request.
+ * @returns A promise that resolves to the editor extensions.
  * Results are cached by index pattern so they are computed once per source and reused
  * across all consumers. While the user is still typing the source name the function
  * returns an empty result immediately without making any HTTP requests.
