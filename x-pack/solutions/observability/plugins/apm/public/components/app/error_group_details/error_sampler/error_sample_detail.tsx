@@ -233,7 +233,7 @@ export function ErrorSampleDetails({
       ) : (
         <Summary
           items={[
-            <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
+            <TimestampTooltip time={errorData && error ? (error.timestamp?.us ?? 0) / 1000 : 0} />,
             errorUrl ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,
