@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ScopedHistory } from '@kbn/core/public';
 
@@ -75,18 +74,6 @@ function getHttpErrorBody(error: unknown): { statusCode: number; error: string }
 }
 
 export class RemoteClusterList extends Component<Props> {
-  static propTypes = {
-    loadClusters: PropTypes.func.isRequired,
-    refreshClusters: PropTypes.func.isRequired,
-    openDetailPanel: PropTypes.func.isRequired,
-    closeDetailPanel: PropTypes.func.isRequired,
-    isDetailPanelOpen: PropTypes.bool,
-    clusters: PropTypes.array,
-    isLoading: PropTypes.bool,
-    isCopyingCluster: PropTypes.bool,
-    isRemovingCluster: PropTypes.bool,
-  };
-
   interval?: ReturnType<typeof setInterval>;
 
   componentDidUpdate() {

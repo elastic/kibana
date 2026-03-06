@@ -21,3 +21,11 @@ export function getIndexPatternsForStream(stream: Streams.all.Definition | undef
   const dataStreamOfDefinition = stream.name;
   return [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`];
 }
+
+export function getSourcesForStream(stream: Streams.all.Definition): string[] {
+  if (Streams.QueryStream.Definition.is(stream)) {
+    return [stream.query.view];
+  }
+
+  return getIndexPatternsForStream(stream);
+}

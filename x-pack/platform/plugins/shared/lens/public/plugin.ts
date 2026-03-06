@@ -376,6 +376,7 @@ export class LensPlugin {
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
         datasourceMap,
+        eventAnnotationService,
         theme: core.theme,
         uiSettings: core.uiSettings,
       };
@@ -406,7 +407,7 @@ export class LensPlugin {
               const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
               const builder = new LensConfigBuilder(undefined, flags.apiFormat);
 
-              return getTransformOut(builder, transformDrilldownsOut);
+              return getTransformOut(builder, transformDrilldownsOut, true); // This will always be called from a dashboard app
             }
           );
         })
@@ -756,8 +757,8 @@ export class LensPlugin {
         { openInNewTab = false, originatingApp = '', originatingPath, skipAppLeave = false } = {}
       ) => {
         // for openInNewTab, we set the time range in url via getEditPath below
-        if (input?.timeRange && !openInNewTab) {
-          startDependencies.data.query.timefilter.timefilter.setTime(input.timeRange);
+        if (input?.time_range && !openInNewTab) {
+          startDependencies.data.query.timefilter.timefilter.setTime(input.time_range);
         }
         const transfer = new EmbeddableStateTransfer(
           core.application.navigateToApp,
@@ -765,7 +766,7 @@ export class LensPlugin {
         );
         transfer.navigateToEditor(APP_ID, {
           openInNewTab,
-          path: getEditPath(undefined, (openInNewTab && input?.timeRange) || undefined),
+          path: getEditPath(undefined, (openInNewTab && input?.time_range) || undefined),
           state: {
             originatingApp,
             originatingPath,
