@@ -13,10 +13,9 @@ import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common'
 
 import { AddFromLibraryFlyout } from './add_from_library_flyout';
 import { usageCollection } from '../kibana_services';
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { registerAddFromLibraryType } from './registry';
-import type { PresentationContainer } from '@kbn/presentation-containers';
-import type { HasType } from '@kbn/presentation-publishing';
+import type { PresentationContainer, HasType } from '@kbn/presentation-publishing';
 
 // Mock saved objects finder component so we can call the onChoose method.
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => {

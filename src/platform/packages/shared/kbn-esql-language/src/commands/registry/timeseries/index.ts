@@ -28,6 +28,7 @@ export const timeseriesCommand = {
     type: 'source' as const,
     hidden: false,
     preview: true,
+    isTimeseries: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.metricsDoc', {
       defaultMessage:
         'A metrics-specific source command, use this command to load data from TSDB indices. ' +
@@ -37,7 +38,7 @@ export const timeseriesCommand = {
         'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
         'When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
-    declaration: '',
+    declaration: 'TS timeseries_index [METADATA fields]',
     examples: ['TS index', 'TS index, index2'],
   },
 };

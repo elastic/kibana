@@ -177,6 +177,7 @@ export const useInfrastructureNodeMetrics = <T>(
   return {
     isLoading,
     data,
+    metricIndices,
   };
 };
 

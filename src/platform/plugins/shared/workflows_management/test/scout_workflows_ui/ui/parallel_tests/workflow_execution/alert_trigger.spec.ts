@@ -11,7 +11,11 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
-import { ALERT_PROPAGATION_TIMEOUT, EXECUTION_TIMEOUT } from '../../fixtures/constants';
+import {
+  ALERT_PROPAGATION_TIMEOUT,
+  ALERT_TRIGGER_TEST_TIMEOUT,
+  EXECUTION_TIMEOUT,
+} from '../../fixtures/constants';
 import {
   getCreateObsAlertRuleWorkflowYaml,
   getCreateSecurityAlertRuleWorkflowYaml,
@@ -80,6 +84,7 @@ test.describe(
       scoutSpace,
       config,
     }) => {
+      test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
       const getCreateAlertRuleYaml = getCreateAlertRuleWorkflow(config.projectType);
 
       const singleWorkflowName = 'Handle single alert';
@@ -210,6 +215,7 @@ test.describe(
       scoutSpace,
       config,
     }) => {
+      test.setTimeout(ALERT_TRIGGER_TEST_TIMEOUT);
       const getCreateAlertRuleYaml = getCreateAlertRuleWorkflow(config.projectType);
 
       const disabledWorkflowName = 'Disabled alert target';

@@ -71,7 +71,8 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
     '.internal.alerts-observability.test.alerts.alerts-default-000001';
   const timestampPattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
 
-  describe('alerts as data delay', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/250277
+  describe.skip('alerts as data delay', function () {
     this.tags('skipFIPS');
     before(async () => {
       await esTestIndexTool.setup();

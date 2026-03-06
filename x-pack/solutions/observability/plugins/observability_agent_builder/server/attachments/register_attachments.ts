@@ -16,6 +16,10 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
+import { createServiceAttachmentType } from './service';
+import { createSloAttachmentType } from './slo';
+import { createHostAttachmentType } from './host';
+import { createTransactionAttachmentType } from './transaction';
 
 export async function registerAttachments({
   core,
@@ -30,9 +34,13 @@ export async function registerAttachments({
 }) {
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createAiInsightAttachmentType(),
-    createErrorAttachmentType({ core, logger, dataRegistry }),
+    createErrorAttachmentType({ logger, dataRegistry }),
     createAlertAttachmentType({ core, logger }),
-    createLogAttachmentType({ core, logger, dataRegistry }),
+    createLogAttachmentType({ core, logger }),
+    createServiceAttachmentType({ logger, dataRegistry }),
+    createSloAttachmentType({ logger, dataRegistry }),
+    createHostAttachmentType({ logger, dataRegistry }),
+    createTransactionAttachmentType({ logger, dataRegistry }),
   ];
 
   for (const attachment of attachmentTypes) {

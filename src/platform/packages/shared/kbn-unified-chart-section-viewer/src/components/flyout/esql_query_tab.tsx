@@ -21,7 +21,7 @@ export const EsqlQueryTab = ({ esqlQuery, metric }: EsqlQueryTabProps) => {
   return (
     <>
       <TabTitleAndDescription metric={metric} />
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="s" isCopyable>
+      <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" isCopyable>
         {esqlQuery}
       </EuiCodeBlock>
     </>

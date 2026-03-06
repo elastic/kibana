@@ -13,6 +13,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
+import { ON_CLICK_IMAGE } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { ImageEmbeddableApi } from '../types';
 import type { FileImageMetadata, FilesClient } from '../imports';
 import { imageEmbeddableFileKind } from '../imports';
@@ -31,9 +32,9 @@ interface ImageEmbeddableProps {
 }
 
 export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
-  const [imageConfig, dynamicActionsState] = useBatchedPublishingSubjects(
+  const [imageConfig, drilldowns] = useBatchedPublishingSubjects(
     api.imageConfig$,
-    api.dynamicActionsState$ ?? new BehaviorSubject<undefined>(undefined)
+    api.drilldowns$ ?? new BehaviorSubject<undefined>(undefined)
   );
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
@@ -47,8 +48,8 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
 
   useEffect(() => {
     // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
-    setHasTriggerActions((dynamicActionsState?.dynamicActions.events ?? []).length > 0);
-  }, [dynamicActionsState]);
+    setHasTriggerActions(drilldowns?.length > 0);
+  }, [drilldowns]);
 
   return (
     <ImageViewerContext.Provider
@@ -79,7 +80,7 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
           // note: passing onClick enables the cursor pointer style, so we only pass it if there are compatible actions
           hasTriggerActions
             ? () => {
-                uiActionsService.executeTriggerActions('IMAGE_CLICK_TRIGGER', {
+                uiActionsService.executeTriggerActions(ON_CLICK_IMAGE, {
                   embeddable: api,
                 });
               }

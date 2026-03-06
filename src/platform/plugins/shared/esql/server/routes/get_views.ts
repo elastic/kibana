@@ -8,13 +8,13 @@
  */
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
-
+import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '../services/esql_service';
 
 export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
     {
-      path: '/internal/esql/views',
+      path: VIEWS_ROUTE,
       validate: {},
       security: {
         authz: {
@@ -34,7 +34,9 @@ export const registerGetViewsRoute = (router: IRouter, { logger }: PluginInitial
         });
       } catch (error) {
         logger.get().debug(error);
-        throw error;
+        return response.ok({
+          body: { views: [] },
+        });
       }
     }
   );

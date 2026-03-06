@@ -63,7 +63,9 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
   pkgInfo: PackageInfo,
   existingDataStreams: IndicesDataStream[]
 ) => {
-  return (existingDataStreams || []).some((ds) => ds._meta?.package?.name !== pkgInfo.name);
+  return (existingDataStreams || []).some(
+    (ds) => ds._meta?.package?.name && ds._meta.package.name !== pkgInfo.name
+  );
 };
 
 export const isInputPackageDatasetUsedByMultiplePolicies = (
@@ -181,7 +183,14 @@ async function installAssetsForDataStreamType(opts: {
       throw new PackagePolicyValidationError(
         `Datastreams matching "${streamIndexPattern}" already exist and are not managed by this package, force flag is required`
       );
-    } else {
+    }
+    if (existingDataStreamsAreFromDifferentPackage && force) {
+      logger.info(
+        `Data stream for dataset ${datasetName} already exists, but is managed by a different package, skipping index template creation`
+      );
+      return;
+    }
+    if (!force) {
       logger.info(
         `Data stream for dataset ${datasetName} already exists, skipping index template creation`
       );
@@ -196,14 +205,22 @@ async function installAssetsForDataStreamType(opts: {
 
   if (existingIndexTemplate) {
     const indexTemplateOwnedByDifferentPackage =
-      existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
+      existingIndexTemplate._meta?.package?.name &&
+      existingIndexTemplate._meta.package.name !== pkgInfo.name;
     if (indexTemplateOwnedByDifferentPackage && !force) {
       // index template already exists but there is no data stream yet
       // we do not want to override the index template
       throw new PackagePolicyValidationError(
         `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
       );
-    } else {
+    }
+    if (indexTemplateOwnedByDifferentPackage && force) {
+      logger.info(
+        `Index template "${dataStream.type}-${datasetName}" already exists, but is managed by a different package, skipping index template creation`
+      );
+      return;
+    }
+    if (!force) {
       logger.info(
         `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation`
       );

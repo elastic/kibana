@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type {
   DashboardAgentPluginPublicSetup,
   DashboardAgentPluginPublicStart,
@@ -34,15 +35,21 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    core: CoreStart,
+    _core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
     import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
+      const dashboardLocator = plugins.share.url.locators.get(DASHBOARD_APP_LOCATOR);
+      const findDashboardsServicePromise = plugins.dashboard.findDashboardsService();
       this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
         attachments: plugins.agentBuilder.attachments,
-        chat$: plugins.agentBuilder.events.chat$,
-        share: plugins.share,
-        core,
+        dashboardLocator,
+        unifiedSearch: plugins.unifiedSearch,
+        doesSavedDashboardExist: async (dashboardId: string) => {
+          const findDashboardsService = await findDashboardsServicePromise;
+          const result = await findDashboardsService.findById(dashboardId);
+          return result.status === 'success';
+        },
       });
     });
 

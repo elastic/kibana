@@ -9,6 +9,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { EsqlViewsResult } from '@kbn/esql-types';
+import { VIEWS_ROUTE } from '@kbn/esql-types';
 import { cacheParametrizedAsyncFunction } from './utils/cache';
 
 /**
@@ -19,7 +20,7 @@ import { cacheParametrizedAsyncFunction } from './utils/cache';
 export const getViews = cacheParametrizedAsyncFunction(
   async (http: HttpStart) => {
     try {
-      const result = await http.get<EsqlViewsResult>('/internal/esql/views');
+      const result = await http.get<EsqlViewsResult>(VIEWS_ROUTE);
       return result ?? { views: [] };
     } catch {
       // API may be unavailable (e.g. 404 in FTR when ES plugin route is not registered)

@@ -16,6 +16,7 @@ import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import { FieldIcon } from '@kbn/react-field';
 import { getFieldIconType } from '@kbn/field-utils/src/components/field_select/utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
+import { DataSourceSelectionChange } from '../types';
 import { FIELDS_BROWSER_I18N_KEYS } from './i18n';
 import { getFieldTypeLabel, getFieldTypeIconType } from './utils';
 
@@ -23,7 +24,7 @@ interface FieldsBrowserProps {
   isOpen: boolean;
   isLoading: boolean;
   onClose: () => void;
-  onSelect: (fieldNames: string[], previousCount: number) => void;
+  onSelect: (fieldName: string, change: DataSourceSelectionChange) => void;
   allFields: ESQLFieldWithMetadata[];
   recommendedFields: RecommendedField[];
   position?: { top?: number; left?: number };
@@ -185,19 +186,17 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
 
   const handleSelectionChange = useCallback(
     (changedOption: EuiSelectableOption | undefined) => {
-      let newSelected;
+      const fieldName = changedOption?.key;
+      if (!fieldName || typeof fieldName !== 'string') return;
 
-      if (changedOption?.checked === 'on') {
-        newSelected = [...selectedItems, changedOption.key as string];
-      } else {
-        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
-      }
-
-      const oldCount = selectedItems.length;
-      setSelectedItems(newSelected);
-      onSelect(newSelected, oldCount);
+      const isSelected = changedOption.checked === 'on';
+      setSelectedItems(isSelected ? [fieldName] : []);
+      onSelect(
+        fieldName,
+        isSelected ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove
+      );
     },
-    [onSelect, selectedItems]
+    [onSelect]
   );
 
   const handleTypeFilterChange = (
@@ -277,6 +276,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      isMultiSelect={false}
     />
   );
 };

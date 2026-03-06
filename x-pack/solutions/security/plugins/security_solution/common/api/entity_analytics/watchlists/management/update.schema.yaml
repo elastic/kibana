@@ -1,0 +1,71 @@
+# Update Watchlist API Schema
+# Modeled after create.schema.yaml
+openapi: 3.0.0
+info:
+  title: Watchlist Management API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{id}:
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: UpdateWatchlist
+      summary: Update an existing watchlist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the watchlist to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - riskModifier
+              properties:
+                name:
+                  type: string
+                  description: Unique name of the watchlist
+                description:
+                  type: string
+                  description: Description of the watchlist
+                riskModifier:
+                  type: number
+                  description: Risk score modifier associated with the watchlist
+                managed:
+                  type: boolean
+                  description: Indicates if the watchlist is managed by the system
+            examples:
+              UpdateWatchlistRequest:
+                summary: Update watchlist request
+                value:
+                  name: High Risk Vendors
+                  description: High risk vendor watchlist
+                  riskModifier: 1.5
+                  managed: false
+      responses:
+        "200":
+          description: Watchlist updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "./common.schema.yaml#/components/schemas/WatchlistObject"
+              examples:
+                UpdateWatchlistResponse:
+                  summary: Updated watchlist
+                  value:
+                    id: watchlist-123
+                    name: High Risk Vendors
+                    description: High risk vendor watchlist
+                    riskModifier: 1.5
+                    managed: false
+                    createdAt: "2026-01-28T12:00:00.000Z"
+                    updatedAt: "2026-02-18T12:00:00.000Z"

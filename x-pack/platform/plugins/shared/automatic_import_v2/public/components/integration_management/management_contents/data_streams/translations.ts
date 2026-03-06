@@ -217,6 +217,27 @@ export const DELETE_MODAL = Object.freeze({
   }),
 });
 
+export const REANALYZE_MODAL = Object.freeze({
+  title: (dataStreamTitle: string) =>
+    i18n.translate('xpack.automaticImportV2.dataStreams.reanalyzeModal.title', {
+      defaultMessage: 'Re-analyze data stream "{dataStreamTitle}"?',
+      values: { dataStreamTitle },
+    }),
+  body: i18n.translate('xpack.automaticImportV2.dataStreams.reanalyzeModal.body', {
+    defaultMessage:
+      'This will re-run the AI analysis on this data stream. The existing data stream will be overwritten.',
+  }),
+  cancelButton: i18n.translate('xpack.automaticImportV2.dataStreams.reanalyzeModal.cancelButton', {
+    defaultMessage: 'Cancel',
+  }),
+  confirmButton: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.reanalyzeModal.confirmButton',
+    {
+      defaultMessage: 'Re-Analyze',
+    }
+  ),
+});
+
 export const EDIT_PIPELINE_FLYOUT = Object.freeze({
   tableCaption: i18n.translate(
     'xpack.automaticImportV2.dataStreams.editPipelineFlyout.tableCaption',
@@ -257,6 +278,50 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
       defaultMessage: 'Failed to load pipeline results. Please try again.',
     }
   ),
+  saveButton: i18n.translate('xpack.automaticImportV2.dataStreams.editPipelineFlyout.saveButton', {
+    defaultMessage: 'Save',
+  }),
+  saveErrorTitle: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.saveErrorTitle',
+    {
+      defaultMessage: 'Unable to save ingest pipeline',
+    }
+  ),
+  saveErrorMessage: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.saveErrorMessage',
+    {
+      defaultMessage: 'Failed to save ingest pipeline. Please fix errors and try again.',
+    }
+  ),
+  closeConfirmTitle: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.closeConfirmTitle',
+    {
+      defaultMessage: 'Discard unsaved changes?',
+    }
+  ),
+  closeConfirmBody: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.closeConfirmBody',
+    {
+      defaultMessage: 'You have unsaved changes in the ingest pipeline editor.',
+    }
+  ),
+  closeConfirmCancel: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.closeConfirmCancel',
+    {
+      defaultMessage: 'Keep editing',
+    }
+  ),
+  closeConfirmDiscard: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.closeConfirmDiscard',
+    {
+      defaultMessage: 'Discard changes',
+    }
+  ),
+  invalidJsonError: (reason: string) =>
+    i18n.translate('xpack.automaticImportV2.dataStreams.editPipelineFlyout.invalidJsonError', {
+      defaultMessage: 'Invalid ingest pipeline JSON: {reason}',
+      values: { reason },
+    }),
 });
 
 export const STATUS_LABELS = Object.freeze({

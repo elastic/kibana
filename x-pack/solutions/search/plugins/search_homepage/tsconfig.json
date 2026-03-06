@@ -8,8 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "test/scout/**/*",
-    "../../../../../typings/emotion.d.ts"
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -48,8 +47,9 @@
     "@kbn/cloud",
     "@kbn/agent-builder-plugin",
     "@kbn/scout-search",
+    "@kbn/management-settings-ids"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-06T14:35:27.904Z",
-  "sha1": "c60f77790accb19b65ed3714d3bf3dbc694f5f1f",
+  "sha1": "f2c5d662e7cd675081be2eb284e927eae5d08507",
   "tests": [
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
@@ -268,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 344,
+        "line": 348,
         "column": 9
       }
     },
@@ -284,7 +283,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/inventory/host_asset_details_flyout.spec.ts",
-        "line": 378,
+        "line": 382,
         "column": 9
       }
     },

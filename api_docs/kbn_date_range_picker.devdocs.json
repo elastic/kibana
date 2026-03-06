@@ -1,0 +1,1031 @@
+{
+  "id": "@kbn/date-range-picker",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.DateRangePicker",
+        "type": "Function",
+        "tags": [],
+        "label": "DateRangePicker",
+        "description": [
+          "\nA date range picker component that accepts natural language and date math input."
+        ],
+        "signature": [
+          "({ panels = [], ...props }: ",
+          {
+            "pluginId": "@kbn/date-range-picker",
+            "scope": "public",
+            "docId": "kibKbnDateRangePickerPluginApi",
+            "section": "def-public.DateRangePickerProps",
+            "text": "DateRangePickerProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+        "lineNumber": 104,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ panels = [], ...props }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/date-range-picker",
+                "scope": "public",
+                "docId": "kibKbnDateRangePickerPluginApi",
+                "section": "def-public.DateRangePickerProps",
+                "text": "DateRangePickerProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 107,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.useDateRangePickerContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useDateRangePickerContext",
+        "description": [
+          "\nHook to access the DateRangePicker context.\nMust be used within a `DateRangePickerProvider`."
+        ],
+        "signature": [
+          "() => DateRangePickerInternalContextValue"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+        "lineNumber": 100,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.useDateRangePickerPanelNavigation",
+        "type": "Function",
+        "tags": [],
+        "label": "useDateRangePickerPanelNavigation",
+        "description": [
+          "\nHook to access panel navigation inside the date range picker dialog.\nMust be used within a `DateRangePickerPanelNavigationProvider`."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/date-range-picker",
+            "scope": "public",
+            "docId": "kibKbnDateRangePickerPluginApi",
+            "section": "def-public.DateRangePickerPanelNavigationContextValue",
+            "text": "DateRangePickerPanelNavigationContextValue"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+        "lineNumber": 53,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.DateRangePickerContextValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRangePickerContextValue",
+        "description": [
+          "Public context value exposed to consumers via `useDateRangePickerContext`."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerContextValue.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [
+              "Current input text"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerContextValue.isInvalid",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [
+              "Whether the current input is invalid"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerContextValue.setText",
+            "type": "Function",
+            "tags": [],
+            "label": "setText",
+            "description": [
+              "Update the input text"
+            ],
+            "signature": [
+              "(value: string) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerContextValue.setText.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+                "lineNumber": 45,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerContextValue.applyRange",
+            "type": "Function",
+            "tags": [],
+            "label": "applyRange",
+            "description": [
+              "\nApply the current text (or an explicit range) as the selected time range.\nWhen called with a `TimeRangeBounds`, sets text to that range; otherwise applies current text.\nPass an optional `textOverride` to control the input value instead of generating it from the bounds.\nCalls parent `onChange` and exits editing mode."
+            ],
+            "signature": [
+              "(range?: ",
+              "TimeRangeBounds",
+              " | undefined, textOverride?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerContextValue.applyRange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  "TimeRangeBounds",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+                "lineNumber": 52,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerContextValue.applyRange.$2",
+                "type": "string",
+                "tags": [],
+                "label": "textOverride",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_context.tsx",
+                "lineNumber": 52,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.DateRangePickerOnChangeProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRangePickerOnChangeProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/date-range-picker",
+            "scope": "public",
+            "docId": "kibKbnDateRangePickerPluginApi",
+            "section": "def-public.DateRangePickerOnChangeProps",
+            "text": "DateRangePickerOnChangeProps"
+          },
+          " extends ",
+          "TimeRangeBounds"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerOnChangeProps.startDate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "startDate",
+            "description": [
+              "Start as Date object"
+            ],
+            "signature": [
+              "Date | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerOnChangeProps.endDate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "endDate",
+            "description": [
+              "End as Date object"
+            ],
+            "signature": [
+              "Date | null"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerOnChangeProps.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "Text representation of the time range"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerOnChangeProps.isInvalid",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [
+              "Whether the time range is invalid"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.DateRangePickerPanelConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRangePickerPanelConfig",
+        "description": [
+          "Configuration for a consumer-provided panel inside the date range picker dialog."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelConfig.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "Unique panel identifier, used for navigation"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelConfig.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [
+              "Title shown in panel header and navigation button"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelConfig.icon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "Icon type passed to `EuiIcon` for the panel navigation item"
+            ],
+            "signature": [
+              "IconType",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelConfig.component",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "component",
+            "description": [
+              "\nPanel component to render. Must be a component reference (not an element).\nRendered inside the provider tree so it can use\n`useDateRangePickerContext()` and `useDateRangePickerPanelNavigation()`."
+            ],
+            "signature": [
+              "React.ComponentType"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.DateRangePickerPanelNavigationContextValue",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRangePickerPanelNavigationContextValue",
+        "description": [
+          "Context value exposed via `useDateRangePickerPanelNavigation()`."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+        "lineNumber": 35,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelNavigationContextValue.activePanelId",
+            "type": "string",
+            "tags": [],
+            "label": "activePanelId",
+            "description": [
+              "Id of the currently visible panel"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelNavigationContextValue.panelDescriptors",
+            "type": "Array",
+            "tags": [],
+            "label": "panelDescriptors",
+            "description": [
+              "Descriptors for all registered panels"
+            ],
+            "signature": [
+              "DateRangePickerPanelDescriptor",
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelNavigationContextValue.navigateTo",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateTo",
+            "description": [
+              "Push a panel onto the history stack and navigate to it"
+            ],
+            "signature": [
+              "(panelId: string) => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerPanelNavigationContextValue.navigateTo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "panelId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+                "lineNumber": 42,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelNavigationContextValue.goBack",
+            "type": "Function",
+            "tags": [],
+            "label": "goBack",
+            "description": [
+              "Pop back to the previous panel and navigate back"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerPanelNavigationContextValue.canGoBack",
+            "type": "boolean",
+            "tags": [],
+            "label": "canGoBack",
+            "description": [
+              "Whether there is a previous panel to go back to"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_panel_navigation.tsx",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.DateRangePickerProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateRangePickerProps",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.defaultValue",
+            "type": "string",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [
+              "Initial text representation of the time range"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "Callback for when the time changes"
+            ],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/date-range-picker",
+                "scope": "public",
+                "docId": "kibKbnDateRangePickerPluginApi",
+                "section": "def-public.DateRangePickerOnChangeProps",
+                "text": "DateRangePickerOnChangeProps"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/date-range-picker",
+                    "scope": "public",
+                    "docId": "kibKbnDateRangePickerPluginApi",
+                    "section": "def-public.DateRangePickerOnChangeProps",
+                    "text": "DateRangePickerOnChangeProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+                "lineNumber": 52,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.dateFormat",
+            "type": "string",
+            "tags": [],
+            "label": "dateFormat",
+            "description": [
+              "Custom format for displaying (and parsing?) dates"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.isInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInvalid",
+            "description": [
+              "Show invalid state"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.onInputChange",
+            "type": "Function",
+            "tags": [
+              "beta"
+            ],
+            "label": "onInputChange",
+            "description": [
+              "\nCalled when the editing input text changes."
+            ],
+            "signature": [
+              "((value: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerProps.onInputChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+                "lineNumber": 61,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.compressed",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "compressed",
+            "description": [
+              "\nReduce input height and padding"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.showTimeWindowButtons",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showTimeWindowButtons",
+            "description": [
+              "\nShow time window buttons (previous, zoom out, zoom in, next) beside the control.\nPass `true` for defaults, or a config object for fine-grained control."
+            ],
+            "signature": [
+              "boolean | ",
+              {
+                "pluginId": "@kbn/date-range-picker",
+                "scope": "public",
+                "docId": "kibKbnDateRangePickerPluginApi",
+                "section": "def-public.TimeWindowButtonsConfig",
+                "text": "TimeWindowButtonsConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.panels",
+            "type": "Array",
+            "tags": [],
+            "label": "panels",
+            "description": [
+              "\nAdditional panels rendered inside the dialog popover.\nEach panel is navigatable via `useDateRangePickerPanelNavigation().navigateTo(id)`."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/date-range-picker",
+                "scope": "public",
+                "docId": "kibKbnDateRangePickerPluginApi",
+                "section": "def-public.DateRangePickerPanelConfig",
+                "text": "DateRangePickerPanelConfig"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 73,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.presets",
+            "type": "Array",
+            "tags": [],
+            "label": "presets",
+            "description": [
+              "\nPredefined time range options shown in the Presets section."
+            ],
+            "signature": [
+              "TimeRangeBoundsOption",
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.recent",
+            "type": "Array",
+            "tags": [
+              "default"
+            ],
+            "label": "recent",
+            "description": [
+              "\nRecently used time ranges shown in the Recent section."
+            ],
+            "signature": [
+              "TimeRangeBoundsOption",
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.onPresetSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onPresetSave",
+            "description": [
+              "Called when the user wants to save the current input time range as a preset."
+            ],
+            "signature": [
+              "((option: ",
+              "TimeRangeBoundsOption",
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerProps.onPresetSave.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "option",
+                "description": [],
+                "signature": [
+                  "TimeRangeBoundsOption"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+                "lineNumber": 88,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.DateRangePickerProps.onPresetDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "onPresetDelete",
+            "description": [
+              "Called when the user wants to delete a saved preset."
+            ],
+            "signature": [
+              "((option: ",
+              "TimeRangeBoundsOption",
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/date-range-picker",
+                "id": "def-public.DateRangePickerProps.onPresetDelete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "option",
+                "description": [],
+                "signature": [
+                  "TimeRangeBoundsOption"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker.tsx",
+                "lineNumber": 90,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/date-range-picker",
+        "id": "def-public.TimeWindowButtonsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimeWindowButtonsConfig",
+        "description": [
+          "Configuration for time window buttons."
+        ],
+        "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_time_window_buttons.tsx",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.TimeWindowButtonsConfig.zoomFactor",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "zoomFactor",
+            "description": [
+              "\nHow much the time window is increased/decreased when zooming.\nA number between 0 and 1, or a percentage string e.g. \"25%\"."
+            ],
+            "signature": [
+              "string | number | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_time_window_buttons.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.TimeWindowButtonsConfig.showShiftArrows",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showShiftArrows",
+            "description": [
+              "\nShow buttons for shifting the time window forward and backward."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_time_window_buttons.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.TimeWindowButtonsConfig.showZoomOut",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showZoomOut",
+            "description": [
+              "\nShow the \"zoom out\" button."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_time_window_buttons.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/date-range-picker",
+            "id": "def-public.TimeWindowButtonsConfig.showZoomIn",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "showZoomIn",
+            "description": [
+              "\nShow the \"zoom in\" button."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/date_range_picker_time_window_buttons.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
