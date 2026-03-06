@@ -55,12 +55,16 @@ spaceTest.describe(
       });
 
       await spaceTest.step('Overview tab shows description list', async () => {
-        await expect(metricsExperience.flyout.overview.descriptionList).toBeVisible();
+        const { descriptionList } = metricsExperience.flyout.overview;
+        await expect(descriptionList).toBeVisible();
+        await expect(descriptionList).toContainText(testData.DATA_VIEW_NAME);
       });
 
       await spaceTest.step('switch to ES|QL Query tab and verify content', async () => {
-        await metricsExperience.flyout.esqlQuery.tabButton.click();
-        await expect(metricsExperience.flyout.esqlQuery.codeBlock).toBeVisible();
+        const { codeBlock, tabButton } = metricsExperience.flyout.esqlQuery;
+        await tabButton.click();
+        await expect(codeBlock).toBeVisible();
+        await expect(codeBlock).toContainText(testData.METRICS_TEST_INDEX_NAME);
       });
 
       await spaceTest.step('switch back to Overview tab', async () => {
