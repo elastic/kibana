@@ -88,7 +88,7 @@ export function createCriteriaEvaluator({
           prompt: LlmCriteriaEvaluationPrompt,
           inferenceClient,
           input: {
-            input: JSON.stringify(input),
+            input: JSON.stringify(input ?? {}),
             output: JSON.stringify(output),
             criteria: structuredCriteria.map((criterion) => {
               return `${criterion.id}: ${criterion.text}`;
