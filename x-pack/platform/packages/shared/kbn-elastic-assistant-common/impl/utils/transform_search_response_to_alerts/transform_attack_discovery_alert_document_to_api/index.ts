@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common';
-import { getMarkdownFields, transformInternalReplacements } from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
@@ -22,6 +20,9 @@ import {
 import moment from 'moment';
 import { pipe } from 'lodash/fp';
 
+import type { AttackDiscoveryApiAlert } from '../../../schemas';
+import { transformInternalReplacements } from '../../attack_discovery_helpers';
+import { getMarkdownFields } from '../../get_attack_discovery_markdown';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
@@ -39,8 +40,8 @@ import {
   ALERT_ATTACK_DISCOVERY_USER_NAME,
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_RISK_SCORE,
-} from '../../../../schedules/fields/field_names';
-import type { AttackDiscoveryAlertDocument } from '../../../../schedules/types';
+} from '../../../schedules/field_names';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 
 export const transformAttackDiscoveryAlertDocumentToApi = ({
   attackDiscoveryAlertDocument,
