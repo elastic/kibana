@@ -57,6 +57,8 @@ telemetry.tracing.exporters:
 
 2. Start the EDOT Collector (Docker required):
 
+If you use `node scripts/evals start`, EDOT is started automatically. Run this step only when using the separate-terminal/manual workflow.
+
 Start the EDOT (Elastic Distribution of OpenTelemetry) Gateway Collector to receive and store traces. Ensure Docker is running, then execute:
 
 ```bash
