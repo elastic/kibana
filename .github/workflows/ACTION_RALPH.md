@@ -1,6 +1,6 @@
 # Action Ralph
 
-Action Ralph is a three-phase GitHub Actions workflow that lets an AI agent (OpenCode) develop and test changes against the Kibana monorepo. It can create new PRs from scratch or modify existing PRs via comments.
+Action Ralph is a three-phase GitHub Actions workflow that lets an AI agent (OpenCode) develop and test changes against the Kibana monorepo. It can create new PRs from scratch, modify existing PRs via comments, or perform read-only code reviews.
 
 ## How it works
 
@@ -74,6 +74,44 @@ Leave a review comment on specific lines in the PR's "Files" tab:
 
 Same behavior as a regular PR comment, but OpenCode gets the file/line context.
 
+### 5. Review mode: `/review-ralph`
+
+Comment `/review-ralph` on any PR (as a regular comment or inline review comment):
+
+```
+/review-ralph review the error handling in this PR
+```
+
+Review mode is **read-only** -- it does not modify code. It runs in three isolated phases:
+
+1. **Review Prepare**: Gathers PR description, recent comments, and inline review comments using GitHub read permissions.
+2. **Review Sandbox**: Checks out the PR branch and runs OpenCode with `permissions: {}`. Extracts the review summary from the agent output. Any accidental file changes are discarded.
+3. **Review Publish**: Posts the review summary as a comment on the PR.
+
+Review mode only works on PRs (not issues or `workflow_dispatch`).
+
+## Access control
+
+Comment-triggered runs (`/action-ralph` and `/review-ralph`) are restricted to a **beta testers list** defined in the `BETA_TESTERS` env variable at the top of `action-ralph.yml`:
+
+```yaml
+env:
+  BETA_TESTERS: '["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'
+```
+
+To add a new member, edit this JSON array in the workflow file **and** update the matching inline list in the job-level `if` condition (GitHub Actions does not support `env` in job-level `if`, so the list must be duplicated there). The TOCTOU mitigation step references `env.BETA_TESTERS` at runtime to re-verify the comment author.
+
+`workflow_dispatch` bypasses the user check -- any repo collaborator with Actions access can trigger it directly.
+
+## Security model
+
+- **Sandboxed execution**: Both the edit and review agent jobs run with `permissions: {}`, which blocks `GITHUB_TOKEN` injection entirely. The agent has no GitHub API access.
+- **Short-lived LiteLLM keys**: A scoped ephemeral key is minted per run with `max_budget: 10` and a 90-minute expiry. Only this key is passed to the agent.
+- **Key revocation**: The ephemeral key is revoked immediately after the agent step completes (success or failure) via an `if: always()` cleanup step.
+- **TOCTOU mitigation**: For comment triggers, the comment is re-fetched from the GitHub API at runtime and re-verified (author in beta list, slash command still present) before proceeding.
+- **Publish isolation**: The publish job uses `KIBANAMACHINE_TOKEN` (PAT) for git push and PR operations. It never has access to LiteLLM keys.
+- **No credential persistence**: Checkout steps use `persist-credentials: false` in sandbox jobs.
+
 ## Required secrets
 
 Configure in **Settings > Secrets and variables > Actions**:
@@ -87,7 +125,15 @@ Configure in **Settings > Secrets and variables > Actions**:
 
 `KIBANAMACHINE_TOKEN` is already configured in the `elastic/kibana` repo. You only need to add the three `LITELLM_*` secrets.
 
-During Phase B, Action Ralph generates a short-lived LiteLLM key scoped to the selected model and passes only that ephemeral key to the agent runtime.
+## Fork testing
+
+The workflow works on forks out of the box -- there are no hardcoded repo names or branch references.
+
+- `default_branch` is auto-detected via `github.event.repository.default_branch`
+- `workflow_dispatch` creates PRs targeting the fork's own default branch
+- Comment triggers (`/action-ralph`, `/review-ralph`) work on the fork's PRs and issues
+
+**Prerequisites**: configure `KIBANAMACHINE_TOKEN` and the three `LITELLM_*` secrets on the fork repo under **Settings > Secrets and variables > Actions**.
 
 ## Runner configuration
 
@@ -115,8 +161,10 @@ Use the `runner` input on `workflow_dispatch` to choose the runner label for Pha
 | Phase | Timeout | Purpose |
 |---|---|---|
 | A: Resolve Context | 45 min | Resolves trigger context/refs with timeout guard |
-| B: Agent Loop | 45 min | Caps total agent reasoning time |
+| B: Agent Loop | 120 min | Caps total agent reasoning time |
+| B: Review Sandbox | 30 min | Caps review analysis time |
 | C: Publish | 10 min | Quick git push + PR creation |
+| C: Review Publish | 10 min | Post review comment |
 
 Concurrency groups prevent parallel runs for the same issue/PR.
 

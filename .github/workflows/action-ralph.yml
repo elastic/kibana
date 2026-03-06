@@ -45,17 +45,19 @@ jobs:
     name: "Phase A: Resolve Context"
     runs-on: ${{ inputs.runner || 'ubuntu-latest' }}
     timeout-minutes: 45
+    # Note: env.BETA_TESTERS is NOT available in job-level if conditions.
+    # The list must be inlined here; the TOCTOU step re-checks using the env var.
     if: >-
       github.event_name == 'workflow_dispatch'
       || (
         github.event_name == 'issue_comment'
         && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
-        && contains(fromJSON(env.BETA_TESTERS), github.event.comment.user.login)
+        && contains(fromJSON('["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'), github.event.comment.user.login)
       )
       || (
         github.event_name == 'pull_request_review_comment'
         && (contains(github.event.comment.body, '/action-ralph') || contains(github.event.comment.body, '/review-ralph'))
-        && contains(fromJSON(env.BETA_TESTERS), github.event.comment.user.login)
+        && contains(fromJSON('["flash1293","achyutjhunjhunwala","klacabane","rStelmach"]'), github.event.comment.user.login)
       )
     permissions:
       contents: read
