@@ -25,7 +25,8 @@
     "@kbn/utility-types",
     "@kbn/spaces-plugin",
     "@kbn/eval-kql",
-    "@kbn/es-query"
+    "@kbn/es-query",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
