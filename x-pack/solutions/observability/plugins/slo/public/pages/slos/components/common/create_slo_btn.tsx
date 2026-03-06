@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
-import React from 'react';
+import React, { useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
+import { SloTemplatesFlyout } from './slo_templates_flyout';
 
 export function CreateSloBtn() {
   const {
@@ -19,19 +25,68 @@ export function CreateSloBtn() {
   } = useKibana().services;
 
   const { data: permissions } = usePermissions();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
+  const isDisabled = !permissions?.hasAllWriteRequested;
 
   const handleClickCreateSlo = () => {
+    setIsPopoverOpen(false);
     navigateToUrl(basePath.prepend(paths.sloCreate));
   };
-  return (
-    <EuiButton
-      color="primary"
-      data-test-subj="slosPageCreateNewSloButton"
-      disabled={!permissions?.hasAllWriteRequested}
-      fill
+
+  const handleClickCreateFromTemplate = () => {
+    setIsPopoverOpen(false);
+    setIsFlyoutOpen(true);
+  };
+
+  const menuItems = [
+    <EuiContextMenuItem
+      key="create"
+      icon="plus"
       onClick={handleClickCreateSlo}
+      data-test-subj="slosPageCreateNewSloButton"
     >
       {i18n.translate('xpack.slo.sloList.pageHeader.create', { defaultMessage: 'Create SLO' })}
-    </EuiButton>
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="createFromTemplate"
+      icon="document"
+      onClick={handleClickCreateFromTemplate}
+      data-test-subj="slosPageCreateFromTemplateButton"
+    >
+      {i18n.translate('xpack.slo.sloList.pageHeader.createFromTemplate', {
+        defaultMessage: 'Create from template',
+      })}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <>
+      <EuiPopover
+        button={
+          <EuiButton
+            color="primary"
+            data-test-subj="slosPageCreateSloDropdown"
+            disabled={isDisabled}
+            fill
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
+            {i18n.translate('xpack.slo.sloList.pageHeader.create', {
+              defaultMessage: 'Create SLO',
+            })}
+          </EuiButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+      >
+        <EuiContextMenuPanel items={menuItems} size="s" />
+      </EuiPopover>
+      {isFlyoutOpen && <SloTemplatesFlyout onClose={() => setIsFlyoutOpen(false)} />}
+    </>
   );
 }
