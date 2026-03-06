@@ -1,7 +1,5 @@
 ---
 navigation_title: "AbuseIPDB"
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/abuseipdb-action-type.html
 applies_to:
   stack: preview 9.3
   serverless: preview
