@@ -10,7 +10,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { deleteBackfillRoute } from './delete_backfill_route';
+import { deleteBackfillRoute, deleteBackfillPublicRoute } from './delete_backfill_route';
 
 const rulesClient = rulesClientMock.create();
 
@@ -66,5 +66,45 @@ describe('deleteBackfillRoute', () => {
     const [, handler] = router.delete.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: 'abc' } });
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+});
+
+describe('deleteBackfillPublicRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('should register the public route with the correct path', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteBackfillPublicRoute(router, licenseState);
+
+    const [config] = router.delete.mock.calls[0];
+
+    expect(config.path).toEqual('/api/alerting/rules/backfill/{id}');
+    expect(config.options).toEqual(
+      expect.objectContaining({
+        access: 'public',
+        summary: 'Delete a backfill by ID',
+        tags: ['oas-tag:alerting'],
+      })
+    );
+  });
+
+  test('should delete the backfill via the public route', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteBackfillPublicRoute(router, licenseState);
+
+    rulesClient.deleteBackfill.mockResolvedValueOnce({});
+    const [, handler] = router.delete.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: 'abc' } });
+
+    await handler(context, req, res);
+
+    expect(rulesClient.deleteBackfill).toHaveBeenLastCalledWith('abc');
+    expect(res.noContent).toHaveBeenCalledTimes(1);
   });
 });
