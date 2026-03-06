@@ -30,7 +30,9 @@ export function getAddDiscoverByValuePanelAction(
 
       const valueInput: DiscoverSessionTab = {
         id: uuidv4(),
-        label: '',
+        label: i18n.translate('discover.uiActions.addPanel.byValueTabName', {
+          defaultMessage: 'New By-value Discover session',
+        }),
         sort: [],
         columns: [],
         isTextBasedQuery: true,
