@@ -29,7 +29,6 @@ export interface SavedSearchEmbeddableBaseProps {
   totalHitCount?: number;
   prepend?: React.ReactElement;
   append?: React.ReactElement;
-  dataTestSubj?: string;
   interceptedWarnings?: SearchResponseWarning[];
   inlineEditing?: InlineEditing;
 }
@@ -39,7 +38,6 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
   totalHitCount,
   prepend,
   append,
-  dataTestSubj,
   interceptedWarnings,
   inlineEditing,
   children,
@@ -50,7 +48,7 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
       direction="column"
       gutterSize="xs"
       responsive={false}
-      data-test-subj={dataTestSubj}
+      data-test-subj="embeddedSavedSearchDocTable"
     >
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
 

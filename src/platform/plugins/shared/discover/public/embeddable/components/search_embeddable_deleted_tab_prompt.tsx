@@ -108,11 +108,7 @@ export const SearchEmbeddableDeletedTabPrompt = ({
   };
 
   return (
-    <SavedSearchEmbeddableBase
-      dataTestSubj="embeddedSavedSearchDocTable"
-      inlineEditing={inlineEditing}
-      isLoading={false}
-    >
+    <SavedSearchEmbeddableBase inlineEditing={inlineEditing} isLoading={false}>
       <EuiFlexGroup
         alignItems="center"
         css={{ height: '100%' }}
