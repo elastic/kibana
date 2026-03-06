@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import type { RuleParams } from '../../rule_schema';
@@ -21,7 +22,7 @@ export interface RunExecutionValidationParams {
   params: RuleParams;
   inputIndex: string[];
   ruleName: string;
-  scopedClusterClient: { asCurrentUser: estypes.Client; asInternalUser: estypes.Client };
+  scopedClusterClient: IScopedClusterClient;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp: string | undefined;
