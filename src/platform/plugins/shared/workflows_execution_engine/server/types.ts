@@ -10,7 +10,6 @@
 // TODO: Remove eslint exceptions comments
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -40,21 +39,6 @@ export interface ExecuteWorkflowResponse {
 
 export interface ExecuteWorkflowStepResponse {
   workflowExecutionId: string;
-}
-
-export interface SearchWorkflowExecutionsParams {
-  query: QueryDslQueryContainer;
-  sort?: Sort;
-  size?: number;
-  from?: number;
-  page?: number;
-}
-
-export interface SearchResult<T> {
-  results: T[];
-  page: number;
-  size: number;
-  total: number;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
