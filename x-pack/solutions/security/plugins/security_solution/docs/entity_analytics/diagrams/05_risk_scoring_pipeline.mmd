@@ -1,6 +1,6 @@
-graph TB
+graph LR
     subgraph "Input"
-        A["Security Alerts Index<br/>(.alerts-security.alerts-*)"]
+        A[".alerts-security.alerts-*"]
     end
 
     subgraph "Calculation"
@@ -13,12 +13,10 @@ graph TB
     end
 
     subgraph "Persistence"
-        F -->|Bulk index| G["Risk Score Data Stream<br/>(risk-score.risk-score-NAMESPACE)"]
-        G -->|Latest Transform| H["Risk Score Latest<br/>(risk-score.risk-score-latest-NAMESPACE)"]
+        F -->|Bulk index| G["risk-score.risk-score-*"]
+        G -->|Latest Transform| H["risk-score.risk-score-latest-*"]
     end
 
-    subgraph "Output"
-        H --> I[Entity Flyouts]
-        H --> J[Dashboards]
-        H --> K[AI Assistant]
-    end
+    H --> I[Flyouts]
+    H --> J[Dashboards]
+    H --> K[AI Assistant]

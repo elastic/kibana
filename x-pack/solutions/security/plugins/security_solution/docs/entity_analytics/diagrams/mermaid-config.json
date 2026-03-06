@@ -2,6 +2,6 @@
   "theme": "default",
   "themeVariables": {
     "fontFamily": "Inter, Segoe UI, sans-serif",
-    "fontSize": "13px"
+    "fontSize": "16px"
   }
 }

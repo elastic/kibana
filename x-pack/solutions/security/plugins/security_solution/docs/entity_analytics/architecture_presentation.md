@@ -84,14 +84,14 @@ These components work together to give security analysts a **unified risk-aware 
 
 ### Key Directories
 
-| Component | Server Code | Common | Public |
-|-----------|------------|--------|--------|
-| **Entity Store** | [`server/lib/entity_analytics/entity_store/`][es-server] | [`common/entity_analytics/entity_store/`][es-common] | [`public/entity_analytics/`][ea-public] |
-| **Risk Engine** | [`server/lib/entity_analytics/risk_engine/`][re-server] | [`common/entity_analytics/risk_engine/`][re-common] | [`public/entity_analytics/`][ea-public] |
-| **Risk Score** | [`server/lib/entity_analytics/risk_score/`][rs-server] | [`common/entity_analytics/risk_score/`][rs-common] | — |
-| **Asset Criticality** | [`server/lib/entity_analytics/asset_criticality/`][ac-server] | — | [`public/entity_analytics/`][ea-public] |
-| **Privilege Monitoring** | [`server/lib/entity_analytics/privilege_monitoring/`][pm-server] | — | — |
-| **Entity Store Plugin** | [`plugins/entity_store/server/`][esp-server] | [`plugins/entity_store/common/`][esp-common] | — |
+| Component                | Server Code                                                      | Common                                               | Public                                  |
+| ------------------------ | ---------------------------------------------------------------- | ---------------------------------------------------- | --------------------------------------- |
+| **Entity Store**         | [`server/lib/entity_analytics/entity_store/`][es-server]         | [`common/entity_analytics/entity_store/`][es-common] | [`public/entity_analytics/`][ea-public] |
+| **Risk Engine**          | [`server/lib/entity_analytics/risk_engine/`][re-server]          | [`common/entity_analytics/risk_engine/`][re-common]  | [`public/entity_analytics/`][ea-public] |
+| **Risk Score**           | [`server/lib/entity_analytics/risk_score/`][rs-server]           | [`common/entity_analytics/risk_score/`][rs-common]   | —                                       |
+| **Asset Criticality**    | [`server/lib/entity_analytics/asset_criticality/`][ac-server]    | —                                                    | [`public/entity_analytics/`][ea-public] |
+| **Privilege Monitoring** | [`server/lib/entity_analytics/privilege_monitoring/`][pm-server] | —                                                    | —                                       |
+| **Entity Store Plugin**  | [`plugins/entity_store/server/`][esp-server]                     | [`plugins/entity_store/common/`][esp-common]         | —                                       |
 
 [es-server]: https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store
 [es-common]: https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/common/entity_analytics/entity_store
@@ -110,12 +110,14 @@ These components work together to give security analysts a **unified risk-aware 
 Entity Analytics spans **two plugins**:
 
 #### 1. Security Solution Plugin (primary) — v1 indices
+
 - Hosts Entity Store engine lifecycle, Risk Engine, Asset Criticality
 - Manages API routes, Kibana tasks, saved objects
 - Uses **v1 schema** indices: `.entities.v1.{latest|updates|history}.*`
 - Coordinates all sub-components
 
 #### 2. Entity Store Plugin (extraction engine) — v2 indices
+
 - Standalone plugin focused on **log extraction via ESQL**
 - Manages its own Kibana tasks for entity extraction
 - Uses **v2 schema** indices: `.entities.v2.{latest|updates}.*`
@@ -133,25 +135,25 @@ The Entity Store maintains **persistent, enriched records** for entities observe
 
 #### Entity Types
 
-| Type | Identity Field | Description |
-|------|---------------|-------------|
-| **Host** | `host.name` | Servers, workstations, network devices |
-| **User** | `user.name` | Human and service accounts |
-| **Service** | `service.name` | Applications and microservices |
-| **Generic** | configurable | Catch-all for custom entity types |
+| Type        | Identity Field | Description                            |
+| ----------- | -------------- | -------------------------------------- |
+| **Host**    | `host.name`    | Servers, workstations, network devices |
+| **User**    | `user.name`    | Human and service accounts             |
+| **Service** | `service.name` | Applications and microservices         |
+| **Generic** | configurable   | Catch-all for custom entity types      |
 
 > [Entity definitions source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/entity_store/common/domain/definitions)
 
 ### Entity Store — Key Concepts
 
-| Concept | Description |
-|---------|-------------|
-| **Engine** | One engine per entity type, manages its own lifecycle |
-| **Updates data stream** | Append-only stream of entity observations (v1 and v2 variants) |
-| **Latest index** | Current state of each entity, maintained by a transform (v1 and v2 variants) |
-| **Snapshot** | Daily point-in-time backup to history index |
-| **Field Retention** | Enrich policy that preserves important fields across observations |
-| **EUID** | Entity Unique Identifier — composite key for each entity |
+| Concept                 | Description                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| **Engine**              | One engine per entity type, manages its own lifecycle                        |
+| **Updates data stream** | Append-only stream of entity observations (v1 and v2 variants)               |
+| **Latest index**        | Current state of each entity, maintained by a transform (v1 and v2 variants) |
+| **Snapshot**            | Daily point-in-time backup to history index                                  |
+| **Field Retention**     | Enrich policy that preserves important fields across observations            |
+| **EUID**                | Entity Unique Identifier — composite key for each entity                     |
 
 ### Entity Store — Data Flow
 
@@ -181,43 +183,55 @@ Entity extraction uses **ES|QL** to query log sources and extract entity records
 
 #### Indices (Security Solution Plugin — v1)
 
-| Index Pattern | Purpose |
-|--------------|---------|
+| Index Pattern                                      | Purpose                                         |
+| -------------------------------------------------- | ----------------------------------------------- |
 | `.entities.v1.updates.security_{type}_{namespace}` | Append-only data stream for entity observations |
-| `.entities.v1.latest.security_{type}_{namespace}` | Current state of each entity |
-| `.entities.v1.history.{snapshotId}` | Daily snapshot history |
-| `.entities.v1.reset.security_{type}_{namespace}` | Reset index for score zeroing |
+| `.entities.v1.latest.security_{type}_{namespace}`  | Current state of each entity                    |
+| `.entities.v1.history.{snapshotId}`                | Daily snapshot history                          |
+| `.entities.v1.reset.security_{type}_{namespace}`   | Reset index for score zeroing                   |
 
 #### Indices (Entity Store Plugin — v2)
 
-| Index Pattern | Purpose |
-|--------------|---------|
+| Index Pattern                               | Purpose                                      |
+| ------------------------------------------- | -------------------------------------------- |
 | `.entities.v2.updates.security_{namespace}` | Updates data stream (ESQL extraction target) |
-| `.entities.v2.latest.security_{namespace}` | Latest entity state (CRUD + extraction) |
+| `.entities.v2.latest.security_{namespace}`  | Latest entity state (CRUD + extraction)      |
 
 #### Transforms
 
-- **Pivot transform** aggregates the updates data stream into the latest entity index
-- Uses `generatePivotGroup` from `@kbn/entityManager-plugin` for transform configuration
-- Groups by entity identity field, keeps latest values
+In v2, ESQL extraction writes **directly to the latest index** — there is no intermediate transform between updates and latest. The updates data stream is used for bulk CRUD operations and CCS extraction, with results merged into the latest index.
+
+> **Historical context:** In v1, a pivot transform aggregated the updates data stream into the latest entity index, grouping by entity identity field and keeping latest values. This was removed in v2 in favor of direct ingest.
 
 #### Enrich Policies
 
-| Resource | Purpose |
-|----------|---------|
+| Resource                                                           | Purpose                                                            |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------ |
 | `entity_store_field_retention_{entityType}_{namespace}_v{version}` | Field retention — preserves important fields across entity updates |
 
 #### Ingest Pipelines
 
-| Pipeline | Purpose |
-|----------|---------|
+| Pipeline                                                   | Purpose                                                      |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
 | `.entities.v2.latest.security_{namespace}_ingest_pipeline` | Dot expander — converts flat dotted fields to nested objects |
 
-> [ES assets source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/elasticsearch_assets)
+This pipeline uses the Elasticsearch [`dot_expander`](https://www.elastic.co/guide/en/elasticsearch/reference/current/dot-expand-processor.html) processor with `field: *`. When entity data arrives with flat dotted field names like `host.os.name: "Ubuntu"`, the dot expander converts them into proper nested JSON objects:
+
+```json
+// Before (flat dotted field)
+{ "host.os.name": "Ubuntu" }
+
+// After (nested object)
+{ "host": { "os": { "name": "Ubuntu" } } }
+```
+
+This is necessary because ESQL extraction and CRUD operations may produce documents with flat dotted keys, but Elasticsearch mappings and downstream consumers (dashboards, flyouts) expect nested objects matching the ECS structure. The pipeline is set as the `default_pipeline` on the latest entity index, so it runs automatically on every document indexed.
+
+> [Ingest pipeline source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/entity_store/server/domain/asset_manager/latest_index_ingest_pipeline.ts) | [ES assets source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/elasticsearch_assets)
 
 ### Entity Store — Engine Lifecycle
 
-![Entity Store Lifecycle](diagrams/04_entity_store_lifecycle.svg)
+<img src="diagrams/04_entity_store_lifecycle.svg" alt="Entity Store Lifecycle" width="800">
 
 #### Key Classes
 
@@ -226,14 +240,14 @@ Entity extraction uses **ES|QL** to query log sources and extract entity records
 
 ### Entity Store — Kibana Tasks
 
-| Task Type | Schedule | Purpose |
-|-----------|----------|---------|
-| `entity_store:v2:extract_entity_task:{entityType}` | Configurable | Extract entities from logs via ESQL |
-| `entity_store:v2:entity_maintainer_task` | Configurable | Entity lifecycle maintenance |
-| `entity_store:snapshot` | Daily | Reindex latest → history, reset index |
-| `entity_store:field_retention:enrichment` | Configurable | Execute field retention enrich policy |
-| `entity_store:data_view:refresh` | Configurable | Refresh data views for new indices |
-| `entity_store:health` | Periodic | Monitor entity store health |
+| Task Type                                          | Schedule     | Purpose                               |
+| -------------------------------------------------- | ------------ | ------------------------------------- |
+| `entity_store:v2:extract_entity_task:{entityType}` | Configurable | Extract entities from logs via ESQL   |
+| `entity_store:v2:entity_maintainer_task`           | Configurable | Entity lifecycle maintenance          |
+| `entity_store:snapshot`                            | Daily        | Reindex latest → history, reset index |
+| `entity_store:field_retention:enrichment`          | Configurable | Execute field retention enrich policy |
+| `entity_store:data_view:refresh`                   | Configurable | Refresh data views for new indices    |
+| `entity_store:health`                              | Periodic     | Monitor entity store health           |
 
 > [Task definitions](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks)
 
@@ -316,13 +330,13 @@ The risk scoring query uses ES|QL to efficiently aggregate alert data.
 
 #### Key Parameters
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `range.start` | `now-30d` | Lookback window start |
-| `range.end` | `now` | Lookback window end |
-| `pageSize` | 3,500 | Entities processed per batch |
-| `alertSampleSizePerShard` | 10,000 | Max alerts sampled per shard |
-| `excludeAlertStatuses` | `['closed']` | Alert statuses to skip |
+| Parameter                 | Default      | Description                  |
+| ------------------------- | ------------ | ---------------------------- |
+| `range.start`             | `now-30d`    | Lookback window start        |
+| `range.end`               | `now`        | Lookback window end          |
+| `pageSize`                | 3,500        | Entities processed per batch |
+| `alertSampleSizePerShard` | 10,000       | Max alerts sampled per shard |
+| `excludeAlertStatuses`    | `['closed']` | Alert statuses to skip       |
 
 > [ESQL calculation source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/calculate_esql_risk_scores.ts)
 
@@ -334,12 +348,12 @@ After ESQL aggregation, scores are adjusted by **modifiers**:
 
 Applies a **Bayesian update** based on the entity's criticality level:
 
-| Criticality Level | Effect |
-|-------------------|--------|
-| `low_impact` | Decreases score |
-| `medium_impact` | Neutral |
-| `high_impact` | Increases score |
-| `extreme_impact` | Significantly increases score |
+| Criticality Level | Effect                        |
+| ----------------- | ----------------------------- |
+| `low_impact`      | Decreases score               |
+| `medium_impact`   | Neutral                       |
+| `high_impact`     | Increases score               |
+| `extreme_impact`  | Significantly increases score |
 
 > [Criticality modifier source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/modifiers/asset_criticality.ts)
 
@@ -353,11 +367,11 @@ Adjusts scores for entities identified as **privileged users** by the Privilege 
 
 #### Indices
 
-| Index | Type | Purpose |
-|-------|------|---------|
-| `.alerts-security.alerts-{namespace}` | **Read** | Source of alert risk scores |
-| `risk-score.risk-score-{namespace}` | **Write** | Time-series data stream of calculated scores |
-| `risk-score.risk-score-latest-{namespace}` | **Read/Write** | Latest score per entity (via transform) |
+| Index                                      | Type           | Purpose                                      |
+| ------------------------------------------ | -------------- | -------------------------------------------- |
+| `.alerts-security.alerts-{namespace}`      | **Read**       | Source of alert risk scores                  |
+| `risk-score.risk-score-{namespace}`        | **Write**      | Time-series data stream of calculated scores |
+| `risk-score.risk-score-latest-{namespace}` | **Read/Write** | Latest score per entity (via transform)      |
 
 #### Transform
 
@@ -376,7 +390,7 @@ When enabled, entities **without recent alert activity** have their scores reset
 
 ### Risk Engine — Lifecycle
 
-![Risk Engine Lifecycle](diagrams/06_risk_engine_lifecycle.svg)
+<img src="diagrams/06_risk_engine_lifecycle.svg" alt="Risk Engine Lifecycle" width="600">
 
 #### Initialization Creates
 
@@ -391,13 +405,13 @@ When enabled, entities **without recent alert activity** have their scores reset
 
 ### Risk Engine — Kibana Task
 
-| Property | Value |
-|----------|-------|
-| **Task Type** | `risk_engine:risk_scoring` |
-| **Task ID** | `risk_engine:risk_scoring:{namespace}:0.0.1` |
-| **Interval** | `1h` (default) |
-| **Timeout** | `10m` |
-| **Scope** | `securitySolution` |
+| Property      | Value                                        |
+| ------------- | -------------------------------------------- |
+| **Task Type** | `risk_engine:risk_scoring`                   |
+| **Task ID**   | `risk_engine:risk_scoring:{namespace}:0.0.1` |
+| **Interval**  | `1h` (default)                               |
+| **Timeout**   | `10m`                                        |
+| **Scope**     | `securitySolution`                           |
 
 #### Task Execution Flow
 
@@ -417,17 +431,17 @@ When enabled, entities **without recent alert activity** have their scores reset
 
 The risk engine stores its configuration in a **`risk-engine-configuration` saved object**:
 
-| Field | Default | Description |
-|-------|---------|-------------|
-| `enabled` | `false` | Whether the engine is active |
-| `dataViewId` | alerts index | Source data view |
-| `interval` | `1h` | Task run frequency |
-| `pageSize` | `3,500` | Entities per batch |
-| `range.start` | `now-30d` | Lookback start |
-| `range.end` | `now` | Lookback end |
-| `enableResetToZero` | `true` | Reset stale scores |
-| `excludeAlertStatuses` | `['closed']` | Statuses to skip |
-| `alertSampleSizePerShard` | `10,000` | Max alerts per shard |
+| Field                     | Default      | Description                  |
+| ------------------------- | ------------ | ---------------------------- |
+| `enabled`                 | `false`      | Whether the engine is active |
+| `dataViewId`              | alerts index | Source data view             |
+| `interval`                | `1h`         | Task run frequency           |
+| `pageSize`                | `3,500`      | Entities per batch           |
+| `range.start`             | `now-30d`    | Lookback start               |
+| `range.end`               | `now`        | Lookback end                 |
+| `enableResetToZero`       | `true`       | Reset stale scores           |
+| `excludeAlertStatuses`    | `['closed']` | Statuses to skip             |
+| `alertSampleSizePerShard` | `10,000`     | Max alerts per shard         |
 
 > [Saved object type](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts) | [Default configuration](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object)
 
@@ -504,145 +518,145 @@ Watchlists allow analysts to **curate lists of entities** for focused monitoring
 
 ### API Endpoints — Entity Store
 
-| Method | Endpoint | Description | Key Fields |
-|--------|----------|-------------|------------|
-| POST | `/api/entity_store/enable` | Enable entity store for all types | `fieldHistoryLength`, `entityTypes[]` |
-| GET | `/api/entity_store/status` | Overall entity store status | Returns `engines[]`, `status` |
-| POST | `/api/entity_store/engines/{entityType}/init` | Initialize engine for type | `indexPattern`, `filter`, `fieldHistoryLength` |
-| POST | `/api/entity_store/engines/{entityType}/start` | Start a stopped engine | — |
-| POST | `/api/entity_store/engines/{entityType}/stop` | Stop a running engine | — |
-| DELETE | `/api/entity_store/engines/{entityType}` | Delete engine and resources | `deleteData` (boolean) |
-| DELETE | `/api/entity_store/engines` | Delete all engines | `deleteData` (boolean) |
-| GET | `/api/entity_store/engines/{entityType}` | Get engine details | Returns engine descriptor |
-| GET | `/api/entity_store/engines` | List all engines | Returns `engines[]` |
-| POST | `/api/entity_store/engines/apply_dataview_indices` | Update source indices | — |
-| GET | `/api/entity_store/privileges` | Check required ES privileges | Returns `has_all_required` |
+| Method | Endpoint                                           | Description                       | Key Fields                                     |
+| ------ | -------------------------------------------------- | --------------------------------- | ---------------------------------------------- |
+| POST   | `/api/entity_store/enable`                         | Enable entity store for all types | `fieldHistoryLength`, `entityTypes[]`          |
+| GET    | `/api/entity_store/status`                         | Overall entity store status       | Returns `engines[]`, `status`                  |
+| POST   | `/api/entity_store/engines/{entityType}/init`      | Initialize engine for type        | `indexPattern`, `filter`, `fieldHistoryLength` |
+| POST   | `/api/entity_store/engines/{entityType}/start`     | Start a stopped engine            | —                                              |
+| POST   | `/api/entity_store/engines/{entityType}/stop`      | Stop a running engine             | —                                              |
+| DELETE | `/api/entity_store/engines/{entityType}`           | Delete engine and resources       | `deleteData` (boolean)                         |
+| DELETE | `/api/entity_store/engines`                        | Delete all engines                | `deleteData` (boolean)                         |
+| GET    | `/api/entity_store/engines/{entityType}`           | Get engine details                | Returns engine descriptor                      |
+| GET    | `/api/entity_store/engines`                        | List all engines                  | Returns `engines[]`                            |
+| POST   | `/api/entity_store/engines/apply_dataview_indices` | Update source indices             | —                                              |
+| GET    | `/api/entity_store/privileges`                     | Check required ES privileges      | Returns `has_all_required`                     |
 
 > [Routes source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes)
 
 ### API Endpoints — Entity CRUD
 
-| Method | Endpoint | Description | Key Fields |
-|--------|----------|-------------|------------|
-| PUT | `/api/entity_store/entities/{entityType}` | Upsert single entity | `entity` object with identity + fields |
-| PUT | `/api/entity_store/entities/bulk` | Bulk upsert entities | `entities[]` array |
-| DELETE | `/api/entity_store/entities/{entityType}` | Delete entity by ID | `entityId` |
-| POST | `/api/entity_store/entities/list` | List entities with filters | `filterQuery`, `sortField`, `page`, `perPage` |
+| Method | Endpoint                                  | Description                | Key Fields                                    |
+| ------ | ----------------------------------------- | -------------------------- | --------------------------------------------- |
+| PUT    | `/api/entity_store/entities/{entityType}` | Upsert single entity       | `entity` object with identity + fields        |
+| PUT    | `/api/entity_store/entities/bulk`         | Bulk upsert entities       | `entities[]` array                            |
+| DELETE | `/api/entity_store/entities/{entityType}` | Delete entity by ID        | `entityId`                                    |
+| POST   | `/api/entity_store/entities/list`         | List entities with filters | `filterQuery`, `sortField`, `page`, `perPage` |
 
 > [Entity CRUD source](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/entity_crud)
 
 ### API Endpoints — Risk Engine
 
-| Method | Endpoint | Description | Key Fields |
-|--------|----------|-------------|------------|
-| POST | `/internal/risk_score/engine/init` | Initialize risk engine | Creates indices, transforms, task |
-| POST | `/internal/risk_score/engine/enable` | Enable risk engine | Starts the scoring task |
-| POST | `/internal/risk_score/engine/disable` | Disable risk engine | Stops the scoring task |
-| GET | `/internal/risk_score/engine/status` | Get engine status | Returns `risk_engine_status`, `is_max_amount_of_risk_engines_reached` |
-| POST | `/internal/risk_score/engine/schedule_now` | Trigger immediate run | — |
-| GET | `/internal/risk_score/engine/privileges` | Check required privileges | Returns `has_all_required`, `privileges` |
-| GET | `/internal/risk_score/engine/settings` | Get engine settings | Returns saved object config |
-| POST | `/api/risk_score/engine/dangerously_delete_data` | Delete all data | Removes indices, transforms, tasks |
-| POST | `/api/risk_score/engine/saved_object/configure` | Update configuration | `dataViewId`, `range`, `interval`, etc. |
+| Method | Endpoint                                         | Description               | Key Fields                                                            |
+| ------ | ------------------------------------------------ | ------------------------- | --------------------------------------------------------------------- |
+| POST   | `/internal/risk_score/engine/init`               | Initialize risk engine    | Creates indices, transforms, task                                     |
+| POST   | `/internal/risk_score/engine/enable`             | Enable risk engine        | Starts the scoring task                                               |
+| POST   | `/internal/risk_score/engine/disable`            | Disable risk engine       | Stops the scoring task                                                |
+| GET    | `/internal/risk_score/engine/status`             | Get engine status         | Returns `risk_engine_status`, `is_max_amount_of_risk_engines_reached` |
+| POST   | `/internal/risk_score/engine/schedule_now`       | Trigger immediate run     | —                                                                     |
+| GET    | `/internal/risk_score/engine/privileges`         | Check required privileges | Returns `has_all_required`, `privileges`                              |
+| GET    | `/internal/risk_score/engine/settings`           | Get engine settings       | Returns saved object config                                           |
+| POST   | `/api/risk_score/engine/dangerously_delete_data` | Delete all data           | Removes indices, transforms, tasks                                    |
+| POST   | `/api/risk_score/engine/saved_object/configure`  | Update configuration      | `dataViewId`, `range`, `interval`, etc.                               |
 
 ### API Endpoints — Risk Score & Asset Criticality
 
 #### Risk Score
 
-| Method | Endpoint | Description | Key Fields |
-|--------|----------|-------------|------------|
-| POST | `/internal/risk_score/preview` | Preview scores without persisting | `data_view_id`, `filter`, `range` |
-| POST | `/internal/risk_score/calculation/entity` | Calculate for specific entity | `identifier`, `identifier_type` |
+| Method | Endpoint                                  | Description                       | Key Fields                        |
+| ------ | ----------------------------------------- | --------------------------------- | --------------------------------- |
+| POST   | `/internal/risk_score/preview`            | Preview scores without persisting | `data_view_id`, `filter`, `range` |
+| POST   | `/internal/risk_score/calculation/entity` | Calculate for specific entity     | `identifier`, `identifier_type`   |
 
 #### Asset Criticality
 
-| Method | Endpoint | Description | Key Fields |
-|--------|----------|-------------|------------|
-| GET | `/api/asset_criticality` | Get criticality record | `id_field`, `id_value` |
-| PUT | `/api/asset_criticality` | Upsert criticality record | `id_field`, `id_value`, `criticality_level` |
-| DELETE | `/api/asset_criticality` | Delete criticality record | `id_field`, `id_value` |
-| POST | `/api/asset_criticality/list` | List records | `page`, `per_page`, `sort_field` |
-| POST | `/api/asset_criticality/bulk` | Bulk upload | `records[]` |
-| POST | `/api/asset_criticality/upload_csv` | Upload CSV file | multipart form data |
-| GET | `/internal/asset_criticality/privileges` | Check privileges | Returns privilege status |
+| Method | Endpoint                                 | Description               | Key Fields                                  |
+| ------ | ---------------------------------------- | ------------------------- | ------------------------------------------- |
+| GET    | `/api/asset_criticality`                 | Get criticality record    | `id_field`, `id_value`                      |
+| PUT    | `/api/asset_criticality`                 | Upsert criticality record | `id_field`, `id_value`, `criticality_level` |
+| DELETE | `/api/asset_criticality`                 | Delete criticality record | `id_field`, `id_value`                      |
+| POST   | `/api/asset_criticality/list`            | List records              | `page`, `per_page`, `sort_field`            |
+| POST   | `/api/asset_criticality/bulk`            | Bulk upload               | `records[]`                                 |
+| POST   | `/api/asset_criticality/upload_csv`      | Upload CSV file           | multipart form data                         |
+| GET    | `/internal/asset_criticality/privileges` | Check privileges          | Returns privilege status                    |
 
 > [Asset criticality routes](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/asset_criticality/routes)
 
 ### API Endpoints — Privilege Monitoring
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/entity_analytics/monitoring/engine/init` | Initialize monitoring engine |
-| POST | `/api/entity_analytics/monitoring/engine/disable` | Disable monitoring |
-| POST | `/api/entity_analytics/monitoring/engine/schedule_now` | Trigger immediate run |
-| DELETE | `/api/entity_analytics/monitoring/engine/delete` | Delete monitoring engine |
-| GET | `/api/entity_analytics/monitoring/privileges/health` | Health check |
-| GET | `/api/entity_analytics/monitoring/privileges/privileges` | Check privileges |
-| POST | `/api/entity_analytics/monitoring/users` | Create privileged user |
-| GET | `/api/entity_analytics/monitoring/users/list` | List privileged users |
-| PUT | `/api/entity_analytics/monitoring/users/{id}` | Update privileged user |
-| DELETE | `/api/entity_analytics/monitoring/users/{id}` | Delete privileged user |
-| POST | `/api/entity_analytics/monitoring/users/_csv` | Upload users via CSV |
-| POST | `/api/entity_analytics/monitoring/entity_source` | Create entity source |
-| GET | `/api/entity_analytics/monitoring/entity_source/{id}` | Get entity source |
-| PUT | `/api/entity_analytics/monitoring/entity_source/{id}` | Update entity source |
-| DELETE | `/api/entity_analytics/monitoring/entity_source/{id}` | Delete entity source |
+| Method | Endpoint                                                 | Description                  |
+| ------ | -------------------------------------------------------- | ---------------------------- |
+| POST   | `/api/entity_analytics/monitoring/engine/init`           | Initialize monitoring engine |
+| POST   | `/api/entity_analytics/monitoring/engine/disable`        | Disable monitoring           |
+| POST   | `/api/entity_analytics/monitoring/engine/schedule_now`   | Trigger immediate run        |
+| DELETE | `/api/entity_analytics/monitoring/engine/delete`         | Delete monitoring engine     |
+| GET    | `/api/entity_analytics/monitoring/privileges/health`     | Health check                 |
+| GET    | `/api/entity_analytics/monitoring/privileges/privileges` | Check privileges             |
+| POST   | `/api/entity_analytics/monitoring/users`                 | Create privileged user       |
+| GET    | `/api/entity_analytics/monitoring/users/list`            | List privileged users        |
+| PUT    | `/api/entity_analytics/monitoring/users/{id}`            | Update privileged user       |
+| DELETE | `/api/entity_analytics/monitoring/users/{id}`            | Delete privileged user       |
+| POST   | `/api/entity_analytics/monitoring/users/_csv`            | Upload users via CSV         |
+| POST   | `/api/entity_analytics/monitoring/entity_source`         | Create entity source         |
+| GET    | `/api/entity_analytics/monitoring/entity_source/{id}`    | Get entity source            |
+| PUT    | `/api/entity_analytics/monitoring/entity_source/{id}`    | Update entity source         |
+| DELETE | `/api/entity_analytics/monitoring/entity_source/{id}`    | Delete entity source         |
 
 > [Privilege monitoring routes](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes)
 
 ### API Endpoints — Entity Store Plugin (Internal)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/internal/security/entity_store/install` | Install entity store resources |
-| POST | `/internal/security/entity_store/uninstall` | Uninstall entity store |
-| GET | `/internal/security/entity_store/status` | Get status |
-| PUT | `/internal/security/entity_store/start` | Start entity store |
-| PUT | `/internal/security/entity_store/stop` | Stop entity store |
-| POST | `/internal/security/entity_store/{entityType}/force_log_extraction` | Force log extraction for type |
-| POST | `/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates` | Force CCS extraction |
-| PUT | `/internal/security/entity_store/entities/{entityType}` | Upsert entity |
-| PUT | `/internal/security/entity_store/entities/bulk` | Bulk upsert |
-| DELETE | `/internal/security/entity_store/entities/` | Delete entity |
+| Method | Endpoint                                                                    | Description                    |
+| ------ | --------------------------------------------------------------------------- | ------------------------------ |
+| POST   | `/internal/security/entity_store/install`                                   | Install entity store resources |
+| POST   | `/internal/security/entity_store/uninstall`                                 | Uninstall entity store         |
+| GET    | `/internal/security/entity_store/status`                                    | Get status                     |
+| PUT    | `/internal/security/entity_store/start`                                     | Start entity store             |
+| PUT    | `/internal/security/entity_store/stop`                                      | Stop entity store              |
+| POST   | `/internal/security/entity_store/{entityType}/force_log_extraction`         | Force log extraction for type  |
+| POST   | `/internal/security/entity_store/{entityType}/force_ccs_extract_to_updates` | Force CCS extraction           |
+| PUT    | `/internal/security/entity_store/entities/{entityType}`                     | Upsert entity                  |
+| PUT    | `/internal/security/entity_store/entities/bulk`                             | Bulk upsert                    |
+| DELETE | `/internal/security/entity_store/entities/`                                 | Delete entity                  |
 
 > [Entity Store plugin routes](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/plugins/entity_store/server/routes)
 
 ### All Kibana Tasks
 
-| Task Type | Interval | Timeout | Purpose |
-|-----------|----------|---------|---------|
-| `risk_engine:risk_scoring` | 1h | 10m | Calculate and persist risk scores |
-| `entity_store:v2:extract_entity_task:{type}` | Configurable | Configurable | ESQL entity extraction from logs |
-| `entity_store:v2:entity_maintainer_task` | Configurable | Configurable | Entity lifecycle maintenance |
-| `entity_store:snapshot` | Daily | — | Snapshot latest → history index |
-| `entity_store:field_retention:enrichment` | Configurable | — | Execute field retention enrich policy |
-| `entity_store:data_view:refresh` | Configurable | — | Refresh data views |
-| `entity_store:health` | Periodic | — | Health monitoring |
-| `entity_analytics:monitoring:privileges:engine` | Configurable | — | Privilege monitoring engine |
+| Task Type                                       | Interval     | Timeout      | Purpose                               |
+| ----------------------------------------------- | ------------ | ------------ | ------------------------------------- |
+| `risk_engine:risk_scoring`                      | 1h           | 10m          | Calculate and persist risk scores     |
+| `entity_store:v2:extract_entity_task:{type}`    | Configurable | Configurable | ESQL entity extraction from logs      |
+| `entity_store:v2:entity_maintainer_task`        | Configurable | Configurable | Entity lifecycle maintenance          |
+| `entity_store:snapshot`                         | Daily        | —            | Snapshot latest → history index       |
+| `entity_store:field_retention:enrichment`       | Configurable | —            | Execute field retention enrich policy |
+| `entity_store:data_view:refresh`                | Configurable | —            | Refresh data views                    |
+| `entity_store:health`                           | Periodic     | —            | Health monitoring                     |
+| `entity_analytics:monitoring:privileges:engine` | Configurable | —            | Privilege monitoring engine           |
 
 #### Migration Tasks (run once)
 
-| Task Type | Purpose |
-|-----------|---------|
-| `security-solution-ea-risk-score-copy-timestamp-to-event-ingested` | Backfill `event.ingested` on risk scores |
+| Task Type                                                                 | Purpose                                        |
+| ------------------------------------------------------------------------- | ---------------------------------------------- |
+| `security-solution-ea-risk-score-copy-timestamp-to-event-ingested`        | Backfill `event.ingested` on risk scores       |
 | `security-solution-ea-asset-criticality-copy-timestamp-to-event-ingested` | Backfill `event.ingested` on asset criticality |
-| `security-solution-ea-asset-criticality-ecs-migration` | Migrate asset criticality to ECS format |
+| `security-solution-ea-asset-criticality-ecs-migration`                    | Migrate asset criticality to ECS format        |
 
 ### Telemetry & Logging Events
 
 #### Event-Based Telemetry
 
-| Event | When |
-|-------|------|
-| `ENTITY_STORE_API_CALL_EVENT` | Any Entity Store API call |
-| `ENTITY_ENGINE_INITIALIZATION_EVENT` | Engine initialized |
-| `ENTITY_ENGINE_DELETION_EVENT` | Engine deleted |
-| `ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT` | Resource creation failed |
+| Event                                            | When                        |
+| ------------------------------------------------ | --------------------------- |
+| `ENTITY_STORE_API_CALL_EVENT`                    | Any Entity Store API call   |
+| `ENTITY_ENGINE_INITIALIZATION_EVENT`             | Engine initialized          |
+| `ENTITY_ENGINE_DELETION_EVENT`                   | Engine deleted              |
+| `ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT`      | Resource creation failed    |
 | `ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT` | Data view refresh task runs |
-| `ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT` | Snapshot task runs |
-| `ENTITY_STORE_HEALTH_REPORT_EVENT` | Health check reports |
-| `ENTITY_STORE_USAGE_EVENT` | Entity Store usage metrics |
-| `ENTITY_HIGHLIGHTS_USAGE_EVENT` | Entity highlights viewed |
+| `ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT`     | Snapshot task runs          |
+| `ENTITY_STORE_HEALTH_REPORT_EVENT`               | Health check reports        |
+| `ENTITY_STORE_USAGE_EVENT`                       | Entity Store usage metrics  |
+| `ENTITY_HIGHLIGHTS_USAGE_EVENT`                  | Entity highlights viewed    |
 
 #### Usage Collectors
 
@@ -655,15 +669,15 @@ Watchlists allow analysts to **curate lists of entities** for focused monitoring
 
 #### Experimental Features (`common/experimental_features.ts`)
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `entityStoreDisabled` | `false` | Kill switch for Entity Store |
-| `entityDetailsHighlightsEnabled` | `true` | Entity details highlights in flyouts |
-| `entityAnalyticsWatchlistEnabled` | `false` | Watchlists feature |
-| `entityThreatHuntingEnabled` | `false` | Entity threat hunting |
-| `enableRiskScoreResetToZero` | `true` | Reset scores for inactive entities |
-| `enableRiskScorePrivmonModifier` | `true` | Privilege monitoring risk modifier |
-| `riskScoreAssistantToolDisabled` | `false` | AI assistant risk score tool |
+| Flag                              | Default | Description                          |
+| --------------------------------- | ------- | ------------------------------------ |
+| `entityStoreDisabled`             | `false` | Kill switch for Entity Store         |
+| `entityDetailsHighlightsEnabled`  | `true`  | Entity details highlights in flyouts |
+| `entityAnalyticsWatchlistEnabled` | `false` | Watchlists feature                   |
+| `entityThreatHuntingEnabled`      | `false` | Entity threat hunting                |
+| `enableRiskScoreResetToZero`      | `true`  | Reset scores for inactive entities   |
+| `enableRiskScorePrivmonModifier`  | `true`  | Privilege monitoring risk modifier   |
+| `riskScoreAssistantToolDisabled`  | `false` | AI assistant risk score tool         |
 
 #### Kibana Configuration (`xpack.securitySolution.entityAnalytics`)
 
@@ -686,12 +700,12 @@ All Entity Analytics routes require: `securitySolution` + `siem-entity-analytics
 
 #### Elasticsearch Privileges
 
-| Component | Index Privileges | Cluster Privileges |
-|-----------|-----------------|-------------------|
-| **Entity Store** | read/write on `.entities.*` | `manage_enrich`, `manage_ingest_pipelines`, `manage_transform` |
-| **Risk Engine** | read/write on `risk-score.*` | `manage_transform` |
-| **Asset Criticality** | read/write on asset criticality index | — |
-| **Privilege Monitoring** | read/write on monitoring indices | — |
+| Component                | Index Privileges                      | Cluster Privileges                                             |
+| ------------------------ | ------------------------------------- | -------------------------------------------------------------- |
+| **Entity Store**         | read/write on `.entities.*`           | `manage_enrich`, `manage_ingest_pipelines`, `manage_transform` |
+| **Risk Engine**          | read/write on `risk-score.*`          | `manage_transform`                                             |
+| **Asset Criticality**    | read/write on asset criticality index | —                                                              |
+| **Privilege Monitoring** | read/write on monitoring indices      | —                                                              |
 
 #### Key Files
 
@@ -700,16 +714,16 @@ All Entity Analytics routes require: `securitySolution` + `siem-entity-analytics
 
 ### Stateful vs Serverless
 
-| Aspect | Stateful | Serverless |
-|--------|----------|------------|
-| **Entity Store** | Full support | Full support |
-| **Risk Engine** | Full support | Full support |
-| **Asset Criticality** | Full support | Full support |
-| **Privilege Monitoring** | Full support | Full support |
-| **API Key Management** | Uses stored API keys | Uses stored API keys |
-| **Task Manager** | Standard task scheduling | Serverless task scheduling |
-| **ML Integration** | Full ML features | Serverless ML constraints |
-| **Index Management** | Standard ES indices | Serverless index management |
+| Aspect                   | Stateful                 | Serverless                  |
+| ------------------------ | ------------------------ | --------------------------- |
+| **Entity Store**         | Full support             | Full support                |
+| **Risk Engine**          | Full support             | Full support                |
+| **Asset Criticality**    | Full support             | Full support                |
+| **Privilege Monitoring** | Full support             | Full support                |
+| **API Key Management**   | Uses stored API keys     | Uses stored API keys        |
+| **Task Manager**         | Standard task scheduling | Serverless task scheduling  |
+| **ML Integration**       | Full ML features         | Serverless ML constraints   |
+| **Index Management**     | Standard ES indices      | Serverless index management |
 
 > Both deployment models share the same codebase. Differences are primarily in infrastructure constraints rather than feature availability.
 
@@ -729,6 +743,7 @@ All Entity Analytics routes require: `securitySolution` + `siem-entity-analytics
 ### Appendix A: RFC Template
 
 > Add upcoming RFCs and design proposals below. Each RFC should include:
+>
 > - **Title** and link to the RFC document
 > - **Status** (Draft / In Review / Accepted / Implemented)
 > - **Summary** of proposed changes
@@ -760,18 +775,18 @@ All Entity Analytics routes require: `securitySolution` + `siem-entity-analytics
 
 ### Appendix B: Glossary
 
-| Term | Definition |
-|------|-----------|
-| **Entity** | A host, user, service, or generic object tracked by the Entity Store |
-| **EUID** | Entity Unique Identifier — composite key identifying an entity |
-| **Engine** | A running instance that manages one entity type's lifecycle |
-| **Field Retention** | Mechanism to preserve entity fields across observations using enrich policies |
-| **Latest Transform** | Elasticsearch transform that maintains the current state from a time-series stream |
-| **Pivot Transform** | Aggregation transform that groups entity observations |
-| **Riemann Zeta** | Mathematical function used to weight and bound risk score aggregation |
-| **Score Modifier** | Post-calculation adjustment (asset criticality, privilege monitoring) |
-| **Snapshot** | Daily point-in-time copy of entity data to history index |
-| **Updates Data Stream** | Append-only stream of entity observations before aggregation |
+| Term                    | Definition                                                                         |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| **Entity**              | A host, user, service, or generic object tracked by the Entity Store               |
+| **EUID**                | Entity Unique Identifier — composite key identifying an entity                     |
+| **Engine**              | A running instance that manages one entity type's lifecycle                        |
+| **Field Retention**     | Mechanism to preserve entity fields across observations using enrich policies      |
+| **Latest Transform**    | Elasticsearch transform that maintains the current state from a time-series stream |
+| **Pivot Transform**     | Aggregation transform that groups entity observations                              |
+| **Riemann Zeta**        | Mathematical function used to weight and bound risk score aggregation              |
+| **Score Modifier**      | Post-calculation adjustment (asset criticality, privilege monitoring)              |
+| **Snapshot**            | Daily point-in-time copy of entity data to history index                           |
+| **Updates Data Stream** | Append-only stream of entity observations before aggregation                       |
 
 ### Appendix C: Quick Reference Links
 

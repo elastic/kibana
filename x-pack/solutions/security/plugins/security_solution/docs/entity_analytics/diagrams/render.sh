@@ -7,6 +7,6 @@ cd "$SCRIPT_DIR"
 echo "Rendering Mermaid diagrams to SVG..."
 for f in *.mmd; do
   echo "  $f → ${f%.mmd}.svg"
-  npx -y @mermaid-js/mermaid-cli@latest -i "$f" -o "${f%.mmd}.svg" -c mermaid-config.json -b white -w 800
+  npx -y @mermaid-js/mermaid-cli@latest -i "$f" -o "${f%.mmd}.svg" -c mermaid-config.json -b white -w 1400
 done
 echo "Done."
