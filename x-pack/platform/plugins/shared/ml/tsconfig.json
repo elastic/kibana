@@ -95,7 +95,6 @@
     "@kbn/ml-validators",
     "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
-    "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-context-render",
@@ -146,5 +145,6 @@
     "@kbn/file-upload",
     "@kbn/file-upload-common",
     "@kbn/kql",
+    "@kbn/as-code-filters-transforms",
   ]
 }

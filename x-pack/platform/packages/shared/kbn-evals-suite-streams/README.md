@@ -6,10 +6,13 @@ Evaluation suite for Elastic Streams pattern extraction quality.
 
 ```bash
 # Start Scout server
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 
 # Run evaluations
-node scripts/playwright test --config x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts
+node scripts/evals run --suite streams --evaluation-connector-id azure-gpt4o
+
+# Only run pipeline_suggestion
+node scripts/evals run --suite streams --evaluation-connector-id azure-gpt4o pipeline_suggestion
 ```
 
 ## Creating New Datasets
@@ -23,6 +26,7 @@ You can easily create new dataset entries from AI suggestions generated in Kiban
    pbpaste | node --require ./src/setup_node_env/ ./x-pack/platform/packages/shared/kbn-evals-suite-streams/scripts/create_dataset_from_clipboard.ts
    ```
 4. The script will automatically:
+
    - Read the JSON from stdin (piped from clipboard)
    - Generate a dataset entry with appropriate structure
    - Insert it into the correct dataset file with a `🔧 NEW DATASETS GO HERE` marker

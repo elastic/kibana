@@ -131,7 +131,26 @@ describe('request utils', () => {
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
       });
       const mockConfig = getMockSearchConfig({});
-      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {}, true);
+      const params = await getDefaultAsyncSubmitParams(
+        mockUiSettingsClient,
+        mockConfig,
+        {},
+        { isServerless: true }
+      );
+      expect(params).not.toHaveProperty('ccs_minimize_roundtrips');
+    });
+
+    test('Does not set `ccs_minimize_roundtrips` for PIT', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const mockConfig = getMockSearchConfig({});
+      const params = await getDefaultAsyncSubmitParams(
+        mockUiSettingsClient,
+        mockConfig,
+        {},
+        { isPit: true }
+      );
       expect(params).not.toHaveProperty('ccs_minimize_roundtrips');
     });
   });

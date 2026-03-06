@@ -19,7 +19,7 @@ import type { LinkItem } from '../common/links/types';
 
 export const links: LinkItem = {
   capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`]],
-  globalNavPosition: 11,
+  globalNavPosition: 12,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.inventory', {
       defaultMessage: 'Inventory',

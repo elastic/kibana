@@ -69,6 +69,7 @@ describe('writeDocs', () => {
       pathsByPlugin: new Map(),
       project: {} as any,
       initialDocIds: ['doc1', 'doc2'],
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {
@@ -84,14 +85,18 @@ describe('writeDocs', () => {
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
+      unnamedExports: {},
     };
 
     allPluginStats = {
       'test-plugin': {
         apiCount: 5,
         missingComments: [],
+        missingComplexTypeInfo: [],
         isAnyType: [],
         noReferences: [],
+        paramDocMismatches: [],
+        missingReturns: [],
         missingExports: 0,
         deprecatedAPIsReferencedCount: 0,
         unreferencedDeprecatedApisCount: 0,
@@ -104,6 +109,7 @@ describe('writeDocs', () => {
         eslintDisableLineCount: 0,
         eslintDisableFileCount: 0,
         enzymeImportCount: 0,
+        unnamedExports: [],
       },
     };
 
@@ -148,6 +154,34 @@ describe('writeDocs', () => {
     await writeDocs(context, setupResult, apiMapResult, allPluginStats, options);
 
     expect(writePluginDocs).toHaveBeenCalled();
+  });
+
+  it('skips aggregate docs when pluginFilter is provided', async () => {
+    const options: CliOptions = {
+      collectReferences: false,
+      pluginFilter: ['test-plugin'],
+    };
+
+    await writeDocs(context, setupResult, apiMapResult, allPluginStats, options);
+
+    expect(writePluginDirectoryDoc).not.toHaveBeenCalled();
+    expect(writeDeprecationDocByPlugin).not.toHaveBeenCalled();
+    expect(writeDeprecationDueByTeam).not.toHaveBeenCalled();
+    expect(writeDeprecationDocByApi).not.toHaveBeenCalled();
+  });
+
+  it('skips aggregate docs when packageFilter is provided', async () => {
+    const options: CliOptions = {
+      collectReferences: false,
+      packageFilter: ['@kbn/test-package'],
+    };
+
+    await writeDocs(context, setupResult, apiMapResult, allPluginStats, options);
+
+    expect(writePluginDirectoryDoc).not.toHaveBeenCalled();
+    expect(writeDeprecationDocByPlugin).not.toHaveBeenCalled();
+    expect(writeDeprecationDueByTeam).not.toHaveBeenCalled();
+    expect(writeDeprecationDocByApi).not.toHaveBeenCalled();
   });
 
   it('trims deleted docs from nav when initialDocIds are provided', async () => {

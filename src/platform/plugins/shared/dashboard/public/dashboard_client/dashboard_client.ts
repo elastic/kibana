@@ -15,6 +15,7 @@ import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '..
 import {
   DASHBOARD_API_PATH,
   DASHBOARD_API_VERSION,
+  DASHBOARD_APP_API_PATH,
   DASHBOARD_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
@@ -38,16 +39,11 @@ export const dashboardClient = {
     dashboardState: DashboardState,
     accessMode?: SavedObjectAccessControl['accessMode']
   ) => {
-    return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_API_PATH, {
+    return coreServices.http.post<DashboardCreateResponseBody>(DASHBOARD_APP_API_PATH, {
       version: DASHBOARD_API_VERSION,
-      query: {
-        allowUnmappedKeys: true,
-      },
       body: JSON.stringify({
-        data: {
-          ...dashboardState,
-          ...(accessMode && { access_control: { access_mode: accessMode } }),
-        },
+        ...dashboardState,
+        ...(accessMode && { access_control: { access_mode: accessMode } }),
       }),
     });
   },
@@ -63,11 +59,8 @@ export const dashboardClient = {
     }
 
     const result = await coreServices.http
-      .get<DashboardReadResponseBody>(`${DASHBOARD_API_PATH}/${id}`, {
+      .get<DashboardReadResponseBody>(`${DASHBOARD_APP_API_PATH}/${id}`, {
         version: DASHBOARD_API_VERSION,
-        query: {
-          allowUnmappedKeys: true,
-        },
       })
       .catch((e) => {
         if (e.response?.status === 404) {
@@ -100,15 +93,10 @@ export const dashboardClient = {
   },
   update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
-      `${DASHBOARD_API_PATH}/${id}`,
+      `${DASHBOARD_APP_API_PATH}/${id}`,
       {
         version: DASHBOARD_API_VERSION,
-        query: {
-          allowUnmappedKeys: true,
-        },
-        body: JSON.stringify({
-          data: dashboardState,
-        }),
+        body: JSON.stringify(dashboardState),
       }
     );
     cache.delete(id);

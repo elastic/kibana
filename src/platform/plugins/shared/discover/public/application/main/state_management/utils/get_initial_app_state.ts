@@ -32,6 +32,7 @@ import {
 } from '../../../../../common/data_sources';
 import { handleSourceColumnState } from '../../../../utils/state_helpers';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 
 export function getInitialAppState({
   initialUrlState,
@@ -39,12 +40,14 @@ export function getInitialAppState({
   persistedTab,
   dataView,
   services,
+  defaultProfileEsqlQuery,
 }: {
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState?: boolean;
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
+  defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }) {
   const defaultAppState = getDefaultAppState({
     persistedTab,
@@ -52,6 +55,7 @@ export function getInitialAppState({
     services,
     initialUrlState,
     hasGlobalState,
+    defaultProfileEsqlQuery,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
@@ -90,12 +94,14 @@ function getDefaultQuery({
   persistedTab,
   services,
   dataView,
+  defaultProfileEsqlQuery,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   services: DiscoverServices;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
+  defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }): Query | AggregateQuery | undefined {
   if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
 
@@ -105,13 +111,17 @@ function getDefaultQuery({
   if (hasGlobalState || hasInitialUrlState)
     return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
 
-  // Lastly fall back to the last selected query mode if available
-  const hasEsqlEnabled = services.uiSettings.get(ENABLE_ESQL);
-
+  // If the last query mode used by the user was classic, just return the default query
   const queryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
-  if (hasEsqlEnabled && queryMode === 'esql' && dataView instanceof DataView)
-    return { esql: getInitialESQLQuery(dataView, true) };
+  if (queryMode === 'classic') return services.data.query.queryString.getDefaultQuery();
 
+  // If the last query mode used by the user was esql, or if esql is default, return the initial esql query
+  const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
+  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
+  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
+    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
+
+  // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();
 }
 
@@ -121,12 +131,14 @@ function getDefaultAppState({
   services,
   initialUrlState,
   hasGlobalState,
+  defaultProfileEsqlQuery,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
+  defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }) {
   const { uiSettings, storage } = services;
   const query = getDefaultQuery({
@@ -135,6 +147,7 @@ function getDefaultAppState({
     dataView,
     initialUrlState,
     hasGlobalState,
+    defaultProfileEsqlQuery,
   });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),

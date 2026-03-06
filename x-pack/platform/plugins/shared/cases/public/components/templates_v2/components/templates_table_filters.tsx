@@ -16,12 +16,12 @@ import {
 import { css } from '@emotion/react';
 import { TemplatesSearch } from './templates_search';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../../all_cases/multi_select_filter';
-import type { QueryParams } from '../types';
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
 import * as i18n from '../../templates/translations';
 
 export interface TemplatesTableFiltersProps {
-  queryParams: QueryParams;
-  onQueryParamsChange: (params: Partial<QueryParams>) => void;
+  queryParams: TemplatesFindRequest;
+  onQueryParamsChange: (params: Partial<TemplatesFindRequest>) => void;
   onRefresh: () => void;
   isLoading?: boolean;
   availableTags?: string[];

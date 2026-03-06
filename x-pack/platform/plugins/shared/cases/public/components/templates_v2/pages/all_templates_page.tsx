@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Template } from '../../../../common/types/domain/template/v1';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
 import * as i18n from '../../templates/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
@@ -80,7 +80,7 @@ export const AllTemplatesPage: React.FC = () => {
   });
 
   const tableRowProps = useCallback(
-    (template: Template) => ({
+    (template: TemplateListItem) => ({
       'data-test-subj': `templates-table-row-${template.templateId}`,
     }),
     []
@@ -170,7 +170,7 @@ export const AllTemplatesPage: React.FC = () => {
           <EuiBasicTable
             columns={columns}
             data-test-subj="templates-table"
-            itemId="key"
+            itemId="templateId"
             items={data?.templates ?? []}
             loading={isLoading}
             tableCaption={i18n.TEMPLATE_TITLE}

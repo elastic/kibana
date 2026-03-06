@@ -9,13 +9,21 @@ import { ToolType } from '@kbn/agent-builder-common';
 import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ActionResult } from '@kbn/actions-plugin/server';
+import type {
+  ActionResult,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { trimStart } from 'lodash';
 import { updateYamlField } from '@kbn/workflows-management-plugin/common/lib/yaml';
-import { parse } from 'yaml';
+import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
+import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
+import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils';
 import { loadWorkflows } from '@kbn/data-catalog-plugin/common/workflow_loader';
+import type { ImportedTool } from '@kbn/data-catalog-plugin/common/data_source_spec';
+import { parse } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createStackConnector } from '../utils/create_stack_connector';
 
@@ -24,6 +32,7 @@ import type {
   DataSourcesServerStartDependencies,
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
+import type { DeleteDataSourceAndRelatedResourcesResult } from '../../common';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -46,6 +55,58 @@ function slugify(input: string): string {
     .replace(/[\u0300-\u036f]/g, '') // remove accents
     .replace(/[^a-z0-9]+/g, '-') // replace non-alphanumerics with -
     .replace(/^-+|-+$/g, ''); // trim leading/trailing -
+}
+
+/**
+ * Bulk imports MCP tools for a Data Source that uses the MCP stack connector.
+ */
+async function importMcpTools(
+  registry: ToolRegistry,
+  actions: ActionsPluginStart,
+  request: KibanaRequest,
+  connectorId: string,
+  tools: Array<ImportedTool>,
+  name: string,
+  namespace: string,
+  logger: Logger
+): Promise<string[]> {
+  if (tools.length === 0) {
+    return [];
+  }
+
+  const toolNames = tools.map((tool) => tool.name);
+
+  const mcpTools = await getNamedMcpTools({
+    actions,
+    request,
+    connectorId,
+    toolNames,
+    logger,
+  });
+
+  const dataSourceTools = mcpTools.map((tool) => ({
+    name: tool.name,
+    description: tool.description + ' ' + tools.find((t) => t.name === tool.name)!.description,
+  }));
+
+  let importedToolIds: string[] = [];
+  try {
+    if (dataSourceTools && dataSourceTools.length > 0) {
+      const { results } = await bulkCreateMcpTools({
+        registry,
+        actions,
+        request,
+        connectorId,
+        tools: dataSourceTools,
+        namespace,
+      });
+      importedToolIds = results.map((result) => result.toolId);
+      logger.info(`Imported tools for Data Source '${name}': ${JSON.stringify(importedToolIds)}`);
+    }
+  } catch (error) {
+    throw new Error(`Error bulk importing MCP tools for ${name}: ${error}`);
+  }
+  return importedToolIds;
 }
 
 /**
@@ -74,55 +135,67 @@ export async function createDataSourceAndRelatedResources(
 
   const workflowIds: string[] = [];
   const toolIds: string[] = [];
+  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
 
-  let finalStackConnectorId: string;
+  const stackConnectorConfigs = dataSource.stackConnectors;
+  const stackConnectorIds: Record<string, string> = {};
 
-  // Pattern 1: Reuse existing stack connector (from flyout)
-  if (stackConnectorId) {
-    logger.info(`Reusing existing stack connector: ${stackConnectorId}`);
-    finalStackConnectorId = stackConnectorId;
-  }
-  // Pattern 2: Create new stack connector (direct API call)
-  else {
-    const toolRegistry = await agentBuilder.tools.getRegistry({ request });
-    const stackConnectorConfig = dataSource.stackConnector;
-    const stackConnector: ActionResult = await createStackConnector(
-      toolRegistry,
-      actions,
-      request,
-      stackConnectorConfig,
-      name,
-      toolIds,
-      credentials,
-      logger
-    );
+  for (const stackConnectorConfig of stackConnectorConfigs) {
+    let finalStackConnectorId: string;
 
-    finalStackConnectorId = stackConnector.id;
+    const connectorType = trimStart(stackConnectorConfig.type, '.');
+
+    // Pattern 1: Reuse existing stack connector (from flyout) - only for first connector
+    if (stackConnectorId) {
+      finalStackConnectorId = stackConnectorId;
+    }
+    // Pattern 2: Create new stack connector (direct API call)
+    else {
+      const stackConnector: ActionResult = await createStackConnector(
+        actions,
+        request,
+        name,
+        stackConnectorConfig,
+        credentials
+      );
+
+      finalStackConnectorId = stackConnector.id;
+    }
+
+    stackConnectorIds[`${connectorType}-stack-connector-id`] = finalStackConnectorId;
+
+    if (connectorType === 'mcp' && stackConnectorConfig.importedTools) {
+      const importedToolIds = await importMcpTools(
+        toolRegistry,
+        actions,
+        request,
+        finalStackConnectorId,
+        stackConnectorConfig.importedTools,
+        name,
+        `${type}.${slugify(name)}`,
+        logger
+      );
+      toolIds.push(...importedToolIds);
+    }
   }
 
   // Create workflows and tools
   const spaceId = getSpaceId(savedObjectsClient);
 
-  // Merge stackConnectorId into workflows' templateInputs
-  const templateInputs = {
-    ...dataSource.workflows.templateInputs,
-    stackConnectorId: finalStackConnectorId,
-  };
-  const workflowInfos = await loadWorkflows({
-    directory: dataSource.workflows.directory,
-    templateInputs,
-  });
+  logger.info(`data source workflows: ${JSON.stringify(dataSource.workflows)}`);
 
-  const toolRegistry = await agentBuilder.tools.getRegistry({ request });
+  const workflowInfos = await loadWorkflows(dataSource.workflows, stackConnectorIds);
 
   logger.info(`Creating workflows and tools for data source '${name}'`);
 
   const workflowAndToolResults = await Promise.all(
     workflowInfos.map(async (workflowInfo) => {
-      // Extract original workflow name from YAML and prefix it with the data source name
+      // Extract workflow name from YAML; use convention source.<type>.<action> to avoid collisions
       const nameMatch = workflowInfo.content.match(/^name:\s*['"]?([^'"\n]+)['"]?/m);
       const originalName = nameMatch?.[1]?.trim() ?? 'workflow';
-      const prefixedName = `${slugify(name)}.${originalName}`;
+      const workflowBaseName = originalName.split('.').pop() || originalName;
+      const canonicalName = `source.${type}.${workflowBaseName}`;
+      const prefixedName = `${slugify(name)}.${canonicalName}`;
       const prefixedContent = updateYamlField(workflowInfo.content, 'name', prefixedName);
 
       const workflow = await workflowManagement.management.createWorkflow(
@@ -140,9 +213,6 @@ export async function createDataSourceAndRelatedResources(
           typeof parsedWorkflow?.description === 'string'
             ? parsedWorkflow.description
             : `Workflow tool for ${type} data source`;
-
-        // e.g., "sources.github.search_issues" -> "search_issues"
-        const workflowBaseName = originalName.split('.').pop() || originalName;
 
         // Tool ID structure: type.data_source_name.workflow_base_name
         const tool = await toolRegistry.create({
@@ -181,7 +251,7 @@ export async function createDataSourceAndRelatedResources(
     updatedAt: now,
     workflowIds,
     toolIds,
-    kscIds: [finalStackConnectorId],
+    kscIds: Object.values(stackConnectorIds),
   });
 
   return savedObject.id;
@@ -370,16 +440,6 @@ interface DeleteDataSourceAndRelatedResourcesParams {
   workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
   request: KibanaRequest;
   logger: Logger;
-}
-
-interface DeleteDataSourceAndRelatedResourcesResult {
-  success: boolean;
-  fullyDeleted: boolean;
-  remaining?: {
-    kscIds: string[];
-    toolIds: string[];
-    workflowIds: string[];
-  };
 }
 
 /**

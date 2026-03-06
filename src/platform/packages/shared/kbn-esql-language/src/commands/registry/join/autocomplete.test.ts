@@ -21,7 +21,7 @@ import {
   inOperators,
   nullCheckOperators,
 } from '../../definitions/all_operators';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
 
@@ -214,7 +214,7 @@ describe('JOIN Autocomplete', () => {
         autocomplete
       );
       const indices: string[] = suggestions
-        .filter((s) => s.detail === 'Index')
+        .filter((s) => s.detail === 'Lookup')
         .map(({ label }) => label)
         .sort();
       const aliases: string[] = suggestions

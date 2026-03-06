@@ -114,6 +114,11 @@ export enum SupportedChartType {
   XY = 'xy',
   RegionMap = 'region_map',
   Heatmap = 'heatmap',
+  Datatable = 'datatable',
+  Pie = 'pie',
+  Treemap = 'treemap',
+  Waffle = 'waffle',
+  Mosaic = 'mosaic',
 }
 
 export interface VisualizationResultData {
@@ -178,10 +183,6 @@ export const isOtherResult = <T extends Object = Record<string, unknown>>(
 
 export const isErrorResult = (result: ToolResult): result is ErrorResult => {
   return result.type === ToolResultType.error;
-};
-
-export const isDashboardResult = (result: ToolResult): result is DashboardResult => {
-  return result.type === ToolResultType.dashboard;
 };
 
 export const isFileReferenceResult = (result: ToolResult): result is FileReferenceResult => {

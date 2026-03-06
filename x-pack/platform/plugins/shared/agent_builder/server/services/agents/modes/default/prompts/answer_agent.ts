@@ -7,12 +7,13 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import { getConversationAttachmentsSection } from '../../utils/attachment_presentation';
 import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { formatDate } from './utils/helpers';
 import { customInstructionsBlock } from './utils/custom_instructions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './utils/actions';
 import { renderVisualizationPrompt } from './utils/visualizations';
-import { attachmentTypeInstructions } from './utils/attachments';
+import { attachmentTypeInstructions, renderAttachmentPrompt } from './utils/attachments';
 import type { PromptFactoryParams, AnswerAgentPromptRuntimeParams } from './types';
 
 type AnswerAgentPromptParams = PromptFactoryParams & AnswerAgentPromptRuntimeParams;
@@ -42,7 +43,7 @@ export const getAnswerSystemMessage = ({
   },
   conversationTimestamp,
   capabilities,
-  processedConversation: { attachmentTypes },
+  processedConversation: { attachmentTypes, versionedAttachmentPresentation },
 }: AnswerAgentPromptParams): string => {
   const visEnabled = capabilities.visualizations;
 
@@ -68,6 +69,8 @@ ${customInstructionsBlock(customInstructions)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
 
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
+
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.
 - Use custom rendering when appropriate.
@@ -76,6 +79,8 @@ ${attachmentTypeInstructions(attachmentTypes)}
 ## CUSTOM RENDERING
 
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
+
+${renderAttachmentPrompt()}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate(conversationTimestamp)}
@@ -104,7 +109,7 @@ export const getStructuredAnswerPrompt = async (
     processedConversation,
     resultTransformer,
   } = params;
-  const { attachmentTypes } = processedConversation;
+  const { attachmentTypes, versionedAttachmentPresentation } = processedConversation;
   const visEnabled = capabilities.visualizations;
 
   // Generate messages from the conversation's rounds
@@ -137,6 +142,8 @@ Your role is to be the **final answering agent** in a multi-agent flow. You must
 ${customInstructionsBlock(customInstructions)}
 
 ${attachmentTypeInstructions(attachmentTypes)}
+
+${getConversationAttachmentsSection(versionedAttachmentPresentation)}
 
 ## OUTPUT STYLE
 - Clear, direct, and scoped. No extraneous commentary.

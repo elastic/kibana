@@ -41,6 +41,7 @@ export function collectAllVariables(
       key: match.groups?.key ?? null,
       type,
       yamlPath,
+      offset: startOffset,
     });
   }
 

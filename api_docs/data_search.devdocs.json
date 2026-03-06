@@ -54,7 +54,7 @@
             "tags": [],
             "label": "sessionService",
             "description": [
-              "- {@link ISessionService }"
+              "- {@link ISessionService}"
             ],
             "signature": [
               {
@@ -260,6 +260,14 @@
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.SearchSessionsFindResponse",
                 "text": "SearchSessionsFindResponse"
+              },
+              ">; status: (sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
               },
               ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
             ],
@@ -653,7 +661,7 @@
             "signature": [
               "(attrs: { appId: string; trackingProps: { openedFrom: string; }; onBackgroundSearchOpened?: ",
               "BackgroundSearchOpenedHandler",
-              " | undefined; }) => void"
+              " | undefined; onClose?: (() => void) | undefined; }) => void"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
             "lineNumber": 71,
@@ -719,6 +727,24 @@
                     "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.onClose",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "onClose",
+                    "description": [],
+                    "signature": [
+                      "(() => void) | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "lineNumber": 78,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [],
+                    "returnComment": []
                   }
                 ]
               }
@@ -735,7 +761,7 @@
               "\nFeature flag value to make it easier to use in different plugins"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -759,7 +785,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -825,7 +851,7 @@
               "<P>, searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig | undefined) => void; isSessionStorageReady: () => boolean; getSearchSessionIndicatorUiConfig: () => SearchSessionIndicatorUiConfig; }"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -864,10 +890,18 @@
                 "section": "def-common.SearchSessionsFindResponse",
                 "text": "SearchSessionsFindResponse"
               },
+              ">; status: (sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
+              },
               ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
             ],
             "path": "src/platform/plugins/shared/data/public/search/types.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -895,7 +929,7 @@
           "<P>"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-        "lineNumber": 132,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -913,7 +947,7 @@
               "() => Promise<string>"
             ],
             "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-            "lineNumber": 136,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -933,7 +967,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-            "lineNumber": 142,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -949,7 +983,7 @@
               "() => Promise<{ id: string; initialState: P; restoreState: P; }>"
             ],
             "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-            "lineNumber": 148,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1315,10 +1349,18 @@
             "section": "def-common.SearchSessionsFindResponse",
             "text": "SearchSessionsFindResponse"
           },
+          ">; status: (sessionIds: string[]) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionStatusesResponse",
+            "text": "SearchSessionStatusesResponse"
+          },
           ">; rename: (sessionId: string, newName: string) => Promise<void>; }"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/sessions_client.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1383,7 +1425,7 @@
           "<P>, searchSessionIndicatorUiConfig?: SearchSessionIndicatorUiConfig | undefined) => void; isSessionStorageReady: () => boolean; getSearchSessionIndicatorUiConfig: () => SearchSessionIndicatorUiConfig; }"
         ],
         "path": "src/platform/plugins/shared/data/public/search/session/session_service.ts",
-        "lineNumber": 67,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1503,7 +1545,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-        "lineNumber": 67,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1519,7 +1561,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 71,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1541,7 +1583,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 72,
+                "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1558,7 +1600,7 @@
                   "Readonly<{} & { search: Readonly<{} & { asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; query: Readonly<{} & { timefilter: Readonly<{} & { minRefreshInterval: number; }>; }>; enableUiSettingsValidations: boolean; }>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 73,
+                "lineNumber": 78,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1575,7 +1617,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 74,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1597,7 +1639,7 @@
               "<{}, unknown>, deps: SetupDependencies) => void"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 79,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1614,7 +1656,7 @@
                   "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 79,
+                "lineNumber": 84,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1631,7 +1673,7 @@
                   "SetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 79,
+                "lineNumber": 84,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1653,7 +1695,7 @@
               ", deps: StartDependencies) => void"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 83,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1669,7 +1711,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 83,
+                "lineNumber": 88,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1686,7 +1728,7 @@
                   "StartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 83,
+                "lineNumber": 88,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1706,7 +1748,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 88,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1746,7 +1788,7 @@
               ">>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 90,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1762,7 +1804,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 91,
+                "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1780,7 +1822,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 92,
+                "lineNumber": 97,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1797,7 +1839,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 93,
+                "lineNumber": 98,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1822,7 +1864,7 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 94,
+                "lineNumber": 99,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1856,7 +1898,7 @@
               ">>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 147,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1872,7 +1914,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 148,
+                "lineNumber": 153,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1890,7 +1932,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 149,
+                "lineNumber": 154,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1907,7 +1949,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 150,
+                "lineNumber": 155,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1941,7 +1983,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 162,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1957,7 +1999,7 @@
                   "SearchSessionStatusDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 163,
+                "lineNumber": 168,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1975,7 +2017,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 164,
+                "lineNumber": 169,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1994,7 +2036,7 @@
                   ", \"type\">"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 165,
+                "lineNumber": 170,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2036,7 +2078,7 @@
               ">>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 216,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2052,7 +2094,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 217,
+                "lineNumber": 215,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2070,7 +2112,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 218,
+                "lineNumber": 216,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2087,7 +2129,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 219,
+                "lineNumber": 217,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2112,7 +2154,7 @@
                   ">"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 220,
+                "lineNumber": 218,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2146,7 +2188,7 @@
               ">>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 235,
+            "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2162,7 +2204,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 236,
+                "lineNumber": 234,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2180,7 +2222,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 237,
+                "lineNumber": 235,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2197,7 +2239,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 238,
+                "lineNumber": 236,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2214,7 +2256,7 @@
                   "Date"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 239,
+                "lineNumber": 237,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2248,7 +2290,7 @@
               ">>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 245,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2264,7 +2306,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 246,
+                "lineNumber": 244,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2282,7 +2324,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 247,
+                "lineNumber": 245,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2299,7 +2341,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 248,
+                "lineNumber": 246,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2323,7 +2365,7 @@
               " | null, sessionId: string) => Promise<{}>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 256,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2339,7 +2381,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 257,
+                "lineNumber": 255,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2357,7 +2399,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 258,
+                "lineNumber": 256,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2374,7 +2416,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 259,
+                "lineNumber": 257,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2398,7 +2440,7 @@
               " | null, sessionId: string) => Promise<Map<string, string>>"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 353,
+            "lineNumber": 351,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2414,7 +2456,7 @@
                   "SearchSessionDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 354,
+                "lineNumber": 352,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2432,7 +2474,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 355,
+                "lineNumber": 353,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2449,7 +2491,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 356,
+                "lineNumber": 354,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2481,7 +2523,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 367,
+            "lineNumber": 365,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2497,7 +2539,7 @@
                   "SearchSessionStatusDependencies"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 368,
+                "lineNumber": 366,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2515,7 +2557,7 @@
                   " | null"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 369,
+                "lineNumber": 367,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2532,7 +2574,90 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 370,
+                "lineNumber": 368,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.updateStatuses",
+            "type": "Function",
+            "tags": [],
+            "label": "updateStatuses",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionStatusDependencies",
+              ", user: ",
+              "AuthenticatedUser",
+              " | null, sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
+            "lineNumber": 384,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.updateStatuses.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionStatusDependencies"
+                ],
+                "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
+                "lineNumber": 385,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.updateStatuses.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  "AuthenticatedUser",
+                  " | null"
+                ],
+                "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
+                "lineNumber": 386,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.updateStatuses.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "sessionIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
+                "lineNumber": 387,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2661,10 +2786,18 @@
                 "section": "def-common.SearchSessionStatusResponse",
                 "text": "SearchSessionStatusResponse"
               },
+              ">; updateStatuses: (sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
+              },
               ">; getConfig: () => Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-            "lineNumber": 424,
+            "lineNumber": 469,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2680,7 +2813,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/session_service.ts",
-                "lineNumber": 424,
+                "lineNumber": 469,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2828,7 +2961,7 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 32,
+                "lineNumber": 35,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2865,10 +2998,18 @@
                     "section": "def-common.SearchSessionRequestInfo",
                     "text": "SearchSessionRequestInfo"
                   },
-                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; }"
+                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; status?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionStatus",
+                    "text": "SearchSessionStatus"
+                  },
+                  " | undefined; }"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 33,
+                "lineNumber": 36,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2910,7 +3051,7 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 35,
+                "lineNumber": 38,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2971,7 +3112,7 @@
                   "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; migrationVersionCompatibility?: \"raw\" | \"compatible\" | undefined; }"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 36,
+                "lineNumber": 39,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3021,7 +3162,7 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 38,
+                "lineNumber": 41,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3058,10 +3199,18 @@
                     "section": "def-common.SearchSessionRequestInfo",
                     "text": "SearchSessionRequestInfo"
                   },
-                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; }"
+                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; status?: ",
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SearchSessionStatus",
+                    "text": "SearchSessionStatus"
+                  },
+                  " | undefined; }"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 39,
+                "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3093,7 +3242,7 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 41,
+                "lineNumber": 44,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3125,7 +3274,7 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 42,
+                "lineNumber": 45,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3167,7 +3316,7 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 44,
+                "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3183,7 +3332,7 @@
                   "Date"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 45,
+                "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -3223,8 +3372,51 @@
                 "label": "sessionId",
                 "description": [],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 47,
+                "lineNumber": 50,
                 "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.IScopedSearchClient.updateSessionStatuses",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSessionStatuses",
+            "description": [],
+            "signature": [
+              "(sessionIds: string[]) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusesResponse",
+                "text": "SearchSessionStatusesResponse"
+              },
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/data/server/search/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IScopedSearchClient.updateSessionStatuses.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "sessionIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
+                "lineNumber": 51,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3241,7 +3433,7 @@
         "label": "ISearchSessionService",
         "description": [],
         "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-        "lineNumber": 51,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3262,7 +3454,7 @@
               "IScopedSearchSessionsClient"
             ],
             "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3278,7 +3470,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/data/server/search/session/types.ts",
-                "lineNumber": 52,
+                "lineNumber": 56,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3769,7 +3961,7 @@
           ">; }"
         ],
         "path": "src/platform/plugins/shared/data/server/search/types.ts",
-        "lineNumber": 123,
+        "lineNumber": 125,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3786,7 +3978,33 @@
           "\"1\""
         ],
         "path": "src/platform/plugins/shared/data/server/search/routes/session.ts",
-        "lineNumber": 30,
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-server.INTERNAL_ENHANCED_ES_SEARCH_STRATEGY",
+        "type": "Uncategorized",
+        "tags": [],
+        "label": "INTERNAL_ENHANCED_ES_SEARCH_STRATEGY",
+        "description": [
+          "\nThis strategy is internal and should only be accessible to server-side code. We use a symbol because symbols are not\nserializable and cannot be passed over the wire.\nNote: This strategy does not provide authentication on behalf of the user and is subject to the same limitations as\n`esClient.asInternalUser`. It is intended for internal use only where the server has already authenticated the user\nthrough other means."
+        ],
+        "signature": [
+          "typeof ",
+          {
+            "pluginId": "data",
+            "scope": "server",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-server.INTERNAL_ENHANCED_ES_SEARCH_STRATEGY",
+            "text": "INTERNAL_ENHANCED_ES_SEARCH_STRATEGY"
+          }
+        ],
+        "path": "src/platform/plugins/shared/data/server/search/strategies/ese_search/constants.ts",
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3809,7 +4027,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/server/search/types.ts",
-        "lineNumber": 121,
+        "lineNumber": 123,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4144,9 +4362,7 @@
                 "type": "Any",
                 "tags": [],
                 "label": "from",
-                "description": [
-                  "- optional object to read values from,\n used when initializing"
-                ],
+                "description": [],
                 "signature": [
                   "any"
                 ],
@@ -10841,7 +11057,7 @@
                 "tags": [],
                 "label": "overwriteType",
                 "description": [
-                  "If `false` is passed in it will disable the overwrite, otherwise\nthe passed in value will be used as the data view type for this search source."
+                  "If `false` is passed in it will disable the overwrite, otherwise"
                 ],
                 "signature": [
                   "string | false | undefined"
@@ -10896,9 +11112,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -10915,9 +11129,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "value",
-                "description": [
-                  ": value for the field"
-                ],
+                "description": [],
                 "signature": [
                   {
                     "pluginId": "data",
@@ -10970,9 +11182,7 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "field",
-                "description": [
-                  ": field name"
-                ],
+                "description": [],
                 "signature": [
                   "K"
                 ],
@@ -12317,7 +12527,7 @@
                 "tags": [],
                 "label": "input",
                 "description": [
-                  "- an object with properties min and max,\nrepresenting the edges for the time span\nwe should cover"
+                  "- an object with properties min and max,"
                 ],
                 "signature": [
                   {
@@ -15286,7 +15496,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/data/common/search/expressions/esql.ts",
-        "lineNumber": 104,
+        "lineNumber": 100,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -15302,7 +15512,7 @@
               "EsqlFnArguments"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/esql.ts",
-            "lineNumber": 104,
+            "lineNumber": 100,
             "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
@@ -16833,7 +17043,7 @@
           "(getConfig: <T = any>(key: string) => T, shouldDetectTimezone?: boolean) => string"
         ],
         "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -16849,7 +17059,7 @@
               "<T = any>(key: string) => T"
             ],
             "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -16866,7 +17076,7 @@
               "boolean"
             ],
             "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -17359,7 +17569,7 @@
           "<any>; } | undefined) => boolean"
         ],
         "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -17390,7 +17600,7 @@
               "<any>; } | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -17662,7 +17872,7 @@
           "<any> | undefined) => boolean"
         ],
         "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -17685,7 +17895,7 @@
               "<any> | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/utils.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
@@ -18692,7 +18902,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]) | undefined; } & Omit<Record<string, any>, \"index\" | \"query\" | \"filters\">"
+                  "[]) | undefined; } & Omit<Record<string, any>, \"index\" | \"filters\" | \"query\">"
                 ],
                 "path": "src/platform/plugins/shared/data/common/search/search_source/query_to_fields.ts",
                 "lineNumber": 47,
@@ -18746,6 +18956,43 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.strategyToString",
+        "type": "Function",
+        "tags": [],
+        "label": "strategyToString",
+        "description": [],
+        "signature": [
+          "(strategy: string | symbol | undefined) => string"
+        ],
+        "path": "src/platform/plugins/shared/data/common/search/utils.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.strategyToString.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strategy",
+            "description": [],
+            "signature": [
+              "string | symbol | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/utils.ts",
+            "lineNumber": 54,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -26645,7 +26892,26 @@
             "lineNumber": 138,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggsCommonStart.calculateAutoTimeExpression.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "range",
+                "description": [],
+                "signature": [
+                  "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/aggs/utils/calculate_auto_time_expression.ts",
+                "lineNumber": 19,
+                "columnNumber": 40,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -31579,8 +31845,26 @@
         "tags": [],
         "label": "SearchSessionRequestInfo",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionRequestInfo",
+            "text": "SearchSessionRequestInfo"
+          },
+          " extends Omit<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionRequestStatus",
+            "text": "SearchSessionRequestStatus"
+          },
+          ", \"status\">"
+        ],
         "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-        "lineNumber": 71,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31595,7 +31879,7 @@
               "\nID of the async search request"
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 72,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31610,7 +31894,32 @@
               "\nSearch strategy used to submit the search request"
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionRequestInfo.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nSearch status - used to avoid extra calls to ES when tracking search IDs"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchStatus",
+                "text": "SearchStatus"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31626,7 +31935,7 @@
         "label": "SearchSessionRequestStatus",
         "description": [],
         "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-        "lineNumber": 82,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31648,7 +31957,43 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionRequestStatus.startedAt",
+            "type": "string",
+            "tags": [],
+            "label": "startedAt",
+            "description": [
+              "\nOptional start time. May be undefined if ES doesn't return it."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionRequestStatus.completedAt",
+            "type": "string",
+            "tags": [],
+            "label": "completedAt",
+            "description": [
+              "\nOptional completion time. May be undefined if the search is still in progress"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31656,17 +32001,17 @@
           {
             "parentPluginId": "data",
             "id": "def-common.SearchSessionRequestStatus.error",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "error",
             "description": [
               "\nAn optional error. Set if status is set to error."
             ],
             "signature": [
-              "string | undefined"
+              "{ code: number; message?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -31942,53 +32287,82 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionSavedObjectAttributes.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nSearch status - used to avoid extra calls to ES when tracking search IDs"
+            ],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatus",
+                "text": "SearchSessionStatus"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.SearchSessionsFindResponse",
+        "id": "def-common.SearchSessionStatusesResponse",
         "type": "Interface",
         "tags": [],
-        "label": "SearchSessionsFindResponse",
-        "description": [
-          "\nList of search session objects with on-the-fly calculated search session statuses"
-        ],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionsFindResponse",
-            "text": "SearchSessionsFindResponse"
-          },
-          " extends ",
-          "SavedObjectsFindResponse",
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSessionSavedObjectAttributes",
-            "text": "SearchSessionSavedObjectAttributes"
-          },
-          ", unknown>"
-        ],
+        "label": "SearchSessionStatusesResponse",
+        "description": [],
         "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-        "lineNumber": 99,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionsFindResponse.statuses",
+            "id": "def-common.SearchSessionStatusesResponse.sessions",
+            "type": "Object",
+            "tags": [],
+            "label": "sessions",
+            "description": [
+              "\nWhen a session enters a completed state (success or error), we show a notification in the cliend side, but we need\nto know the minimal information to display the notification."
+            ],
+            "signature": [
+              "{ [x: string]: Pick<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionSavedObjectAttributes",
+                "text": "SearchSessionSavedObjectAttributes"
+              },
+              ", \"name\" | \"appId\" | \"restoreState\" | \"locatorId\">; }"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionStatusesResponse.statuses",
             "type": "Object",
             "tags": [],
             "label": "statuses",
             "description": [
-              "\nMap containing calculated statuses of search sessions from the find response"
+              "\nMap containing calculated statuses of search sessions"
             ],
             "signature": [
               "{ [x: string]: ",
@@ -32002,7 +32376,7 @@
               "; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 104,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -32020,7 +32394,7 @@
           "\nOn-the-fly calculated search session status"
         ],
         "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-        "lineNumber": 90,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -32042,7 +32416,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 94,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -32058,7 +32432,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
-            "lineNumber": 96,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -35034,7 +35408,7 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/data/common/search/expressions/esql.ts",
-        "lineNumber": 78,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -36467,7 +36841,7 @@
         "label": "GeoPoint",
         "description": [],
         "signature": [
-          "string | [number, number] | Point"
+          "string | Point | [number, number]"
         ],
         "path": "src/platform/plugins/shared/data/common/search/expressions/geo_point.ts",
         "lineNumber": 21,
@@ -37380,6 +37754,42 @@
         ],
         "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
         "lineNumber": 68,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionsFindResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "SearchSessionsFindResponse",
+        "description": [
+          "\nList of search session objects with on-the-fly calculated search session statuses"
+        ],
+        "signature": [
+          "SavedObjectsFindResponse",
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionSavedObjectAttributes",
+            "text": "SearchSessionSavedObjectAttributes"
+          },
+          ", unknown> & { statuses: Record<string, ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionStatusResponse",
+            "text": "SearchSessionStatusResponse"
+          },
+          ">; }"
+        ],
+        "path": "src/platform/plugins/shared/data/common/search/session/types.ts",
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

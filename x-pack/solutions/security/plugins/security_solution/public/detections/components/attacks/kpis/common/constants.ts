@@ -7,3 +7,6 @@
 
 export const MAX_ATTACKS_COUNT = 10000;
 export const ATTACK_IDS_FIELD = 'kibana.alert.attack_ids';
+
+export const TREND_CHART_HEIGHT = 240; // px
+export const CHART_PANEL_HEIGHT = 375; // px

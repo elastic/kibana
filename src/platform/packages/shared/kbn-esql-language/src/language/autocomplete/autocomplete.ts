@@ -8,19 +8,17 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
+import { EsqlQuery, parse, isHeaderCommand, Walker } from '@elastic/esql';
 import type {
   ESQLColumn,
   ESQLAstItem,
   ESQLCommandOption,
   ESQLFunction,
   ESQLAstAllCommands,
-} from '../../types';
-import { EsqlQuery } from '../../composer';
+} from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
-import { isHeaderCommand, Walker } from '../../ast';
-import { parse } from '../../parser';
-import { SuggestionOrderingEngine } from '../../shared';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
+import { SuggestionOrderingEngine } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
@@ -256,20 +254,32 @@ async function getSuggestionsWithinCommandExpression(
     callbacks
   );
 
+  const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
+  const canSuggestResourceBrowser = (await callbacks?.canSuggestResourceBrowser?.()) ?? false;
+
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
+    isFieldsBrowserEnabled: canSuggestResourceBrowser && !isInsideSubquery,
     unmappedFieldsStrategy,
   };
+
+  // Wrap getColumnsByType so the fields browser option is injected from context;
+  // command autocompletes and getFieldsSuggestions stay agnostic.
+  const getByTypeWithContext: GetColumnsByTypeFn = (type, ignored, options) =>
+    getColumnsByType(type, ignored, {
+      ...options,
+      isFieldsBrowserEnabled: context.isFieldsBrowserEnabled,
+    });
 
   // does it make sense to have a different context per command?
   const suggestions = await commandDefinition.methods.autocomplete(
     fullText,
     astContext.command,
     {
-      getByType: getColumnsByType,
+      getByType: getByTypeWithContext,
       getSuggestedUserDefinedColumnName,
       getColumnsForQuery: callbacks?.getColumnsFor
         ? async (query: string) => {
@@ -279,6 +289,7 @@ async function getSuggestionsWithinCommandExpression(
       hasMinimumLicenseRequired,
       getKqlSuggestions: callbacks?.getKqlSuggestions,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
+      canSuggestResourceBrowser: callbacks?.canSuggestResourceBrowser,
       isServerless: callbacks?.isServerless,
     },
     context,

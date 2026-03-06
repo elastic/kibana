@@ -145,7 +145,8 @@ describe('ChangePasswordModal', () => {
     });
   });
 
-  describe('render', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254057
+  describe.skip('render', () => {
     const coreStart = coreMock.createStart();
     const authc = securityMock.createSetup().authc;
     const history = createMemoryHistory({ initialEntries: ['/users'] });
@@ -311,7 +312,9 @@ describe('ChangePasswordModal', () => {
       unmount();
     });
 
-    describe('when rendered for current user', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/250436
+    // FLAKY: https://github.com/elastic/kibana/issues/250437
+    describe.skip('when rendered for current user', () => {
       beforeEach(() => {
         // Mock useCurrentUser to return the current user
         jest.spyOn(currentUserModule, 'useCurrentUser').mockReturnValue({

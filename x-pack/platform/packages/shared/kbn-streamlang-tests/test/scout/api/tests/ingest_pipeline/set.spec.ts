@@ -6,13 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Set Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should set a field using a value', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-set-value';
@@ -159,17 +160,7 @@ apiTest.describe(
       };
 
       expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
-              path: ['steps', 0, 'value', 'copy_from'],
-            },
-          ],
-          null,
-          2
-        )
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
 
@@ -186,17 +177,7 @@ apiTest.describe(
       };
 
       expect(() => transpile(streamlangDSL)).toThrowError(
-        JSON.stringify(
-          [
-            {
-              code: 'custom',
-              message: 'Set processor must have either value or copy_from, but not both.',
-              path: ['steps', 0, 'value', 'copy_from'],
-            },
-          ],
-          null,
-          2
-        )
+        'Set processor must have either value or copy_from, but not both.'
       );
     });
   }

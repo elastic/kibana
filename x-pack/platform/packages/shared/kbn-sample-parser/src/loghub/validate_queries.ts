@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { isEmpty } from 'lodash';
 import type { LoghubSystem } from './read_loghub_system_files';
 import { getFileOrThrow } from '../utils';
@@ -40,7 +40,7 @@ export interface LoghubQuery {
   query: DslQuery;
 }
 
-export const querySchema: z.ZodSchema<LoghubQuery, z.ZodTypeDef, any> = z.object({
+export const querySchema: z.ZodType<LoghubQuery> = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string(),

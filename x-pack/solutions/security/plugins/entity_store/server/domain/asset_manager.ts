@@ -8,21 +8,29 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { getEntityDefinition } from '../../common/domain/definitions/registry';
-import type {
-  EntityType,
-  ManagedEntityDefinition,
-} from '../../common/domain/definitions/entity_schema';
+import type { EntityType } from '../../common';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
+import { scheduleHistorySnapshotTasks } from '../tasks/history_snapshot_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
-import type {
-  EngineDescriptor,
-  EngineDescriptorClient,
-  LogExtractionState,
+import {
+  EngineDescriptorTypeName,
+  type EngineDescriptor,
+  type EngineDescriptorClient,
+  type EntityStoreGlobalStateClient,
+  HistorySnapshotState,
+  LogExtractionConfig,
 } from './definitions/saved_objects';
-import type { LogExtractionBodyParams } from '../routes/constants';
-import { ENGINE_STATUS, ENTITY_STORE_STATUS } from './constants';
+import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../routes/constants';
+import {
+  ENGINE_STATUS,
+  ENTITY_STORE_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_INDICES_PRIVILEGES,
+  ENTITY_STORE_STATUS,
+  ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+} from './constants';
 import type {
   EntityStoreStatus,
   EngineComponentStatus,
@@ -38,16 +46,29 @@ import {
   getUpdatesComponentTemplateName,
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
-import type { LogsExtractionClient } from './logs_extraction_client';
+import type { LogsExtractionClient } from './logs_extraction';
+import type { ManagedEntityDefinition } from '../../common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '../../common/domain/definitions/registry';
+import { installEuidStoredScripts, deleteEuidStoredScripts } from './assets/euid_stored_scripts';
+import {
+  type TelemetryReporter,
+  ENTITY_STORE_DELETION_EVENT,
+  ENTITY_STORE_INITIALIZATION_EVENT,
+  ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
+} from '../telemetry/events';
+import { getErrorMessage } from '../../common';
 
 interface AssetManagerDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
+  globalStateClient: EntityStoreGlobalStateClient;
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
+  security: SecurityPluginStart;
+  analytics: TelemetryReporter;
 }
 
 export class AssetManager {
@@ -55,35 +76,69 @@ export class AssetManager {
   private readonly esClient: ElasticsearchClient;
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
+  private readonly globalStateClient: EntityStoreGlobalStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
+  private readonly security: SecurityPluginStart;
+  private readonly analytics: TelemetryReporter;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
     this.esClient = deps.esClient;
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
+    this.globalStateClient = deps.globalStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
+    this.security = deps.security;
+    this.analytics = deps.analytics;
   }
 
-  public async initEntity(
+  public async init(
     request: KibanaRequest,
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
+    entityTypes: EntityType[],
+    logsExtractionParams?: LogExtractionBodyParams,
+    historySnapshotParams?: HistorySnapshotBodyParams
   ) {
-    await this.install(type, logExtractionParams); // TODO: async
-    await this.start(request, type);
+    try {
+      const logsExtraction = LogExtractionConfig.parse(logsExtractionParams ?? {});
+      const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
+
+      await Promise.all([
+        this.globalStateClient.init({ historySnapshot, logsExtraction }),
+
+        ...entityTypes.map((type) => this.initEntity(request, type, logsExtraction)),
+
+        scheduleHistorySnapshotTasks({
+          logger: this.logger,
+          taskManager: this.taskManager,
+          namespace: this.namespace,
+          request,
+          frequency: historySnapshot.frequency,
+        }),
+
+        installEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
+        }),
+      ]);
+    } catch (error) {
+      this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_FAILURE_EVENT, {
+        namespace: this.namespace,
+        error: getErrorMessage(error),
+      });
+      this.logger.error('Error during entity store init:', error);
+      throw error;
+    }
   }
 
-  public async start(request: KibanaRequest, type: EntityType) {
+  public async start(request: KibanaRequest, type: EntityType, { frequency }: LogExtractionConfig) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
-      const {
-        logExtractionState: { frequency },
-      } = await this.engineDescriptorClient.findOrThrow(type);
+
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
 
       await scheduleExtractEntityTask({
         logger: this.logger,
@@ -95,6 +150,7 @@ export class AssetManager {
       });
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
       throw error;
     }
   }
@@ -107,45 +163,20 @@ export class AssetManager {
         type,
         namespace: this.namespace,
       });
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STOPPED });
     } catch (error) {
       this.logger.get(type).error(`Error stopping extract entity task for type ${type}:`, error);
-      throw error;
-    }
-  }
-
-  public async install(
-    type: EntityType,
-    logExtractionParams?: LogExtractionBodyParams
-  ): Promise<ManagedEntityDefinition> {
-    // TODO: return early if already installed
-    try {
-      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
-      const definition = getEntityDefinition(type, this.namespace);
-      const initialState: Partial<LogExtractionState> = logExtractionParams ?? {};
-
-      await Promise.all([
-        this.engineDescriptorClient.init(type, initialState),
-        installElasticsearchAssets({
-          esClient: this.esClient,
-          logger: this.logger,
-          definition,
-          namespace: this.namespace,
-        }),
-      ]);
-
-      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
-
-      this.logger.debug(`Installed definition: ${type}`);
-
-      return definition;
-    } catch (error) {
-      this.logger.error(`Error installing assets for entity type ${type}`, { error });
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.ERROR });
       throw error;
     }
   }
 
   public async uninstall(type: EntityType) {
     try {
+      const { engines } = await this.getStatus();
+      if (!engines.some((e) => e.type === type)) {
+        return false;
+      }
       const definition = getEntityDefinition(type, this.namespace);
       await this.stop(type);
 
@@ -157,9 +188,24 @@ export class AssetManager {
           definition,
           namespace: this.namespace,
         }),
+        deleteEuidStoredScripts({
+          esClient: this.esClient,
+          logger: this.logger,
+        }),
       ]);
 
+      const remainingEngines = await this.engineDescriptorClient.getAll();
+      if (remainingEngines.length === 0) {
+        this.logger.debug(`Deleting global state because last engine was uninstalled`);
+        await this.globalStateClient.delete();
+      }
+
       this.logger.get(type).debug(`Uninstalled definition: ${type}`);
+      this.analytics.reportEvent(ENTITY_STORE_DELETION_EVENT, {
+        entityType: type,
+        namespace: this.namespace,
+      });
+      return true;
     } catch (error) {
       this.logger.get(type).error(`Error uninstalling assets for entity type ${type}`, { error });
       throw error;
@@ -168,19 +214,114 @@ export class AssetManager {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const engines = await this.engineDescriptorClient.getAll();
+      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }] =
+        await Promise.all([
+          this.engineDescriptorClient.getAll(),
+          this.globalStateClient.findOrThrow(),
+        ]);
+
       const status = this.calculateEntityStoreStatus(engines);
 
       if (withComponents) {
         const enginesWithComponents = await Promise.all(
           engines.map((engine) => this.getEngineWithComponents(engine))
         );
-        return { status, engines: enginesWithComponents };
+        return {
+          status,
+          engines: enginesWithComponents,
+          historySnapshot,
+          logsExtractionConfig,
+        };
       }
 
-      return { status, engines };
+      return { status, engines, historySnapshot, logsExtractionConfig };
     } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return { status: ENTITY_STORE_STATUS.NOT_INSTALLED, engines: [] };
+      }
+
       this.logger.error('Error getting status', { error });
+      throw error;
+    }
+  }
+
+  public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
+    const globalState = await this.globalStateClient.find();
+    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+  }
+
+  private async initEntity(
+    request: KibanaRequest,
+    type: EntityType,
+    logsExtractionConfig: LogExtractionConfig
+  ): Promise<boolean> {
+    const installed = await this.install(type);
+    if (installed) {
+      await this.start(request, type, logsExtractionConfig);
+    }
+    this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
+      entityType: type,
+      namespace: this.namespace,
+    });
+    return installed;
+  }
+
+  public async getPrivileges(
+    request: KibanaRequest,
+    additionalIndexPatterns: string[] = []
+  ): Promise<CheckPrivilegesResponse> {
+    const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+
+    const sourceIndexPatterns = await this.logsExtractionClient.getLocalIndexPatterns(
+      additionalIndexPatterns
+    );
+
+    const kibanaPrivileges = this.security.authz.actions.savedObject.get(
+      EngineDescriptorTypeName,
+      'create'
+    );
+
+    const sourceIndexPrivileges = Object.fromEntries(
+      sourceIndexPatterns.map((idx) => [idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES])
+    );
+
+    const targetIndexPrivileges = {
+      [getLatestEntitiesIndexName(this.namespace)]: ENTITY_STORE_TARGET_INDICES_PRIVILEGES,
+    };
+
+    return checkPrivileges({
+      kibana: [kibanaPrivileges],
+      elasticsearch: {
+        cluster: ENTITY_STORE_CLUSTER_PRIVILEGES,
+        index: { ...targetIndexPrivileges, ...sourceIndexPrivileges },
+      },
+    });
+  }
+
+  public async install(type: EntityType): Promise<boolean> {
+    try {
+      const { engines } = await this.getStatus();
+      if (engines.some((e) => e.type === type)) {
+        return false;
+      }
+
+      this.logger.get(type).debug(`Installing assets for entity type: ${type}`);
+      const definition = getEntityDefinition(type, this.namespace);
+      await Promise.all([
+        this.engineDescriptorClient.init(type),
+        installElasticsearchAssets({
+          esClient: this.esClient,
+          logger: this.logger,
+          definition,
+          namespace: this.namespace,
+        }),
+      ]);
+      await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+      this.logger.debug(`Installed definition: ${type}`);
+
+      return true;
+    } catch (error) {
+      this.logger.error(`Error installing assets for entity type ${type}`, { error });
       throw error;
     }
   }
@@ -206,7 +347,7 @@ export class AssetManager {
       taskComponent,
     ] = await Promise.all([
       this.getEntityDefinitionComponent(definition),
-      this.getIndexTemplateComponents(definition),
+      this.getIndexTemplateComponents(),
       this.getIndexComponents(),
       this.getComponentTemplateComponents(definition),
       this.getIlmPolicyComponents(),
@@ -231,9 +372,7 @@ export class AssetManager {
     };
   }
 
-  private async getIndexTemplateComponents(
-    definition: ManagedEntityDefinition
-  ): Promise<EngineComponentStatus[]> {
+  private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
     const updatesId = getUpdatesIndexTemplateId(this.namespace);
@@ -296,13 +435,12 @@ export class AssetManager {
     const taskId = getExtractEntityTaskId(type, this.namespace);
     try {
       const task = await this.taskManager.get(taskId);
-      const countResult = await this.logsExtractionClient.extractLogs(type, { countOnly: true });
       return {
         id: taskId,
         installed: true,
         resource: 'task',
         status: task.state.status ?? null,
-        remainingLogsToExtract: countResult.success ? countResult.count : null,
+        remainingLogsToExtract: await this.logsExtractionClient.getRemainingLogsCount(type),
         runs: task.state.runs ?? 0,
         lastError: task.state.lastError ?? null,
       };
@@ -322,6 +460,7 @@ export class AssetManager {
    * Runs an async operation. Returns true if the promise resolves (no failure),
    * or false if it throws.
    */
+
   private async tryAsBoolean(promise: Promise<unknown>): Promise<boolean> {
     try {
       await promise;

@@ -5,143 +5,241 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import type { PhaseName } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
-import { formatBytes } from '../helpers/format_bytes';
-import { getILMRatios } from '../helpers/helpers';
 import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
-import {
-  buildLifecyclePhases,
-  type LifecyclePhase,
-} from '../common/data_lifecycle/lifecycle_types';
+import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
+import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
+import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
+import { MAX_DOWNSAMPLE_STEPS } from '../downsampling/edit_dsl_steps_flyout/form';
+import type {
+  IlmPhaseSelectOption,
+  IlmPhaseSelectRenderButtonProps,
+} from '../downsampling/ilm_phase_select/ilm_phase_select';
+import { IlmPhaseSelect } from '../downsampling/ilm_phase_select/ilm_phase_select';
+
+const addPhaseButtonLabel = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
+  {
+    defaultMessage: 'Add data phase',
+  }
+);
+
+const allPhasesInUseTooltip = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.allPhasesInUseTooltip',
+  { defaultMessage: 'All data phases are in use' }
+);
+
+const addPhaseAndDownsamplingButtonLabel = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.addPhaseAndDownsamplingButtonLabel',
+  {
+    defaultMessage: 'Add data phase and downsampling',
+  }
+);
+
+const addDownsampleStepButtonLabel = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.addDownsampleStepButtonLabel',
+  {
+    defaultMessage: 'Add downsample step',
+  }
+);
+
+const maxDownsampleStepsTooltip = i18n.translate(
+  'xpack.streams.dataLifecycleSummary.maxDownsampleStepsTooltip',
+  {
+    defaultMessage: 'Maximum of {max} downsampling steps',
+    values: { max: MAX_DOWNSAMPLE_STEPS },
+  }
+);
+
+const renderAddPhaseButton = (label: string) => (buttonProps: IlmPhaseSelectRenderButtonProps) => {
+  const button = (
+    <EuiButton {...buttonProps} color="text" size="s" iconType="arrowDown" iconSide="right">
+      {label}
+    </EuiButton>
+  );
+
+  if (!buttonProps.disabled) return button;
+
+  return (
+    <EuiToolTip position="top" content={allPhasesInUseTooltip}>
+      {button}
+    </EuiToolTip>
+  );
+};
 
 interface LifecycleSummaryProps {
   definition: Streams.ingest.all.GetResponse;
+  isMetricsStream: boolean;
   stats?: DataStreamStats;
+  refreshDefinition?: () => void;
+  onFlyoutOpenChange?: (isOpen: boolean) => void;
+  onFlyoutUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void;
 }
 
-export const LifecycleSummary = ({ definition, stats }: LifecycleSummaryProps) => {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-    isServerless,
-  } = useKibana();
-  const { euiTheme } = useEuiTheme();
-  const { ilmPhases } = useIlmPhasesColorAndDescription();
+const IlmLifecycleSummary = ({
+  definition,
+  isMetricsStream,
+  stats,
+  refreshDefinition,
+  onFlyoutOpenChange,
+  onFlyoutUnsavedChangesChange,
+}: LifecycleSummaryProps) => {
+  const { updateStreamLifecycle } = useUpdateStreamLifecycle(definition);
+  const ilmSummary = useIlmLifecycleSummary({
+    definition,
+    stats,
+    refreshDefinition,
+    updateStreamLifecycle,
+    isMetricsStream,
+  });
 
-  const isIlm = isIlmLifecycle(definition.effective_lifecycle);
-  const isDsl = isDslLifecycle(definition.effective_lifecycle);
-  const isRetentionDisabled = isDisabledLifecycle(definition.effective_lifecycle);
+  const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
+  const hasUnsavedChangesInFlyout = ilmSummary.hasUnsavedEditLifecycleFlyoutChanges;
+  const invalidPhases = ilmSummary.flyoutInvalidPhases;
 
-  const { value: ilmStatsValue, loading: ilmLoading } = useStreamsAppFetch(
-    ({ signal }) => {
-      if (!isIlm) {
-        return undefined;
-      }
-      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
-        params: { path: { name: definition.stream.name } },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, definition, isIlm]
-  );
+  useEffect(() => {
+    onFlyoutOpenChange?.(isEditLifecycleFlyoutOpen);
+  }, [isEditLifecycleFlyoutOpen, onFlyoutOpenChange]);
 
-  const getPhases = (): LifecyclePhase[] => {
-    if (isIlm) {
-      const phasesWithGrow = getILMRatios(ilmStatsValue);
-      if (!phasesWithGrow) {
-        return [];
-      }
+  useEffect(() => {
+    onFlyoutUnsavedChangesChange?.(hasUnsavedChangesInFlyout);
+  }, [hasUnsavedChangesInFlyout, onFlyoutUnsavedChangesChange]);
 
-      // Calculate total docs and distribute based on size ratio
-      const totalDocs = stats?.totalDocs || 0;
-      const totalSize = phasesWithGrow.reduce(
-        (sum, phase) => sum + ('size_in_bytes' in phase ? phase.size_in_bytes : 0),
-        0
-      );
-
-      return phasesWithGrow.map((phase, index) => {
-        // Estimate doc count based on size ratio
-        const phaseSize = 'size_in_bytes' in phase ? phase.size_in_bytes : 0;
-        const estimatedDocs =
-          totalSize > 0 && totalDocs > 0
-            ? Math.round((phaseSize / totalSize) * totalDocs)
-            : undefined;
-
-        // Get readonly and searchable_snapshot from the server-side phase data
-        const hasReadonlyAction = 'readonly' in phase && phase.readonly === true;
-        const searchableSnapshotAction =
-          'searchable_snapshot' in phase ? phase.searchable_snapshot : undefined;
-
-        return {
-          name: phase.name,
-          color: ilmPhases[phase.name].color,
-          label: phase.name,
-          size: 'size_in_bytes' in phase ? formatBytes(phase.size_in_bytes) : undefined,
-          grow: phase.grow,
-          isDelete: phase.name === 'delete',
-          timelineValue: phasesWithGrow[index + 1]?.min_age,
-          description: ilmPhases[phase.name].description,
-          sizeInBytes: 'size_in_bytes' in phase ? phase.size_in_bytes : undefined,
-          docsCount: estimatedDocs,
-          min_age: phase.min_age,
-          isReadOnly: hasReadonlyAction,
-          downsample: 'downsample' in phase ? phase.downsample : undefined,
-          searchableSnapshot: searchableSnapshotAction,
-        };
-      });
-    }
-
-    if (isDsl || isRetentionDisabled) {
-      const lifecycle = definition.effective_lifecycle;
-      const retentionPeriod = isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined;
-      const storageSize = stats?.sizeBytes ? formatBytes(stats.sizeBytes) : undefined;
-
-      return buildLifecyclePhases({
-        label: isServerless
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.successfulIngest', {
-              defaultMessage: 'Successful ingest',
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.hot', {
-              defaultMessage: 'Hot',
-            }),
-        color: isServerless ? euiTheme.colors.severity.success : ilmPhases.hot.color,
-        size: storageSize,
-        retentionPeriod,
-        description: isServerless ? '' : ilmPhases.hot.description,
-        sizeInBytes: stats?.sizeBytes,
-        docsCount: stats?.totalDocs,
-        deletePhaseDescription: ilmPhases.delete.description,
-        deletePhaseColor: ilmPhases.delete.color,
-      });
-    }
-
-    return [];
-  };
-
-  const getDslDownsampleSteps = () => {
-    if (isDslLifecycle(definition.effective_lifecycle)) {
-      return definition.effective_lifecycle.dsl.downsample;
-    }
-    // Ilm downsampling is defined by the phases so returning undefined
-    return undefined;
-  };
+  const headerActions =
+    definition.privileges.lifecycle &&
+    ilmSummary.ilmSelectedPhasesForAdd &&
+    ilmSummary.onAddIlmPhase ? (
+      <IlmPhaseSelect
+        selectedPhases={ilmSummary.ilmSelectedPhasesForAdd}
+        excludedPhases={ilmSummary.ilmExcludedPhasesForAdd}
+        onSelect={(phase: IlmPhaseSelectOption) => ilmSummary.onAddIlmPhase?.(phase)}
+        data-test-subj="dataLifecycleSummaryAddPhase"
+        anchorPosition="downRight"
+        renderButton={renderAddPhaseButton(
+          isMetricsStream ? addPhaseAndDownsamplingButtonLabel : addPhaseButtonLabel
+        )}
+      />
+    ) : undefined;
 
   return (
-    <DataLifecycleSummary
-      phases={getPhases()}
-      loading={isIlm && ilmLoading}
-      downsampleSteps={getDslDownsampleSteps()}
-    />
+    <>
+      <DataLifecycleSummary
+        model={{
+          phases: ilmSummary.phases,
+          loading: ilmSummary.loading,
+        }}
+        showDownsampling={isMetricsStream}
+        capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
+        headerActions={headerActions}
+        phaseActions={{
+          onRemovePhase: ilmSummary.onRemovePhase,
+          onEditPhase: (phaseName) => ilmSummary.onEditPhase?.(phaseName as PhaseName),
+          showPhaseActions: true,
+        }}
+        downsamplingActions={{
+          onRemoveDownsampleStep: ilmSummary.onRemoveDownsampleStep,
+          onEditDownsampleStep: (stepNumber, phaseName) =>
+            ilmSummary.onEditDownsampleStep?.(stepNumber, phaseName as PhaseName | undefined),
+        }}
+        uiState={{
+          editedPhaseName: ilmSummary.editingPhase,
+          isEditLifecycleFlyoutOpen,
+          invalidPhases,
+        }}
+      />
+
+      {ilmSummary.modals}
+    </>
   );
+};
+
+const NonIlmLifecycleSummary = ({
+  definition,
+  isMetricsStream,
+  stats,
+  onFlyoutOpenChange,
+  onFlyoutUnsavedChangesChange,
+  refreshDefinition,
+}: LifecycleSummaryProps) => {
+  const isDsl = isDslLifecycle(definition.effective_lifecycle);
+  const { updateStreamLifecycle } = useUpdateStreamLifecycle(definition);
+  const dslSummary = useDslLifecycleSummary({
+    definition,
+    stats,
+    refreshDefinition,
+    updateStreamLifecycle,
+  });
+
+  useEffect(() => {
+    onFlyoutOpenChange?.(dslSummary.isEditLifecycleFlyoutOpen);
+    // For now DSL downsampling edits don't surface an external "unsaved changes" indicator.
+    onFlyoutUnsavedChangesChange?.(false);
+  }, [dslSummary.isEditLifecycleFlyoutOpen, onFlyoutOpenChange, onFlyoutUnsavedChangesChange]);
+
+  const currentDslStepsCount = dslSummary.downsampleSteps?.length ?? 0;
+  const isAddDownsampleStepDisabled = currentDslStepsCount >= MAX_DOWNSAMPLE_STEPS;
+  const invalidStepIndices = dslSummary.flyoutInvalidStepIndices;
+
+  const addDownsampleStepButton = (
+    <EuiButton
+      color="text"
+      size="s"
+      data-test-subj="dataLifecycleSummaryAddDownsampleStep"
+      onClick={() => dslSummary.onAddDownsampleStep?.()}
+      disabled={isAddDownsampleStepDisabled}
+    >
+      {addDownsampleStepButtonLabel}
+    </EuiButton>
+  );
+
+  const dslHeaderActions =
+    definition.privileges.lifecycle &&
+    isDsl &&
+    isMetricsStream &&
+    dslSummary.onAddDownsampleStep ? (
+      isAddDownsampleStepDisabled ? (
+        <EuiToolTip position="top" content={maxDownsampleStepsTooltip}>
+          {addDownsampleStepButton}
+        </EuiToolTip>
+      ) : (
+        addDownsampleStepButton
+      )
+    ) : undefined;
+
+  return (
+    <>
+      <DataLifecycleSummary
+        model={{
+          phases: dslSummary.phases,
+          loading: false,
+          downsampleSteps: isDsl ? dslSummary.downsampleSteps : undefined,
+        }}
+        showDownsampling={isMetricsStream}
+        downsamplingActions={{
+          onRemoveDownsampleStep: dslSummary.onRemoveDownsampleStep,
+          onEditDownsampleStep: dslSummary.onEditDownsampleStep,
+        }}
+        capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
+        headerActions={dslHeaderActions}
+        uiState={{
+          editedPhaseName: undefined,
+          isEditLifecycleFlyoutOpen: dslSummary.isEditLifecycleFlyoutOpen,
+          invalidStepIndices,
+        }}
+      />
+
+      {dslSummary.modals}
+    </>
+  );
+};
+
+export const LifecycleSummary = (props: LifecycleSummaryProps) => {
+  const isIlm = isIlmLifecycle(props.definition.effective_lifecycle);
+  return isIlm ? <IlmLifecycleSummary {...props} /> : <NonIlmLifecycleSummary {...props} />;
 };

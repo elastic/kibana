@@ -320,6 +320,7 @@ describe('TabsStorageManager', () => {
     expect(loadedTab.attributes).toStrictEqual({
       visContext: legacyVisContext,
       controlGroupState: legacyControlGroupState,
+      timeRestore: false,
     });
     expect(loadedTab.initialInternalState).toStrictEqual({
       serializedSearchSource: storedSerializedSearchSource,
@@ -553,6 +554,7 @@ describe('TabsStorageManager', () => {
       attributes: {
         visContext: { someKey: 'updatedValue' } as unknown as UnifiedHistogramVisContext,
         controlGroupState: {},
+        timeRestore: false,
       },
       appState: {
         columns: ['a', 'b', 'c'],
