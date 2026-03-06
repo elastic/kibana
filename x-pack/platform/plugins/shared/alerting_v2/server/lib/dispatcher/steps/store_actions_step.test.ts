@@ -293,7 +293,7 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  it('records unmatched episodes with action_type no_action', async () => {
+  it('records unmatched episodes with action_type unmatched', async () => {
     const mockService = createMockStorageService();
     const step = new StoreActionsStep(mockService);
 
@@ -323,7 +323,7 @@ describe('StoreActionsStep', () => {
           group_hash: 'hash-unmatched',
           last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
           actor: 'system',
-          action_type: 'no_action',
+          action_type: 'unmatched',
           rule_id: 'rule-unmatched',
           source: 'internal',
           reason: 'no matching notification policy',
@@ -362,8 +362,8 @@ describe('StoreActionsStep', () => {
 
     const callArgs = mockService.bulkIndexDocs.mock.calls[0][0];
     expect(callArgs.docs).toHaveLength(2);
-    expect(callArgs.docs[0].action_type).toBe('no_action');
-    expect(callArgs.docs[1].action_type).toBe('no_action');
+    expect(callArgs.docs[0].action_type).toBe('unmatched');
+    expect(callArgs.docs[1].action_type).toBe('unmatched');
   });
 
   it('records unmatched episodes alongside dispatched and throttled groups', async () => {
@@ -423,10 +423,10 @@ describe('StoreActionsStep', () => {
     expect(actionTypes).toContain('suppress');
     expect(actionTypes).toContain('fire');
     expect(actionTypes).toContain('notified');
-    expect(actionTypes).toContain('no_action');
+    expect(actionTypes).toContain('unmatched');
 
     const noActionDocs = callArgs.docs.filter(
-      (d: Record<string, unknown>) => d.action_type === 'no_action'
+      (d: Record<string, unknown>) => d.action_type === 'unmatched'
     );
     expect(noActionDocs).toHaveLength(1);
     expect(noActionDocs[0]).toEqual({
@@ -434,7 +434,7 @@ describe('StoreActionsStep', () => {
       group_hash: 'hash-unmatched',
       last_series_event_timestamp: '2026-01-22T07:10:00.000Z',
       actor: 'system',
-      action_type: 'no_action',
+      action_type: 'unmatched',
       rule_id: 'rule-unmatched',
       source: 'internal',
       reason: 'no matching notification policy',

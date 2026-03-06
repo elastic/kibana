@@ -81,7 +81,7 @@ export class StoreActionsStep implements DispatcherStep {
         ...unmatched.map((episode) =>
           toAction({
             episode,
-            actionType: 'no_action',
+            actionType: 'unmatched',
             now,
             reason: 'no matching notification policy',
           })
@@ -117,7 +117,7 @@ function toAction({
   reason,
 }: {
   episode: AlertEpisode;
-  actionType: 'suppress' | 'fire' | 'notified' | 'no_action';
+  actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
   now: Date;
   reason?: string;
 }): AlertAction {

@@ -40,12 +40,12 @@ describe('getDispatchableAlertEventsQuery', () => {
     expect(req.query).toContain('COALESCE(episode.id, episode_id)');
   });
 
-  it('computes last_fired via INLINE STATS for fire/suppress/no_action actions', () => {
+  it('computes last_fired via INLINE STATS for fire/suppress/unmatched actions', () => {
     const req = getDispatchableAlertEventsQuery();
 
     expect(req.query).toContain('last_fired = MAX(last_series_event_timestamp)');
     expect(req.query).toContain(
-      'action_type == "fire" OR action_type == "suppress" OR action_type == "no_action"'
+      'action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched"'
     );
   });
 
