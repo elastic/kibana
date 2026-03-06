@@ -25,6 +25,7 @@ export const RICH_TRACE = {
     TRANSACTION_DB_ERROR: 'Constraint violation: duplicate key',
     TRANSACTION_VALIDATION_ERROR: 'Validation error: invalid order ID',
     DB_SPAN_TIMEOUT: 'Query timeout on orders table',
+    PROCESS_ORDER_FAILURE: 'Order processing failed: item out of stock',
   },
   LOGS: {
     TRANSACTION_DB_ERROR: 'Constraint violation: duplicate key value violates unique constraint',

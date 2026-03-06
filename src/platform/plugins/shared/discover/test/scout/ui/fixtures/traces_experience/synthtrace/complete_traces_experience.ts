@@ -17,7 +17,7 @@
  *    - DB span with `span.destination.service.resource` (dependency link)
  *      → 1 APM error + 1 correlated error log
  *    - Internal span with span links
- *      → 3 correlated info logs (non-error)
+ *      → 1 APM error + 3 correlated info logs
  *
  * 2. Minimal trace ("GET /health") — transaction + DB span only
  *    - No errors, no logs, no span links
@@ -176,7 +176,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
     return error.timestamp(timestamp).serialize()[0];
   };
 
-  // 2 errors on transaction, 1 error on DB span
+  // 2 errors on transaction, 1 error on DB span, 1 error on process-order span
   const errorEvents: ApmFields[] = [
     createError(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR, 'DatabaseError', transactionId, from + 100),
     createError(
@@ -190,6 +190,12 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
       'QueryTimeoutError',
       correlationIds.dbSpanId,
       from + 310
+    ),
+    createError(
+      RICH_TRACE.ERRORS.PROCESS_ORDER_FAILURE,
+      'InventoryError',
+      correlationIds.processOrderSpanId,
+      from + 320
     ),
   ];
 
