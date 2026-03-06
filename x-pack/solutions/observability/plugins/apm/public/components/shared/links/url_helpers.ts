@@ -39,7 +39,7 @@ function getNextLocation(history: History, locationWithQuery: LocationWithQuery)
   };
 }
 
-function isInactiveHistoryError(error: unknown): boolean {
+export function isInactiveHistoryError(error: unknown): boolean {
   return error instanceof Error && error.message.includes('fell out of navigation scope');
 }
 

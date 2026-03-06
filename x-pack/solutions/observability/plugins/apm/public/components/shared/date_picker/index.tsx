@@ -11,7 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { clearCache } from '../../../services/rest/call_api';
-import { fromQuery, toQuery } from '../links/url_helpers';
+import { fromQuery, isInactiveHistoryError, toQuery } from '../links/url_helpers';
 import type { TimePickerQuickRange } from './typings';
 
 export function DatePicker({
@@ -55,7 +55,7 @@ export function DatePicker({
         }),
       });
     } catch (error) {
-      if (!(error instanceof Error && error.message.includes('fell out of navigation scope'))) {
+      if (!isInactiveHistoryError(error)) {
         throw error;
       }
     }

@@ -9,6 +9,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
 
 export function useDateRangeRedirect() {
   const history = useHistory();
@@ -38,7 +39,7 @@ export function useDateRangeRedirect() {
         search: qs.stringify(nextQuery),
       });
     } catch (error) {
-      if (!(error instanceof Error && error.message.includes('fell out of navigation scope'))) {
+      if (!isInactiveHistoryError(error)) {
         throw error;
       }
     }
