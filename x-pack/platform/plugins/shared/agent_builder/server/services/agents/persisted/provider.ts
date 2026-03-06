@@ -37,16 +37,8 @@ export const createPersistedProviderFn =
     });
   };
 
-const createDefaultAgent = async (client: AgentClient): Promise<PersistedAgentDefinition> => {
-  try {
-    return await client.create(getDefaultAgentCreateRequest());
-  } catch (e) {
-    // Handle race condition: another concurrent request may have created it
-    if (await client.has(agentBuilderDefaultAgentId)) {
-      return client.get(agentBuilderDefaultAgentId);
-    }
-    throw e;
-  }
+const ensureDefaultAgent = async (client: AgentClient): Promise<PersistedAgentDefinition> => {
+  return client.ensureDefaultAgent(getDefaultAgentCreateRequest());
 };
 
 const createPersistedProvider = async ({
@@ -79,7 +71,7 @@ const createPersistedProvider = async ({
     has: async (agentId: string) => {
       const exists = await client.has(agentId);
       if (!exists && agentId === agentBuilderDefaultAgentId) {
-        await createDefaultAgent(client);
+        await ensureDefaultAgent(client);
         return true;
       }
       return exists;
@@ -90,7 +82,7 @@ const createPersistedProvider = async ({
         return toInternalDefinition({ definition });
       } catch (e) {
         if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
-          const definition = await createDefaultAgent(client);
+          const definition = await ensureDefaultAgent(client);
           return toInternalDefinition({ definition });
         }
         throw e;
@@ -98,9 +90,9 @@ const createPersistedProvider = async ({
     },
     list: async (opts) => {
       const definitions = await client.list(opts);
-      const hasDefaultAgent = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
-      if (!hasDefaultAgent) {
-        const defaultAgent = await createDefaultAgent(client);
+      const hasDefault = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
+      if (!hasDefault) {
+        const defaultAgent = await ensureDefaultAgent(client);
         definitions.push(defaultAgent);
       }
       return definitions.map((definition) => toInternalDefinition({ definition }));

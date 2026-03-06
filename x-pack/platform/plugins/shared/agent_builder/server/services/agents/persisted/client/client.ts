@@ -38,6 +38,7 @@ export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<PersistedAgentDefinition>;
   create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
+  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
   update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
@@ -175,6 +176,27 @@ class AgentClientImpl implements AgentClient {
     });
 
     await this.storage.getClient().index({
+      document: attributes,
+    });
+
+    return this.get(profile.id);
+  }
+
+  async ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
+    if (await this.exists(profile.id)) {
+      return this.get(profile.id);
+    }
+
+    const now = new Date();
+    const documentId = `${this.space}_${profile.id}`;
+    const attributes = createRequestToEs({
+      profile,
+      space: this.space,
+      creationDate: now,
+    });
+
+    await this.storage.getClient().index({
+      id: documentId,
       document: attributes,
     });
 
