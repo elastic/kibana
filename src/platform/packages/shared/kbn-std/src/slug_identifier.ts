@@ -21,11 +21,16 @@
  * toSlugIdentifier('Test Space ') // 'test-space'
  */
 export function toSlugIdentifier(value = ''): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9_]/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
+  let result = value.toLowerCase().replace(/[^a-z0-9_]/g, '-');
+
+  while (result.startsWith('-')) {
+    result = result.slice(1);
+  }
+  while (result.endsWith('-')) {
+    result = result.slice(0, -1);
+  }
+
+  return result;
 }
 
 /**
