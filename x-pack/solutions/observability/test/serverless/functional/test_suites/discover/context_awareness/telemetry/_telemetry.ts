@@ -51,11 +51,11 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       it('should set EBT context for telemetry events with o11y root profile', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true);
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.try(async () => {
           const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
@@ -73,11 +73,11 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       it('should set EBT context for telemetry events when logs data source profile and reset', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
         await ebtUIHelper.setOptIn(true);
         await testSubjects.click('querySubmitButton');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await retry.try(async () => {
           const events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
@@ -92,11 +92,9 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         });
 
         // should reset the profiles when navigating away from Discover
-        await testSubjects.click('logo');
-        await retry.waitFor('home page to open', async () => {
-          return await testSubjects.exists('homeApp');
-        });
-        await testSubjects.click('addSampleData');
+        await common.navigateToApp('management');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.click('userMenuButton');
 
         await retry.try(async () => {
           const eventsAfter = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
