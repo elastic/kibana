@@ -34,6 +34,7 @@ import { useGetDataStreamResults, useUpdateDataStreamPipeline } from '../../../.
 import { useUIState } from '../../contexts';
 import * as i18n from './translations';
 import { getIconFromType, flattenPipelineObject } from './utils';
+import { PipelineChatPanel } from './pipeline_chat_panel';
 
 interface EditPipelineFlyoutProps {
   integrationId: string;
@@ -58,6 +59,7 @@ export const EditPipelineFlyout = ({
   const [pipelineText, setPipelineText] = useState('');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
 
   const { data, isLoading, isError, error } = useGetDataStreamResults(
@@ -209,16 +211,32 @@ export const EditPipelineFlyout = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="save"
-              onClick={handleSave}
-              isLoading={updateDataStreamPipelineMutation.isLoading}
-              isDisabled={selectedPipelineTab !== 'pipeline' || !pipelineText.trim()}
-              data-test-subj="editPipelineFlyoutSaveButton"
-            >
-              {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
-            </EuiButtonEmpty>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="save"
+                  onClick={handleSave}
+                  isLoading={updateDataStreamPipelineMutation.isLoading}
+                  isDisabled={selectedPipelineTab !== 'pipeline' || !pipelineText.trim()}
+                  data-test-subj="editPipelineFlyoutSaveButton"
+                >
+                  {i18n.EDIT_PIPELINE_FLYOUT.saveButton}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="sparkles"
+                  onClick={() => setIsChatOpen((prev) => !prev)}
+                  color={isChatOpen ? 'primary' : 'text'}
+                  aria-label={i18n.AI_CHAT_PANEL.toggleButtonAriaLabel}
+                  data-test-subj="editPipelineFlyoutAiChatToggle"
+                >
+                  {i18n.AI_CHAT_PANEL.toggleButton}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiTabs>
@@ -253,74 +271,89 @@ export const EditPipelineFlyout = ({
           </EuiConfirmModal>
         )}
 
-        {isLoading && (
-          <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexGroup gutterSize="m" responsive={false} style={{ height: '100%' }}>
+          <EuiFlexItem>
+            {isLoading && (
+              <EuiFlexGroup justifyContent="center" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="xl" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+
+            {isError && (
+              <EuiCallOut
+                announceOnMount
+                title={i18n.EDIT_PIPELINE_FLYOUT.errorTitle}
+                color="danger"
+                iconType="error"
+              >
+                <p>{error?.message ?? i18n.EDIT_PIPELINE_FLYOUT.errorMessage}</p>
+              </EuiCallOut>
+            )}
+
+            {saveError && (
+              <EuiCallOut
+                announceOnMount
+                title={i18n.EDIT_PIPELINE_FLYOUT.saveErrorTitle}
+                color="danger"
+                iconType="error"
+              >
+                <p>{saveError}</p>
+              </EuiCallOut>
+            )}
+
+            {isTableVisible && (
+              <EuiInMemoryTable
+                items={tableData}
+                columns={columns}
+                searchFormat="text"
+                search={search}
+                tableCaption={i18n.EDIT_PIPELINE_FLYOUT.tableCaption}
+                pagination
+                sorting
+              />
+            )}
+
+            {isEditorVisible && (
+              <div
+                onKeyDownCapture={(event) => {
+                  if (event.key === 'Enter') {
+                    event.stopPropagation();
+                  }
+                }}
+              >
+                <CodeEditor
+                  isCopyable
+                  enableFindAction
+                  languageId={XJsonLang.ID}
+                  height="calc(100vh - 280px)"
+                  width="100%"
+                  options={{
+                    readOnly: false,
+                    automaticLayout: true,
+                    tabSize: 2,
+                    wordWrap: 'on',
+                  }}
+                  value={pipelineText}
+                  onChange={setPipelineText}
+                />
+              </div>
+            )}
+          </EuiFlexItem>
+
+          {isChatOpen && (
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="xl" />
+              <PipelineChatPanel
+                integrationId={integrationId}
+                dataStreamId={dataStream.dataStreamId}
+                connectorId={connectorId}
+                pipelineText={pipelineText}
+                onApplyPipeline={setPipelineText}
+              />
             </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-
-        {isError && (
-          <EuiCallOut
-            announceOnMount
-            title={i18n.EDIT_PIPELINE_FLYOUT.errorTitle}
-            color="danger"
-            iconType="error"
-          >
-            <p>{error?.message ?? i18n.EDIT_PIPELINE_FLYOUT.errorMessage}</p>
-          </EuiCallOut>
-        )}
-
-        {saveError && (
-          <EuiCallOut
-            announceOnMount
-            title={i18n.EDIT_PIPELINE_FLYOUT.saveErrorTitle}
-            color="danger"
-            iconType="error"
-          >
-            <p>{saveError}</p>
-          </EuiCallOut>
-        )}
-
-        {isTableVisible && (
-          <EuiInMemoryTable
-            items={tableData}
-            columns={columns}
-            searchFormat="text"
-            search={search}
-            tableCaption={i18n.EDIT_PIPELINE_FLYOUT.tableCaption}
-            pagination
-            sorting
-          />
-        )}
-
-        {isEditorVisible && (
-          <div
-            onKeyDownCapture={(event) => {
-              if (event.key === 'Enter') {
-                // Prevent parent form handlers from intercepting Enter while editing JSON.
-                event.stopPropagation();
-              }
-            }}
-          >
-            <CodeEditor
-              isCopyable
-              enableFindAction
-              languageId={XJsonLang.ID}
-              height="calc(100vh - 280px)"
-              width="100%"
-              options={{
-                readOnly: false,
-                automaticLayout: true,
-                tabSize: 2,
-                wordWrap: 'on',
-              }}
-              value={pipelineText}
-              onChange={setPipelineText}
-            />
-          </div>
-        )}
+          )}
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
