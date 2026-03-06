@@ -72,7 +72,7 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
       datasourceStates: layers,
       ...(internalReferences.length ? { internalReferences } : {}),
       visualization: visualizationState,
-      ...(Object.keys(adHocDataViews).length ? { adHocDataViews } : {}),
+      adHocDataViews,
     },
     references,
   };

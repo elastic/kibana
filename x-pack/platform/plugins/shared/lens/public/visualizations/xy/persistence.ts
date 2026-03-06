@@ -141,6 +141,18 @@ function injectReferences(
     return state as XYState;
   }
   if (!needsInjectReferences(state)) {
+    // Runtime-format state still needs orphan cleanup: remove by-reference annotation
+    // layers whose annotation group was deleted from the library.
+    if (annotationGroups) {
+      const runtimeState = state as XYState;
+      const filteredLayers = runtimeState.layers.filter((layer) => {
+        if (!isAnnotationsLayer(layer) || !isByReferenceAnnotationsLayer(layer)) return true;
+        return layer.annotationGroupId in annotationGroups;
+      });
+      if (filteredLayers.length !== runtimeState.layers.length) {
+        return { ...runtimeState, layers: filteredLayers };
+      }
+    }
     return state as XYState;
   }
 

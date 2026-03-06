@@ -76,7 +76,6 @@ import { getAccessorColorConfigs, getColorAssignments } from './color_assignment
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
-  annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
   isLineSeries,
   getColumnToLabelMap,
@@ -814,12 +813,7 @@ export const getXyVisualization = ({
       return <ReferenceLayerHeader />;
     }
     if (isAnnotationsLayer(layer)) {
-      return (
-        <AnnotationsLayerHeader
-          title={getAnnotationLayerTitle(layer)}
-          hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
-        />
-      );
+      return <AnnotationsLayerHeader title={getAnnotationLayerTitle(layer)} />;
     }
     return undefined;
   },

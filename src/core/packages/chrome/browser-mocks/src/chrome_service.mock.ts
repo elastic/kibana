@@ -16,6 +16,7 @@ import type {
   InternalChromeSetup,
   InternalChromeStart,
 } from '@kbn/core-chrome-browser-internal';
+import type { ChromeComponentsDeps } from '@kbn/core-chrome-browser-components';
 import { lazyObject } from '@kbn/lazy-object';
 import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
 
@@ -25,15 +26,42 @@ const createSetupContractMock = (): DeeplyMockedKeys<InternalChromeSetup> => {
   });
 };
 
+const mockComponentDeps = {
+  config: { isServerless: false, kibanaVersion: '1.0.0', homeHref: '/', kibanaDocLink: '/' },
+  application: {} as ChromeComponentsDeps['application'],
+  basePath: {} as ChromeComponentsDeps['basePath'],
+  docLinks: {} as ChromeComponentsDeps['docLinks'],
+  navControls: { left$: of([]), center$: of([]), right$: of([]), extension$: of([]) },
+  classic: {
+    breadcrumbs$: of([]),
+    badge$: of(undefined),
+    recentlyAccessed$: of([]),
+    customNavLink$: of(undefined),
+  },
+  project: { breadcrumbs$: of([]), homeHref$: of('/'), navigation$: of({} as any) },
+  loadingCount$: of(0),
+  navLinks$: of([]),
+  customBranding$: of({} as any),
+  breadcrumbsAppendExtensions$: of([]),
+  helpMenu: {
+    menuLinks$: of([]),
+    extension$: of(undefined),
+    supportUrl$: of(''),
+    globalExtensionMenuLinks$: of([]),
+  },
+  appMenu$: of(undefined),
+  headerBanner$: of(undefined),
+  sideNav: {
+    collapsed$: of(false),
+    initialCollapsed: false,
+    onToggleCollapsed: jest.fn(),
+  },
+} satisfies ChromeComponentsDeps;
+
 const createStartContractMock = () => {
   const startContract: DeeplyMockedKeys<InternalChromeStart> = lazyObject({
-    getClassicHeaderComponent: jest.fn(),
-    getChromelessHeader: jest.fn(),
-    getHeaderBanner: jest.fn(),
-    getProjectAppMenuComponent: jest.fn(),
-    getProjectHeaderComponent: jest.fn(),
-    getProjectSideNavComponent: jest.fn(),
-    getSidebarComponent: jest.fn(),
+    componentDeps:
+      mockComponentDeps as unknown as DeeplyMockedKeys<InternalChromeStart>['componentDeps'],
     withProvider: jest.fn((children) => children),
     sidebar: lazyObject(sidebarServiceMock.createStartContract()),
     navLinks: lazyObject({
@@ -91,16 +119,12 @@ const createStartContractMock = () => {
     setChromeStyle: jest.fn(),
     getActiveSolutionNavId$: jest.fn(),
     project: lazyObject({
-      setHome: jest.fn(),
       setCloudUrls: jest.fn(),
       setKibanaName: jest.fn(),
       initNavigation: jest.fn(),
       setBreadcrumbs: jest.fn(),
       getBreadcrumbs$: jest.fn(),
-      getActiveNavigationNodes$: jest.fn(),
-      getNavigationTreeUi$: jest.fn(),
-      changeActiveSolutionNavigation: jest.fn(),
-      updateSolutionNavigations: jest.fn(),
+      getNavigation$: jest.fn(),
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
