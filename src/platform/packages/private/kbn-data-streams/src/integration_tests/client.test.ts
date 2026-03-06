@@ -1073,5 +1073,44 @@ describe('DataStreamClient', () => {
         })
       );
     });
+
+    test('removes lifecycle policy when it is removed in a new version', async () => {
+      const elasticsearchClient = esServer.getClient();
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleVersionedDataStreamV1,
+      });
+
+      const lifecycleRemovedDefinition: DataStreamDefinition<MappingsDefinition> = {
+        ...lifecycleVersionedDataStreamV1,
+        version: 2,
+        template: {
+          mappings: myTestDocMappings,
+        },
+      };
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: lifecycleRemovedDefinition,
+      });
+
+      const {
+        index_templates: [updatedTemplate],
+      } = await elasticsearchClient.indices.getIndexTemplate({
+        name: lifecycleRemovedDefinition.name,
+      });
+
+      expect(updatedTemplate.index_template.template).not.toHaveProperty('lifecycle');
+      expect(updatedTemplate.index_template.template?.lifecycle).toBeUndefined();
+      expect(updatedTemplate.index_template._meta).toEqual(
+        expect.objectContaining({
+          version: 2,
+          previousVersions: [1],
+        })
+      );
+    });
   });
 });
