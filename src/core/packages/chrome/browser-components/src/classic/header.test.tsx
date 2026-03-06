@@ -106,22 +106,11 @@ describe('Header', () => {
 
     act(() =>
       breadcrumbsAppendExtensions$.next([
-        {
-          mount: (root: HTMLDivElement) => {
-            root.innerHTML = '<div class="my-extension1">__render__</div>';
-            return () => (root.innerHTML = '');
-          },
-        },
-        {
-          mount: (root: HTMLDivElement) => {
-            root.innerHTML = '<div class="my-extension2">__render__</div>';
-            return () => (root.innerHTML = '');
-          },
-        },
+        { content: <div className="my-extension1">__render__</div> },
+        { content: <div className="my-extension2">__render__</div> },
       ])
     );
     component.update();
-    expect(component.find('HeaderExtension').length).toBe(2);
     const rootNode = component.getDOMNode();
     expect(rootNode.querySelector('.my-extension1')).toBeTruthy();
     expect(rootNode.querySelector('.my-extension2')).toBeTruthy();

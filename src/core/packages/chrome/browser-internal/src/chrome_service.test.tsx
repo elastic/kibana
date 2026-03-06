@@ -465,15 +465,15 @@ describe('start', () => {
       );
 
       const ext1 = chrome.setBreadcrumbsAppendExtension({
-        mount: () => () => {},
+        content: null,
       });
       chrome.setBreadcrumbsAppendExtension({
         order: 0,
-        mount: () => () => {},
+        content: null,
       });
       const ext3 = chrome.setBreadcrumbsAppendExtension({
         order: 100,
-        mount: () => () => {},
+        content: null,
       });
       ext3();
       ext1();
@@ -484,43 +484,43 @@ describe('start', () => {
           Array [],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "mount": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "mount": [Function],
+              "content": null,
             },
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 100,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
             Object {
-              "mount": [Function],
+              "content": null,
             },
           ],
           Array [
             Object {
-              "mount": [Function],
+              "content": null,
               "order": 0,
             },
           ],
