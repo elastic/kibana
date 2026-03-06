@@ -572,7 +572,7 @@ $$$securitysolution-ipreputationlinks$$$`securitySolution:ipReputationLinks` {ap
     ```
     :::
 
-$$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
+$$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {applies_to}`stack: ga 9.0-9.3, removed 9.4+` {applies_to}`serverless: unavailable`
 :   Enables privilege check warnings in rules for CCS indices. `true` by default.
 
 $$$security-solution-suppression-behavior-on-alert-closure$$$`securitySolution:suppressionBehaviorOnAlertClosure` {applies_to}`stack: ga` {applies_to}`security: ga`
