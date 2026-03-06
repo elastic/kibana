@@ -42,12 +42,16 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
   const agentsRaw = hitFields.agents ?? source.agents;
   const agentsList = Array.isArray(agentsRaw) ? agentsRaw : [];
 
+  const actionId = get('action_id') as string;
+  const packName = get('pack_name') as string | undefined;
+  const packId = get('pack_id') as string | undefined;
+
   const queries = (source.queries ?? []) as Array<{
     query?: string;
     agents?: string[];
     id?: string;
   }>;
-  const isPack = queries.length > 1 || get('pack_id');
+  const isPack = queries.length > 1 || packId;
   const queryText = isPack ? '' : queries[0]?.query ?? '';
 
   const totalAgents =
@@ -57,23 +61,22 @@ export const mapLiveHitToRow = (hit: LiveActionHit): LiveHistoryRow => {
 
   const alertIdsRaw = hitFields.alert_ids ?? source.alert_ids;
   const hasAlertIds = Array.isArray(alertIdsRaw) ? alertIdsRaw.length > 0 : !!alertIdsRaw;
-  const rowSource = hasAlertIds ? ('Rule' as const) : ('Live' as const);
 
   return {
-    id: get('action_id') as string,
+    id: actionId,
     sourceType: 'live' as const,
     timestamp: get('@timestamp') as string,
     queryText,
-    queryName: get('pack_name') as string | undefined,
-    source: rowSource,
-    packName: get('pack_name') as string | undefined,
-    packId: get('pack_id') as string | undefined,
+    queryName: packName,
+    source: hasAlertIds ? ('Rule' as const) : ('Live' as const),
+    packName,
+    packId,
     spaceId: get('space_id') as string | undefined,
     agentCount: totalAgents,
     successCount: undefined,
     errorCount: undefined,
     totalRows: undefined,
     userId: get('user_id') as string | undefined,
-    actionId: get('action_id') as string,
+    actionId,
   };
 };

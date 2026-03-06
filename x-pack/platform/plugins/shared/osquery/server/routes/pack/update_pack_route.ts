@@ -8,7 +8,19 @@
 import moment from 'moment-timezone';
 import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
-import { unset, has, difference, filter, map, mapKeys, uniq, some, isEmpty, keyBy } from 'lodash';
+import {
+  unset,
+  has,
+  difference,
+  filter,
+  map,
+  mapKeys,
+  mapValues,
+  uniq,
+  some,
+  isEmpty,
+  keyBy,
+} from 'lodash';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
@@ -120,20 +132,15 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         );
         const now = moment().toISOString();
         const queries = rawQueries
-          ? (Object.fromEntries(
-              Object.entries(rawQueries).map(([queryId, queryData]) => {
-                const existing = existingScheduleIds[queryId];
+          ? (mapValues(rawQueries, (queryData, queryId) => {
+              const existing = existingScheduleIds[queryId];
 
-                return [
-                  queryId,
-                  {
-                    ...queryData,
-                    schedule_id: existing?.schedule_id ?? uuidv4(),
-                    start_date: existing?.start_date ?? now,
-                  },
-                ];
-              })
-            ) as Record<string, PackQueryInput>)
+              return {
+                ...queryData,
+                schedule_id: existing?.schedule_id ?? uuidv4(),
+                start_date: existing?.start_date ?? now,
+              };
+            }) as Record<string, PackQueryInput>)
           : undefined;
 
         if (name) {

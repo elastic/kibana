@@ -50,12 +50,15 @@ import { CASE_ATTACHMENT_TYPE_ID } from '../common/constants';
 import { createActionService } from './handlers/action/create_action_service';
 import { backfillScheduleIds } from './lib/backfill_schedule_ids';
 
+const BACKFILL_TASK_TYPE = 'osquery:backfillScheduleIds';
+
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private readonly logger: Logger;
   private context: PluginInitializerContext;
   private readonly osqueryAppContextService = new OsqueryAppContextService();
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
+  private coreStart: CoreStart | null = null;
   private licenseSubscription: Subscription | null = null;
   private createActionService: ReturnType<typeof createActionService> | null = null;
 
@@ -108,6 +111,35 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
+    plugins.taskManager?.registerTaskDefinitions({
+      [BACKFILL_TASK_TYPE]: {
+        title: 'Backfill schedule IDs for osquery pack queries',
+        timeout: '5m',
+        maxAttempts: 3,
+        createTaskRunner: ({ taskInstance }) => ({
+          run: async () => {
+            if (taskInstance.state?.completed) {
+              this.logger.debug('backfillScheduleIds task: already completed, skipping');
+
+              return { state: { completed: true } };
+            }
+
+            if (!this.coreStart) {
+              throw new Error('Core not started');
+            }
+
+            await backfillScheduleIds({
+              coreStart: this.coreStart,
+              osqueryContext: this.osqueryAppContextService,
+              logger: this.logger,
+            });
+
+            return { state: { completed: true } };
+          },
+        }),
+      },
+    });
+
     plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
@@ -117,6 +149,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
   public start(core: CoreStart, plugins: StartPlugins) {
     this.logger.debug('osquery: Started');
+    this.coreStart = core;
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     this.osqueryAppContextService.start({
       ...plugins.fleet,
@@ -158,13 +191,18 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           // we do not want to wait for it
         });
 
-        backfillScheduleIds({
-          coreStart: core,
-          osqueryContext: this.osqueryAppContextService,
-          logger: this.logger,
-        }).catch((err) => {
-          this.logger.warn(`backfillScheduleIds failed: ${err.message}`);
-        });
+        plugins.taskManager
+          ?.ensureScheduled({
+            id: BACKFILL_TASK_TYPE,
+            taskType: BACKFILL_TASK_TYPE,
+            scope: ['osquery'],
+            schedule: { interval: '24h' },
+            params: {},
+            state: {},
+          })
+          .catch((err) => {
+            this.logger.warn(`Failed to schedule backfillScheduleIds task: ${err.message}`);
+          });
 
         if (registerIngestCallback) {
           registerIngestCallback(
