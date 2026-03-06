@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { AttackDiscoveryApiAlert } from '@kbn/elastic-assistant-common';
-import { getMarkdownFields } from '@kbn/elastic-assistant-common';
-import type { AttackDiscoveryAlertDocument } from '../../../../schedules/types';
 import { omit } from 'lodash/fp';
 
 import {
@@ -21,6 +18,9 @@ import {
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-data-utils';
 
+import type { AttackDiscoveryApiAlert } from '../../../..';
+import { getMarkdownFields } from '../../../..';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
@@ -38,7 +38,7 @@ import {
   ALERT_ATTACK_DISCOVERY_USER_NAME,
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_RISK_SCORE,
-} from '../../../../schedules/fields/field_names';
+} from '../../../schedules/field_names';
 import { transformAttackDiscoveryAlertDocumentToApi } from '.';
 
 describe('transformAttackDiscoveryAlertDocumentToApi', () => {
