@@ -77,9 +77,10 @@ export const ConfigurationProvider: FunctionComponent<{ children?: React.ReactNo
         ? isUsingCustomRollover
         : true
       : false,
-    isUsingSearchableSnapshotInHotPhase: get(formData, pathToHotPhaseSearchableSnapshot) != null,
+    isUsingSearchableSnapshotInHotPhase:
+      hotEnabled && get(formData, pathToHotPhaseSearchableSnapshot) != null,
     isUsingSearchableSnapshotInColdPhase: get(formData, pathToColdPhaseSearchableSnapshot) != null,
-    isUsingDownsampleInHotPhase: !!get(formData, isUsingDownsamplePath('hot')),
+    isUsingDownsampleInHotPhase: hotEnabled && !!get(formData, isUsingDownsamplePath('hot')),
     isUsingDownsampleInWarmPhase: !!get(formData, isUsingDownsamplePath('warm')),
     isUsingDownsampleInColdPhase: !!get(formData, isUsingDownsamplePath('cold')),
   };

@@ -53,11 +53,7 @@ export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
   const isDeletePhase = phase === 'delete';
   const { setDeletePhaseEnabled } = usePhaseTimings();
   // hot phase is always enabled unless it's editing a policy that doesn't have a hot phase
-  const enabled = isHotPhase
-    ? isHotPhaseRequired
-      ? true
-      : Boolean(get(formData, enabledPath))
-    : Boolean(get(formData, enabledPath));
+  const enabled = (isHotPhase && isHotPhaseRequired) || Boolean(get(formData, enabledPath));
 
   const { errors } = useFormErrorsContext();
   const hasErrors = Object.keys(errors[phase]).length > 0;

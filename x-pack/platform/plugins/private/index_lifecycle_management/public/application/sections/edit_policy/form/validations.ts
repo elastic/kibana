@@ -103,7 +103,7 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
   }
 };
 
-const dataPhaseEnabledPaths = [
+export const dataPhaseEnabledPaths = [
   '_meta.hot.enabled',
   '_meta.warm.enabled',
   '_meta.cold.enabled',
