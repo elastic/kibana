@@ -13,10 +13,8 @@ import { mockContextDependencies } from './__mock__/context_dependencies';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
-import { createWorkflowExecutionRepository } from '../repositories/workflow_execution_repository/create_workflow_execution_repository';
 
 import '../workflow_event_logger/mocks';
-jest.mock('../repositories/workflow_execution_repository/create_workflow_execution_repository');
 jest.mock('../repositories/execution_state_repository/execution_state_repository');
 jest.mock('@kbn/workflows/graph');
 
@@ -67,19 +65,15 @@ describe('setupDependencies', () => {
       .fn()
       .mockResolvedValue(mockScopedActionsClient);
 
-    (ExecutionStateRepository as jest.Mock).mockImplementation(() => ({
-      getExecutions: jest.fn().mockResolvedValue({
+    (ExecutionStateRepository as unknown as jest.Mock).mockImplementation(() => ({
+      getWorkflowExecutions: jest.fn().mockResolvedValue({
         [workflowRunId]: mockWorkflowExecution,
       }),
+      getStepExecutions: jest.fn().mockResolvedValue({}),
       bulkUpsert: jest.fn(),
       bulkUpdate: jest.fn(),
-      bulkDelete: jest.fn(),
+      deleteTerminalExecutions: jest.fn(),
     }));
-
-    (createWorkflowExecutionRepository as jest.Mock).mockResolvedValue({
-      getWorkflowExecutionById: jest.fn(),
-      createWorkflowExecution: jest.fn(),
-    });
 
     const mockWorkflowGraph = {
       fromWorkflowDefinition: jest.fn().mockReturnThis(),

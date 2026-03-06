@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import type { WorkflowExecutionDataStreamClient } from './data_stream';
+import { WorkflowExecutionRepository } from './workflow_execution_repository';
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
@@ -20,7 +20,14 @@ describe('WorkflowExecutionRepository', () => {
       create: jest.fn(),
     } as unknown as jest.Mocked<WorkflowExecutionDataStreamClient>;
 
-    repository = new WorkflowExecutionRepository(mockDataStreamClient);
+    const mockEsClient = {} as any;
+    const mockLogger = {
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as any;
+    repository = new WorkflowExecutionRepository(mockDataStreamClient, mockEsClient, mockLogger);
   });
 
   describe('createWorkflowExecution', () => {

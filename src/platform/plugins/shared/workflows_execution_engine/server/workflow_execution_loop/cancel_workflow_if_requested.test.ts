@@ -71,7 +71,7 @@ describe('cancelWorkflowIfRequested', () => {
   describe('error handling', () => {
     it('should handle Elasticsearch timeout errors gracefully', async () => {
       const timeoutError = new Error('TLS handshake timeout');
-      executionStateRepository.getExecutions.mockRejectedValue(timeoutError);
+      executionStateRepository.getWorkflowExecutions.mockRejectedValue(timeoutError);
 
       await cancelWorkflowIfRequested(
         executionStateRepository,
@@ -93,7 +93,7 @@ describe('cancelWorkflowIfRequested', () => {
 
     it('should handle network errors gracefully', async () => {
       const networkError = new Error('ECONNREFUSED: Connection refused');
-      executionStateRepository.getExecutions.mockRejectedValue(networkError);
+      executionStateRepository.getWorkflowExecutions.mockRejectedValue(networkError);
 
       await cancelWorkflowIfRequested(
         executionStateRepository,
@@ -113,7 +113,7 @@ describe('cancelWorkflowIfRequested', () => {
 
     it('should handle non-Error objects gracefully', async () => {
       const stringError = 'String error message';
-      executionStateRepository.getExecutions.mockRejectedValue(stringError);
+      executionStateRepository.getWorkflowExecutions.mockRejectedValue(stringError);
 
       await cancelWorkflowIfRequested(
         executionStateRepository,
@@ -135,7 +135,7 @@ describe('cancelWorkflowIfRequested', () => {
 
     it('should return early when error occurs, allowing step execution to continue', async () => {
       const error = new Error('Elasticsearch unavailable');
-      executionStateRepository.getExecutions.mockRejectedValue(error);
+      executionStateRepository.getWorkflowExecutions.mockRejectedValue(error);
 
       const result = await cancelWorkflowIfRequested(
         executionStateRepository,
@@ -151,8 +151,8 @@ describe('cancelWorkflowIfRequested', () => {
   });
 
   describe('normal cancellation flow', () => {
-    it('should proceed with cancellation when getExecutions returns cancelRequested=true', async () => {
-      executionStateRepository.getExecutions.mockResolvedValue({
+    it('should proceed with cancellation when getWorkflowExecutions returns cancelRequested=true', async () => {
+      executionStateRepository.getWorkflowExecutions.mockResolvedValue({
         'test-workflow-execution-id': {
           ...workflowExecution,
           cancelRequested: true,
@@ -182,8 +182,8 @@ describe('cancelWorkflowIfRequested', () => {
       expect(workflowLogger.logError).not.toHaveBeenCalled();
     });
 
-    it('should return early when getExecutions returns cancelRequested=false', async () => {
-      executionStateRepository.getExecutions.mockResolvedValue({
+    it('should return early when getWorkflowExecutions returns cancelRequested=false', async () => {
+      executionStateRepository.getWorkflowExecutions.mockResolvedValue({
         'test-workflow-execution-id': workflowExecution,
       });
 
@@ -213,7 +213,7 @@ describe('cancelWorkflowIfRequested', () => {
         monitorAbortController
       );
 
-      expect(executionStateRepository.getExecutions).not.toHaveBeenCalled();
+      expect(executionStateRepository.getWorkflowExecutions).not.toHaveBeenCalled();
       expect(monitorAbortController.signal.aborted).toBe(true);
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalled();
     });

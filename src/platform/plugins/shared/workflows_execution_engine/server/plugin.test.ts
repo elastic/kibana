@@ -45,8 +45,8 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
   beforeEach(() => {
     executionStateRepository = {
-      getExecutions: jest.fn(),
-      getExecutionById: jest.fn(),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({}),
+      getStepExecutions: jest.fn().mockResolvedValue({}),
       bulkCreate: jest.fn(),
       bulkUpsert: jest.fn(),
       bulkUpdate: jest.fn(),
@@ -83,7 +83,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
 
   describe('when no existing non-terminal scheduled execution exists', () => {
     it('should return false and not create a skipped execution', async () => {
-      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({ results: [], total: 0 });
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [],
+        total: 0,
+      });
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,
@@ -140,7 +143,10 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
     });
 
     it('should not skip when only terminal status executions exist', async () => {
-      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({ results: [], total: 0 });
+      executionStateRepository.searchWorkflowExecutions.mockResolvedValue({
+        results: [],
+        total: 0,
+      });
 
       const result = await checkAndSkipIfExistingScheduledExecution(
         workflow,

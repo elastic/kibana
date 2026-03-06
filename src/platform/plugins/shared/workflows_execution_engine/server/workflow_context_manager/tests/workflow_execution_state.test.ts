@@ -18,18 +18,19 @@ describe('WorkflowExecutionState', () => {
 
   beforeEach(() => {
     executionStateRepository = {
-      getExecutions: jest.fn().mockResolvedValue({}),
+      getStepExecutions: jest.fn().mockResolvedValue({}),
+      getWorkflowExecutions: jest.fn().mockResolvedValue({}),
       bulkUpsert: jest.fn().mockResolvedValue(undefined),
       bulkUpdate: jest.fn().mockResolvedValue(undefined),
-      bulkDelete: jest.fn().mockResolvedValue(undefined),
-      getExecutionById: jest.fn(),
-      getRunningExecutionsByConcurrencyGroup: jest.fn(),
-      getRunningExecutionsByWorkflowId: jest.fn(),
+      bulkCreate: jest.fn().mockResolvedValue(undefined),
+      searchWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+      deleteTerminalExecutions: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<ExecutionStateRepository>;
 
     const fakeWorkflowExecution = {
       id: 'test-workflow-execution-id',
       workflowId: 'test-workflow-id',
+      spaceId: 'default',
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
     } as EsWorkflowExecution;
@@ -41,6 +42,7 @@ describe('WorkflowExecutionState', () => {
     expect(workflowExecution).toEqual({
       id: 'test-workflow-execution-id',
       workflowId: 'test-workflow-id',
+      spaceId: 'default',
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
     } as EsWorkflowExecution);
@@ -95,7 +97,7 @@ describe('WorkflowExecutionState', () => {
       startedAt: '2025-08-05T20:00:00.000Z',
       stepExecutionIndex: 0,
       globalExecutionIndex: 0,
-      spaceId: undefined,
+      spaceId: 'default',
       type: 'step',
     } as EsWorkflowStepExecution);
     expect(executionStateRepository.bulkUpsert).not.toHaveBeenCalled();
@@ -346,7 +348,7 @@ describe('WorkflowExecutionState', () => {
       } as EsWorkflowExecution;
       underTest = new WorkflowExecutionState(fakeWorkflowExecution, executionStateRepository);
 
-      executionStateRepository.getExecutions.mockResolvedValue({
+      executionStateRepository.getStepExecutions.mockResolvedValue({
         '11': {
           id: '11',
           stepId: 'testStep',
@@ -383,7 +385,7 @@ describe('WorkflowExecutionState', () => {
       } as EsWorkflowExecution;
       underTest = new WorkflowExecutionState(fakeWorkflowExecution, executionStateRepository);
 
-      executionStateRepository.getExecutions.mockResolvedValue({
+      executionStateRepository.getStepExecutions.mockResolvedValue({
         '11': { id: '11', stepId: 'testStep', stepExecutionIndex: 1 } as any,
         '44': { id: '44', stepId: 'testStep', stepExecutionIndex: 4 } as any,
         '33': { id: '33', stepId: 'testStep', stepExecutionIndex: 3 } as any,

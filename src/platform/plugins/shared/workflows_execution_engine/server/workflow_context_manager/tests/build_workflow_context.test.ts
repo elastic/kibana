@@ -25,6 +25,8 @@ describe('buildWorkflowContext', () => {
   const dependencies = mockContextDependencies();
   const baseExecution: EsWorkflowExecution = {
     id: 'test-execution-id',
+    type: 'workflow' as const,
+    workflowRunId: 'test-execution-id',
     workflowId: 'test-workflow-id',
     spaceId: 'default',
     isTestRun: false,
@@ -46,7 +48,7 @@ describe('buildWorkflowContext', () => {
     finishedAt: '2023-01-01T00:00:00.000Z',
     createdBy: 'test-user',
     duration: 0,
-    error: null,
+    error: undefined,
     cancelRequested: false,
   };
 

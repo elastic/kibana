@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StepExecutionRepository } from './step_execution_repository';
 import type { StepExecutionDataStreamClient } from './data_stream';
+import { StepExecutionRepository } from './step_execution_repository';
 
 describe('StepExecutionRepository', () => {
   let repository: StepExecutionRepository;
@@ -20,7 +20,8 @@ describe('StepExecutionRepository', () => {
       create: jest.fn(),
     } as unknown as jest.Mocked<StepExecutionDataStreamClient>;
 
-    repository = new StepExecutionRepository(mockDataStreamClient);
+    const mockEsClient = {} as any;
+    repository = new StepExecutionRepository(mockDataStreamClient, mockEsClient);
   });
 
   describe('searchStepExecutionsByExecutionId', () => {
