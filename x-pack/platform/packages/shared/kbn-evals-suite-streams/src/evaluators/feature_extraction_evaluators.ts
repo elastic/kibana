@@ -51,9 +51,14 @@ export interface FeatureIdentificationEvaluationDataset {
  * These verify objectively measurable properties without relying on an LLM judge.
  */
 
+interface FeatureExtractionTaskOutput {
+  features: BaseFeature[];
+  traceId?: string | null;
+}
+
 interface CodeEvaluatorParams {
   input: Record<string, unknown>;
-  output: BaseFeature[];
+  output: FeatureExtractionTaskOutput;
   expected: {
     min_features?: number;
     max_features?: number;
@@ -73,7 +78,7 @@ const typeValidationEvaluator = {
   name: 'type_validation',
   kind: 'CODE' as const,
   evaluate: async ({ output }: CodeEvaluatorParams) => {
-    const features = output ?? [];
+    const features = output?.features ?? [];
     if (features.length === 0) {
       return { score: 1, explanation: 'No features to validate (vacuously valid)' };
     }
@@ -200,7 +205,7 @@ const evidenceGroundingEvaluator = {
   name: 'evidence_grounding',
   kind: 'CODE' as const,
   evaluate: async ({ input, output }: CodeEvaluatorParams) => {
-    const features = output ?? [];
+    const features = output?.features ?? [];
     const rawDocs = Array.isArray(input.sample_documents)
       ? (input.sample_documents as Array<Record<string, unknown>>)
       : [];
@@ -315,7 +320,7 @@ const featureCountEvaluator = {
   name: 'feature_count',
   kind: 'CODE' as const,
   evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
-    const count = output?.length ?? 0;
+    const count = output?.features?.length ?? 0;
     const { min_features = -Infinity, max_features = Infinity } = expected;
 
     const issues: string[] = [];
@@ -348,7 +353,7 @@ const confidenceBoundsEvaluator = {
   evaluate: async ({ output, expected }: CodeEvaluatorParams) => {
     const { max_confidence = 100 } = expected;
 
-    const features = output ?? [];
+    const features = output?.features ?? [];
     if (features.length === 0) {
       return {
         score: 1,
@@ -389,7 +394,7 @@ const typeAssertionsEvaluator = {
       return { score: 1, explanation: 'No type assertions specified — skipping' };
     }
 
-    const features = output ?? [];
+    const features = output?.features ?? [];
     const presentTypes = new Set(features.map((f) => f.type));
     const issues: string[] = [];
     let totalAssertions = 0;
@@ -453,6 +458,7 @@ export const createFeatureExtractionEvaluators = (scenarioCriteria?: {
     createScenarioCriteriaLlmEvaluator({
       criteriaFn,
       criteria,
+      transformOutput: (output) => (output as FeatureExtractionTaskOutput)?.features,
     }),
   ];
 };

@@ -9,7 +9,6 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type { IconType, EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
 export interface ChromeBadge {
@@ -27,7 +26,6 @@ export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
 
 /**
  * @example
- * Set a banner using a React node (recommended):
  * ```tsx
  * chrome.setHeaderBanner({ content: <MyBanner /> });
  * ```
@@ -35,14 +33,7 @@ export type ChromeBreadcrumbsBadge = EuiBadgeProps & {
  * @public
  */
 export interface ChromeUserBanner {
-  /**
-   * The banner content as a React node.
-   */
-  content?: ReactNode;
-  /**
-   * @deprecated Use {@link ChromeUserBanner.content} instead.
-   */
-  mount?: MountPoint<HTMLDivElement>;
+  content: ReactNode;
 }
 
 /** @public */

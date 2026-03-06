@@ -8,6 +8,42 @@
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand, ESQLSingleAstItem, ESQLSource } from '@elastic/esql/types';
 
+// ---------------------------------------------------------------------------
+// Internal helpers — shared parsing, type-guarding, and printing logic
+// ---------------------------------------------------------------------------
+
+function parseFromCommand(esql: string) {
+  const { root } = Parser.parse(esql);
+  const fromCmd = root.commands.find(
+    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
+  );
+  return { root, fromCmd };
+}
+
+function isIndexSource(arg: ESQLCommand['args'][number]): arg is ESQLSource {
+  return (
+    !Array.isArray(arg) &&
+    'type' in arg &&
+    arg.type === 'source' &&
+    (arg as ESQLSource).sourceType === 'index'
+  );
+}
+
+function printWithUpdatedFrom(
+  root: ReturnType<typeof parseFromCommand>['root'],
+  fromCmd: ESQLCommand,
+  newArgs: ESQLCommand['args']
+): string {
+  const updatedCommands = root.commands.map((cmd) =>
+    cmd === fromCmd ? { ...cmd, args: newArgs } : cmd
+  );
+  return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
 /**
  * Builds the ES|QL AST node for `METADATA _id, _source`.
  * Shared across all locations that construct or augment FROM commands.
@@ -42,12 +78,7 @@ export function extractWhereExpression(esql: string): ESQLSingleAstItem | undefi
  * clause. Returns the query unchanged if METADATA is already present.
  */
 export function ensureMetadata(esql: string): string {
-  const { root } = Parser.parse(esql);
-
-  const fromCmd = root.commands.find(
-    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
-  );
-
+  const { root, fromCmd } = parseFromCommand(esql);
   if (!fromCmd) return esql;
 
   const hasMetadata = fromCmd.args.some(
@@ -61,11 +92,7 @@ export function ensureMetadata(esql: string): string {
 
   if (hasMetadata) return esql;
 
-  const updatedCommands = root.commands.map((cmd) =>
-    cmd === fromCmd ? { ...cmd, args: [...cmd.args, buildMetadataOption()] } : cmd
-  );
-
-  return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
+  return printWithUpdatedFrom(root, fromCmd, [...fromCmd.args, buildMetadataOption()]);
 }
 
 /**
@@ -84,23 +111,23 @@ export function normalizeEsqlQuery(esql: string): string {
  * ES|QL query. Returns an empty array when there is no FROM clause.
  */
 export function getFromSources(esql: string): string[] {
-  const { root } = Parser.parse(esql);
-
-  const fromCmd = root.commands.find(
-    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
-  );
-
+  const { fromCmd } = parseFromCommand(esql);
   if (!fromCmd) return [];
+  return fromCmd.args.filter(isIndexSource).map((source) => source.name);
+}
 
-  return fromCmd.args
-    .filter(
-      (arg): arg is ESQLSource =>
-        !Array.isArray(arg) &&
-        'type' in arg &&
-        arg.type === 'source' &&
-        (arg as ESQLSource).sourceType === 'index'
-    )
-    .map((source) => source.name);
+/**
+ * Replaces all index sources in the FROM clause with `newSources`,
+ * preserving any non-source arguments (e.g. METADATA options).
+ * Returns the query unchanged when there is no FROM clause.
+ */
+export function replaceFromSources(esql: string, newSources: string[]): string {
+  const { root, fromCmd } = parseFromCommand(esql);
+  if (!fromCmd) return esql;
+
+  const nonSourceArgs = fromCmd.args.filter((arg) => !isIndexSource(arg));
+  const sourceArgs = newSources.map((s) => Builder.expression.source.index(s));
+  return printWithUpdatedFrom(root, fromCmd, [...sourceArgs, ...nonSourceArgs]);
 }
 
 /**
@@ -111,26 +138,14 @@ export function getFromSources(esql: string): string[] {
  * modified.
  */
 export function rewriteFromSources(esql: string, transform: (index: string) => string): string {
-  const { root } = Parser.parse(esql);
-
-  const fromCmd = root.commands.find(
-    (cmd): cmd is ESQLCommand => 'name' in cmd && cmd.name === 'from'
-  );
-
+  const { root, fromCmd } = parseFromCommand(esql);
   if (!fromCmd) return esql;
 
   let modified = false;
   const updatedArgs = fromCmd.args.map((arg) => {
-    if (
-      !Array.isArray(arg) &&
-      'type' in arg &&
-      arg.type === 'source' &&
-      (arg as ESQLSource).sourceType === 'index'
-    ) {
-      const source = arg as ESQLSource;
-      const currentIndex = source.name;
-      const newIndex = transform(currentIndex);
-      if (newIndex !== currentIndex) {
+    if (isIndexSource(arg)) {
+      const newIndex = transform(arg.name);
+      if (newIndex !== arg.name) {
         modified = true;
         return Builder.expression.source.index(newIndex);
       }
@@ -140,7 +155,5 @@ export function rewriteFromSources(esql: string, transform: (index: string) => s
 
   if (!modified) return esql;
 
-  const updatedFrom = { ...fromCmd, args: updatedArgs };
-  const updatedCommands = root.commands.map((cmd) => (cmd === fromCmd ? updatedFrom : cmd));
-  return BasicPrettyPrinter.print(Builder.expression.query(updatedCommands as ESQLCommand[]));
+  return printWithUpdatedFrom(root, fromCmd, updatedArgs);
 }
