@@ -359,7 +359,11 @@ describe('UiamService', () => {
     it('properly calls UIAM service to exchange an OAuth token for an ephemeral token', async () => {
       const mockResponse = {
         token: 'essu_ephemeral_token_value',
-        audience: 'https://my-project.kb.us-east-1.cloud.es.io',
+        credentials: {
+          oauth: {
+            audience: 'https://my-project.kb.us-east-1.cloud.es.io',
+          },
+        },
       };
 
       fetchSpy.mockResolvedValue({
@@ -379,7 +383,7 @@ describe('UiamService', () => {
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true',
+        'https://uiam.service/uiam/api/v1/authentication/_authenticate?include_token=true&audience=https%3A%2F%2Fmy-project.kb.us-east-1.cloud.es.io',
         {
           method: 'POST',
           headers: {
@@ -387,9 +391,6 @@ describe('UiamService', () => {
             [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer essu_oauth_access_token',
           },
-          body: JSON.stringify({
-            audience: 'https://my-project.kb.us-east-1.cloud.es.io',
-          }),
           dispatcher: AGENT_MOCK,
         }
       );

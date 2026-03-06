@@ -275,26 +275,26 @@ export class UiamService implements UiamServicePublic {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
     try {
+      const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
+      url.searchParams.set('include_token', 'true');
+      url.searchParams.set('audience', expectedAudience);
+
       const response = await UiamService.#parseUiamResponse(
-        await fetch(
-          `${this.#config.url}/uiam/api/v1/authentication/_authenticate?include_token=true`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ audience: expectedAudience }),
-            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-            dispatcher: this.#dispatcher,
-          }
-        )
+        await fetch(url.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
       );
 
       return {
         ephemeralToken: response.token,
-        audience: response.audience,
+        audience: response.credentials.oauth.audience,
       };
     } catch (err) {
       this.#logger.error(
