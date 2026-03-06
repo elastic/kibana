@@ -20,7 +20,7 @@ import {
   featureDuplicationEvaluator,
   createSemanticUniquenessEvaluator,
   createIdConsistencyEvaluator,
-} from '../../../src/evaluators/feature_duplication_evaluators';
+} from '../../../src/evaluators/feature_duplication';
 
 evaluate.describe('Streams features duplication (harness)', () => {
   const from = kbnDatemath.parse('now-10m')!;

@@ -1,0 +1,11 @@
+Evaluate the following feature id groups for consistency:
+
+**Stream name**: {{{stream_name}}}
+
+**Context**:
+{{{context}}}
+
+**Id groups**:
+{{{id_groups}}}
+
+Please evaluate each id group and call the `evaluate` tool with your findings.
