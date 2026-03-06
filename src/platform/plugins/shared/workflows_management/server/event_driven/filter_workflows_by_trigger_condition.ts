@@ -38,10 +38,7 @@ export function workflowMatchesTriggerCondition(
 
   const onBlock = matchingTrigger && 'on' in matchingTrigger ? matchingTrigger.on : undefined;
   const condition =
-    onBlock &&
-    typeof onBlock === 'object' &&
-    onBlock !== null &&
-    'condition' in onBlock
+    onBlock && typeof onBlock === 'object' && onBlock !== null && 'condition' in onBlock
       ? onBlock.condition
       : undefined;
   const conditionStr = typeof condition === 'string' ? condition.trim() : '';
