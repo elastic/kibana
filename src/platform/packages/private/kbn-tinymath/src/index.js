@@ -8,7 +8,8 @@
  */
 
 const { get } = require('lodash');
-const memoizeOne = require('memoize-one');
+const memoizeOneImport = require('memoize-one');
+const memoizeOne = memoizeOneImport.default ?? memoizeOneImport;
 const { functions: includedFunctions } = require('./functions');
 const { parse: parseFn } = require('./grammar.peggy');
 
