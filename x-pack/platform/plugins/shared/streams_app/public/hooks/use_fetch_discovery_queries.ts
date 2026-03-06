@@ -12,6 +12,7 @@ import type {
   SignificantEventsResponse,
   StreamQuery,
 } from '@kbn/streams-schema';
+import type { QueryStatus } from '@kbn/streams-plugin/common';
 import moment from 'moment';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
@@ -40,11 +41,11 @@ export const useFetchDiscoveryQueries = (
     query?: string;
     page: number;
     perPage: number;
-    includeRuleUnbacked?: boolean;
+    status?: QueryStatus[];
   },
   deps: unknown[] = []
 ) => {
-  const { name, query, page, perPage, includeRuleUnbacked } = options;
+  const { name, query, page, perPage, status } = options;
   const {
     dependencies: {
       start: {
@@ -91,7 +92,7 @@ export const useFetchDiscoveryQueries = (
             streamNames: name ? [name] : undefined,
             page,
             perPage,
-            includeRuleUnbacked,
+            status,
           },
         },
         signal: signal ?? null,
@@ -129,7 +130,7 @@ export const useFetchDiscoveryQueries = (
       query,
       page,
       perPage,
-      includeRuleUnbacked,
+      status,
       ...deps,
     ],
     queryFn: fetchDiscoveryQueries,

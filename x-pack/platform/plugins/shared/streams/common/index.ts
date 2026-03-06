@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Query } from './queries';
+export type { Query, QueryStatus } from './queries';
 export type {
   ProcessorSuggestion,
   ProcessorPropertySuggestion,

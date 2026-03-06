@@ -7,6 +7,8 @@
 
 import type { StreamQuery } from '@kbn/streams-schema';
 
+export type QueryStatus = 'active' | 'draft';
+
 export interface QueryLink {
   'asset.uuid': string;
   'asset.type': 'query';
