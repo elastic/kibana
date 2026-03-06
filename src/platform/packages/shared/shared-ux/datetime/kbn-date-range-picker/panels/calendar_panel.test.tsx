@@ -12,13 +12,8 @@ import { fireEvent, screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { CalendarPanel } from './calendar_panel';
-import {
-  DATE_RANGE_INPUT_DELIMITER,
-  DATE_TYPE_ABSOLUTE,
-  DATE_TYPE_NOW,
-  DATE_TYPE_RELATIVE,
-} from '../constants';
-import { toLocalPreciseString } from '../utils';
+import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
+import { formatDateRange, toLocalPreciseString } from '../utils';
 
 const mockUseDateRangePickerContext = jest.fn();
 
@@ -81,12 +76,13 @@ jest.mock('../calendar', () => {
   return { Calendar: MockCalendar };
 });
 
-/** Builds the local-precise string for a given Feb 2026 date+hour used in setText assertions. */
-const feb2026Local = (day: number, h: number, m: number, s = 0, ms = 0) =>
-  toLocalPreciseString(new Date(2026, 1, day, h, m, s, ms));
+/** Creates a Date for Feb 2026 with the given components. */
+const feb2026 = (day: number, h: number, m: number, s = 0, ms = 0) =>
+  new Date(2026, 1, day, h, m, s, ms);
 
-/** Combines two ISO-like strings with the standard delimiter. */
-const isoRange = (start: string, end: string) => `${start} ${DATE_RANGE_INPUT_DELIMITER} ${end}`;
+/** Builds the local-precise string for a given Feb 2026 date. */
+const feb2026Local = (day: number, h: number, m: number, s = 0, ms = 0) =>
+  toLocalPreciseString(feb2026(day, h, m, s, ms));
 
 /** Click a day by its number in the February 2026 calendar. */
 const clickDay = (day: number) =>
@@ -106,7 +102,7 @@ describe('CalendarPanel', () => {
     applyRange,
     onPresetSave,
     setText,
-    text: isoRange(toLocalPreciseString(startDate), toLocalPreciseString(endDate)),
+    text: formatDateRange(startDate, endDate),
     timeRange: {
       startDate,
       endDate,
@@ -143,7 +139,7 @@ describe('CalendarPanel', () => {
       renderWithEuiTheme(<CalendarPanel />);
 
       expect(setText).toHaveBeenCalledWith(
-        isoRange(feb2026Local(1, 10, 15, 30, 500), feb2026Local(2, 12, 45, 0, 0))
+        formatDateRange(feb2026(1, 10, 15, 30, 500), feb2026(2, 12, 45, 0, 0))
       );
     });
 
@@ -170,7 +166,25 @@ describe('CalendarPanel', () => {
       clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        isoRange(feb2026Local(10, 14, 30, 45, 123), feb2026Local(15, 18, 15, 30, 456))
+        formatDateRange(feb2026(10, 14, 30, 45, 123), feb2026(15, 18, 15, 30, 456))
+      );
+    });
+
+    it('orders times correctly when selecting same day with start time > end time', () => {
+      mockUseDateRangePickerContext.mockReturnValue(
+        makeContext(
+          [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
+          new Date(2026, 1, 1, 20, 0, 0, 0),
+          new Date(2026, 1, 2, 8, 0, 0, 0)
+        )
+      );
+      renderWithEuiTheme(<CalendarPanel />);
+
+      clickDay(10);
+      clickDay(10);
+
+      expect(setText).toHaveBeenLastCalledWith(
+        formatDateRange(feb2026(10, 8, 0, 0, 0), feb2026(10, 20, 0, 0, 0))
       );
     });
   });
@@ -193,7 +207,7 @@ describe('CalendarPanel', () => {
       clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        isoRange(feb2026Local(10, 0, 0), feb2026Local(15, 23, 30))
+        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 30))
       );
     });
 
@@ -274,7 +288,7 @@ describe('CalendarPanel', () => {
           start: new Date(2026, 1, 10, 0, 0).toISOString(),
           end: new Date(2026, 1, 15, 23, 30).toISOString(),
         },
-        isoRange(feb2026Local(10, 0, 0), feb2026Local(15, 23, 30))
+        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 30))
       );
     });
 
@@ -307,11 +321,14 @@ describe('CalendarPanel', () => {
   describe('back navigation', () => {
     it('restores original text when going back', () => {
       const originalText = 'Last 15 minutes';
+
       mockUseDateRangePickerContext.mockReturnValue({
         ...makeContext([DATE_TYPE_RELATIVE, DATE_TYPE_NOW]),
         text: originalText,
       });
+
       renderWithEuiTheme(<CalendarPanel />);
+
       setText.mockClear();
 
       fireEvent.click(screen.getByTestId('back-button'));

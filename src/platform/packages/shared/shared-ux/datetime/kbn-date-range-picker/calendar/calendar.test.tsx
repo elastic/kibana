@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockScrollToIndex = jest.fn();
-
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import type { DateRange } from 'react-day-picker';
 
 import { Calendar } from './calendar';
+
+const mockScrollToIndex = jest.fn();
 
 jest.mock('./calendar_view', () => ({
   CalendarView: ({ month }: { month: Date }) => {
@@ -95,55 +95,81 @@ describe('Calendar', () => {
     expect(calendarView).toHaveAttribute('data-month', expectedMonth);
   });
 
-  describe('Today button visibility', () => {
-    it('does not show Today button when today is visible', () => {
-      renderWithEuiTheme(<Calendar {...defaultProps} />);
+  describe('"Today" button', () => {
+    describe('visibility', () => {
+      it('does not show Today button when today is visible', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-      expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+      });
+
+      it('shows Today button when scrolled into future months', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('simulate-scroll-future'));
+
+        expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+      });
+
+      it('shows Today button when scrolled into past months', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+
+        expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+      });
+
+      it('hides Today button when scrolling back to today', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+
+        expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+
+        fireEvent.click(screen.getByTestId('simulate-scroll-today'));
+
+        expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
+      });
     });
 
-    it('shows Today button when scrolled into past months', () => {
-      renderWithEuiTheme(<Calendar {...defaultProps} />);
+    describe('interaction', () => {
+      it('calls scrollToIndex when Today button is clicked', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId('simulate-scroll-future'));
+        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+        fireEvent.click(screen.getByRole('button', { name: 'Today' }));
 
-      expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+        expect(mockScrollToIndex).toHaveBeenCalledWith(
+          expect.objectContaining({
+            behavior: 'smooth',
+            align: 'center',
+          })
+        );
+      });
     });
 
-    it('shows Today button when scrolled into future months', () => {
-      renderWithEuiTheme(<Calendar {...defaultProps} />);
+    describe('icon direction', () => {
+      it('shows `sortUp` icon when viewing future months (scroll backward to reach today)', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-      fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+        fireEvent.click(screen.getByTestId('simulate-scroll-future'));
 
-      expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
-    });
+        const todayButton = screen.getByRole('button', { name: 'Today' });
+        const icon = todayButton.querySelector('[data-euiicon-type="sortUp"]');
 
-    it('hides Today button when scrolling back to today', () => {
-      renderWithEuiTheme(<Calendar {...defaultProps} />);
+        expect(icon).toBeInTheDocument();
+      });
 
-      fireEvent.click(screen.getByTestId('simulate-scroll-past'));
+      it('shows `sortDown` icon when viewing past months (scroll forward to reach today)', () => {
+        renderWithEuiTheme(<Calendar {...defaultProps} />);
 
-      expect(screen.getByRole('button', { name: 'Today' })).toBeInTheDocument();
+        fireEvent.click(screen.getByTestId('simulate-scroll-past'));
 
-      fireEvent.click(screen.getByTestId('simulate-scroll-today'));
+        const todayButton = screen.getByRole('button', { name: 'Today' });
+        const icon = todayButton.querySelector('[data-euiicon-type="sortDown"]');
 
-      expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument();
-    });
-  });
-
-  describe('Today button interaction', () => {
-    it('calls scrollToIndex when Today button is clicked', () => {
-      renderWithEuiTheme(<Calendar {...defaultProps} />);
-
-      fireEvent.click(screen.getByTestId('simulate-scroll-past'));
-      fireEvent.click(screen.getByRole('button', { name: 'Today' }));
-
-      expect(mockScrollToIndex).toHaveBeenCalledWith(
-        expect.objectContaining({
-          behavior: 'smooth',
-          align: 'center',
-        })
-      );
+        expect(icon).toBeInTheDocument();
+      });
     });
   });
 });

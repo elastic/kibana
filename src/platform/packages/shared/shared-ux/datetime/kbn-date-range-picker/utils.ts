@@ -124,6 +124,37 @@ export function getOptionInputText(option: TimeRangeBoundsOption): string {
 }
 
 /**
+ * Formats a date range as a local ISO-8601 string pair with the standard delimiter.
+ * e.g. "2026-03-04T10:00:00.000 to 2026-03-05T23:30:00.000"
+ */
+export function formatDateRange(start: Date, end: Date): string {
+  return `${toLocalPreciseString(start)} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(
+    end
+  )}`;
+}
+
+/**
+ * Combines date (year/month/day) from `date` with time from `timeSource`.
+ * Falls back to defaults when timeSource is null.
+ */
+export function combineDateAndTime(
+  date: Date,
+  timeSource: Date | null,
+  defaultHour = 0,
+  defaultMinute = 0
+): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    timeSource?.getHours() ?? defaultHour,
+    timeSource?.getMinutes() ?? defaultMinute,
+    timeSource?.getSeconds() ?? 0,
+    timeSource?.getMilliseconds() ?? 0
+  );
+}
+
+/**
  * Extracts the offset portion from a date math bound string, or
  * returns `null` for absolute dates and rounding-only expressions
  * that have no stable offset representation.

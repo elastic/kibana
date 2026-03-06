@@ -22,9 +22,7 @@ import {
   getScrollDirectionIcon,
   type ScrollDirection,
 } from './calendar.utils';
-import { TODAY_INDEX, MONTHS_TO_LOAD } from './calendar.constants';
-
-const HALF_MONTHS_TO_LOAD = MONTHS_TO_LOAD / 2;
+import { TODAY_INDEX, MONTHS_TO_LOAD, HALF_MONTHS_TO_LOAD } from './calendar.constants';
 
 interface CalendarProps {
   range: DateRange | undefined;
@@ -87,8 +85,6 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  const iconType = getScrollDirectionIcon(scrollDirection);
-
   return (
     <div css={styles.container}>
       <Virtuoso
@@ -105,7 +101,7 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
         <EuiButtonEmpty
           css={styles.todayButton}
           size="s"
-          iconType={iconType}
+          iconType={getScrollDirectionIcon(scrollDirection)}
           onClick={scrollToToday}
         >
           {calendarTexts.todayButton}

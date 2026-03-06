@@ -19,3 +19,6 @@ export const TODAY_INDEX = 100000;
  * and when the top or bottom of the calendar scroll is reached.
  */
 export const MONTHS_TO_LOAD = 12;
+
+/** Half of MONTHS_TO_LOAD, used for centering today in the initial view. */
+export const HALF_MONTHS_TO_LOAD = MONTHS_TO_LOAD / 2;

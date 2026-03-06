@@ -13,7 +13,7 @@ import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiToolTip, useGeneratedHtmlId } 
 
 import type { TimeRangeBounds } from '../types';
 import { Calendar } from '../calendar';
-import { DATE_RANGE_INPUT_DELIMITER, DATE_TYPE_ABSOLUTE } from '../constants';
+import { DATE_TYPE_ABSOLUTE } from '../constants';
 import {
   PanelBody,
   PanelContainer,
@@ -23,31 +23,14 @@ import {
 } from '../date_range_picker_panel_ui';
 import { calendarPanelTexts, mainPanelTexts } from '../translations';
 import { timeRangeToDisplayText } from '../format';
-import { toLocalPreciseString } from '../utils';
+import { combineDateAndTime, formatDateRange, toLocalPreciseString } from '../utils';
 import { useDateRangePickerContext } from '../date_range_picker_context';
-
-const DEFAULT_END_HOUR = 23;
-const DEFAULT_END_MINUTE = 30;
-
-/**
- * Combines date (year/month/day) from `date` with time from `timeSource`.
- * Falls back to defaults when timeSource is null.
- */
-const combineDateAndTime = (
-  date: Date,
-  timeSource: Date | null,
-  defaultHour = 0,
-  defaultMinute = 0
-): Date =>
-  new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    timeSource?.getHours() ?? defaultHour,
-    timeSource?.getMinutes() ?? defaultMinute,
-    timeSource?.getSeconds() ?? 0,
-    timeSource?.getMilliseconds() ?? 0
-  );
+import {
+  DEFAULT_END_HOUR,
+  DEFAULT_END_MINUTE,
+  DEFAULT_START_HOUR,
+  DEFAULT_START_MINUTE,
+} from './calendar_panel.constants';
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
@@ -63,97 +46,104 @@ export function CalendarPanel() {
   const [hasChanges, setHasChanges] = useState(false);
   const [saveAsPreset, setSaveAsPreset] = useState(false);
 
-  const initialStartRef = useRef(timeRange.startDate);
-  const initialEndRef = useRef(timeRange.endDate);
-  const originalTextRef = useRef(text);
-  const mountTextRef = useRef<string | null>(null);
-
-  if (mountTextRef.current === null && timeRange.startDate && timeRange.endDate) {
-    mountTextRef.current = `${toLocalPreciseString(
-      timeRange.startDate
-    )} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(timeRange.endDate)}`;
-  }
+  const initialStateRef = useRef({
+    startDate: timeRange.startDate,
+    endDate: timeRange.endDate,
+    text,
+    mountText:
+      timeRange.startDate && timeRange.endDate
+        ? formatDateRange(timeRange.startDate, timeRange.endDate)
+        : null,
+  });
 
   // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
-    if (mountTextRef.current) {
-      setText(mountTextRef.current);
+    if (initialStateRef.current.mountText) {
+      setText(initialStateRef.current.mountText);
     }
   }, [setText]);
 
   const restoreOriginalText = useCallback(() => {
-    setText(originalTextRef.current);
+    setText(initialStateRef.current.text);
   }, [setText]);
+
+  const getStartDate = useCallback(
+    (date: Date) =>
+      combineDateAndTime(
+        date,
+        initialStateRef.current.startDate,
+        DEFAULT_START_HOUR,
+        DEFAULT_START_MINUTE
+      ),
+    []
+  );
+
+  const getEndDate = useCallback(
+    (date: Date) =>
+      combineDateAndTime(
+        date,
+        initialStateRef.current.endDate,
+        DEFAULT_END_HOUR,
+        DEFAULT_END_MINUTE
+      ),
+    []
+  );
+
+  const getOrderedDates = useCallback(
+    (from: Date, to: Date): { start: Date; end: Date } => {
+      const startDate = getStartDate(from);
+      const endDate = getEndDate(to);
+
+      return startDate <= endDate
+        ? { start: startDate, end: endDate }
+        : { start: endDate, end: startDate };
+    },
+    [getStartDate, getEndDate]
+  );
+
+  const formatRangeText = useCallback(
+    (from: Date, to?: Date): string => {
+      if (!to) return toLocalPreciseString(getStartDate(from));
+
+      const { start, end } = getOrderedDates(from, to);
+      return formatDateRange(start, end);
+    },
+    [getStartDate, getOrderedDates]
+  );
 
   const absoluteRange = useMemo(() => {
     if (!range?.from || !range?.to) return null;
 
-    const startDate = combineDateAndTime(range.from, initialStartRef.current);
-    const endDate = combineDateAndTime(
-      range.to,
-      initialEndRef.current,
-      DEFAULT_END_HOUR,
-      DEFAULT_END_MINUTE
-    );
-
-    if (startDate > endDate) return null;
-
-    const inputText = `${toLocalPreciseString(
-      startDate
-    )} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(endDate)}`;
+    const { start, end } = getOrderedDates(range.from, range.to);
 
     return {
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
-      inputText,
+      start: start.toISOString(),
+      end: end.toISOString(),
+      inputText: formatDateRange(start, end),
     };
-  }, [range]);
+  }, [range, getOrderedDates]);
 
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
       setHasChanges(true);
 
-      // When both dates selected, reset to single date on next click
+      // Reset to single date when clicking after complete selection
       if (range?.from && range?.to) {
         const fromChanged = newRange?.from?.getTime() !== range.from.getTime();
         const clickedDate = fromChanged ? newRange?.from : newRange?.to;
 
         setRange({ from: clickedDate, to: undefined });
-
-        if (clickedDate) {
-          const startDate = combineDateAndTime(clickedDate, initialStartRef.current);
-          setText(toLocalPreciseString(startDate));
-        }
-
+        if (clickedDate) setText(formatRangeText(clickedDate));
         return;
       }
 
       setRange(newRange);
 
-      if (newRange?.from && newRange?.to) {
-        // Complete range: show both dates
-        const startDate = combineDateAndTime(newRange.from, initialStartRef.current);
-        const endDate = combineDateAndTime(
-          newRange.to,
-          initialEndRef.current,
-          DEFAULT_END_HOUR,
-          DEFAULT_END_MINUTE
-        );
-
-        if (startDate <= endDate) {
-          setText(
-            `${toLocalPreciseString(
-              startDate
-            )} ${DATE_RANGE_INPUT_DELIMITER} ${toLocalPreciseString(endDate)}`
-          );
-        }
-      } else if (newRange?.from) {
-        // Start date only: show just that date
-        const startDate = combineDateAndTime(newRange.from, initialStartRef.current);
-        setText(toLocalPreciseString(startDate));
+      if (newRange?.from) {
+        setText(formatRangeText(newRange.from, newRange.to));
       }
     },
-    [range, setText]
+    [range, setText, formatRangeText]
   );
 
   const isRangeComplete = Boolean(range?.from && range?.to);
