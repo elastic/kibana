@@ -29,7 +29,7 @@ export function registerReadRoute(
   });
 
   // Do not call getDashboardStateSchema when registering route.
-  // Route is registered during setup and before all plugins have reigistered embeddable schemas.
+  // Route is registered during setup and before all plugins have registered embeddable schemas.
   // Instead, use once to only call getDashboardStateSchema the first time a route handler is executed.
   const getCachedDashboardStateSchema = once(() => {
     return getDashboardStateSchema(isDashboardAppRequest);
