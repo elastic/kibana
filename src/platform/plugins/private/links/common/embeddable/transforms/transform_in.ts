@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuid } from 'uuid';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractReferences } from './references';
 import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
@@ -30,7 +31,7 @@ export function transformIn(state: LinksEmbeddableState) {
   return {
     state: {
       ...state,
-      links: links?.map((link, order) => ({ ...link, order })),
+      links: links?.map((link, order) => ({ ...link, order, id: link.id ?? uuid() })),
     },
     references,
   };
