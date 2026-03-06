@@ -12,6 +12,7 @@ import type { DataSourcesServerStartDependencies } from '../types';
 import {
   getExtractionConfig,
   updateExtractionConfig,
+  EXTRACTION_CONFIG_SO_TYPE,
 } from '../extraction_config';
 
 const EXTRACTION_CONFIG_PATH = '/internal/data_sources/extraction_config';
@@ -40,11 +41,12 @@ export function registerExtractionConfigRoutes({
         },
       },
     },
-    async (context, _request, response) => {
-      const coreContext = await context.core;
-      const soClient = coreContext.savedObjects.client;
-
+    async (_context, _request, response) => {
       try {
+        const [coreStart] = await getStartServices();
+        const soClient = coreStart.savedObjects.createInternalRepository([
+          EXTRACTION_CONFIG_SO_TYPE,
+        ]);
         const config = await getExtractionConfig(soClient);
         return response.ok({ body: config });
       } catch (error) {
@@ -95,11 +97,12 @@ export function registerExtractionConfigRoutes({
         },
       },
     },
-    async (context, request, response) => {
-      const coreContext = await context.core;
-      const soClient = coreContext.savedObjects.client;
-
+    async (_context, request, response) => {
       try {
+        const [coreStart] = await getStartServices();
+        const soClient = coreStart.savedObjects.createInternalRepository([
+          EXTRACTION_CONFIG_SO_TYPE,
+        ]);
         const updated = await updateExtractionConfig(soClient, request.body);
         return response.ok({ body: updated });
       } catch (error) {

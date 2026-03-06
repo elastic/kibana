@@ -23,7 +23,10 @@ import type {
 import { registerUISettings } from './register';
 import { setupSavedObjects } from './saved_objects';
 import { BulkDeleteTask } from './tasks/bulk_delete_task';
-import { registerExtractionConfigSavedObject } from './extraction_config/saved_object';
+import {
+  registerExtractionConfigSavedObject,
+  EXTRACTION_CONFIG_SO_TYPE,
+} from './extraction_config/saved_object';
 import { createExtractStepDefinition } from './steps/extract/extract_step';
 import { getExtractionConfig, DEFAULT_EXTRACTION_CONFIG } from './extraction_config';
 import { registerExtractionConfigRoutes } from './routes/extraction_config_routes';
@@ -64,7 +67,9 @@ export class DataSourcesServerPlugin
       const getGlobalConfig = async () => {
         try {
           const [coreStart] = await core.getStartServices();
-          const soClient = coreStart.savedObjects.createInternalRepository();
+          const soClient = coreStart.savedObjects.createInternalRepository([
+            EXTRACTION_CONFIG_SO_TYPE,
+          ]);
           return await getExtractionConfig({
             get: soClient.get.bind(soClient),
           } as Parameters<typeof getExtractionConfig>[0]);
