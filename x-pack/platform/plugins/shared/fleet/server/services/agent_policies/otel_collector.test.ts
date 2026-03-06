@@ -787,6 +787,29 @@ describe('generateOtelcolConfig', () => {
       ],
     ]);
 
+    it('should add elasticapm connector and processor for dynamic_signal_types input and use_apm enabled', () => {
+      const inputWithUseApm: FullAgentPolicyInput = {
+        ...otelInputWithMultipleSignalTypes,
+        streams: otelInputWithMultipleSignalTypes.streams?.map((stream) => ({
+          ...stream,
+          use_apm: true,
+        })),
+      };
+      const inputs: FullAgentPolicyInput[] = [inputWithUseApm];
+      const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
+
+      expect(result.connectors?.elasticapm).toEqual({});
+      expect(result.processors?.elasticapm).toEqual({});
+      expect(result.service?.pipelines?.['metrics/aggregated-otel-metrics']).toEqual({
+        receivers: ['elasticapm'],
+        exporters: ['forward'],
+      });
+      const tracesPipeline =
+        result.service?.pipelines?.['traces/otlp/test-multi-signal-stream-id-1'];
+      expect(tracesPipeline?.exporters).toContain('elasticapm');
+      expect(tracesPipeline?.processors).toContain('elasticapm');
+    });
+
     it('should generate transform with multiple signal type statements when dynamic_signal_types is true', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
       const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
