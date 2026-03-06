@@ -241,7 +241,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             }),
             body: schema.object({
               index: schema.string(),
-              data: schema.arrayOf(schema.any(), { maxSize: 10000 }),
+              data: schema.arrayOf(schema.any(), { maxSize: 50000 }),
               settings: schema.maybe(schema.any()),
               /** Mappings */
               mappings: schema.any(),
@@ -260,7 +260,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
                       pipeline: schema.maybe(schema.any()),
                     })
                   ),
-                  { maxSize: 10000 }
+                  { maxSize: 50000 }
                 )
               ),
             }),

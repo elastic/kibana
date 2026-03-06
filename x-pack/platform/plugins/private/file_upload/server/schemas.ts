@@ -39,7 +39,7 @@ export const initializeImportFileBodySchema = schema.object({
   /** Mappings */
   mappings: schema.any(),
   /** Ingest pipeline definition */
-  ingestPipelines: schema.arrayOf(ingestPipeline, { maxSize: 10000 }),
+  ingestPipelines: schema.arrayOf(ingestPipeline, { maxSize: 50000 }),
   existingIndex: schema.maybe(schema.boolean()),
 });
 
