@@ -106,47 +106,53 @@ jobs:
         id: context
         env:
           GH_TOKEN: ${{ github.token }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          EVENT_NAME: ${{ github.event_name }}
+          DEFAULT_BRANCH_INPUT: ${{ github.event.repository.default_branch }}
+          PR_HEAD_REPO_FULL: ${{ github.event.pull_request.head.repo.full_name }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_NUMBER_INPUT: ${{ github.event.pull_request.number }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          COMMENT_BODY="${{ github.event.comment.body }}"
           COMMAND_MODE="action"
-          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+          if [ "$EVENT_NAME" != "workflow_dispatch" ]; then
             if printf '%s' "$COMMENT_BODY" | grep -q '/review-ralph'; then
               COMMAND_MODE="review"
             fi
           fi
 
-          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
-          DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
+          DEFAULT_BRANCH="${DEFAULT_BRANCH_INPUT:-main}"
           IS_PR="false"
           IS_FORK_PR="false"
           PR_NUMBER=""
           PR_BRANCH=""
           PR_HEAD_REPO=""
 
-          if [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+          if [ "$EVENT_NAME" = "pull_request_review_comment" ]; then
             IS_PR="true"
-            if [ "${{ github.event.pull_request.head.repo.full_name }}" = "${{ github.repository }}" ]; then
+            if [ "$PR_HEAD_REPO_FULL" = "$REPO" ]; then
               IS_FORK_PR="false"
             else
               IS_FORK_PR="true"
             fi
-            PR_NUMBER="${{ github.event.pull_request.number }}"
-            PR_BRANCH="${{ github.event.pull_request.head.ref }}"
-            PR_HEAD_REPO="${{ github.event.pull_request.head.repo.full_name }}"
-          elif [ "${{ github.event_name }}" = "issue_comment" ]; then
-            PR_JSON=$(gh api "repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}" 2>/dev/null) || PR_JSON=""
+            PR_NUMBER="$PR_NUMBER_INPUT"
+            PR_BRANCH="$PR_HEAD_REF"
+            PR_HEAD_REPO="$PR_HEAD_REPO_FULL"
+          elif [ "$EVENT_NAME" = "issue_comment" ]; then
+            PR_JSON=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}" 2>/dev/null) || PR_JSON=""
             if [ -n "$PR_JSON" ]; then
               PR_BRANCH=$(printf '%s' "$PR_JSON" | jq -r '.head.ref // empty')
               PR_HEAD_REPO=$(printf '%s' "$PR_JSON" | jq -r '.head.repo.full_name // empty')
               if [ -n "$PR_BRANCH" ] && [ -n "$PR_HEAD_REPO" ]; then
                 IS_PR="true"
-                if [ "$PR_HEAD_REPO" = "${{ github.repository }}" ]; then
+                if [ "$PR_HEAD_REPO" = "$REPO" ]; then
                   IS_FORK_PR="false"
                 else
                   IS_FORK_PR="true"
                 fi
-                PR_NUMBER="${{ github.event.issue.number }}"
+                PR_NUMBER="$ISSUE_NUMBER"
               fi
             fi
           fi
@@ -156,7 +162,7 @@ jobs:
             CHECKOUT_REPO="$PR_HEAD_REPO"
           else
             CHECKOUT_REF="$DEFAULT_BRANCH"
-            CHECKOUT_REPO="${{ github.repository }}"
+            CHECKOUT_REPO="$REPO"
           fi
 
           {
@@ -711,7 +717,7 @@ jobs:
           curl -fsS -X POST "${NO_V1}/key/delete" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{key: $key}')" || echo "::warning::Failed to revoke short-lived key"
 
   # ---------------------------------------------------------------------------
   # Phase C: Apply changes and either push to the existing PR branch or
@@ -1136,7 +1142,7 @@ jobs:
           curl -fsS -X POST "${NO_V1}/key/delete" \
             -H "Authorization: Bearer ${LITELLM_API_KEY}" \
             -H "Content-Type: application/json" \
-            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{keys: [$key]}')" || echo "::warning::Failed to revoke short-lived key"
+            -d "$(jq -n --arg key "$SHORT_LIVED_KEY" '{key: $key}')" || echo "::warning::Failed to revoke short-lived key"
 
   review_publish:
     name: "Review Phase C: Publish Comment"
