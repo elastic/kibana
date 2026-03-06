@@ -123,7 +123,7 @@ export const useQualityIssuesDocsChart = () => {
       trackDetailsNavigated(navigationTargets.Lens, navigationSources.Chart);
       lens.navigateToPrefilledEditor({
         id: '',
-        timeRange,
+        time_range: timeRange,
         attributes,
       });
     }
@@ -156,8 +156,8 @@ export const useQualityIssuesDocsChart = () => {
     };
   }, [openInLensCallback]);
 
-  const degradedEsqlQuery = `FROM ${datasetDetails.rawName} METADATA _ignored | WHERE _ignored IS NOT NULL`;
-  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures`;
+  const degradedEsqlQuery = `FROM ${datasetDetails.rawName} METADATA _ignored | WHERE _ignored IS NOT NULL | SORT @timestamp DESC`;
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures | SORT @timestamp DESC`;
 
   const esqlQuery = docsTrendChart === 'degraded' ? degradedEsqlQuery : failedEsqlQuery;
 
