@@ -11,11 +11,9 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 
 export interface TracesFlyout {
   readonly overviewTab: Locator;
+  readonly aboutSection: Locator;
   readonly similarSpansSection: Locator;
-  readonly similarSpansLatencyChart: Locator;
   readonly traceSummarySection: Locator;
-  readonly traceWaterfallClickArea: Locator;
-  readonly traceWaterfallFullScreenButton: Locator;
   readonly errorsSection: Locator;
   readonly logsSection: Locator;
   readonly spanLinksSection: Locator;
@@ -24,15 +22,9 @@ export interface TracesFlyout {
 export function createTracesFlyout(page: ScoutPage): TracesFlyout {
   return {
     overviewTab: page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview'),
+    aboutSection: page.testSubj.locator('UnifiedDocViewerTableGrid'),
     similarSpansSection: page.testSubj.locator('docViewerSimilarSpansSection'),
-    similarSpansLatencyChart: page.testSubj.locator('docViewerSimilarSpansLatencyChart'),
     traceSummarySection: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
-    traceWaterfallClickArea: page.testSubj.locator(
-      'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
-    ),
-    traceWaterfallFullScreenButton: page.testSubj.locator(
-      'unifiedDocViewerObservabilityTracesTraceFullScreenButton'
-    ),
     errorsSection: page.testSubj.locator('unifiedDocViewerErrorsAccordion'),
     logsSection: page.testSubj.locator('unifiedDocViewerLogsSection'),
     spanLinksSection: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
