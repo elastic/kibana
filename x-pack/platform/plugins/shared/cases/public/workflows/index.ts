@@ -6,7 +6,6 @@
  */
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
-import { createUpdateCaseStepDefinition } from './update_case';
 import { createUpdateCasesStepDefinition } from './update_cases';
 import { createSetCustomFieldStepDefinition } from './set_custom_field';
 import { addCommentStepDefinition } from './add_comment';
@@ -39,7 +38,6 @@ export function registerCasesSteps(
 
   // Leaving this in for now. We need to get support for reflective value lookup first.
   // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
-  workflowsExtensions.registerStepDefinition(createUpdateCaseStepDefinition());
   workflowsExtensions.registerStepDefinition(createUpdateCasesStepDefinition());
   workflowsExtensions.registerStepDefinition(createSetCustomFieldStepDefinition());
   workflowsExtensions.registerStepDefinition(addCommentStepDefinition);
