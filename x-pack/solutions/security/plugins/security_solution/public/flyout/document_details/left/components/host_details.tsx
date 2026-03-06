@@ -87,7 +87,9 @@ import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import type { EntityIdentifiers } from '../../shared/utils';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedHost } from '../../../entity_details/host_right/hooks/use_observed_host';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -192,7 +194,25 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-  const observedHost = useObservedHost(entityIdentifiers, scopeId);
+  const entityFromStoreResult = useEntityFromStore({
+    entityIdentifiers,
+    entityType: 'host',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
+  const observedHost = useObservedHost(
+    entityIdentifiers,
+    scopeId,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
+
+  const spaceId = useSpaceId();
+  const relatedUsersIndexNames = useMemo((): string[] => {
+    if (entityStoreV2Enabled && spaceId != null) {
+      const namespace = spaceId || 'default';
+      return [`.entities.v2.latest.security_${namespace}`];
+    }
+    return selectedPatterns;
+  }, [entityStoreV2Enabled, spaceId, selectedPatterns]);
 
   const [isHostLoadingFromDetails, hostDetailsArgs, refetch] = useHostDetails({
     id: hostDetailsQueryId,
@@ -269,9 +289,11 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     refetch: refetchRelatedUsers,
   } = useHostRelatedUsers({
     entityIdentifiers,
-    indexNames: selectedPatterns,
+    indexNames: relatedUsersIndexNames,
     from: timestamp, // related users are users who were successfully authenticated onto this host AFTER alert time
-    skip: selectedPatterns.length === 0,
+    skip:
+      (entityStoreV2Enabled && spaceId == null) ||
+      (!entityStoreV2Enabled && selectedPatterns.length === 0),
   });
 
   const relatedUsersColumns: Array<EuiBasicTableColumn<RelatedUser>> = useMemo(
@@ -427,7 +449,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             narrowDateRange={narrowDateRange}
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedHost.refetchEntityStore ?? (() => {}) : refetch}
-            inspect={hostDetailsArgs.inspect}
+            inspect={
+              entityStoreV2Enabled ? entityFromStoreResult?.inspect : hostDetailsArgs.inspect
+            }
             deleteQuery={deleteQuery}
             scopeId={scopeId}
             isFlyoutOpen={true}
@@ -438,6 +462,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
             lastSeenFromEntityStore={
               entityStoreV2Enabled ? observedHost.lastSeen?.date ?? undefined : undefined
             }
+            showInspectButtonAlways={true}
           />
         )}
       </AnomalyTableProvider>

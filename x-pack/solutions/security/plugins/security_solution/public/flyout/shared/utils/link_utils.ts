@@ -30,15 +30,6 @@ import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
 import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
-// Helper function to extract primary field from entityIdentifiers
-const getPrimaryField = (entityIdentifiers: EntityIdentifiers): string | null => {
-  if (entityIdentifiers[HOST_NAME_FIELD_NAME]) return HOST_NAME_FIELD_NAME;
-  if (entityIdentifiers[USER_NAME_FIELD_NAME]) return USER_NAME_FIELD_NAME;
-  if (entityIdentifiers[SIGNAL_RULE_NAME_FIELD_NAME]) return SIGNAL_RULE_NAME_FIELD_NAME;
-  const keys = Object.keys(entityIdentifiers);
-  return keys.length > 0 ? keys[0] : null;
-};
-
 // Helper function to check if the field has a flyout link
 export const isFlyoutLink = ({
   field,
@@ -57,10 +48,12 @@ export const isFlyoutLink = ({
 };
 
 interface GetFlyoutParams {
-  entityIdentifiers: EntityIdentifiers;
+  value: string;
+  field: string;
   scopeId: string;
   ruleId?: string;
   ancestorsIndexName?: string;
+  entityIdentifiers?: EntityIdentifiers;
 }
 
 const FLYOUT_FIELDS = [
@@ -75,50 +68,47 @@ const FLYOUT_FIELDS = [
 // If flyout is not currently open, flyout rightpanel params are returned
 export const getRightPanelParams = ({
   entityIdentifiers,
+  value,
+  field,
   scopeId,
   ruleId,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
-  const primaryField = getPrimaryField(entityIdentifiers);
-  if (!primaryField) {
+  if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
   }
 
-  const value = entityIdentifiers[primaryField];
-
-  if (!isFlyoutLink({ field: primaryField, ruleId, scopeId })) {
-    return null;
-  }
-
-  if (getEcsField(primaryField)?.type === IP_FIELD_TYPE) {
+  if (getEcsField(field)?.type === IP_FIELD_TYPE) {
     return {
       id: NetworkPanelKey,
       params: {
         ip: value,
         scopeId,
-        flowTarget: primaryField.includes(FlowTargetSourceDest.destination)
+        flowTarget: field.includes(FlowTargetSourceDest.destination)
           ? FlowTargetSourceDest.destination
           : FlowTargetSourceDest.source,
       },
     };
   }
 
-  switch (primaryField) {
+  switch (field) {
     case HOST_NAME_FIELD_NAME:
       return {
         id: HostPanelKey,
         params: {
+          hostName: value,
+          scopeId,
           contextID: scopeId,
           entityIdentifiers,
-          scopeId,
         },
       };
     case USER_NAME_FIELD_NAME:
       return {
         id: UserPanelKey,
         params: {
+          userName: value,
+          scopeId,
           contextID: scopeId,
           entityIdentifiers,
-          scopeId,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:
@@ -134,29 +124,24 @@ export const getRightPanelParams = ({
 };
 
 export const getPreviewPanelParams = ({
-  entityIdentifiers,
+  value,
+  field,
   scopeId,
   ruleId,
   ancestorsIndexName,
+  entityIdentifiers,
 }: GetFlyoutParams): FlyoutPanelProps | null => {
-  const primaryField = getPrimaryField(entityIdentifiers);
-  if (!primaryField) {
+  if (!isFlyoutLink({ field, ruleId, scopeId })) {
     return null;
   }
 
-  const value = entityIdentifiers[primaryField];
-
-  if (!isFlyoutLink({ field: primaryField, ruleId, scopeId })) {
-    return null;
-  }
-
-  if (getEcsField(primaryField)?.type === IP_FIELD_TYPE) {
+  if (getEcsField(field)?.type === IP_FIELD_TYPE) {
     return {
       id: NetworkPreviewPanelKey,
       params: {
         ip: value,
         scopeId,
-        flowTarget: primaryField.includes(FlowTargetSourceDest.destination)
+        flowTarget: field.includes(FlowTargetSourceDest.destination)
           ? FlowTargetSourceDest.destination
           : FlowTargetSourceDest.source,
         banner: NETWORK_PREVIEW_BANNER,
@@ -164,25 +149,27 @@ export const getPreviewPanelParams = ({
     };
   }
 
-  switch (primaryField) {
+  switch (field) {
     case HOST_NAME_FIELD_NAME:
       return {
         id: HostPreviewPanelKey,
         params: {
-          contextID: scopeId || 'highlighted-fields-host-preview',
-          entityIdentifiers,
+          hostName: value,
           scopeId,
           banner: HOST_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-host-preview',
+          entityIdentifiers,
         },
       };
     case USER_NAME_FIELD_NAME:
       return {
         id: UserPreviewPanelKey,
         params: {
-          contextID: scopeId || 'highlighted-fields-user-preview',
-          entityIdentifiers,
+          userName: value,
           scopeId,
           banner: USER_PREVIEW_BANNER,
+          contextID: scopeId || 'highlighted-fields-host-preview',
+          entityIdentifiers,
         },
       };
     case SIGNAL_RULE_NAME_FIELD_NAME:

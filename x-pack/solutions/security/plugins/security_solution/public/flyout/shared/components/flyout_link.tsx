@@ -78,7 +78,9 @@ export const FlyoutLink: FC<FlyoutLinkProps> = ({
   const rightPanelParams = useMemo(
     () =>
       getRightPanelParams({
-        entityIdentifiers: entityIdentifiers ?? { [field]: value },
+        entityIdentifiers,
+        field,
+        value,
         scopeId,
         ruleId,
       }),

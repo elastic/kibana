@@ -71,6 +71,8 @@ export interface UserSummaryProps {
   lastSeenFromEntityStore?: string;
   /** When true (e.g. from explore pages), only user.name from entityIdentifiers is used with a terms filter; entityIdentifiers filter is not applied. */
   isExploreContext?: boolean;
+  /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
+  showInspectButtonAlways?: boolean;
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -103,6 +105,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
     isExploreContext = false,
+    showInspectButtonAlways = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -348,7 +351,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     );
     return (
       <>
-        <InspectButtonContainer>
+        <InspectButtonContainer show={!showInspectButtonAlways}>
           <OverviewWrapper
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="user-overview"

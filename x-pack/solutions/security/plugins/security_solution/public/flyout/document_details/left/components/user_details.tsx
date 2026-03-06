@@ -79,6 +79,7 @@ import { useNavigateToUserDetails } from '../../../entity_details/user_right/hoo
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import type { EntityIdentifiers } from '../../shared/utils';
+import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 import { useObservedUser } from '../../../entity_details/user_right/hooks/use_observed_user';
 import {
   buildRiskScoreStateFromEntityRecord,
@@ -187,6 +188,11 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   }, [openPreviewPanel, entityIdentifiers, scopeId, telemetry]);
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityFromStoreResult = useEntityFromStore({
+    entityIdentifiers,
+    entityType: 'user',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
   const observedUser = useObservedUser(entityIdentifiers, scopeId);
 
   const filterQuery = useMemo(
@@ -432,7 +438,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
             narrowDateRange={narrowDateRange}
             setQuery={setQuery}
             refetch={entityStoreV2Enabled ? observedUser.refetchEntityStore ?? (() => {}) : refetch}
-            inspect={inspect}
+            inspect={entityStoreV2Enabled ? entityFromStoreResult?.inspect : inspect}
             entityIdentifiers={entityIdentifiers}
             indexPatterns={selectedPatterns}
             jobNameById={jobNameById}

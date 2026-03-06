@@ -68,6 +68,8 @@ interface HostSummaryProps {
   firstSeenFromEntityStore?: string;
   /** When using Entity Store v2: last seen from entity lifecycle. */
   lastSeenFromEntityStore?: string;
+  /** When true, inspect button is always visible (e.g. in document details flyout). Default false = show on hover. */
+  showInspectButtonAlways?: boolean;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
@@ -99,6 +101,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     riskScoreState: riskScoreStateFromEntityStore,
     firstSeenFromEntityStore,
     lastSeenFromEntityStore,
+    showInspectButtonAlways = false,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -355,7 +358,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     );
     return (
       <>
-        <InspectButtonContainer>
+        <InspectButtonContainer show={!showInspectButtonAlways}>
           <OverviewWrapper
             direction={isInDetailsSidePanel ? 'column' : 'row'}
             data-test-subj="host-overview"

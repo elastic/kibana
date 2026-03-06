@@ -61,7 +61,7 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
   const primaryField = useMemo(() => {
     if (entityIdentifiers['host.name']) return 'host.name';
     if (entityIdentifiers['user.name']) return 'user.name';
-    return Object.keys(entityIdentifiers)[0];
+    return Object.keys(entityIdentifiers)[0] ?? '';
   }, [entityIdentifiers]);
 
   const primaryValue = useMemo(() => {
@@ -72,11 +72,13 @@ export const PreviewLink: FC<PreviewLinkProps> = ({
     () =>
       getPreviewPanelParams({
         entityIdentifiers,
+        field: primaryField,
+        value: primaryValue,
         scopeId,
         ruleId,
         ancestorsIndexName,
       }),
-    [entityIdentifiers, scopeId, ruleId, ancestorsIndexName]
+    [entityIdentifiers, primaryField, primaryValue, scopeId, ruleId, ancestorsIndexName]
   );
 
   const onClick = useCallback(() => {
