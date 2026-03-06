@@ -1,0 +1,614 @@
+{
+  "sha1": "ecf7def55ea53ef41d4a3ae9a182be20e83270ee",
+  "tests": [
+    {
+      "id": "71242d88739937b-70753e6cedbcd4d",
+      "title": "Setup Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 15,
+        "column": 16
+      }
+    },
+    {
+      "id": "dead2a7ad96ce82-08fc1aac24baf7e",
+      "title": "Metrics in Discover - Grid Navigation should paginate through metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
+        "line": 58,
+        "column": 14
+      }
+    },
+    {
+      "id": "dead2a7ad96ce82-24dd19c631bbb2d",
+      "title": "Metrics in Discover - Grid Navigation should filter metrics using search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.navigation.spec.ts",
+        "line": 96,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-5dffb57f64bb9de",
+      "title": "Metrics in Discover - Grid should render metrics grid with cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-f2ef49ddfad8ddc",
+      "title": "Metrics in Discover - Grid should render grid with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 49,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-67aeead5ce34d63",
+      "title": "Metrics in Discover - Grid should render grid with LIMIT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 56,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-d62abe4ab8aa5fe",
+      "title": "Metrics in Discover - Grid should render grid with SORT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-14688950b91de99",
+      "title": "Metrics in Discover - Grid should not render grid with FROM command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-02d09836901d31f",
+      "title": "Metrics in Discover - Grid should not render grid with STATS command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 73,
+        "column": 14
+      }
+    },
+    {
+      "id": "58bf3339e331a3e-479858a2e43f91f",
+      "title": "Metrics in Discover - Grid should persist grid when changing time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/grid.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "e5122822a21b3b2-d64cae306a0fa14",
+      "title": "Traces in Discover - Custom columns should display trace-specific columns in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/custom_columns.spec.ts",
+        "line": 38,
+        "column": 14
+      }
+    },
+    {
+      "id": "e5122822a21b3b2-f6bf5a5f72a9604",
+      "title": "Traces in Discover - Custom columns should display trace-specific columns in ESQL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/custom_columns.spec.ts",
+        "line": 53,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c74bf7c77d0456-ef90c5e983568f5",
+      "title": "Traces in Discover - Overview tab should show Overview tab in the document flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab.spec.ts",
+        "line": 37,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c74bf7c77d0456-8ccb96e907d66f3",
+      "title": "Traces in Discover - Overview tab should render the Similar Spans section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab.spec.ts",
+        "line": 47,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c74bf7c77d0456-6502e274c6c278a",
+      "title": "Traces in Discover - Overview tab should render the Trace Summary section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab.spec.ts",
+        "line": 57,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c74bf7c77d0456-86a929ac26794c7",
+      "title": "Traces in Discover - Overview tab should render the Logs section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/overview_tab.spec.ts",
+        "line": 67,
+        "column": 14
+      }
+    },
+    {
+      "id": "739c62fdec50e27-9769bb34d445fad",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Classic)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-ba6702658f026b8",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Classic)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 60,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-de0d56f85499f05",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Classic)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 77,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-a7770e39a4e073a",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Search)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-0caf01adc247915",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Search)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 60,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-b3574ba39cb8851",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Search)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 77,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-7fa76165ecffbff",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not display trace-specific columns in data view mode (Security)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 41,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-ce21131b4b582fa",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not render RED metrics charts in ESQL mode (Security)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 60,
+        "column": 16
+      }
+    },
+    {
+      "id": "739c62fdec50e27-be0a84e32b7b264",
+      "title": "Traces in Discover - Profile disabled in non-observability configs should not show Overview tab in document flyout (Security)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/profile_disabled.spec.ts",
+        "line": 77,
+        "column": 16
+      }
+    },
+    {
+      "id": "1fc77e09fdc2139-ac5ec5651035a2b",
+      "title": "Traces in Discover - RED metrics charts should render RED metrics charts in ESQL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
+        "line": 38,
+        "column": 14
+      }
+    },
+    {
+      "id": "1fc77e09fdc2139-eb3aa439f084974",
+      "title": "Traces in Discover - RED metrics charts should render RED metrics charts with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "1fc77e09fdc2139-a3d04842c051a5d",
+      "title": "Traces in Discover - RED metrics charts should not render RED metrics charts with transformative ESQL query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
+        "line": 72,
+        "column": 14
+      }
+    },
+    {
+      "id": "1fc77e09fdc2139-198b157dfbbbf0a",
+      "title": "Traces in Discover - RED metrics charts should not render RED metrics charts in data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
+        "line": 87,
+        "column": 14
+      }
+    }
+  ]
+}

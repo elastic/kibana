@@ -1,0 +1,42 @@
+{
+  "sha1": "ba67ff0df4b8232690f358fe18a961528948856d",
+  "tests": [
+    {
+      "id": "a88e11e11af63ac-04de5a79d29d1c0",
+      "title": "Setup environment for Lens tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "4d02e446d082177-e5040a56b0ee7d7",
+      "title": "Lens Convert to ES|QL should display ES|QL conversion modal for inline visualizations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d02e446d082177-cfb66e0984c0af4",
+      "title": "Lens Convert to ES|QL should disable Convert to ES|QL button for visualizations saved to library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_conversion_enabled.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    }
+  ]
+}

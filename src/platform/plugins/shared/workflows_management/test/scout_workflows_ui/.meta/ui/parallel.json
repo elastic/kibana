@@ -1,5 +1,5 @@
 {
-  "sha1": "e7ddc17a5fc05109ca09d3969cddb585cb0889a9",
+  "sha1": "8f485ef625e03149be4ed775d3f142773cfb5426",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -118,7 +118,7 @@
     {
       "id": "8a478a8cadc4edc-063497b8c9edff4",
       "title": "Workflow execution - Alert triggers should trigger workflow from alert",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -129,14 +129,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 77,
+        "line": 80,
         "column": 9
       }
     },
     {
       "id": "8a478a8cadc4edc-c4010c12909cde8",
       "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -147,7 +147,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 207,
+        "line": 211,
         "column": 9
       }
     },
@@ -250,6 +250,20 @@
       }
     },
     {
+      "id": "611939e87af9d3e-3173b9e49af5f6a",
+      "title": "WorkflowsList/BulkActions should keep list order stable when bulk-enabling N-1 workflows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
       "id": "611939e87af9d3e-2fa309b19ed98e8",
       "title": "WorkflowsList/BulkActions should disable enabled workflows",
       "expectedStatus": "passed",
@@ -259,7 +273,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 53,
+        "line": 89,
         "column": 7
       }
     },
@@ -273,7 +287,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 81,
+        "line": 117,
         "column": 7
       }
     },
@@ -287,7 +301,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 105,
+        "line": 141,
         "column": 7
       }
     },
@@ -385,7 +399,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 98,
+        "line": 111,
         "column": 7
       }
     },
@@ -399,7 +413,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 122,
+        "line": 148,
         "column": 7
       }
     },
@@ -413,7 +427,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 149,
+        "line": 175,
         "column": 7
       }
     },
@@ -427,7 +441,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 173,
+        "line": 199,
         "column": 7
       }
     }
