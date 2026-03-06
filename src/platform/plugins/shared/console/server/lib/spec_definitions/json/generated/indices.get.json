@@ -35,6 +35,7 @@
       "{index}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-get",
     "availability": {
       "stack": true,
       "serverless": true

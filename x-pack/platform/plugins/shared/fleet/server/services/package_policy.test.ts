@@ -25,6 +25,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
+import { CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE } from '../../common/constants/cloud_connector';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
 import type {
@@ -843,6 +844,7 @@ describe('Package policy service', () => {
             },
           },
           cloudProvider: 'aws',
+          accountType: CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
         });
       } finally {
         // Restore the original method
@@ -1476,6 +1478,7 @@ describe('Package policy service', () => {
             },
           },
           cloudProvider: 'aws',
+          accountType: CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
         });
 
         // Verify the name was auto-generated with the correct format

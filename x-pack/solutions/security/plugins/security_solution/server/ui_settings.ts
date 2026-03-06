@@ -35,13 +35,13 @@ import {
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
-  ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
+  INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION,
   EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
@@ -50,6 +50,7 @@ import {
   SHOW_RELATED_INTEGRATIONS_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
+  DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -255,6 +256,7 @@ export const initUiSettings = (
         requiresPageReload: true,
         schema: schema.boolean(),
         solutionViews: ['classic', 'security'],
+        technicalPreview: true,
       },
     }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
@@ -397,21 +399,6 @@ export const initUiSettings = (
       ),
       solutionViews: ['classic', 'security'],
     },
-    [ENABLE_CCS_READ_WARNING_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
-        defaultMessage: 'CCS Rule Privileges Warning',
-      }),
-      value: true,
-      description: i18n.translate('xpack.securitySolution.uiSettings.enableCcsWarningDescription', {
-        defaultMessage: '<p>Enables privilege check warnings in rules for CCS indices</p>',
-        values: { p: (chunks) => `<p>${chunks}</p>` },
-      }),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: false,
-      schema: schema.boolean(),
-      solutionViews: ['classic', 'security'],
-    },
     [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
       name: i18n.translate(
         'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
@@ -508,6 +495,27 @@ export const initUiSettings = (
         schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
       ),
       value: [],
+      category: [APP_ID],
+      requiresPageReload: false,
+      solutionViews: ['classic', 'security'],
+    },
+    [INCLUDED_DATA_STREAM_NAMESPACES_FOR_RULE_EXECUTION]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionLabel',
+        {
+          defaultMessage: 'Include data stream namespaces in rule execution',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.includedDataStreamNamespacesForRuleExecutionDescription',
+        {
+          defaultMessage:
+            'When configured, only events from the specified data stream namespaces are searched during rule execution. Provide an array of namespace strings, e.g. "namespace1","namespace2"',
+        }
+      ),
+      type: 'array',
+      schema: schema.arrayOf(schema.string(), { maxSize: 50 }),
+      value: DATA_STREAM_NAMESPACES_DEFAULT_SETTING,
       category: [APP_ID],
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],

@@ -69,7 +69,7 @@ describe('SecurityNavControlService', () => {
     const [{ mount }] = coreStart.chrome.navControls.registerRight.mock.calls[0];
 
     const target = document.createElement('div');
-    const cleanup = mount(target);
+    const cleanup = (mount as (element: HTMLElement) => () => void)(target);
 
     await nextTick();
 
@@ -81,10 +81,8 @@ describe('SecurityNavControlService', () => {
         >
           <div
             class="euiPopover emotion-euiPopover-inline-block"
-            id="headerUserMenu"
           >
             <button
-              aria-controls="headerUserMenu"
               aria-expanded="false"
               aria-haspopup="true"
               aria-label="Account menu"

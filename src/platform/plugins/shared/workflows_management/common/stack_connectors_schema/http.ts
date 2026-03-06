@@ -17,7 +17,7 @@ import { z } from '@kbn/zod/v4';
 // HTTP connector parameter schema
 export const HttpParamsSchema = z.object({
   url: z
-    .url()
+    .string()
     .optional()
     .describe(
       'The base URL to send the request to. If `connector-id` is provided the configured URL will be used and this value will be ignored.'

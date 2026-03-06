@@ -56,8 +56,6 @@ export const getNavigationTreeDefinition = ({
   isCloudEnabled?: boolean;
 }): AddSolutionNavigationArg => {
   return {
-    dataTestSubj: 'searchSideNav',
-    homePage: SEARCH_HOMEPAGE,
     icon,
     id: 'es',
     navigationTree$: dynamicItems$.pipe(
@@ -275,7 +273,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:trained_models' },
                     {
-                      link: 'searchInferenceEndpoints:inferenceEndpoints',
+                      link: 'management:inference_endpoints',
                     },
                     { link: 'management:anomaly_detection' },
                     { link: 'management:analytics' },

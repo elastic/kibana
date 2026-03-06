@@ -582,15 +582,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ query?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | QT | undefined; filters?: ",
+              "{ filters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -598,7 +590,15 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; onCancel?: (() => void) | undefined; refreshInterval?: number | undefined; indexPatterns?: ",
+              "[] | undefined; onCancel?: (() => void) | undefined; refreshInterval?: number | undefined; query?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | QT | undefined; indexPatterns?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -716,7 +716,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               {
                 "pluginId": "kql",
                 "scope": "public",

@@ -29,7 +29,9 @@ import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
+import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { registerTaskDefinitions } from './services/execution';
+import { createModelProviderFactory } from './services/runner/model_provider';
 
 export class AgentBuilderPlugin
   implements
@@ -82,6 +84,8 @@ export class AgentBuilderPlugin
       logger: this.logger.get('services'),
       workflowsManagement: setupDeps.workflowsManagement,
       trackingService: this.trackingService,
+      cloud: setupDeps.cloud,
+      usageApi: setupDeps.usageApi,
     });
 
     registerTaskDefinitions({
@@ -130,6 +134,8 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
+    registerSkillToolsLoaderHook(serviceSetups);
+
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
@@ -169,23 +175,40 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const { tools, agents, skills, runnerFactory } = startServices;
+    const { tools, agents, skills, runnerFactory, execution } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
       registerSampleData(this.home, this.logger);
     }
+
+    const modelProviderFactory = createModelProviderFactory({
+      inference,
+      uiSettings,
+      savedObjects,
+      trackingService: this.trackingService,
+    });
+
     return {
       agents: {
-        runAgent: agents.execute.bind(agents),
+        getRegistry: ({ request }) => agents.getRegistry({ request }),
+        runAgent: runner.runAgent.bind(runner),
       },
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
       },
       skills: {
+        getRegistry: skills.getRegistry.bind(skills),
         register: skills.registerSkill.bind(skills),
         unregister: skills.unregisterSkill.bind(skills),
+      },
+      execution: {
+        executeAgent: execution.executeAgent.bind(execution),
+        getExecution: execution.getExecution.bind(execution),
+      },
+      runtime: {
+        createModelProvider: modelProviderFactory,
       },
     };
   }
