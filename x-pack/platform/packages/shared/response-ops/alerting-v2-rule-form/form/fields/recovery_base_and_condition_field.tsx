@@ -13,7 +13,6 @@ import type { FormValues } from '../types';
 import type { useRecoveryValidation } from '../hooks/use_recovery_validation';
 import { WhereClauseEditor } from './where_clause_editor';
 import { RecoveryBaseQueryField } from './recovery_base_query_field';
-import { useRuleFormServices } from '../contexts';
 
 const BASE_QUERY_TOOLTIP = i18n.translate('xpack.alertingV2.ruleForm.recoveryBaseQueryTooltip', {
   defaultMessage:
@@ -41,7 +40,6 @@ interface RecoveryBaseAndConditionFieldProps {
 export const RecoveryBaseAndConditionField: React.FC<RecoveryBaseAndConditionFieldProps> = ({
   validation,
 }) => {
-  const { data } = useRuleFormServices();
   const { getValues, setValue } = useFormContext<FormValues>();
   const {
     recoveryBaseQuery,
@@ -139,7 +137,6 @@ export const RecoveryBaseAndConditionField: React.FC<RecoveryBaseAndConditionFie
             'Define a WHERE clause condition that determines when an alert should recover. Applied to the evaluation base query.',
         })}
         isOptional={isBaseQueryVisible}
-        services={{ search: data.search.search }}
         baseQuery={effectiveBaseQuery}
         dataTestSubj="recoveryConditionWhereClause"
         rules={conditionRules}
