@@ -25,7 +25,6 @@ import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
-import { useKibana } from '../../utils/kibana_react';
 
 export function AlertActions(
   props: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
@@ -47,7 +46,6 @@ export function AlertActions(
     cases,
   } = services;
   const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
-  const { telemetryClient } = useKibana().services;
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
@@ -74,6 +72,7 @@ export function AlertActions(
     cases,
     refresh,
     onActionExecuted: closeActionsPopover,
+    owner: [observabilityFeatureId],
   });
 
   useEffect(() => {

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
-import type { CasesService } from '../types';
+import type { CasesOwner, CasesService } from '../types';
 import { useCaseActions } from './use_case_actions';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 
@@ -23,13 +23,15 @@ export const useCaseAlertActionItems = ({
   cases,
   refresh,
   onActionExecuted,
+  owner = ['cases'],
 }: {
   alert: Alert;
   cases?: CasesService;
   refresh: () => void;
   onActionExecuted?: () => void;
+  owner?: CasesOwner[];
 }): React.ReactElement[] => {
-  const userCasesPermissions = cases?.helpers.canUseCases(['cases']);
+  const userCasesPermissions = cases?.helpers.canUseCases(owner);
 
   const { handleAddToExistingCaseClick, handleAddToNewCaseClick } = useCaseActions({
     alerts: [alert],
