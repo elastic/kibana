@@ -156,7 +156,9 @@ export const GeneratePackagesOptimizedAssets: Task = {
     const assetDirs = [npmAssetDir, srcAssetDir];
 
     // process assets in each ui-shared-deps package
-    await Promise.all(assetDirs.map((dir) => optimizeAssets(log, dir)));
+    for (const assetDir of assetDirs) {
+      await optimizeAssets(log, assetDir);
+    }
 
     // analyze assets to produce metrics.json file
     const groups = categorizeAssets(assetDirs);
