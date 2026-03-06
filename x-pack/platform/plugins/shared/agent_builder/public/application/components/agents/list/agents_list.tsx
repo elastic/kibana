@@ -100,32 +100,77 @@ const getVisibilityBadgeColor = (
     case AgentVisibility.Shared:
       return 'primary';
     case AgentVisibility.Public:
-      return 'success';
+      return 'default';
+  }
+};
+
+const getVisibilityBadgeIcon = (visibility: NonNullable<AgentDefinition['visibility']>) => {
+  switch (visibility) {
+    case AgentVisibility.Private:
+      return 'lock';
+    case AgentVisibility.Shared:
+      return 'users';
+    case AgentVisibility.Public:
+      return 'globe';
+  }
+};
+
+const getVisibilityBadgeTooltipContent = (
+  visibility: NonNullable<AgentDefinition['visibility']>
+) => {
+  switch (visibility) {
+    case AgentVisibility.Private:
+      return i18n.translate('xpack.agentBuilder.agents.visibility.privateTooltip', {
+        defaultMessage: 'Only the owner or a superuser can view and edit.',
+      });
+    case AgentVisibility.Shared:
+      return i18n.translate('xpack.agentBuilder.agents.visibility.sharedTooltip', {
+        defaultMessage: 'Anyone can view. Only the owner or a superuser can edit.',
+      });
+    case AgentVisibility.Public:
+      return i18n.translate('xpack.agentBuilder.agents.visibility.publicTooltip', {
+        defaultMessage: 'Anyone can view and edit.',
+      });
   }
 };
 
 const renderAgentVisibilityBadge = (agent: AgentDefinition) => {
   if (agent.readonly) {
     return (
-      <EuiBadge color="accent" data-test-subj="agentBuilderAgentsListVisibilityBuiltInBadge">
-        {i18n.translate('xpack.agentBuilder.agents.visibility.builtIn', {
-          defaultMessage: 'Read-only',
+      <EuiToolTip
+        content={i18n.translate('xpack.agentBuilder.agents.visibility.readOnlyTooltip', {
+          defaultMessage: 'Built-in agents are read-only.',
         })}
-      </EuiBadge>
+      >
+        <EuiBadge
+          tabIndex={0}
+          color="accent"
+          data-test-subj="agentBuilderAgentsListVisibilityBuiltInBadge"
+        >
+          {i18n.translate('xpack.agentBuilder.agents.visibility.builtIn', {
+            defaultMessage: 'Read-only',
+          })}
+        </EuiBadge>
+      </EuiToolTip>
     );
   }
 
   const visibility = getAgentVisibility(agent);
   const visibilityLabel = getVisibilityBadgeLabel(visibility);
   const visibilityColor = getVisibilityBadgeColor(visibility);
+  const visibilityTooltip = getVisibilityBadgeTooltipContent(visibility);
 
   return (
-    <EuiBadge
-      color={visibilityColor}
-      data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
-    >
-      {visibilityLabel}
-    </EuiBadge>
+    <EuiToolTip content={visibilityTooltip}>
+      <EuiBadge
+        tabIndex={0}
+        iconType={getVisibilityBadgeIcon(visibility)}
+        color={visibilityColor}
+        data-test-subj={`agentBuilderAgentsListVisibility-${visibility}`}
+      >
+        {visibilityLabel}
+      </EuiBadge>
+    </EuiToolTip>
   );
 };
 
