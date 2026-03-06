@@ -379,8 +379,10 @@ export function useEsqlDataCascadeRowHeaderComponents(
   selectedColumns: string[],
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
 ) {
-  const namedColumnsFromQuery = useMemo(() => {
-    return editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier);
+  const aggregateColumnTypes = useMemo(() => {
+    return new Map(
+      editorQueryMeta.appliedFunctions.map(({ identifier, returnType }) => [identifier, returnType])
+    );
   }, [editorQueryMeta.appliedFunctions]);
 
   /**
@@ -424,10 +426,14 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData }) =>
       selectedColumns
         .map((selectedColumn) => {
-          // only allow aggregation columns to be rendered in the meta part of the row header
-          if (namedColumnsFromQuery.indexOf(selectedColumn) < 0) {
+          // only allow displaying selected columns to be rendered in the meta part of the row header that are aggregation columns
+          const aggregateReturnType = aggregateColumnTypes.get(selectedColumn);
+
+          if (!aggregateReturnType) {
             return null;
           }
+
+          const isNumericType = ['double', 'long', 'integer'].includes(aggregateReturnType);
 
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -446,11 +452,12 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
                     return (
                       <EuiFlexItem grow={false}>
-                        {typeof aggregatedValue === 'number' ? (
-                          <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
+                        {typeof aggregatedValue === 'number' || isNumericType ? (
+                          <NumberBadge value={Number(aggregatedValue)} shortenAtExpSize={3} />
                         ) : (
                           <EuiBadge color="hollow" css={textSlotStyles}>
-                            {aggregatedValue
+                            {([] as string[])
+                              .concat(aggregatedValue)
                               .map((value) => {
                                 return (
                                   value ||
@@ -471,7 +478,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
           );
         })
         .filter(Boolean),
-    [namedColumnsFromQuery, selectedColumns]
+    [aggregateColumnTypes, selectedColumns]
   );
 
   const rowActions = useCallback<
