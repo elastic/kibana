@@ -155,8 +155,8 @@ export const ConsoleTutorialsGroup = () => {
               betaBadgeProps={{
                 label: isNew(tutorial.publishedAt)
                   ? i18n.translate('xpack.searchGettingStarted.consoleTutorials.badge', {
-                      defaultMessage: 'New',
-                    })
+                    defaultMessage: 'New',
+                  })
                   : '',
                 color: 'accent',
               }}
@@ -168,7 +168,7 @@ export const ConsoleTutorialsGroup = () => {
               data-test-subj={tutorial.dataTestSubj}
               footer={
                 <TryInConsoleButton
-                  type="button"
+                  type="emptyButton"
                   iconType={`${assetBasePath}/command_line.svg`} // TODO: Replace with EUI icon when it's available
                   color="text"
                   request={tutorial.request}
