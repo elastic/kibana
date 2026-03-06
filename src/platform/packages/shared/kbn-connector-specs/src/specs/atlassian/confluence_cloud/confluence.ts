@@ -12,7 +12,7 @@ import { z } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
 
 const buildBaseUrl = (ctx: ActionContext) =>
-  `https://${(ctx.config?.subdomain as string).trim()}.atlassian.net`;
+  `https://${String((ctx.config?.subdomain as string) ?? '').trim()}.atlassian.net`;
 
 const CONFLUENCE_V2_PREFIX = '/wiki/api/v2';
 
@@ -126,7 +126,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
         if (typedInput.bodyFormat != null) params['body-format'] = typedInput.bodyFormat;
         const response = await ctx.client.get(
           `${baseUrl}${CONFLUENCE_V2_PREFIX}/pages/${typedInput.id}`,
-          { params: Object.keys(params).length > 0 ? params : undefined }
+          Object.keys(params).length > 0 ? { params } : undefined
         );
         return response.data;
       },
