@@ -16,7 +16,11 @@ import type {
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
+import {
+  EisCloudConnectPromoCallout,
+  EisPromotionalCallout,
+  useCloudConnectStatus,
+} from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import { docLinks } from '../../../common/doc_links';
@@ -81,8 +85,11 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
-    services: { cloud, application },
+    services: { cloud, cloudConnect, application },
   } = useKibana();
+  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
+    cloudConnect?.hooks.useCloudConnectStatus
+  );
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
@@ -210,14 +217,16 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           ctaLink={docLinks.elasticInferenceService}
           direction="row"
         />
-        <EisCloudConnectPromoCallout
-          promoId="inferenceEndpointManagement"
-          isSelfManaged={!cloud?.isCloudEnabled}
-          direction="row"
-          navigateToApp={() =>
-            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-          }
-        />
+        {!isCloudConnectStatusLoading && !isCloudConnected && (
+          <EisCloudConnectPromoCallout
+            promoId="inferenceEndpointManagement"
+            isSelfManaged={!cloud?.isCloudEnabled}
+            direction="row"
+            navigateToApp={() =>
+              application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+            }
+          />
+        )}
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
