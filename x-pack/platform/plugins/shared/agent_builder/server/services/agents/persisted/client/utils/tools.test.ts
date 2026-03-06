@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateToolSelection } from './utils';
+import { validateToolSelection } from './tools';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
