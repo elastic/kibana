@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   findSimilarCasesStepCommonDefinition,
   FindSimilarCasesStepTypeId,
 } from '../../common/workflows/steps/find_similar_cases';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createFindSimilarCasesStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...findSimilarCasesStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.FIND_SIMILAR_CASES_STEP_LABEL,
-    description: i18n.FIND_SIMILAR_CASES_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.FIND_SIMILAR_CASES_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Find similar cases
+export const findSimilarCasesStepDefinition = createPublicStepDefinition({
+  ...findSimilarCasesStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.FIND_SIMILAR_CASES_STEP_LABEL,
+  description: i18n.FIND_SIMILAR_CASES_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.FIND_SIMILAR_CASES_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Find similar cases
 \`\`\`yaml
 - name: find_similar_cases
   type: ${FindSimilarCasesStepTypeId}
@@ -35,8 +35,7 @@ export const createFindSimilarCasesStepDefinition = () => {
     page: 1
     perPage: 20
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});

@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   assignCaseStepCommonDefinition,
   AssignCaseStepTypeId,
 } from '../../common/workflows/steps/assign_case';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createAssignCaseStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...assignCaseStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.ASSIGN_CASE_STEP_LABEL,
-    description: i18n.ASSIGN_CASE_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.ASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Assign users to case
+export const assignCaseStepDefinition = createPublicStepDefinition({
+  ...assignCaseStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.ASSIGN_CASE_STEP_LABEL,
+  description: i18n.ASSIGN_CASE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Assign users to case
 \`\`\`yaml
 - name: assign_case_users
   type: ${AssignCaseStepTypeId}
@@ -36,8 +36,7 @@ export const createAssignCaseStepDefinition = () => {
       - uid: "user-123"
       - uid: "user-456"
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});

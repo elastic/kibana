@@ -6,24 +6,24 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { addTagStepCommonDefinition, AddTagStepTypeId } from '../../common/workflows/steps/add_tag';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createAddTagStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...addTagStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.ADD_TAG_STEP_LABEL,
-    description: i18n.ADD_TAG_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.ADD_TAG_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Set case tags
+export const addTagStepDefinition = createPublicStepDefinition({
+  ...addTagStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.ADD_TAG_STEP_LABEL,
+  description: i18n.ADD_TAG_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_TAG_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set case tags
 \`\`\`yaml
 - name: set_case_tags
   type: ${AddTagStepTypeId}
@@ -31,8 +31,7 @@ export const createAddTagStepDefinition = () => {
     case_id: "abc-123-def-456"
     tags: ["investigation", "high-priority"]
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});

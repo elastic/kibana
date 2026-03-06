@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   setStatusStepCommonDefinition,
   SetStatusStepTypeId,
 } from '../../common/workflows/steps/set_status';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createSetStatusStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...setStatusStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.SET_STATUS_STEP_LABEL,
-    description: i18n.SET_STATUS_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.SET_STATUS_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Set case status
+export const setStatusStepDefinition = createPublicStepDefinition({
+  ...setStatusStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.SET_STATUS_STEP_LABEL,
+  description: i18n.SET_STATUS_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.SET_STATUS_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set case status
 \`\`\`yaml
 - name: set_case_status
   type: ${SetStatusStepTypeId}
@@ -34,8 +34,7 @@ export const createSetStatusStepDefinition = () => {
     case_id: "abc-123-def-456"
     status: "in-progress"
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});

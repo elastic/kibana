@@ -6,22 +6,6 @@
  */
 
 // import { createCreateCaseFromTemplateStepDefinition } from './create_case_from_template';
-
-import { addCommentStepDefinition } from './add_comment';
-import { findCasesStepDefinition } from './find_cases';
-import { createSetSeverityStepDefinition } from './set_severity';
-import { createSetStatusStepDefinition } from './set_status';
-import { createCloseCaseStepDefinition } from './close_case';
-import { createAssignCaseStepDefinition } from './assign_case';
-import { createUnassignCaseStepDefinition } from './unassign_case';
-import { createAddAlertsStepDefinition } from './add_alerts';
-import { createAddEventsStepDefinition } from './add_events';
-import { createFindSimilarCasesStepDefinition } from './find_similar_cases';
-import { createSetDescriptionStepDefinition } from './set_description';
-import { createSetTitleStepDefinition } from './set_title';
-import { createAddObservablesStepDefinition } from './add_observables';
-import { createAddTagStepDefinition } from './add_tag';
-import { createAddCategoryStepDefinition } from './add_category';
 import type { CasesPublicSetupDependencies } from '../types';
 
 export function registerCasesSteps(
@@ -59,21 +43,58 @@ export function registerCasesSteps(
     import('./find_cases').then((m) => m.findCasesStepDefinition)
   );
 
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_severity').then((m) => m.setSeverityStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_status').then((m) => m.setStatusStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./close_case').then((m) => m.closeCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./assign_case').then((m) => m.assignCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./unassign_case').then((m) => m.unassignCaseStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./add_alerts').then((m) => m.addAlertsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./add_events').then((m) => m.addEventsStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./find_similar_cases').then((m) => m.findSimilarCasesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_description').then((m) => m.setDescriptionStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./set_title').then((m) => m.setTitleStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./add_observables').then((m) => m.addObservablesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./add_tag').then((m) => m.addTagStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./add_category').then((m) => m.addCategoryStepDefinition)
+  );
+
   // Leaving this in for now. We need to get support for reflective value lookup first.
   // workflowsExtensions.registerStepDefinition(createCreateCaseFromTemplateStepDefinition());
-  workflowsExtensions.registerStepDefinition(addCommentStepDefinition);
-  workflowsExtensions.registerStepDefinition(findCasesStepDefinition);
-  workflowsExtensions.registerStepDefinition(createSetSeverityStepDefinition());
-  workflowsExtensions.registerStepDefinition(createSetStatusStepDefinition());
-  workflowsExtensions.registerStepDefinition(createCloseCaseStepDefinition());
-  workflowsExtensions.registerStepDefinition(createAssignCaseStepDefinition());
-  workflowsExtensions.registerStepDefinition(createUnassignCaseStepDefinition());
-  workflowsExtensions.registerStepDefinition(createAddAlertsStepDefinition());
-  workflowsExtensions.registerStepDefinition(createAddEventsStepDefinition());
-  workflowsExtensions.registerStepDefinition(createFindSimilarCasesStepDefinition());
-  workflowsExtensions.registerStepDefinition(createSetDescriptionStepDefinition());
-  workflowsExtensions.registerStepDefinition(createSetTitleStepDefinition());
-  workflowsExtensions.registerStepDefinition(createAddObservablesStepDefinition());
-  workflowsExtensions.registerStepDefinition(createAddTagStepDefinition());
-  workflowsExtensions.registerStepDefinition(createAddCategoryStepDefinition());
 }

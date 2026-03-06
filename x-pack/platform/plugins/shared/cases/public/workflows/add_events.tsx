@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   addEventsStepCommonDefinition,
   AddEventsStepTypeId,
 } from '../../common/workflows/steps/add_events';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createAddEventsStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...addEventsStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.ADD_EVENTS_STEP_LABEL,
-    description: i18n.ADD_EVENTS_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.ADD_EVENTS_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Add events to case
+export const addEventsStepDefinition = createPublicStepDefinition({
+  ...addEventsStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.ADD_EVENTS_STEP_LABEL,
+  description: i18n.ADD_EVENTS_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_EVENTS_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Add events to case
 \`\`\`yaml
 - name: add_events
   type: ${AddEventsStepTypeId}
@@ -36,8 +36,7 @@ export const createAddEventsStepDefinition = () => {
       - eventId: "event-1"
         index: ".ds-logs-*"
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});

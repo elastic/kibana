@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   addObservablesStepCommonDefinition,
   AddObservablesStepTypeId,
 } from '../../common/workflows/steps/add_observables';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createAddObservablesStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...addObservablesStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.ADD_OBSERVABLES_STEP_LABEL,
-    description: i18n.ADD_OBSERVABLES_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Add observables to case
+export const addObservablesStepDefinition = createPublicStepDefinition({
+  ...addObservablesStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.ADD_OBSERVABLES_STEP_LABEL,
+  description: i18n.ADD_OBSERVABLES_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Add observables to case
 \`\`\`yaml
 - name: add_observables
   type: ${AddObservablesStepTypeId}
@@ -37,8 +37,7 @@ export const createAddObservablesStepDefinition = () => {
         value: "10.0.0.8"
         description: "Source IP"
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});

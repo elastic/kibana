@@ -5,40 +5,40 @@
  * 2.0.
  */
 
-import { createSetSeverityStepDefinition } from './set_severity';
-import { createSetStatusStepDefinition } from './set_status';
-import { createCloseCaseStepDefinition } from './close_case';
-import { createAssignCaseStepDefinition } from './assign_case';
-import { createUnassignCaseStepDefinition } from './unassign_case';
-import { createAddAlertsStepDefinition } from './add_alerts';
-import { createAddEventsStepDefinition } from './add_events';
-import { createFindSimilarCasesStepDefinition } from './find_similar_cases';
-import { createSetDescriptionStepDefinition } from './set_description';
-import { createSetTitleStepDefinition } from './set_title';
-import { createAddObservablesStepDefinition } from './add_observables';
-import { createAddTagStepDefinition } from './add_tag';
-import { createAddCategoryStepDefinition } from './add_category';
+import { setSeverityStepDefinition } from './set_severity';
+import { setStatusStepDefinition } from './set_status';
+import { closeCaseStepDefinition } from './close_case';
+import { assignCaseStepDefinition } from './assign_case';
+import { unassignCaseStepDefinition } from './unassign_case';
+import { addAlertsStepDefinition } from './add_alerts';
+import { addEventsStepDefinition } from './add_events';
+import { findSimilarCasesStepDefinition } from './find_similar_cases';
+import { setDescriptionStepDefinition } from './set_description';
+import { setTitleStepDefinition } from './set_title';
+import { addObservablesStepDefinition } from './add_observables';
+import { addTagStepDefinition } from './add_tag';
+import { addCategoryStepDefinition } from './add_category';
 
 describe('new cases public step definitions', () => {
   const steps = [
-    createSetSeverityStepDefinition(),
-    createSetStatusStepDefinition(),
-    createCloseCaseStepDefinition(),
-    createAssignCaseStepDefinition(),
-    createUnassignCaseStepDefinition(),
-    createAddAlertsStepDefinition(),
-    createAddEventsStepDefinition(),
-    createFindSimilarCasesStepDefinition(),
-    createSetDescriptionStepDefinition(),
-    createSetTitleStepDefinition(),
-    createAddObservablesStepDefinition(),
-    createAddTagStepDefinition(),
-    createAddCategoryStepDefinition(),
+    setSeverityStepDefinition,
+    setStatusStepDefinition,
+    closeCaseStepDefinition,
+    assignCaseStepDefinition,
+    unassignCaseStepDefinition,
+    addAlertsStepDefinition,
+    addEventsStepDefinition,
+    findSimilarCasesStepDefinition,
+    setDescriptionStepDefinition,
+    setTitleStepDefinition,
+    addObservablesStepDefinition,
+    addTagStepDefinition,
+    addCategoryStepDefinition,
   ];
 
   it.each(steps)('returns expected metadata for %s', (definition) => {
     expect(definition.id.startsWith('cases.')).toBe(true);
-    expect(definition.actionsMenuGroup).toBe('kibana');
+    expect(definition.category).toBe('kibana');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 });

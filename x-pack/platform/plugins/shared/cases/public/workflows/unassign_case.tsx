@@ -6,27 +6,27 @@
  */
 
 import React from 'react';
-import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
+import { StepCategory } from '@kbn/workflows';
+import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import {
   unassignCaseStepCommonDefinition,
   UnassignCaseStepTypeId,
 } from '../../common/workflows/steps/unassign_case';
-import * as i18n from './translations';
+import * as i18n from '../../common/workflows/translations';
 
-export const createUnassignCaseStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...unassignCaseStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    label: i18n.UNASSIGN_CASE_STEP_LABEL,
-    description: i18n.UNASSIGN_CASE_STEP_DESCRIPTION,
-    documentation: {
-      details: i18n.UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
-      examples: [
-        `## Set assignees after unassignment
+export const unassignCaseStepDefinition = createPublicStepDefinition({
+  ...unassignCaseStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  label: i18n.UNASSIGN_CASE_STEP_LABEL,
+  description: i18n.UNASSIGN_CASE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set assignees after unassignment
 \`\`\`yaml
 - name: unassign_case_users
   type: ${UnassignCaseStepTypeId}
@@ -34,8 +34,7 @@ export const createUnassignCaseStepDefinition = () => {
     case_id: "abc-123-def-456"
     assignees: []
 \`\`\``,
-      ],
-    },
-    actionsMenuGroup: ActionsMenuGroup.kibana,
-  });
-};
+    ],
+  },
+  category: StepCategory.Kibana,
+});
