@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export type * from './src/types';
-export * from './src/client';
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-change-history'],
+};

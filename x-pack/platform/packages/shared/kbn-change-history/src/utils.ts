@@ -16,47 +16,6 @@ import type {
 export const sha256 = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
 
 /**
- * Masks sensitive data in a snapshot of an object.
- * @param snapshot - The snapshot of the object to mask sensitive data from.
- * @param maskFields - The fields to mask in the snapshot.
- * @returns The masked keys and the snapshot with the masked fields.
- * @example
- *   const snapshot = { user: { email: 'bob@example.com' } };
- *   const maskFields = { user: true };
- *   const result = maskSensitiveFields(snapshot, maskFields);
- *   // {
- *   //  maskedKeys: ['user.email'],
- *   //  snapshot: { user: { email: '****************1af4e7be90' } }
- *   // }
- */
-export function maskSensitiveFields(
-  snapshot: Record<string, any>,
-  maskFields?: ChangeTrackingDataMaskingFields
-): { masked: Array<string>; snapshot: Record<string, any> } {
-  const masked: string[] = [];
-  if (!maskFields) {
-    return { masked, snapshot };
-  }
-  const flatSnapshot = flatten(snapshot, { safe: true }) as Record<string, any>;
-  const flatMaskings = flatten(maskFields, { safe: true }) as Record<string, boolean>;
-  const isMasked = (key: string) =>
-    Object.entries(flatMaskings).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
-
-  for (const key of Object.keys(flatSnapshot)) {
-    const value = flatSnapshot[key];
-    if (isMasked(key) && typeof value === 'string') {
-      masked.push(key);
-      flatSnapshot[key] = `****************${sha256(value).slice(-12)}`;
-    }
-  }
-
-  return {
-    masked,
-    snapshot: unflatten(flatSnapshot),
-  };
-}
-
-/**
  * Returns a filtered diff of two JSON-equivalent objects (enumerable properties, no cyclical structures)
  * The output contains a structure that helps navigate between a JSON object and its previous structure.
  *
@@ -157,4 +116,45 @@ export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): Cha
   result.stats.total = stats.additions + stats.deletions + stats.updates;
   result.fieldChanges = Object.keys(result.newvalues);
   return result;
+}
+
+/**
+ * Masks sensitive data in a snapshot of an object.
+ * @param snapshot - The snapshot of the object to mask sensitive data from.
+ * @param maskFields - The fields to mask in the snapshot.
+ * @returns The masked keys and the snapshot with the masked fields.
+ * @example
+ *   const snapshot = { user: { email: 'bob@example.com' } };
+ *   const maskFields = { user: true };
+ *   const result = maskSensitiveFields(snapshot, maskFields);
+ *   // {
+ *   //  maskedKeys: ['user.email'],
+ *   //  snapshot: { user: { email: '****************1af4e7be90' } }
+ *   // }
+ */
+export function maskSensitiveFields(
+  snapshot: Record<string, any>,
+  maskFields?: ChangeTrackingDataMaskingFields
+): { masked: Array<string>; snapshot: Record<string, any> } {
+  const masked: string[] = [];
+  if (!maskFields) {
+    return { masked, snapshot };
+  }
+  const flatSnapshot = flatten(snapshot, { safe: true }) as Record<string, any>;
+  const flatMaskings = flatten(maskFields, { safe: true }) as Record<string, boolean>;
+  const isMasked = (key: string) =>
+    Object.entries(flatMaskings).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
+
+  for (const key of Object.keys(flatSnapshot)) {
+    const value = flatSnapshot[key];
+    if (isMasked(key) && typeof value === 'string') {
+      masked.push(key);
+      flatSnapshot[key] = `****************${sha256(value).slice(-12)}`;
+    }
+  }
+
+  return {
+    masked,
+    snapshot: unflatten(flatSnapshot),
+  };
 }

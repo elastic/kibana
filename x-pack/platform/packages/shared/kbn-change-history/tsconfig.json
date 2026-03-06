@@ -7,11 +7,12 @@
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/core",
     "@kbn/data-streams",
-    "@kbn/alerting-types",
-    "@kbn/core/server",
-    "@elasticsearch/elasticsearch",
     "@kbn/es-mappings",
     "@kbn/logging",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/tooling-log",
+    "@kbn/test",
   ]
 }

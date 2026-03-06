@@ -5,156 +5,7 @@
  * 2.0.
  */
 
-// import flatten from 'flat';
 import { sha256, maskSensitiveFields, standardDiffDocCalculation } from './utils';
-
-describe('#maskSensitiveFields', () => {
-  const maskedValuePattern = /^\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*[a-f0-9]{12}$/;
-
-  describe('when maskFields is not provided', () => {
-    it('should return snapshot unchanged and empty masked array', () => {
-      const snapshot = { user: { email: 'bob@example.com' } };
-      const result = maskSensitiveFields(snapshot);
-
-      expect(result.masked).toEqual([]);
-      expect(result.snapshot).toEqual(snapshot);
-    });
-  });
-
-  describe('when maskFields is undefined', () => {
-    it('should return snapshot unchanged and empty masked array', () => {
-      const snapshot = { secret: 'sensitive' };
-      const result = maskSensitiveFields(snapshot, undefined);
-
-      expect(result.masked).toEqual([]);
-      expect(result.snapshot).toEqual(snapshot);
-    });
-  });
-
-  describe('single field masking', () => {
-    it('should mask a top-level string field and list it in masked', () => {
-      const snapshot = { user: { email: 'bob@example.com' } };
-      const maskFields = { user: true };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.masked).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
-      expect(result.snapshot.user.email).not.toBe('bob@example.com');
-    });
-
-    it('should mask a nested field when only that path is in maskFields', () => {
-      const snapshot = { user: { email: 'bob@example.com', name: 'Bob' } };
-      const maskFields = { user: { email: true } };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.masked).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
-      expect(result.snapshot.user.name).toBe('Bob');
-    });
-  });
-
-  describe('multiple fields masking', () => {
-    it('should mask multiple string fields and list all in masked', () => {
-      const snapshot = {
-        user: { email: 'bob@example.com', apiKey: 'secret-key-123' },
-        token: 'abc-token',
-      };
-      const maskFields = { user: true, token: true };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.masked.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
-      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
-      expect(result.snapshot.user.apiKey).toMatch(maskedValuePattern);
-      expect(result.snapshot.token).toMatch(maskedValuePattern);
-    });
-  });
-
-  describe('non-string values', () => {
-    it('should not mask non-string values even when key is in maskFields', () => {
-      const snapshot = { config: { count: 42, enabled: true, nested: { id: 1 } } };
-      const maskFields = { config: true };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.masked).toEqual([]);
-      expect(result.snapshot).toEqual(snapshot);
-    });
-
-    it('should mask only string fields and leave numbers/booleans unchanged', () => {
-      const snapshot = {
-        user: { email: 'bob@example.com', count: 5, active: true },
-      };
-      const maskFields = { user: true };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.masked).toEqual(['user.email']);
-      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
-      expect(result.snapshot.user.count).toBe(5);
-      expect(result.snapshot.user.active).toBe(true);
-    });
-  });
-
-  describe('unmasked fields', () => {
-    it('should leave unmasked fields unchanged', () => {
-      const snapshot = {
-        user: { email: 'bob@example.com', name: 'Bob' },
-        title: 'My Dashboard',
-      };
-      const maskFields = { user: { email: true } };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.snapshot.user.name).toBe('Bob');
-      expect(result.snapshot.title).toBe('My Dashboard');
-    });
-  });
-
-  describe('masking format', () => {
-    it('should produce deterministic masked value for same input', () => {
-      const snapshot = { secret: 'same-value' };
-      const maskFields = { secret: true };
-      const result1 = maskSensitiveFields(snapshot, maskFields);
-      const result2 = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result1.snapshot.secret).toBe(result2.snapshot.secret);
-    });
-
-    it('should use last 12 chars of sha256 in masked value', () => {
-      const snapshot = { secret: 'test' };
-      const maskFields = { secret: true };
-      const sha256Value = sha256('test');
-      const maskedValue = `****************${sha256Value.slice(-12)}`;
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.snapshot.secret).toEqual(maskedValue);
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle empty snapshot', () => {
-      const result = maskSensitiveFields({}, { user: true });
-
-      expect(result.masked).toEqual([]);
-      expect(result.snapshot).toEqual({});
-    });
-
-    it('should handle empty string value', () => {
-      const snapshot = { secret: '' };
-      const maskFields = { secret: true };
-      const result = maskSensitiveFields(snapshot, maskFields);
-
-      expect(result.masked).toEqual(['secret']);
-      expect(result.snapshot.secret).toMatch(maskedValuePattern);
-    });
-
-    it('should not mutate the original snapshot', () => {
-      const user = { email: 'bob@example.com' };
-      const snapshot = { user };
-      const maskFields = { user: true };
-      maskSensitiveFields(snapshot, maskFields);
-
-      expect(snapshot.user).toBe(user);
-    });
-  });
-});
 
 describe('#standardDiffDocCalculation', () => {
   describe('empty objects', () => {
@@ -164,6 +15,7 @@ describe('#standardDiffDocCalculation', () => {
       expect(result).toEqual({
         stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
         fieldChanges: [],
+        ignored: [],
         oldvalues: {},
         newvalues: {},
       });
@@ -176,6 +28,7 @@ describe('#standardDiffDocCalculation', () => {
       expect(result).toEqual({
         stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
         fieldChanges: [],
+        ignored: [],
         oldvalues: {},
         newvalues: {},
       });
@@ -188,6 +41,7 @@ describe('#standardDiffDocCalculation', () => {
       expect(result).toEqual({
         stats: { total: 0, additions: 0, deletions: 0, updates: 0 },
         fieldChanges: [],
+        ignored: [],
         oldvalues: {},
         newvalues: {},
       });
@@ -580,6 +434,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.ignored.sort()).toEqual(['description', 'type'].sort());
       expect(result.fieldChanges).toEqual(['title']);
       expect(result.newvalues).toEqual({ title: 'New Title' });
     });
@@ -604,6 +459,9 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 1,
       });
+      expect(result.ignored.sort()).toEqual(
+        ['config.layout', 'metadata.author', 'metadata.version'].sort()
+      );
       expect(result.fieldChanges).toEqual(['config.theme']);
     });
 
@@ -619,6 +477,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 0,
       });
+      expect(result.ignored).toEqual(['title']);
     });
 
     it('should handle filter with multiple properties', () => {
@@ -643,6 +502,7 @@ describe('#standardDiffDocCalculation', () => {
         deletions: 0,
         updates: 2,
       });
+      expect(result.ignored.sort()).toEqual(['description', 'version'].sort());
       expect(result.fieldChanges.sort()).toEqual(['author', 'title'].sort());
     });
 
@@ -656,6 +516,7 @@ describe('#standardDiffDocCalculation', () => {
       const ignoreFields = { config: { theme: true } };
       const result = standardDiffDocCalculation({ a, b, ignoreFields });
 
+      expect(result.ignored).toEqual(['config.theme']);
       expect(result.fieldChanges).toContain('config.layout.columns');
     });
   });
@@ -877,6 +738,154 @@ describe('#standardDiffDocCalculation', () => {
         expect(result.stats.updates).toBe(1);
         expect(result.fieldChanges).toEqual(['data']);
       });
+    });
+  });
+});
+
+describe('#maskSensitiveFields', () => {
+  const maskedValuePattern = /^[\*]{16}[a-f0-9]{12}$/;
+
+  describe('when maskFields is not provided', () => {
+    it('should return snapshot unchanged and empty masked array', () => {
+      const snapshot = { user: { email: 'bob@example.com' } };
+      const result = maskSensitiveFields(snapshot);
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual(snapshot);
+    });
+  });
+
+  describe('when maskFields is undefined', () => {
+    it('should return snapshot unchanged and empty masked array', () => {
+      const snapshot = { secret: 'sensitive' };
+      const result = maskSensitiveFields(snapshot, undefined);
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual(snapshot);
+    });
+  });
+
+  describe('single field masking', () => {
+    it('should mask a top-level string field and list it in masked', () => {
+      const snapshot = { user: { email: 'bob@example.com' } };
+      const maskFields = { user: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.email).not.toBe('bob@example.com');
+    });
+
+    it('should mask a nested field when only that path is in maskFields', () => {
+      const snapshot = { user: { email: 'bob@example.com', name: 'Bob' } };
+      const maskFields = { user: { email: true } };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.name).toBe('Bob');
+    });
+  });
+
+  describe('multiple fields masking', () => {
+    it('should mask multiple string fields and list all in masked', () => {
+      const snapshot = {
+        user: { email: 'bob@example.com', apiKey: 'secret-key-123' },
+        token: 'abc-token',
+      };
+      const maskFields = { user: true, token: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked.sort()).toEqual(['token', 'user.apiKey', 'user.email'].sort());
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.apiKey).toMatch(maskedValuePattern);
+      expect(result.snapshot.token).toMatch(maskedValuePattern);
+    });
+  });
+
+  describe('non-string values', () => {
+    it('should not mask non-string values even when key is in maskFields', () => {
+      const snapshot = { config: { count: 42, enabled: true, nested: { id: 1 } } };
+      const maskFields = { config: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual(snapshot);
+    });
+
+    it('should mask only string fields and leave numbers/booleans unchanged', () => {
+      const snapshot = {
+        user: { email: 'bob@example.com', count: 5, active: true },
+      };
+      const maskFields = { user: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['user.email']);
+      expect(result.snapshot.user.email).toMatch(maskedValuePattern);
+      expect(result.snapshot.user.count).toBe(5);
+      expect(result.snapshot.user.active).toBe(true);
+    });
+  });
+
+  describe('unmasked fields', () => {
+    it('should leave unmasked fields unchanged', () => {
+      const snapshot = {
+        user: { email: 'bob@example.com', name: 'Bob' },
+        title: 'My Dashboard',
+      };
+      const maskFields = { user: { email: true } };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.snapshot.user.name).toBe('Bob');
+      expect(result.snapshot.title).toBe('My Dashboard');
+    });
+  });
+
+  describe('masking format', () => {
+    it('should produce deterministic masked value for same input', () => {
+      const snapshot = { secret: 'same-value' };
+      const maskFields = { secret: true };
+      const result1 = maskSensitiveFields(snapshot, maskFields);
+      const result2 = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result1.snapshot.secret).toBe(result2.snapshot.secret);
+    });
+
+    it('should use last 12 chars of sha256 in masked value', () => {
+      const snapshot = { secret: 'test' };
+      const maskFields = { secret: true };
+      const sha256Value = sha256('test');
+      const maskedValue = `****************${sha256Value.slice(-12)}`;
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.snapshot.secret).toEqual(maskedValue);
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle empty snapshot', () => {
+      const result = maskSensitiveFields({}, { user: true });
+
+      expect(result.masked).toEqual([]);
+      expect(result.snapshot).toEqual({});
+    });
+
+    it('should handle empty string value', () => {
+      const snapshot = { secret: '' };
+      const maskFields = { secret: true };
+      const result = maskSensitiveFields(snapshot, maskFields);
+
+      expect(result.masked).toEqual(['secret']);
+      expect(result.snapshot.secret).toMatch(maskedValuePattern);
+    });
+
+    it('should not mutate the original snapshot', () => {
+      const user = { email: 'bob@example.com' };
+      const snapshot = { user };
+      const maskFields = { user: true };
+      maskSensitiveFields(snapshot, maskFields);
+
+      expect(snapshot.user).toBe(user);
     });
   });
 });
