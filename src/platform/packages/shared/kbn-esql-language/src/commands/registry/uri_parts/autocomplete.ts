@@ -17,11 +17,14 @@ import {
   getNewUserDefinedColumnSuggestion,
 } from '../complete_items';
 
+const ASSIGNMENT_AT_END_REGEX = /=\s*$/;
+const TRAILING_SPACE_REGEX = /\s$/;
+
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
-  _?: ICommandContext,
+  context?: ICommandContext,
   cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
@@ -30,11 +33,16 @@ export async function autocomplete(
   const hasAssignment = command.args.some((arg) => !Array.isArray(arg) && isAssignment(arg));
   const hasTargetFieldName = !!targetField?.name?.trim().length;
 
-  if (hasAssignment && expression && !expression.incomplete && !/=\s*$/.test(innerText)) {
-    return [withAutoSuggest(pipeCompleteItem)];
+  if (
+    hasAssignment &&
+    expression &&
+    !expression.incomplete &&
+    !ASSIGNMENT_AT_END_REGEX.test(innerText)
+  ) {
+    return [pipeCompleteItem];
   }
 
-  if (hasAssignment && /=\s*$/.test(innerText)) {
+  if (hasAssignment && ASSIGNMENT_AT_END_REGEX.test(innerText)) {
     const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) ?? [];
 
     return fieldSuggestions.map((suggestion) =>
@@ -45,7 +53,7 @@ export async function autocomplete(
     );
   }
 
-  if (hasTargetFieldName && /\s$/.test(innerText)) {
+  if (hasTargetFieldName && TRAILING_SPACE_REGEX.test(innerText)) {
     return [assignCompletionItem];
   }
 
