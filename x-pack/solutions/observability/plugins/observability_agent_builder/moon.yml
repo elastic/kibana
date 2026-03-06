@@ -62,6 +62,8 @@ dependsOn:
   - '@kbn/slo-schema'
   - '@kbn/apm-types-shared'
   - '@kbn/observability-utils-server'
+  - '@kbn/esql-utils'
+  - '@kbn/calculate-auto'
 tags:
   - plugin
   - prod
