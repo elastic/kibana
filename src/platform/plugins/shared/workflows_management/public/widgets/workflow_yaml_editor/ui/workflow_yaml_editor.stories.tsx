@@ -108,12 +108,12 @@ const StoryWrapper: React.FC<{
           spaceId: 'default',
           workflowId: 'test-workflow',
           status: ExecutionStatus.RUNNING,
-          error: null,
+          error: undefined,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
           workflowDefinition: createMockWorkflowDefinition(),
           stepExecutions,
-          duration: null,
+          duration: undefined,
           yaml: workflowYaml,
         };
         dispatch(setExecution(mockExecution));

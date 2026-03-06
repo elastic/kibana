@@ -52,7 +52,7 @@ export function searchWorkflowExecutionsFn(esClient: ElasticsearchClient) {
     const { query, sort = [{ createdAt: 'desc' }], size = 100, from, page = 1, fields } = params;
     const filter: QueryDslQueryContainer[] = [];
 
-    if (query.bool?.filter) {
+    if (query?.bool?.filter) {
       if (Array.isArray(query.bool.filter)) {
         filter.push(...query.bool.filter);
       } else {
@@ -62,13 +62,13 @@ export function searchWorkflowExecutionsFn(esClient: ElasticsearchClient) {
 
     filter.push({ term: { type: 'workflow' } });
 
-    const modifiedQuery = {
+    const modifiedQuery: QueryDslQueryContainer = {
       ...query,
       bool: {
-        ...query.bool,
+        ...(query?.bool ?? {}),
         filter,
       },
-    };
+    } as QueryDslQueryContainer;
 
     const response = await esClient.search({
       index: [WORKFLOWS_EXECUTIONS_DATA_STREAM, WORKFLOWS_EXECUTION_STATE_INDEX],

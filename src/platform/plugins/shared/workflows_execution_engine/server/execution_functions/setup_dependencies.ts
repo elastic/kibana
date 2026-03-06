@@ -47,7 +47,8 @@ export async function setupDependencies(
   const executionStateRepository = new ExecutionStateRepository(internalEsClient);
   const workflowExecutionRepository = await createWorkflowExecutionRepository(
     coreStart.dataStreams,
-    internalEsClient
+    internalEsClient,
+    logger
   );
   const stepExecutionRepository = await createStepExecutionRepository(
     coreStart.dataStreams,

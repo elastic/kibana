@@ -34,6 +34,7 @@ const stepExecution = {
   id: 'step-exec-1',
   stepId: 'step-1',
   status: 'completed' as ExecutionStatus,
+  createdAt: '2023-10-01T12:00:00Z',
   startedAt: '2023-10-01T12:00:00Z',
   executionTimeMs: 300000,
   scopeStack: [],

@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { WorkflowExecutionRepository } from '.';
 import { initializeDataStreamClient } from './data_stream';
 
 export async function createWorkflowExecutionRepository(
   coreDataStreams: DataStreamsStart,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  logger: Logger
 ): Promise<WorkflowExecutionRepository> {
   const dataStream = await initializeDataStreamClient(coreDataStreams);
-  return new WorkflowExecutionRepository(dataStream, esClient);
+  return new WorkflowExecutionRepository(dataStream, esClient, logger);
 }

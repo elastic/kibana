@@ -44,7 +44,7 @@ interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: Date | null;
-  duration: number | null;
+  duration: number | undefined;
   executedBy?: string;
   triggeredBy?: string;
   selected?: boolean;

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_DATA_STREAM } from './constants';
 import type { WorkflowExecutionDataStreamClient } from './data_stream';
-import { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export class WorkflowExecutionRepository {
   constructor(

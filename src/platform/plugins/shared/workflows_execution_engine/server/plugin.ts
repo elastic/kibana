@@ -265,7 +265,8 @@ export class WorkflowsExecutionEnginePlugin
                 const [coreStart] = await core.getStartServices();
                 const workflowExecutionRepository = await createWorkflowExecutionRepository(
                   coreStart.dataStreams,
-                  coreStart.elasticsearch.client.asInternalUser
+                  coreStart.elasticsearch.client.asInternalUser,
+                  logger
                 );
                 const stepExecutionRepository = await createStepExecutionRepository(
                   coreStart.dataStreams,
@@ -545,7 +546,8 @@ export class WorkflowsExecutionEnginePlugin
     const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
     const workflowExecutionRepositoryPromise = createWorkflowExecutionRepository(
       coreStart.dataStreams,
-      internalEsClient
+      internalEsClient,
+      this.logger
     );
     const stepExecutionRepositoryPromise = createStepExecutionRepository(
       coreStart.dataStreams,

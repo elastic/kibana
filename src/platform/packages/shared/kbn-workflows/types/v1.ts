@@ -166,7 +166,7 @@ export interface Provider {
   inputsDefinition: Record<string, ProviderInput>;
 }
 
-export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
+export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId' | 'type'>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;

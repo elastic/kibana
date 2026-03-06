@@ -233,6 +233,7 @@ export const WorkflowStepExecutionTree = ({
           scopeStack: [],
           workflowRunId: '',
           workflowId: '',
+          createdAt: '',
           startedAt: '',
           finishedAt: '',
           children: [],
