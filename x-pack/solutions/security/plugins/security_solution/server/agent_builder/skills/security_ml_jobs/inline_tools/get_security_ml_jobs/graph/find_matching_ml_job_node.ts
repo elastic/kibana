@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { StateType } from './graph';
 import type { ActiveMlModules } from '../get_security_ml_jobs';
@@ -33,7 +33,7 @@ export const findMatchingMlJobsNode = async ({
       Carefully consider the module title, description and job description and influencers to determine if the job can help answer the user prompt.
       Return only the list of job IDs that can be used to answer the user prompt for the given entity type.
 
-      User prompt: "${prompt}""
+      User prompt: "${prompt}"
       Entity type: "${entityType}"
       Available Modules and Jobs: ${JSON.stringify(activeMlModules)}`);
 

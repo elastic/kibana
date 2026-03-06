@@ -50,9 +50,11 @@ After using this skill, you may want to use:
 - If indices.length > 1, you MUST call the 'platform.core.generate_esql' tool for EACH index, to ensure you are querying all relevant data. For example, if the 'security.ml.jobs' tool returns indices ["index1", "index2"], you should
   call the 'platform.core.generate_esql' tool two times: once with "index1" and once with "index2".
 - Provide this context to the 'platform.core.generate_esql' tool:
-  "When generating ES|QL queries for machine learning jobs, you **MUST ALWAYS** filter by activeJobIds using a WHERE clause (e.g. "WHERE job_id IN ({activeJobIds})") to ensure that you are only querying relevant and active ML jobs.
+  "When generating ES|QL queries for machine learning jobs:
+  You **MUST ALWAYS** filter by activeJobIds using a WHERE clause (e.g. "WHERE job_id IN ({activeJobIds})") to ensure that you are only querying relevant and active ML jobs.
   You **MUST ONLY** return anomalies with a 'record_score' bigger than {scoreThreshold} (Anomaly threshold set in the UI settings). Use this filter: "| WHERE record_score > {scoreThreshold}".
-  All records inside the anomaly job index are of type 'result_type:record'. Always return the job_id field
+  You **MUST ONLY** return anomalies with a 'result_type' of type 'record'. Use this filter: "WHERE result_type == \"record\"".
+  ALWAYS return the job_id field
 
   Fields that you MUST use to answer the question:
     * record_score: The anomaly score.

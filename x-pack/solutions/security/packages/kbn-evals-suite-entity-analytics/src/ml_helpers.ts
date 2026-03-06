@@ -6,7 +6,6 @@
  */
 
 import pRetry from 'p-retry';
-import type supertest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { v4 as uuidv4 } from 'uuid';
@@ -98,7 +97,7 @@ const executeSetupModuleRequest = async ({
 
 interface SetupMlModulesWithRetryOpts {
   module: string;
-  supertest: supertest.Agent;
+  supertest: SuperTest.Agent;
   retries?: number;
   indexPatternName?: string;
 }
@@ -135,7 +134,7 @@ export const setupMlModulesWithRetry = ({
 interface ForceStartDatafeedsOpts {
   jobIds: string[];
   rspCode: number;
-  supertest: supertest.Agent;
+  supertest: SuperTest.Agent;
 }
 export const forceStartDatafeeds = async ({
   jobIds,
@@ -156,7 +155,7 @@ export const forceStartDatafeeds = async ({
 
 interface GetJobsSummaryOpts {
   jobIds: string[];
-  supertest: supertest.Agent;
+  supertest: SuperTest.Agent;
 }
 const getJobsSummary = async ({
   jobIds,
@@ -174,7 +173,7 @@ const getJobsSummary = async ({
 
 interface WaitForAllJobsToStartOpts {
   jobIds: string[];
-  supertest: supertest.Agent;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
 }
 
@@ -247,7 +246,7 @@ export const waitForAllJobsToStart = async ({
 
 interface InstallIntegrationAndCreatePolicyOpts {
   kbnClient: KbnClient;
-  supertest: supertest.Agent;
+  supertest: SuperTest.Agent;
   integrationName: string;
   namespace?: string;
 }
@@ -307,7 +306,7 @@ export const deleteMLJobs = async ({
   supertest,
 }: {
   jobIds: string[];
-  supertest: supertest.Agent;
+  supertest: SuperTest.Agent;
 }) => {
   await supertest
     .post(`/internal/ml/jobs/delete_jobs`)
