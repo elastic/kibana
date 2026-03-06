@@ -132,6 +132,10 @@ export const FullScreenWaterfall = ({
   }, []);
 
   const [scrollElement, setScrollElement] = useState<Element | null>(null);
+
+  // TODO: Remove this deferred-mount workaround once EUI exposes a prop to
+  // disable the flyout open animation at mount time.
+  // Tracking issue: https://github.com/elastic/kibana/issues/XXXXX
   const [isWaterfallReady, setIsWaterfallReady] = useState(Boolean(skipOpenAnimation));
 
   useEffect(() => {
