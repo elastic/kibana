@@ -1,0 +1,30 @@
+version: '1'
+name: 'sources.firecrawl.map'
+description: 'Map a website to discover all indexed URLs. Use when you need to list or explore URLs on a site before scraping. Inputs: url (string), search (string, optional), limit (number, optional), includeSubdomains (boolean, optional).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: url
+    type: string
+  - name: search
+    type: string
+    required: false
+  - name: limit
+    type: number
+    required: false
+    default: 5000
+  - name: includeSubdomains
+    type: boolean
+    required: false
+    default: true
+steps:
+  - name: map-urls
+    type: firecrawl.map
+    connector-id: <%= firecrawl-stack-connector-id %>
+    with:
+      url: "${{ inputs.url }}"
+      search: "${{ inputs.search }}"
+      limit: ${{ inputs.limit }}
+      includeSubdomains: ${{ inputs.includeSubdomains }}
