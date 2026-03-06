@@ -82,12 +82,10 @@ export const performEsqlRequest = async ({
       request_type: 'findMatches',
     });
     const asyncSearchStarted = performance.now();
-    const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({
-      method: 'POST',
-      path: '/_query/async',
-      body: { project_routing: '_alias:_origin', ...requestBody },
-      querystring: requestQueryParams,
-    });
+    const asyncEsqlResponse = (await esClient.esql.asyncQuery({
+      ...requestBody,
+      ...requestQueryParams,
+    })) as unknown as AsyncEsqlResponse;
     setLatestRequestDuration(asyncSearchStarted, loggedRequests);
 
     queryId = asyncEsqlResponse.id;
@@ -106,10 +104,9 @@ export const performEsqlRequest = async ({
         description: i18n.ESQL_POLL_REQUEST_DESCRIPTION,
       });
       const pollStarted = performance.now();
-      const pollResponse = await esClient.transport.request<AsyncEsqlResponse>({
-        method: 'GET',
-        path: `/_query/async/${queryId}`,
-      });
+      const pollResponse = (await esClient.esql.asyncQueryGet({
+        id: queryId,
+      })) as unknown as AsyncEsqlResponse;
       setLatestRequestDuration(pollStarted, loggedRequests);
 
       if (!pollResponse.is_running) {
@@ -140,10 +137,7 @@ export const performEsqlRequest = async ({
         description: i18n.ESQL_DELETE_REQUEST_DESCRIPTION,
       });
       const deleteStarted = performance.now();
-      await esClient.transport.request({
-        method: 'DELETE',
-        path: `/_query/async/${queryId}`,
-      });
+      await esClient.esql.asyncQueryDelete({ id: queryId });
       setLatestRequestDuration(deleteStarted, loggedRequests);
     }
   }
