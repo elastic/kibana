@@ -69309,6 +69309,46 @@ components:
               properties:
                 action:
                   enum:
+                    - uri_parts
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Field containing the URI string
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip when source field is missing
+                  type: boolean
+                keep_original:
+                  description: Copy unparsed URI to `${target_field}.original` (defaults to true)
+                  type: boolean
+                remove_if_successful:
+                  description: Remove source field after successful parse (defaults to false)
+                  type: boolean
+                to:
+                  description: Target field/prefix to store parsed URI parts (defaults to "url")
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_1___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - additionalProperties: false
+              type: object
+              properties:
+                action:
+                  enum:
                     - join
                   type: string
                 customIdentifier:
