@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
@@ -40,7 +40,7 @@ export function registerStart(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
         const { entityTypes } = req.body;
         logger.debug('Start API invoked');
 
@@ -50,7 +50,8 @@ export function registerStart(router: EntityStorePluginRouter) {
         );
         const toStart = entityTypes.filter((type) => stoppedTypes.has(type));
 
-        await Promise.all(toStart.map((type) => assetManager.start(req, type)));
+        const logsExtraction = await assetManager.getLogExtractionConfig();
+        await Promise.all(toStart.map((type) => assetManager.start(req, type, logsExtraction)));
 
         return res.ok({
           body: {
