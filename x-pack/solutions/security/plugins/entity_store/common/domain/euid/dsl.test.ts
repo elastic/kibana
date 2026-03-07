@@ -123,7 +123,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 
   describe('user', () => {
-    it('returns filter with term on user.email and entity.namespace when present (event.module sets namespace)', () => {
+    it('returns filter with term on user.email only (entity.namespace is evaluated, not stored, so excluded from query)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
         event: { module: 'okta' },
@@ -131,10 +131,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'user.email': 'alice@example.com' } },
-            { term: { 'entity.namespace': 'okta' } },
-          ],
+          filter: [{ term: { 'user.email': 'alice@example.com' } }],
         },
       });
     });
@@ -147,7 +144,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns filter with term on user.name and entity.namespace and must_not on higher-ranked identity fields when user.name is present', () => {
+    it('returns filter with term on user.name only and must_not on higher-ranked identity fields (entity.namespace excluded)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'alice' },
         event: { module: 'azure' },
@@ -155,10 +152,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'user.name': 'alice' } },
-            { term: { 'entity.namespace': 'entra_id' } },
-          ],
+          filter: [{ term: { 'user.name': 'alice' } }],
           must_not: [
             { exists: { field: 'user.email' } },
             { exists: { field: 'user.id' } },
@@ -168,7 +162,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns filter with term on user.id and entity.namespace and must_not on higher-ranked identity fields when only user.id is present', () => {
+    it('returns filter with term on user.id only and must_not on user.email (entity.namespace excluded)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { id: 'user-id-42' },
         event: { module: 'o365' },
@@ -176,10 +170,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'user.id': 'user-id-42' } },
-            { term: { 'entity.namespace': 'microsoft_365' } },
-          ],
+          filter: [{ term: { 'user.id': 'user-id-42' } }],
           must_not: [{ exists: { field: 'user.email' } }],
         },
       });
@@ -189,7 +180,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(getEuidDslFilterBasedOnDocument('user', {})).toBeUndefined();
     });
 
-    it('precedence: uses user.email and entity.namespace when both user.email and user.id are present', () => {
+    it('precedence: uses user.email only when both user.email and user.id are present (entity.namespace excluded)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com', id: 'user-42' },
         event: { module: 'entityanalytics_okta' },
@@ -197,15 +188,12 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'user.email': 'alice@example.com' } },
-            { term: { 'entity.namespace': 'okta' } },
-          ],
+          filter: [{ term: { 'user.email': 'alice@example.com' } }],
         },
       });
     });
 
-    it('returns filter for Active Directory conditional: user.name, user.domain, entity.namespace when namespace is active_directory', () => {
+    it('returns filter for Active Directory conditional: user.name and user.domain only (entity.namespace excluded)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
         event: { module: 'entityanalytics_ad' },
@@ -213,14 +201,27 @@ describe('getEuidDslFilterBasedOnDocument', () => {
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'user.name': 'jane' } },
-            { term: { 'user.domain': 'corp.com' } },
-            { term: { 'entity.namespace': 'active_directory' } },
-          ],
+          filter: [{ term: { 'user.name': 'jane' } }, { term: { 'user.domain': 'corp.com' } }],
           must_not: [{ exists: { field: 'user.email' } }, { exists: { field: 'user.id' } }],
         },
       });
+    });
+
+    it('excludes all fieldEvaluation destinations (e.g. entity.namespace) from filter and must_not so the query can match stored documents', () => {
+      const result = getEuidDslFilterBasedOnDocument('user', {
+        user: { email: 'bob@example.com' },
+        event: { module: 'okta' },
+      });
+      const filter = result?.bool?.filter as Array<{ term?: Record<string, string> }> | undefined;
+      const filterFields = Array.isArray(filter)
+        ? filter.map((clause) => Object.keys(clause.term ?? {})[0])
+        : [];
+      const mustNot = (result?.bool?.must_not ?? []) as Array<{ exists?: { field: string } }>;
+      const mustNotFields = Array.isArray(mustNot)
+        ? mustNot.map((clause) => clause.exists?.field).filter(Boolean)
+        : [];
+      expect(filterFields).not.toContain('entity.namespace');
+      expect(mustNotFields).not.toContain('entity.namespace');
     });
   });
 

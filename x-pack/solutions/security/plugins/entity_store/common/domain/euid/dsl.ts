@@ -13,25 +13,85 @@ import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from '
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
- * Returns a DSL filter that matches documents containing at least one
+ * Returns a DSL filter that *strictly* matches documents containing at least one
  * identity field for the given entity type.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
  * resolve to an entity of the requested type.
  *
+ * For users, for example, it will also filter on the pre-conditions for IDP events
+ *
  * @example
  * ```ts
  * const filter = getEuidDslDocumentsContainsIdFilter('user');
  * // {
  * //   bool: {
- * //     should: [
- * //       { exists: { field: 'user.entity.id' } },
- * //       { exists: { field: 'user.id' } },
- * //       { exists: { field: 'user.name' } },
- * //       { exists: { field: 'user.email' } }
- * //     ],
- * //     minimum_should_match: 1
+ * //     filter: [
+ * //       {
+ * //         // IDP pre-conditions: (A) asset with user identity, or (B) IAM event with user identity
+ * //         bool: {
+ * //           should: [
+ * //             {
+ * //               bool: {
+ * //                 must: [
+ * //                   { match: { 'event.kind': 'asset' } },
+ * //                   {
+ * //                     bool: {
+ * //                       should: [
+ * //                         { bool: { must: [ { exists: { field: 'user.email' } }, { bool: { must_not: { match: { 'user.email': '' } } } } ] } },
+ * //                         { bool: { must: [ { exists: { field: 'user.id' } }, { bool: { must_not: { match: { 'user.id': '' } } } } ] } },
+ * //                         { bool: { must: [ { exists: { field: 'user.name' } }, { bool: { must_not: { match: { 'user.name': '' } } } } ] } }
+ * //                       ]
+ * //                     }
+ * //                   }
+ * //                 ]
+ * //               }
+ * //             },
+ * //             {
+ * //               bool: {
+ * //                 must: [
+ * //                   { terms: { 'event.category': ['iam'] } },
+ * //                   {
+ * //                     bool: {
+ * //                       should: [
+ * //                         { match: { 'event.type': 'user' } },
+ * //                         { match: { 'event.type': 'creation' } },
+ * //                         { match: { 'event.type': 'deletion' } },
+ * //                         { match: { 'event.type': 'group' } }
+ * //                       ]
+ * //                     }
+ * //                   },
+ * //                   {
+ * //                     bool: {
+ * //                       should: [
+ * //                         { bool: { must: [ { exists: { field: 'user.email' } }, { bool: { must_not: { match: { 'user.email': '' } } } } ] } },
+ * //                         { bool: { must: [ { exists: { field: 'user.id' } }, { bool: { must_not: { match: { 'user.id': '' } } } } ] } },
+ * //                         { bool: { must: [ { exists: { field: 'user.name' } }, { bool: { must_not: { match: { 'user.name': '' } } } } ] } }
+ * //                       ]
+ * //                     }
+ * //                   },
+ * //                   { bool: { must_not: { match: { 'event.kind': 'enrichment' } } } }
+ * //                 ]
+ * //               }
+ * //             }
+ * //           ]
+ * //         }
+ * //       },
+ * //       {
+ * //         // At least one identity field present (requiresOneOfFields)
+ * //         bool: {
+ * //           should: [
+ * //             { exists: { field: 'user.email' } },
+ * //             { exists: { field: 'user.id' } },
+ * //             { exists: { field: 'user.name' } },
+ * //             { exists: { field: 'client.user.email' } },
+ * //             { exists: { field: 'source.user.email' } }
+ * //           ],
+ * //           minimum_should_match: 1
+ * //         }
+ * //       }
+ * //     ]
  * //   }
  * // }
  * ```
@@ -92,7 +152,6 @@ export function getEuidDslDocumentsContainsIdFilter(
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @returns An Elasticsearch DSL query container, or undefined if the document does not contain enough identifying information.
  */
-
 export function getEuidDslFilterBasedOnDocument(
   entityType: EntityType,
   doc: any
@@ -112,15 +171,27 @@ export function getEuidDslFilterBasedOnDocument(
     return undefined;
   }
 
+  // Evaluated fields (e.g. entity.namespace from event.module) are computed in memory and are not
+  // stored in the index. Including them in the query would make it never match real documents.
+  const evaluatedDestinations = new Set(
+    identityField.fieldEvaluations?.map((e) => e.destination) ?? []
+  );
+
+  const filterValues = Object.entries(fieldsToBeFilteredOn.values).filter(
+    ([field]) => !evaluatedDestinations.has(field)
+  );
   const dsl: QueryDslQueryContainer = {
     bool: {
-      filter: Object.entries(fieldsToBeFilteredOn.values).map(([field, value]) => ({
+      filter: filterValues.map(([field, value]) => ({
         term: { [field]: value },
       })),
     },
   };
 
-  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
+  const toBeFilteredOut = getFieldsToBeFilteredOut(
+    identityField.euidFields,
+    fieldsToBeFilteredOn
+  ).filter((field) => !evaluatedDestinations.has(field));
   if (toBeFilteredOut.length > 0) {
     dsl.bool = {
       ...dsl.bool,
