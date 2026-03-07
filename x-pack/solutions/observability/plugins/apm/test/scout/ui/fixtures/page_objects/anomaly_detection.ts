@@ -19,8 +19,6 @@ export class AnomalyDetectionPage {
 
     // Wait for the page content to load
     await this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
   }
 
   async getCreateJobButton() {
