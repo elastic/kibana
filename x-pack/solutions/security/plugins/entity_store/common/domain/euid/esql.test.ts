@@ -44,46 +44,34 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
   });
 
   describe('host', () => {
-    it('returns filter with equality on host.entity.id when present', () => {
+    it('returns filter with equality on host.id when present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('host', {
-        host: { name: 'to-be-ignored', entity: { id: 'host-entity-1' } },
+        host: { name: 'to-be-ignored', id: 'host-id-1' },
       });
 
-      expect(result).toBe('((host.entity.id == "host-entity-1"))');
+      expect(result).toBe('((host.id == "host-id-1"))');
     });
 
-    it('returns filter with equality on host.id and null/empty check on host.entity.id when host.entity.id is missing', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('host', { host: { id: 'host-id-1' } });
-
-      expect(result).toBe(
-        '((host.id == "host-id-1") AND (host.entity.id IS NULL OR host.entity.id == ""))'
-      );
-    });
-
-    it('returns filter with equalities on host.name and host.domain and null/empty checks when composed id is used', () => {
-      const result = getEuidEsqlFilterBasedOnDocument('host', {
-        host: { name: 'myserver', domain: 'example.com' },
-      });
-
-      expect(result).toBe(
-        '((host.name == "myserver") AND (host.domain == "example.com") AND (host.entity.id IS NULL OR host.entity.id == "") AND (host.id IS NULL OR host.id == ""))'
-      );
-    });
-
-    it('returns filter with equality on host.name and null/empty checks when only host.name is present', () => {
+    it('returns filter with equality on host.name and null/empty check on host.id when host.id is missing', () => {
       const result = getEuidEsqlFilterBasedOnDocument('host', { host: { name: 'server1' } });
 
+      expect(result).toBe('((host.name == "server1") AND (host.id IS NULL OR host.id == ""))');
+    });
+
+    it('returns filter with equality on host.hostname and null/empty checks when only host.hostname is present', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('host', { host: { hostname: 'node-1' } });
+
       expect(result).toBe(
-        '((host.name == "server1") AND (host.entity.id IS NULL OR host.entity.id == "") AND (host.id IS NULL OR host.id == "") AND (host.domain IS NULL OR host.domain == "") AND (host.hostname IS NULL OR host.hostname == ""))'
+        '((host.hostname == "node-1") AND (host.id IS NULL OR host.id == "") AND (host.name IS NULL OR host.name == ""))'
       );
     });
 
-    it('precedence: uses host.entity.id when both host.entity.id and host.name are present', () => {
+    it('precedence: uses host.id when both host.id and host.name are present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('host', {
-        host: { entity: { id: 'e1' }, name: 'myserver', domain: 'example.com' },
+        host: { id: 'e1', name: 'myserver' },
       });
 
-      expect(result).toBe('((host.entity.id == "e1"))');
+      expect(result).toBe('((host.id == "e1"))');
     });
   });
 
@@ -190,7 +178,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('host');
 
     const expected =
-      'NOT(`host.entity.id` IS NULL) AND `host.entity.id` != "" OR NOT(`host.id` IS NULL) AND `host.id` != "" OR NOT(`host.name` IS NULL) AND `host.name` != "" OR NOT(`host.hostname` IS NULL) AND `host.hostname` != ""';
+      'NOT(`host.id` IS NULL) AND `host.id` != "" OR NOT(`host.name` IS NULL) AND `host.name` != "" OR NOT(`host.hostname` IS NULL) AND `host.hostname` != ""';
     expect(result).toBe(expected);
   });
 
@@ -248,10 +236,7 @@ describe('getEuidEsqlEvaluation', () => {
   it('returns full CONCAT(type:, CASE(...), NULL) for calculated identity (host)', () => {
     const result = getEuidEsqlEvaluation('host');
 
-    const expected = `CONCAT("host:", CASE((host.entity.id IS NOT NULL AND host.entity.id != ""), host.entity.id,
-                      (host.id IS NOT NULL AND host.id != ""), host.id,
-                      (host.name IS NOT NULL AND host.name != "" AND host.domain IS NOT NULL AND host.domain != ""), CONCAT(host.name, ".", host.domain),
-                      (host.hostname IS NOT NULL AND host.hostname != "" AND host.domain IS NOT NULL AND host.domain != ""), CONCAT(host.hostname, ".", host.domain),
+    const expected = `CONCAT("host:", CASE((host.id IS NOT NULL AND host.id != ""), host.id,
                       (host.name IS NOT NULL AND host.name != ""), host.name,
                       (host.hostname IS NOT NULL AND host.hostname != ""), host.hostname, NULL))`;
     expect(normalize(result)).toBe(normalize(expected));

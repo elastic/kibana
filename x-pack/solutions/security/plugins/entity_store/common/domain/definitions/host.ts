@@ -12,7 +12,7 @@ import {
   getEntityFieldsDescriptions,
   isNotEmptyCondition,
 } from './common_fields';
-import { compose, field, sep } from './euid_instructions';
+import { compose, field } from './euid_instructions';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
@@ -21,16 +21,12 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   name: `Security 'host' Entity Store Definition`,
   identityField: {
     euidFields: [
-      compose(field('host.entity.id')),
       compose(field('host.id')),
-      compose(field('host.name'), sep('.'), field('host.domain')),
-      compose(field('host.hostname'), sep('.'), field('host.domain')),
       compose(field('host.name')),
       compose(field('host.hostname')),
     ],
     documentsFilter: {
       or: [
-        isNotEmptyCondition('host.entity.id'),
         isNotEmptyCondition('host.id'),
         isNotEmptyCondition('host.name'),
         isNotEmptyCondition('host.hostname'),

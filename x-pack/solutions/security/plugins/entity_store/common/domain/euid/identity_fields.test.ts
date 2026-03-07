@@ -14,13 +14,7 @@ describe('getEuidSourceFields', () => {
 
     expect(result.requiresOneOf).toEqual(result.identitySourceFields);
     expect(result.requiresOneOf).toEqual(
-      expect.arrayContaining([
-        'host.entity.id',
-        'host.id',
-        'host.name',
-        'host.domain',
-        'host.hostname',
-      ])
+      expect.arrayContaining(['host.id', 'host.name', 'host.hostname'])
     );
     expect(result.identitySourceFields).toHaveLength(new Set(result.identitySourceFields).size);
   });

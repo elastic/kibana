@@ -26,63 +26,35 @@ describe('getEuidFromObject', () => {
   });
 
   describe('host', () => {
-    it('uses host.entity.id when present', () => {
-      expect(getEuidFromObject('host', { host: { entity: { id: 'host-entity-1' } } })).toBe(
-        'host:host-entity-1'
-      );
-    });
-
-    it('uses host.id when host.entity.id is missing', () => {
+    it('uses host.id when present', () => {
       expect(getEuidFromObject('host', { host: { id: 'host-id-1' } })).toBe('host:host-id-1');
     });
 
-    it('uses host.name + "." + host.domain when prior fields are missing', () => {
-      expect(getEuidFromObject('host', { host: { name: 'myserver', domain: 'example.com' } })).toBe(
-        'host:myserver.example.com'
-      );
-    });
-
-    it('uses host.hostname + "." + host.domain when prior fields are missing', () => {
-      expect(
-        getEuidFromObject('host', {
-          host: { hostname: 'box1', domain: 'corp.local' },
-        })
-      ).toBe('host:box1.corp.local');
-    });
-
-    it('uses host.name alone when prior combinations are missing', () => {
+    it('uses host.name when host.id is missing', () => {
       expect(getEuidFromObject('host', { host: { name: 'server1' } })).toBe('host:server1');
     });
 
-    it('uses host.hostname alone when prior combinations are missing', () => {
+    it('uses host.hostname when host.id and host.name are missing', () => {
       expect(getEuidFromObject('host', { host: { hostname: 'node-1' } })).toBe('host:node-1');
     });
 
-    it('precedence: host.entity.id over host.id', () => {
-      const obj = { host: { entity: { id: 'e1' }, id: 'h1' } };
-      expect(getEuidFromObject('host', obj)).toBe('host:e1');
-    });
-
-    it('precedence: host.entity.id over host.name and host.domain', () => {
-      const obj = {
-        host: { entity: { id: 'e1' }, name: 'myserver', domain: 'example.com' },
-      };
-      expect(getEuidFromObject('host', obj)).toBe('host:e1');
-    });
-
-    it('precedence: host.id over host.name + host.domain', () => {
-      const obj = { host: { id: 'h1', name: 'myserver', domain: 'example.com' } };
+    it('precedence: host.id over host.name', () => {
+      const obj = { host: { id: 'h1', name: 'server1' } };
       expect(getEuidFromObject('host', obj)).toBe('host:h1');
     });
 
-    it('precedence: host.name + host.domain over host.name alone', () => {
-      const obj = { host: { name: 'myserver', domain: 'example.com' } };
-      expect(getEuidFromObject('host', obj)).toBe('host:myserver.example.com');
+    it('precedence: host.id over host.hostname', () => {
+      const obj = { host: { id: 'h1', hostname: 'node-1' } };
+      expect(getEuidFromObject('host', obj)).toBe('host:h1');
     });
 
     it('precedence: host.name over host.hostname when both present', () => {
       const obj = { host: { name: 'server1', hostname: 'node-1' } };
       expect(getEuidFromObject('host', obj)).toBe('host:server1');
+    });
+
+    it('returns undefined when no host identity field is present', () => {
+      expect(getEuidFromObject('host', { host: { domain: 'example.com' } })).toBeUndefined();
     });
   });
 

@@ -7,10 +7,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
-(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
-(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
     | STATS
@@ -326,10 +323,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`]
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
-(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
-(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL))
     | STATS
@@ -724,11 +718,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
-  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
-(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
-(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
   | STATS
@@ -983,11 +974,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
-  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
-(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
-(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
   | STATS
@@ -1244,11 +1232,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | WHERE 
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
-  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
-(host.id IS NOT NULL AND host.id != \\"\\"), host.id,
-(host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
-(host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\"), host.name,
 (host.hostname IS NOT NULL AND host.hostname != \\"\\"), host.hostname, NULL)
   | STATS
@@ -1909,7 +1894,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
+      AND (NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
   | STATS document_count = COUNT()"
 `;
 

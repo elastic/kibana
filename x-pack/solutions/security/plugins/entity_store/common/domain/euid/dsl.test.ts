@@ -39,84 +39,63 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 
   describe('host', () => {
-    it('returns filter with term on host.entity.id when present', () => {
+    it('returns filter with term on host.id when present', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
-        host: { name: 'to-be-ignored', entity: { id: 'host-entity-1' } },
+        host: { name: 'to-be-ignored', id: 'host-id-1' },
       });
-
-      expect(result).toEqual({
-        bool: {
-          filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
-        },
-      });
-    });
-
-    it('returns filter with term on host.entity.id when present (with flattened source)', () => {
-      const result = getEuidDslFilterBasedOnDocument('host', {
-        _source: {
-          'host.name': 'to-be-ignored',
-          'host.entity.id': 'host-entity-1',
-        },
-      });
-
-      expect(result).toEqual({
-        bool: {
-          filter: [{ term: { 'host.entity.id': 'host-entity-1' } }],
-        },
-      });
-    });
-
-    it('returns filter with term on host.id when host.entity.id is missing', () => {
-      const result = getEuidDslFilterBasedOnDocument('host', { host: { id: 'host-id-1' } });
 
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'host.id': 'host-id-1' } }],
-          must_not: [{ exists: { field: 'host.entity.id' } }],
         },
       });
     });
 
-    it('returns filter with terms on host.name and host.domain when composed id is used', () => {
+    it('returns filter with term on host.id when present (with flattened source)', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
-        host: { name: 'myserver', domain: 'example.com' },
+        _source: {
+          'host.name': 'to-be-ignored',
+          'host.id': 'host-id-1',
+        },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [
-            { term: { 'host.name': 'myserver' } },
-            { term: { 'host.domain': 'example.com' } },
-          ],
-          must_not: [{ exists: { field: 'host.entity.id' } }, { exists: { field: 'host.id' } }],
+          filter: [{ term: { 'host.id': 'host-id-1' } }],
         },
       });
     });
 
-    it('returns filter with term on host.name when only host.name is present', () => {
+    it('returns filter with term on host.name when host.id is missing', () => {
       const result = getEuidDslFilterBasedOnDocument('host', { host: { name: 'server1' } });
 
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'host.name': 'server1' } }],
-          must_not: [
-            { exists: { field: 'host.entity.id' } },
-            { exists: { field: 'host.id' } },
-            { exists: { field: 'host.domain' } },
-            { exists: { field: 'host.hostname' } },
-          ],
+          must_not: [{ exists: { field: 'host.id' } }],
         },
       });
     });
 
-    it('precedence: uses host.entity.id when both host.entity.id and host.name are present', () => {
+    it('returns filter with term on host.hostname when host.id and host.name are missing', () => {
+      const result = getEuidDslFilterBasedOnDocument('host', { host: { hostname: 'node-1' } });
+
+      expect(result).toEqual({
+        bool: {
+          filter: [{ term: { 'host.hostname': 'node-1' } }],
+          must_not: [{ exists: { field: 'host.id' } }, { exists: { field: 'host.name' } }],
+        },
+      });
+    });
+
+    it('precedence: uses host.id when both host.id and host.name are present', () => {
       const result = getEuidDslFilterBasedOnDocument('host', {
-        host: { entity: { id: 'e1' }, name: 'myserver', domain: 'example.com' },
+        host: { id: 'e1', name: 'myserver' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'host.entity.id': 'e1' } }],
+          filter: [{ term: { 'host.id': 'e1' } }],
         },
       });
     });
@@ -318,7 +297,6 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
     expect(result).toEqual({
       bool: {
         should: [
-          isNotEmptyClause('host.entity.id'),
           isNotEmptyClause('host.id'),
           isNotEmptyClause('host.name'),
           isNotEmptyClause('host.hostname'),
