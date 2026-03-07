@@ -39,6 +39,32 @@ import { applyFieldEvaluations } from './field_evaluations';
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
  */
+export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
+  if (!doc) {
+    return undefined;
+  }
+
+  doc = getDocument(doc);
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (identityField.fieldEvaluations?.length) {
+    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
+    doc = { ...doc, ...evaluated };
+  }
+  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
+  if (fieldsToBeFilteredOn.rankingPosition === -1) {
+    return undefined;
+  }
+
+  const onExpressions = Object.entries(fieldsToBeFilteredOn.values).map(
+    ([field, value]) => `(${field} == "${escapeEsqlString(value)}")`
+  );
+
+  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
+  const outExpressions = toBeFilteredOut.map((field) => `${esqlIsNullOrEmpty(field)}`);
+
+  return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
+}
+
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, source, whenClauses } = evaluation;
   const caseParts: string[] = [];
@@ -81,32 +107,6 @@ export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
   }
   const conditions = evaluations.map((e) => `(${esqlIsNotNullOrEmpty(e.source)})`).join(' AND ');
   return conditions;
-}
-
-export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
-  if (!doc) {
-    return undefined;
-  }
-
-  doc = getDocument(doc);
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
-  if (identityField.fieldEvaluations?.length) {
-    const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
-    doc = { ...doc, ...evaluated };
-  }
-  const fieldsToBeFilteredOn = getFieldsToBeFilteredOn(doc, identityField.euidFields);
-  if (fieldsToBeFilteredOn.rankingPosition === -1) {
-    return undefined;
-  }
-
-  const onExpressions = Object.entries(fieldsToBeFilteredOn.values).map(
-    ([field, value]) => `(${field} == "${escapeEsqlString(value)}")`
-  );
-
-  const toBeFilteredOut = getFieldsToBeFilteredOut(identityField.euidFields, fieldsToBeFilteredOn);
-  const outExpressions = toBeFilteredOut.map((field) => `${esqlIsNullOrEmpty(field)}`);
-
-  return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
 }
 
 /**
