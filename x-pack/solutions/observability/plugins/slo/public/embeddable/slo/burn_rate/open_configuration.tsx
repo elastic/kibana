@@ -14,14 +14,14 @@ import type { SLOPublicPluginsStart } from '../../..';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLORepositoryClient } from '../../../types';
 import { Configuration } from './configuration';
-import type { EmbeddableProps, SloBurnRateEmbeddableState } from './types';
+import type { SloBurnRateEmbeddableState } from './types';
 
 export async function openConfiguration(
   coreStart: CoreStart,
   pluginsStart: SLOPublicPluginsStart,
   sloClient: SLORepositoryClient,
   initialState?: SloBurnRateEmbeddableState
-): Promise<EmbeddableProps> {
+): Promise<SloBurnRateEmbeddableState> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {
@@ -44,9 +44,9 @@ export async function openConfiguration(
             >
               <QueryClientProvider client={queryClient}>
                 <Configuration
-                  onCreate={(update: EmbeddableProps) => {
+                  onCreate={(state) => {
                     flyoutSession.close();
-                    resolve(update);
+                    resolve(state);
                   }}
                   onCancel={() => {
                     flyoutSession.close();

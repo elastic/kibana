@@ -14,6 +14,12 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { Subject } from 'rxjs';
 
+/** Re-exported from server (derived from schemas there) */
+export type {
+  BurnRateCustomState,
+  BurnRateEmbeddableState,
+} from '../../../server/lib/embeddables/burn_rate_schema';
+
 export interface EmbeddableProps {
   sloId: string;
   sloInstanceId: string;
@@ -21,13 +27,7 @@ export interface EmbeddableProps {
   reloadSubject?: Subject<boolean>;
 }
 
-export interface BurnRateCustomInput {
-  sloId: string;
-  sloInstanceId: string;
-  duration: string;
-}
-
-export type SloBurnRateEmbeddableState = SerializedTitles & BurnRateCustomInput;
+export type SloBurnRateEmbeddableState = BurnRateEmbeddableState;
 export type BurnRateApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle;
