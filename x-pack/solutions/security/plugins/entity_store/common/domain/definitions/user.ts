@@ -30,12 +30,11 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       {
         destination: 'entity.namespace',
         source: 'event.module',
-        rules: [
-          { when: 'one_of', in: ['okta', 'entityanalytics_okta'], then: 'okta' },
-          { when: 'one_of', in: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
-          { when: 'one_of', in: ['o365', 'o365_metrics'], then: 'microsoft_365' },
-          { when: 'one_of', in: ['entityanalytics_ad'], then: 'active_directory' },
-          { when: 'else', copyValueFrom: 'source' },
+        whenClauses: [
+          { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },
+          { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
+          { sourceMatchesAny: ['o365', 'o365_metrics'], then: 'microsoft_365' },
+          { sourceMatchesAny: ['entityanalytics_ad'], then: 'active_directory' },
         ],
       },
     ],

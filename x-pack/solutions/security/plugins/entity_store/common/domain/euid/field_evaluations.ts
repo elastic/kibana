@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type { FieldEvaluation, FieldEvaluationRule } from '../definitions/entity_schema';
+import type { FieldEvaluation } from '../definitions/entity_schema';
 
 function getSourceValue(doc: any, source: string): string | undefined {
   const flattened = doc[source];
@@ -26,29 +26,14 @@ function getSourceValue(doc: any, source: string): string | undefined {
   return String(value);
 }
 
-function evaluateRule(
-  rule: FieldEvaluationRule,
-  sourceValue: string | undefined
-): string | null | undefined {
-  if (rule.when === 'one_of') {
-    if (sourceValue === undefined) {
-      return undefined;
-    }
-    return rule.in.includes(sourceValue) ? rule.then : undefined;
-  }
-  if (rule.when === 'else') {
-    return sourceValue ?? null;
-  }
-  return undefined;
-}
-
 /**
- * Applies field evaluation rules to a document and returns a map of destination field to value.
+ * Applies field evaluations to a document and returns a map of destination field to value.
+ * First matching whenClause wins; if none matches, falls back to source value.
  * Used before euid resolution so that getFieldValue(doc, 'entity.namespace') etc. see computed values.
  *
  * @param doc - The document (flat or nested)
  * @param fieldEvaluations - List of evaluations from identityField.fieldEvaluations
- * @returns Map of destination field name to evaluated value (string or null). Omit destinations that did not match any rule (e.g. else with undefined source).
+ * @returns Map of destination field name to evaluated value (string or null). Omit destinations when source is missing and no clause matches.
  */
 export function applyFieldEvaluations(
   doc: any,
@@ -57,12 +42,18 @@ export function applyFieldEvaluations(
   const result: Record<string, string | null> = {};
   for (const evaluation of fieldEvaluations) {
     const sourceValue = getSourceValue(doc, evaluation.source);
-    for (const rule of evaluation.rules) {
-      const value = evaluateRule(rule, sourceValue);
-      if (value !== undefined) {
-        result[evaluation.destination] = value;
+    let value: string | null | undefined;
+    for (const clause of evaluation.whenClauses) {
+      if (sourceValue !== undefined && clause.sourceMatchesAny.includes(sourceValue)) {
+        value = clause.then;
         break;
       }
+    }
+    if (value === undefined) {
+      value = sourceValue ?? null;
+    }
+    if (value !== undefined) {
+      result[evaluation.destination] = value;
     }
   }
   return result;

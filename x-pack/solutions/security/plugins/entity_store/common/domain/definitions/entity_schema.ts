@@ -48,17 +48,17 @@ const euidFieldInstructionSchema = z.object({
   composition: z.array(z.union([euidFieldSchema, euidSeparatorSchema])),
 });
 
-// Field evaluation rules: pre-evaluate a field before euid generation (first match wins).
+// Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value).
 // Source fields are required in the main query filter so only documents with source set reach evaluation.
-const fieldEvaluationRuleSchema = z.discriminatedUnion('when', [
-  z.object({ when: z.literal('one_of'), in: z.array(z.string()), then: z.string() }),
-  z.object({ when: z.literal('else'), copyValueFrom: z.literal('source') }),
-]);
+const fieldEvaluationWhenClauseSchema = z.object({
+  sourceMatchesAny: z.array(z.string()),
+  then: z.string(),
+});
 
 const fieldEvaluationSchema = z.object({
   destination: z.string(),
   source: z.string(),
-  rules: z.array(fieldEvaluationRuleSchema),
+  whenClauses: z.array(fieldEvaluationWhenClauseSchema),
 });
 
 // Any field used in the euid calculation must be mapped in the fields array,
@@ -104,5 +104,5 @@ export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
 export type EuidConditional = z.infer<typeof euidConditionalSchema>;
 export type EuidFieldInstruction = z.infer<typeof euidFieldInstructionSchema>;
-export type FieldEvaluationRule = z.infer<typeof fieldEvaluationRuleSchema>;
+export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;

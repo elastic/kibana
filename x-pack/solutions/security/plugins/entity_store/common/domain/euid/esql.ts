@@ -40,16 +40,15 @@ import { applyFieldEvaluations } from './field_evaluations';
  * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
-  const { destination, source, rules } = evaluation;
+  const { destination, source, whenClauses } = evaluation;
   const caseParts: string[] = [];
-  for (const rule of rules) {
-    if (rule.when === 'one_of') {
-      const conditions = rule.in.map((v) => `${source} == "${escapeEsqlString(v)}"`).join(' OR ');
-      caseParts.push(`(${conditions}), "${escapeEsqlString(rule.then)}"`);
-    } else if (rule.when === 'else') {
-      caseParts.push(source);
-    }
+  for (const clause of whenClauses) {
+    const conditions = clause.sourceMatchesAny
+      .map((v) => `${source} == "${escapeEsqlString(v)}"`)
+      .join(' OR ');
+    caseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
   }
+  caseParts.push(source);
   return `${destination} = CASE(${caseParts.join(', ')})`;
 }
 

@@ -125,7 +125,7 @@ describe('getEuidFromObject', () => {
       ).toBe('user:a@b.com@microsoft_365');
     });
 
-    it('uses event.module as entity.namespace when not in mapping (else rule)', () => {
+    it('uses event.module as entity.namespace when no whenClause matches (fallback to source)', () => {
       expect(
         getEuidFromObject('user', {
           user: { email: 'a@b.com' },

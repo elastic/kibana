@@ -83,17 +83,15 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
       `  String _src = doc['${srcEsc}'].value`,
     ];
     let first = true;
-    for (const rule of ev.rules) {
-      if (rule.when === 'one_of') {
-        const conds = rule.in.map((v) => `_src == "${escapePainlessString(v)}"`).join(' || ');
-        const prefix = first ? '  if ' : '  else if ';
-        stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(rule.then)}"; }`);
-        first = false;
-      } else if (rule.when === 'else') {
-        stmts.push(`  else { ${varName} = _src; }`);
-        first = false;
-      }
+    for (const clause of ev.whenClauses) {
+      const conds = clause.sourceMatchesAny
+        .map((v) => `_src == "${escapePainlessString(v)}"`)
+        .join(' || ');
+      const prefix = first ? '  if ' : '  else if ';
+      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
+      first = false;
     }
+    stmts.push(`  else { ${varName} = _src; }`);
     stmts.push('}');
     parts.push(stmts.join(' '));
   }

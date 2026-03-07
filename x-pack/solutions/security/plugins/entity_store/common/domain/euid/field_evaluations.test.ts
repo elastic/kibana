@@ -53,7 +53,7 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
-  it('uses event.module as-is for else (unknown module)', () => {
+  it('uses event.module as-is when no whenClause matches (fallback to source)', () => {
     expect(applyFieldEvaluations({ event: { module: 'custom_module' } }, userEvaluations)).toEqual({
       'entity.namespace': 'custom_module',
     });
