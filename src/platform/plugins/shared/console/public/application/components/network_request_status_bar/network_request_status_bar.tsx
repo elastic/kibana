@@ -11,26 +11,27 @@ import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
+import { useRequestReadContext } from '../../contexts';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
+/*
+interface RequestResult {
+  // Status code of the request, e.g., 200
+  statusCode: number;
 
-export interface Props {
-  requestInProgress: boolean;
-  requestResult?: {
-    // Status code of the request, e.g., 200
-    statusCode: number;
+  // Status text of the request, e.g., OK
+  statusText: string;
 
-    // Status text of the request, e.g., OK
-    statusText: string;
+  // Method of the request, e.g., GET
+  method: string;
 
-    // Method of the request, e.g., GET
-    method: string;
+  // The path of endpoint that was called, e.g., /_search
+  endpoint: string;
 
-    // The path of endpoint that was called, e.g., /_search
-    endpoint: string;
-
-    // The time, in milliseconds, that the last request took
-    timeElapsedMs: number;
-  };
+  // The time, in milliseconds, that the last request took
+  timeElapsedMs: number;
 }
+
+  */
 
 const mapStatusCodeToBadgeColor = (statusCode: number) => {
   if (statusCode <= 199) {
@@ -52,13 +53,25 @@ const mapStatusCodeToBadgeColor = (statusCode: number) => {
   return 'danger';
 };
 
-export const NetworkRequestStatusBar: FunctionComponent<Props> = ({
-  requestInProgress,
-  requestResult,
-}) => {
+export const NetworkRequestStatusBar: FunctionComponent = () => {
   let content: React.ReactNode = null;
 
-  if (requestInProgress) {
+  const {
+    requestInFlight,
+    lastResult: { data: requestData, error: requestError },
+  } = useRequestReadContext();
+  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
+  const requestResult = data
+    ? {
+        method: data.request.method.toUpperCase(),
+        endpoint: data.request.path,
+        statusCode: data.response.statusCode,
+        statusText: data.response.statusText,
+        timeElapsedMs: data.response.timeMs,
+      }
+    : undefined;
+
+  if (requestInFlight) {
     content = (
       <EuiFlexItem grow={false}>
         <EuiBadge color="hollow">

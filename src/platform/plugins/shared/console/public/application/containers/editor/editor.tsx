@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, memo, useEffect, useState } from 'react';
-import { css } from '@emotion/react';
+
 import { debounce } from 'lodash';
 import {
   EuiProgress,
@@ -18,18 +18,13 @@ import {
   EuiButtonEmpty,
   EuiResizableContainer,
   useIsWithinBreakpoints,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { TextObject } from '../../../../common/text_object';
 
-import {
-  EditorContentSpinner,
-  OutputPanelEmptyState,
-  NetworkRequestStatusBar,
-} from '../../components';
-import { getAutocompleteInfo, StorageKeys } from '../../../services';
+import { NetworkRequestStatusBar } from '../../components';
+import { StorageKeys } from '../../../services';
 import {
   useServicesContext,
   useRequestReadContext,
@@ -37,49 +32,14 @@ import {
   useEditorActionContext,
   useEditorReadContext,
 } from '../../contexts';
-import { MonacoEditor } from './monaco_editor';
-import { MonacoEditorOutput } from './monaco_editor_output';
+import { OutputPanel } from './output_panel';
+import { InputPanel } from './input_panel';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
-import { consoleEditorPanelStyles, useResizerButtonStyles } from '../styles';
+import { useStyles } from './editor_styles';
 
 const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
 const DEBOUNCE_DELAY = 500;
-
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return {
-    consoleEditorPanel: consoleEditorPanelStyles,
-
-    requestProgressBarContainer: css`
-      position: relative;
-      z-index: ${euiTheme.levels.menu};
-    `,
-
-    resizerButton: useResizerButtonStyles(),
-
-    // Consolidated styles for editor panels with positioning
-    editorPanelPositioned: css`
-      top: 0;
-      height: calc(100% - 40px);
-    `,
-
-    outputPanelCentered: css`
-      align-content: center;
-      top: 0;
-      height: calc(100% - 40px);
-    `,
-
-    actionsPanelWithBackground: css`
-      background-color: ${euiTheme.colors.backgroundBasePlain};
-    `,
-
-    fullHeightPanel: css`
-      height: 100%;
-    `,
-  };
-};
 
 interface Props {
   loading: boolean;
@@ -93,32 +53,21 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   } = useServicesContext();
   const styles = useStyles();
 
-  const { currentTextObject, customParsedRequestsProvider } = useEditorReadContext();
+  // only used to hide content
+  const { currentTextObject } = useEditorReadContext();
 
   const {
     requestInFlight,
     lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
+  // request related
   const dispatch = useRequestActionContext();
+  // localStorage related
   const editorDispatch = useEditorActionContext();
 
+  // used for showing a loading state when fetching autocomplete entities
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
-
-  useEffect(() => {
-    const debouncedSetFechingAutocompleteEntities = debounce(
-      setFetchingAutocompleteEntities,
-      DEBOUNCE_DELAY
-    );
-    const subscription = getAutocompleteInfo().isLoading$.subscribe(
-      debouncedSetFechingAutocompleteEntities
-    );
-
-    return () => {
-      subscription.unsubscribe();
-      debouncedSetFechingAutocompleteEntities.cancel();
-    };
-  }, []);
 
   const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
     INITIAL_PANEL_SIZE,
@@ -134,6 +83,8 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     }, 300),
     []
   );
+
+  // how can localStorage concerns be centralized?
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedUpdateLocalStorageValue = useCallback(
@@ -162,6 +113,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   if (!currentTextObject) return null;
 
+  // these could go into a hook
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
   const isLoading = loading || requestInFlight;
 
@@ -197,16 +149,11 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   grow={true}
                   css={[styles.consoleEditorPanel, styles.editorPanelPositioned]}
                 >
-                  {loading ? (
-                    <EditorContentSpinner />
-                  ) : (
-                    <MonacoEditor
-                      localStorageValue={currentTextObject.text}
-                      value={inputEditorValue}
-                      setValue={setInputEditorValue}
-                      customParsedRequestsProvider={customParsedRequestsProvider}
-                    />
-                  )}
+                  <InputPanel
+                    loading={loading}
+                    inputEditorValue={inputEditorValue}
+                    setInputEditorValue={setInputEditorValue}
+                  />
                 </EuiSplitPanel.Inner>
 
                 {!loading && (
@@ -255,13 +202,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   paddingSize="none"
                   css={[styles.consoleEditorPanel, styles.outputPanelCentered]}
                 >
-                  {data ? (
-                    <MonacoEditorOutput />
-                  ) : isLoading ? (
-                    <EditorContentSpinner />
-                  ) : (
-                    <OutputPanelEmptyState />
-                  )}
+                  <OutputPanel loading={isLoading} />
                 </EuiSplitPanel.Inner>
 
                 {(data || isLoading) && (
@@ -285,20 +226,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                       </EuiFlexItem>
 
                       <EuiFlexItem>
-                        <NetworkRequestStatusBar
-                          requestInProgress={requestInFlight}
-                          requestResult={
-                            data
-                              ? {
-                                  method: data.request.method.toUpperCase(),
-                                  endpoint: data.request.path,
-                                  statusCode: data.response.statusCode,
-                                  statusText: data.response.statusText,
-                                  timeElapsedMs: data.response.timeMs,
-                                }
-                              : undefined
-                          }
-                        />
+                        <NetworkRequestStatusBar />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiSplitPanel.Inner>
