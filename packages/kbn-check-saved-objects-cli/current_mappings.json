@@ -1419,8 +1419,7 @@
   },
   "entity-store-global-state": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "epm-packages": {
     "dynamic": false,
@@ -2335,6 +2334,10 @@
         "type": "keyword"
       }
     }
+  },
+  "inference-settings": {
+    "dynamic": false,
+    "properties": {}
   },
   "infra-custom-dashboards": {
     "dynamic": false,
