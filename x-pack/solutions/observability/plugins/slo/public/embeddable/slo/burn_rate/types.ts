@@ -7,11 +7,7 @@
 import type { ApplicationStart, IUiSettingsClient, NotificationsStart } from '@kbn/core/public';
 import { type CoreStart } from '@kbn/core/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  PublishesTitle,
-  PublishesWritableTitle,
-  SerializedTitles,
-} from '@kbn/presentation-publishing';
+import type { PublishesTitle, PublishesWritableTitle } from '@kbn/presentation-publishing';
 import type { Subject } from 'rxjs';
 
 /** Re-exported from server (derived from schemas there) */
