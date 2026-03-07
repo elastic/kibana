@@ -19,7 +19,7 @@ import React from 'react';
 import type { OpenInNewTabParams, UpdateESQLQueryFn } from '../../../../types';
 
 export const CustomDocView: React.FC<{
-  openInNewTab?: (params: OpenInNewTabParams) => void;
+  openInNewTab?: (params: OpenInNewTabParams) => Promise<void>;
   updateESQLQuery?: UpdateESQLQueryFn;
   formattedRecord: string;
 }> = ({ openInNewTab, updateESQLQuery, formattedRecord }) => (
@@ -56,7 +56,7 @@ export const CustomDocView: React.FC<{
                   color="text"
                   size="s"
                   onClick={() => {
-                    openInNewTab({
+                    void openInNewTab({
                       tabLabel: 'My new tab',
                       query: { esql: 'FROM my-example-logs | LIMIT 5' },
                     });

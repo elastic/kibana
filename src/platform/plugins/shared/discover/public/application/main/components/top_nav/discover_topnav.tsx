@@ -119,7 +119,7 @@ export const DiscoverTopNav = ({
 
   const onOpenQueryInNewTab = useCallback(
     async (tabName: string, esqlQuery: string) => {
-      dispatch(
+      await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
           appState: { query: { esql: esqlQuery } },

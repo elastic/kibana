@@ -20,8 +20,8 @@ export const createContextAwarenessToolkit = ({
 }): ContextAwarenessToolkit => {
   return {
     actions: {
-      openInNewTab: (params) => {
-        void internalState.dispatch(internalStateActions.openInNewTabExtPointAction(params));
+      openInNewTab: async (params) => {
+        await internalState.dispatch(internalStateActions.openInNewTabExtPointAction(params));
       },
       updateESQLQuery: (queryOrUpdater) => {
         internalState.dispatch(internalStateActions.updateESQLQuery({ tabId, queryOrUpdater }));

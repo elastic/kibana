@@ -65,7 +65,7 @@ describe('tabs actions', () => {
         tabLabel: 'Logs',
       };
 
-      internalState.dispatch(internalStateActions.openInNewTabExtPointAction(params));
+      await internalState.dispatch(internalStateActions.openInNewTabExtPointAction(params));
 
       const tabs = selectAllTabs(internalState.getState());
       const newTab = tabs[tabs.length - 1];

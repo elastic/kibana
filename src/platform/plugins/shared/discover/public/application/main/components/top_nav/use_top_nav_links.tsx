@@ -129,7 +129,9 @@ export const useTopNavLinks = ({
             trackingProps: { openedFrom: 'background search button' },
             onBackgroundSearchOpened: ({ session, event }) => {
               event?.preventDefault();
-              dispatch(internalStateActions.openSearchSessionInNewTab({ searchSession: session }));
+              void dispatch(
+                internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+              );
             },
             onClose: onFinishAction,
           });

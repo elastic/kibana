@@ -13,7 +13,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { OpenInNewTabParams, UpdateESQLQueryFn } from './types';
 
 export interface ContextAwarenessToolkitActions {
-  openInNewTab?: (params: OpenInNewTabParams) => void;
+  openInNewTab?: (params: OpenInNewTabParams) => Promise<void>;
   updateESQLQuery?: UpdateESQLQueryFn;
   addFilter?: DocViewFilterFn;
   updateAdHocDataViews?: (adHocDataViews: DataView[]) => Promise<void>;

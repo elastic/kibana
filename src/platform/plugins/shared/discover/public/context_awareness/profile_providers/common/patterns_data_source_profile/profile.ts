@@ -72,7 +72,7 @@ export const createPatternsDataSourceProfileProvider = (
               }
               return patternColumns.includes(field.name);
             },
-            execute: (executeContext) => {
+            execute: async (executeContext) => {
               const index = executeContext.dataView?.getIndexPattern();
               if (
                 !isOfAggregateQueryType(executeContext.query) ||
@@ -95,7 +95,7 @@ export const createPatternsDataSourceProfileProvider = (
               };
 
               if (toolkit.actions.openInNewTab) {
-                toolkit.actions.openInNewTab({
+                await toolkit.actions.openInNewTab({
                   query,
                   timeRange: executeContext.timeRange,
                 });
