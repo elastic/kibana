@@ -24,7 +24,7 @@ export class AgentConfigurationsPage {
     await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
-    await this.page.getByRole('heading', { name: 'Settings', level: 1 });
+    this.page.getByRole('heading', { name: 'Settings', level: 1 });
   }
 
   async getCreateConfigurationButton() {
@@ -32,9 +32,7 @@ export class AgentConfigurationsPage {
   }
 
   async isCreateConfigurationButtonAvailable() {
-    return await this.page
-      .getByText('Create configuration')
-      .isVisible({ timeout: 2500 });
+    return await this.page.getByText('Create configuration').isVisible({ timeout: 2500 });
   }
 
   async hasPermissionsError() {
