@@ -80,7 +80,12 @@ export function getFieldsToBeFilteredOn(
 ): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
     const instruction = euidFields[i];
-    if (!instructionMatchesDoc(doc, instruction)) continue;
+
+    // if the special conditional does not match, skip the instruction
+    if (!instructionMatchesDoc(doc, instruction)) {
+      continue;
+    }
+
     const composition = instruction.composition;
     const fieldAttrs = composition.filter(isEuidField);
     const composedFieldValues = fieldAttrs.reduce(
