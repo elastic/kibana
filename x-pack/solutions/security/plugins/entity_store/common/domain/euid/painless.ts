@@ -53,52 +53,6 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @returns A Painless evaluation string that computes the entity id.
  */
-function destinationToVarName(destination: string): string {
-  return destination.replace(/\./g, '_');
-}
-
-/** Painless boolean expression for the minimal conditional (field == eq). */
-function conditionalToPainlessExpression(
-  conditional: EuidConditional,
-  fieldValueExpr: (field: string) => string
-): string {
-  const val = fieldValueExpr(conditional.field);
-  return `${val} == "${escapePainlessString(conditional.eq)}"`;
-}
-
-function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
-  preamble: string;
-  evaluatedVars: Map<string, string>;
-} {
-  const evaluatedVars = new Map<string, string>();
-  const parts: string[] = [];
-  for (const ev of evaluations) {
-    const varName = destinationToVarName(ev.destination);
-    evaluatedVars.set(ev.destination, varName);
-    const srcEsc = escapePainlessField(ev.source);
-    const sourceNotEmpty = `doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != ""`;
-    const stmts: string[] = [
-      `String ${varName} = null;`,
-      `if (${sourceNotEmpty}) {`,
-      `  String _src = doc['${srcEsc}'].value`,
-    ];
-    let first = true;
-    for (const clause of ev.whenClauses) {
-      const conds = clause.sourceMatchesAny
-        .map((v) => `_src == "${escapePainlessString(v)}"`)
-        .join(' || ');
-      const prefix = first ? '  if ' : '  else if ';
-      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
-      first = false;
-    }
-    stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push('}');
-    parts.push(stmts.join(' '));
-  }
-  const preamble = parts.join(' ');
-  return { preamble, evaluatedVars };
-}
-
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
 
@@ -106,7 +60,11 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
+  // Map of field names to their already evaluated variable names.
+  // Used to avoid re-evaluating the same field multiple times.
   const evaluatedVars = new Map<string, string>();
+
+  // Goes through field evaluations and creates the required parsing logic for them.
   let preamble = '';
   if (identityField.fieldEvaluations?.length) {
     const result = buildFieldEvaluationsPreamble(identityField.fieldEvaluations);
@@ -126,6 +84,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     return `doc['${escapePainlessField(field)}'].value`;
   };
 
+  // If there is only one euid field, we can simplify the logic.
   if (identityField.euidFields.length === 1) {
     const instruction = identityField.euidFields[0];
     const comp = instruction.composition;
@@ -187,4 +146,51 @@ function escapePainlessField(field: string): string {
 
 function escapePainlessString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function destinationToVarName(destination: string): string {
+  return destination.replace(/\./g, '_');
+}
+
+/** Painless boolean expression for the minimal conditional (field == eq). */
+function conditionalToPainlessExpression(
+  conditional: EuidConditional,
+  // Function to get the value of a field.
+  fieldValueExpr: (field: string) => string
+): string {
+  const val = fieldValueExpr(conditional.field);
+  return `${val} == "${escapePainlessString(conditional.eq)}"`;
+}
+
+function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
+  preamble: string;
+  evaluatedVars: Map<string, string>;
+} {
+  const evaluatedVars = new Map<string, string>();
+  const parts: string[] = [];
+  for (const ev of evaluations) {
+    const varName = destinationToVarName(ev.destination);
+    evaluatedVars.set(ev.destination, varName);
+    const srcEsc = escapePainlessField(ev.source);
+    const sourceNotEmpty = `doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != ""`;
+    const stmts: string[] = [
+      `String ${varName} = null;`,
+      `if (${sourceNotEmpty}) {`,
+      `  String _src = doc['${srcEsc}'].value`,
+    ];
+    let first = true;
+    for (const clause of ev.whenClauses) {
+      const conds = clause.sourceMatchesAny
+        .map((v) => `_src == "${escapePainlessString(v)}"`)
+        .join(' || ');
+      const prefix = first ? '  if ' : '  else if ';
+      stmts.push(`${prefix}(${conds}) { ${varName} = "${escapePainlessString(clause.then)}"; }`);
+      first = false;
+    }
+    stmts.push(`  else { ${varName} = _src; }`);
+    stmts.push('}');
+    parts.push(stmts.join(' '));
+  }
+  const preamble = parts.join(' ');
+  return { preamble, evaluatedVars };
 }
