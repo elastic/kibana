@@ -19,7 +19,7 @@ export interface SearchInferenceEndpointsConfigType {
   };
 }
 
-export interface InferenceFeatureSetting {
+interface InferenceFeatureSetting {
   feature_id: string;
   endpoint_ids: string[];
 }
