@@ -116,7 +116,7 @@ export function buildRemainingLogsCountQuery(params: {
 
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
-  entityDefinition: { fields, type, entityTypeFallback },
+  entityDefinition,
   fromDateISO,
   toDateISO,
   docsLimit,
@@ -124,6 +124,8 @@ export function buildLogsExtractionEsqlQuery({
   recoveryId,
   pagination,
 }: LogsExtractionQueryParams): string {
+  const { fields, type, entityTypeFallback } = entityDefinition;
+
   return (
     buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId }) +
     buildFieldEvaluations(type) +
@@ -147,11 +149,12 @@ export function buildLogsExtractionEsqlQuery({
     )} ASC
   ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
   | LIMIT ${docsLimit}` +
-    // Concatenate the type of the entity and the id to perform the LOOKUP JOIN (otherwise ids won't match)
+    // Main entity id: type-prefixed (when needed) for LOOKUP JOIN
     `
-  | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = CONCAT("${type}:", ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )})` +
+  | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = ${getMainEntityIdFromUntypedEsql(
+      entityDefinition,
+      recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)
+    )}` +
     // - Perform the LOOKUP JOIN to get the latest data for the entity
     // - Merge the fields from latest with recent data (taking into consideration the retention strategy)
     // - Perform the custom fields evaluation logic
@@ -401,4 +404,14 @@ function buildFieldEvaluations(type: EntityType): string {
   // keep the line break to make the query more readable
   return `
   | EVAL ${fieldEvaluationsEsql}`;
+}
+
+function getMainEntityIdFromUntypedEsql(
+  { identityField, type }: EntityDefinition,
+  untypedIdExpression: string
+): string {
+  if (identityField.skipTypePrepend) {
+    return untypedIdExpression;
+  }
+  return `CONCAT("${type}:", ${untypedIdExpression})`;
 }

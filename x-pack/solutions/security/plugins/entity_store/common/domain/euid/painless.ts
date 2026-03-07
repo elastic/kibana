@@ -56,12 +56,13 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  */
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;
     const escaped = escapePainlessField(field);
     const condition = `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
-    return `if (${condition}) { return "${entityType}:" + doc['${escaped}'].value; } return null;`;
+    return `if (${condition}) { return ${prefixExpr}doc['${escaped}'].value; } return null;`;
   }
 
   if (identityField.euidFields.length === 0) {
@@ -106,10 +107,9 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
       : '';
     const condition = condPart + fieldCondition(field);
     const valueExpr = fieldValueExpr(field);
-    return `${preamble}if (${condition}) { return "${entityType}:" + ${valueExpr}; } return null;`;
+    return `${preamble}if (${condition}) { return ${prefixExpr}${valueExpr}; } return null;`;
   }
 
-  const prefix = `"${entityType}:"`;
   const clauses = identityField.euidFields.map((instruction) => {
     const composedField = instruction.composition;
     const compositionCond = composedField
@@ -121,7 +121,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
       : '';
     const condition = condPart + compositionCond;
     const valueExpr = buildPainlessValueExprWithEvaluated(composedField, fieldValueExpr);
-    return `if (${condition}) { return ${prefix} + ${valueExpr}; }`;
+    return `if (${condition}) { return ${prefixExpr}${valueExpr}; }`;
   });
 
   return preamble + clauses.join(' ') + ' return null;';

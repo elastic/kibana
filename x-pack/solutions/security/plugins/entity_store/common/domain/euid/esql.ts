@@ -192,9 +192,10 @@ export function getEuidEsqlEvaluation(
   { withTypeId = true }: { withTypeId?: boolean } = {}
 ) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
   if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, withTypeId);
+    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
   }
 
   if (identityField.euidFields.length === 0) {
@@ -217,9 +218,9 @@ export function getEuidEsqlEvaluation(
         const caseExpr = `CASE((${condEsql}) AND (${esqlIsNotNullOrEmpty(firstAttr.field)}), ${
           firstAttr.field
         }, NULL)`;
-        return appendTypeIdIfNeeded(entityType, caseExpr, withTypeId);
+        return appendTypeIdIfNeeded(entityType, caseExpr, mustPrependTypeId);
       }
-      return appendTypeIdIfNeeded(entityType, firstAttr.field, withTypeId);
+      return appendTypeIdIfNeeded(entityType, firstAttr.field, mustPrependTypeId);
     }
     // single instruction but composed: fall through to multi-branch CASE
   }
@@ -259,11 +260,15 @@ export function getEuidEsqlEvaluation(
   });
 
   const idLogic = `CASE(${euidLogic.join(',\n')}, NULL)`;
-  return appendTypeIdIfNeeded(entityType, idLogic, withTypeId);
+  return appendTypeIdIfNeeded(entityType, idLogic, mustPrependTypeId);
 }
 
-function appendTypeIdIfNeeded(entityType: EntityType, euidLogic: string, withTypeId: boolean) {
-  if (withTypeId) {
+function appendTypeIdIfNeeded(
+  entityType: EntityType,
+  euidLogic: string,
+  mustPrependTypeId: boolean
+) {
+  if (mustPrependTypeId) {
     return `CONCAT("${entityType}:", ${euidLogic})`;
   }
   return euidLogic;

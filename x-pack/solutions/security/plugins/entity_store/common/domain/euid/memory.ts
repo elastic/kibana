@@ -43,6 +43,9 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     if (value === undefined) {
       return undefined;
     }
+    if (identityField.skipTypePrepend) {
+      return value;
+    }
     return `${entityType}:${value}`;
   }
 
@@ -55,7 +58,11 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
     return undefined;
   }
 
-  return `${entityType}:${composedId.join('')}`;
+  const rawId = composedId.join('');
+  if (identityField.skipTypePrepend) {
+    return rawId;
+  }
+  return `${entityType}:${rawId}`;
 }
 
 function getComposedFieldValues(doc: any, euidFields: EuidFieldInstruction[]): string[] {

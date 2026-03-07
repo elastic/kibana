@@ -566,7 +566,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   
   | LIMIT 10000
-  | EVAL recent.entity.id = CONCAT(\\"generic:\\", recent.entity.EngineMetadata.UntypedId)
+  | EVAL recent.entity.id = recent.entity.EngineMetadata.UntypedId
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),

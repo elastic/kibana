@@ -79,6 +79,9 @@ const calculatedIdentityFieldLogicSchema = z.object({
   // present" (and any entity-specific rules, e.g. user IDP pre-conditions). Translated to
   // DSL and ESQL via conditionToQueryDsl and conditionToESQL.
   documentsFilter: streamlangConditionSchema,
+
+  // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
+  skipTypePrepend: z.optional(z.boolean()),
 });
 
 /**
@@ -87,6 +90,8 @@ const calculatedIdentityFieldLogicSchema = z.object({
  */
 export const singleFieldIdentitySchema = z.object({
   singleField: z.string(),
+  // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
+  skipTypePrepend: z.optional(z.boolean()),
 });
 
 const identityFieldSchema = z.union([

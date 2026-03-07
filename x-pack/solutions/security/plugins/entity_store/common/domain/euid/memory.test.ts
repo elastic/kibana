@@ -14,14 +14,12 @@ describe('getEuidFromObject', () => {
   });
 
   describe('generic', () => {
-    it('returns generic: + entity.id when present', () => {
-      expect(getEuidFromObject('generic', { entity: { id: 'e-123' } })).toBe('generic:e-123');
+    it('returns entity.id without type prefix (skipTypePrepend)', () => {
+      expect(getEuidFromObject('generic', { entity: { id: 'e-123' } })).toBe('e-123');
     });
 
     it('unwraps _source when doc is an Elasticsearch hit', () => {
-      expect(getEuidFromObject('generic', { _source: { entity: { id: 'e-123' } } })).toBe(
-        'generic:e-123'
-      );
+      expect(getEuidFromObject('generic', { _source: { entity: { id: 'e-123' } } })).toBe('e-123');
     });
   });
 

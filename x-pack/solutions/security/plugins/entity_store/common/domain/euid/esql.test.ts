@@ -226,10 +226,10 @@ describe('getFieldEvaluationsSourcesFilterEsql', () => {
 });
 
 describe('getEuidEsqlEvaluation', () => {
-  it('returns field IS NOT NULL AND field != "" for non-calculated identity (generic)', () => {
+  it('returns raw field for generic (skipTypePrepend: no type prefix)', () => {
     const result = getEuidEsqlEvaluation('generic');
 
-    const expected = 'CONCAT("generic:", entity.id)';
+    const expected = 'entity.id';
     expect(normalize(result)).toBe(normalize(expected));
   });
 
