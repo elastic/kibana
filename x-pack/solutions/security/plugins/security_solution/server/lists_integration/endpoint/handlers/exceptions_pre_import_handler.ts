@@ -28,6 +28,7 @@ import {
   TrustedAppValidator,
   TrustedDeviceValidator,
 } from '../validators';
+import { buildSpaceDataFilter } from '../utils';
 
 export const getExceptionsPreImportHandler = (
   endpointAppContext: EndpointAppContextService
@@ -36,6 +37,8 @@ export const getExceptionsPreImportHandler = (
     data: { data, overwrite },
     context: { request, exceptionListClient },
   }): ReturnType<ExceptionsListPreImportServerExtension['callback']> => {
+    const logger = endpointAppContext.createLogger('listsPreImportExtensionPoint');
+
     validateCanEndpointArtifactsBeImported(data, endpointAppContext.experimentalFeatures);
     provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, endpointAppContext);
 
@@ -129,16 +132,31 @@ export const getExceptionsPreImportHandler = (
     // as we disabled the overwrite query param on the list API level to avoid conflict issue.
     const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
 
-    const notGlobalExceptionFilter = `NOT exception-list-agnostic.attributes.tags:"${GLOBAL_ARTIFACT_TAG}"`;
-    const createdInCurrentSpaceExceptionFilter = `exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(
-      spaceId
-    )}"`;
-    const filterForCurrentSpace = `${notGlobalExceptionFilter} AND ${createdInCurrentSpaceExceptionFilter} `;
+    const canManageGlobalArtifacts = (await endpointAppContext.getEndpointAuthz(request))
+      .canManageGlobalArtifacts;
+
+    let filter: string;
+    if (canManageGlobalArtifacts) {
+      const filterForAllItemsVisibleInCurrentSpace = (
+        await buildSpaceDataFilter(endpointAppContext, request)
+      ).filter;
+
+      filter = filterForAllItemsVisibleInCurrentSpace;
+    } else {
+      const notGlobalExceptionFilter = `NOT exception-list-agnostic.attributes.tags:"${GLOBAL_ARTIFACT_TAG}"`;
+      const createdInCurrentSpaceExceptionFilter = `exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(
+        spaceId
+      )}"`;
+
+      const filterForNonGlobalItemsOwnedByCurrentSpace = `${notGlobalExceptionFilter} AND ${createdInCurrentSpaceExceptionFilter} `;
+
+      filter = filterForNonGlobalItemsOwnedByCurrentSpace;
+    }
 
     const findResult = await exceptionListClient.findExceptionListItem({
       listId: importedListId,
       namespaceType: 'agnostic',
-      filter: filterForCurrentSpace,
+      filter,
       page: 1,
       perPage: 1_000,
       sortField: undefined,
@@ -150,6 +168,16 @@ export const getExceptionsPreImportHandler = (
         ids: findResult.data.map((item) => item.id) ?? [],
         namespaceType: 'agnostic',
       });
+
+      logger.info(
+        `Deleted ${
+          findResult.data.length
+        } items from list [${importedListId}] in space [${spaceId}] to prepare for import with overwrite${
+          canManageGlobalArtifacts ? ', including global artifacts' : ''
+        }.`
+      );
+    } else {
+      logger.info('No exception list items found to delete on import with overwrite.');
     }
 
     return {

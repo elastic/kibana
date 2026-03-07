@@ -604,7 +604,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 });
 
                 describe('when without global artifact privilege', () => {
-                  it('should remove existing per-policy artifacts only from the same space', async () => {
+                  it('should remove existing per-policy artifacts OWNED by current space', async () => {
                     await supertest[artifact.listId].all
                       .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
                       .set('kbn-xsrf', 'true')
@@ -631,33 +631,77 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         success_count_exception_list_items: 1,
                       } as ImportExceptionsResponseSchema);
 
-                    const artifactsInSpaceDefault = (
+                    const artifactsInCurrentSpace = (
                       await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
                     ).map((item) => item.item_id);
-                    const artifactsInSpaceB = (await fetchArtifacts(OTHER_SPACE_ID, 'item_id')).map(
-                      (item) => item.item_id
-                    );
+                    const artifactsInOtherSpace = (
+                      await fetchArtifacts(OTHER_SPACE_ID, 'item_id')
+                    ).map((item) => item.item_id);
 
-                    expect(artifactsInSpaceB).to.eql([
+                    expect(artifactsInCurrentSpace).to.eql([
+                      'existing-global-artifact-in-current-space',
+                      'existing-global-artifact-in-other-space',
+                      // 'existing-per-policy-artifact-in-current-space', => deleted
+                      'existing-per-policy-artifact-in-other-space-visible-in-current-space',
+                      'imported-artifact',
+                    ]);
+
+                    expect(artifactsInOtherSpace).to.eql([
                       'existing-global-artifact-in-current-space',
                       'existing-global-artifact-in-other-space',
                       'existing-per-policy-artifact-in-other-space',
                       'existing-per-policy-artifact-in-other-space-visible-in-current-space',
                     ]);
-
-                    expect(artifactsInSpaceDefault).to.eql([
-                      'existing-global-artifact-in-current-space',
-                      'existing-global-artifact-in-other-space',
-                      // 'existing-per-policy-artifact-in-current-space', => this should be deleted
-                      'existing-per-policy-artifact-in-other-space-visible-in-current-space',
-                      'imported-artifact',
-                    ]);
                   });
                 });
 
                 describe('when with global artifact privilege', () => {
-                  it('should remove existing global artifacts', async () => {});
-                  it('should remove existing per-policy artifacts that are visible in current space', async () => {});
+                  it('should remove existing per-policy artifacts VISIBLE in current space and all global artifacts', async () => {
+                    await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                      .post(`${EXCEPTION_LIST_URL}/_import?overwrite=true`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .attach(
+                        'file',
+                        buildImportBuffer(artifact.listId, [
+                          {
+                            name: "i'm imported!",
+                            tags: [CURRENT_SPACE_OWNER_ID],
+                            item_id: 'imported-artifact',
+                          },
+                        ]),
+                        'import_data.ndjson'
+                      )
+                      .expect(200)
+                      .expect({
+                        errors: [],
+                        success: true,
+                        success_count: 1,
+                        success_exception_lists: true,
+                        success_count_exception_lists: 0,
+                        success_exception_list_items: true,
+                        success_count_exception_list_items: 1,
+                      } as ImportExceptionsResponseSchema);
+
+                    const artifactsInCurrentSpace = (
+                      await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
+                    ).map((item) => item.item_id);
+                    const artifactsInOtherSpace = (
+                      await fetchArtifacts(OTHER_SPACE_ID, 'item_id')
+                    ).map((item) => item.item_id);
+
+                    expect(artifactsInCurrentSpace).to.eql([
+                      // all visible artifacts are deleted, even if not owned by current space
+                      'imported-artifact',
+                    ]);
+
+                    expect(artifactsInOtherSpace).to.eql([
+                      // 'existing-global-artifact-in-current-space', => deleted
+                      // 'existing-global-artifact-in-other-space',   => deleted
+                      'existing-per-policy-artifact-in-other-space',
+                      // 'existing-per-policy-artifact-in-other-space-visible-in-current-space', => deleted
+                    ]);
+                  });
                 });
               });
             });
