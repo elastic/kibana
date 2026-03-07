@@ -9,12 +9,13 @@ import { type CoreStart } from '@kbn/core/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesTitle, PublishesWritableTitle } from '@kbn/presentation-publishing';
 import type { Subject } from 'rxjs';
+import type { BurnRateEmbeddableState } from '../../../../common/embeddables/burn_rate/types';
 
-/** Re-exported from server (derived from schemas there) */
+/** Re-exported from common (which re-exports from server schemas) */
 export type {
   BurnRateCustomState,
   BurnRateEmbeddableState,
-} from '../../../server/lib/embeddables/burn_rate_schema';
+} from '../../../../common/embeddables/burn_rate/types';
 
 export interface EmbeddableProps {
   sloId: string;

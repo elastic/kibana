@@ -82,7 +82,7 @@ describe('transformBurnRateOut', () => {
       transformBurnRateOut({
         slo_id: 'new-slo-id',
         duration: '1h',
-      })
+      } as BurnRateEmbeddableState)
     ).toMatchInlineSnapshot(`
       Object {
         "duration": "1h",
