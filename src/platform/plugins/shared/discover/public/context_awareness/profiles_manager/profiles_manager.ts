@@ -127,7 +127,11 @@ export class ProfilesManager {
   }) {
     return new ScopedProfilesManager(
       this.rootContext$,
-      this.rootProfileService,
+      () =>
+        this.rootProfileService.getProfile({
+          context: this.rootContext$.getValue(),
+          toolkit,
+        }),
       this.dataSourceProfileService,
       this.documentProfileService,
       scopedEbtManager,
