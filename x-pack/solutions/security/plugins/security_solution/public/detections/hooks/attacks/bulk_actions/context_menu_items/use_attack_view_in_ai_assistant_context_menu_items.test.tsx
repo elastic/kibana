@@ -14,6 +14,8 @@ import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/
 import { useReportAddToChat } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { useAttackViewInAiAssistantContextMenuItems } from './use_attack_view_in_ai_assistant_context_menu_items';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
 jest.mock('@kbn/elastic-assistant');
 jest.mock('@kbn/elastic-assistant-common', () => {
@@ -28,6 +30,7 @@ jest.mock('../../../../../attack_discovery/pages/results/use_attack_discovery_at
 jest.mock('../../../../../agent_builder/hooks/use_agent_builder_availability');
 jest.mock('../../../../../agent_builder/hooks/use_report_add_to_chat');
 jest.mock('../../../../../assistant/use_assistant_availability');
+jest.mock('../../../../../common/lib/kibana');
 
 const mockUseAttackDiscoveryAttachment = useAttackDiscoveryAttachment as jest.MockedFunction<
   typeof useAttackDiscoveryAttachment
@@ -50,10 +53,20 @@ const mockAttack = getMockAttackDiscoveryAlerts()[0];
 const mockRegisterPromptContext = jest.fn();
 const mockUnRegisterPromptContext = jest.fn();
 const mockShowAssistantOverlay = jest.fn();
+const reportEventMock = jest.fn();
 
 describe('useAttackViewInAiAssistantContextMenuItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    reportEventMock.mockClear();
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
 
     mockUseAttackDiscoveryAttachment.mockReturnValue(jest.fn());
     mockUseAgentBuilderAvailability.mockReturnValue({
@@ -122,6 +135,21 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
     expect(mockRegisterPromptContext.mock.invocationCallOrder[0]).toBeLessThan(
       mockShowAssistantOverlay.mock.invocationCallOrder[0]
     );
+  });
+
+  it('should report AIAssistantOpened event on "View in AI Assistant" click', () => {
+    const { result } = renderHook(() =>
+      useAttackViewInAiAssistantContextMenuItems({
+        attack: mockAttack,
+        telemetrySource: 'attacks_page_group_take_action',
+      })
+    );
+
+    result.current.items[0]?.onClick?.({} as React.MouseEvent);
+
+    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.AIAssistantOpened, {
+      source: 'attacks_page_group_take_action',
+    });
   });
 
   it('should return "Add to chat" when Agent Builder chat experience is enabled and user has privilege', () => {
@@ -217,6 +245,28 @@ describe('useAttackViewInAiAssistantContextMenuItems', () => {
     expect(reportAddToChatClick.mock.invocationCallOrder[0]).toBeLessThan(
       closePopover.mock.invocationCallOrder[0]
     );
+  });
+
+  it('should not report AIAssistantOpened event on "Add to chat" click', () => {
+    const reportAddToChatClick = jest.fn();
+    mockUseReportAddToChat.mockReturnValue(reportAddToChatClick);
+    mockUseAgentBuilderAvailability.mockReturnValue({
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+      isAgentBuilderEnabled: true,
+    });
+
+    const { result } = renderHook(() =>
+      useAttackViewInAiAssistantContextMenuItems({
+        attack: mockAttack,
+        telemetrySource: 'attacks_page_group_take_action',
+      })
+    );
+
+    result.current.items[0]?.onClick?.({} as React.MouseEvent);
+
+    expect(reportEventMock).not.toHaveBeenCalled();
   });
 
   it('should disable "View in AI Assistant" when user has no assistant privilege', () => {
