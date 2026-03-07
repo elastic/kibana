@@ -507,8 +507,16 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 });
               });
 
-              it('should return conflict on list, but import artifacts when list exist', async () => {
+              it('should return conflict on list, but import artifacts when list exist without deleting existing ones', async () => {
                 await endpointArtifactTestResources.createList(artifact.listId);
+                await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                  tags: [GLOBAL_ARTIFACT_TAG],
+                  item_id: 'existing-global-artifact-in-current-space',
+                });
+                await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                  tags: [],
+                  item_id: 'existing-per-policy-artifact-in-current-space',
+                });
 
                 await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
                   .post(`${EXCEPTION_LIST_URL}/_import`)
@@ -516,7 +524,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_ID] }]),
+                    buildImportBuffer(artifact.listId, [
+                      { item_id: 'imported-artifact', tags: [CURRENT_SPACE_OWNER_ID] },
+                    ]),
                     'import_data.ndjson'
                   )
                   .expect(200)
@@ -537,6 +547,16 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     success_exception_list_items: true,
                     success_count_exception_list_items: 1,
                   } as ImportExceptionsResponseSchema);
+
+                const artifactsInCurrentSpace = (
+                  await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
+                ).map((item) => item.item_id);
+
+                expect(artifactsInCurrentSpace).to.eql([
+                  'existing-global-artifact-in-current-space',
+                  'existing-per-policy-artifact-in-current-space',
+                  'imported-artifact',
+                ]);
               });
 
               describe('when `overwrite` query param is `true`', () => {

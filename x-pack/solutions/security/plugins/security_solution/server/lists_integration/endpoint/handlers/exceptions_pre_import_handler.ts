@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ExceptionsListPreImportServerExtension } from '@kbn/lists-plugin/server';
+import type {
+  ExceptionListClient,
+  ExceptionsListPreImportServerExtension,
+} from '@kbn/lists-plugin/server';
 import {
   ENDPOINT_ARTIFACT_LIST_IDS,
   ENDPOINT_ARTIFACT_LISTS,
 } from '@kbn/securitysolution-list-constants';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
@@ -40,7 +44,7 @@ export const getExceptionsPreImportHandler = (
     const logger = endpointAppContext.createLogger('listsPreImportExtensionPoint');
 
     validateCanEndpointArtifactsBeImported(data, endpointAppContext.experimentalFeatures);
-    provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, endpointAppContext);
+    provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, logger);
 
     if (!endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
       return { data, overwrite };
@@ -113,72 +117,19 @@ export const getExceptionsPreImportHandler = (
       await endpointExceptionValidator.validatePreImport(data);
     }
 
-    // after all validation is successful, let's prepare for importing the data
-    if (overwrite) {
-      // Let's not pass the `list` to the list API, to avoid conflict issue due to the `overwrite` query param is disabled on that level.
-      cleanList(data);
-    }
-
-    if (!request) {
-      throw new EndpointArtifactExceptionValidationError(
-        'Unable to determine space id. Missing HTTP Request object',
-        500
-      );
+    if (!overwrite) {
+      return { data, overwrite };
     }
 
     // --- From this point, we're starting to perform operations on SOs. All validations must be above ---
-
-    // Delete items from the list API if overwrite is true, to simulate the overwrite behaviour,
-    // as we disabled the overwrite query param on the list API level to avoid conflict issue.
-    const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
-
-    const canManageGlobalArtifacts = (await endpointAppContext.getEndpointAuthz(request))
-      .canManageGlobalArtifacts;
-
-    let filter: string;
-    if (canManageGlobalArtifacts) {
-      const filterForAllItemsVisibleInCurrentSpace = (
-        await buildSpaceDataFilter(endpointAppContext, request)
-      ).filter;
-
-      filter = filterForAllItemsVisibleInCurrentSpace;
-    } else {
-      const notGlobalExceptionFilter = `NOT exception-list-agnostic.attributes.tags:"${GLOBAL_ARTIFACT_TAG}"`;
-      const createdInCurrentSpaceExceptionFilter = `exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(
-        spaceId
-      )}"`;
-
-      const filterForNonGlobalItemsOwnedByCurrentSpace = `${notGlobalExceptionFilter} AND ${createdInCurrentSpaceExceptionFilter} `;
-
-      filter = filterForNonGlobalItemsOwnedByCurrentSpace;
-    }
-
-    const findResult = await exceptionListClient.findExceptionListItem({
-      listId: importedListId,
-      namespaceType: 'agnostic',
-      filter,
-      page: 1,
-      perPage: 1_000,
-      sortField: undefined,
-      sortOrder: undefined,
+    await deleteExistingItemsForOverwrite({
+      data,
+      exceptionListClient,
+      endpointAppContext,
+      request,
+      importedListId,
+      logger,
     });
-
-    if (findResult?.total && findResult.total > 0) {
-      await exceptionListClient.bulkDeleteExceptionListItems({
-        ids: findResult.data.map((item) => item.id) ?? [],
-        namespaceType: 'agnostic',
-      });
-
-      logger.info(
-        `Deleted ${
-          findResult.data.length
-        } items from list [${importedListId}] in space [${spaceId}] to prepare for import with overwrite${
-          canManageGlobalArtifacts ? ', including global artifacts' : ''
-        }.`
-      );
-    } else {
-      logger.info('No exception list items found to delete on import with overwrite.');
-    }
 
     return {
       data,
@@ -225,10 +176,8 @@ const validateCanEndpointArtifactsBeImported = (
  */
 const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
   data: PromiseFromStreams,
-  endpointAppContextService: EndpointAppContextService
+  logger: Logger
 ) => {
-  const logger = endpointAppContextService.createLogger('listsPreImportExtensionPoint');
-
   const adjustedImportItems: PromiseFromStreams['items'] = [];
 
   for (const item of data.items) {
@@ -249,6 +198,80 @@ const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
   }
 };
 
-const cleanList = (data: PromiseFromStreams) => {
+const deleteExistingItemsForOverwrite = async ({
+  data,
+  exceptionListClient,
+  endpointAppContext,
+  request,
+  importedListId,
+  logger,
+}: {
+  data: PromiseFromStreams;
+  exceptionListClient: ExceptionListClient;
+  endpointAppContext: EndpointAppContextService;
+  request: KibanaRequest | undefined;
+  importedListId: string;
+  logger: Logger;
+}) => {
+  if (!request) {
+    throw new EndpointArtifactExceptionValidationError(
+      'Unable to determine space id. Missing HTTP Request object',
+      500
+    );
+  }
+
+  // Let's not pass the `list` to the list API, to avoid conflict issue due to the `overwrite` query param is disabled on that level.
   data.lists = [];
+
+  // Delete items from the list API if overwrite is true, to simulate the overwrite behaviour,
+  // as we disabled the overwrite query param on the list API level to avoid conflict issue.
+  const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+
+  const canManageGlobalArtifacts = (await endpointAppContext.getEndpointAuthz(request))
+    .canManageGlobalArtifacts;
+
+  let filter: string;
+  if (canManageGlobalArtifacts) {
+    const filterForAllItemsVisibleInCurrentSpace = (
+      await buildSpaceDataFilter(endpointAppContext, request)
+    ).filter;
+
+    filter = filterForAllItemsVisibleInCurrentSpace;
+  } else {
+    const notGlobalExceptionFilter = `NOT exception-list-agnostic.attributes.tags:"${GLOBAL_ARTIFACT_TAG}"`;
+    const createdInCurrentSpaceExceptionFilter = `exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(
+      spaceId
+    )}"`;
+
+    const filterForNonGlobalItemsOwnedByCurrentSpace = `${notGlobalExceptionFilter} AND ${createdInCurrentSpaceExceptionFilter} `;
+
+    filter = filterForNonGlobalItemsOwnedByCurrentSpace;
+  }
+
+  const findResult = await exceptionListClient.findExceptionListItem({
+    listId: importedListId,
+    namespaceType: 'agnostic',
+    filter,
+    page: 1,
+    perPage: 1_000,
+    sortField: undefined,
+    sortOrder: undefined,
+  });
+
+  if (findResult?.total && findResult.total > 0) {
+    await exceptionListClient.bulkDeleteExceptionListItems({
+      ids: findResult.data.map((item) => item.id) ?? [],
+      namespaceType: 'agnostic',
+    });
+
+    logger.info(
+      `Deleted ${
+        findResult.data.length
+      } items from list [${importedListId}] in space [${spaceId}] to prepare for import with overwrite${
+        canManageGlobalArtifacts ? ', including global artifacts' : ''
+      }.`
+    );
+  } else {
+    logger.info('No exception list items found to delete on import with overwrite.');
+  }
 };
