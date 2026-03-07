@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-12T10:42:37.757Z",
-  "sha1": "63686bda12a3b15365bd180d5238b3f9426e2568",
+  "sha1": "828d203fa707bbb72e29316dc34284b66829e271",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -12,7 +11,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 34,
+        "line": 41,
         "column": 10
       }
     },
@@ -26,7 +25,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 57,
+        "line": 64,
         "column": 10
       }
     },
@@ -40,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 80,
+        "line": 87,
         "column": 10
       }
     },
@@ -54,7 +53,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 102,
+        "line": 109,
         "column": 10
       }
     },
@@ -68,7 +67,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 123,
+        "line": 130,
         "column": 10
       }
     },
@@ -82,7 +81,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
-        "line": 141,
+        "line": 148,
         "column": 10
       }
     },

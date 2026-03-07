@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-25T05:08:30.077Z",
-  "sha1": "66e7f718d049f175668137d770e0b40023705749",
+  "sha1": "3f81a2cb548740cf1bb1657246a29bbc8783f2ae",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -1081,6 +1080,22 @@
       }
     },
     {
+      "id": "0ea21a81fd9bb15-e7b2804e4de31d3",
+      "title": "Transaction details Redirects to transaction list when transactionName is missing in URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    },
+    {
       "id": "0ea21a81fd9bb15-025e43f8799c8ae",
       "title": "Transaction details Renders the page with expected content",
       "expectedStatus": "passed",
@@ -1092,7 +1107,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 29,
+        "line": 51,
         "column": 9
       }
     },
@@ -1108,7 +1123,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 52,
+        "line": 74,
         "column": 9
       }
     },
@@ -1124,7 +1139,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
-        "line": 74,
+        "line": 96,
         "column": 9
       }
     },
