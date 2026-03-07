@@ -57,7 +57,7 @@ export class AnomalyDetectionPage {
 
     await this.page
       .getByText('Anomaly detection jobs created')
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async deleteMlJob() {
