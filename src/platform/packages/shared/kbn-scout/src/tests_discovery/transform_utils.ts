@@ -77,14 +77,17 @@ const buildScoutCommand = (serverRunFlag: string): string => {
   return `node scripts/scout run-tests --location cloud ${serverRunFlag}`;
 };
 
+const NO_DATA_GROUP_SUFFIX = ' - clean env';
+
 /**
  * Flattens ModuleDiscoveryInfo[] into an array grouped by mode, group, and server run flag
- * for qaf-tests run (Cloud test execution)
+ * for qaf-tests run (Cloud test execution).
+ * Configs with `needsCleanEnv` are placed into a separate group suffixed with " - no data".
  */
 export const flattenModulesByServerRunFlag = (
   modules: ModuleDiscoveryInfo[]
 ): FlattenedConfigGroup[] => {
-  // Using a map with composite key: `${mode}:${group}:${serverRunFlag}`
+  // Using a map with composite key: `${mode}:${groupName}:${serverRunFlag}`
   const groupsMap = new Map<string, FlattenedConfigGroup>();
 
   for (const module of modules) {
@@ -94,12 +97,14 @@ export const flattenModulesByServerRunFlag = (
           ? 'serverless'
           : 'stateful';
 
-        const key = `${arch}:${module.group}:${serverRunFlag}`;
+        const groupName = config.needsCleanEnv
+          ? `${module.group}${NO_DATA_GROUP_SUFFIX}`
+          : module.group;
+        const key = `${arch}:${groupName}:${serverRunFlag}`;
 
         // Get or create group
         let group = groupsMap.get(key);
         if (!group) {
-          // Determine deployment type based on mode (ECH/stateful vs MKI/serverless)
           const domain =
             arch === 'stateful'
               ? getTargetDomainForEch(module.group)
@@ -110,7 +115,7 @@ export const flattenModulesByServerRunFlag = (
               arch,
               domain,
             },
-            group: module.group,
+            group: groupName,
             scoutCommand: buildScoutCommand(serverRunFlag),
             configs: [],
           };

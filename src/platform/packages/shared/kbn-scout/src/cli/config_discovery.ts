@@ -37,6 +37,12 @@ export type { FlattenedConfigGroup, ModuleDiscoveryInfo } from '../tests_discove
 
 // Builds module discovery info from testable modules
 
+const NEEDS_CLEAN_ENV_TAG = '@needs_clean_environment';
+
+const hasCleanEnvTests = (tests: { tags: string[] }[]): boolean => {
+  return tests.some((test) => test.tags.includes(NEEDS_CLEAN_ENV_TAG));
+};
+
 const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
   return testableModules.allIncludingConfigs.map((module) => ({
     name: module.name,
@@ -53,8 +59,9 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
       return {
         path: config.path,
         hasTests: !!runnableTest,
+        needsCleanEnv: hasCleanEnvTests(config.manifest.tests),
         tags: allTags,
-        serverRunFlags: [], // Will be computed from tags after cross-tag filtering
+        serverRunFlags: [],
         usesParallelWorkers,
       };
     }),

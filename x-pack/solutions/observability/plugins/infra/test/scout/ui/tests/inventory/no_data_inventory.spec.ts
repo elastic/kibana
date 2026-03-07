@@ -11,7 +11,13 @@ import { test } from '../../fixtures';
 
 test.describe(
   'Infrastructure Inventory - Onboarding',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.observability.complete,
+      '@needs_clean_environment',
+    ],
+  },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
       await browserAuth.loginAsViewer();

@@ -36,6 +36,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/to/api/config',
             hasTests: true,
+            needsCleanEnv: false,
             tags: ['@local-stateful-classic'],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -64,6 +65,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/config',
             hasTests: true,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -85,6 +87,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/config',
             hasTests: true,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch serverless --domain observability_complete'],
             usesParallelWorkers: false,
@@ -110,6 +113,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/a',
             hasTests: true,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -124,6 +128,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/path/b',
             hasTests: true,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -148,6 +153,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/s',
             hasTests: true,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch serverless --domain search'],
             usesParallelWorkers: false,
@@ -162,6 +168,7 @@ describe('flattenModulesByServerRunFlag', () => {
           {
             path: '/e',
             hasTests: true,
+            needsCleanEnv: false,
             tags: [],
             serverRunFlags: ['--arch stateful --domain classic'],
             usesParallelWorkers: false,
@@ -173,6 +180,84 @@ describe('flattenModulesByServerRunFlag', () => {
     expect(result).toHaveLength(2);
     expect(result[0].testTarget.arch).toBe('stateful');
     expect(result[1].testTarget.arch).toBe('serverless');
+  });
+
+  it('groups no-data configs into a separate group with " - clean env" suffix', () => {
+    const modules: ModuleDiscoveryInfo[] = [
+      {
+        name: 'infraPlugin',
+        group: 'observability',
+        type: 'plugin',
+        configs: [
+          {
+            path: '/path/to/parallel.playwright.config.ts',
+            hasTests: true,
+            needsCleanEnv: false,
+            tags: [],
+            serverRunFlags: ['--arch stateful --domain classic'],
+            usesParallelWorkers: true,
+          },
+          {
+            path: '/path/to/playwright.config.ts',
+            hasTests: true,
+            needsCleanEnv: true,
+            tags: [],
+            serverRunFlags: ['--arch stateful --domain classic'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
+    const result = flattenModulesByServerRunFlag(modules);
+    expect(result).toHaveLength(2);
+
+    const regularGroup = result.find((g) => g.group === 'observability');
+    expect(regularGroup).toBeDefined();
+    expect(regularGroup!.configs).toEqual(['/path/to/parallel.playwright.config.ts']);
+
+    const noDataGroup = result.find((g) => g.group === 'observability - clean env');
+    expect(noDataGroup).toBeDefined();
+    expect(noDataGroup!.configs).toEqual(['/path/to/playwright.config.ts']);
+    expect(noDataGroup!.testTarget).toEqual({ arch: 'stateful', domain: 'observability_complete' });
+  });
+
+  it('aggregates multiple no-data configs from different modules into the same no-data group', () => {
+    const modules: ModuleDiscoveryInfo[] = [
+      {
+        name: 'pluginA',
+        group: 'observability',
+        type: 'plugin',
+        configs: [
+          {
+            path: '/path/a/playwright.config.ts',
+            hasTests: true,
+            needsCleanEnv: true,
+            tags: [],
+            serverRunFlags: ['--arch serverless --domain observability_complete'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+      {
+        name: 'pluginB',
+        group: 'observability',
+        type: 'plugin',
+        configs: [
+          {
+            path: '/path/b/playwright.config.ts',
+            hasTests: true,
+            needsCleanEnv: true,
+            tags: [],
+            serverRunFlags: ['--arch serverless --domain observability_complete'],
+            usesParallelWorkers: false,
+          },
+        ],
+      },
+    ];
+    const result = flattenModulesByServerRunFlag(modules);
+    expect(result).toHaveLength(1);
+    expect(result[0].group).toBe('observability - clean env');
+    expect(result[0].configs).toHaveLength(2);
   });
 
   it('returns empty array for empty input', () => {
