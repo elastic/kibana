@@ -151,24 +151,13 @@ export const extractEsqlVariables = (
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const isSingleSelect = panel.singleSelect ?? true;
-      const selectedValues = panel.selectedOptions || [];
-
-      let value: string | number | (string | number)[];
-
-      if (isSingleSelect) {
-        // Single select: return the first selected value, converting to number if possible
-        const singleValue = selectedValues[0];
-        value = isNaN(Number(singleValue)) ? singleValue : Number(singleValue);
-      } else {
-        // Multi select: return array with numbers converted from strings when possible
-        value = selectedValues.map((val) => (isNaN(Number(val)) ? val : Number(val)));
-      }
+      const isSingleSelect = panel.single_select ?? true;
+      const selectedValues = panel.selected_options || [];
 
       acc.push({
-        key: panel.variableName,
-        type: panel.variableType as ESQLVariableType,
-        value,
+        key: panel.variable_name,
+        type: panel.variable_type as ESQLVariableType,
+        value: isSingleSelect ? selectedValues[0] ?? '' : selectedValues,
       });
     }
     return acc;

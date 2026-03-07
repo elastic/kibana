@@ -12,9 +12,15 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { AttacksListPanel } from './attacks_list_panel';
 import { useAttacksListData } from './use_attacks_list_data';
 import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
+jest.mock('../../../../../common/lib/kibana');
 jest.mock('./use_attacks_list_data');
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../entity_analytics/components/severity/severity_bar', () => ({
+  SeverityBar: () => <div data-test-subj="severity-bar" />,
+}));
 
 describe('AttacksListPanel', () => {
   const mockDataView = {
@@ -23,10 +29,18 @@ describe('AttacksListPanel', () => {
   } as unknown as DataView;
 
   const mockOpenFlyout = jest.fn();
+  const reportEvent = jest.fn();
 
   beforeEach(() => {
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: mockOpenFlyout,
+    });
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
     });
   });
 
@@ -51,8 +65,18 @@ describe('AttacksListPanel', () => {
 
   it('renders table with data correctly', () => {
     const mockItems = [
-      { id: 'attack-1', name: 'Attack 1', alertsCount: 5 },
-      { id: 'attack-2', name: 'Attack 2', alertsCount: 3 },
+      {
+        id: 'attack-1',
+        name: 'Attack 1',
+        alertsCount: 5,
+        severityCount: { critical: 2, high: 3 },
+      },
+      {
+        id: 'attack-2',
+        name: 'Attack 2',
+        alertsCount: 3,
+        severityCount: { low: 3 },
+      },
     ];
 
     (useAttacksListData as jest.Mock).mockReturnValue({
@@ -72,10 +96,11 @@ describe('AttacksListPanel', () => {
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('Attack 2')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getAllByTestId('severity-bar')).toHaveLength(2);
   });
 
   it('calls openFlyout when clicking on an attack name', () => {
-    const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5 }];
+    const mockItems = [{ id: 'attack-1', name: 'Attack 1', alertsCount: 5, severityCount: {} }];
 
     (useAttacksListData as jest.Mock).mockReturnValue({
       items: mockItems,
@@ -100,6 +125,10 @@ describe('AttacksListPanel', () => {
           indexName: 'test-index-pattern',
         },
       },
+    });
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_summary_kpi',
     });
   });
 

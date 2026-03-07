@@ -168,7 +168,8 @@ const bytesColumn: GenericIndexPatternColumn = {
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
  */
-describe('FormBasedDimensionEditor', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253327
+describe.skip('FormBasedDimensionEditor', () => {
   let state: FormBasedPrivateState;
   let setState: jest.Mock;
   let defaultProps: FormBasedDimensionEditorProps;

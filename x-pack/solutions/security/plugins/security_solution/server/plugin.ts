@@ -241,15 +241,20 @@ export class Plugin implements ISecuritySolutionPlugin {
   }
 
   private registerAgentBuilderAttachmentsAndTools(
-    agentBuilder: SecuritySolutionPluginSetupDependencies['agentBuilder'],
+    plugins: SecuritySolutionPluginSetupDependencies,
     core: SecuritySolutionPluginCoreSetupDependencies,
     logger: Logger
   ): void {
-    if (!agentBuilder) {
+    if (!plugins.agentBuilder) {
       return;
     }
 
-    registerTools(agentBuilder, core, logger, this.config.experimentalFeatures).catch((error) => {
+    const agentBuilder = plugins.agentBuilder;
+
+    const experimentalFeatures = this.config.experimentalFeatures;
+    const endpointAppContextService = this.endpointAppContextService;
+
+    registerTools(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
       this.logger.error(`Error registering security tools: ${error}`);
     });
     registerAttachments(agentBuilder).catch((error) => {
@@ -258,7 +263,15 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerAgents(agentBuilder, core, logger).catch((error) => {
       this.logger.error(`Error registering security agent: ${error}`);
     });
-    registerSkills(agentBuilder).catch((error) => {
+    registerSkills({
+      agentBuilder,
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      kibanaVersion: this.pluginContext.env.packageInfo.version,
+      logger,
+      ml: plugins.ml,
+      options: { endpointAppContextService },
+    }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });
   }
@@ -677,7 +690,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
-    this.registerAgentBuilderAttachmentsAndTools(plugins.agentBuilder, core, this.logger);
+    this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
     return {
       setProductFeaturesConfigurator:

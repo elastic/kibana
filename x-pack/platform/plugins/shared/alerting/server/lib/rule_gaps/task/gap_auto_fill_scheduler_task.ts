@@ -248,12 +248,15 @@ export async function processGapsForRules({
     if (filteredGaps.length) {
       const sortedGaps = filteredGaps.sort((a, b) => a.range.gte.getTime() - b.range.gte.getTime());
 
-      const { results: chunkResults } = await processGapsBatch(rulesClientContext, {
-        gapsBatch: sortedGaps,
-        range: { start: startISO, end: endISO },
-        initiator: backfillInitiator.SYSTEM,
-        initiatorId: taskInstanceId,
-      });
+      const { results: chunkResults, truncatedRuleIds } = await processGapsBatch(
+        rulesClientContext,
+        {
+          gapsBatch: sortedGaps,
+          range: { start: startISO, end: endISO },
+          initiator: backfillInitiator.SYSTEM,
+          initiatorId: taskInstanceId,
+        }
+      );
 
       aggregated = addChunkResultsToAggregation(aggregated, chunkResults);
 
@@ -271,6 +274,20 @@ export async function processGapsForRules({
             remainingBackfills,
             state: SchedulerLoopState.CAPACITY_EXHAUSTED,
           };
+        }
+      }
+
+      const completedRuleIds = new Set(truncatedRuleIds);
+      for (const result of chunkResults) {
+        if (result.status === GapFillSchedulePerRuleStatus.SUCCESS) {
+          completedRuleIds.add(result.ruleId);
+        }
+      }
+
+      if (completedRuleIds.size > 0) {
+        toProcessRuleIds = toProcessRuleIds.filter((id) => !completedRuleIds.has(id));
+        if (toProcessRuleIds.length === 0) {
+          break;
         }
       }
     }

@@ -39,6 +39,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "evals",
       "licenseManagement",
       "workflowsManagement",
       "usageCollection",

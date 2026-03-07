@@ -403,7 +403,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return correlationTerms.find(
+      return correlationTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue

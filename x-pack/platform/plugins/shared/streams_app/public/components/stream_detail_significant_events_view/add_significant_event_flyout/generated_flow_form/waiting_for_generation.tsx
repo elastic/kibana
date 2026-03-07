@@ -14,10 +14,12 @@ export function AiFlowWaitingForGeneration({
   stopGeneration,
   hasInitialResults = false,
   isBeingCanceled = false,
+  isSchedulingGenerationTask = false,
 }: {
   stopGeneration: () => void;
   hasInitialResults?: boolean;
   isBeingCanceled?: boolean;
+  isSchedulingGenerationTask?: boolean;
 }) {
   const label = useWaitingForAiMessage(hasInitialResults);
 
@@ -39,7 +41,7 @@ export function AiFlowWaitingForGeneration({
             })
           : label}
       </EuiFlexItem>
-      {!isBeingCanceled && (
+      {!isBeingCanceled && !isSchedulingGenerationTask && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             onClick={stopGeneration}

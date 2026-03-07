@@ -13,7 +13,6 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
-  extractEsqlVariables,
   internalStateActions,
   useCurrentTabDispatch,
   useCurrentTabSelector,
@@ -78,7 +77,7 @@ export const useESQLVariables = ({
         input.initialChildControlState as ControlPanelsState<OptionsListESQLControlState>;
       // drop unused keys for BWC
       const transformedState = Object.keys(controlGroupState).reduce((prev, key) => {
-        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'useGlobalFilters']) };
+        return { ...prev, [key]: omit(controlGroupState[key], ['id', 'use_global_filters']) };
       }, {});
       const nextControlGroupState = transformedState;
       previousControlGroupStateRef.current = nextControlGroupState;
@@ -92,8 +91,9 @@ export const useESQLVariables = ({
         onUpdateESQLQuery(pendingQueryUpdate.current);
         pendingQueryUpdate.current = undefined;
       }
+    });
 
-      const newVariables = extractEsqlVariables(controlGroupState);
+    const variablesSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
       if (!isEqual(newVariables, currentEsqlVariables)) {
         // Update the ESQL variables in the internal state
         dispatchCurrentTab(internalStateActions.setEsqlVariables, { esqlVariables: newVariables });
@@ -103,6 +103,7 @@ export const useESQLVariables = ({
 
     return () => {
       inputSubscription.unsubscribe();
+      variablesSubscription?.unsubscribe();
     };
   }, [controlGroupApi, currentEsqlVariables, dispatchCurrentTab, isEsqlMode, onUpdateESQLQuery]);
 

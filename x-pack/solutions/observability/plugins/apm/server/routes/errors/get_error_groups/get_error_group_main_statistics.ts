@@ -18,6 +18,8 @@ import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
   ERROR_LOG_MESSAGE,
+  ERROR_MESSAGE,
+  ERROR_TYPE,
   SERVICE_NAME,
   TRACE_ID,
   TRANSACTION_NAME,
@@ -105,6 +107,8 @@ export async function getErrorGroupMainStatistics({
     ERROR_EXC_MESSAGE,
     ERROR_EXC_HANDLED,
     ERROR_EXC_TYPE,
+    ERROR_MESSAGE,
+    ERROR_TYPE,
   ] as const);
 
   const response = await apmEventClient.search('get_error_group_main_statistics', {
@@ -185,7 +189,7 @@ export async function getErrorGroupMainStatistics({
         occurrences: bucket.doc_count,
         culprit: event[ERROR_CULPRIT],
         handled: exception.handled,
-        type: exception.type,
+        type: exception.type || event[ERROR_TYPE],
         traceId: event[TRACE_ID],
       };
     }) ?? [];

@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from '@emotion/react';
 import { ReactFlow, Background } from '@xyflow/react';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { RelationshipNode as RelationshipNodeComponent } from './relationship_node';
@@ -44,7 +43,7 @@ const nodeTypes = {
 };
 
 const Template: StoryFn<RelationshipNodeViewModel> = (args: RelationshipNodeViewModel) => (
-  <ThemeProvider theme={{ darkMode: false }}>
+  <>
     <ReactFlow
       fitView
       attributionPosition={undefined}
@@ -61,7 +60,7 @@ const Template: StoryFn<RelationshipNodeViewModel> = (args: RelationshipNodeView
       <Background />
     </ReactFlow>
     <GlobalGraphStyles />
-  </ThemeProvider>
+  </>
 );
 
 export const RelationshipNode: StoryObj<RelationshipNodeViewModel> = {

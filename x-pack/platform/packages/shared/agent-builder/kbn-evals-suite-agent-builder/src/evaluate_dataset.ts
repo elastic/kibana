@@ -17,7 +17,6 @@ import {
   createSpanLatencyEvaluator,
   createRagEvaluators,
   type GroundTruth,
-  type RetrievedDoc,
   type ExperimentTask,
   type TaskOutput,
 } from '@kbn/evals';
@@ -33,6 +32,7 @@ import {
   getToolCallSteps,
 } from '@kbn/evals';
 import type { AgentBuilderEvaluationChatClient } from './chat_client';
+import { extractSearchRetrievedDocs } from './rag_extractor';
 
 interface DatasetExample extends Example {
   input: {
@@ -114,26 +114,7 @@ function configureExperiment({
   const ragEvaluators = createRagEvaluators({
     k: 10,
     relevanceThreshold: 1,
-    extractRetrievedDocs: (output: TaskOutput) => {
-      const steps =
-        (
-          output as {
-            steps?: Array<{
-              type: string;
-              tool_id?: string;
-              results?: Array<{ data?: { reference?: { id?: string; index?: string } } }>;
-            }>;
-          }
-        )?.steps ?? [];
-      return steps
-        .filter((step) => step.type === 'tool_call' && step.tool_id === 'platform.core.search')
-        .flatMap((step) => step.results ?? [])
-        .map((result) => ({
-          index: result.data?.reference?.index,
-          id: result.data?.reference?.id,
-        }))
-        .filter((doc): doc is RetrievedDoc => Boolean(doc.id && doc.index));
-    },
+    extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   });
@@ -215,13 +196,13 @@ function configureExperiment({
 
 export function createEvaluateDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
@@ -248,7 +229,7 @@ export function createEvaluateDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task,
@@ -260,18 +241,19 @@ export function createEvaluateDataset({
 
 export function createEvaluateExternalDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
   traceEsClient,
   log,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   traceEsClient: EsClient;
   log: ToolingLog;
 }): EvaluateExternalDataset {
   return async function evaluateExternalDataset(datasetName: string) {
+    const resolvesFromPhoenix = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
     const { task, evaluators: selectedEvaluators } = configureExperiment({
       evaluators,
       chatClient,
@@ -279,12 +261,15 @@ export function createEvaluateExternalDataset({
       log,
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset: {
           name: datasetName,
-          description: 'External dataset resolved from Phoenix by name',
-          examples: [], // Examples will be loaded from Phoenix, not provided in code
+          description: resolvesFromPhoenix
+            ? 'External dataset resolved from Phoenix by name'
+            : 'External dataset resolved from Elasticsearch by name',
+          // Examples are resolved from upstream dataset storage, not provided in code.
+          examples: [],
         },
         task,
         trustUpstreamDataset: true,

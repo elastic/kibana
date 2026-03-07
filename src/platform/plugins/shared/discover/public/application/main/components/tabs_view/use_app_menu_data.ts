@@ -25,7 +25,7 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
-import { isEsqlSource } from '../../../../../common/data_sources';
+import { isDataViewSource } from '../../../../../common/data_sources';
 
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
@@ -57,7 +57,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     setShouldCollapseAppMenu(dimensions.width < APP_MENU_COLLAPSE_THRESHOLD);
   }, []);
 
-  // Provide "Switch to Classic" menu item for the selected tab when in ES|QL mode
+  // Provide "Switch to ES|QL" and "Switch to Classic" menu items for the selected tab
   const getAdditionalTabMenuItems = useCallback<
     NonNullable<UnifiedTabsProps['getAdditionalTabMenuItems']>
   >(
@@ -69,8 +69,26 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
 
-      if (!isCurrentTab || !isEsqlSource(tab.appState.dataSource)) {
+      if (!isCurrentTab || !currentDataView) {
         return [];
+      }
+
+      if (isDataViewSource(tab.appState.dataSource)) {
+        return [
+          {
+            'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
+            name: 'switchToESQL',
+            label: i18n.translate('discover.localMenu.switchToESQLTitle', {
+              defaultMessage: 'Switch to ES|QL',
+            }),
+            onClick: () => {
+              services.trackUiMetric?.(METRIC_TYPE.CLICK, `esql:try_btn_clicked`);
+              dispatchCurrentTab(internalStateActions.transitionFromDataViewToESQL, {
+                dataView: currentDataView,
+              });
+            },
+          },
+        ];
       }
 
       return [
@@ -94,7 +112,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
               dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
             } else {
               dispatchCurrentTab(internalStateActions.transitionFromESQLToDataView, {
-                dataViewId: currentDataView?.id ?? '',
+                dataViewId: currentDataView.id ?? '',
               });
             }
           },
@@ -103,7 +121,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
     },
     [
       allTabs,
-      currentDataView?.id,
+      currentDataView,
       currentTabId,
       dispatch,
       dispatchCurrentTab,

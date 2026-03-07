@@ -9,8 +9,7 @@
       "node",
       "react",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-storybook-types",
-      "@emotion/react/types/css-prop"
+      "@kbn/ambient-storybook-types"
     ]
   },
   "include": [
@@ -19,6 +18,7 @@
   ],
   "kbn_references": [
     "@kbn/content-management-table-list-view-common",
+    "@kbn/content-management-tags",
     "@kbn/user-profile-components"
   ],
   "exclude": [

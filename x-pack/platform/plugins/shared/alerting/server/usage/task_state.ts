@@ -147,6 +147,28 @@ const stateSchemaV7 = stateSchemaV6.extends({
   count_rules_with_api_key_created_by_user: schema.number(),
 });
 
+const stateSchemaV8 = stateSchemaV7.extends({
+  count_rules_with_elasticagent_tag: schema.number(),
+  count_rules_with_elasticagent_tag_by_type: schema.recordOf(schema.string(), schema.number()),
+});
+
+const stateSchemaV9 = stateSchemaV8.extends({
+  gap_auto_fill_scheduler_runs_per_day: schema.number(),
+  gap_auto_fill_scheduler_runs_by_status_per_day: schema.recordOf(schema.string(), schema.number()),
+  gap_auto_fill_scheduler_duration_ms_per_day: schema.object({
+    min: schema.number(),
+    max: schema.number(),
+    avg: schema.number(),
+    sum: schema.number(),
+  }),
+  gap_auto_fill_scheduler_unique_rule_count_per_day: schema.number(),
+  gap_auto_fill_scheduler_processed_gaps_total_per_day: schema.number(),
+  gap_auto_fill_scheduler_results_by_status_per_day: schema.recordOf(
+    schema.string(),
+    schema.number()
+  ),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -287,9 +309,40 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV7,
   },
+  8: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[7].up(state),
+      count_rules_with_elasticagent_tag: state.count_rules_with_elasticagent_tag || 0,
+      count_rules_with_elasticagent_tag_by_type:
+        state.count_rules_with_elasticagent_tag_by_type || {},
+    }),
+    schema: stateSchemaV8,
+  },
+  9: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[8].up(state),
+      gap_auto_fill_scheduler_runs_per_day: state.gap_auto_fill_scheduler_runs_per_day || 0,
+      gap_auto_fill_scheduler_runs_by_status_per_day:
+        state.gap_auto_fill_scheduler_runs_by_status_per_day || {},
+      gap_auto_fill_scheduler_duration_ms_per_day:
+        state.gap_auto_fill_scheduler_duration_ms_per_day || {
+          min: 0,
+          max: 0,
+          avg: 0,
+          sum: 0,
+        },
+      gap_auto_fill_scheduler_unique_rule_count_per_day:
+        state.gap_auto_fill_scheduler_unique_rule_count_per_day || 0,
+      gap_auto_fill_scheduler_processed_gaps_total_per_day:
+        state.gap_auto_fill_scheduler_processed_gaps_total_per_day || 0,
+      gap_auto_fill_scheduler_results_by_status_per_day:
+        state.gap_auto_fill_scheduler_results_by_status_per_day || {},
+    }),
+    schema: stateSchemaV9,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[7].schema;
+const latestTaskStateSchema = stateSchemaByVersion[9].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -332,6 +385,8 @@ export const emptyState: LatestTaskStateSchema = {
     warning: 0,
   },
   count_rules_with_tags: 0,
+  count_rules_with_elasticagent_tag: 0,
+  count_rules_with_elasticagent_tag_by_type: {},
   count_rules_by_notify_when: {
     on_action_group_change: 0,
     on_active_alert: 0,
@@ -379,4 +434,15 @@ export const emptyState: LatestTaskStateSchema = {
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
   count_rules_with_api_key_created_by_user: 0,
+  gap_auto_fill_scheduler_runs_per_day: 0,
+  gap_auto_fill_scheduler_runs_by_status_per_day: {},
+  gap_auto_fill_scheduler_duration_ms_per_day: {
+    min: 0,
+    max: 0,
+    avg: 0,
+    sum: 0,
+  },
+  gap_auto_fill_scheduler_unique_rule_count_per_day: 0,
+  gap_auto_fill_scheduler_processed_gaps_total_per_day: 0,
+  gap_auto_fill_scheduler_results_by_status_per_day: {},
 };
