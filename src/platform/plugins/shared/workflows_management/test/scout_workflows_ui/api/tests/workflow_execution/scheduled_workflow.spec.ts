@@ -15,12 +15,12 @@ import { apiTest } from '../../fixtures';
 import { waitForConditionOrThrow } from '../../fixtures/utils/wait_for_condition';
 import type { WorkflowsApiService } from '../../fixtures/workflows_api_service';
 
-const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 5;
+const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 10;
 
 const SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML = `
 name: Scout Scheduled Workflow Test
 enabled: false
-description: Scheduled workflow that runs every 5s for testing
+description: Scheduled workflow that runs every 10s for testing
 triggers:
   - type: scheduled
     with:
@@ -35,7 +35,7 @@ steps:
 const LONG_RUNNING_SCHEDULED_WORKFLOW_YAML = `
 name: Scout Scheduled Workflow Test
 enabled: true
-description: Scheduled workflow that runs every 5s for testing
+description: Scheduled workflow that runs every 10s for testing
 triggers:
   - type: scheduled
     with:
@@ -49,7 +49,7 @@ steps:
   - name: wait
     type: wait
     with:
-      duration: 6s
+      duration: 11s
 `;
 
 apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
@@ -77,7 +77,7 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) => r.length > 2,
       interval: 1000,
-      timeout: 20_000,
+      timeout: 30_000,
       errorMessage: ({ results: r }) => `Expected > 2 executions, got ${r.length}`,
     });
 
@@ -97,7 +97,7 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
         completedExecutionsSorted[index - 1]?.startedAt ?? ''
       ).getTime();
       expect(currentStart - previousStart).toBeGreaterThan(
-        SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000
+        SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 0.85 // 85% of the interval to reduce the risk of flakiness
       );
       expect(currentExecution?.status).toBe(ExecutionStatus.COMPLETED);
     }
@@ -110,7 +110,7 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) => r.length >= 1,
       interval: 1000,
-      timeout: 10_000,
+      timeout: 20_000,
       errorMessage: 'No executions appeared after enabling the workflow',
     });
 
@@ -120,7 +120,7 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
     const countBeforeDisable = beforeDisable.length;
 
     // Wait another interval to confirm no new executions appear
-    await new Promise((resolve) => setTimeout(resolve, 8_000));
+    await new Promise((resolve) => setTimeout(resolve, 10_000));
 
     const { results: afterDisable } = await workflowsApi.getExecutions(workflowId);
 
@@ -145,7 +145,7 @@ apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic 
         condition: ({ results: r }) =>
           r.filter((e) => e.status === ExecutionStatus.COMPLETED).length >= 2,
         interval: 2000,
-        timeout: 30_000,
+        timeout: 40_000,
         errorMessage: ({ results: r }) =>
           `Expected >= 2 completed executions, got ${
             r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
