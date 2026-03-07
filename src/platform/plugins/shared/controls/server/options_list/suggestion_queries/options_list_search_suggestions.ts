@@ -127,7 +127,7 @@ const suggestionAggSubtypes: { [key: string]: OptionsListSuggestionAggregationBu
       }, []);
       return {
         suggestions,
-        totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`),
+        totalCardinality: get(rawEsResult, `${basePath}.unique_terms.value`) ?? 0,
       };
     },
   },

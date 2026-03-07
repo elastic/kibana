@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/controls-constants'
   - '@kbn/i18n'
   - '@kbn/controls-schemas'
-  - '@kbn/presentation-containers'
 tags:
   - shared-browser
   - package

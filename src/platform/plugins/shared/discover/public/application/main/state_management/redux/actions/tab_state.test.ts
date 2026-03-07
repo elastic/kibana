@@ -56,11 +56,20 @@ describe('tab_state actions', () => {
       const dataViewId = 'test-data-view-id';
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
+      const prevResetDefaultProfileState = tab.resetDefaultProfileState;
 
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
       expect(tab.appState.columns).toHaveLength(2);
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
+      });
+
+      expect(prevResetDefaultProfileState).toEqual({
+        resetId: expect.any(String),
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+        hideChart: false,
       });
 
       // Transition to data view mode
@@ -85,6 +94,18 @@ describe('tab_state actions', () => {
         type: DataSourceType.DataView,
         dataViewId,
       });
+
+      expect(tab.resetDefaultProfileState).toEqual({
+        resetId: expect.any(String),
+        columns: true,
+        rowHeight: true,
+        breakdownField: true,
+        hideChart: true,
+      });
+      expect(tab.resetDefaultProfileState.resetId).not.toEqual(
+        prevResetDefaultProfileState.resetId
+      );
+      expect(tab.resetDefaultProfileState.resetId).not.toEqual('');
     });
   });
 
@@ -120,6 +141,7 @@ describe('tab_state actions', () => {
 
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
+      const prevResetDefaultProfileState = tab.resetDefaultProfileState;
 
       expect(tab.appState.query).toStrictEqual(query);
       expect(tab.appState.sort).toEqual([
@@ -131,6 +153,14 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.DataView,
         dataViewId: 'the-data-view-id',
+      });
+
+      expect(prevResetDefaultProfileState).toEqual({
+        resetId: expect.any(String),
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+        hideChart: false,
       });
 
       // Transition to ES|QL mode
@@ -155,6 +185,18 @@ describe('tab_state actions', () => {
       expect(tab.appState.dataSource).toStrictEqual({
         type: DataSourceType.Esql,
       });
+
+      expect(tab.resetDefaultProfileState).toEqual({
+        resetId: expect.any(String),
+        columns: true,
+        rowHeight: true,
+        breakdownField: true,
+        hideChart: true,
+      });
+      expect(tab.resetDefaultProfileState.resetId).not.toEqual(
+        prevResetDefaultProfileState.resetId
+      );
+      expect(tab.resetDefaultProfileState.resetId).not.toEqual('');
     });
   });
 

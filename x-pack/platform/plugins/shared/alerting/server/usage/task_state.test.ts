@@ -911,6 +911,24 @@ describe('telemetry task state', () => {
     });
   });
 
+  describe('v6', () => {
+    const v6 = stateSchemaByVersion[6];
+    it('should work on empty object when running the up migration', () => {
+      const result = v6.up({});
+      expect(result).toHaveProperty('count_backfill_executions', 0);
+      expect(result).toHaveProperty('count_backfills_by_execution_status_per_day', {});
+      expect(result).toHaveProperty('count_gaps', 0);
+      expect(result).toHaveProperty('total_unfilled_gap_duration_ms', 0);
+      expect(result).toHaveProperty('total_filled_gap_duration_ms', 0);
+    });
+
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v6.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
+
   describe('v7', () => {
     const v7 = stateSchemaByVersion[7];
     it('should work on empty object when running the up migration', () => {
@@ -1017,6 +1035,75 @@ describe('telemetry task state', () => {
       const state = { foo: true };
       const result = v7.up(state);
       expect(result).not.toHaveProperty('foo');
+    });
+  });
+
+  describe('v8', () => {
+    const v8 = stateSchemaByVersion[8];
+    it('should work on empty object when running the up migration', () => {
+      const result = v8.up({});
+      expect(result).toHaveProperty('count_rules_with_elasticagent_tag', 0);
+      expect(result).toHaveProperty('count_rules_with_elasticagent_tag_by_type', {});
+    });
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        count_rules_with_elasticagent_tag: 5,
+        count_rules_with_elasticagent_tag_by_type: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logs__alert__document__count: 3,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          metrics__alert__threshold: 2,
+        },
+      };
+      const result = v8.up(cloneDeep(state));
+      expect(result.count_rules_with_elasticagent_tag).toEqual(5);
+      expect(result.count_rules_with_elasticagent_tag_by_type).toEqual({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        logs__alert__document__count: 3,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        metrics__alert__threshold: 2,
+      });
+    });
+    it('should drop unknown properties when running the up migration', () => {
+      const state = { foo: true };
+      const result = v8.up(state);
+      expect(result).not.toHaveProperty('foo');
+    });
+  });
+
+  describe('v9', () => {
+    const v9 = stateSchemaByVersion[9];
+
+    it('should set defaults for gap auto fill scheduler telemetry fields', () => {
+      const result = v9.up({});
+      expect(result).toEqual(
+        expect.objectContaining({
+          gap_auto_fill_scheduler_runs_per_day: 0,
+          gap_auto_fill_scheduler_runs_by_status_per_day: {},
+          gap_auto_fill_scheduler_duration_ms_per_day: {
+            min: 0,
+            max: 0,
+            avg: 0,
+            sum: 0,
+          },
+          gap_auto_fill_scheduler_unique_rule_count_per_day: 0,
+          gap_auto_fill_scheduler_processed_gaps_total_per_day: 0,
+          gap_auto_fill_scheduler_results_by_status_per_day: {},
+        })
+      );
+    });
+
+    it(`shouldn't overwrite properties when running the up migration`, () => {
+      const state = {
+        gap_auto_fill_scheduler_runs_per_day: 1,
+        gap_auto_fill_scheduler_runs_by_status_per_day: { success: 2 },
+        gap_auto_fill_scheduler_duration_ms_per_day: { min: 1, max: 2, avg: 3, sum: 4 },
+        gap_auto_fill_scheduler_unique_rule_count_per_day: 5,
+        gap_auto_fill_scheduler_processed_gaps_total_per_day: 6,
+        gap_auto_fill_scheduler_results_by_status_per_day: { success: 7, error: 8 },
+      };
+      const result = v9.up(state);
+      expect(result).toEqual(expect.objectContaining(state));
     });
   });
 });

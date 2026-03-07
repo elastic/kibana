@@ -3,7 +3,7 @@ id: kibDevTutorialSetupDevEnv
 slug: /kibana-dev-docs/getting-started/setup-dev-env
 title: Set up a Development Environment
 description: Learn how to setup a development environment for contributing to the Kibana repository
-date: 2024-08-09
+date: 2026-02-06
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup', 'devcontainer']
 ---
 
@@ -77,6 +77,33 @@ yarn start
 
 Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
 You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
+
+## Run in serverless mode
+
+To develop against serverless projects, you need to start both Elasticsearch and Kibana in serverless mode with matching project types.
+
+**Step 1:** Start Elasticsearch in serverless mode (in a separate terminal):
+
+```sh
+# Pick the project type that matches your work
+yarn es serverless --projectType=oblt          
+yarn es serverless --projectType=security 
+yarn es serverless --projectType=es            
+yarn es serverless --projectType=workplaceai  
+```
+
+**Step 2:** Start Kibana in the matching serverless mode:
+
+```sh
+yarn serverless-oblt         
+yarn serverless-security     
+yarn serverless-es           
+yarn serverless-workplace-ai 
+```
+
+**Important:** The Kibana serverless mode must match the ES `--projectType` value. Mismatched modes will cause errors.
+
+Login with `elastic_serverless` / `changeme` (or `system_indices_superuser` / `changeme`).
 
 ## Code away!
 

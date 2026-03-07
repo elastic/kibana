@@ -35,13 +35,13 @@ interface SerializedRootProfileParams {
  */
 export interface ResolveRootProfileResult {
   /**
-   * Render app wrapper accessor
-   */
-  getRenderAppWrapper: AppliedProfile['getRenderAppWrapper'];
-  /**
    * Default ad hoc data views accessor
    */
   getDefaultAdHocDataViews: AppliedProfile['getDefaultAdHocDataViews'];
+  /**
+   * Default ES|QL query accessor
+   */
+  getDefaultEsqlQuery: AppliedProfile['getDefaultEsqlQuery'];
 }
 
 export class ProfilesManager {
@@ -81,8 +81,8 @@ export class ProfilesManager {
 
     if (isEqual(this.prevRootProfileParams, serializedParams)) {
       return {
-        getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
         getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+        getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
       };
     }
 
@@ -100,8 +100,8 @@ export class ProfilesManager {
 
     if (abortController.signal.aborted) {
       return {
-        getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
         getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+        getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
       };
     }
 
@@ -109,8 +109,8 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
 
     return {
-      getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
       getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
+      getDefaultEsqlQuery: this.rootProfile.getDefaultEsqlQuery,
     };
   }
 

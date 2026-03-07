@@ -149,18 +149,16 @@ export function ContextAppRoute() {
       scopedProfilesManager={scopedProfilesManager}
       scopedEBTManager={scopedEbtManager}
     >
-      <rootProfileState.AppWrapper>
-        <ContextApp
-          anchorId={anchorId}
-          dataView={dataView}
-          referrer={locationState?.referrer}
-          addFilter={stableAddFilter}
-          expandedDoc={expandedDoc}
-          initialDocViewerTabId={initialDocViewerTabId}
-          docViewerRef={docViewerRef}
-          setExpandedDoc={setExpandedDoc}
-        />
-      </rootProfileState.AppWrapper>
+      <ContextApp
+        anchorId={anchorId}
+        dataView={dataView}
+        referrer={locationState?.referrer}
+        addFilter={stableAddFilter}
+        expandedDoc={expandedDoc}
+        initialDocViewerTabId={initialDocViewerTabId}
+        docViewerRef={docViewerRef}
+        setExpandedDoc={setExpandedDoc}
+      />
     </ScopedServicesProvider>
   );
 }

@@ -55,8 +55,9 @@ export const setTabs: InternalStateThunkActionCreator<
     {
       runtimeStateManager,
       tabsStorageManager,
+      getCascadedDocumentsStateManager,
       getContextAwarenessToolkit,
-      services: { profilesManager, ebtManager },
+      services,
     }
   ) {
     const previousState = getState();
@@ -78,7 +79,7 @@ export const setTabs: InternalStateThunkActionCreator<
       const newRecentlyClosedTab: TabState = { ...tab };
       // make sure to get the latest internal and app state from runtime state manager before deleting the runtime state
       newRecentlyClosedTab.initialInternalState =
-        selectTabRuntimeInternalState(runtimeStateManager, tab.id) ??
+        selectTabRuntimeInternalState(runtimeStateManager, tab.id, services) ??
         cloneDeep(tab.initialInternalState);
       newRecentlyClosedTab.attributes = cloneDeep(tab.attributes);
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
@@ -91,8 +92,8 @@ export const setTabs: InternalStateThunkActionCreator<
 
     for (const tab of addedTabs) {
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
-        profilesManager,
-        ebtManager,
+        services,
+        cascadedDocumentsStateManager: getCascadedDocumentsStateManager(tab.id),
         toolkit: getContextAwarenessToolkit(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
@@ -181,7 +182,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
 
         tab.initialInternalState =
-          selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId) ??
+          selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId, services) ??
           cloneDeep(existingTabToDuplicateFrom.initialInternalState);
         tab.attributes = cloneDeep(existingTabToDuplicateFrom.attributes);
         tab.appState = cloneDeep(existingTabToDuplicateFrom.appState);
@@ -212,7 +213,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         tab.appState = {
           ...(isOfAggregateQueryType(currentQuery)
-            ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
+            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
             : {}),
           dataSource: createDataSource({
             dataView: currentDataView,

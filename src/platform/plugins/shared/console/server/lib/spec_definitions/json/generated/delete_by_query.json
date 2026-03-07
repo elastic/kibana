@@ -78,6 +78,7 @@
       "{index}/_delete_by_query"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-delete-by-query",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-delete-by-query",
     "availability": {
       "stack": true,
       "serverless": true

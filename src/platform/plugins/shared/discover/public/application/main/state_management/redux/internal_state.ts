@@ -33,7 +33,11 @@ import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
-import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
+import {
+  type RuntimeStateManager,
+  selectTabRuntimeInternalState,
+  selectTabRuntimeState,
+} from './runtime_state';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
   TabsBarVisibility,
@@ -47,6 +51,8 @@ import { type HasUnsavedChangesResult, selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
+import type { CascadedDocumentsStateManager } from '../../data_fetching/cascaded_documents_fetcher';
+import { createCascadedDocumentsStateManager } from './cascaded_documents_state_manager';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
@@ -58,6 +64,7 @@ const initialState: DiscoverInternalState = {
   persistedDiscoverSession: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
+  defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
   isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
@@ -149,6 +156,13 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setDefaultProfileEsqlQuery: (
+      state,
+      action: PayloadAction<DiscoverInternalState['defaultProfileEsqlQuery']>
+    ) => {
+      state.defaultProfileEsqlQuery = action.payload;
     },
 
     setTabsBarVisibility: (state, action: PayloadAction<TabsBarVisibility>) => {
@@ -481,9 +495,9 @@ const createMiddleware = (options: InternalStateDependencies) => {
       (action, listenerApi) => {
         const discoverSession =
           action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
-          selectTabRuntimeInternalState(runtimeStateManager, tabId);
+          selectTabRuntimeInternalState(runtimeStateManager, tabId, services);
         void tabsStorageManager.persistLocally(
           action.payload,
           getTabInternalState,
@@ -499,10 +513,10 @@ const createMiddleware = (options: InternalStateDependencies) => {
     actionCreator: syncLocallyPersistedTabState,
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
-        const { runtimeStateManager, tabsStorageManager } = listenerApi.extra;
+        const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         withTab(listenerApi.getState(), action.payload, (tab) => {
           tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id),
+            internalState: selectTabRuntimeInternalState(runtimeStateManager, tab.id, services),
             attributes: tab.attributes,
             appState: tab.appState,
             globalState: tab.globalState,
@@ -543,6 +557,19 @@ const createMiddleware = (options: InternalStateDependencies) => {
     },
   });
 
+  startListening({
+    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
+    effect: (action, listenerApi) => {
+      const { runtimeStateManager } = listenerApi.extra;
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
+      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+
+      if (tabStateContainer?.dataState.cleanupEsql) {
+        tabStateContainer.dataState.cleanupEsql();
+      }
+    },
+  });
+
   return listenerMiddleware.middleware;
 };
 
@@ -555,18 +582,28 @@ export interface InternalStateDependencies {
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
   getContextAwarenessToolkit: (tabId: string) => ContextAwarenessToolkit;
+  getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getContextAwarenessToolkit'>
+  options: Omit<
+    InternalStateDependencies,
+    'getInternalState$' | 'getContextAwarenessToolkit' | 'getCascadedDocumentsStateManager'
+  >
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
     getContextAwarenessToolkit: (tabId: string) => {
       return createContextAwarenessToolkit({
+        internalState,
+        tabId,
+      });
+    },
+    getCascadedDocumentsStateManager: (tabId) => {
+      return createCascadedDocumentsStateManager({
         internalState,
         tabId,
       });

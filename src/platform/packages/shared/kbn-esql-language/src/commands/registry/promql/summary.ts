@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstPromqlCommand, ESQLCommand } from '@elastic/esql/types';
+import { isBinaryExpression, isIdentifier } from '@elastic/esql';
 import type { ESQLCommandSummary } from '../..';
-import type { ESQLAstPromqlCommand, ESQLCommand } from '../../../types';
 import { PromqlParamName } from './utils';
-import { isBinaryExpression, isIdentifier } from '../../../ast';
 
 /** Returns true if PROMQL has the specified parameter */
 const hasParam = (command: ESQLAstPromqlCommand, paramName: PromqlParamName): boolean => {
@@ -26,8 +26,11 @@ export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary
   const promqlCommand = command as ESQLAstPromqlCommand;
   const newColumns: string[] = [];
 
-  // "step" param acts as a bucket and creates a step column
-  if (hasParam(promqlCommand, PromqlParamName.Step)) {
+  // "step" or "buckets" param creates a step column in the output
+  if (
+    hasParam(promqlCommand, PromqlParamName.Step) ||
+    hasParam(promqlCommand, PromqlParamName.Buckets)
+  ) {
     newColumns.push(PromqlParamName.Step);
   }
 

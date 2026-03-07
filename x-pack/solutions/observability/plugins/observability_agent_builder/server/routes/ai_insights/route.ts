@@ -13,7 +13,10 @@ import { getRequestAbortedSignal } from '@kbn/inference-plugin/server/routes/get
 import { generateErrorAiInsight } from './apm_error/generate_error_ai_insight';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
 import { getLogAiInsights } from './get_log_ai_insights';
-import { getAlertAiInsight, type AlertDocForInsight } from './get_alert_ai_insights';
+import {
+  getAlertAiInsight,
+  type AlertDocForInsight,
+} from './alert_ai_insights/generate_alert_ai_insight';
 import { getDefaultConnectorId } from '../../utils/get_default_connector_id';
 
 export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerRouteRepository {
@@ -40,6 +43,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request });
+      const connector = await inference.getConnectorById(connectorId, request);
 
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const alertDoc = (await alertsClient.get({ id: alertId })) as AlertDocForInsight;
@@ -50,6 +54,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         alertDoc,
         inferenceClient,
         connectorId,
+        connector,
         dataRegistry,
         request,
         logger,
@@ -91,6 +96,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request, logger });
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+      const connector = await inference.getConnectorById(connectorId, request);
 
       const result = await generateErrorAiInsight({
         core,
@@ -100,6 +106,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         start,
         end,
         environment,
+        connector,
         dataRegistry,
         request,
         inferenceClient,
@@ -131,7 +138,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         id: t.string,
       }),
     }),
-    handler: async ({ request, core, dataRegistry, params, response, logger, plugins }) => {
+    handler: async ({ request, core, params, response, logger, plugins }) => {
       const { index, id } = params.body;
 
       const [coreStart, startDeps] = await core.getStartServices();
@@ -139,14 +146,17 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
 
       const connectorId = await getDefaultConnectorId({ coreStart, inference, request });
       const inferenceClient = inference.getClient({ request });
+      const connector = await inference.getConnectorById(connectorId, request);
       const esClient = coreStart.elasticsearch.client.asScoped(request);
 
       const result = await getLogAiInsights({
         core,
+        plugins,
         index,
         id,
         inferenceClient,
         connectorId,
+        connector,
         request,
         esClient,
         logger,

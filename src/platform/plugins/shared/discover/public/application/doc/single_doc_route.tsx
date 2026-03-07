@@ -109,9 +109,7 @@ export const SingleDocRoute = () => {
       scopedProfilesManager={scopedProfilesManager}
       scopedEBTManager={scopedEbtManager}
     >
-      <rootProfileState.AppWrapper>
-        <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
-      </rootProfileState.AppWrapper>
+      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
     </ScopedServicesProvider>
   );
 };

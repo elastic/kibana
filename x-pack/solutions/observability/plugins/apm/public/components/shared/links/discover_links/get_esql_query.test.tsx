@@ -14,6 +14,7 @@ import {
   SPAN_DURATION,
   SPAN_ID,
   SPAN_NAME,
+  TRACE_ID,
   TRANSACTION_DURATION,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
@@ -163,6 +164,26 @@ describe('getESQLQuery', () => {
       });
 
       expect(result).toContain(`\`${SPAN_ID}\` == "span-456"`);
+    });
+
+    it('should add traceId filter', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { traceId: 'trace-789' },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${TRACE_ID}\` == "trace-789"`);
+    });
+
+    it('should not add traceId filter when traceId is not provided', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: {},
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toContain(TRACE_ID);
     });
   });
 
@@ -343,6 +364,22 @@ describe('getESQLQuery', () => {
       expect(result).toContain('KQL("status: 200")');
     });
 
+    it('should combine traceId with other filters correctly', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName: 'my-service',
+          traceId: 'abc-123-def',
+          transactionName: 'GET /api/users',
+        },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${SERVICE_NAME}\` == "my-service"`);
+      expect(result).toContain(`\`${TRACE_ID}\` == "abc-123-def"`);
+      expect(result).toContain(`\`${TRANSACTION_NAME}\` == "GET /api/users"`);
+    });
+
     it('should return only FROM clause when no params are provided', () => {
       const result = getESQLQuery({
         indexType: 'traces',
@@ -351,6 +388,55 @@ describe('getESQLQuery', () => {
       });
 
       expect(result).toBe(`FROM ${MOCK_TRACES_INDEX}`);
+    });
+  });
+
+  describe('sort direction', () => {
+    it('should add SORT @timestamp ASC when sortDirection is ASC', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { traceId: 'trace-789', sortDirection: 'ASC' },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain(`\`${TRACE_ID}\` == "trace-789"`);
+      expect(result).toContain('SORT @timestamp ASC');
+    });
+
+    it('should add SORT @timestamp DESC when sortDirection is DESC', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { sortDirection: 'DESC' },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).toContain('SORT @timestamp DESC');
+    });
+
+    it('should not add SORT when sortDirection is not provided', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { traceId: 'trace-789' },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toContain('SORT');
+    });
+
+    it('should place SORT after all WHERE clauses and KQL', () => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: {
+          serviceName: 'my-service',
+          kuery: 'status: 200',
+          sortDirection: 'ASC',
+        },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      const sortIndex = result!.indexOf('SORT');
+      const kqlIndex = result!.indexOf('KQL');
+      expect(sortIndex).toBeGreaterThan(kqlIndex);
     });
   });
 });

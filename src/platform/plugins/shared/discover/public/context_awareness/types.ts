@@ -21,7 +21,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { FunctionComponent, PropsWithChildren } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -109,8 +109,6 @@ export interface OpenInNewTabParams {
   timeRange?: TimeRange;
 }
 
-export type ChartSectionConfigurationExtensionParams = Record<string, never>;
-
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover
  */
@@ -153,6 +151,12 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+  /**
+   * Optional render function to display a custom header section above the tabs
+   * @param props The doc view render props
+   * @returns A React element to render above the tabs
+   */
+  renderHeader?: (props: DocViewRenderProps) => React.ReactElement;
 }
 
 /**
@@ -227,6 +231,16 @@ export interface DefaultAppStateExtension {
    * The state for chart visibility toggle
    */
   hideChart?: boolean;
+}
+
+/**
+ * Supports setting a default ES|QL query when Discover starts in ES|QL mode
+ */
+export interface DefaultEsqlQueryConfig {
+  /**
+   * The ES|QL query string to use as the default
+   */
+  query: string;
 }
 
 /**
@@ -358,14 +372,6 @@ export interface Profile {
    */
 
   /**
-   * Render a custom wrapper component around the Discover application,
-   * e.g. to allow using profile specific context providers
-   * @param props The app wrapper props
-   * @returns The custom app wrapper component
-   */
-  getRenderAppWrapper: FunctionComponent<PropsWithChildren<{}>>;
-
-  /**
    * Gets default Discover app state that should be used when the profile is resolved
    * @param params The default app state extension parameters
    * @returns The default app state
@@ -380,6 +386,16 @@ export interface Profile {
   getDefaultAdHocDataViews: () => Array<
     Omit<DataViewSpec, 'id'> & { id: NonNullable<DataViewSpec['id']> }
   >;
+
+  /**
+   * Gets the default ES|QL query that should be used when Discover starts in ES|QL mode.
+   *
+   * This extension point is evaluated on Discover app initialization and is resolved from the
+   * root profile only.
+   *
+   * @returns The default ES|QL query config, or `undefined` to fall back to Discover defaults.
+   */
+  getDefaultEsqlQuery: () => DefaultEsqlQueryConfig | undefined;
 
   /**
    * Chart
@@ -398,9 +414,7 @@ export interface Profile {
    * This allows modifying the chart section with a custom component
    * @returns The custom configuration for the chart
    */
-  getChartSectionConfiguration: (
-    params: ChartSectionConfigurationExtensionParams
-  ) => ChartSectionConfiguration;
+  getChartSectionConfiguration: () => ChartSectionConfiguration;
 
   /**
    * Data grid

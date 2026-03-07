@@ -14,9 +14,9 @@ import type { DataSourceProfileProvider } from '../../../../profiles';
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev, { toolkit }) =>
-  (params) => {
+  () => {
     return {
-      ...prev(params),
+      ...prev(),
       renderChartSection: (props) => {
         return (
           <TraceMetricsGrid

@@ -151,7 +151,7 @@ const ChartsWrapper = ({ stateContainer, panelsToggle }: UnifiedHistogramChartPr
 
     return getChartConfigAccessor(() => ({
       replaceDefaultChart: false,
-    }))({});
+    }))();
   }, [getChartConfigAccessor, isEsqlMode]);
 
   useEffect(() => {

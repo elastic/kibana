@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/flyout-ui",
-  "owner": "@elastic/security-threat-hunting-investigations",
-  "group": "platform",
-  "visibility": "shared"
-}

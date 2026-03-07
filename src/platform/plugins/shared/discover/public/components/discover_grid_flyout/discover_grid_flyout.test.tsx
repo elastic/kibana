@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType } from 'react';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -29,7 +28,7 @@ import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 
-let mockFlyoutCustomBody: ComponentType | undefined;
+let mockRenderCustomHeader: UnifiedDocViewerFlyoutProps['renderCustomHeader'] | undefined;
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
   const actual = jest.requireActual('@kbn/unified-doc-viewer-plugin/public');
@@ -39,7 +38,7 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
     UnifiedDocViewerFlyout: (props: UnifiedDocViewerFlyoutProps) => (
       <OriginalFlyout
         {...props}
-        {...(mockFlyoutCustomBody ? { FlyoutCustomBody: mockFlyoutCustomBody } : {})}
+        {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
       />
     ),
   };
@@ -114,7 +113,7 @@ describe('Discover flyout', function () {
   };
 
   beforeEach(() => {
-    mockFlyoutCustomBody = undefined;
+    mockRenderCustomHeader = undefined;
     jest.clearAllMocks();
   });
 
@@ -226,7 +225,7 @@ describe('Discover flyout', function () {
   });
 
   it('should not navigate with arrow keys through documents if an input is in focus', async () => {
-    mockFlyoutCustomBody = () => <input data-test-subj="flyoutCustomInput" />;
+    mockRenderCustomHeader = () => <input data-test-subj="flyoutCustomInput" />;
     const { component, props } = await mountComponent({});
     findTestSubject(component, 'flyoutCustomInput').simulate('keydown', {
       key: 'ArrowRight',
@@ -299,6 +298,25 @@ describe('Discover flyout', function () {
           hideTitle: false,
         })
       );
+    });
+
+    it('should render custom header when provided by document profile', async () => {
+      const services = getServices();
+      const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+        scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      });
+      const records = buildDataTableRecordList({
+        records: esHitsMock as EsHitRecord[],
+        dataView: dataViewMock,
+        processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
+      });
+      const { component } = await mountComponent({ services, records });
+
+      // The custom header should be rendered in the flyout
+      const customHeader = findTestSubject(component, 'customDocViewerHeader');
+      expect(customHeader.length).toBe(1);
+      expect(customHeader.text()).toBe('Custom Header');
     });
   });
 });

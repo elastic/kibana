@@ -58,8 +58,8 @@ describe('ContextAppRoute', () => {
     useDataViewMock.mockReturnValue({ dataView: dataViewMock, error: undefined });
     useRootProfileMock.mockReturnValue({
       rootProfileLoading: false,
-      AppWrapper: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
       getDefaultAdHocDataViews: () => [],
+      getDefaultEsqlQuery: () => undefined,
     });
   });
 

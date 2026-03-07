@@ -21,11 +21,11 @@ export type {
   EvalsExecutorClient,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
-export { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
+export { withRetry, type RetryOptions } from './src/utils/retry_utils';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -52,6 +52,7 @@ export {
   type EvaluatorStats,
   type RunStats,
 } from './src/utils/score_repository';
+export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
@@ -70,6 +71,7 @@ export type {
   GroundTruthExtractor,
   RetrievedDoc,
 } from './src/evaluators/rag/types';
+export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

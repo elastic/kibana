@@ -31,6 +31,14 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
 
       expect(result).toBe('((entity.id == "e-123"))');
     });
+
+    it('unwraps _source when doc is an Elasticsearch hit', () => {
+      const result = getEuidEsqlFilterBasedOnDocument('generic', {
+        _source: { entity: { id: 'e-123' } },
+      });
+
+      expect(result).toBe('((entity.id == "e-123"))');
+    });
   });
 
   describe('host', () => {
