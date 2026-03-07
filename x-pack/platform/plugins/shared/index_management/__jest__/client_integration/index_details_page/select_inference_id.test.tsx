@@ -16,6 +16,7 @@ import {
   renderSelectInferenceId,
   setupInferenceEndpointsMocks,
 } from './select_inference_id.helpers';
+import { useLoadInferenceEndpoints } from '../../../public/application/services/api';
 
 const mockDispatch = jest.fn();
 const mockNavigateToUrl = jest.fn();
@@ -223,9 +224,7 @@ describe('SelectInferenceId', () => {
 
   describe('WHEN incompatible endpoint is created via flyout', () => {
     it('SHOULD NOT select the endpoint if its task type is incompatible', async () => {
-      const useLoadInferenceEndpointsMock = jest.mocked(
-        require('../../../public/application/services/api').useLoadInferenceEndpoints
-      );
+      const useLoadInferenceEndpointsMock = jest.mocked(useLoadInferenceEndpoints);
 
       setupInferenceEndpointsMocks();
       renderSelectInferenceId({ initialValue: '' });
@@ -269,9 +268,7 @@ describe('SelectInferenceId', () => {
     });
 
     it('SHOULD select the endpoint if its task type is compatible', async () => {
-      const useLoadInferenceEndpointsMock = jest.mocked(
-        require('../../../public/application/services/api').useLoadInferenceEndpoints
-      );
+      const useLoadInferenceEndpointsMock = jest.mocked(useLoadInferenceEndpoints);
 
       setupInferenceEndpointsMocks();
       renderSelectInferenceId({ initialValue: '' });
