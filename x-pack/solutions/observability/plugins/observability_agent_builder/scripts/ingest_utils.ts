@@ -332,23 +332,36 @@ export async function checkOtlpEndpoint(endpoint: string): Promise<boolean> {
   }
 }
 
+export type DatasetId = 'openrca' | 'rcaeval-re3';
+
 export async function exportTracesViaOtlp(
   resourceSpansList: OtlpResourceSpans[],
   otlpEndpoint: string,
-  label?: string
+  options?: { label?: string; datasetId?: DatasetId }
 ): Promise<number> {
-  const tag = label ? `[${label}] ` : '';
+  const tag = options?.label ? `[${options.label}] ` : '';
   let totalExported = 0;
 
   for (const { serviceName, spans } of resourceSpansList) {
     for (let offset = 0; offset < spans.length; offset += OTLP_BATCH_SIZE) {
       const batch = spans.slice(offset, offset + OTLP_BATCH_SIZE);
+
+      const resourceAttributes: Array<{
+        key: string;
+        value: { stringValue?: string };
+      }> = [{ key: 'service.name', value: { stringValue: serviceName } }];
+
+      if (options?.datasetId) {
+        resourceAttributes.push({
+          key: 'ingest.dataset',
+          value: { stringValue: options.datasetId },
+        });
+      }
+
       const payload = {
         resourceSpans: [
           {
-            resource: {
-              attributes: [{ key: 'service.name', value: { stringValue: serviceName } }],
-            },
+            resource: { attributes: resourceAttributes },
             scopeSpans: [
               {
                 scope: { name: 'dataset-ingest', version: '1.0.0' },
@@ -377,6 +390,34 @@ export async function exportTracesViaOtlp(
 
   if (totalExported > 0) console.log();
   return totalExported;
+}
+
+export async function deleteApmDataByDataset(client: Client, datasetId: DatasetId): Promise<void> {
+  const apmPatterns = ['traces-apm*', 'metrics-apm*'];
+  for (const pattern of apmPatterns) {
+    try {
+      const result = await client.deleteByQuery({
+        index: pattern,
+        query: {
+          bool: {
+            should: [
+              { term: { 'labels.ingest_dataset': datasetId } },
+              { term: { 'resource.attributes.ingest.dataset': datasetId } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+        conflicts: 'proceed',
+        refresh: true,
+      });
+      const deleted = result.deleted ?? 0;
+      if (deleted > 0) {
+        console.log(`Deleted ${deleted} APM documents from ${pattern} (dataset=${datasetId})`);
+      }
+    } catch {
+      // Index pattern may not exist
+    }
+  }
 }
 
 export function generateHexId(length: number): string {

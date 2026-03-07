@@ -45,6 +45,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import globby from 'globby';
 import {
   type BaseArgs,
+  type DatasetId,
   type OtlpSpan,
   type OtlpResourceSpans,
   parseArgs,
@@ -63,6 +64,7 @@ import {
   printVerifyCommands,
   checkOtlpEndpoint,
   exportTracesViaOtlp,
+  deleteApmDataByDataset,
   INFRA_METRIC_MAPPINGS,
 } from './ingest_utils';
 
@@ -75,6 +77,7 @@ const LOG_INDEX_NAME = 'logs-rcaeval.re3-default';
 const LOG_TEMPLATE_NAME = 'rcaeval-re3-logs';
 const METRIC_INDEX_NAME = 'metrics-rcaeval.re3-default';
 const METRIC_TEMPLATE_NAME = 'rcaeval-re3-metrics';
+const DATASET_ID: DatasetId = 'rcaeval-re3';
 const DEFAULT_OTLP_ENDPOINT = 'http://localhost:4318';
 
 const PLUGIN_ROOT = resolve(__dirname, '..');
@@ -239,11 +242,11 @@ function buildTraceSpans(caseInfo: CaseInfo, windowMs: number): OtlpResourceSpan
   if (rows.length === 0) return [];
 
   const startTimeField = rows[0].startTime !== undefined ? 'startTime' : 'startTimeMillis';
-  const isNano = startTimeField === 'startTime';
+  const isMicros = startTimeField === 'startTime';
 
   const rawStartTimesMs = rows.map((row) => {
     const val = parseInt(row[startTimeField], 10);
-    return isNano ? Math.round(val / 1e3) : val;
+    return isMicros ? Math.round(val / 1e3) : val;
   });
   const remapped = remapTimestamps(rawStartTimesMs, windowMs);
 
@@ -512,7 +515,8 @@ async function main() {
     const client = await createEsClient(opts.esUrl);
     await deleteDataStream(client, LOG_INDEX_NAME);
     await deleteDataStream(client, METRIC_INDEX_NAME);
-    console.log('Cleaned: deleted RCAEval data streams');
+    await deleteApmDataByDataset(client, DATASET_ID);
+    console.log('Cleaned: deleted RCAEval data streams and APM data');
     return;
   }
 
@@ -612,7 +616,10 @@ async function main() {
       const spanCount = traceSpans.reduce((sum, rs) => sum + rs.spans.length, 0);
       if (spanCount > 0) {
         console.log(`  Traces: ${spanCount} spans across ${traceSpans.length} services`);
-        const exported = await exportTracesViaOtlp(traceSpans, opts.otlpEndpoint, label);
+        const exported = await exportTracesViaOtlp(traceSpans, opts.otlpEndpoint, {
+          label,
+          datasetId: DATASET_ID,
+        });
         totalTraceSpans += exported;
       } else {
         console.log('  Traces: no traces.csv found');

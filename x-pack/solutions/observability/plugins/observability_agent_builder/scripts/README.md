@@ -53,7 +53,7 @@ The dataset (~178 MB) is downloaded once and cached in `../datasets/`. Timestamp
 | `--es-url <url>`        | `http://elastic:changeme@localhost:9200` | Elasticsearch URL                               |
 | `--window <duration>`   | `1h`                                     | Time window to remap timestamps into            |
 | `--case <name>`         | all                                      | Single case, e.g. `adservice_f4/1`              |
-| `--clean`               |                                          | Delete data streams and exit (no ingestion)     |
+| `--clean`               |                                          | Delete data streams and APM data, then exit     |
 | `--source <path>`       | (download)                               | Local RE3-OB directory                          |
 | `--otlp-endpoint <url>` | `http://localhost:4318`                  | OTLP endpoint for trace ingestion               |
 | `--skip-traces`         |                                          | Skip trace ingestion (no EDOT Collector needed) |
@@ -81,11 +81,11 @@ Run without `--case` to discover all 30 available case names.
 `ingest_openrca.ts` downloads the [OpenRCA](https://github.com/microsoft/OpenRCA) benchmark dataset (Bank and Market systems) and ingests logs, traces, and metrics. The dataset contains real telemetry from microservice failure scenarios with ground-truth root causes. CSV files are streamed to avoid memory issues with the multi-GB Market logs.
 
 ```bash
-npx tsx scripts/ingest_openrca.ts                          # list available cases
-npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04   # ingest a single case (all signals)
+npx tsx scripts/ingest_openrca.ts                                            # list available cases
+npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04                     # ingest a single case (all signals)
 npx tsx scripts/ingest_openrca.ts --case market/2022_03_20
-npx tsx scripts/ingest_openrca.ts --skip-traces --skip-metrics  # logs only
-npx tsx scripts/ingest_openrca.ts --clean                  # delete ingested data
+npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04 --skip-traces --skip-metrics  # logs only
+npx tsx scripts/ingest_openrca.ts --clean                                    # delete ingested data
 ```
 
 The dataset (~5 GB) is downloaded once from Google Drive and cached in `../datasets/openrca/`. Timestamps are remapped into a recent 1-hour window so the data works with default time ranges.
@@ -107,7 +107,7 @@ The dataset (~5 GB) is downloaded once from Google Drive and cached in `../datas
 | ----------------------- | ---------------------------------------- | ----------------------------------------------- |
 | `--case <system/date>`  | (none — lists available cases)           | Case to ingest, e.g. `bank/2021_03_04`          |
 | `--es-url <url>`        | `http://elastic:changeme@localhost:9200` | Elasticsearch URL                               |
-| `--clean`               |                                          | Delete all OpenRCA data streams and exit        |
+| `--clean`               |                                          | Delete all OpenRCA data streams and APM data    |
 | `--source <path>`       | (download)                               | Local OpenRCA directory                         |
 | `--otlp-endpoint <url>` | `http://localhost:4318`                  | OTLP endpoint for trace ingestion               |
 | `--skip-traces`         |                                          | Skip trace ingestion (no EDOT Collector needed) |

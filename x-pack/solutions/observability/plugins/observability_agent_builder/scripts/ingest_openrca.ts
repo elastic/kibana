@@ -49,6 +49,7 @@ import Papa from 'papaparse';
 import type { Client } from '@elastic/elasticsearch';
 import {
   type BaseArgs,
+  type DatasetId,
   type OtlpSpan,
   type OtlpResourceSpans,
   parseArgs,
@@ -66,6 +67,7 @@ import {
   printVerifyCommands,
   checkOtlpEndpoint,
   exportTracesViaOtlp,
+  deleteApmDataByDataset,
   generateHexId,
   toHexId,
   INFRA_METRIC_MAPPINGS,
@@ -81,6 +83,7 @@ const GDRIVE_FILE_IDS: Record<string, string> = {
 };
 
 const DEFAULT_OTLP_ENDPOINT = 'http://localhost:4318';
+const DATASET_ID: DatasetId = 'openrca';
 
 const PLUGIN_ROOT = resolve(__dirname, '..');
 const DATASETS_DIR = join(PLUGIN_ROOT, 'datasets');
@@ -118,11 +121,14 @@ function getOpts() {
     date = raw.case.slice(slash + 1);
   }
 
+  const hasExplicitCase = Boolean(raw.case || raw.date);
+
   return {
     esUrl: raw.esUrl,
     window: raw.window,
     systems,
     date,
+    hasExplicitCase,
     source: raw.source,
     otlpEndpoint: raw['otlp-endpoint'] ?? DEFAULT_OTLP_ENDPOINT,
     clean: process.argv.includes('--clean'),
@@ -306,7 +312,10 @@ async function streamTraceSpansFromFile(
 
     const spanCount = resourceSpans.reduce((sum, rs) => sum + rs.spans.length, 0);
     if (spanCount > 0) {
-      const exported = await exportTracesViaOtlp(resourceSpans, otlpEndpoint, label);
+      const exported = await exportTracesViaOtlp(resourceSpans, otlpEndpoint, {
+        label,
+        datasetId: DATASET_ID,
+      });
       return exported;
     }
     return 0;
@@ -809,7 +818,8 @@ async function main() {
       await deleteDataStream(client, config.logIndexName);
       await deleteDataStream(client, config.metricIndexName);
     }
-    console.log('Cleaned: deleted all OpenRCA data streams');
+    await deleteApmDataByDataset(client, DATASET_ID);
+    console.log('Cleaned: deleted all OpenRCA data streams and APM data');
     return;
   }
 
@@ -827,6 +837,18 @@ async function main() {
   if (ingestTraces) console.log(`OTLP:     ${opts.otlpEndpoint}`);
   console.log();
 
+  const dataDir = await ensureDataset(opts.source);
+
+  if (!opts.hasExplicitCase) {
+    const availableCases = discoverCases(dataDir);
+    console.log(`Available cases (${availableCases.length}):`);
+    for (const c of availableCases) {
+      console.log(`  ${c}`);
+    }
+    console.log(`\nRun with --case <name> to ingest a single case.`);
+    return;
+  }
+
   // Verify EDOT Collector is reachable before starting
   if (ingestTraces) {
     const otlpReachable = await checkOtlpEndpoint(opts.otlpEndpoint);
@@ -839,17 +861,6 @@ async function main() {
       process.exit(1);
     }
     console.log(`EDOT Collector reachable at ${opts.otlpEndpoint}`);
-  }
-
-  const dataDir = await ensureDataset(opts.source);
-
-  const availableCases = discoverCases(dataDir);
-  if (!opts.date) {
-    console.log(`Available cases (${availableCases.length}):`);
-    for (const c of availableCases) {
-      console.log(`  ${c}`);
-    }
-    console.log(`\nRun with --case <name> to ingest a single case.\n`);
   }
 
   const client = await createEsClient(opts.esUrl);
