@@ -26,7 +26,10 @@ export const createEsqlAlertType = (): SecurityAlertType<EsqlRuleParams, EsqlSta
       },
     },
     schemas: {
-      params: { type: 'zod', schema: EsqlRuleParams },
+      params: {
+        type: 'zod',
+        schema: EsqlRuleParams,
+      },
     },
     actionGroups: [
       {

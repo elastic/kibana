@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, useCallback, useMemo, useState } from 'react';
+import React, { lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
@@ -13,7 +13,7 @@ import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
-import type { AlertDetailsNavigation } from '@kbn/response-ops-alerts-table/types';
+import type { AlertDetailsNavigation, CasesService } from '@kbn/response-ops-alerts-table/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
 import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
@@ -76,6 +76,7 @@ export function RuleComponent({
   const {
     ruleTypeRegistry,
     actionTypeRegistry,
+    getCasesPlugin,
     data,
     http,
     notifications,
@@ -86,6 +87,14 @@ export function RuleComponent({
     charts,
     uiSettings,
   } = useKibana().services;
+
+  const [cases, setCases] = useState<CasesService>();
+
+  useEffect(() => {
+    getCasesPlugin?.()
+      .then(setCases)
+      .catch(() => {});
+  }, [getCasesPlugin]);
 
   const getAlertFormatter = useCallback(
     (ruleTypeId: string) => {
@@ -160,7 +169,12 @@ export function RuleComponent({
           lastReloadRequestTime={lastReloadRequestTime}
           getAlertFormatter={getAlertFormatter}
           alertDetailsNavigation={alertDetailsNavigation}
+          casesConfiguration={{
+            featureId: 'management',
+            owner: ['cases'],
+          }}
           services={{
+            cases,
             data,
             http,
             notifications,
@@ -175,6 +189,7 @@ export function RuleComponent({
   }, [
     alertDetailsNavigation,
     application,
+    cases,
     data,
     fieldFormats,
     getAlertFormatter,
