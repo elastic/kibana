@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-16T09:53:31.181Z",
-  "sha1": "",
+  "sha1": "69a1846241ab7b544a37097e79eb1bd7eb7e701c",
   "tests": [
     {
       "id": "1b513f723098bcd-67df9619ed61daf",
@@ -26,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/exploratory_view/test/scout/ui/tests/step_duration.spec.ts",
-        "line": 18,
+        "line": 17,
         "column": 7
       }
     }
