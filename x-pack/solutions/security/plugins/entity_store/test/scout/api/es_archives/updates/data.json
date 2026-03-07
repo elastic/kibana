@@ -100,7 +100,8 @@
     "source": {
       "@timestamp": "2026-01-20T12:05:03Z",
       "host": {
-        "domain": "test.org"
+        "domain": "test.org",
+        "hostname": "domain-only-host"
       }
     }
   }
@@ -231,7 +232,8 @@
       "@timestamp": "2026-01-20T12:05:11Z",
       "host": {
         "domain": "example.com",
-        "name": ""
+        "name": "",
+        "hostname": "empty-name-host"
       }
     }
   }
@@ -393,8 +395,9 @@
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "service": {
+        "name": "mailchimp",
         "entity": {
-          "id": "non-generated-service-id"
+          "id": "mailchimp"
         }
       }
     }
@@ -424,6 +427,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:00Z",
+      "event": { "kind": "asset", "module": "okta" },
       "host": {
         "entity": {
           "id": "host-123"
@@ -444,6 +448,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:01Z",
+      "event": { "kind": "asset", "module": "azure" },
       "host": {
         "id": "host-456"
       },
@@ -462,6 +467,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:02Z",
+      "event": { "kind": "asset", "module": "entityanalytics_entra_id" },
       "host": {
         "name": "server-01"
       },
@@ -480,6 +486,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:03Z",
+      "event": { "kind": "asset", "module": "o365" },
       "user": {
         "id": "user-789",
         "name": "alice.brown"
@@ -496,6 +503,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
+      "event": { "kind": "asset", "module": "o365_metrics" },
       "user": {
         "id": "user-101"
       }
@@ -511,9 +519,11 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
+      "event": { "kind": "asset", "module": "entityanalytics_ad" },
       "user": {
+        "name": "arnlod.schmidt",
         "entity": {
-          "id": "non-generated-user"
+          "id": "arnlod.schmidt"
         }
       }
     }
@@ -528,6 +538,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:05Z",
+      "event": { "kind": "asset", "module": "entityanalytics_okta" },
       "user": {
         "email": "test@example.com"
       }
@@ -543,6 +554,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:06Z",
+      "event": { "kind": "asset", "module": "aws" },
       "user": {
         "domain": "corp",
         "name": "charlie.wilson"
@@ -559,6 +571,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:07Z",
+      "event": { "kind": "asset", "module": "gcp" },
       "user": {
         "name": "david.lee"
       }
@@ -574,6 +587,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:08Z",
+      "event": { "kind": "asset", "module": "okta" },
       "user": {
         "id": "user-202",
         "name": ""
@@ -590,6 +604,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:09Z",
+      "event": { "kind": "asset", "module": "azure" },
       "user": {
         "id": "user-303",
         "name": null
@@ -606,6 +621,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:10Z",
+      "event": { "kind": "asset", "module": "o365" },
       "host": {
         "entity": {
           "id": ""
@@ -627,6 +643,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:11Z",
+      "event": { "kind": "asset", "module": "entityanalytics_ad" },
       "host": {
         "entity": {
           "id": null
@@ -649,6 +666,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:12Z",
+      "event": { "kind": "asset", "module": "okta" },
       "host": {
         "entity": {
           "id": null
@@ -672,6 +690,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:13Z",
+      "event": { "kind": "asset", "module": "entityanalytics_entra_id" },
       "user": {
         "name": "henry.clark"
       }
@@ -687,6 +706,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:14Z",
+      "event": { "kind": "asset", "module": "aws" },
       "user": {
         "domain": "",
         "name": "iris.davis"
@@ -703,6 +723,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:15Z",
+      "event": { "kind": "asset", "module": "gcp" },
       "user": {
         "domain": null,
         "name": "jack.white"
@@ -719,6 +740,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:16Z",
+      "event": { "kind": "asset", "module": "okta" },
       "host": {
         "entity": {
           "id": "host-505"
@@ -740,6 +762,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:17Z",
+      "event": { "kind": "asset", "module": "azure" },
       "host": {
         "id": "host-606"
       },
@@ -759,6 +782,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:18Z",
+      "event": { "kind": "asset", "module": "entityanalytics_ad" },
       "host": {
         "name": "server-07"
       },
@@ -766,6 +790,33 @@
         "domain": "corp",
         "name": "mary.blue"
       }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "nocap1_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:19Z",
+      "event": { "kind": "asset" },
+      "user": { "name": "not-captured-no-module" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "nocap2_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:19Z",
+      "user": { "name": "not-captured-no-event" }
     }
   }
 }

@@ -184,7 +184,7 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
     const stmts: string[] = [
       `String ${varName} = null;`,
       `if (${sourceNotEmpty}) {`,
-      `  String _src = doc['${srcEsc}'].value`,
+      `  String _src = doc['${srcEsc}'].value;`,
     ];
     let first = true;
     for (const clause of ev.whenClauses) {

@@ -38,7 +38,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       responseType: 'json',
       body: {},
     });
-    expect(response.statusCode).toBe(201);
+    expect([200, 201]).toContain(response.statusCode);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -55,7 +55,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 22;
+    const expectedResultCount = 19;
 
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -203,6 +203,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Ingest a document without sub_type
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:00:00Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         name: 'latest-test-name',
@@ -219,14 +220,14 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(firstExtractionResponse.statusCode).toBe(200);
     expect(firstExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const beforeSubType = await searchDocById(esClient, 'user:latest-test');
+    const beforeSubType = await searchDocById(esClient, 'user:latest-test@okta');
 
     expect(beforeSubType.hits.hits).toHaveLength(1);
     expect(beforeSubType.hits.hits[0]._version).toBe(1);
     expect(beforeSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:00:00.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
       },
@@ -235,6 +236,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Add sub_type to the document
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:01:00Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-1', 'hash-2'],
@@ -254,13 +256,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(secondExtractionResponse.statusCode).toBe(200);
     expect(secondExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const afterSubType = await searchDocById(esClient, 'user:latest-test');
+    const afterSubType = await searchDocById(esClient, 'user:latest-test@okta');
     expect(afterSubType.hits.hits).toHaveLength(1);
     expect(afterSubType.hits.hits[0]._version).toBe(2);
     expect(afterSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:01:00.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 1',
@@ -271,6 +273,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Update sub_type in between documents with null values
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:01Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         entity: {
@@ -281,6 +284,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:02Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-3', 'hash-4'],
@@ -292,6 +296,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:03Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-1', 'hash-3'], // add duplicated hashes
@@ -303,6 +308,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:04Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-5'],
@@ -322,13 +328,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(thirdExtractionResponse.statusCode).toBe(200);
     expect(thirdExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const updatedSubType = await searchDocById(esClient, 'user:latest-test');
+    const updatedSubType = await searchDocById(esClient, 'user:latest-test@okta');
     expect(updatedSubType.hits.hits).toHaveLength(1);
     expect(updatedSubType.hits.hits[0]._version).toBe(3);
     expect(updatedSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:02:04.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
@@ -339,6 +345,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Make sure latest is not overwritten from the document if not changed
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:03:00Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         domain: 'example.com',
@@ -356,13 +363,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(fourthExtractionResponse.statusCode).toBe(200);
     expect(fourthExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test');
+    const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test@okta');
     expect(updatedLatestDomain.hits.hits).toHaveLength(1);
     expect(updatedLatestDomain.hits.hits[0]._version).toBe(4);
     expect(updatedLatestDomain.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:03:00.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',

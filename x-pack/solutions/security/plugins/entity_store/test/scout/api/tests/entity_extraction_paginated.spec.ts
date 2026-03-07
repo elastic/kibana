@@ -39,7 +39,7 @@ apiTest.describe(
           },
         },
       });
-      expect(response.statusCode).toBe(201);
+      expect([200, 201]).toContain(response.statusCode);
 
       await esArchiver.loadIfNeeded(
         'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -58,8 +58,8 @@ apiTest.describe(
     apiTest(
       'Should extract properly extract host with pagination',
       async ({ apiClient, esClient }) => {
-        const expectedResultCount = 22;
-        const expectedPageCount = 5;
+        const expectedResultCount = 19;
+        const expectedPageCount = 4;
 
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),

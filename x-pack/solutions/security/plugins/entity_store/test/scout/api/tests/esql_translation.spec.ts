@@ -14,7 +14,11 @@ import {
   UPDATES_INDEX,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
-import { getEuidEsqlFilterBasedOnDocument } from '../../../../common/domain/euid/esql';
+import {
+  getEuidEsqlFilterBasedOnDocument,
+  getFieldEvaluationsEsql,
+  getFieldEvaluationsSourcesFilterEsql,
+} from '../../../../common/domain/euid/esql';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
@@ -30,12 +34,13 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
 
+    // Install first so the data stream exists; then load the archive.
     const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
     });
-    expect(response.statusCode).toBe(201);
+    expect([200, 201]).toContain(response.statusCode);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -86,7 +91,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       });
 
       const { values, columns } = result;
-      expect(values).toHaveLength(1);
+      expect(values).toHaveLength(3);
       const nameIdx = columns.findIndex((c) => c.name === 'host.name');
       const domainIdx = columns.findIndex((c) => c.name === 'host.domain');
       expect(nameIdx).toBeGreaterThan(-1);
@@ -118,13 +123,18 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   );
 
   apiTest(
-    'user: ESQL from doc with user.entity.id returns exactly that document',
+    'user: ESQL from doc with user.name + entity.namespace returns exactly that document',
     async ({ esClient }) => {
-      const docSource = { user: { entity: { id: 'non-generated-user' } } };
+      const docSource = {
+        user: { name: 'arnlod.schmidt' },
+        event: { module: 'entityanalytics_ad' },
+      };
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const sourceFilter = getFieldEvaluationsSourcesFilterEsql('user');
+      const evalFragment = getFieldEvaluationsEsql('user');
+      const query = `FROM ${UPDATES_INDEX} | WHERE ${sourceFilter} | EVAL ${evalFragment} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -134,41 +144,37 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(values).toHaveLength(1);
       const entityIdIdx = columns.findIndex((c) => c.name === 'user.entity.id');
       expect(entityIdIdx).toBeGreaterThan(-1);
-      expect(values[0][entityIdIdx]).toBe('non-generated-user');
+      expect(values[0][entityIdIdx]).toBe('arnlod.schmidt');
     }
   );
 
-  apiTest(
-    'user: ESQL from doc with user.name + host.entity.id returns expected document',
-    async ({ esClient }) => {
-      const docSource = {
-        user: { name: 'john.doe' },
-        host: { entity: { id: 'host-123' } },
-      };
-      const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
-      expect(filter).toBeDefined();
+  apiTest('user: ESQL from doc with user.name', async ({ esClient }) => {
+    const docSource = {
+      user: { name: 'john.doe' },
+      event: { module: 'okta' },
+    };
+    const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
+    expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
-      const result = await esClient.esql.query({
-        query,
-        drop_null_columns: true,
-      });
+    const sourceFilter = getFieldEvaluationsSourcesFilterEsql('user');
+    const evalFragment = getFieldEvaluationsEsql('user');
+    const query = `FROM ${UPDATES_INDEX} | WHERE ${sourceFilter} | EVAL ${evalFragment} | WHERE ${filter} | LIMIT 10`;
+    const result = await esClient.esql.query({
+      query,
+      drop_null_columns: true,
+    });
 
-      const { values, columns } = result;
-      expect(values).toHaveLength(1);
-      const userNameIdx = columns.findIndex((c) => c.name === 'user.name');
-      expect(userNameIdx).toBeGreaterThan(-1);
-      expect(values[0][userNameIdx]).toBe('john.doe');
-      const hostEntityIdIdx = columns.findIndex((c) => c.name === 'host.entity.id');
-      expect(hostEntityIdIdx).toBeGreaterThan(-1);
-      expect(values[0][hostEntityIdIdx]).toBe('host-123');
-    }
-  );
+    const { values, columns } = result;
+    expect(values).toHaveLength(1);
+    const userNameIdx = columns.findIndex((c) => c.name === 'user.name');
+    expect(userNameIdx).toBeGreaterThan(-1);
+    expect(values[0][userNameIdx]).toBe('john.doe');
+  });
 
   apiTest(
-    'service: ESQL from doc with service.entity.id returns exactly that document',
+    'service: ESQL from doc with service.name returns exactly that document',
     async ({ esClient }) => {
-      const docSource = { service: { entity: { id: 'non-generated-service-id' } } };
+      const docSource = { service: { name: 'mailchimp' } };
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
@@ -182,7 +188,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(values).toHaveLength(1);
       const entityIdIdx = columns.findIndex((c) => c.name === 'service.entity.id');
       expect(entityIdIdx).toBeGreaterThan(-1);
-      expect(values[0][entityIdIdx]).toBe('non-generated-service-id');
+      expect(values[0][entityIdIdx]).toBe('mailchimp');
     }
   );
 

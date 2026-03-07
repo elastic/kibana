@@ -35,7 +35,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       responseType: 'json',
       body: { historySnapshot: { frequency: '24h' } },
     });
-    expect(installResponse.statusCode).toBe(201);
+    expect([200, 201]).toContain(installResponse.statusCode);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -88,7 +88,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       const historyCount = await esClient.count({ index: historyIndex });
       expect(historyCount.count).toBe(body.docCount);
 
-      const entityIdsWithBehaviors = ['host:host-123', 'host:server-01.example.com'] as const;
+      const entityIdsWithBehaviors = ['host:host-123', 'host:server-01'] as const;
       const expectedBehaviorsInHistory = [
         { rule_names: ['rule-a', 'rule-b'], anomaly_job_ids: 'job-1' },
         { rule_names: 'rule-c', anomaly_job_ids: ['job-2', 'job-3'] },

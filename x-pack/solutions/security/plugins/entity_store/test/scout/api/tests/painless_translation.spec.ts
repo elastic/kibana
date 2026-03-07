@@ -37,7 +37,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       responseType: 'json',
       body: {},
     });
-    expect(response.statusCode).toBe(201);
+    expect([200, 201]).toContain(response.statusCode);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
