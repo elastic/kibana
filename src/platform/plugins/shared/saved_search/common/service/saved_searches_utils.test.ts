@@ -69,7 +69,7 @@ describe('saved_searches_utils', () => {
           "id": "id",
           "isTextBasedQuery": false,
           "managed": false,
-          "references": Array [],
+          "references": undefined,
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": 250,
@@ -98,7 +98,7 @@ describe('saved_searches_utils', () => {
             "requestStartHandlers": Array [],
             "shouldOverwriteDataViewType": false,
           },
-          "sharingSavedObjectProps": Object {},
+          "sharingSavedObjectProps": undefined,
           "sort": Array [],
           "tabs": Array [
             Object {
