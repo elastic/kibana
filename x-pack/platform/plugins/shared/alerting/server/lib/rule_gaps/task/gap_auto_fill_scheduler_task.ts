@@ -16,7 +16,11 @@ import { processGapsBatch } from '../../../application/gaps/methods/bulk_fill_ga
 import { GapFillSchedulePerRuleStatus } from '../../../application/gaps/methods/bulk_fill_gaps_by_rule_ids/types';
 
 import type { RulesClientApi } from '../../../types';
-import { gapStatus, GAP_AUTO_FILL_STATUS } from '../../../../common/constants';
+import {
+  gapStatus,
+  GAP_AUTO_FILL_STATUS,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
+} from '../../../../common/constants';
 import type { createGapAutoFillSchedulerEventLogger } from './gap_auto_fill_scheduler_event_log';
 import {
   GAP_AUTO_FILL_SCHEDULER_TASK_TYPE,
@@ -413,10 +417,20 @@ export function registerGapAutoFillSchedulerTask({
 
             try {
               const now = new Date();
-              const startDate: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
-              if (!startDate) {
+              const parsedStart: Date | undefined = dateMath.parse(config.gapFillRange)?.toDate();
+              if (!parsedStart) {
                 throw new Error(`Invalid gapFillRange: ${config.gapFillRange}`);
               }
+
+              const BACKFILL_LOOKBACK_SAFETY_MARGIN_MS = 5 * 60 * 1000; // 5 minutes
+              const minAllowedStart = new Date(
+                now.getTime() -
+                  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS +
+                  BACKFILL_LOOKBACK_SAFETY_MARGIN_MS
+              );
+              const startDate = new Date(
+                Math.max(parsedStart.getTime(), minAllowedStart.getTime())
+              );
               const startISO = startDate.toISOString();
               const endISO = now.toISOString();
 
