@@ -36,7 +36,6 @@ export class MockRouter {
   public path: string;
   public version?: string;
   public context: jest.Mocked<RequestHandlerContext>;
-  public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
   constructor({
