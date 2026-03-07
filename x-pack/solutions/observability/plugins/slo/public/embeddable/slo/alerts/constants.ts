@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const SLO_ALERTS_EMBEDDABLE_ID = 'SLO_ALERTS_EMBEDDABLE';
-export const ADD_SLO_ALERTS_ACTION_ID = 'CREATE_SLO_ALERTS_EMBEDDABLE';
+export {
+  SLO_ALERTS_EMBEDDABLE_ID,
+  ADD_SLO_ALERTS_ACTION_ID,
+} from '../../../../common/embeddables/alerts/constants';
