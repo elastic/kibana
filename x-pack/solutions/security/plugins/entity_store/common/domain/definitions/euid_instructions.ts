@@ -13,6 +13,8 @@ import type {
   EuidSeparator,
 } from './entity_schema';
 
+/** Set of syntax sugar functions for building EUID instructions.*/
+
 export function field(fieldName: string): EuidField {
   return {
     field: fieldName,
