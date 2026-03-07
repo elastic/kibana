@@ -8891,31 +8891,31 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/timeline/saved_object_mappings/timelines.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
           },
           {
             "plugin": "securitySolution",

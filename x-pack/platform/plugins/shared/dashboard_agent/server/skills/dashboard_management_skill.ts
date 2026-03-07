@@ -8,6 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { manageDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
+import { gridLayoutPrompt } from './grid_layout_prompt';
 
 export const dashboardManagementSkill = defineSkillType({
   id: 'dashboard-management',
@@ -56,7 +57,7 @@ Use this contract:
   "operations": [
     { "operation": "set_metadata", "title": "optional", "description": "optional" },
     { "operation": "upsert_markdown", "markdownContent": "..." },
-    { "operation": "add_panels_from_attachments", "attachmentIds": ["single-attachment-id"] },
+    { "operation": "add_panels_from_attachments", "items": [{ "attachmentId": "id", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }] },
     { "operation": "remove_panels", "panelIds": [] }
   ]
 }
@@ -67,7 +68,7 @@ Use this contract:
 When creating a dashboard, prefer this sequence:
 1. \`set_metadata\` to set title/description
 2. \`upsert_markdown\` to add a summary panel
-3. Add visualizations with **separate** \`add_panels_from_attachments\` operations in the exact display order (one attachment ID per operation)
+3. Add visualizations with \`add_panels_from_attachments\` using \`items[]\` — each item specifies the \`attachmentId\` and a required \`grid: { w, h }\` for dashboard layout
 
 If you omit metadata on a new dashboard, creation can fail.
 
@@ -76,7 +77,7 @@ If you omit metadata on a new dashboard, creation can fail.
 1. Extract the dashboard attachment ID from the previous tool result: look for \`data.dashboardAttachment.id\`.
 2. Call ${dashboardTools.manageDashboard} with \`dashboardAttachmentId\` and an ordered \`operations[]\` list.
 3. Use:
-   - ordered \`add_panels_from_attachments\` operations to add new or previously created visualization attachments (one per operation when order matters)
+   - \`add_panels_from_attachments\` with \`items[]\` to add visualization attachments with their dashboard grid layout
    - \`remove_panels\` to remove by \`panelId\`
    - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
 
@@ -113,6 +114,9 @@ When the user's request is vague (e.g., "create a dashboard for my logs"), explo
 ## Edge Cases
 
 - **Missing \`attachment_id\` from visualization creation:** Treat that panel as failed for dashboard composition and do not include it in \`attachmentIds\`.
+
+${gridLayoutPrompt}
+
 - **Missing dashboard attachment ID on updates:** If the user asks to update a dashboard but the prior \`dashboardAttachment.id\` is not available in conversation context, ask the user to clarify which dashboard they mean or offer to create a new one.
 - **User asks to update a panel in place:** Prefer ordered remove + add operations in the same call.
 
@@ -140,15 +144,11 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
     },
     {
       "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-1"]
-    },
-    {
-      "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-2"]
-    },
-    {
-      "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-3"]
+      "items": [
+        { "attachmentId": "viz-1", "grid": { "x": 0, "y": 0, "w": 24, "h": 5 } },
+        { "attachmentId": "viz-2", "grid": { "x": 24, "y": 0, "w": 24, "h": 5 } },
+        { "attachmentId": "viz-3", "grid": { "x": 0, "y": 5, "w": 48, "h": 8 } }
+      ]
     }
   ]
 }
@@ -163,7 +163,7 @@ See \`./examples/manage-dashboard-payloads\` for complete payload examples cover
     { "operation": "remove_panels", "panelIds": ["panel-xyz"] },
     {
       "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-attachment-789"]
+      "items": [{ "attachmentId": "viz-attachment-789", "grid": { "x": 0, "y": 0, "w": 24, "h": 8 } }]
     },
     {
       "operation": "upsert_markdown",
@@ -183,7 +183,7 @@ Use this when the user wants to add a visualization that was already created ear
   "operations": [
     {
       "operation": "add_panels_from_attachments",
-      "attachmentIds": ["viz-attachment-456"]
+      "items": [{ "attachmentId": "viz-attachment-456", "grid": { "x": 0, "y": 0, "w": 24, "h": 9 } }]
     }
   ]
 }
@@ -226,10 +226,9 @@ Use this when the user wants to add a visualization that was already created ear
         "title": "Web Server Performance",
         "description": "Overview of web server request traffic and host resource usage",
         "panels": [
-          { "type": "generic", "panelId": "md-001", "title": "Summary" },
-          { "type": "lens", "panelId": "viz-001", "title": "Total Requests" },
-          { "type": "lens", "panelId": "viz-002", "title": "Average CPU Usage" },
-          { "type": "lens", "panelId": "viz-003", "title": "Requests Over Time" }
+          { "type": "lens", "panelId": "viz-001", "title": "Total Requests", "grid": { "x": 0, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "panelId": "viz-002", "title": "Average CPU Usage", "grid": { "x": 12, "y": 0, "w": 12, "h": 5 } },
+          { "type": "lens", "panelId": "viz-003", "title": "Requests Over Time", "grid": { "x": 0, "y": 5, "w": 24, "h": 10 } }
         ]
       }
     }
@@ -240,6 +239,7 @@ Use this when the user wants to add a visualization that was already created ear
 Key fields to remember:
 - \`data.dashboardAttachment.id\` — save this value. Pass it as \`dashboardAttachmentId\` in follow-up update calls.
 - \`data.dashboardAttachment.content.panels[].panelId\` — use these when the user asks to remove a specific panel via \`remove_panels.panelIds\`.
+- \`data.dashboardAttachment.content.panels[].grid\` — current position and size of each panel. Use this to find gaps when adding new panels to an existing dashboard.
 - \`data.version\` — increments with each update to the dashboard.
 - Panels with \`type: "generic"\` are non-visualization panels (e.g., markdown summary). Panels with \`type: "lens"\` are visualizations.
 
