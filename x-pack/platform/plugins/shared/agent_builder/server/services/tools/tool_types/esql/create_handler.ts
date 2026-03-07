@@ -53,12 +53,16 @@ export const createHandler = (
       params as Record<string, EsqlToolParamValue>
     );
 
-    const paramArray = Object.entries(resolvedParams).map(([param, value]) => ({ [param]: value }));
+    // Filter out null params — they represent optional parameters that weren't provided.
+    // Elasticsearch cannot handle null parameter values in ES|QL queries.
+    const paramArray = Object.entries(resolvedParams)
+      .filter(([, value]) => value !== null)
+      .map(([param, value]) => ({ [param]: value }));
 
     const result = await client.esql.query({
       query: configuration.query,
       // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
-      params: paramArray as unknown as FieldValue[],
+      ...(paramArray.length > 0 ? { params: paramArray as unknown as FieldValue[] } : {}),
     });
 
     // need the interpolated query to return in the results / to display in the UI
