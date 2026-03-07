@@ -53,6 +53,17 @@ export const createHandler = (
       params as Record<string, EsqlToolParamValue>
     );
 
+    // Validate that all required parameters have values
+    const missingRequiredParams = Object.entries(configuration.params)
+      .filter(
+        ([paramName, definition]) => !definition.optional && resolvedParams[paramName] === null
+      )
+      .map(([paramName]) => paramName);
+
+    if (missingRequiredParams.length > 0) {
+      throw new Error(`Missing required ESQL tool parameters: ${missingRequiredParams.join(', ')}`);
+    }
+
     // Filter out null params — they represent optional parameters that weren't provided.
     // Elasticsearch cannot handle null parameter values in ES|QL queries.
     const paramArray = Object.entries(resolvedParams)

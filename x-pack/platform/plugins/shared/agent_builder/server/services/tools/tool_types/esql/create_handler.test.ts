@@ -122,6 +122,24 @@ describe('createHandler', () => {
         query: 'FROM users | LIMIT 10',
       });
     });
+
+    it('should throw an error when required parameters are missing', async () => {
+      const config: EsqlToolConfig = {
+        query: 'FROM users | WHERE status == ?status',
+        params: {
+          status: { type: 'string', description: 'User status' }, // Required (no optional flag)
+        },
+      };
+
+      const handler = createHandler(config);
+      const llmParams = {}; // LLM omits required param
+
+      await expect(handler(llmParams, mockContext as any)).rejects.toThrow(
+        'Missing required ESQL tool parameters: status'
+      );
+
+      expect(mockEsClient.asCurrentUser.esql.query).not.toHaveBeenCalled();
+    });
   });
 });
 
