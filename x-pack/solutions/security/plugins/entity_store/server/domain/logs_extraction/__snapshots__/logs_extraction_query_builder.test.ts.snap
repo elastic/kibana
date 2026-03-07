@@ -7,7 +7,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
+      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
 (host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
 (host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
@@ -181,7 +181,8 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (((user.email IS NOT NULL AND user.email != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (client.user.email IS NOT NULL AND client.user.email != \\"\\") OR (source.user.email IS NOT NULL AND source.user.email != \\"\\")) AND (\`event.kind\` == \\"asset\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND \`event.kind\` != \\"enrichment\\") AND ((event.module IS NOT NULL AND event.module != \\"\\")))| EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
+      AND (((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\")) AND ((event.module IS NOT NULL AND event.module != \\"\\")))
+  | EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 ((entity.namespace == \\"active_directory\\") AND (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\")), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace),
@@ -325,7 +326,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`]
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
+      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")| EVAL recent.entity.EngineMetadata.UntypedId = CONCAT(\\"host:\\", CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
 (host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
 (host.hostname IS NOT NULL AND host.hostname != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.hostname, \\".\\", host.domain),
@@ -498,7 +499,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
+      AND (NOT(\`entity.id\` IS NULL) AND \`entity.id\` != \\"\\")
   | EVAL recent.entity.EngineMetadata.UntypedId = entity.id
   | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -723,7 +724,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
+      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
 (host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
@@ -982,7 +983,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
+      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
 (host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
@@ -1243,7 +1244,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
   | WHERE 
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
+      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((host.entity.id IS NOT NULL AND host.entity.id != \\"\\"), host.entity.id,
 (host.id IS NOT NULL AND host.id != \\"\\"), host.id,
 (host.name IS NOT NULL AND host.name != \\"\\" AND host.domain IS NOT NULL AND host.domain != \\"\\"), CONCAT(host.name, \\".\\", host.domain),
@@ -1504,7 +1505,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((service.entity.id IS NOT NULL AND service.entity.id != \\"\\") OR (service.name IS NOT NULL AND service.name != \\"\\"))
+      AND (NOT(\`service.entity.id\` IS NULL) AND \`service.entity.id\` != \\"\\" OR NOT(\`service.name\` IS NULL) AND \`service.name\` != \\"\\")
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((service.entity.id IS NOT NULL AND service.entity.id != \\"\\"), service.entity.id,
 (service.name IS NOT NULL AND service.name != \\"\\"), service.name, NULL)
   | STATS
@@ -1687,7 +1688,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (((user.email IS NOT NULL AND user.email != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (client.user.email IS NOT NULL AND client.user.email != \\"\\") OR (source.user.email IS NOT NULL AND source.user.email != \\"\\")) AND (\`event.kind\` == \\"asset\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND \`event.kind\` != \\"enrichment\\") AND ((event.module IS NOT NULL AND event.module != \\"\\")))| EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)
+      AND (((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\")) AND ((event.module IS NOT NULL AND event.module != \\"\\")))
+  | EVAL entity.namespace = CASE((event.module == \\"okta\\" OR event.module == \\"entityanalytics_okta\\"), \\"okta\\", (event.module == \\"azure\\" OR event.module == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (event.module == \\"o365\\" OR event.module == \\"o365_metrics\\"), \\"microsoft_365\\", (event.module == \\"entityanalytics_ad\\"), \\"active_directory\\", event.module)
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 ((entity.namespace == \\"active_directory\\") AND (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\")), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
@@ -1898,7 +1900,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
+      AND (NOT(\`entity.id\` IS NULL) AND \`entity.id\` != \\"\\")
   | STATS document_count = COUNT()"
 `;
 
@@ -1908,7 +1910,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for host enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))
+      AND (NOT(\`host.entity.id\` IS NULL) AND \`host.entity.id\` != \\"\\" OR NOT(\`host.id\` IS NULL) AND \`host.id\` != \\"\\" OR NOT(\`host.name\` IS NULL) AND \`host.name\` != \\"\\" OR NOT(\`host.hostname\` IS NULL) AND \`host.hostname\` != \\"\\")
   | STATS document_count = COUNT()"
 `;
 
@@ -1918,7 +1920,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((service.entity.id IS NOT NULL AND service.entity.id != \\"\\") OR (service.name IS NOT NULL AND service.name != \\"\\"))
+      AND (NOT(\`service.entity.id\` IS NULL) AND \`service.entity.id\` != \\"\\" OR NOT(\`service.name\` IS NULL) AND \`service.name\` != \\"\\")
   | STATS document_count = COUNT()"
 `;
 
@@ -1928,6 +1930,6 @@ exports[`buildRemainingLogsCountQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (((user.email IS NOT NULL AND user.email != \\"\\") OR (user.id IS NOT NULL AND user.id != \\"\\") OR (user.name IS NOT NULL AND user.name != \\"\\") OR (client.user.email IS NOT NULL AND client.user.email != \\"\\") OR (source.user.email IS NOT NULL AND source.user.email != \\"\\")) AND (\`event.kind\` == \\"asset\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND \`event.kind\` != \\"enrichment\\") AND ((event.module IS NOT NULL AND event.module != \\"\\")))
+      AND (((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\")) AND ((event.module IS NOT NULL AND event.module != \\"\\")))
   | STATS document_count = COUNT()"
 `;

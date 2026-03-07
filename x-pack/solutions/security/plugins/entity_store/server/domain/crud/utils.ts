@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import { getFlattenedObject } from '@kbn/std';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
-import { BadCRUDRequestError } from '../errors';
+import { getEuidSourceFields } from '../../../common/domain/euid';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import type { EntityType } from '../../../common';
@@ -16,6 +16,7 @@ import type {
   EntityField,
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
+import { BadCRUDRequestError } from '../errors';
 
 const GENERIC_TYPE = 'generic' as EntityType;
 
@@ -53,8 +54,9 @@ function getFieldDescriptions(
   const invalid: string[] = [];
   const descriptions: Record<string, EntityField & { value: unknown }> = {};
 
+  const identitySourceFields = getEuidSourceFields(description.type).identitySourceFields;
   for (const [key, value] of Object.entries(flatProps)) {
-    if (key === ENTITY_ID_FIELD || description.identityField.requiresOneOfFields.includes(key)) {
+    if (key === ENTITY_ID_FIELD || identitySourceFields.includes(key)) {
       continue;
     }
 

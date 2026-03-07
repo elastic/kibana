@@ -13,113 +13,25 @@ import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from '
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
- * Returns a DSL filter that *strictly* matches documents containing at least one
- * identity field for the given entity type.
+ * Returns a DSL filter that matches documents considered for the given entity type.
+ * This is the translation of {@link EntityIdentity.documentsFilter}.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
  * resolve to an entity of the requested type.
  *
- * For users, for example, it will also filter on the pre-conditions for IDP events
- *
  * @example
  * ```ts
- * const filter = getEuidDslDocumentsContainsIdFilter('user');
- * // {
- * //   bool: {
- * //     filter: [
- * //       {
- * //         // IDP pre-conditions: (A) asset with user identity, or (B) IAM event with user identity
- * //         bool: {
- * //           should: [
- * //             {
- * //               bool: {
- * //                 must: [
- * //                   { match: { 'event.kind': 'asset' } },
- * //                   {
- * //                     bool: {
- * //                       should: [
- * //                         { bool: { must: [ { exists: { field: 'user.email' } }, { bool: { must_not: { match: { 'user.email': '' } } } } ] } },
- * //                         { bool: { must: [ { exists: { field: 'user.id' } }, { bool: { must_not: { match: { 'user.id': '' } } } } ] } },
- * //                         { bool: { must: [ { exists: { field: 'user.name' } }, { bool: { must_not: { match: { 'user.name': '' } } } } ] } }
- * //                       ]
- * //                     }
- * //                   }
- * //                 ]
- * //               }
- * //             },
- * //             {
- * //               bool: {
- * //                 must: [
- * //                   { terms: { 'event.category': ['iam'] } },
- * //                   {
- * //                     bool: {
- * //                       should: [
- * //                         { match: { 'event.type': 'user' } },
- * //                         { match: { 'event.type': 'creation' } },
- * //                         { match: { 'event.type': 'deletion' } },
- * //                         { match: { 'event.type': 'group' } }
- * //                       ]
- * //                     }
- * //                   },
- * //                   {
- * //                     bool: {
- * //                       should: [
- * //                         { bool: { must: [ { exists: { field: 'user.email' } }, { bool: { must_not: { match: { 'user.email': '' } } } } ] } },
- * //                         { bool: { must: [ { exists: { field: 'user.id' } }, { bool: { must_not: { match: { 'user.id': '' } } } } ] } },
- * //                         { bool: { must: [ { exists: { field: 'user.name' } }, { bool: { must_not: { match: { 'user.name': '' } } } } ] } }
- * //                       ]
- * //                     }
- * //                   },
- * //                   { bool: { must_not: { match: { 'event.kind': 'enrichment' } } } }
- * //                 ]
- * //               }
- * //             }
- * //           ]
- * //         }
- * //       },
- * //       {
- * //         // At least one identity field present (requiresOneOfFields)
- * //         bool: {
- * //           should: [
- * //             { exists: { field: 'user.email' } },
- * //             { exists: { field: 'user.id' } },
- * //             { exists: { field: 'user.name' } },
- * //             { exists: { field: 'client.user.email' } },
- * //             { exists: { field: 'source.user.email' } }
- * //           ],
- * //           minimum_should_match: 1
- * //         }
- * //       }
- * //     ]
- * //   }
- * // }
+ * const filter = getEuidDslDocumentsContainsIdFilter('host');
+ * // documentsFilter for host is or(isNotEmpty × 4), so filter is e.g.:
+ * // { bool: { should: [ { bool: { must: [ ... ] } }, ... ], minimum_should_match: 1 } }
  * ```
  */
 export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const containsIdBool: QueryDslQueryContainer = {
-    bool: {
-      should: identityField.requiresOneOfFields.map((field) => ({
-        exists: { field },
-      })),
-      minimum_should_match: 1,
-    },
-  };
-
-  const documentsFilter = identityField.documentsFilter;
-  if (documentsFilter) {
-    const documentsFilterDsl = conditionToQueryDsl(documentsFilter) as QueryDslQueryContainer;
-    return {
-      bool: {
-        filter: [documentsFilterDsl, containsIdBool],
-      },
-    };
-  }
-
-  return containsIdBool;
+  return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
 }
 
 /**

@@ -265,38 +265,32 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 });
 
-const userIsNotEmptyClause = (field: string) => ({
+const isNotEmptyClause = (field: string) => ({
   bool: {
     must: [{ exists: { field } }, { bool: { must_not: { match: { [field]: '' } } } }],
   },
 });
 
 describe('getEuidDslDocumentsContainsIdFilter', () => {
-  it('user: returns bool with documentsFilter and should with all user identity fields', () => {
+  it('user: returns documentsFilter DSL (identity AND (asset OR iam branch))', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
     expect(result).toEqual({
       bool: {
-        filter: [
+        must: [
           {
             bool: {
               should: [
-                {
-                  bool: {
-                    must: [
-                      { match: { 'event.kind': 'asset' } },
-                      {
-                        bool: {
-                          should: [
-                            userIsNotEmptyClause('user.email'),
-                            userIsNotEmptyClause('user.id'),
-                            userIsNotEmptyClause('user.name'),
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
+                isNotEmptyClause('user.email'),
+                isNotEmptyClause('user.id'),
+                isNotEmptyClause('user.name'),
+              ],
+            },
+          },
+          {
+            bool: {
+              should: [
+                { bool: { must: [{ match: { 'event.kind': 'asset' } }] } },
                 {
                   bool: {
                     must: [
@@ -311,15 +305,6 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
                           ],
                         },
                       },
-                      {
-                        bool: {
-                          should: [
-                            userIsNotEmptyClause('user.email'),
-                            userIsNotEmptyClause('user.id'),
-                            userIsNotEmptyClause('user.name'),
-                          ],
-                        },
-                      },
                       { bool: { must_not: { match: { 'event.kind': 'enrichment' } } } },
                     ],
                   },
@@ -327,57 +312,45 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
               ],
             },
           },
-          {
-            bool: {
-              should: [
-                { exists: { field: 'user.email' } },
-                { exists: { field: 'user.id' } },
-                { exists: { field: 'user.name' } },
-                { exists: { field: 'client.user.email' } },
-                { exists: { field: 'source.user.email' } },
-              ],
-              minimum_should_match: 1,
-            },
-          },
         ],
       },
     });
   });
 
-  it('host: returns should with all host identity fields', () => {
+  it('host: returns documentsFilter DSL (or of isNotEmpty for each identity field)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('host');
 
     expect(result).toEqual({
       bool: {
         should: [
-          { exists: { field: 'host.entity.id' } },
-          { exists: { field: 'host.id' } },
-          { exists: { field: 'host.name' } },
-          { exists: { field: 'host.hostname' } },
+          isNotEmptyClause('host.entity.id'),
+          isNotEmptyClause('host.id'),
+          isNotEmptyClause('host.name'),
+          isNotEmptyClause('host.hostname'),
         ],
-        minimum_should_match: 1,
       },
     });
   });
 
-  it('service: returns should with all service identity fields', () => {
+  it('service: returns documentsFilter DSL (or of isNotEmpty for each identity field)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('service');
 
     expect(result).toEqual({
       bool: {
-        should: [{ exists: { field: 'service.entity.id' } }, { exists: { field: 'service.name' } }],
-        minimum_should_match: 1,
+        should: [isNotEmptyClause('service.entity.id'), isNotEmptyClause('service.name')],
       },
     });
   });
 
-  it('generic: returns should with entity.id', () => {
+  it('generic: returns documentsFilter DSL (entity.id not empty)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('generic');
 
     expect(result).toEqual({
       bool: {
-        should: [{ exists: { field: 'entity.id' } }],
-        minimum_should_match: 1,
+        must: [
+          { exists: { field: 'entity.id' } },
+          { bool: { must_not: { match: { 'entity.id': '' } } } },
+        ],
       },
     });
   });

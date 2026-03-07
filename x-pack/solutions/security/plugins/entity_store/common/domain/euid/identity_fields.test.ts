@@ -12,11 +12,8 @@ describe('getEuidSourceFields', () => {
   it('returns expected host identity invariants deduplicated', () => {
     const result = getEuidSourceFields(EntityType.enum.host);
 
+    expect(result.requiresOneOf).toEqual(result.identitySourceFields);
     expect(result.requiresOneOf).toEqual(
-      expect.arrayContaining(['host.entity.id', 'host.id', 'host.name', 'host.hostname'])
-    );
-    expect(result.identitySourceFields).toHaveLength(new Set(result.identitySourceFields).size);
-    expect(result.identitySourceFields).toEqual(
       expect.arrayContaining([
         'host.entity.id',
         'host.id',
@@ -25,5 +22,14 @@ describe('getEuidSourceFields', () => {
         'host.hostname',
       ])
     );
+    expect(result.identitySourceFields).toHaveLength(new Set(result.identitySourceFields).size);
+  });
+
+  it('returns fieldEvaluation source (event.module) instead of destination (entity.namespace) for user', () => {
+    const result = getEuidSourceFields(EntityType.enum.user);
+
+    expect(result.identitySourceFields).toContain('event.module');
+    expect(result.identitySourceFields).not.toContain('entity.namespace');
+    expect(result.requiresOneOf).toEqual(result.identitySourceFields);
   });
 });

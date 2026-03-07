@@ -64,9 +64,6 @@ const fieldEvaluationSchema = z.object({
 // Any field used in the euid calculation must be mapped in the fields array,
 // otherwise we won't have guarantees of field being available
 const calculatedIdentityFieldLogicSchema = z.object({
-  // Filter to be applied before evaluating the evaluation logic
-  requiresOneOfFields: z.array(z.string()),
-
   // Sequential order of fields to be used to generate the identity field.
   // The ids that are generated using the esqlEvaluation will also be prepended
   // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
@@ -77,10 +74,11 @@ const calculatedIdentityFieldLogicSchema = z.object({
   // euid generation and translated to ESQL, Painless, and in-memory.
   fieldEvaluations: z.optional(z.array(fieldEvaluationSchema)),
 
-  // Optional document-level filter (Condition from @kbn/streamlang). When set, only documents
-  // matching this filter are considered for this entity type. Translated to DSL and ESQL
-  // via conditionToQueryDsl and conditionToESQL.
-  documentsFilter: z.optional(streamlangConditionSchema),
+  // Document-level filter (Condition from @kbn/streamlang). Only documents matching this
+  // filter are considered for this entity type. Must express "at least one identity field
+  // present" (and any entity-specific rules, e.g. user IDP pre-conditions). Translated to
+  // DSL and ESQL via conditionToQueryDsl and conditionToESQL.
+  documentsFilter: streamlangConditionSchema,
 });
 
 export const entitySchema = z.object({

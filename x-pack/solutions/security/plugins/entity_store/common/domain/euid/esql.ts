@@ -128,15 +128,7 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const filters = [
-    identityField.requiresOneOfFields
-      .map((field) => `(${esqlIsNotNullOrEmpty(field)})`)
-      .join(' OR '),
-  ];
-
-  if (identityField.documentsFilter) {
-    filters.push(conditionToESQL(identityField.documentsFilter));
-  }
+  const filters = [conditionToESQL(identityField.documentsFilter)];
 
   const evaluationSourceFilter = getFieldEvaluationsSourcesFilterEsql(entityType);
   if (evaluationSourceFilter) {

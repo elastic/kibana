@@ -18,14 +18,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
   name: `Security 'user' Entity Store Definition`,
   identityField: {
-    // TODO the filter is very complex right now. Can we simplify it?
-    requiresOneOfFields: [
-      'user.email',
-      'user.id',
-      'user.name',
-      'client.user.email',
-      'source.user.email',
-    ],
     fieldEvaluations: [
       {
         destination: 'entity.namespace',
@@ -54,44 +46,35 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       compose(field('source.user.email'), sep('@'), field('entity.namespace')),
     ],
     /**
-     * UEBA user documents filter: only documents that are either
-     * (A) event.kind == "asset" with at least one of user.email/user.id/user.name not empty, or
-     * (B) event.category contains "iam", event.type in ("user","creation","deletion","group"),
-     *     same user-identity present, and event.kind != "enrichment".
+     * UEBA user documents filter: (at least one user identity present) AND
+     * ( (A) event.kind == "asset" OR (B) event.category contains "iam", event.type in ("user","creation","deletion","group"), and event.kind != "enrichment" ).
      */
     documentsFilter: {
-      or: [
+      and: [
         {
-          and: [
-            { field: 'event.kind', eq: 'asset' },
-            {
-              or: [
-                isNotEmptyCondition('user.email'),
-                isNotEmptyCondition('user.id'),
-                isNotEmptyCondition('user.name'),
-              ],
-            },
+          or: [
+            isNotEmptyCondition('user.email'),
+            isNotEmptyCondition('user.id'),
+            isNotEmptyCondition('user.name'),
           ],
         },
         {
-          and: [
-            { field: 'event.category', includes: 'iam' },
+          or: [
+            { and: [{ field: 'event.kind', eq: 'asset' }] },
             {
-              or: [
-                { field: 'event.type', eq: 'user' },
-                { field: 'event.type', eq: 'creation' },
-                { field: 'event.type', eq: 'deletion' },
-                { field: 'event.type', eq: 'group' },
+              and: [
+                { field: 'event.category', includes: 'iam' },
+                {
+                  or: [
+                    { field: 'event.type', eq: 'user' },
+                    { field: 'event.type', eq: 'creation' },
+                    { field: 'event.type', eq: 'deletion' },
+                    { field: 'event.type', eq: 'group' },
+                  ],
+                },
+                { field: 'event.kind', neq: 'enrichment' },
               ],
             },
-            {
-              or: [
-                isNotEmptyCondition('user.email'),
-                isNotEmptyCondition('user.id'),
-                isNotEmptyCondition('user.name'),
-              ],
-            },
-            { field: 'event.kind', neq: 'enrichment' },
           ],
         },
       ],

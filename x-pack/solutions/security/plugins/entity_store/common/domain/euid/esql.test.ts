@@ -185,7 +185,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   it('returns single field condition for generic (one required field)', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('generic');
 
-    const expected = '(entity.id IS NOT NULL AND entity.id != "")';
+    const expected = 'NOT(`entity.id` IS NULL) AND `entity.id` != ""';
     expect(result).toBe(expected);
   });
 
@@ -193,7 +193,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('host');
 
     const expected =
-      '(host.entity.id IS NOT NULL AND host.entity.id != "") OR (host.id IS NOT NULL AND host.id != "") OR (host.name IS NOT NULL AND host.name != "") OR (host.hostname IS NOT NULL AND host.hostname != "")';
+      'NOT(`host.entity.id` IS NULL) AND `host.entity.id` != "" OR NOT(`host.id` IS NULL) AND `host.id` != "" OR NOT(`host.name` IS NULL) AND `host.name` != "" OR NOT(`host.hostname` IS NULL) AND `host.hostname` != ""';
     expect(result).toBe(expected);
   });
 
@@ -203,9 +203,9 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     expect(result).toMatch(/event\.kind/);
     expect(result).toMatch(/event\.category/);
     expect(result).toMatch(/AND\s+\(/);
-    expect(result).toMatch(/user\.email IS NOT NULL AND user\.email != ""/);
-    expect(result).toMatch(/user\.id IS NOT NULL AND user\.id != ""/);
-    expect(result).toMatch(/user\.name IS NOT NULL AND user\.name != ""/);
+    expect(result).toMatch(/user\.email/);
+    expect(result).toMatch(/user\.id/);
+    expect(result).toMatch(/user\.name/);
   });
 });
 

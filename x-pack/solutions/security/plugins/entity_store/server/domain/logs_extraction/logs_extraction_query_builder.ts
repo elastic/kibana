@@ -397,5 +397,8 @@ function buildFieldEvaluations(type: EntityType): string {
   if (!fieldEvaluationsEsql) {
     return '';
   }
-  return `| EVAL ${fieldEvaluationsEsql}`;
+
+  // keep the line break to make the query more readable
+  return `
+  | EVAL ${fieldEvaluationsEsql}`;
 }
