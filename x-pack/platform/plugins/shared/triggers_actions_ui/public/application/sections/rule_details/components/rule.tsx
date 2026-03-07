@@ -160,10 +160,6 @@ export function RuleComponent({
           lastReloadRequestTime={lastReloadRequestTime}
           getAlertFormatter={getAlertFormatter}
           alertDetailsNavigation={alertDetailsNavigation}
-          casesConfiguration={{
-            featureId: 'management',
-            owner: ['cases'],
-          }}
           services={{
             data,
             http,

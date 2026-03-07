@@ -66,6 +66,9 @@ const { ObservabilityAIAssistantContextualInsight } =
 
 const prependMock = jest.fn().mockImplementation((args) => args);
 mockKibana.services.http.basePath.prepend = prependMock;
+mockKibana.services.application.getUrlForApp.mockImplementation(
+  (appId: string, { path }: { path?: string } = {}) => `/app/${appId}${path ? `${path}` : ''}`
+);
 
 const config: ConfigSchema = {
   unsafe: {

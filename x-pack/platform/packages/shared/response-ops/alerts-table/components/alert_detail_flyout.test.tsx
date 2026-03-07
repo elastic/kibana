@@ -129,4 +129,32 @@ describe('AlertDetailFlyout', () => {
       expect(screen.getByTestId(`${subj}Panel`)).toBeInTheDocument();
     });
   });
+
+  describe('footer', () => {
+    it('should not render the footer when alertDetailsNavigation is not provided', () => {
+      renderWithContext(<AlertDetailFlyout {...props} />);
+      expect(screen.queryByTestId('alertFlyoutAlertDetailsButton')).not.toBeInTheDocument();
+    });
+
+    it('should render the alert details button when alertDetailsNavigation is provided', () => {
+      const application = applicationServiceMock.createStartContract();
+      application.getUrlForApp.mockReturnValue('/app/test-app/alerts/mock-id');
+
+      renderWithContext(
+        <AlertDetailFlyout
+          {...props}
+          alertDetailsNavigation={{
+            appId: 'test-app',
+            getPath: (alertId) => `/alerts/${alertId}`,
+          }}
+          services={{
+            ...props.services,
+            application,
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('alertFlyoutAlertDetailsButton')).toBeInTheDocument();
+    });
+  });
 });
