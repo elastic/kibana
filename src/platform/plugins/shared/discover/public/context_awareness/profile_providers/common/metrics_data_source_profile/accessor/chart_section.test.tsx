@@ -73,6 +73,9 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
 };
 
 const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
+  const toolkitActions: ContextAwarenessToolkitActions = {
+    addFilter: jest.fn(),
+  };
   const getChartSection = createChartSection();
 
   if (!getChartSection) {
@@ -83,7 +86,10 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
     () => ({ replaceDefaultChart: false } as ChartSectionConfiguration),
     {
       context: { category: DataSourceCategory.Metrics },
-      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      toolkit: {
+        ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        actions: toolkitActions,
+      },
     }
   );
 
@@ -98,6 +104,8 @@ const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
   }
 
   render(<>{config.renderChartSection(createChartSectionProps(overrides))}</>);
+
+  return { toolkitActions };
 };
 
 describe('MetricsExperienceGridWrapper', () => {
@@ -140,5 +148,11 @@ describe('MetricsExperienceGridWrapper', () => {
       type: 'updateAppState',
       payload: { appState: { breakdownField: 'service.name' } },
     });
+  });
+
+  it('passes toolkit actions to UnifiedMetricsExperienceGrid', () => {
+    const { toolkitActions } = renderChartSection();
+
+    expect(unifiedGridProps?.actions).toBe(toolkitActions);
   });
 });
