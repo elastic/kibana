@@ -78,7 +78,7 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
     const srcEsc = escapePainlessField(ev.source);
     const sourceNotEmpty = `doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != ""`;
     const stmts: string[] = [
-      `String ${varName} = null`,
+      `String ${varName} = null;`,
       `if (${sourceNotEmpty}) {`,
       `  String _src = doc['${srcEsc}'].value`,
     ];
