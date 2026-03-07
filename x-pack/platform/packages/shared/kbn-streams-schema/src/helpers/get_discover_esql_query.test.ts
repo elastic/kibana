@@ -46,22 +46,26 @@ const classicStreamDefinition: Streams.ClassicStream.Definition = {
 
 describe('getDiscoverEsqlQuery', () => {
   describe('wired streams', () => {
-    it('returns FROM with the ES|QL view name and sort', () => {
+    it('defaults to index patterns when useViews is not specified', () => {
       expect(getDiscoverEsqlQuery({ definition: wiredStreamDefinition })).toBe(
+        'FROM logs.otel, logs.otel.* | SORT @timestamp DESC'
+      );
+    });
+
+    it('returns FROM with the ES|QL view name when useViews is true', () => {
+      expect(getDiscoverEsqlQuery({ definition: wiredStreamDefinition, useViews: true })).toBe(
         'FROM $.logs.otel | SORT @timestamp DESC'
       );
     });
 
-    it('appends METADATA _source when includeMetadata is true', () => {
+    it('appends METADATA _source when includeMetadata is true and useViews is true', () => {
       expect(
-        getDiscoverEsqlQuery({ definition: wiredStreamDefinition, includeMetadata: true })
+        getDiscoverEsqlQuery({
+          definition: wiredStreamDefinition,
+          includeMetadata: true,
+          useViews: true,
+        })
       ).toBe('FROM $.logs.otel METADATA _source | SORT @timestamp DESC');
-    });
-
-    it('does not append METADATA _source when includeMetadata is false', () => {
-      expect(
-        getDiscoverEsqlQuery({ definition: wiredStreamDefinition, includeMetadata: false })
-      ).toBe('FROM $.logs.otel | SORT @timestamp DESC');
     });
 
     it('falls back to index patterns when useViews is false', () => {

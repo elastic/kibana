@@ -25,7 +25,7 @@ export interface GetDiscoverEsqlQueryOptions {
   includeMetadata?: boolean;
   /**
    * Whether to use ES|QL view names for wired streams. Set to false on
-   * serverless where the _query/view API is not available. Defaults to true.
+   * serverless where the _query/view API is not available. Defaults to false.
    */
   useViews?: boolean;
 }
@@ -57,7 +57,7 @@ export interface GetDiscoverEsqlQueryOptions {
  * // Returns: "FROM logs,logs.* METADATA _source | SORT @timestamp DESC"
  */
 export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): string | undefined {
-  const { definition, indexMode, includeMetadata = false, useViews = true } = options;
+  const { definition, indexMode, includeMetadata = false, useViews = false } = options;
 
   if (Streams.QueryStream.Definition.is(definition)) {
     // Query streams use their $.prefixed ES|QL view name directly (e.g. FROM $.cars.electric)
