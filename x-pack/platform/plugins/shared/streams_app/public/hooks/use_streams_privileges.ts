@@ -58,7 +58,7 @@ export function useStreamsPrivileges() {
 
   const wiredStreamViewsEnabled = uiSettings.get(
     OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
-    true
+    false
   );
 
   return {
