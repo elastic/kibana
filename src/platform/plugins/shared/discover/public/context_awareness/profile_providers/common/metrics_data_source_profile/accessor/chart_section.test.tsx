@@ -26,13 +26,11 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
+import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 type UnifiedGridProps = ChartSectionProps & {
-  actions: {
-    openInNewTab?: (params: unknown) => void;
-    updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
-  };
+  actions: ContextAwarenessToolkitActions;
   breakdownField?: string;
   onBreakdownFieldChange?: (fieldName?: string) => void;
 };
