@@ -241,6 +241,9 @@ export async function compressTar({
   createRootDirectory,
   rootDirectoryName,
 }: CompressTarOptions): Promise<number> {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
   const folder = rootDirectoryName || basename(source);
 
   let fileCount = 0;
@@ -278,6 +281,9 @@ export async function compressZip({
   createRootDirectory,
   rootDirectoryName,
 }: CompressZipOptions): Promise<number> {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
   const output = fs.createWriteStream(destination);
   const archive = archiver('zip', archiverOptions);
   const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
