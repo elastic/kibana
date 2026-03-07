@@ -92,7 +92,7 @@ export class SearchInferenceEndpointsPlugin
           disabled: true,
           savedObject: {
             all: [],
-            read: [INFERENCE_SETTINGS_SO_TYPE],
+            read: [],
           },
           ui: [],
         },
