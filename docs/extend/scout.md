@@ -86,4 +86,4 @@ Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
-If your feature is behind a feature flag, you can use the `coreApi` [fixture](https://github.com/elastic/kibana/blob/e4f12d39154fe286ce92217e00a7d8bd758ee02d/src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/core/index.ts#L17-L30) to enable it during test execution (recommended). Alternatively, you can create a [custom config directory](https://github.com/elastic/kibana/pull/244306) and link your Scout tests (reach out for more info).
+Yes. See [Feature flags](./scout/feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or using custom server configurations.
