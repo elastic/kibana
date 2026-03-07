@@ -57,7 +57,10 @@ export function isDateHistogramBucketAggConfig(agg: unknown): agg is IBucketDate
     typeof agg === 'object' &&
     agg !== null &&
     'buckets' in agg &&
-    agg.buckets instanceof TimeBuckets
+    typeof agg.buckets === 'object' &&
+    agg.buckets !== null &&
+    'setBounds' in agg.buckets &&
+    'setInterval' in agg.buckets
   );
 }
 

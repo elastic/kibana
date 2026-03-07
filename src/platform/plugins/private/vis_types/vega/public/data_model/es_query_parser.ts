@@ -13,6 +13,7 @@ import { cloneDeep, isPlainObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Assign } from 'utility-types';
 import { dateHistogramInterval } from '@kbn/data-plugin/common';
+import type { SearchRequest } from '@kbn/data-plugin/public';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
 import type {
@@ -202,7 +203,7 @@ export class EsQueryParser {
       name: getRequestName(r.dataObject.name, index),
     }));
 
-    const data$ = this._searchAPI.search(esSearches);
+    const data$ = this._searchAPI.search(esSearches as SearchRequest[]);
 
     const results = await data$.toPromise();
 
