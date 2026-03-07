@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { ReactNode, MutableRefObject } from 'react';
+import type { SerializedStyles } from '@emotion/react';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 
 export interface RowMatches {
@@ -42,13 +43,24 @@ export interface InTableSearchRestorableState {
 }
 
 export interface UseFindMatchesProps {
-  initialState: InTableSearchRestorableState | undefined;
+  initialState: MutableRefObject<InTableSearchRestorableState | undefined>;
   onInitialStateChange: ((state: InTableSearchRestorableState) => void) | undefined;
   inTableSearchTerm: string;
   visibleColumns: string[];
   rows: unknown[];
   renderCellValue: RenderCellValueWrapper;
   onScrollToActiveMatch: (activeMatch: ActiveMatch, animate: boolean) => void;
+}
+
+export interface InTableSearchControlProps
+  extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
+  pageSize: number | null;
+  getColumnIndexFromId: (columnId: string) => number;
+  scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'center' }) => void;
+  shouldOverrideCmdF: (element: HTMLElement) => boolean;
+  onChange: (searchTerm: string | undefined) => void;
+  onChangeCss: (styles: SerializedStyles) => void;
+  onChangeToExpectedPage: (pageIndex: number) => void;
 }
 
 export interface UseFindMatchesState {
@@ -61,8 +73,8 @@ export interface UseFindMatchesState {
   renderCellsShadowPortal: (() => ReactNode) | null;
 }
 
-export interface UseFindMatchesReturn
-  extends Omit<UseFindMatchesState, 'matchesList' | 'columns' | 'term'> {
+/** Search term is from UseFindMatchesState; used to skip re-running search when context state matches. */
+export interface UseFindMatchesReturn extends Omit<UseFindMatchesState, 'matchesList' | 'columns'> {
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;

@@ -10,7 +10,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiPanel } from '@elastic/eui';
-import { useScrollSync } from '../../../../lib/core/scroll_sync';
+import { useScrollSync } from '../../../helpers/scroll_sync';
 import {
   useStyles as useCascadeRowHeaderSlotsRendererStyles,
   type ScrollState,

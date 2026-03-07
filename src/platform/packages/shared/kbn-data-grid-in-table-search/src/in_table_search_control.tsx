@@ -18,7 +18,9 @@ import type { UseFindMatchesProps } from './types';
 import { BUTTON_TEST_SUBJ, INPUT_TEST_SUBJ } from './constants';
 import { getHighlightColors } from './get_highlight_colors';
 import { getActiveMatchCss } from './get_active_match_css';
+import { useInTableSearchContext } from './in_table_search_context';
 
+// eslint-disable-next-line @elastic/eui/no-static-z-index
 const innerCss = css`
   /* ensure nested search input borders are visible */
   position: relative;
@@ -62,7 +64,7 @@ export interface InTableSearchControlProps
   onChangeToExpectedPage: (pageIndex: number) => void;
 }
 
-export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
+const InTableSearchControlInner: React.FC<InTableSearchControlProps> = ({
   initialState,
   pageSize,
   getColumnIndexFromId,
@@ -79,6 +81,10 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(Boolean(props.inTableSearchTerm));
+
+  // When toolbar is in header and search runs, the grid toolbar (different mount) may have isInputVisible=false;
+  // keep input expanded whenever there is a search term so it stays open in both places.
+  const isInputExpanded = isInputVisible || Boolean(props.inTableSearchTerm);
 
   const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
     (activeMatch, animate) => {
@@ -159,18 +165,18 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
   // returns focus to the button when the input was cancelled by pressing the escape key
   useEffect(() => {
-    if (shouldReturnFocusToButtonRef.current && !isInputVisible) {
+    if (shouldReturnFocusToButtonRef.current && !isInputExpanded) {
       shouldReturnFocusToButtonRef.current = false;
       buttonRef.current?.focus();
     }
-  }, [isInputVisible]);
+  }, [isInputExpanded]);
 
   return (
     <div ref={(node) => (containerRef.current = node)} css={innerCss}>
-      {isInputVisible ? (
+      {isInputExpanded ? (
         <>
           <InTableSearchInput
-            initialInTableSearchTerm={initialState?.searchTerm}
+            initialInTableSearchTerm={props.inTableSearchTerm ?? initialState?.current?.searchTerm}
             matchesCount={matchesCount}
             activeMatchPosition={activeMatchPosition}
             isProcessing={isProcessing}
@@ -210,4 +216,15 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       )}
     </div>
   );
+};
+
+/**
+ * Renders the in-table search control. When used inside InTableSearchProvider (e.g. in a sticky
+ * header portal), props can be omitted and the control will read from context. When used with
+ * props (e.g. default toolbar), props take precedence.
+ */
+export const InTableSearchControl = () => {
+  const context = useInTableSearchContext();
+
+  return <InTableSearchControlInner {...context} />;
 };

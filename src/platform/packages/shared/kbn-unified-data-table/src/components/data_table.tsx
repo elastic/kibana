@@ -63,6 +63,7 @@ import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import {
+  InTableSearchProvider,
   type InTableSearchRestorableState,
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
@@ -77,6 +78,8 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  CustomGridBodyContext,
+  DataGridScrollOverrides,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -382,9 +385,17 @@ interface InternalUnifiedDataTableProps {
    *
    * Behind the scenes, this function is treated as a React component,
    * allowing hooks, context, and other React concepts to be used.
-   * It receives #EuiDataGridCustomBodyProps as its only argument.
+   * It receives #EuiDataGridCustomBodyProps as its first argument and a context object
+   * as the second argument that allows integration with UnifiedDataTable features.
+   *
+   * The context includes `scrollOverridesRef` which custom grid bodies can use to provide
+   * their own scroll implementations for features like in-table search to work correctly
+   * with custom virtualization.
    */
-  renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
+  renderCustomGridBody?: (
+    args: EuiDataGridCustomBodyProps,
+    context: CustomGridBodyContext
+  ) => React.ReactNode;
   /**
    * Optional render for the grid toolbar
    * @param toolbarProps
@@ -833,6 +844,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const {
       inTableSearchTermCss,
       inTableSearchControl,
+      inTableSearchContextValue,
       cellContextWithInTableSearchSupport,
       renderCellValueWithInTableSearchSupport,
     } = useDataGridInTableSearch({
@@ -844,7 +856,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       renderCellValue,
       cellContext,
       pagination: paginationObj,
-      initialState: inTableSearchLatestStateRef.current,
+      initialState: inTableSearchLatestStateRef,
       onInitialStateChange: onInTableSearchInitialStateChange,
     });
 
@@ -1150,11 +1162,13 @@ const InternalUnifiedDataTable = React.forwardRef<
       customBulkActions,
     ]);
 
-    const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    const renderedGridToolbarRef = useRef<React.ReactElement | null>(null);
+
+    const renderCustomToolbarFn = useMemo<EuiDataGridProps['renderCustomToolbar']>(
       () =>
         renderCustomToolbar
-          ? (toolbarProps) =>
-              renderCustomToolbar({
+          ? (toolbarProps) => {
+              return (renderedGridToolbarRef.current = renderCustomToolbar({
                 toolbarProps,
                 gridProps: {
                   additionalControls:
@@ -1163,10 +1177,27 @@ const InternalUnifiedDataTable = React.forwardRef<
                       : additionalControls,
                   inTableSearchControl,
                 },
-              })
+              }));
+            }
           : undefined,
       [renderCustomToolbar, additionalControls, inTableSearchControl]
     );
+
+    const wrappedRenderCustomGridBody = useMemo(() => {
+      if (!renderCustomGridBody) return undefined;
+
+      // This allows us to pass functions internal
+      // to the data table in a way that's accessible within the custom grid body
+      return (euiCustomGridBodyProps: EuiDataGridCustomBodyProps) => {
+        return renderCustomGridBody(euiCustomGridBodyProps, {
+          renderedGridToolbarRef,
+          provideDataGridRefOverrides: (overrides: DataGridScrollOverrides) => {
+            if (!dataGridRef.current) return;
+            Object.assign(dataGridRef.current, overrides);
+          },
+        });
+      };
+    }, [renderCustomGridBody, renderedGridToolbarRef]);
 
     const showDisplaySelector = useMemo(():
       | EuiDataGridToolBarVisibilityDisplaySelectorOptions
@@ -1353,116 +1384,118 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     return (
       <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
-        <span className="unifiedDataTable__inner" css={styles.dataTableInner}>
-          <Global styles={styles.dataTableGlobal} />
-          <div
-            ref={setDataGridWrapper}
-            key={isCompareActive ? 'comparisonTable' : 'docTable'}
-            data-test-subj="discoverDocTable"
-            data-render-complete={isRenderComplete}
-            data-shared-item=""
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-            data-title={searchTitle}
-            data-description={searchDescription}
-            data-document-number={displayedRows.length}
-            className={classnames(className, 'unifiedDataTable__table')}
-            css={[styles.dataTable, inTableSearchTermCss]}
-          >
-            {isCompareActive ? (
-              <CompareDocuments
-                id={dataGridId}
-                wrapper={dataGridWrapper}
-                consumer={consumer}
-                ariaDescribedBy={randomId}
-                ariaLabelledBy={ariaLabelledBy}
-                dataView={dataView}
-                isPlainRecord={isPlainRecord}
-                selectedFieldNames={visibleColumns}
-                selectedDocIds={docIdsInSelectionOrder}
-                schemaDetectors={schemaDetectors}
-                forceShowAllFields={defaultColumns}
-                showFullScreenButton={showFullScreenButton}
-                fieldFormats={fieldFormats}
-                getDocById={getDocById}
-                replaceSelectedDocs={replaceSelectedDocs}
-                setIsCompareActive={setIsCompareActive}
-              />
-            ) : (
-              <EuiDataGridMemoized
-                id={dataGridId}
-                aria-describedby={randomId}
-                aria-labelledby={ariaLabelledBy}
-                columns={euiGridColumns}
-                columnVisibility={columnsVisibility}
-                data-test-subj="docTable"
-                leadingControlColumns={leadingControlColumns}
-                onColumnResize={onResize}
-                pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
-                renderCellValue={renderCellValueWithInTableSearchSupport}
-                ref={dataGridRef}
-                rowCount={rowCount}
-                schemaDetectors={schemaDetectors}
-                sorting={sorting as EuiDataGridSorting}
-                toolbarVisibility={toolbarVisibility}
-                rowHeightsOptions={rowHeightsOptions}
-                gridStyle={gridStyle}
-                renderCustomGridBody={renderCustomGridBody}
-                renderCustomToolbar={renderCustomToolbarFn}
-                trailingControlColumns={trailingControlColumns}
-                cellContext={cellContextWithInTableSearchSupport}
-                renderCellPopover={renderCustomPopover}
-                virtualizationOptions={virtualizationOptions}
-                onFullScreenChange={onFullScreenChange}
-              />
+        <InTableSearchProvider value={inTableSearchContextValue}>
+          <span className="unifiedDataTable__inner" css={styles.dataTableInner}>
+            <Global styles={styles.dataTableGlobal} />
+            <div
+              ref={setDataGridWrapper}
+              key={isCompareActive ? 'comparisonTable' : 'docTable'}
+              data-test-subj="discoverDocTable"
+              data-render-complete={isRenderComplete}
+              data-shared-item=""
+              data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
+              data-title={searchTitle}
+              data-description={searchDescription}
+              data-document-number={displayedRows.length}
+              className={classnames(className, 'unifiedDataTable__table')}
+              css={[styles.dataTable, inTableSearchTermCss]}
+            >
+              {isCompareActive ? (
+                <CompareDocuments
+                  id={dataGridId}
+                  wrapper={dataGridWrapper}
+                  consumer={consumer}
+                  ariaDescribedBy={randomId}
+                  ariaLabelledBy={ariaLabelledBy}
+                  dataView={dataView}
+                  isPlainRecord={isPlainRecord}
+                  selectedFieldNames={visibleColumns}
+                  selectedDocIds={docIdsInSelectionOrder}
+                  schemaDetectors={schemaDetectors}
+                  forceShowAllFields={defaultColumns}
+                  showFullScreenButton={showFullScreenButton}
+                  fieldFormats={fieldFormats}
+                  getDocById={getDocById}
+                  replaceSelectedDocs={replaceSelectedDocs}
+                  setIsCompareActive={setIsCompareActive}
+                />
+              ) : (
+                <EuiDataGridMemoized
+                  id={dataGridId}
+                  aria-describedby={randomId}
+                  aria-labelledby={ariaLabelledBy}
+                  columns={euiGridColumns}
+                  columnVisibility={columnsVisibility}
+                  data-test-subj="docTable"
+                  leadingControlColumns={leadingControlColumns}
+                  onColumnResize={onResize}
+                  pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
+                  renderCellValue={renderCellValueWithInTableSearchSupport}
+                  ref={dataGridRef}
+                  rowCount={rowCount}
+                  schemaDetectors={schemaDetectors}
+                  sorting={sorting as EuiDataGridSorting}
+                  toolbarVisibility={toolbarVisibility}
+                  rowHeightsOptions={rowHeightsOptions}
+                  gridStyle={gridStyle}
+                  renderCustomGridBody={wrappedRenderCustomGridBody}
+                  renderCustomToolbar={renderCustomToolbarFn}
+                  trailingControlColumns={trailingControlColumns}
+                  cellContext={cellContextWithInTableSearchSupport}
+                  renderCellPopover={renderCustomPopover}
+                  virtualizationOptions={virtualizationOptions}
+                  onFullScreenChange={onFullScreenChange}
+                />
+              )}
+            </div>
+            {loadingState !== DataLoadingState.loading &&
+              isPaginationEnabled && // we hide the footer for Surrounding Documents page
+              !isFilterActive && // hide footer when showing selected documents
+              !isCompareActive && (
+                <UnifiedDataTableFooter
+                  isLoadingMore={loadingState === DataLoadingState.loadingMore}
+                  rowCount={rowCount}
+                  sampleSize={sampleSizeState}
+                  pageCount={pageCount}
+                  pageIndex={paginationObj?.pageIndex}
+                  totalHits={totalHits}
+                  onFetchMoreRecords={onFetchMoreRecords}
+                  data={data}
+                  fieldFormats={fieldFormats}
+                  paginationMode={paginationMode}
+                  hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
+                />
+              )}
+            {searchTitle && (
+              <EuiScreenReaderOnly>
+                <p id={String(randomId)}>
+                  {searchDescription ? (
+                    <FormattedMessage
+                      id="unifiedDataTable.searchGenerationWithDescriptionGrid"
+                      defaultMessage="Table generated by Discover session ''{searchTitle}'' ({searchDescription})"
+                      values={{ searchTitle, searchDescription }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="unifiedDataTable.searchGenerationWithDescription"
+                      defaultMessage="Table generated by Discover session ''{searchTitle}''"
+                      values={{ searchTitle }}
+                    />
+                  )}
+                </p>
+              </EuiScreenReaderOnly>
             )}
-          </div>
-          {loadingState !== DataLoadingState.loading &&
-            isPaginationEnabled && // we hide the footer for Surrounding Documents page
-            !isFilterActive && // hide footer when showing selected documents
-            !isCompareActive && (
-              <UnifiedDataTableFooter
-                isLoadingMore={loadingState === DataLoadingState.loadingMore}
-                rowCount={rowCount}
-                sampleSize={sampleSizeState}
-                pageCount={pageCount}
-                pageIndex={paginationObj?.pageIndex}
-                totalHits={totalHits}
-                onFetchMoreRecords={onFetchMoreRecords}
-                data={data}
-                fieldFormats={fieldFormats}
-                paginationMode={paginationMode}
-                hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
-              />
-            )}
-          {searchTitle && (
-            <EuiScreenReaderOnly>
-              <p id={String(randomId)}>
-                {searchDescription ? (
-                  <FormattedMessage
-                    id="unifiedDataTable.searchGenerationWithDescriptionGrid"
-                    defaultMessage="Table generated by Discover session ''{searchTitle}'' ({searchDescription})"
-                    values={{ searchTitle, searchDescription }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="unifiedDataTable.searchGenerationWithDescription"
-                    defaultMessage="Table generated by Discover session ''{searchTitle}''"
-                    values={{ searchTitle }}
-                  />
-                )}
-              </p>
-            </EuiScreenReaderOnly>
-          )}
-          {canSetExpandedDoc &&
-            expandedDoc &&
-            renderDocumentView!(
-              expandedDoc,
-              displayedRows,
-              displayedColumns,
-              setExpandedDoc!,
-              columnsMeta
-            )}
-        </span>
+            {canSetExpandedDoc &&
+              expandedDoc &&
+              renderDocumentView!(
+                expandedDoc,
+                displayedRows,
+                displayedColumns,
+                setExpandedDoc!,
+                columnsMeta
+              )}
+          </span>
+        </InTableSearchProvider>
       </UnifiedDataTableContext.Provider>
     );
   }

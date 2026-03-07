@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
 import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
+import { StickyHeaderExtensionPointProvider } from '../../helpers/sticky_header_extension_point';
 import { isCascadeGroupRowNode } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
@@ -53,6 +54,13 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     virtualRowIndex: virtualRow.index,
   });
 
+  // Ref for the cell portal target - always available since we always render the portal
+  const stickyHeaderExtensionRenderRef = useRef<HTMLDivElement | null>(null);
+
+  const setStickyHeaderExtensionRenderRef = useCallback((ref: HTMLDivElement | null) => {
+    stickyHeaderExtensionRenderRef.current = ref;
+  }, []);
+
   const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
   const styles = useMemo(() => {
@@ -80,16 +88,16 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       />
     );
   }, [
-    RowTitleSlot,
-    enableRowSelection,
-    enableSecondaryExpansionAction,
     isGroupNode,
-    onCascadeGroupNodeExpanded,
-    onCascadeGroupNodeCollapsed,
-    rowHeaderActions,
+    RowTitleSlot,
     rowHeaderMetaSlots,
+    rowHeaderActions,
     rowInstance,
     size,
+    enableRowSelection,
+    enableSecondaryExpansionAction,
+    onCascadeGroupNodeExpanded,
+    onCascadeGroupNodeCollapsed,
   ]);
 
   return (
@@ -103,24 +111,40 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
       css={styles.rowWrapper}
     >
       <EuiFlexGroup direction="column" gutterSize={size} css={styles.rowInner}>
-        <React.Fragment>
-          {isActiveSticky && activeStickyRenderSlotRef.current
-            ? createPortal(
-                <div css={styles.rowStickyHeaderInner}>{rowHeader}</div>,
-                activeStickyRenderSlotRef.current,
-                `${rowId}-sticky-header`
-              )
-            : null}
-        </React.Fragment>
+        {/* Always render the portal when the slot is available so the cell portal
+            target ref is always set. Toggle visibility with CSS based on isActiveSticky. */}
+        {activeStickyRenderSlotRef.current &&
+          createPortal(
+            <div
+              css={[
+                styles.rowStickyHeaderInner,
+                isActiveSticky ? null : styles.rowStickyHeaderInnerHidden,
+              ]}
+            >
+              <>{rowHeader}</>
+              <div
+                data-test-subj="sticky-header-extension-point"
+                ref={setStickyHeaderExtensionRenderRef}
+                css={styles.rowStickyHeaderExtensionPointWrapper}
+              />
+            </div>,
+            activeStickyRenderSlotRef.current,
+            `${rowId}-sticky-header`
+          )}
         <EuiFlexItem>{rowHeader}</EuiFlexItem>
         <React.Fragment>
-          {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
-            <EuiFlexItem role="gridcell">
-              {rowVisibleCells.map((cell) => (
-                <TableCellRender key={cell.id} cell={cell} />
-              ))}
-            </EuiFlexItem>
-          )}
+          <StickyHeaderExtensionPointProvider
+            extensionPointRef={stickyHeaderExtensionRenderRef}
+            isActiveSticky={isActiveSticky}
+          >
+            {!isGroupNode && rowIsExpanded && hasAllParentsExpanded && (
+              <EuiFlexItem role="gridcell">
+                {rowVisibleCells.map((cell) => (
+                  <TableCellRender key={cell.id} cell={cell} />
+                ))}
+              </EuiFlexItem>
+            )}
+          </StickyHeaderExtensionPointProvider>
         </React.Fragment>
       </EuiFlexGroup>
     </div>

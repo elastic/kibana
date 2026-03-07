@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import type { InTableSearchControlProps } from './in_table_search_control';
 import { InTableSearchControl } from './in_table_search_control';
+import { InTableSearchProvider } from './in_table_search_context';
+import type { InTableSearchRestorableState, UseFindMatchesState } from './types';
 import {
   CELL_MATCH_INDEX_ATTRIBUTE,
   COUNTER_TEST_SUBJ,
@@ -19,6 +22,7 @@ import {
 } from './constants';
 import { wrapRenderCellValueWithInTableSearchSupport } from './wrap_render_cell_value';
 import { getRenderCellValueMock } from './__mocks__';
+import { INITIAL_STATE as INITIAL_MATCH_STATE } from './matches/use_find_matches';
 
 describe('InTableSearchControl', () => {
   const testData = [
@@ -40,9 +44,29 @@ describe('InTableSearchControl', () => {
       wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(data), 'black', 'green')
     );
 
+  const emptyInitialStateRef = { current: undefined as InTableSearchRestorableState | undefined };
+
+  function WithProvider({
+    children,
+    controlProps,
+  }: PropsWithChildren<{ controlProps: InTableSearchControlProps }>) {
+    const [matchState, setMatchState] = useState<UseFindMatchesState>(INITIAL_MATCH_STATE);
+
+    return (
+      <InTableSearchProvider
+        value={{
+          controlPropsContextValue: controlProps,
+          matchContextValue: { matchState, setMatchState },
+        }}
+      >
+        <InTableSearchControl />
+      </InTableSearchProvider>
+    );
+  }
+
   it('should update correctly when deps change', async () => {
     const initialProps: InTableSearchControlProps = {
-      initialState: undefined,
+      initialState: emptyInitialStateRef,
       onInitialStateChange: undefined,
       inTableSearchTerm: 'a',
       pageSize: 10,
@@ -57,7 +81,7 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+    const { rerender } = render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/9');
@@ -90,10 +114,12 @@ describe('InTableSearchControl', () => {
     );
 
     rerender(
-      <InTableSearchControl
-        {...initialProps}
-        rows={testData2}
-        renderCellValue={getRenderCellValueWrappedMock(testData2)}
+      <WithProvider
+        controlProps={{
+          ...initialProps,
+          rows: testData2,
+          renderCellValue: getRenderCellValueWrappedMock(testData2),
+        }}
       />
     );
 
@@ -130,7 +156,7 @@ describe('InTableSearchControl', () => {
 
   it('should update correctly when search term changes', async () => {
     const initialProps: InTableSearchControlProps = {
-      initialState: undefined,
+      initialState: emptyInitialStateRef,
       onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: null,
@@ -145,13 +171,13 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+    const { rerender } = render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
     });
 
-    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="b" />);
+    rerender(<WithProvider controlProps={{ ...initialProps, inTableSearchTerm: 'b' }} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/6');
@@ -160,7 +186,7 @@ describe('InTableSearchControl', () => {
 
   it('should change pages correctly', async () => {
     const initialProps: InTableSearchControlProps = {
-      initialState: undefined,
+      initialState: emptyInitialStateRef,
       onInitialStateChange: undefined,
       inTableSearchTerm: 'abc',
       pageSize: 2,
@@ -175,7 +201,7 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+    const { rerender } = render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/1');
@@ -183,7 +209,9 @@ describe('InTableSearchControl', () => {
 
     expect(initialProps.onChangeToExpectedPage).toHaveBeenCalledWith(1);
 
-    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="c" pageSize={1} />);
+    rerender(
+      <WithProvider controlProps={{ ...initialProps, inTableSearchTerm: 'c', pageSize: 1 }} />
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/2');
@@ -191,7 +219,7 @@ describe('InTableSearchControl', () => {
 
     expect(initialProps.onChangeToExpectedPage).toHaveBeenNthCalledWith(2, 2);
 
-    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="100" />);
+    rerender(<WithProvider controlProps={{ ...initialProps, inTableSearchTerm: '100' }} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/1');
@@ -199,13 +227,15 @@ describe('InTableSearchControl', () => {
 
     expect(initialProps.onChangeToExpectedPage).toHaveBeenNthCalledWith(3, 0);
 
-    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="random" />);
+    rerender(<WithProvider controlProps={{ ...initialProps, inTableSearchTerm: 'random' }} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('0/0');
     });
 
-    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="100" pageSize={null} />);
+    rerender(
+      <WithProvider controlProps={{ ...initialProps, inTableSearchTerm: '100', pageSize: null }} />
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/1');
@@ -216,7 +246,7 @@ describe('InTableSearchControl', () => {
 
   it('should highlight the active match correctly', async () => {
     const initialProps: InTableSearchControlProps = {
-      initialState: undefined,
+      initialState: emptyInitialStateRef,
       onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: 2,
@@ -231,7 +261,7 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    render(<InTableSearchControl {...initialProps} />);
+    render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
@@ -328,7 +358,7 @@ describe('InTableSearchControl', () => {
 
   it('should handle timeouts', async () => {
     const initialProps: InTableSearchControlProps = {
-      initialState: undefined,
+      initialState: emptyInitialStateRef,
       onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: null,
@@ -343,13 +373,13 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+    const { rerender } = render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
     });
 
-    rerender(<InTableSearchControl {...initialProps} renderCellValue={jest.fn()} />);
+    rerender(<WithProvider controlProps={{ ...initialProps, renderCellValue: jest.fn() }} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('0/0');
@@ -358,7 +388,7 @@ describe('InTableSearchControl', () => {
 
   it('should handle ignore errors in cells', async () => {
     const initialProps: InTableSearchControlProps = {
-      initialState: undefined,
+      initialState: emptyInitialStateRef,
       onInitialStateChange: undefined,
       inTableSearchTerm: 'aa',
       pageSize: null,
@@ -373,14 +403,19 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+    const { rerender } = render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/2');
     });
 
     rerender(
-      <InTableSearchControl {...initialProps} visibleColumns={[...visibleColumns, 'extraColumn']} />
+      <WithProvider
+        controlProps={{
+          ...initialProps,
+          visibleColumns: [...visibleColumns, 'extraColumn'],
+        }}
+      />
     );
 
     await waitFor(() => {
@@ -391,12 +426,14 @@ describe('InTableSearchControl', () => {
   it('should restore the initial state when provided', async () => {
     const initialProps: InTableSearchControlProps = {
       initialState: {
-        searchTerm: 'b',
-        activeMatch: {
-          matchPosition: 2,
-          matchIndexWithinCell: 0,
-          columnId: 'column0',
-          rowIndex: 1,
+        current: {
+          searchTerm: 'b',
+          activeMatch: {
+            matchPosition: 2,
+            matchIndexWithinCell: 0,
+            columnId: 'column0',
+            rowIndex: 1,
+          },
         },
       },
       onInitialStateChange: jest.fn(),
@@ -413,7 +450,7 @@ describe('InTableSearchControl', () => {
       onChangeToExpectedPage: jest.fn(),
     };
 
-    const { rerender } = render(<InTableSearchControl {...initialProps} />);
+    const { rerender } = render(<WithProvider controlProps={initialProps} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/6');
@@ -429,7 +466,7 @@ describe('InTableSearchControl', () => {
 
     expect(initialProps.onInitialStateChange).not.toHaveBeenCalled(); // Initial state should not trigger a change
 
-    rerender(<InTableSearchControl {...initialProps} inTableSearchTerm="aa" />);
+    rerender(<WithProvider controlProps={{ ...initialProps, inTableSearchTerm: 'aa' }} />);
 
     await waitFor(() => {
       expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
