@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getDocument, getFieldValue, getFieldsToBeFilteredOn } from './commons';
 
 describe('getDocument', () => {
@@ -52,11 +51,13 @@ describe('getFieldValue', () => {
 });
 
 describe('getFieldsToBeFilteredOn', () => {
-  const genericEuidFields = getEntityDefinitionWithoutId('generic').identityField.euidFields;
+  // Single-field identity (e.g. generic) uses a simplified path and does not expose euidFields.
+  // Use an inline composition equivalent to entity.id for this test.
+  const singleFieldEuidFields = [{ composition: [{ field: 'entity.id' }] }];
 
   describe('flattened documents', () => {
     it('returns values for flattened doc', () => {
-      const result = getFieldsToBeFilteredOn({ 'entity.id': 'e-flat' }, genericEuidFields);
+      const result = getFieldsToBeFilteredOn({ 'entity.id': 'e-flat' }, singleFieldEuidFields);
       expect(result.rankingPosition).toBe(0);
       expect(result.values).toEqual({ 'entity.id': 'e-flat' });
     });
@@ -64,7 +65,7 @@ describe('getFieldsToBeFilteredOn', () => {
 
   describe('nested documents (existing behavior)', () => {
     it('returns values for nested doc', () => {
-      const result = getFieldsToBeFilteredOn({ entity: { id: 'e-nested' } }, genericEuidFields);
+      const result = getFieldsToBeFilteredOn({ entity: { id: 'e-nested' } }, singleFieldEuidFields);
       expect(result.rankingPosition).toBe(0);
       expect(result.values).toEqual({ 'entity.id': 'e-nested' });
     });

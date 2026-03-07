@@ -184,26 +184,26 @@ describe('getEuidFromObject', () => {
   });
 
   describe('service', () => {
-    it('uses service.entity.id when present', () => {
+    it('returns undefined when service.name is missing (single-field identity)', () => {
       expect(getEuidFromObject('service', { service: { entity: { id: 'svc-entity-1' } } })).toBe(
-        'service:svc-entity-1'
+        undefined
       );
     });
 
-    it('uses service.name when service.entity.id is missing', () => {
+    it('uses service.name (single-field identity)', () => {
       expect(getEuidFromObject('service', { service: { name: 'api-gateway' } })).toBe(
         'service:api-gateway'
       );
     });
 
-    it('returns empty string when no service id fields are present', () => {
+    it('returns undefined when no service.name is present', () => {
       expect(getEuidFromObject('service', {})).toBe(undefined);
       expect(getEuidFromObject('service', { service: {} })).toBe(undefined);
     });
 
-    it('precedence: service.entity.id over service.name', () => {
+    it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
       const obj = { service: { entity: { id: 'svc-e1' }, name: 'api-gateway' } };
-      expect(getEuidFromObject('service', obj)).toBe('service:svc-e1');
+      expect(getEuidFromObject('service', obj)).toBe('service:api-gateway');
     });
   });
 });

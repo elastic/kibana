@@ -11,6 +11,7 @@ import type {
   EuidConditional,
   FieldEvaluation,
 } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, isEuidSeparator } from './commons';
 
@@ -55,6 +56,13 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
  */
 export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const field = identityField.singleField;
+    const escaped = escapePainlessField(field);
+    const condition = `doc.containsKey('${escaped}') && doc['${escaped}'].size() > 0 && doc['${escaped}'].value != null && doc['${escaped}'].value != ""`;
+    return `if (${condition}) { return "${entityType}:" + doc['${escaped}'].value; } return null;`;
+  }
 
   if (identityField.euidFields.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');

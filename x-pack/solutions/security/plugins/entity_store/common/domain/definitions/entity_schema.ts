@@ -81,6 +81,19 @@ const calculatedIdentityFieldLogicSchema = z.object({
   documentsFilter: streamlangConditionSchema,
 });
 
+/**
+ * Single-field identity: entity is identified by one field only (e.g. service.name, entity.id).
+ * No composition, no field evaluations. ESQL/DSL use a simplified path for this shape.
+ */
+export const singleFieldIdentitySchema = z.object({
+  singleField: z.string(),
+});
+
+const identityFieldSchema = z.union([
+  calculatedIdentityFieldLogicSchema,
+  singleFieldIdentitySchema,
+]);
+
 export const entitySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -88,12 +101,14 @@ export const entitySchema = z.object({
   filter: z.string().optional(),
   entityTypeFallback: z.string().optional(),
   fields: z.array(fieldSchema),
-  identityField: calculatedIdentityFieldLogicSchema,
+  identityField: identityFieldSchema,
   indexPatterns: z.array(z.string()),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
-export type EntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // logic to generate identity field
+export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidFields + documentsFilter + optional fieldEvaluations)
+export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
+export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
 export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; // entity with a known 'type'
@@ -104,3 +119,9 @@ export type EuidConditional = z.infer<typeof euidConditionalSchema>;
 export type EuidFieldInstruction = z.infer<typeof euidFieldInstructionSchema>;
 export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
+
+export function isSingleFieldIdentity(identity: EntityIdentity): identity is SingleFieldIdentity {
+  return (
+    'singleField' in identity && typeof (identity as SingleFieldIdentity).singleField === 'string'
+  );
+}

@@ -7,20 +7,12 @@
 
 import { newestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import {
-  getCommonFieldDescriptions,
-  getEntityFieldsDescriptions,
-  isNotEmptyCondition,
-} from './common_fields';
-import { compose, field } from './euid_instructions';
+import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
 export const genericEntityDefinition: EntityDefinitionWithoutId = {
   type: 'generic',
   name: `Security 'generic' Entity Store Definition`,
-  identityField: {
-    euidFields: [compose(field('entity.id'))],
-    documentsFilter: isNotEmptyCondition('entity.id'),
-  },
+  identityField: { singleField: 'entity.id' },
   indexPatterns: [],
   fields: [
     // We want this to make sure it's also extracted on CCS logs extraction

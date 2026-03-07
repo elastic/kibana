@@ -31,7 +31,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
     it('returns ESQL filter with equality on entity.id when present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('generic', { entity: { id: 'e-123' } });
 
-      expect(result).toBe('((entity.id == "e-123"))');
+      expect(result).toBe('(entity.id == "e-123")');
     });
 
     it('unwraps _source when doc is an Elasticsearch hit', () => {
@@ -39,7 +39,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
         _source: { entity: { id: 'e-123' } },
       });
 
-      expect(result).toBe('((entity.id == "e-123"))');
+      expect(result).toBe('(entity.id == "e-123")');
     });
   });
 
@@ -153,30 +153,28 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
   });
 
   describe('service', () => {
-    it('returns filter with equality on service.entity.id when present', () => {
+    it('returns undefined when service.name is missing (single-field identity)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('service', {
         service: { entity: { id: 'svc-entity-1' } },
       });
 
-      expect(result).toBe('((service.entity.id == "svc-entity-1"))');
+      expect(result).toBeUndefined();
     });
 
-    it('returns filter with equality on service.name and null/empty check when service.entity.id is missing', () => {
+    it('returns filter with equality on service.name (single-field identity)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('service', {
         service: { name: 'api-gateway' },
       });
 
-      expect(result).toBe(
-        '((service.name == "api-gateway") AND (service.entity.id IS NULL OR service.entity.id == ""))'
-      );
+      expect(result).toBe('(service.name == "api-gateway")');
     });
 
-    it('precedence: uses service.entity.id when both service.entity.id and service.name are present', () => {
+    it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
       const result = getEuidEsqlFilterBasedOnDocument('service', {
         service: { entity: { id: 'svc-e1' }, name: 'api-gateway' },
       });
 
-      expect(result).toBe('((service.entity.id == "svc-e1"))');
+      expect(result).toBe('(service.name == "api-gateway")');
     });
   });
 });
@@ -185,8 +183,7 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
   it('returns single field condition for generic (one required field)', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('generic');
 
-    const expected = 'NOT(`entity.id` IS NULL) AND `entity.id` != ""';
-    expect(result).toBe(expected);
+    expect(result).toBe('(entity.id IS NOT NULL AND entity.id != "")');
   });
 
   it('returns OR of required fields for host', () => {

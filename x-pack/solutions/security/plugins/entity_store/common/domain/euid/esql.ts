@@ -8,10 +8,12 @@
 import { conditionToESQL } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
 import type { FieldEvaluation } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { esqlIsNotNullOrEmpty, esqlIsNullOrEmpty } from '../../esql/strings';
 import {
   getDocument,
+  getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   isEuidField,
@@ -46,6 +48,15 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(doc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return `(${identityField.singleField} == "${escapeEsqlString(value)}")`;
+  }
+
   if (identityField.fieldEvaluations?.length) {
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
@@ -88,6 +99,9 @@ function escapeEsqlString(s: string): string {
  */
 export function getFieldEvaluationsEsql(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (isSingleFieldIdentity(identityField)) {
+    return undefined;
+  }
   const evaluations = identityField.fieldEvaluations;
   if (!evaluations || evaluations.length === 0) {
     return undefined;
@@ -101,6 +115,9 @@ export function getFieldEvaluationsEsql(entityType: EntityType) {
  */
 export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (isSingleFieldIdentity(identityField)) {
+    return undefined;
+  }
   const evaluations = identityField.fieldEvaluations;
   if (!evaluations || evaluations.length === 0) {
     return undefined;
@@ -128,6 +145,11 @@ export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
+  }
+
   const filters = [conditionToESQL(identityField.documentsFilter)];
 
   const evaluationSourceFilter = getFieldEvaluationsSourcesFilterEsql(entityType);
@@ -170,6 +192,10 @@ export function getEuidEsqlEvaluation(
   { withTypeId = true }: { withTypeId?: boolean } = {}
 ) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    return appendTypeIdIfNeeded(entityType, identityField.singleField, withTypeId);
+  }
 
   if (identityField.euidFields.length === 0) {
     throw new Error('No euid fields found, invalid euid logic definition');

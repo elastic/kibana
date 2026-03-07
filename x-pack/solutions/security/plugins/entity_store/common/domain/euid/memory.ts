@@ -6,6 +6,7 @@
  */
 
 import type { EntityType, EuidFieldInstruction } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { getDocument, getFieldValue, instructionMatchesDoc, isEuidField } from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
@@ -36,6 +37,15 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(doc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return `${entityType}:${value}`;
+  }
+
   if (identityField.fieldEvaluations?.length) {
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };

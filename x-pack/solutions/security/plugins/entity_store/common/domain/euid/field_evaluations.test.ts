@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { applyFieldEvaluations } from './field_evaluations';
 
 describe('applyFieldEvaluations', () => {
-  const userEvaluations = getEntityDefinitionWithoutId('user').identityField.fieldEvaluations!;
+  // User entity uses calculated identity with fieldEvaluations (entity.namespace from event.module)
+  const userEvaluations = (
+    getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
+  ).fieldEvaluations!;
 
   it('returns entity.namespace null when event.module is null or missing', () => {
     expect(applyFieldEvaluations({}, userEvaluations)).toEqual({ 'entity.namespace': null });

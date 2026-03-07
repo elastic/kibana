@@ -226,19 +226,15 @@ describe('getEuidDslFilterBasedOnDocument', () => {
   });
 
   describe('service', () => {
-    it('returns filter with term on service.entity.id when present', () => {
+    it('returns undefined when service.name is missing (single-field identity)', () => {
       const result = getEuidDslFilterBasedOnDocument('service', {
         service: { entity: { id: 'svc-entity-1' } },
       });
 
-      expect(result).toEqual({
-        bool: {
-          filter: [{ term: { 'service.entity.id': 'svc-entity-1' } }],
-        },
-      });
+      expect(result).toBeUndefined();
     });
 
-    it('returns filter with term on service.name when service.entity.id is missing', () => {
+    it('returns filter with term on service.name (single-field identity)', () => {
       const result = getEuidDslFilterBasedOnDocument('service', {
         service: { name: 'api-gateway' },
       });
@@ -246,19 +242,18 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       expect(result).toEqual({
         bool: {
           filter: [{ term: { 'service.name': 'api-gateway' } }],
-          must_not: [{ exists: { field: 'service.entity.id' } }],
         },
       });
     });
 
-    it('precedence: uses service.entity.id when both service.entity.id and service.name are present', () => {
+    it('uses service.name when both service.entity.id and service.name are present (single-field identity)', () => {
       const result = getEuidDslFilterBasedOnDocument('service', {
         service: { entity: { id: 'svc-e1' }, name: 'api-gateway' },
       });
 
       expect(result).toEqual({
         bool: {
-          filter: [{ term: { 'service.entity.id': 'svc-e1' } }],
+          filter: [{ term: { 'service.name': 'api-gateway' } }],
         },
       });
     });
@@ -332,12 +327,15 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
     });
   });
 
-  it('service: returns documentsFilter DSL (or of isNotEmpty for each identity field)', () => {
+  it('service: returns documentsFilter DSL (service.name not empty)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('service');
 
     expect(result).toEqual({
       bool: {
-        should: [isNotEmptyClause('service.entity.id'), isNotEmptyClause('service.name')],
+        must: [
+          { exists: { field: 'service.name' } },
+          { bool: { must_not: { match: { 'service.name': '' } } } },
+        ],
       },
     });
   });

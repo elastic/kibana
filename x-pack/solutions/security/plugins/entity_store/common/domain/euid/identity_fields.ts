@@ -6,6 +6,7 @@
  */
 
 import type { EntityType } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField } from './commons';
 
@@ -30,9 +31,17 @@ export interface IdentitySourceFields {
  * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidFields
  */
 export function getEuidSourceFields(entityType: EntityType): IdentitySourceFields {
-  const {
-    identityField: { euidFields, fieldEvaluations },
-  } = getEntityDefinitionWithoutId(entityType);
+  const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const field = identityField.singleField;
+    return {
+      requiresOneOf: [field],
+      identitySourceFields: [field],
+    };
+  }
+
+  const { euidFields, fieldEvaluations } = identityField;
   const evaluationDestinationToSource = new Map(
     (fieldEvaluations ?? []).map((e) => [e.destination, e.source])
   );

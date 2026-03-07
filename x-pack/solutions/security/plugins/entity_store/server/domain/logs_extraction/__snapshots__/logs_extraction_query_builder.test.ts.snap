@@ -499,7 +499,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`entity.id\` IS NULL) AND \`entity.id\` != \\"\\")
+      AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
   | EVAL recent.entity.EngineMetadata.UntypedId = entity.id
   | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -1505,9 +1505,8 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`service.entity.id\` IS NULL) AND \`service.entity.id\` != \\"\\" OR NOT(\`service.name\` IS NULL) AND \`service.name\` != \\"\\")
-  | EVAL recent.entity.EngineMetadata.UntypedId = CASE((service.entity.id IS NOT NULL AND service.entity.id != \\"\\"), service.entity.id,
-(service.name IS NOT NULL AND service.name != \\"\\"), service.name, NULL)
+      AND ((service.name IS NOT NULL AND service.name != \\"\\"))
+  | EVAL recent.entity.EngineMetadata.UntypedId = service.name
   | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1900,7 +1899,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for generic e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`entity.id\` IS NULL) AND \`entity.id\` != \\"\\")
+      AND ((entity.id IS NOT NULL AND entity.id != \\"\\"))
   | STATS document_count = COUNT()"
 `;
 
@@ -1920,7 +1919,7 @@ exports[`buildRemainingLogsCountQuery generates the expected query for service e
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND (NOT(\`service.entity.id\` IS NULL) AND \`service.entity.id\` != \\"\\" OR NOT(\`service.name\` IS NULL) AND \`service.name\` != \\"\\")
+      AND ((service.name IS NOT NULL AND service.name != \\"\\"))
   | STATS document_count = COUNT()"
 `;
 

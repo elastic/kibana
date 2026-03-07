@@ -8,13 +8,20 @@
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import type { EntityType } from '../definitions/entity_schema';
+import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getDocument, getFieldsToBeFilteredOn, getFieldsToBeFilteredOut } from './commons';
+import { isNotEmptyCondition } from '../definitions/common_fields';
+import {
+  getDocument,
+  getFieldValue,
+  getFieldsToBeFilteredOn,
+  getFieldsToBeFilteredOut,
+} from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
- * This is the translation of {@link EntityIdentity.documentsFilter}.
+ * This is the translation of {@link CalculatedEntityIdentity.documentsFilter}.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
@@ -31,6 +38,11 @@ export function getEuidDslDocumentsContainsIdFilter(
   entityType: EntityType
 ): QueryDslQueryContainer {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+  if (isSingleFieldIdentity(identityField)) {
+    return conditionToQueryDsl(
+      isNotEmptyCondition(identityField.singleField)
+    ) as QueryDslQueryContainer;
+  }
   return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
 }
 
@@ -74,6 +86,19 @@ export function getEuidDslFilterBasedOnDocument(
 
   doc = getDocument(doc);
   const { identityField } = getEntityDefinitionWithoutId(entityType);
+
+  if (isSingleFieldIdentity(identityField)) {
+    const value = getFieldValue(doc, identityField.singleField);
+    if (value === undefined) {
+      return undefined;
+    }
+    return {
+      bool: {
+        filter: [{ term: { [identityField.singleField]: value } }],
+      },
+    };
+  }
+
   if (identityField.fieldEvaluations?.length) {
     const evaluated = applyFieldEvaluations(doc, identityField.fieldEvaluations);
     doc = { ...doc, ...evaluated };
