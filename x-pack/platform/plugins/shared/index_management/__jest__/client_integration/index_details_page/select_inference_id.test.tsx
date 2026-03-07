@@ -261,9 +261,7 @@ describe('SelectInferenceId', () => {
 
       // The incompatible endpoint should NOT appear in the dropdown
       await waitFor(() => {
-        expect(
-          screen.queryByTestId('custom-inference_new-endpoint-id')
-        ).not.toBeInTheDocument();
+        expect(screen.queryByTestId('custom-inference_new-endpoint-id')).not.toBeInTheDocument();
       });
 
       // The button should still show the previous selection
