@@ -846,7 +846,8 @@ export class ExceptionListClient {
     const { savedObjectsClient } = this;
 
     if (this.enableServerExtensionPoints) {
-      // todo: optimize
+      // todo: this is not ideal, items will be checked one-by-one. we'd need an `exceptionsListPreBulkDeleteItems`
+      // callback, but then that also needs a bulkGet function in exceptionListClient, which we don't have yet.
       for (const id of ids) {
         await this.serverExtensionsClient.pipeRun(
           'exceptionsListPreDeleteItem',
@@ -1196,18 +1197,21 @@ export class ExceptionListClient {
       ...readStream,
     ]);
 
+    let shouldListApiPerformOverwrite = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
-        parsedObjects,
+        { data: parsedObjects, overwrite },
         this.getServerExtensionCallbackContext()
       );
+
+      shouldListApiPerformOverwrite = result.overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId,
-      overwrite,
+      overwrite: shouldListApiPerformOverwrite,
       savedObjectsClient,
       user,
     });
@@ -1231,18 +1235,21 @@ export class ExceptionListClient {
     // validation of import and sorting of lists and items
     const parsedObjects = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
 
+    let shouldListApiPerformOverwrite = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
-        parsedObjects,
+        { data: parsedObjects, overwrite },
         this.getServerExtensionCallbackContext()
       );
+
+      shouldListApiPerformOverwrite = result.overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId: false,
-      overwrite,
+      overwrite: shouldListApiPerformOverwrite,
       savedObjectsClient,
       user,
     });

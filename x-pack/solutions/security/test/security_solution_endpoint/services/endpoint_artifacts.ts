@@ -9,6 +9,7 @@ import type {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
@@ -120,6 +121,36 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       };
     }
 
+    async updateExceptionItem(
+      updatePayload: UpdateExceptionListItemSchema,
+      { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
+    ): Promise<ArtifactTestData> {
+      this.log.verbose(`Updating exception item:\n${JSON.stringify(updatePayload)}`);
+
+      const artifact = await supertest
+        .put(addSpaceIdToPath('/', spaceId, EXCEPTION_LIST_ITEM_URL))
+        .set('kbn-xsrf', 'true')
+        .send(updatePayload)
+        .then(this.getHttpResponseFailureHandler())
+        .then((response) => response.body as ExceptionListItemSchema);
+
+      const { item_id: itemId, list_id: listId } = artifact;
+      const artifactAssignment = isArtifactGlobal(artifact) ? 'Global' : 'Per-Policy';
+
+      this.log.info(
+        `Updated [${artifactAssignment}] exception list item in space [${spaceId}], List ID [${listId}], Item ID [${itemId}]`
+      );
+
+      const cleanup = async () => {
+        await this.deleteExceptionItem(artifact, { supertest, spaceId });
+      };
+
+      return {
+        artifact,
+        cleanup,
+      };
+    }
+
     async deleteExceptionItem(
       {
         list_id: listId,
@@ -204,6 +235,34 @@ export function EndpointArtifactsTestResourcesProvider({ getService }: FtrProvid
       const trustedDevice = this.exceptionsGenerator.generateTrustedDeviceForCreate(overrides);
 
       return this.createExceptionItem(trustedDevice, options);
+    }
+
+    async createList(
+      listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
+      options: ArtifactCreateOptions = {}
+    ): Promise<void> {
+      switch (listId) {
+        case ENDPOINT_ARTIFACT_LISTS.trustedApps.id: {
+          return this.ensureListExists(TRUSTED_APPS_EXCEPTION_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.trustedDevices.id: {
+          return this.ensureListExists(TRUSTED_DEVICES_EXCEPTION_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.eventFilters.id: {
+          return this.ensureListExists(EVENT_FILTER_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.blocklists.id: {
+          return this.ensureListExists(BLOCKLISTS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
+          return this.ensureListExists(HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION, options);
+        }
+        case ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id: {
+          return this.ensureListExists(ENDPOINT_EXCEPTIONS_LIST_DEFINITION, options);
+        }
+        default:
+          throw new Error(`Unexpected list id ${listId}`);
+      }
     }
 
     async createArtifact(

@@ -11,7 +11,10 @@ import {
   ENDPOINT_ARTIFACT_LISTS,
 } from '@kbn/securitysolution-list-constants';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
-import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
+import {
+  buildSpaceOwnerIdTag,
+  hasArtifactOwnerSpaceId,
+} from '../../../../common/endpoint/service/artifacts/utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
@@ -29,13 +32,18 @@ import {
 export const getExceptionsPreImportHandler = (
   endpointAppContext: EndpointAppContextService
 ): ExceptionsListPreImportServerExtension['callback'] => {
-  return async ({ data, context: { request } }): Promise<PromiseFromStreams> => {
+  return async ({
+    data: { data, overwrite },
+    context: { request, exceptionListClient },
+  }): ReturnType<ExceptionsListPreImportServerExtension['callback']> => {
     validateCanEndpointArtifactsBeImported(data, endpointAppContext.experimentalFeatures);
     provideSpaceAwarenessCompatibilityForOldEndpointExceptions(data, endpointAppContext);
 
     if (!endpointAppContext.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
-      return data;
+      return { data, overwrite };
     }
+
+    // --- Below are the validations/operations when Import/Export is allowed for all endpoint artifacts based on FF ---
 
     const importedListIds = new Set<string>();
     for (const item of [...data.lists, ...data.items]) {
@@ -49,7 +57,7 @@ export const getExceptionsPreImportHandler = (
     );
 
     if (!hasEndpointArtifact) {
-      return data;
+      return { data, overwrite };
     }
 
     if (importedListIds.size > 1) {
@@ -102,7 +110,55 @@ export const getExceptionsPreImportHandler = (
       await endpointExceptionValidator.validatePreImport(data);
     }
 
-    return data;
+    // after all validation is successful, let's prepare for importing the data
+    if (overwrite) {
+      // Let's not pass the `list` to the list API, to avoid conflict issue due to the `overwrite` query param is disabled on that level.
+      cleanList(data);
+    }
+
+    if (!request) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Unable to determine space id. Missing HTTP Request object',
+        500
+      );
+    }
+
+    // --- From this point, we're starting to perform operations on SOs. All validations must be above ---
+
+    // Delete items from the list API if overwrite is true, to simulate the overwrite behaviour,
+    // as we disabled the overwrite query param on the list API level to avoid conflict issue.
+    const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+
+    const notGlobalExceptionFilter = `NOT exception-list-agnostic.attributes.tags:"${GLOBAL_ARTIFACT_TAG}"`;
+    const createdInCurrentSpaceExceptionFilter = `exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(
+      spaceId
+    )}"`;
+    const filterForCurrentSpace = `${notGlobalExceptionFilter} AND ${createdInCurrentSpaceExceptionFilter} `;
+
+    const findResult = await exceptionListClient.findExceptionListItem({
+      listId: importedListId,
+      namespaceType: 'agnostic',
+      filter: filterForCurrentSpace,
+      page: 1,
+      perPage: 1_000,
+      sortField: undefined,
+      sortOrder: undefined,
+    });
+
+    if (findResult?.total && findResult.total > 0) {
+      await exceptionListClient.bulkDeleteExceptionListItems({
+        ids: findResult.data.map((item) => item.id) ?? [],
+        namespaceType: 'agnostic',
+      });
+    }
+
+    return {
+      data,
+
+      // We're not allowing the list API to overwrite the list, as it would delete all items.
+      // Instead, we're 'simulating' the overwrite behaviour here, in the extension.
+      overwrite: false,
+    };
   };
 };
 
@@ -163,4 +219,8 @@ const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
     logger.debug(`The following Endpoint Exceptions item imports were adjusted to include the Global artifact tag:
  ${stringify(adjustedImportItems)}`);
   }
+};
+
+const cleanList = (data: PromiseFromStreams) => {
+  data.lists = [];
 };
