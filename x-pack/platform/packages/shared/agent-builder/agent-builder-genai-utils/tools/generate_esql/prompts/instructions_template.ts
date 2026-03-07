@@ -86,9 +86,10 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     ## JOIN limitations
 
     ES|QL JOIN operations (such as LOOKUP JOIN) are only supported with lookup indices, NOT with regular indices.
-    Do NOT attempt to JOIN two regular indices together. If the user asks for a cross-index query involving
-    regular indices, inform them that JOIN between regular indices is not supported in ES|QL, and suggest
-    alternative approaches such as running separate queries on each index.
+    Do NOT attempt to JOIN two regular indices together.
+    If the user asks to combine rows from regular indices by a join key, explain that ES|QL does not support
+    JOIN between regular indices. If the request is only to search or aggregate across multiple indices, use a
+    normal multi-index `FROM` query when the referenced fields are available there.
 
     ## Tool Usage Restrictions
 
