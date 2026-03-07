@@ -14,13 +14,8 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { DataGridDensity } from '@kbn/discover-utils';
-import type {
-  SavedSearch,
-  SavedSearchAttributes,
-  SerializableSavedSearch,
-  SortOrder,
-} from '../types';
+import type { DiscoverSessionAttributes } from '../../server';
+import type { SavedSearch, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import type { SavedSearchCrudTypes } from '../content_management';
 import { fromDiscoverSessionAttributesToSavedSearch } from './saved_searches_utils';
@@ -78,7 +73,7 @@ export const convertToSavedSearch = async <
     managed,
   }: {
     savedSearchId: string | undefined;
-    attributes: SavedSearchAttributes;
+    attributes: DiscoverSessionAttributes;
     references: Reference[];
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;
@@ -128,17 +123,10 @@ export const getSavedSearch = async <
   serialized?: Serialized
 ): Promise<ReturnType> => {
   const so = await getSearchSavedObject(savedSearchId, deps);
-  const attributes = so.item.attributes;
-  const firstTabAttributes = attributes.tabs[0].attributes;
   const savedSearch = await convertToSavedSearch(
     {
       savedSearchId,
-      attributes: {
-        ...attributes,
-        ...firstTabAttributes,
-        sort: firstTabAttributes.sort as SortOrder[],
-        density: firstTabAttributes.density as DataGridDensity,
-      },
+      attributes: so.item.attributes,
       references: so.item.references,
       sharingSavedObjectProps: so.meta,
       managed: so.item.managed,

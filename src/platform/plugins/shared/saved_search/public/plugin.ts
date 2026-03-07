@@ -23,12 +23,7 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { once } from 'lodash';
 import { LATEST_VERSION, SavedSearchType } from '../common';
 import { kibanaContext } from '../common/expressions';
-import type {
-  DiscoverSession,
-  SavedSearch,
-  SavedSearchAttributes,
-  SerializableSavedSearch,
-} from '../common/types';
+import type { DiscoverSession, SavedSearch, SerializableSavedSearch } from '../common/types';
 import { getKibanaContext } from './expressions/kibana_context';
 import type { SavedSearchesServiceDeps } from './service/saved_searches_service';
 import type { SaveSavedSearchOptions, saveSavedSearch } from './service/save_saved_searches';
@@ -39,6 +34,7 @@ import type {
 } from './service/save_discover_session';
 import type { SavedSearchUnwrapResult } from './service/to_saved_search';
 import { getNewSavedSearch } from '../common/service/get_new_saved_search';
+import type { DiscoverSessionAttributes } from '../server';
 
 /**
  * Saved search plugin public Setup contract
@@ -56,7 +52,9 @@ export interface SavedSearchPublicPluginStart {
   ) => Promise<Serialized extends true ? SerializableSavedSearch : SavedSearch>;
   getDiscoverSession: (discoverSessionId: string) => Promise<DiscoverSession>;
   getNew: () => ReturnType<typeof getNewSavedSearch>;
-  getAll: () => Promise<Array<SOWithMetadata<SavedSearchAttributes>>>;
+  getAll: () => Promise<
+    Array<SOWithMetadata<Pick<DiscoverSessionAttributes, 'title' | 'description'>>>
+  >;
   save: (
     savedSearch: SavedSearch,
     options?: SaveSavedSearchOptions

@@ -12,8 +12,8 @@ import {
   toSavedSearchAttributes,
 } from './saved_searches_utils';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedSearch, SavedSearchAttributes } from '../types';
-import type { DiscoverSessionTab } from '../../server';
+import type { SavedSearch } from '../types';
+import type { DiscoverSessionAttributes, DiscoverSessionTab } from '../../server';
 
 describe('saved_searches_utils', () => {
   describe('fromDiscoverSessionAttributesToSavedSearch', () => {
@@ -37,21 +37,9 @@ describe('saved_searches_utils', () => {
           },
         },
       ];
-      const attributes: SavedSearchAttributes = {
-        kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
+      const attributes: DiscoverSessionAttributes = {
         title: 'saved search',
-        sort: [],
-        columns: ['a', 'b'],
         description: 'foo',
-        grid: {},
-        hideChart: true,
-        isTextBasedQuery: false,
-        usesAdHocDataView: false,
-        rowsPerPage: 250,
-        sampleSize: 1000,
-        breakdownField: 'extension.keyword',
-        chartInterval: 'm',
-        controlGroupJson: undefined,
         tabs,
       };
 
