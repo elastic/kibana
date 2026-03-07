@@ -119,7 +119,7 @@ describe('Inference Settings API', () => {
 
       expect(mockRouter.response.customError).toHaveBeenCalledWith({
         statusCode: 403,
-        body: { message: 'Forbidden' },
+        body: 'Forbidden',
       });
     });
 
@@ -308,7 +308,7 @@ describe('Inference Settings API', () => {
 
       expect(mockRouter.response.customError).toHaveBeenCalledWith({
         statusCode: 403,
-        body: { message: 'Forbidden' },
+        body: 'Forbidden',
       });
     });
 
