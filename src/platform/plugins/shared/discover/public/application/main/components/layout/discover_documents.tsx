@@ -343,6 +343,8 @@ function DiscoverDocumentsComponent({
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
   const setDocViewerUiState = useCurrentTabAction(internalStateActions.setDocViewerUiState);
 
+  const latestDocViewerUiState = useLatest(docViewerUiState);
+
   const onInitialDocViewerStateChange = useCallback(
     (newDocViewerUiState: Partial<DocViewerRestorableState>) => {
       dispatch(setDocViewerUiState({ docViewerUiState: newDocViewerUiState }));
@@ -387,7 +389,7 @@ function DiscoverDocumentsComponent({
         docViewerRef={docViewerRef}
         docViewerExtensionActions={docViewerExtensionActions}
         onUpdateSelectedTabId={onUpdateSelectedTabId}
-        initialDocViewerState={docViewerUiState}
+        initialDocViewerState={latestDocViewerUiState.current}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
       />
     ),
@@ -401,7 +403,7 @@ function DiscoverDocumentsComponent({
       onAddColumnWithTracking,
       docViewerExtensionActions,
       onUpdateSelectedTabId,
-      docViewerUiState,
+      latestDocViewerUiState,
       onInitialDocViewerStateChange,
     ]
   );
