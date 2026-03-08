@@ -38,6 +38,7 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/security-plugin",
-    "@kbn/streamlang"
+    "@kbn/streamlang",
+    "@kbn/safer-lodash-set"
   ]
 }
