@@ -16,11 +16,7 @@ import {
 } from '../../../../server/domain/constants';
 import { getLatestEntitiesIndexName } from '../../../../server/domain/asset_manager/latest_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
-import {
-  COMMON_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-} from '../fixtures/constants';
+import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 // Init/stop/start/run behavior with registered maintainers is covered by Jest
