@@ -202,7 +202,7 @@ describe('lens suggestions api helpers', () => {
       );
     });
 
-    it('should preserve column-independent XY settings when columns change but visualization type matches', async () => {
+    it('should return the suggestion as it is when columns change (no merge on column mismatch)', async () => {
       const newContext = {
         ...context,
         textBasedColumns: [
@@ -222,7 +222,6 @@ describe('lens suggestions api helpers', () => {
         },
       };
 
-      // Suggestion with lnsXY visualization type
       const suggestion = {
         ...mockAllSuggestions[0],
         visualizationId: 'lnsXY',
@@ -246,15 +245,8 @@ describe('lens suggestions api helpers', () => {
         visualizationType: 'lnsXY',
         state: {
           visualization: {
-            preferredSeriesType: 'line', // Different from suggestion
+            preferredSeriesType: 'line',
             legend: { isVisible: false, position: 'left' },
-            axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: false },
-            tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
-            gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: false },
-            xTitle: 'Custom X Title',
-            yTitle: 'Custom Y Title',
-            curveType: 'CURVE_MONOTONE_X',
-            fillOpacity: 0.5,
             layers: [
               {
                 layerId: 'layer1',
@@ -288,163 +280,7 @@ describe('lens suggestions api helpers', () => {
         context: newContext,
       });
 
-      // Should preserve chart-level column-independent settings from existing state
-      expect(result.visualizationState).toMatchObject({
-        preferredSeriesType: 'line', // Preserved from existing
-        legend: { isVisible: false, position: 'left' }, // Preserved from existing
-        axisTitlesVisibilitySettings: { x: false, yLeft: false, yRight: false }, // Preserved
-        tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true }, // Preserved
-        gridlinesVisibilitySettings: { x: false, yLeft: false, yRight: false }, // Preserved
-        xTitle: 'Custom X Title', // Preserved
-        yTitle: 'Custom Y Title', // Preserved
-        curveType: 'CURVE_MONOTONE_X', // Preserved
-        fillOpacity: 0.5, // Preserved
-      });
-
-      // Layer-level settings come from the new suggestion (not preserved)
-      const resultLayers = (result.visualizationState as Record<string, unknown>).layers as Array<
-        Record<string, unknown>
-      >;
-      expect(resultLayers[0]).toMatchObject({
-        accessors: ['newField1'], // From suggestion
-        xAccessor: 'newField2', // From suggestion
-        seriesType: 'bar_stacked', // From suggestion (layer settings not preserved)
-      });
-    });
-
-    it('should preserve chart-level settings but not layer settings when columns change', async () => {
-      const newContext = {
-        ...context,
-        textBasedColumns: [
-          { id: 'metric1', name: 'metric1', meta: { type: 'number' } },
-          { id: 'metric2', name: 'metric2', meta: { type: 'number' } },
-          { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
-        ] as DatatableColumn[],
-        query: { esql: 'FROM logs | STATS MAX(bytes), MEDIAN(memory) BY timestamp' },
-      };
-
-      const suggestion = {
-        ...mockAllSuggestions[0],
-        visualizationId: 'lnsXY',
-        visualizationState: {
-          preferredSeriesType: 'bar_stacked',
-          legend: { isVisible: true, position: 'right' },
-          layers: [
-            {
-              layerId: 'layer1',
-              layerType: 'data',
-              seriesType: 'bar_stacked',
-              accessors: ['metric1', 'metric2'],
-              xAccessor: 'timestamp',
-            },
-          ],
-        },
-        datasourceId: 'textBased',
-      };
-
-      const visAttributes = {
-        visualizationType: 'lnsXY',
-        state: {
-          visualization: {
-            preferredSeriesType: 'line',
-            legend: { isVisible: false, position: 'bottom' },
-            xTitle: 'Time',
-            yTitle: 'Values',
-            layers: [
-              {
-                layerId: 'layer1',
-                layerType: 'data',
-                seriesType: 'area',
-                accessors: ['oldMetric1', 'oldMetric2'],
-                xAccessor: 'oldTimestamp',
-              },
-            ],
-          },
-          datasourceStates: {
-            textBased: {
-              layers: {
-                layer1: {
-                  columns: [
-                    { columnId: 'oldMetric1', fieldName: 'oldMetric1', meta: { type: 'number' } },
-                    { columnId: 'oldMetric2', fieldName: 'oldMetric2', meta: { type: 'number' } },
-                    { columnId: 'oldTimestamp', fieldName: 'oldTimestamp', meta: { type: 'date' } },
-                  ],
-                },
-              },
-            },
-          },
-        },
-      } as unknown as TypedLensByValueInput['attributes'];
-
-      const result = mergeSuggestionWithVisContext({
-        suggestion,
-        visAttributes,
-        context: newContext,
-      });
-
-      // Chart-level settings should be preserved
-      expect(result.visualizationState).toMatchObject({
-        preferredSeriesType: 'line', // Preserved
-        legend: { isVisible: false, position: 'bottom' }, // Preserved
-        xTitle: 'Time', // Preserved
-        yTitle: 'Values', // Preserved
-      });
-
-      // Layer settings come from suggestion (not preserved when columns change)
-      const resultLayers = (result.visualizationState as Record<string, unknown>).layers as Array<
-        Record<string, unknown>
-      >;
-      expect(resultLayers[0].seriesType).toBe('bar_stacked'); // From suggestion
-      expect(resultLayers[0].accessors).toEqual(['metric1', 'metric2']); // From suggestion
-      expect(resultLayers[0].xAccessor).toBe('timestamp'); // From suggestion
-    });
-
-    it('should not preserve settings when visualization types are different', async () => {
-      const newContext = {
-        ...context,
-        textBasedColumns: [
-          { id: 'newField1', name: 'newField1', meta: { type: 'number' } },
-        ] as DatatableColumn[],
-      };
-
-      // Suggestion with lnsPie (different from existing lnsXY)
-      const suggestion = {
-        ...mockAllSuggestions[0],
-        visualizationId: 'lnsPie',
-        visualizationState: {
-          shape: 'pie',
-          layers: [{ layerId: 'layer1', accessors: ['newField1'] }],
-        },
-        datasourceId: 'textBased',
-      };
-
-      const visAttributes = {
-        visualizationType: 'lnsXY',
-        state: {
-          visualization: {
-            preferredSeriesType: 'line',
-            legend: { isVisible: false },
-            layers: [{ layerId: 'layer1', accessors: ['oldField1'] }],
-          },
-          datasourceStates: {
-            textBased: {
-              layers: {
-                layer1: {
-                  columns: [{ columnId: 'oldField1', fieldName: 'oldField1' }],
-                },
-              },
-            },
-          },
-        },
-      } as unknown as TypedLensByValueInput['attributes'];
-
-      const result = mergeSuggestionWithVisContext({
-        suggestion,
-        visAttributes,
-        context: newContext,
-      });
-
-      // Should return plain suggestion without merging (different vis types)
+      // Column mismatch: returns suggestion unchanged (preservation is handled by visualization layer)
       expect(result).toStrictEqual(suggestion);
     });
 
