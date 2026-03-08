@@ -265,18 +265,53 @@ function buildTraceSpans(caseInfo: CaseInfo, windowMs: number): OtlpResourceSpan
     const operationName = row.operationName || row.operation_name || row.methodName || 'unknown';
     const statusCode = parseInt(row.statusCode || row.status_code || '0', 10);
 
-    const isRoot = !parentSpanId || parentSpanId === '0' || parentSpanId === '';
-    const spanKind = isRoot ? 2 : 3; // SERVER=2, CLIENT=3
+    // Normalize: strip "grpc." prefix and leading "/" to get clean gRPC path
+    let grpcPath = operationName;
+    if (grpcPath.startsWith('grpc.')) grpcPath = grpcPath.slice(5);
+    if (grpcPath.startsWith('/')) grpcPath = grpcPath.slice(1);
 
-    const attributes: OtlpSpan['attributes'] = [];
+    const grpcSlashIdx = grpcPath.indexOf('/');
+    const grpcServiceFull = grpcSlashIdx > 0 ? grpcPath.slice(0, grpcSlashIdx) : null;
+
+    // Span kind: compare gRPC service short name to serviceName.
+    // e.g. operationName "hipstershop.ProductCatalogService/GetProduct"
+    // on serviceName "productcatalogservice" → extract "ProductCatalogService"
+    // → lowercase → matches → SERVER
+    let isServer = false;
+    if (grpcServiceFull) {
+      const lastDot = grpcServiceFull.lastIndexOf('.');
+      const shortName = (
+        lastDot >= 0 ? grpcServiceFull.slice(lastDot + 1) : grpcServiceFull
+      ).toLowerCase();
+      isServer = shortName === serviceName.toLowerCase();
+    }
+    const spanKind = isServer ? 2 : 3; // SERVER=2, CLIENT=3
+
+    const attributes: OtlpSpan['attributes'] = [
+      // EDOT 9.3.1 connector (v0.29.0) does not enrich span.name from the
+      // span Name() field. Without this attribute the signaltometrics connector
+      // skips service_destination metrics entirely because span.name is a
+      // required (non-optional) dimension. Newer connector versions (≥v0.29.1)
+      // add this automatically.
+      { key: 'span.name', value: { stringValue: operationName } },
+    ];
+
+    if (grpcServiceFull) {
+      attributes.push({
+        key: 'rpc.service',
+        value: { stringValue: grpcServiceFull },
+      });
+      attributes.push({ key: 'rpc.system', value: { stringValue: 'grpc' } });
+    }
+
     if (row.methodName) {
       attributes.push({ key: 'rpc.method', value: { stringValue: row.methodName } });
     }
     if (statusCode) {
-      attributes.push({ key: 'http.status_code', value: { intValue: statusCode } });
+      attributes.push({ key: 'rpc.grpc.status_code', value: { intValue: statusCode } });
     }
 
-    const otlpStatus = statusCode >= 400 ? { code: 2, message: `HTTP ${statusCode}` } : { code: 1 };
+    const otlpStatus = statusCode > 0 ? { code: 2, message: `gRPC ${statusCode}` } : { code: 1 };
 
     const span: OtlpSpan = {
       traceId,
@@ -311,6 +346,14 @@ function buildTraceSpans(caseInfo: CaseInfo, windowMs: number): OtlpResourceSpan
 // ---------------------------------------------------------------------------
 
 function buildMetricDocuments(caseInfo: CaseInfo, windowMs: number): Record<string, unknown>[] {
+  const csvCandidates = ['simple_metrics.csv', 'data.csv'];
+  for (const name of csvCandidates) {
+    const csvFile = join(caseInfo.path, name);
+    if (existsSync(csvFile)) {
+      return buildMetricsFromDataCsv(csvFile, caseInfo, windowMs);
+    }
+  }
+
   const metricsFile = join(caseInfo.path, 'metrics.json');
   if (!existsSync(metricsFile)) return [];
 
@@ -321,27 +364,8 @@ function buildMetricDocuments(caseInfo: CaseInfo, windowMs: number): Record<stri
     return [];
   }
 
-  // metrics.json can have different structures. Common patterns:
-  // 1. { "service_cpu": [...], "service_mem": [...], ... } keyed by metric name
-  // 2. Array of records with time + per-service columns
-  // 3. Nested { service: { metric: [...] } }
-
   const docs: Record<string, unknown>[] = [];
 
-  // Try to handle the data.csv format which has columns like:
-  // time, svc1_cpu, svc1_mem, svc2_cpu, svc2_mem, ...
-  const dataCsvFile = join(caseInfo.path, 'data.csv');
-  if (existsSync(dataCsvFile)) {
-    return buildMetricsFromDataCsv(dataCsvFile, caseInfo, windowMs);
-  }
-
-  // Try to handle the simple_metrics.csv format
-  const simpleMetricsCsvFile = join(caseInfo.path, 'simple_metrics.csv');
-  if (existsSync(simpleMetricsCsvFile)) {
-    return buildMetricsFromDataCsv(simpleMetricsCsvFile, caseInfo, windowMs);
-  }
-
-  // Fall back: try to parse metrics.json as { metricName: number[] } with implied timestamps
   if (typeof metricsData === 'object' && !Array.isArray(metricsData)) {
     const entries = Object.entries(metricsData as Record<string, unknown>);
     const timeSeriesEntries = entries.filter(
@@ -410,17 +434,14 @@ function buildMetricsFromDataCsv(
     : rows.map((_, i) => i * 1000);
   const remapped = remapTimestamps(rawTimesMs, windowMs);
 
-  // Parse column names to extract service and metric type
   const headers = Object.keys(rows[0]).filter((h) => h !== 'time' && h !== '');
   const columnMeta = headers.map((h) => {
-    const lastDash = h.lastIndexOf('-');
-    const lastUnderscore = h.lastIndexOf('_');
-    const sep = lastDash > lastUnderscore ? lastDash : lastUnderscore;
-    if (sep <= 0) return { header: h, service: h, metric: 'value' };
+    const firstUnderscore = h.indexOf('_');
+    if (firstUnderscore <= 0) return { header: h, service: h, metric: 'value' };
     return {
       header: h,
-      service: h.slice(0, sep),
-      metric: h.slice(sep + 1).toLowerCase(),
+      service: h.slice(0, firstUnderscore),
+      metric: h.slice(firstUnderscore + 1).toLowerCase(),
     };
   });
 
@@ -430,7 +451,6 @@ function buildMetricsFromDataCsv(
     const ts = remapped[i];
     if (!ts) continue;
 
-    // Group columns by service to emit one doc per service per timestamp
     const serviceMetrics = new Map<string, Record<string, number>>();
     for (const { header, service, metric } of columnMeta) {
       const val = parseFloat(rows[i][header]);
@@ -458,9 +478,24 @@ function buildMetricsFromDataCsv(
       }
       if (metrics.mem !== undefined || metrics.memory !== undefined) {
         const memVal = metrics.mem ?? metrics.memory!;
-        if (memVal <= 1) {
-          doc['system.memory.actual.used.pct'] = memVal;
-        }
+        doc['system.memory.actual.used.pct'] = Math.min(memVal, 1);
+      }
+      if (metrics.diskio !== undefined) {
+        doc['system.diskio.read.bytes'] = metrics.diskio;
+      }
+      if (metrics.socket !== undefined) {
+        doc['system.network.in.bytes'] = metrics.socket;
+      }
+      if (metrics.error !== undefined) {
+        doc['service.errors'] = metrics.error;
+      }
+      if (metrics.workload !== undefined) {
+        doc['service.throughput'] = metrics.workload;
+      }
+      const latencyKeys = Object.keys(metrics).filter((k) => k.startsWith('latency-'));
+      for (const k of latencyKeys) {
+        const percentile = k.slice('latency-'.length);
+        doc[`service.latency.p${percentile}`] = metrics[k];
       }
 
       docs.push(doc);
