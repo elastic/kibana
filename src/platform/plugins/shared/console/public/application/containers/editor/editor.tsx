@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, memo, useEffect, useState } from 'react';
+import React, { useCallback, memo, useEffect, useState, useRef } from 'react';
 
 import { debounce } from 'lodash';
 import {
@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import type { TextObject } from '../../../../common/text_object';
 
 import { NetworkRequestStatusBar } from '../../components';
-import { StorageKeys } from '../../../services';
 import {
   useServicesContext,
   useRequestReadContext,
@@ -36,8 +35,8 @@ import { OutputPanel } from './output_panel';
 import { InputPanel } from './input_panel';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 import { useStyles } from './editor_styles';
+import { PanelStorage } from './panel_storage';
 
-const INITIAL_PANEL_SIZE = 50;
 const PANEL_MIN_SIZE = '20%';
 const DEBOUNCE_DELAY = 500;
 
@@ -49,10 +48,10 @@ interface Props {
 
 export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: Props) => {
   const {
-    services: { storage, objectStorageClient },
+    services: { objectStorageClient },
   } = useServicesContext();
   const styles = useStyles();
-
+  const panelStorage = useRef(new PanelStorage());
   // only used to hide content
   const { currentTextObject } = useEditorReadContext();
 
@@ -67,25 +66,11 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const editorDispatch = useEditorActionContext();
 
   // used for showing a loading state when fetching autocomplete entities
-  // const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
-  const [fetchingAutocompleteEntities] = useState(false);
+  const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
-  // only used in two places, make small class
-  const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
-    INITIAL_PANEL_SIZE,
-    INITIAL_PANEL_SIZE,
-  ]);
+  const [firstPanelSize, secondPanelSize] = panelStorage.current.getPanelSize();
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
-
-  // only used in two places, make small class
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  const onPanelSizeChange = useCallback(
-    debounce((sizes) => {
-      storage.set(StorageKeys.SIZE, Object.values(sizes));
-    }, 300),
-    []
-  );
 
   // logic should be moved into state update OR into a class
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -129,7 +114,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
       <EuiResizableContainer
         css={styles.fullHeightPanel}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
-        onPanelWidthChange={(sizes) => onPanelSizeChange(sizes)}
+        onPanelWidthChange={(sizes) => panelStorage.current.setPanelSize(sizes)}
         data-test-subj="consoleEditorContainer"
       >
         {(EuiResizablePanel, EuiResizableButton) => (
@@ -155,6 +140,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                     loading={loading}
                     inputEditorValue={inputEditorValue}
                     setInputEditorValue={setInputEditorValue}
+                    setFetchingAutocompleteEntities={setFetchingAutocompleteEntities}
                   />
                 </EuiSplitPanel.Inner>
 
