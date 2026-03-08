@@ -11,6 +11,5 @@
   ],
   "kbn_references": [
     "@kbn/dev-cli-runner",
-    "@kbn/repo-info",
   ]
 }
