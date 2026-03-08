@@ -820,7 +820,7 @@ async function main() {
     }
     await deleteApmDataByDataset(client, DATASET_ID);
     console.log('Cleaned: deleted all OpenRCA data streams and APM data');
-    return;
+    if (!opts.hasExplicitCase) return;
   }
 
   const windowMs = parseDuration(opts.window);

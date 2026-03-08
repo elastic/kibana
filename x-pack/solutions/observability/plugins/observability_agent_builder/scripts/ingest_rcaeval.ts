@@ -517,7 +517,7 @@ async function main() {
     await deleteDataStream(client, METRIC_INDEX_NAME);
     await deleteApmDataByDataset(client, DATASET_ID);
     console.log('Cleaned: deleted RCAEval data streams and APM data');
-    return;
+    if (!opts.caseName) return;
   }
 
   const dataDir = await ensureDataset(opts.source);

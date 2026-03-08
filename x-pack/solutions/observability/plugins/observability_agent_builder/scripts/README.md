@@ -13,9 +13,10 @@ Scripts for downloading and ingesting observability datasets (logs, traces, metr
 30 code-level failure cases from the Online Boutique microservice system. Source: [RCAEval RE3-OB](https://github.com/phamquiluan/RCAEval) ([paper](https://arxiv.org/html/2412.17015v5)).
 
 ```bash
-npx tsx scripts/ingest_rcaeval.ts                      # list available cases
-npx tsx scripts/ingest_rcaeval.ts --case adservice_f4/1 # ingest a single case
-npx tsx scripts/ingest_rcaeval.ts --clean               # delete ingested data
+npx tsx scripts/ingest_rcaeval.ts                                # list available cases
+npx tsx scripts/ingest_rcaeval.ts --case adservice_f4/1          # ingest a single case
+npx tsx scripts/ingest_rcaeval.ts --clean --case adservice_f4/1  # clean then ingest
+npx tsx scripts/ingest_rcaeval.ts --clean                        # delete ingested data
 ```
 
 ### Data Streams
@@ -48,9 +49,10 @@ Fault types: f1 (incorrect parameter values), f2 (missing parameters), f3 (missi
 Real telemetry from microservice failure scenarios across Bank and Market systems. Source: [OpenRCA](https://github.com/microsoft/OpenRCA). Full ground truth is in `datasets/openrca/Bank/query.csv` and `Market/cloudbed-*/query.csv`.
 
 ```bash
-npx tsx scripts/ingest_openrca.ts                        # list available cases
-npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04 # ingest a single case
-npx tsx scripts/ingest_openrca.ts --clean                # delete ingested data
+npx tsx scripts/ingest_openrca.ts                                  # list available cases
+npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04           # ingest a single case
+npx tsx scripts/ingest_openrca.ts --clean --case bank/2021_03_04   # clean then ingest
+npx tsx scripts/ingest_openrca.ts --clean                          # delete ingested data
 ```
 
 ### Data Streams
