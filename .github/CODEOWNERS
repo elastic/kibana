@@ -1924,19 +1924,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/functional/services/transform @elastic/kibana-management
 /x-pack/platform/test/functional_basic/apps/transform/ @elastic/kibana-management
 
-# Operations
-/src/platform/test/package @elastic/kibana-operations
-/src/platform/test/package/roles @elastic/kibana-operations
-/src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
-/src/dev/license_checker/config.ts @elastic/kibana-operations
-/src/dev/ @elastic/kibana-operations
-/src/setup_node_env/ @elastic/kibana-operations
-/src/cli/ @elastic/kibana-operations
-/src/cli_keystore/ @elastic/kibana-operations
-/.github/workflows/ @elastic/kibana-operations
-/.buildkite/ @elastic/kibana-operations
-/.coderabbit.yml @elastic/kibana-operations
-
 # Evals (Buildkite + scripts)
 /.buildkite/pipelines/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
 /.buildkite/scripts/steps/evals/ @elastic/obs-ai-team @elastic/security-generative-ai
@@ -3238,6 +3225,20 @@ x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 /.agents/skills/kibana-privilege-deprecation/** @elastic/kibana-security
 /.agents/skills/encrypted-saved-objects/** @elastic/kibana-security
 
+# Operations (last-match override)
+/src/platform/test/package @elastic/kibana-operations
+/src/platform/test/package/roles @elastic/kibana-operations
+/src/platform/test/common/fixtures/plugins/coverage/kibana.json @elastic/kibana-operations
+/src/dev/license_checker/config.ts @elastic/kibana-operations
+/src/dev/ @elastic/kibana-operations
+/src/setup_node_env/ @elastic/kibana-operations
+/src/cli/ @elastic/kibana-operations
+/src/cli_keystore/ @elastic/kibana-operations
+/.github/workflows/ @elastic/kibana-operations
+/.buildkite/ @elastic/kibana-operations
+/.coderabbit.yml @elastic/kibana-operations
+/moon.yml @elastic/kibana-operations
+**/moon.yml @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
