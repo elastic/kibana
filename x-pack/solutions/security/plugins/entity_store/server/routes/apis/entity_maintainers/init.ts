@@ -10,10 +10,10 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import { ENTITY_STORE_STATUS } from '../../../domain/constants';
-import type { AssetManager } from '../../../domain/asset_manager';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { getMissingPrivileges } from '../utils/get_missing_privileges';
+import type { AssetManagerClient } from '../../../domain/asset_manager';
 
 export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
@@ -32,11 +32,11 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, entityMaintainersClient } = entityStoreCtx;
+        const { logger, assetManagerClient, entityMaintainersClient } = entityStoreCtx;
 
         logger.debug('Entity maintainers init API called');
 
-        const validationError = await validateInitMaintainersRequest(assetManager, req, res);
+        const validationError = await validateInitMaintainersRequest(assetManagerClient, req, res);
         if (validationError) {
           return validationError;
         }
@@ -48,7 +48,6 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
     );
 }
 
-
 /**
  * Validates that the request can proceed with entity maintainers init:
  * 1. User has required privileges (cluster, index, saved object).
@@ -56,11 +55,11 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
  * Returns an error response if validation fails, or null if validation passes.
  */
 async function validateInitMaintainersRequest(
-  assetManager: AssetManager,
+  assetManagerClient: AssetManagerClient,
   req: KibanaRequest,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse | null> {
-  const privileges = await assetManager.getPrivileges(req);
+  const privileges = await assetManagerClient.getPrivileges(req);
   if (!privileges.hasAllRequested) {
     return res.forbidden({
       body: {
@@ -70,7 +69,7 @@ async function validateInitMaintainersRequest(
     });
   }
 
-  const { status } = await assetManager.getStatus(false);
+  const { status } = await assetManagerClient.getStatus(false);
   if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
     return res.badRequest({
       body: {

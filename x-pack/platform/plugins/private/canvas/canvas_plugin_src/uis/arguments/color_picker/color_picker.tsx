@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import type { EuiSetColorMethod } from '@elastic/eui';
 import { EuiColorPicker, EuiFlexGroup, EuiFlexItem, useColorPickerState } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
@@ -36,11 +35,6 @@ const ColorPicker: FC<Props> = ({ onValueChange, argValue }) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-ColorPicker.propTypes = {
-  argValue: PropTypes.any.isRequired,
-  onValueChange: PropTypes.func.isRequired,
 };
 
 export const colorPicker = () => ({
