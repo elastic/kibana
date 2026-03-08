@@ -47,7 +47,9 @@ export async function runMaintainer({
         break;
       }
       logger.info(
-        `[${integration.id}] Running composite aggregation (afterKey: ${JSON.stringify(afterKey ?? 'none')})`
+        `[${integration.id}] Running composite aggregation (afterKey: ${JSON.stringify(
+          afterKey ?? 'none'
+        )})`
       );
 
       const aggResult = await esClient
@@ -57,7 +59,9 @@ export async function runMaintainer({
         })
         .catch((err) => {
           logger.error(
-            `[${integration.id}] Composite aggregation failed: ${err?.message ?? JSON.stringify(err)}`
+            `[${integration.id}] Composite aggregation failed: ${
+              err?.message ?? JSON.stringify(err)
+            }`
           );
           throw err;
         });
@@ -75,10 +79,7 @@ export async function runMaintainer({
       const bucketFilter = integration.buildBucketUserFilter(buckets);
       const esqlFilter = {
         bool: {
-          filter: [
-            { range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } },
-            bucketFilter,
-          ],
+          filter: [{ range: { '@timestamp': { gte: LOOKBACK_WINDOW, lt: 'now' } } }, bucketFilter],
         },
       };
 
@@ -86,9 +87,7 @@ export async function runMaintainer({
       logger.info(
         `[${integration.id}] Running ES|QL query (skipEntityFields=${skipEntityFields}):\n${esqlQuery}`
       );
-      logger.info(
-        `[${integration.id}] Bucket user filter: ${JSON.stringify(bucketFilter)}`
-      );
+      logger.info(`[${integration.id}] Bucket user filter: ${JSON.stringify(bucketFilter)}`);
 
       let esqlResult;
       try {
@@ -129,9 +128,7 @@ export async function runMaintainer({
 
         for (const record of records) {
           const freq =
-            record.accesses_frequently.length > 0
-              ? record.accesses_frequently.join(', ')
-              : 'none';
+            record.accesses_frequently.length > 0 ? record.accesses_frequently.join(', ') : 'none';
           const infreq =
             record.accesses_infrequently.length > 0
               ? record.accesses_infrequently.join(', ')
