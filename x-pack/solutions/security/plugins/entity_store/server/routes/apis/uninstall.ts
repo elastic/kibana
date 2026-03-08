@@ -37,7 +37,11 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res) => {
-        const { logger, assetManagerClient: assetManager, entityMaintainersClient } = await ctx.entityStore;
+        const {
+          logger,
+          assetManagerClient: assetManager,
+          entityMaintainersClient,
+        } = await ctx.entityStore;
         const { entityTypes } = req.body;
         logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
 
