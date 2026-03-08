@@ -53,6 +53,10 @@ export const predefinedStepTypes = [
     displayName: 'Foreach',
   },
   {
+    actionTypeId: 'while',
+    displayName: 'While',
+  },
+  {
     actionTypeId: 'parallel',
     displayName: 'Parallel',
   },
