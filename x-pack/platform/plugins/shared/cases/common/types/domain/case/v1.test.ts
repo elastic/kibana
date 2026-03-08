@@ -274,7 +274,7 @@ describe('CaseAttributesRt', () => {
     const request = {
       ...defaultRequest,
       template: { id: 'template-id', version: 1 },
-      [CASE_EXTENDED_FIELDS]: { field1: { foo: 'bar' } },
+      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
     };
 
     const query = CaseAttributesRt.decode(request);
