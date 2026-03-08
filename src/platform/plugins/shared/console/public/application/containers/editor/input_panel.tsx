@@ -13,6 +13,7 @@ import { EditorContentSpinner } from '../../components/editor_content_spinner';
 import { MonacoEditor } from './monaco_editor';
 import { useEditorReadContext } from '../../contexts';
 import { getAutocompleteInfo } from '../../../services';
+import { DEBOUNCE_DELAY } from '../../const';
 
 interface Props {
   loading: boolean;
@@ -20,9 +21,6 @@ interface Props {
   setInputEditorValue: (value: string) => void;
   setFetchingAutocompleteEntities: (value: boolean) => void;
 }
-
-// move to shared const
-const DEBOUNCE_DELAY = 500;
 
 export const InputPanel = ({
   loading,
@@ -51,7 +49,6 @@ export const InputPanel = ({
 
   return (
     <>
-      {' '}
       {loading ? (
         <EditorContentSpinner />
       ) : (

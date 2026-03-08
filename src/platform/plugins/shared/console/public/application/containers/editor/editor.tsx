@@ -72,7 +72,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  // logic should be moved into state update OR into a class
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedUpdateLocalStorageValue = useCallback(
     debounce((newValue: string | undefined) => {
@@ -92,7 +91,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     []
   );
 
-  // Always keep the localstorage value in sync with the value in the editor
   // to avoid losing the text object when the user navigates away from the shell
   useEffect(() => {
     debouncedUpdateLocalStorageValue(inputEditorValue);

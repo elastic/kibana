@@ -9,18 +9,16 @@
 
 import { debounce } from 'lodash';
 import { getStorage, StorageKeys } from '../../../services';
+import { DEBOUNCE_DELAY } from '../../const';
 
 const INITIAL_PANEL_SIZE = 50;
-const SAVE_DEBOUNCE_MS = 300;
 
 export class PanelStorage {
   private readonly storage = getStorage();
 
-  constructor() {}
-
   private debouncedSave = debounce((sizes: number[]) => {
     this.storage.set(StorageKeys.SIZE, sizes);
-  }, SAVE_DEBOUNCE_MS);
+  }, DEBOUNCE_DELAY);
 
   getPanelSize(): [number, number] {
     const stored = this.storage.get<unknown>(StorageKeys.SIZE);

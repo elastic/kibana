@@ -13,25 +13,6 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
 import { useRequestReadContext } from '../../contexts';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
-/*
-interface RequestResult {
-  // Status code of the request, e.g., 200
-  statusCode: number;
-
-  // Status text of the request, e.g., OK
-  statusText: string;
-
-  // Method of the request, e.g., GET
-  method: string;
-
-  // The path of endpoint that was called, e.g., /_search
-  endpoint: string;
-
-  // The time, in milliseconds, that the last request took
-  timeElapsedMs: number;
-}
-
-  */
 
 const mapStatusCodeToBadgeColor = (statusCode: number) => {
   if (statusCode <= 199) {

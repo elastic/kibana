@@ -42,7 +42,6 @@ export class Storage {
     }
   }
 
-  // add debounced set
   set(key: string, val: unknown) {
     this.engine.setItem(this.encodeKey(key), this.encode(val));
     return val;
