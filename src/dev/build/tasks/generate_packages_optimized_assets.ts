@@ -12,8 +12,9 @@ import Fsp from 'fs/promises';
 import fs from 'fs';
 import zlib from 'zlib';
 import { cpus } from 'os';
+import { promisify } from 'util';
 
-import { minifySync } from '@swc/core';
+import { minify } from '@swc/core';
 import { transform as lightningTransform } from 'lightningcss';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -30,6 +31,7 @@ const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSy
 
 const BROTLI_QUALITY = 9;
 const PARALLEL_CONCURRENCY = cpus().length;
+const brotliCompressAsync = promisify(zlib.brotliCompress);
 
 async function optimizeAssets(log: ToolingLog, assetDir: string) {
   log.info('Creating optimized assets for', assetDir);
@@ -40,6 +42,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
 
     log.debug('Minify CSS with Lightning CSS');
     const cssFiles = await globby(['**/*.css'], { cwd: assetDir, absolute: true });
+    // lightningcss only exposes a synchronous transform() API (no async variant)
     await asyncForEachWithLimit(cssFiles, PARALLEL_CONCURRENCY, async (file) => {
       const code = await Fsp.readFile(file);
       const result = lightningTransform({
@@ -54,7 +57,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     const jsFiles = await globby(['**/*.js'], { cwd: assetDir, absolute: true });
     await asyncForEachWithLimit(jsFiles, PARALLEL_CONCURRENCY, async (file) => {
       const source = await Fsp.readFile(file, 'utf8');
-      const result = minifySync(source, {
+      const result = await minify(source, {
         compress: { passes: 2 },
         mangle: true,
         sourceMap: false,
@@ -66,7 +69,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
     const compressFiles = await globby(['**/*.{js,css}'], { cwd: assetDir, absolute: true });
     await asyncForEachWithLimit(compressFiles, PARALLEL_CONCURRENCY, async (file) => {
       const content = await Fsp.readFile(file);
-      const compressed = zlib.brotliCompressSync(content, {
+      const compressed = await brotliCompressAsync(content, {
         params: {
           [zlib.constants.BROTLI_PARAM_QUALITY]: BROTLI_QUALITY,
         },
