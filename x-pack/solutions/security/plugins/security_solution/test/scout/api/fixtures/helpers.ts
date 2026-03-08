@@ -19,7 +19,7 @@ interface AccessPair {
 }
 
 /**
- * 5 users x 2 hosts each = 10,000 documents.
+ * 6 users, mixed host counts = 16,000 documents.
  * access_count > 4 → accesses_frequently, otherwise accesses_infrequently.
  */
 export const ACCESS_PAIRS: AccessPair[] = [
@@ -115,6 +115,62 @@ export const ACCESS_PAIRS: AccessPair[] = [
     hostId: 'test-host-004',
     hostName: 'test-host-004',
     hostIp: '10.0.0.4',
+    count: 2,
+    expectedRelationship: 'accesses_infrequently',
+  },
+  // user-006: host-006 x1998 (freq), host-007 x1998 (freq), host-008 x1998 (freq),
+  //           host-009 x2 (infreq), host-010 x2 (infreq), host-011 x2 (infreq) = 6000
+  {
+    userId: 'test-user-006',
+    userName: 'test-user-006',
+    hostId: 'test-host-006',
+    hostName: 'test-host-006',
+    hostIp: '10.0.0.6',
+    count: 1998,
+    expectedRelationship: 'accesses_frequently',
+  },
+  {
+    userId: 'test-user-006',
+    userName: 'test-user-006',
+    hostId: 'test-host-007',
+    hostName: 'test-host-007',
+    hostIp: '10.0.0.7',
+    count: 1998,
+    expectedRelationship: 'accesses_frequently',
+  },
+  {
+    userId: 'test-user-006',
+    userName: 'test-user-006',
+    hostId: 'test-host-008',
+    hostName: 'test-host-008',
+    hostIp: '10.0.0.8',
+    count: 1998,
+    expectedRelationship: 'accesses_frequently',
+  },
+  {
+    userId: 'test-user-006',
+    userName: 'test-user-006',
+    hostId: 'test-host-009',
+    hostName: 'test-host-009',
+    hostIp: '10.0.0.9',
+    count: 2,
+    expectedRelationship: 'accesses_infrequently',
+  },
+  {
+    userId: 'test-user-006',
+    userName: 'test-user-006',
+    hostId: 'test-host-010',
+    hostName: 'test-host-010',
+    hostIp: '10.0.0.10',
+    count: 2,
+    expectedRelationship: 'accesses_infrequently',
+  },
+  {
+    userId: 'test-user-006',
+    userName: 'test-user-006',
+    hostId: 'test-host-011',
+    hostName: 'test-host-011',
+    hostIp: '10.0.0.11',
     count: 2,
     expectedRelationship: 'accesses_infrequently',
   },
@@ -222,112 +278,103 @@ export async function bulkIngestEvents(esClient: EsClient): Promise<number> {
 }
 
 export async function ensureDataStream(esClient: EsClient): Promise<void> {
-  const templateExists = await esClient.indices.existsIndexTemplate({
-    name: ELASTIC_DEFEND_TEMPLATE,
-  });
+  await cleanupDataStream(esClient);
 
-  if (!templateExists) {
-    await esClient.indices.putIndexTemplate({
-      name: ELASTIC_DEFEND_TEMPLATE,
-      index_patterns: ['logs-endpoint.events.security-*'],
-      data_stream: {},
-      priority: 500,
-      template: {
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 0,
-        },
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            event: {
-              properties: {
-                action: { type: 'keyword' },
-                outcome: { type: 'keyword' },
-                category: { type: 'keyword' },
-                kind: { type: 'keyword' },
-                module: { type: 'keyword' },
-                type: { type: 'keyword' },
-                dataset: { type: 'keyword' },
-                id: { type: 'keyword' },
-                agent_id_status: { type: 'keyword' },
-                created: { type: 'date' },
-              },
+  await esClient.indices.putIndexTemplate({
+    name: ELASTIC_DEFEND_TEMPLATE,
+    index_patterns: ['logs-endpoint.events.security-*'],
+    data_stream: {},
+    priority: 500,
+    template: {
+      settings: {
+        number_of_shards: 1,
+        number_of_replicas: 0,
+      },
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          event: {
+            properties: {
+              action: { type: 'keyword' },
+              outcome: { type: 'keyword' },
+              category: { type: 'keyword' },
+              kind: { type: 'keyword' },
+              module: { type: 'keyword' },
+              type: { type: 'keyword' },
+              dataset: { type: 'keyword' },
+              id: { type: 'keyword' },
+              agent_id_status: { type: 'keyword' },
+              created: { type: 'date' },
             },
-            host: {
-              properties: {
-                id: { type: 'keyword' },
-                name: { type: 'keyword' },
-                hostname: { type: 'keyword' },
-                ip: { type: 'ip' },
-                mac: { type: 'keyword' },
-                architecture: { type: 'keyword' },
-                os: {
-                  properties: {
-                    family: { type: 'keyword' },
-                    full: { type: 'keyword' },
-                    name: { type: 'keyword' },
-                    platform: { type: 'keyword' },
-                    type: { type: 'keyword' },
-                    version: { type: 'keyword' },
-                  },
+          },
+          host: {
+            properties: {
+              id: { type: 'keyword' },
+              name: { type: 'keyword' },
+              hostname: { type: 'keyword' },
+              domain: { type: 'keyword' },
+              ip: { type: 'ip' },
+              mac: { type: 'keyword' },
+              architecture: { type: 'keyword' },
+              os: {
+                properties: {
+                  family: { type: 'keyword' },
+                  full: { type: 'keyword' },
+                  name: { type: 'keyword' },
+                  platform: { type: 'keyword' },
+                  type: { type: 'keyword' },
+                  version: { type: 'keyword' },
                 },
               },
             },
-            user: {
-              properties: {
-                id: { type: 'keyword' },
-                name: { type: 'keyword' },
-                domain: { type: 'keyword' },
-              },
+          },
+          user: {
+            properties: {
+              id: { type: 'keyword' },
+              name: { type: 'keyword' },
+              email: { type: 'keyword' },
+              domain: { type: 'keyword' },
             },
-            process: {
-              properties: {
-                Ext: {
-                  properties: {
-                    ancestry: { type: 'keyword' },
-                    session_info: {
-                      properties: {
-                        authentication_package: { type: 'keyword' },
-                        logon_type: { type: 'keyword' },
-                      },
+          },
+          process: {
+            properties: {
+              Ext: {
+                properties: {
+                  ancestry: { type: 'keyword' },
+                  session_info: {
+                    properties: {
+                      authentication_package: { type: 'keyword' },
+                      logon_type: { type: 'keyword' },
                     },
                   },
                 },
-                executable: { type: 'keyword' },
-                name: { type: 'keyword' },
-                pid: { type: 'long' },
               },
+              executable: { type: 'keyword' },
+              name: { type: 'keyword' },
+              pid: { type: 'long' },
             },
-            agent: {
-              properties: {
-                id: { type: 'keyword' },
-                type: { type: 'keyword' },
-                version: { type: 'keyword' },
-              },
-            },
-            data_stream: {
-              properties: {
-                dataset: { type: 'keyword' },
-                namespace: { type: 'keyword' },
-                type: { type: 'keyword' },
-              },
-            },
-            message: { type: 'text' },
           },
+          agent: {
+            properties: {
+              id: { type: 'keyword' },
+              type: { type: 'keyword' },
+              version: { type: 'keyword' },
+            },
+          },
+          data_stream: {
+            properties: {
+              dataset: { type: 'keyword' },
+              namespace: { type: 'keyword' },
+              type: { type: 'keyword' },
+            },
+          },
+          message: { type: 'text' },
         },
       },
-    });
-  }
+    },
+  });
 
-  const dataStreamExists = await esClient.indices
-    .getDataStream({ name: ELASTIC_DEFEND_INDEX })
-    .then(() => true)
-    .catch(() => false);
-
-  if (!dataStreamExists) {
-    await esClient.indices.createDataStream({ name: ELASTIC_DEFEND_INDEX });
-  }
+  await esClient.indices.createDataStream({ name: ELASTIC_DEFEND_INDEX });
 }
 
 export async function cleanupDataStream(esClient: EsClient): Promise<void> {
@@ -341,6 +388,7 @@ export async function cleanupDataStream(esClient: EsClient): Promise<void> {
  *
  * Without *.entity.id fields in Elastic Defend data, the user EUID resolves
  * to `user.name@host.id`, so each user-host pair becomes a separate entity.
+ * Entity IDs in the latest index include the `user:` type prefix.
  *
  * Returns a map of entityId → { accesses_frequently: hostId[], accesses_infrequently: hostId[] }
  */
@@ -354,7 +402,7 @@ export function getExpectedRelationships(): Map<
   >();
 
   for (const pair of ACCESS_PAIRS) {
-    const entityId = `${pair.userName}@${pair.hostId}`;
+    const entityId = `user:${pair.userName}@${pair.hostId}`;
     const entry: { accesses_frequently: string[]; accesses_infrequently: string[] } = {
       accesses_frequently: [],
       accesses_infrequently: [],

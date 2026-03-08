@@ -6,8 +6,12 @@
  */
 
 import { tags } from '@kbn/scout-security';
+import {
+  ENTITY_STORE_ROUTES as BASE_ENTITY_STORE_ROUTES,
+  FF_ENABLE_ENTITY_STORE_V2,
+} from '@kbn/entity-store/common';
 
-export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
+export { FF_ENABLE_ENTITY_STORE_V2 };
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -16,12 +20,14 @@ export const COMMON_HEADERS = {
   'elastic-api-version': '2',
 };
 
+const stripLeadingSlash = (path: string) => (path.startsWith('/') ? path.slice(1) : path);
+
 export const ENTITY_STORE_ROUTES = {
-  INSTALL: 'internal/security/entity-store/install',
-  UNINSTALL: 'internal/security/entity-store/uninstall',
+  INSTALL: stripLeadingSlash(BASE_ENTITY_STORE_ROUTES.INSTALL),
+  UNINSTALL: stripLeadingSlash(BASE_ENTITY_STORE_ROUTES.UNINSTALL),
   FORCE_LOG_EXTRACTION: (entityType: string) =>
     `internal/security/entity-store/${entityType}/force-log-extraction`,
-} as const;
+};
 
 export const MAINTAINER_ROUTES = {
   RUN: 'internal/security_solution/poc/run_maintainer',
