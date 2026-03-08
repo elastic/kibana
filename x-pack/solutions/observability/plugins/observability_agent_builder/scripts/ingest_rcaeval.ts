@@ -218,10 +218,6 @@ function buildDocuments(caseInfo: CaseInfo, windowMs: number): Record<string, un
       'container.name': row.container_name,
       'kubernetes.pod.name': row.pod_name ?? '',
       'kubernetes.node.name': row.node_name ?? '',
-      'labels.fault_service': caseInfo.faultService,
-      'labels.fault_type': caseInfo.faultType,
-      'labels.fault_instance': caseInfo.instance,
-      'labels.inject_time': caseInfo.injectTime,
       'labels.dataset': 'rcaeval-re3-ob',
     });
   }
@@ -455,8 +451,6 @@ function buildMetricsFromDataCsv(
         'event.module': 'system',
         'event.dataset': 'rcaeval-re3-metrics',
         'labels.dataset': 'rcaeval-re3-ob',
-        'labels.fault_service': caseInfo.faultService,
-        'labels.fault_type': caseInfo.faultType,
       };
 
       if (metrics.cpu !== undefined) {
@@ -494,10 +488,6 @@ const RCAEVAL_MAPPINGS = {
   },
   labels: {
     properties: {
-      fault_service: { type: 'keyword' as const },
-      fault_type: { type: 'keyword' as const },
-      fault_instance: { type: 'keyword' as const },
-      inject_time: { type: 'long' as const },
       dataset: { type: 'keyword' as const },
     },
   },
