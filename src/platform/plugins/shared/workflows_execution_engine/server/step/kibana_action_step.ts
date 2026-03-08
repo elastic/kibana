@@ -289,13 +289,9 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
 
-    // Handle empty responses (e.g. 204 No Content) gracefully instead of
-    // throwing a SyntaxError from JSON.parse on an empty string.
-    const responseText = await response.text();
-    if (!responseText) {
+    if (response.status === 204 || response.status === 304) {
       return { status: response.status };
     }
-
-    return JSON.parse(responseText);
+    return response.json();
   }
 }
