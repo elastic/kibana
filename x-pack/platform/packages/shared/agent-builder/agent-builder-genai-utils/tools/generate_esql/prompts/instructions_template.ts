@@ -89,7 +89,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     Do NOT attempt to JOIN two regular indices together.
     If the user asks to combine rows from regular indices by a join key, explain that ES|QL does not support
     JOIN between regular indices. If the request is only to search or aggregate across multiple indices, use a
-    normal multi-index `FROM` query when the referenced fields are available there.
+    normal multi-index FROM query when the referenced fields are available there.
 
     ## Tool Usage Restrictions
 
