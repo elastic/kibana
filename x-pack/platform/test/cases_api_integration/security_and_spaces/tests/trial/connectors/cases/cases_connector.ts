@@ -1886,7 +1886,7 @@ const createCaseWithId = async ({
       // @ts-ignore
       status: STATUS_EXTERNAL_TO_ESMODEL[req?.status ?? CaseStatuses.open],
       // @ts-ignore
-      severity: SEVERITY_EXTERNAL_TO_ESMODEL[req?.severity ?? CaseSeverity.low],
+      severity: SEVERITY_EXTERNAL_TO_ESMODEL[req?.severity ?? CaseSeverity.LOW],
       closed_at: null,
       closed_by: null,
       updated_at: null,

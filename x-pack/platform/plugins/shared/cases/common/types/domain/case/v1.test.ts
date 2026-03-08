@@ -7,6 +7,7 @@
 
 import { AttachmentType } from '../attachment/v1';
 import { ConnectorTypes } from '../connector/v1';
+import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import {
   CaseAttributesRt,
   CaseSettingsRt,
@@ -266,6 +267,38 @@ describe('CaseAttributesRt', () => {
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
+    });
+  });
+
+  it('accepts optional template and extended_fields', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1 },
+      [CASE_EXTENDED_FIELDS]: { field1: 'foo' },
+    };
+
+    const query = CaseAttributesRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: request,
+    });
+  });
+
+  it('removes unknown attributes from template', () => {
+    const request = {
+      ...defaultRequest,
+      template: { id: 'template-id', version: 1, foo: 'bar' },
+    };
+
+    const query = CaseAttributesRt.decode(request);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: {
+        ...defaultRequest,
+        template: { id: 'template-id', version: 1 },
+      },
     });
   });
 });

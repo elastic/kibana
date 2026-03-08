@@ -12,18 +12,16 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsRawDoc,
 } from '@kbn/core/server';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { v4 } from 'uuid';
 import { load as parseYaml } from 'js-yaml';
-import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CreateTemplateInput,
   ParsedTemplate,
   Template,
   UpdateTemplateInput,
 } from '../../../common/types/domain/template/v1';
-import { CASE_EXTENDED_FIELDS, CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
@@ -35,7 +33,6 @@ export class TemplatesService {
       unsecuredSavedObjectsClient: SavedObjectsClientContract;
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
-      internalClusterClient: ElasticsearchClient;
     }
   ) {}
 
@@ -228,29 +225,6 @@ export class TemplatesService {
     };
   }
 
-  private async updateMappings(definition: string) {
-    const parsedDefinition = parseYaml(definition) as ParsedTemplate['definition'];
-
-    await this.dependencies.internalClusterClient.indices.putMapping({
-      index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      properties: {
-        cases: {
-          properties: {
-            [CASE_EXTENDED_FIELDS]: {
-              properties: parsedDefinition.fields.reduce((acc, field) => {
-                acc[[field.name, field.type].join('_as_')] = {
-                  type: field.type,
-                };
-
-                return acc;
-              }, {} as unknown as Record<PropertyName, MappingProperty>),
-            },
-          },
-        },
-      },
-    });
-  }
-
   async createTemplate(input: CreateTemplateInput, author: string): Promise<SavedObject<Template>> {
     const parsedDefinition = parseYaml(input.definition) as ParsedTemplate['definition'];
 
@@ -272,8 +246,6 @@ export class TemplatesService {
       } as Template,
       { refresh: true }
     );
-
-    await this.updateMappings(input.definition);
 
     return templateSavedObject;
   }
@@ -323,8 +295,6 @@ export class TemplatesService {
       ],
       { refresh: true }
     );
-
-    await this.updateMappings(input.definition);
 
     return templateSavedObject;
   }

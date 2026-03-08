@@ -29727,8 +29727,6 @@
     "xpack.observability.alertFlyout.overviewTab.status": "ステータス",
     "xpack.observability.alertFlyout.overviewTab.threshold": "しきい値",
     "xpack.observability.alertFlyout.overviewTab.triggered": "実行済み",
-    "xpack.observability.alerts.actions.addToCase": "既存のケースに追加",
-    "xpack.observability.alerts.actions.addToNewCase": "新しいケースに追加",
     "xpack.observability.alerts.alertStatusFilter.active": "アクティブ",
     "xpack.observability.alerts.alertStatusFilter.legend": "フィルタリング条件",
     "xpack.observability.alerts.alertStatusFilter.recovered": "回復済み",

@@ -76,7 +76,7 @@
           "EuiBreadcrumbProps"
         ],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -95,7 +95,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 17,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -111,7 +111,7 @@
         "label": "ChromeBreadcrumbsAppendExtension",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-        "lineNumber": 24,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -129,39 +129,10 @@
               "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 34,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeBreadcrumbsAppendExtension.mount",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "mount",
-            "description": [],
-            "signature": [
-              "MountPoint",
-              "<HTMLDivElement> | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 38,
-            "columnNumber": 3,
-            "deprecated": true,
-            "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/chrome/browser-components/src/shared/breadcrumbs_with_extensions.tsx"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/chrome/browser-internal/src/state/breadcrumbs_state.test.ts"
-              }
-            ]
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -176,7 +147,7 @@
               "number | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 42,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1683,7 +1654,7 @@
         "label": "ChromeSetBreadcrumbsParams",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-        "lineNumber": 46,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1705,7 +1676,7 @@
               "[]; absolute?: boolean | undefined; } | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 48,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

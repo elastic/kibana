@@ -44,7 +44,7 @@ export const genericEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'orchestrator.organization' }),
     newestValue({ source: 'orchestrator.resource.annotation' }),
     newestValue({ source: 'orchestrator.resource.id' }),
-    newestValue({ source: 'orchestrator.resource.ip' }),
+    newestValue({ source: 'orchestrator.resource.ip', mapping: { type: 'ip' } }),
     newestValue({ source: 'orchestrator.resource.label' }),
     newestValue({ source: 'orchestrator.resource.name' }),
     newestValue({ source: 'orchestrator.resource.parent.type' }),

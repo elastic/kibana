@@ -29674,8 +29674,6 @@
     "xpack.observability.alertFlyout.overviewTab.status": "Statut",
     "xpack.observability.alertFlyout.overviewTab.threshold": "Seuil",
     "xpack.observability.alertFlyout.overviewTab.triggered": "Déclenché",
-    "xpack.observability.alerts.actions.addToCase": "Ajouter à un cas existant",
-    "xpack.observability.alerts.actions.addToNewCase": "Ajouter au nouveau cas",
     "xpack.observability.alerts.alertStatusFilter.active": "Actif",
     "xpack.observability.alerts.alertStatusFilter.legend": "Filtrer par",
     "xpack.observability.alerts.alertStatusFilter.recovered": "Récupéré",

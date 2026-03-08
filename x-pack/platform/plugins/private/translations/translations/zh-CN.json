@@ -29706,8 +29706,6 @@
     "xpack.observability.alertFlyout.overviewTab.status": "状态",
     "xpack.observability.alertFlyout.overviewTab.threshold": "阈值",
     "xpack.observability.alertFlyout.overviewTab.triggered": "已触发",
-    "xpack.observability.alerts.actions.addToCase": "添加到现有案例",
-    "xpack.observability.alerts.actions.addToNewCase": "添加到新案例",
     "xpack.observability.alerts.alertStatusFilter.active": "活动",
     "xpack.observability.alerts.alertStatusFilter.legend": "筛选依据",
     "xpack.observability.alerts.alertStatusFilter.recovered": "已恢复",

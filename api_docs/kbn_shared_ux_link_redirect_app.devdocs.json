@@ -102,6 +102,18 @@
             "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/components/visualization_missed_saved_object_error.tsx"
           },
@@ -124,18 +136,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/get_application_user_messages.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
             "plugin": "agentBuilder",
@@ -707,6 +707,18 @@
             "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/components/visualization_missed_saved_object_error.tsx"
           },
@@ -729,18 +741,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/get_application_user_messages.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
             "plugin": "agentBuilder",
@@ -1312,6 +1312,18 @@
             "path": "src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
           },
           {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+          },
+          {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/components/visualization_missed_saved_object_error.tsx"
           },
@@ -1334,18 +1346,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/get_application_user_messages.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
           },
           {
             "plugin": "agentBuilder",

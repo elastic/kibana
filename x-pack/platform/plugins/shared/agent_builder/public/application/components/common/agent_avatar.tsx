@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiAvatar, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { EuiAvatarProps } from '@elastic/eui';
-import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
 
@@ -43,6 +43,7 @@ interface AgentAvatarWithAgentProps extends BaseAgentAvatarProps {
 
 interface AgentAvatarCustomProps extends BaseAgentAvatarProps {
   agent?: never;
+  agentId?: string;
   name: AgentDefinition['name'];
   symbol: AgentDefinition['avatar_symbol'];
   color: 'subdued' | AgentDefinition['avatar_color'];
@@ -59,6 +60,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     color: colorProp,
     readonly,
     icon,
+    agentId,
   } = 'agent' in props && props.agent
     ? {
         name: props.agent.name,
@@ -67,14 +69,22 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         color: props.color ?? props.agent.avatar_color,
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
+        agentId: props.agent.id,
       }
-    : { name: props.name, symbol: props.symbol, color: props.color, readonly: false };
+    : {
+        agentId: props.agentId,
+        name: props.name,
+        symbol: props.symbol,
+        color: props.color,
+        readonly: false,
+      };
 
   const { euiTheme } = useEuiTheme();
   const color = colorProp === 'subdued' ? euiTheme.colors.backgroundBaseSubdued : colorProp;
   const hasBackground = Boolean(color);
   const isBuiltIn = readonly;
-  const shouldUseIcon = isBuiltIn && !symbol;
+  const isDefaultAgent = agentId === agentBuilderDefaultAgentId;
+  const shouldUseIcon = !symbol && (isBuiltIn || isDefaultAgent || Boolean(icon));
 
   if (shouldUseIcon) {
     const iconType = icon ?? 'logoElastic';

@@ -1613,7 +1613,17 @@
             },
             "<\"GET /internal/streams/{name}/schema/unmapped_fields\", any, ",
             "StreamsRouteHandlerResources",
-            ", { unmappedFields: string[]; }, undefined>; \"POST /internal/streams/{name}/_suggest_processing_pipeline\": ",
+            ", { unmappedFields: string[]; }, undefined>; \"POST /internal/streams/{name}/_restore_data_stream\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"POST /internal/streams/{name}/_restore_data_stream\", any, ",
+            "StreamsRouteHandlerResources",
+            ", { acknowledged: true; }, undefined>; \"POST /internal/streams/{name}/_suggest_processing_pipeline\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -2939,7 +2949,17 @@
           },
           "<\"GET /internal/streams/{name}/schema/unmapped_fields\", any, ",
           "StreamsRouteHandlerResources",
-          ", { unmappedFields: string[]; }, undefined>; \"POST /internal/streams/{name}/_suggest_processing_pipeline\": ",
+          ", { unmappedFields: string[]; }, undefined>; \"POST /internal/streams/{name}/_restore_data_stream\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"POST /internal/streams/{name}/_restore_data_stream\", any, ",
+          "StreamsRouteHandlerResources",
+          ", { acknowledged: true; }, undefined>; \"POST /internal/streams/{name}/_suggest_processing_pipeline\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -3705,7 +3725,24 @@
           " & { title: string; }"
         ],
         "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
-        "lineNumber": 26,
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.QueryStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryStatus",
+        "description": [],
+        "signature": [
+          "\"active\" | \"draft\""
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3731,6 +3768,23 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "streams",
+        "id": "def-common.QUERY_STATUSES",
+        "type": "Object",
+        "tags": [],
+        "label": "QUERY_STATUSES",
+        "description": [],
+        "signature": [
+          "readonly [\"active\", \"draft\"]"
+        ],
+        "path": "x-pack/platform/plugins/shared/streams/common/queries.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "streams",
         "id": "def-common.STREAMS_TIERED_AI_FEATURE",

@@ -2670,7 +2670,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 276,
+            "lineNumber": 279,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2686,7 +2686,7 @@
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 277,
+                "lineNumber": 280,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2703,7 +2703,7 @@
                   "SecuritySolutionPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 278,
+                "lineNumber": 281,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2734,7 +2734,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 699,
+            "lineNumber": 702,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2750,7 +2750,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 700,
+                "lineNumber": 703,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2767,7 +2767,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 701,
+                "lineNumber": 704,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2787,7 +2787,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 990,
+            "lineNumber": 993,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

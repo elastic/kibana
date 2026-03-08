@@ -29328,8 +29328,6 @@
     "xpack.observability.alertFlyout.overviewTab.status": "Status",
     "xpack.observability.alertFlyout.overviewTab.threshold": "Schwellenwert",
     "xpack.observability.alertFlyout.overviewTab.triggered": "Ausgelöst",
-    "xpack.observability.alerts.actions.addToCase": "Zu einem bestehenden Fall hinzufügen",
-    "xpack.observability.alerts.actions.addToNewCase": "Zu einem neuen Fall hinzufügen",
     "xpack.observability.alerts.alertStatusFilter.active": "Aktiv",
     "xpack.observability.alerts.alertStatusFilter.legend": "Filtern nach",
     "xpack.observability.alerts.alertStatusFilter.recovered": "Wiederhergestellt",
