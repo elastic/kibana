@@ -213,7 +213,6 @@ describe('getContextSchemaForPath', () => {
             {
               name: 'check_status',
               type: 'console',
-              with: { message: 'Checking...' },
             },
           ],
         },
@@ -225,8 +224,37 @@ describe('getContextSchemaForPath', () => {
       0,
       'steps',
       0,
-      'with',
-      'message',
+    ]);
+    expect((context.shape as any).while).toBeDefined();
+    expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
+  });
+
+  it('should return while context for the condition field of a while step', () => {
+    const definitionWithWhile = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {},
+      steps: [
+        {
+          name: 'poll_loop',
+          type: 'while',
+          condition: 'while.iteration < 10',
+          steps: [
+            {
+              name: 'check_status',
+              type: 'console',
+            },
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
+    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
+      'steps',
+      0,
+      'condition',
     ]);
     expect((context.shape as any).while).toBeDefined();
     expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);

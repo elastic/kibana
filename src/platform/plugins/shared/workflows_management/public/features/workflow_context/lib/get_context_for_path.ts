@@ -112,5 +112,18 @@ function getStepContextSchemaEnrichmentEntries(
       });
     }
   }
+
+  // Container steps (while, foreach) are decomposed into enter/exit nodes in the
+  // graph, so getNodeStack for the step name itself returns []. getStepNode
+  // resolves the step name to its enter-* node via prefix lookup. If the step IS
+  // a container, its own scope context should be available (e.g., while.iteration
+  // in the condition field is evaluated per-iteration).
+  const selfNode = workflowExecutionGraph.getStepNode(stepId);
+  if (selfNode) {
+    if (isEnterWhile(selfNode) && !enrichments.some((e) => e.key === 'while')) {
+      enrichments.push({ key: 'while', value: WhileContextSchema });
+    }
+  }
+
   return enrichments;
 }
