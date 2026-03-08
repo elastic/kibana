@@ -34,6 +34,7 @@ import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
+import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
   hasReadAccess,
@@ -214,8 +215,10 @@ class AgentClientImpl implements AgentClient {
   }
 
   async ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
-    if (await this.exists(profile.id)) {
-      return this.get(profile.id);
+    // Intentionally skipping access checks when ensuring an agent exists
+    const defaultAgent = await this._get(profile.id);
+    if (defaultAgent) {
+      return fromEs(defaultAgent);
     }
 
     const now = new Date();
@@ -224,6 +227,9 @@ class AgentClientImpl implements AgentClient {
       profile,
       space: this.space,
       creationDate: now,
+      user: {
+        username: SYSTEM_USER_ID,
+      },
     });
 
     await this.storage.getClient().index({
