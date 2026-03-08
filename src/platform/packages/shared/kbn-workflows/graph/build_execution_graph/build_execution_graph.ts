@@ -824,13 +824,13 @@ function insertGraphBetweenNodes(
   });
 }
 
-function normalizeMaxIterations(raw: MaxIterations): {
+function normalizeMaxIterations(raw?: MaxIterations): {
   maxIterations?: number;
   onLimit?: 'continue' | 'fail';
 } {
   if (raw == null) return {};
   if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
-  return { maxIterations: raw.limit, onLimit: raw['on-limit'] ?? 'continue' };
+  return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
 }
 
 function createForeachGraph(

@@ -60,6 +60,12 @@ export function generateBuiltInStepSnippet(
         steps: [{ name: 'then-step', type: '# Add step type here' }],
       };
       break;
+    case 'while':
+      parameters = {
+        condition: 'steps.inner_step.output: "value"',
+        steps: [{ name: 'inner-step', type: '# Add step type here' }],
+      };
+      break;
     case 'parallel':
       parameters = {
         branches: [

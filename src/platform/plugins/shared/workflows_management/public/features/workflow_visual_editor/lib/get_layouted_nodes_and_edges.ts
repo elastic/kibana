@@ -21,11 +21,21 @@ export type NodeType =
   | 'parallel'
   | 'action'
   | 'foreach'
+  | 'while'
   | 'atomic'
   | 'http'
   | 'trigger';
 
-export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
+export const flowNodeTypes = [
+  'if',
+  'merge',
+  'parallel',
+  'foreach',
+  'while',
+  'atomic',
+  'http',
+  'trigger',
+];
 
 export function transformYamlToNodesAndEdges(
   triggers: WorkflowYaml['triggers'],

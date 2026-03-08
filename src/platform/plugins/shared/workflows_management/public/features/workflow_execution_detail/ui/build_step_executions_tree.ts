@@ -40,6 +40,10 @@ function getStepTreeType(
       return 'foreach-iteration';
     }
 
+    if (previousStepExecution.stepType === 'while') {
+      return 'while-iteration';
+    }
+
     if (previousStepExecution.stepType === 'if') {
       return 'if-branch';
     }

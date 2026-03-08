@@ -10,8 +10,8 @@
 import _ from 'lodash';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicStepContextSchema } from '@kbn/workflows';
-import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
+import { DynamicStepContextSchema, WhileContextSchema } from '@kbn/workflows';
+import { isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
 import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
 import { getForeachStateSchema } from './get_foreach_state_schema';
@@ -92,7 +92,7 @@ function getStepContextSchemaEnrichmentEntries(
   workflowExecutionGraph: WorkflowGraph,
   stepId: string
 ) {
-  const enrichments: { key: 'foreach'; value: z.ZodType }[] = [];
+  const enrichments: { key: 'foreach' | 'while'; value: z.ZodType }[] = [];
   const stack = workflowExecutionGraph.getNodeStack(stepId);
 
   for (const nodeId of stack) {
@@ -104,6 +104,26 @@ function getStepContextSchemaEnrichmentEntries(
         value: getForeachStateSchema(stepContextSchema, node.configuration),
       });
     }
+
+    if (isEnterWhile(node)) {
+      enrichments.push({
+        key: 'while',
+        value: WhileContextSchema,
+      });
+    }
   }
+
+  // Container steps (while, foreach) are decomposed into enter/exit nodes in the
+  // graph, so getNodeStack for the step name itself returns []. getStepNode
+  // resolves the step name to its enter-* node via prefix lookup. If the step IS
+  // a container, its own scope context should be available (e.g., while.iteration
+  // in the condition field is evaluated per-iteration).
+  const selfNode = workflowExecutionGraph.getStepNode(stepId);
+  if (selfNode) {
+    if (isEnterWhile(selfNode) && !enrichments.some((e) => e.key === 'while')) {
+      enrichments.push({ key: 'while', value: WhileContextSchema });
+    }
+  }
+
   return enrichments;
 }

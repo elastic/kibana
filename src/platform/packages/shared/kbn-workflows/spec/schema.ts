@@ -179,16 +179,17 @@ export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 export const MaxIterationsObjectSchema = z.object({
   limit: z.number().int().positive(),
-  'on-limit': z.enum(['continue', 'fail']).optional().default('continue'),
+  'on-limit': z.enum(['continue', 'fail']),
 });
 
-export const MaxIterationsSchema = z
-  .union([z.number().int().positive(), MaxIterationsObjectSchema])
-  .optional();
+export const MaxIterationsSchema = z.union([
+  z.number().int().positive(),
+  MaxIterationsObjectSchema,
+]);
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
 export const LoopStepPropsSchema = z.object({
-  'max-iterations': MaxIterationsSchema,
+  'max-iterations': MaxIterationsSchema.optional(),
   'iteration-timeout': DurationSchema.optional(),
   'iteration-on-failure': WorkflowOnFailureSchema.optional(),
 });
@@ -429,6 +430,7 @@ export const WhileStepSchema = BaseStepSchema.extend({
       'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
     ),
   ...WhileStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
@@ -917,9 +919,15 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
+export const WhileContextSchema = z.object({
+  iteration: z.number().int(),
+});
+export type WhileContext = z.infer<typeof WhileContextSchema>;
+
 export const StepContextSchema = WorkflowContextSchema.extend({
   steps: z.record(z.string(), StepDataSchema),
   foreach: ForEachContextSchema.optional(),
+  while: WhileContextSchema.optional(),
   variables: z.record(z.string(), z.unknown()).optional(),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;

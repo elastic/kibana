@@ -46,11 +46,21 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       this.node.maxIterations !== undefined && nextIteration >= this.node.maxIterations;
 
     if (!maxReached) {
+      // The while scope has already been popped from the execution scope stack by
+      // run_node.ts exitScope() before this node runs, so getContext() won't include
+      // the while context. Inject it explicitly from the step state.
+      const whileAdditionalContext: Record<string, unknown> = {
+        while: { iteration: nextIteration },
+      };
+
       const renderedCondition =
-        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(this.node.condition);
+        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+          this.node.condition,
+          whileAdditionalContext
+        );
       const conditionResult = evaluateCondition(
         renderedCondition,
-        this.stepExecutionRuntime.contextManager.getContext(),
+        { ...this.stepExecutionRuntime.contextManager.getContext(), ...whileAdditionalContext },
         this.node.stepId
       );
       if (conditionResult) {
@@ -59,14 +69,14 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       }
     }
 
-    this.stepExecutionRuntime.finishStep();
-
     if (maxReached && this.node.onLimit === 'fail') {
       throw new Error(
         `While step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
           `Completed ${nextIteration} iterations.`
       );
     }
+
+    this.stepExecutionRuntime.finishStep();
 
     const reason = maxReached
       ? `reached max-iterations limit of ${this.node.maxIterations}`

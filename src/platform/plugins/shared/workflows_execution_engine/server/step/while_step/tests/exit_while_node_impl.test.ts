@@ -170,14 +170,14 @@ describe('ExitWhileNodeImpl', () => {
         );
       });
 
-      it('should finish the step before throwing', () => {
+      it('should not finish the step when throwing', () => {
         try {
           underTest.run();
         } catch {
           // expected
         }
 
-        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+        expect(stepExecutionRuntime.finishStep).not.toHaveBeenCalled();
       });
     });
   });

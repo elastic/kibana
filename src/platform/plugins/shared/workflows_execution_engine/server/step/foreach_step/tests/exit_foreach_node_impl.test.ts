@@ -123,6 +123,21 @@ describe('ExitForeachNodeImpl', () => {
         `Foreach step "${node.stepId}" exceeded max-iterations limit of 2. Processed 2 of 5 items.`
       );
     });
+
+    it('should not finish the step when on-limit is fail', () => {
+      (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
+        index: 1,
+        total: 5,
+      });
+      node.maxIterations = 2;
+      node.onLimit = 'fail';
+      try {
+        underTest.run();
+      } catch {
+        // expected
+      }
+      expect(stepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+    });
   });
 
   describe('when loop break is requested', () => {
