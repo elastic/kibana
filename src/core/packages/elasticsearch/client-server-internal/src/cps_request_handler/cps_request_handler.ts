@@ -10,9 +10,31 @@
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import type { TransportRequestMetadata } from '@elastic/elasticsearch';
+import { metrics, ValueType } from '@opentelemetry/api';
 import type { OnRequestHandler } from '../create_transport';
 
+// temporary type correction while @elastic/elasticsearch types fixes the actual acceptedParams type
+interface StructuredAcceptedParams {
+  path: string[];
+  body: string[];
+  query: string[];
+}
+
 type AcceptedParams = NonNullable<TransportRequestMetadata['acceptedParams']>;
+
+const meter = metrics.getMeter('kibana.elasticsearch.cps');
+
+const requestsTotalCounter = meter.createCounter('cps.requests.total', {
+  description: 'Total Elasticsearch requests processed by CPS handler by routing type',
+  unit: '1',
+  valueType: ValueType.INT,
+});
+
+const requestsWithoutRoutingCounter = meter.createCounter('cps.requests.without_routing', {
+  description: 'Requests without project_routing parameter while CPS enabled (bypass indicator)',
+  unit: '1',
+  valueType: ValueType.INT,
+});
 
 /** @internal */
 export function getCpsRequestHandler(
@@ -21,18 +43,32 @@ export function getCpsRequestHandler(
 ): OnRequestHandler {
   return (_ctx, params, _options) => {
     const body = isPlainObject(params.body) ? (params.body as Record<string, unknown>) : undefined;
-    const { acceptedParams } = params.meta ?? {};
+    const { acceptedParams, name } = params.meta ?? {};
+
+    let routingType: 'injected' | 'explicit' | 'stripped' | 'none';
 
     if (cpsEnabled) {
       if (isProjectRoutingInQuery(acceptedParams)) {
+        const hadExplicitRouting =
+          typeof params.querystring === 'object' && params.querystring?.project_routing != null;
+
         injectProjectRoutingQueryString(projectRouting, params);
+
+        routingType = hadExplicitRouting ? 'explicit' : 'injected';
       } else if (isProjectRoutingInBody(acceptedParams)) {
         if (body?.pit) {
           // The project_routing is set by the openPit API, and thus part of the PIT context.
           stripProjectRoutingBody(body);
+          routingType = 'stripped';
         } else {
+          const hadExplicitRouting = body?.project_routing != null;
+
           injectProjectRoutingBody(projectRouting, params, body);
+
+          routingType = hadExplicitRouting ? 'explicit' : 'injected';
         }
+      } else {
+        routingType = 'none';
       }
     } else {
       // Strip from body, querystring, and NDJSON bulk body unconditionally: project_routing is
@@ -40,6 +76,21 @@ export function getCpsRequestHandler(
       stripProjectRoutingBody(body);
       stripProjectRoutingQueryString(params);
       stripProjectRoutingNdjsonBody(params);
+      routingType = 'stripped';
+    }
+
+    requestsTotalCounter.add(1, {
+      'cps.routing_type': routingType,
+      'cps.enabled': String(cpsEnabled),
+      'api.name': name ?? 'unknown',
+    });
+
+    if (cpsEnabled && routingType === 'none') {
+      if (isProjectRoutingInQuery(acceptedParams) || isProjectRoutingInBody(acceptedParams)) {
+        requestsWithoutRoutingCounter.add(1, {
+          'api.name': name ?? 'unknown',
+        });
+      }
     }
   };
 }
@@ -54,7 +105,7 @@ export function getCpsRequestHandler(
  */
 function isProjectRoutingInQuery(acceptedParams: AcceptedParams | undefined): boolean {
   if (!acceptedParams || Array.isArray(acceptedParams)) return false;
-  return acceptedParams.query.includes('project_routing');
+  return (acceptedParams as StructuredAcceptedParams).query.includes('project_routing');
 }
 
 /**
@@ -67,7 +118,7 @@ function isProjectRoutingInQuery(acceptedParams: AcceptedParams | undefined): bo
 function isProjectRoutingInBody(acceptedParams: AcceptedParams | undefined): boolean {
   if (!acceptedParams) return false;
   if (Array.isArray(acceptedParams)) return acceptedParams.includes('project_routing');
-  return acceptedParams.body.includes('project_routing');
+  return (acceptedParams as StructuredAcceptedParams).body.includes('project_routing');
 }
 
 function stripProjectRoutingBody(body: Record<string, unknown> | undefined): void {
