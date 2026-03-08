@@ -38,6 +38,22 @@ describe('createChatCompleteApi', () => {
 
   let chatComplete: ChatCompleteAPI;
   const mockEsClient = {
+    get: jest.fn().mockResolvedValue({
+      _source: {
+        id: 'existing-replacements-id',
+        namespace: 'default',
+        replacements: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        created_by: 'inference',
+      },
+    }),
+    index: jest.fn().mockResolvedValue({}),
+    update: jest.fn().mockResolvedValue({}),
+    indices: {
+      exists: jest.fn().mockResolvedValue(true),
+      create: jest.fn().mockResolvedValue({}),
+    },
     ml: {
       inferTrainedModel: jest.fn(),
     },
@@ -49,6 +65,7 @@ describe('createChatCompleteApi', () => {
     regexWorker = createRegexWorkerServiceMock();
     const callbackApi = createChatCompleteCallbackApi({
       request,
+      namespace: 'default',
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
@@ -72,6 +89,9 @@ describe('createChatCompleteApi', () => {
   afterEach(() => {
     getInferenceExecutorMock.mockReset();
     getInferenceAdapterMock.mockReset();
+    mockEsClient.get.mockClear();
+    mockEsClient.index.mockClear();
+    mockEsClient.update.mockClear();
   });
 
   it('calls `getInferenceExecutor` with the right parameters', async () => {
@@ -132,6 +152,72 @@ describe('createChatCompleteApi', () => {
   });
 
   describe('response mode', () => {
+    it('reuses carried replacementsId when found', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'existing-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.get).toHaveBeenCalled();
+      expect(mockEsClient.get.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ id: 'existing-replacements-id' })
+      );
+      expect(mockEsClient.update).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(0);
+      expect(response.metadata?.anonymization?.replacementsId).toBe('existing-replacements-id');
+    });
+
+    it('falls back to a new replacementsId when carried one is missing', async () => {
+      mockEsClient.get.mockRejectedValueOnce({ meta: { statusCode: 404 } });
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        metadata: {
+          anonymization: {
+            replacementsId: 'stale-replacements-id',
+          },
+        },
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.get).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.update).toHaveBeenCalledTimes(0);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      expect(response.metadata?.anonymization?.replacementsId).not.toBe('stale-replacements-id');
+      expect(response.metadata?.anonymization?.replacementsId).toEqual(expect.any(String));
+    });
+
+    it('does not persist replacements when there is no anonymization and no carried id', async () => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+
+      const turn1 = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'turn-1' }],
+        maxRetries: 0,
+      });
+
+      await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'turn-2' }],
+        maxRetries: 0,
+      });
+
+      expect(turn1.metadata?.anonymization?.replacementsId).toBeUndefined();
+      expect(mockEsClient.get).toHaveBeenCalledTimes(0);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(0);
+      expect(mockEsClient.update).toHaveBeenCalledTimes(0);
+    });
+
     it('returns a promise resolving with the response', async () => {
       inferenceAdapter.chatComplete.mockReturnValue(
         of(chunkEvent('chunk-1'), chunkEvent('chunk-2'))
@@ -145,6 +231,7 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
+        metadata: undefined,
         toolCalls: [],
       });
     });
@@ -173,6 +260,7 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'chunk-1chunk-2',
+        metadata: undefined,
         toolCalls: [],
       });
     });
@@ -245,16 +333,19 @@ describe('createChatCompleteApi', () => {
       expect(events).toEqual([
         {
           content: 'chunk-1',
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-2',
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-1chunk-2',
+          metadata: undefined,
           toolCalls: [],
           type: 'chatCompletionMessage',
         },
@@ -292,11 +383,13 @@ describe('createChatCompleteApi', () => {
       expect(events).toEqual([
         {
           content: 'chunk-1',
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },
         {
           content: 'chunk-2',
+          metadata: undefined,
           tool_calls: [],
           type: 'chatCompletionChunk',
         },

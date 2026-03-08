@@ -182,6 +182,13 @@ export function QueryStreamFlyout({
                           defaultMessage: 'View documentation',
                         })}
                       </EuiLink>
+                      <EuiSpacer size="s" />
+                      <EuiText component="p" size="xs" color="subdued">
+                        {i18n.translate('xpack.streams.queryStreamFlyout.isolationNote', {
+                          defaultMessage:
+                            "This query stream's data is independent and won't appear in the parent stream's queries. Access it directly through Discover or its ES|QL view.",
+                        })}
+                      </EuiText>
                       <EuiSpacer size="m" />
                       <QueryStreamForm>
                         {showNameField && (
@@ -226,7 +233,7 @@ export function QueryStreamFlyout({
                       <EuiFlexItem grow={false} data-test-subj="streamsAppQueryStreamPreviewPanel">
                         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
                           <EuiFlexGroup component="span" gutterSize="s">
-                            <EuiIcon type="inspect" />
+                            <EuiIcon type="inspect" aria-hidden={true} />
                             <strong>
                               {i18n.translate('xpack.streams.queryStreamFlyout.previewHeader', {
                                 defaultMessage: 'Data Preview for query stream',

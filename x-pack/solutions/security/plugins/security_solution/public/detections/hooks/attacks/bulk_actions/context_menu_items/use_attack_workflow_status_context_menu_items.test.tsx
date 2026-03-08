@@ -44,6 +44,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
     closePopover: mockClosePopover,
     setIsLoading: mockSetIsLoading,
     onSuccess: mockOnSuccess,
+    telemetrySource: 'attacks_page_group_take_action' as const,
   };
 
   beforeEach(() => {
@@ -94,6 +95,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
     expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith({
       onWorkflowStatusUpdate: mockOnSuccess,
       currentStatus: 'open',
+      telemetrySource: 'attacks_page_group_take_action',
     });
   });
 
@@ -119,6 +121,7 @@ describe('useAttackWorkflowStatusContextMenuItems', () => {
     expect(mockUseBulkAttackWorkflowStatusItems).toHaveBeenCalledWith({
       onWorkflowStatusUpdate: mockOnSuccess,
       currentStatus: 'open',
+      telemetrySource: 'attacks_page_group_take_action',
     });
   });
 
