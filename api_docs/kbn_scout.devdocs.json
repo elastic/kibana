@@ -10555,7 +10555,7 @@
         "label": "PageObjects",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10571,7 +10571,7 @@
               "DatePicker"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10587,7 +10587,7 @@
               "DiscoverApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10603,7 +10603,7 @@
               "DashboardApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10619,7 +10619,7 @@
               "DashboardLinks"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10635,7 +10635,7 @@
               "FilterBar"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10651,7 +10651,7 @@
               "MapsPage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10667,7 +10667,7 @@
               "RenderablePage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10683,7 +10683,7 @@
               "CollapsibleNav"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10699,7 +10699,7 @@
               "Toasts"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10715,7 +10715,7 @@
               "Inspector"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10731,7 +10731,7 @@
               "LensApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10747,7 +10747,23 @@
               "LoginPage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.overlays",
+            "type": "Object",
+            "tags": [],
+            "label": "overlays",
+            "description": [],
+            "signature": [
+              "OverlaysPage"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
