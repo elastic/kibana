@@ -263,6 +263,8 @@ export const FetcherConfigSchema = z
     keep_alive: z.boolean().optional().describe('Enable HTTP keep-alive for connection reuse'),
     max_content_length: z
       .number()
+      .positive()
+      .finite()
       .optional()
       .describe('Maximum response body size in bytes. Aborts the request mid-stream if exceeded.'),
   })
@@ -737,7 +739,6 @@ export const WorkflowDataContextSchema = z.object({
   name: z.string(),
   enabled: z.boolean(),
   spaceId: z.string(),
-  settings: WorkflowSettingsSchema.optional(),
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 

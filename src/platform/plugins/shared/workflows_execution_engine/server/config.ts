@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -24,7 +25,7 @@ const configSchema = schema.object({
       }
     ),
   }),
-  maxResponseSize: schema.byteSize({ defaultValue: '10mb' }),
+  maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   collectQueueMetrics: schema.boolean({
     defaultValue: false,
     meta: {

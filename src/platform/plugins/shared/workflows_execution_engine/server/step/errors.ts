@@ -9,6 +9,8 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 
+export const DEFAULT_MAX_STEP_SIZE = '10mb';
+
 const BYTE_UNITS: Array<{ unit: string; size: number }> = [
   { unit: 'GB', size: 1024 * 1024 * 1024 },
   { unit: 'MB', size: 1024 * 1024 },
@@ -81,7 +83,7 @@ export function safeOutputSize(output: unknown): number {
  * Used by both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (base class output guard).
  */
 export class ResponseSizeLimitError extends ExecutionError {
-  constructor(actualBytes: number, limitBytes: number, stepName: string) {
+  constructor(limitBytes: number, stepName: string) {
     super({
       type: 'StepSizeLimitExceeded',
       message:

@@ -304,7 +304,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       return null;
     }
 
-    const maxSize = this.getMaxResponseSize();
+    const maxSize = this.getMaxResponseBytes();
     const reader = response.body.getReader();
     const chunks: Uint8Array[] = [];
     let totalBytes = 0;
@@ -316,9 +316,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
         totalBytes += value.byteLength;
         if (maxSize > 0 && totalBytes > maxSize) {
           void reader.cancel();
-          const stepName =
-            this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
-          throw new ResponseSizeLimitError(totalBytes, maxSize, stepName);
+          throw new ResponseSizeLimitError(maxSize, this.step.name);
         }
         chunks.push(value);
       }
@@ -327,7 +325,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     }
 
     const text = Buffer.concat(chunks).toString('utf-8');
-    return text ? JSON.parse(text) : null;
+    if (!text) return null;
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
   }
 
   /**

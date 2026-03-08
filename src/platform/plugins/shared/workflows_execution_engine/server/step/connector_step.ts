@@ -13,7 +13,7 @@
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
-import { formatBytes, ResponseSizeLimitError } from './errors';
+import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -28,7 +28,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * When adding Layer 1 for a new connector type (e.g. one that can return large payloads),
  * add it here and implement the limit in that connector's Actions executor.
  */
-const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http', '.webhook']);
+const CONNECTOR_TYPES_WITH_LAYER_1 = new Set<string>(['http']);
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -89,7 +89,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       // so axios can abort mid-stream (Layer 1 OOM prevention).
       const rawType = step.type;
       if (CONNECTOR_TYPES_WITH_LAYER_1.has(rawType)) {
-        const maxBytes = this.getMaxResponseSize();
+        const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           renderedInputs = {
             ...renderedInputs,
@@ -139,59 +139,13 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       } else {
         const errorMsg = serviceMessage ?? message ?? 'Unknown error';
 
-        // Detect maxContentLength exceeded from HTTP connectors and enrich the error
         if (errorMsg.includes('maxContentLength')) {
-          const stepName = step.name || (step as any).configuration?.name || (step as any).stepId;
-          const limitBytes = this.getMaxResponseSize();
-          const sizeLimitError = new ResponseSizeLimitError(-1, limitBytes, stepName);
-
-          // Best-effort: do a HEAD request to get the actual content-length
-          try {
-            const url = withInputs?.url || renderedInputs?.url;
-            if (url) {
-              const headResponse = await fetch(url, { method: 'HEAD' });
-              const contentLength = headResponse.headers.get('content-length');
-              const contentEncoding = headResponse.headers.get('content-encoding');
-              const isCompressed = !!contentEncoding && contentEncoding !== 'identity';
-
-              if (contentLength && sizeLimitError.details) {
-                const rawSize = parseInt(contentLength, 10);
-
-                if (isCompressed) {
-                  sizeLimitError.details._debug = {
-                    url,
-                    compressedSize: rawSize,
-                    compressedSizeFormatted: formatBytes(rawSize),
-                    contentEncoding,
-                    suggestion:
-                      `The remote resource is ${formatBytes(
-                        rawSize
-                      )} compressed (${contentEncoding}). ` +
-                      `The decompressed size is larger and exceeded the ${formatBytes(
-                        limitBytes
-                      )} limit. ` +
-                      `Increase max-step-size until the request succeeds.`,
-                  };
-                } else {
-                  sizeLimitError.details._debug = {
-                    url,
-                    actualContentLength: rawSize,
-                    actualContentLengthFormatted: formatBytes(rawSize),
-                    suggestedLimit: formatBytes(Math.ceil(rawSize * 1.1)),
-                    suggestion:
-                      `The remote resource is ${formatBytes(rawSize)}. ` +
-                      `Set max-step-size to at least ${formatBytes(
-                        Math.ceil(rawSize * 1.1)
-                      )} to allow this request.`,
-                  };
-                }
-              }
-            }
-          } catch {
-            // HEAD request failed -- still return the size limit error without debug info
-          }
-
-          return { input: withInputs, output: undefined, error: sizeLimitError };
+          const limitBytes = this.getMaxResponseBytes();
+          return {
+            input: withInputs,
+            output: undefined,
+            error: new ResponseSizeLimitError(limitBytes, step.name),
+          };
         }
 
         return {

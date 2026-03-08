@@ -261,7 +261,7 @@ if (result.output !== undefined && result.output !== null) {
 | `DataSetStepImpl` | N/A -- no external I/O | Yes -- base class output check | -- | Very low risk |
 | Control flow nodes | N/A | N/A | -- | No data processing |
 
-All demo workflows are in `workflows/examples/`. The ES workflow requires seeding test data first via `bash workflows/examples/seed_large_index.sh`.
+All demo workflows are in `docs/examples/` (relative to the `workflows_execution_engine` plugin). The ES workflow requires seeding test data first via `bash docs/examples/seed_large_index.sh`.
 
 ---
 

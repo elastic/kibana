@@ -43,7 +43,7 @@ export const ParamsSchema = z
         follow_redirects: z.boolean().optional(),
         max_redirects: z.number().optional(),
         keep_alive: z.boolean().optional(),
-        max_content_length: z.number().optional(),
+        max_content_length: z.number().positive().finite().optional(),
       })
       .optional(),
   })

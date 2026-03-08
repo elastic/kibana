@@ -82,15 +82,9 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
 
       // Map ES transport maxResponseSize exceeded to our ResponseSizeLimitError
       if (isMaximumResponseSizeExceededError(error)) {
-        const stepName =
-          this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
-        // Extract actual size from error message: "The content length (N) is bigger than..."
-        const sizeMatch = (error as Error).message?.match(/content length \((\d+)\)/);
-        const actualBytes = sizeMatch ? parseInt(sizeMatch[1], 10) : -1;
         const sizeLimitError = new ResponseSizeLimitError(
-          actualBytes,
-          this.getMaxResponseSize(),
-          stepName
+          this.getMaxResponseBytes(),
+          this.step.name
         );
         // Run a lightweight query to help the user estimate the needed limit
         try {
@@ -192,8 +186,8 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<El
     stepType: string,
     params: any
   ): Promise<any> {
-    const maxResponseSize = this.getMaxResponseSize();
-    const transportOptions = maxResponseSize > 0 ? { maxResponseSize } : {};
+    const maxResponseBytes = this.getMaxResponseBytes();
+    const transportOptions = maxResponseBytes > 0 ? { maxResponseSize: maxResponseBytes } : {};
 
     // Support both raw API format and connector-driven syntax
     if (params.request) {

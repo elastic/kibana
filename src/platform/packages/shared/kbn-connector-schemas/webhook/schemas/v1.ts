@@ -39,10 +39,5 @@ export const ConfigSchema = z.object(configSchemaProps).strict();
 export const ParamsSchema = z
   .object({
     body: z.string().optional(),
-    fetcher: z
-      .object({
-        max_content_length: z.number().optional(),
-      })
-      .optional(),
   })
   .strict();

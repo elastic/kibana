@@ -14,7 +14,7 @@ This document answers how the two-layer approach is enforced on new steps, how t
    All atomic steps are created by `NodesFactory.create()`. The factory only ever returns implementations that extend `BaseAtomicNodeImplementation`:
    - `ElasticsearchActionStepImpl`
    - `KibanaActionStepImpl`
-   - `ConnectorStepImpl` (includes `type: http`, `.webhook`, `.slack`, `.jira`, etc.)
+   - `ConnectorStepImpl` (includes `type: http`, `.slack`, `.jira`, etc.)
    - `DataSetStepImpl`
    - `CustomStepImpl` (extension-registered steps)
 
@@ -60,20 +60,20 @@ The only place that decides “this connector type gets Layer 1” is in code:
 
 | Location | Rule |
 |----------|------|
-| `connector_step.ts` | `if (rawType === 'http' \|\| rawType === '.webhook')` → inject `fetcher.max_content_length` (Layer 1). All other connector types (e.g. `.slack`, `.jira`) get Layer 2 only. |
+| `connector_step.ts` | `CONNECTOR_TYPES_WITH_LAYER_1.has(rawType)` → inject `fetcher.max_content_length` (Layer 1). Currently only `http`. All other connector types (e.g. `.slack`, `.jira`) get Layer 2 only. |
 | ES step | Layer 1 via `transport.request(..., { maxResponseSize })`. |
 | Kibana action step | Layer 1 via streaming body reader. |
 
 So today:
 
-- **Layer 1:** `http`, `.webhook`, `elasticsearch.*`, `kibana.*`
+- **Layer 1:** `http`, `elasticsearch.*`, `kibana.*`
 - **Layer 2 only:** every other connector type (e.g. `.slack`, `.jira`, custom connector types), plus all steps still get Layer 2 in the base class.
 
 ### How to track and enforce connector coverage
 
 1. **Explicit allowlist (recommended)**  
    - Define a constant, e.g. in `connector_step.ts` or a small `size_limits_constants.ts`:
-     - `CONNECTOR_TYPES_WITH_LAYER_1: ReadonlySet<string> = new Set(['http', '.webhook'])`
+     - `CONNECTOR_TYPES_WITH_LAYER_1: ReadonlySet<string> = new Set(['http'])`
    - Use it in the `if` condition instead of inline string checks. The list is then the single place to update when you add Layer 1 for another connector type (e.g. a future “large export” connector).
    - Optionally add a short comment: “Connector types that support mid-stream response size limit (Layer 1). All others rely on Layer 2 only.”
 
@@ -111,7 +111,7 @@ When a step fails with **StepSizeLimitExceeded**:
 
    So every size-limit failure produces a workflow log event with:
    - `error.type` = `'StepSizeLimitExceeded'`
-   - `labels.step_type` = e.g. `http`, `.webhook`, `elasticsearch.search`, `data.set`, `.jira`, etc.
+   - `labels.step_type` = e.g. `http`, `elasticsearch.search`, `data.set`, `.jira`, etc.
 
 3. **Elasticsearch step only**  
    When the ES step hits the size limit, it also calls `workflowLogger.logError(..., { tags: [..., 'response-size-exceeded'] })` before returning. So for ES you get an extra event with tag `response-size-exceeded`. For failures from the base class (Layer 2) or from the HTTP/connector path, that tag is not set today.

@@ -3,7 +3,7 @@
 # Creates 10,000 documents with ~1KB each in the 'large-test-data' index.
 # Total index size: ~10MB, enough to exceed a 5mb max-step-size limit with size:10000.
 #
-# Usage: bash workflows/examples/seed_large_index.sh
+# Usage: bash src/platform/plugins/shared/workflows_execution_engine/docs/examples/seed_large_index.sh
 #
 # Requires: curl, local Elasticsearch at https://localhost:9200
 
@@ -67,4 +67,4 @@ echo ""
 echo ""
 echo "=== Done! ==="
 echo "The '$INDEX' index now has 10,000 documents (~10MB total)."
-echo "Use with: workflows/examples/test_es_size_limit.yaml"
+echo "Use with: docs/examples/test_es_size_limit.yaml"

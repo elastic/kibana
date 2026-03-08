@@ -102,16 +102,16 @@ describe('safeOutputSize', () => {
 });
 
 describe('ResponseSizeLimitError', () => {
-  it('should create an error with the correct type', () => {
-    const error = new ResponseSizeLimitError(5000, 1024, 'my_step');
+  it('should create an error with the correct type and message', () => {
+    const error = new ResponseSizeLimitError(1024, 'my_step');
     expect(error.type).toBe('StepSizeLimitExceeded');
     expect(error.message).toContain('my_step');
     expect(error.message).toContain('1 KB');
     expect(error.details?.limitBytes).toBe(1024);
   });
 
-  it('should not include actualBytes in details', () => {
-    const error = new ResponseSizeLimitError(-1, 10 * 1024 * 1024, 'es_step');
+  it('should include limit in message', () => {
+    const error = new ResponseSizeLimitError(10 * 1024 * 1024, 'es_step');
     expect(error.message).toContain('10 MB');
     expect(error.message).toContain('exceeded the');
     expect(error.details?.limitBytes).toBe(10 * 1024 * 1024);

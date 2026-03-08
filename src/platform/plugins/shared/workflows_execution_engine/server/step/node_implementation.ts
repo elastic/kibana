@@ -15,7 +15,12 @@
 import apm from 'elastic-apm-node';
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
-import { parseByteSize, ResponseSizeLimitError, safeOutputSize } from './errors';
+import {
+  DEFAULT_MAX_STEP_SIZE,
+  parseByteSize,
+  ResponseSizeLimitError,
+  safeOutputSize,
+} from './errors';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -118,12 +123,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     // Auto-populate max-step-size from the graph node configuration.
     // This ensures every step respects the YAML limit regardless of how
-    // the subclass constructs its step object (prevents the bug where
-    // step implementations forget to copy max-step-size).
+    // the subclass constructs its step object.
     if (!this.step['max-step-size']) {
       const nodeConfig = (stepExecutionRuntime.node as any)?.configuration;
       if (nodeConfig?.['max-step-size']) {
-        (this.step as any)['max-step-size'] = nodeConfig['max-step-size'];
+        this.step['max-step-size'] = nodeConfig['max-step-size'];
       }
     }
   }
@@ -156,13 +160,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       // Enforce input size limit before executing the step.
       // Prevents oversized template-rendered inputs from being passed to _run().
       if (input != null) {
-        const maxBytes = this.getMaxResponseSize();
+        const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const inputSize = safeOutputSize(input);
           if (inputSize > 0 && inputSize > maxBytes) {
-            const stepName =
-              this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
-            throw new ResponseSizeLimitError(inputSize, maxBytes, `${stepName} (input)`);
+            throw new ResponseSizeLimitError(maxBytes, `${this.step.name} (input)`);
           }
         }
       }
@@ -174,14 +176,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       // This is the generic catch-all that protects every step type against context growth.
       // Layer 1 (pre-emptive I/O enforcement) may have already caught this at the transport level.
       if (result.output != null && !result.error) {
-        const maxBytes = this.getMaxResponseSize();
+        const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
-          // outputSize === -1 means non-serializable (stream, circular ref) -- skip check
           if (outputSize > 0 && outputSize > maxBytes) {
-            const stepName =
-              this.step.name || (this.step as any).configuration?.name || (this.step as any).stepId;
-            throw new ResponseSizeLimitError(outputSize, maxBytes, stepName);
+            throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
         }
       }
@@ -228,35 +227,41 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   protected abstract _run(input?: any): Promise<RunStepResult>;
 
   /**
-   * Resolves the maximum response size for this step in bytes.
-   * Resolution order: step-level > workflow settings > plugin config > hardcoded default (10mb).
-   * Subclasses use this for both Layer 1 (pre-emptive I/O enforcement) and Layer 2 (output guard).
+   * Resolves the maximum step size in bytes.
+   * Resolution order: step-level > workflow settings > plugin config > DEFAULT_MAX_STEP_SIZE.
+   * Returns 0 if the configured value is explicitly "0" (disables the limit).
+   * Returns the default on invalid/unparseable values to avoid crashing the step.
    */
-  protected getMaxResponseSize(): number {
-    // 1. Step-level override (from YAML -- auto-populated in constructor)
-    const stepLimit = this.step['max-step-size'];
-    if (stepLimit) {
-      return parseByteSize(stepLimit);
-    }
+  protected getMaxResponseBytes(): number {
+    try {
+      // 1. Step-level override (from YAML — auto-populated in constructor)
+      const stepLimit = this.step['max-step-size'];
+      if (stepLimit) {
+        return parseByteSize(stepLimit);
+      }
 
-    // 2. Workflow-level override (from YAML settings)
-    const workflowSettings =
-      this.stepExecutionRuntime.contextManager.getContext().workflow.settings;
-    const workflowLimit = workflowSettings?.['max-step-size'];
-    if (workflowLimit) {
-      return parseByteSize(workflowLimit);
-    }
+      // 2. Workflow-level override (from YAML settings, via runtime — not user-facing context)
+      const workflowSettings =
+        this.stepExecutionRuntime.workflowExecution?.workflowDefinition?.settings;
+      const workflowLimit = workflowSettings?.['max-step-size'];
+      if (workflowLimit) {
+        return parseByteSize(workflowLimit);
+      }
 
-    // 3. Plugin config default (from kibana.yml)
-    const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
-    if (pluginConfig?.maxResponseSize) {
-      const configValue = pluginConfig.maxResponseSize;
-      // schema.byteSize() returns a ByteSizeValue object with getValueInBytes()
-      return typeof configValue === 'number' ? configValue : (configValue as any).getValueInBytes();
-    }
+      // 3. Plugin config default (from kibana.yml)
+      const pluginConfig = this.stepExecutionRuntime.contextManager.getDependencies().config;
+      if (pluginConfig?.maxResponseSize) {
+        const configValue = pluginConfig.maxResponseSize;
+        return typeof configValue === 'number'
+          ? configValue
+          : (configValue as any).getValueInBytes();
+      }
 
-    // 4. Hardcoded fallback
-    return parseByteSize('10mb');
+      // 4. Hardcoded fallback
+      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+    } catch {
+      return parseByteSize(DEFAULT_MAX_STEP_SIZE);
+    }
   }
 
   // Helper for handling on-failure, retries, etc.
