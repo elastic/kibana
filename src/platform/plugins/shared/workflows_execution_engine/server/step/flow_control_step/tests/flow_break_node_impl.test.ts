@@ -30,19 +30,21 @@ describe('FlowBreakNodeImpl', () => {
       loopStepId: 'my_loop',
     };
 
-    wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
-    wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
-    wfExecutionRuntimeManager.navigateToNode = jest.fn();
-    wfExecutionRuntimeManager.requestLoopBreak = jest.fn();
+    stepExecutionRuntime = {
+      startStep: jest.fn(),
+      finishStep: jest.fn(),
+    } as unknown as StepExecutionRuntime;
 
-    stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
-    stepExecutionRuntime.contextManager = {
-      renderValueAccordingToContext: jest.fn().mockImplementation((input) => input),
-      getContext: jest.fn().mockReturnValue({}),
-    } as any;
+    wfExecutionRuntimeManager = {
+      navigateToNextNode: jest.fn(),
+      navigateToNode: jest.fn(),
+      unwindScopesToLoop: jest.fn(),
+      requestLoopBreak: jest.fn(),
+    } as unknown as WorkflowExecutionRuntimeManager;
 
-    workflowLogger = {} as unknown as IWorkflowEventLogger;
-    workflowLogger.logDebug = jest.fn();
+    workflowLogger = {
+      logDebug: jest.fn(),
+    } as unknown as IWorkflowEventLogger;
 
     underTest = new FlowBreakNodeImpl(
       node,
@@ -52,47 +54,20 @@ describe('FlowBreakNodeImpl', () => {
     );
   });
 
-  describe('unconditional break', () => {
-    it('should request loop break and navigate to exit node', () => {
-      underTest.run();
+  it('should start and finish the step with navigateToNode output', () => {
+    underTest.run();
 
-      expect(wfExecutionRuntimeManager.requestLoopBreak).toHaveBeenCalledWith('my_loop');
-      expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
+    expect(stepExecutionRuntime.startStep).toHaveBeenCalled();
+    expect(stepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+      navigateToNode: 'exitForeach_my_loop',
     });
   });
 
-  describe('conditional break', () => {
-    beforeEach(() => {
-      node.condition = 'foreach.item.status : "done"';
-      underTest = new FlowBreakNodeImpl(
-        node,
-        stepExecutionRuntime,
-        wfExecutionRuntimeManager,
-        workflowLogger
-      );
-    });
+  it('should unwind scopes, request loop break, and navigate to exit node', () => {
+    underTest.run();
 
-    it('should break when condition evaluates to true', () => {
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(true);
-
-      underTest.run();
-
-      expect(wfExecutionRuntimeManager.requestLoopBreak).toHaveBeenCalledWith('my_loop');
-      expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
-    });
-
-    it('should continue loop when condition evaluates to false', () => {
-      (
-        stepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockReturnValue(false);
-
-      underTest.run();
-
-      expect(wfExecutionRuntimeManager.requestLoopBreak).not.toHaveBeenCalled();
-      expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
-      expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
-    });
+    expect(wfExecutionRuntimeManager.unwindScopesToLoop).toHaveBeenCalled();
+    expect(wfExecutionRuntimeManager.requestLoopBreak).toHaveBeenCalledWith('my_loop');
+    expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
   });
 });

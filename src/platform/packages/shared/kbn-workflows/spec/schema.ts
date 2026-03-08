@@ -547,7 +547,7 @@ export const FlowBreakStepSchema = BaseStepSchema.extend({
   type: z
     .literal('flow.break')
     .describe('Exit the enclosing loop immediately. Valid only inside a foreach or while body'),
-  if: z.string().optional().describe('Optional condition — break only when this evaluates to true'),
+  ...StepWithIfConditionSchema.shape,
 });
 export type FlowBreakStep = z.infer<typeof FlowBreakStepSchema>;
 
@@ -557,10 +557,7 @@ export const FlowContinueStepSchema = BaseStepSchema.extend({
     .describe(
       'Skip remaining steps in the current iteration and advance to the next one. Valid only inside a foreach or while body'
     ),
-  if: z
-    .string()
-    .optional()
-    .describe('Optional condition — continue only when this evaluates to true'),
+  ...StepWithIfConditionSchema.shape,
 });
 export type FlowContinueStep = z.infer<typeof FlowContinueStepSchema>;
 

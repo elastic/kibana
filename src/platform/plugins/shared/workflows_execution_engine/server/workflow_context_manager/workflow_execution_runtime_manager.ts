@@ -208,6 +208,28 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
+  /**
+   * Pops intermediate scopes (e.g. enter-if wrappers) from the scope stack until
+   * the enclosing loop scope (enter-while or enter-foreach) is on top.
+   * Called by flow.break/flow.continue before navigating to the loop exit node,
+   * so that exitScope() in run_node.ts can correctly pop the loop scope.
+   */
+  public unwindScopesToLoop(): void {
+    let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+
+    while (!scopeStack.isEmpty()) {
+      const currentScope = scopeStack.getCurrentScope();
+      if (currentScope?.nodeType === 'enter-while' || currentScope?.nodeType === 'enter-foreach') {
+        break;
+      }
+      scopeStack = scopeStack.exitScope();
+    }
+
+    this.workflowExecutionState.updateWorkflowExecution({
+      scopeStack: scopeStack.stackFrames,
+    });
+  }
+
   public requestLoopBreak(loopStepId: string): void {
     this.loopBreakRequests.add(loopStepId);
   }

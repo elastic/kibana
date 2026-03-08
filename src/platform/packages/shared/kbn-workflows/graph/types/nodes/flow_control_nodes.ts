@@ -15,7 +15,6 @@ export const FlowBreakNodeSchema = GraphNodeSchema.extend({
   type: z.literal('flow-break'),
   loopExitNodeId: z.string(),
   loopStepId: z.string(),
-  condition: z.string().optional(),
 });
 
 export type FlowBreakNode = z.infer<typeof FlowBreakNodeSchema>;
@@ -23,8 +22,7 @@ export type FlowBreakNode = z.infer<typeof FlowBreakNodeSchema>;
 export const FlowContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('flow-continue'),
-  loopEnterNodeId: z.string(),
-  condition: z.string().optional(),
+  loopExitNodeId: z.string(),
 });
 
 export type FlowContinueNode = z.infer<typeof FlowContinueNodeSchema>;

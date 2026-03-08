@@ -1231,7 +1231,7 @@ describe('convertToWorkflowGraph', () => {
 
       expect(continueNode).toBeDefined();
       expect(continueNode.type).toBe('flow-continue');
-      expect(continueNode.loopEnterNodeId).toBe('enterForeach_my_loop');
+      expect(continueNode.loopExitNodeId).toBe('exitForeach_my_loop');
     });
 
     it('should create flow-break node inside a while loop', () => {
@@ -1255,7 +1255,7 @@ describe('convertToWorkflowGraph', () => {
       expect(breakNode.loopStepId).toBe('my_while');
     });
 
-    it('should support conditional flow.break with if property', () => {
+    it('should support conditional flow.break via the generic inline if mechanism', () => {
       const workflowDefinition = {
         steps: [
           {
@@ -1274,10 +1274,18 @@ describe('convertToWorkflowGraph', () => {
       } as Partial<WorkflowYaml>;
 
       const graph = convertToWorkflowGraph(workflowDefinition as any);
-      const breakNode = graph.node('conditional_break') as FlowBreakNode;
 
+      const enterIfNode = graph.node('enterCondition_if_conditional_break') as EnterIfNode;
+      expect(enterIfNode).toBeDefined();
+      expect(enterIfNode.type).toBe('enter-if');
+      expect(enterIfNode.configuration).toEqual(
+        expect.objectContaining({ condition: 'foreach.item.status : "done"' })
+      );
+
+      const breakNode = graph.node('conditional_break') as FlowBreakNode;
       expect(breakNode).toBeDefined();
-      expect(breakNode.condition).toBe('foreach.item.status : "done"');
+      expect(breakNode.type).toBe('flow-break');
+      expect(breakNode.loopExitNodeId).toBe('exitForeach_my_loop');
     });
 
     it('should throw when flow.break is used outside a loop', () => {

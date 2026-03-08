@@ -43,17 +43,6 @@ export function generateBuiltInStepSnippet(
         ],
       };
       break;
-    case 'while':
-      parameters = {
-        condition: '${{ steps.inner_step.output.done != true }}',
-        steps: [
-          {
-            name: 'inner-step',
-            type: '# Add step type here',
-          },
-        ],
-      };
-      break;
     case 'if':
       parameters = {
         condition: 'steps.step_1.output: "value"',
@@ -93,12 +82,6 @@ export function generateBuiltInStepSnippet(
         with: { duration: '5s' },
       };
       break;
-    case 'flow.break':
-      parameters = {};
-      break;
-    case 'flow.continue':
-      parameters = {};
-      break;
     case 'workflow.execute':
     case 'workflow.executeAsync':
       parameters = {
@@ -107,6 +90,10 @@ export function generateBuiltInStepSnippet(
           inputs: {},
         },
       };
+      break;
+    case 'flow.break':
+    case 'flow.continue':
+      parameters = {};
       break;
     default:
       parameters = {

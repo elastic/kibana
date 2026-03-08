@@ -67,6 +67,12 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
     case 'while-iteration':
       iconType = 'tokenNumber';
       break;
+    case 'flow.break':
+    case 'flow.continue':
+    case 'flow-break':
+    case 'flow-continue':
+      iconType = 'controls';
+      break;
 
     // connectors which use EUI icons
     case 'email':

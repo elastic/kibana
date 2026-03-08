@@ -118,20 +118,20 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     }
   }
 
-  if ((currentStep as FlowBreakStep).type === 'flow.break') {
-    return visitFlowBreakStep(currentStep as FlowBreakStep, context);
-  }
-
-  if ((currentStep as FlowContinueStep).type === 'flow.continue') {
-    return visitFlowContinueStep(currentStep as FlowContinueStep, context);
-  }
-
   if ((currentStep as StepWithIfCondition).if) {
     return createIfGraphForIfStepLevel(currentStep as StepWithIfCondition, context);
   }
 
   if ((currentStep as IfStep).type === 'if') {
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
+  }
+
+  if ((currentStep as FlowBreakStep).type === 'flow.break') {
+    return visitFlowBreakStep(currentStep as FlowBreakStep, context);
+  }
+
+  if ((currentStep as FlowContinueStep).type === 'flow.continue') {
+    return visitFlowContinueStep(currentStep as FlowContinueStep, context);
   }
 
   if ((currentStep as TimeoutProp).timeout) {
@@ -960,7 +960,6 @@ function visitFlowBreakStep(
     stepType: currentStep.type,
     loopExitNodeId,
     loopStepId: enclosingLoop.stepId,
-    condition: currentStep.if,
   };
   graph.setNode(flowBreakNode.id, flowBreakNode);
   return graph;
@@ -974,13 +973,17 @@ function visitFlowContinueStep(
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
 
+  const loopExitNodeId =
+    enclosingLoop.type === 'enter-foreach'
+      ? (enclosingLoop as EnterForeachNode).exitNodeId
+      : (enclosingLoop as EnterWhileNode).exitNodeId;
+
   const flowContinueNode: FlowContinueNode = {
     id: stepId,
     type: 'flow-continue',
     stepId,
     stepType: currentStep.type,
-    loopEnterNodeId: enclosingLoop.id,
-    condition: currentStep.if,
+    loopExitNodeId,
   };
   graph.setNode(flowContinueNode.id, flowContinueNode);
   return graph;

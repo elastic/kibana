@@ -11,7 +11,6 @@ import type { FlowBreakNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
-import { evaluateCondition } from '../evaluate_condition';
 import type { NodeImplementation } from '../node_implementation';
 
 export class FlowBreakNodeImpl implements NodeImplementation {
@@ -23,30 +22,16 @@ export class FlowBreakNodeImpl implements NodeImplementation {
   ) {}
 
   public run(): void {
-    if (this.node.condition) {
-      const renderedCondition =
-        this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(this.node.condition);
-      const conditionResult = evaluateCondition(
-        renderedCondition,
-        this.stepExecutionRuntime.contextManager.getContext(),
-        this.node.stepId
-      );
-
-      if (!conditionResult) {
-        this.workflowLogger.logDebug(
-          `flow.break condition "${this.node.condition}" evaluated to false for step "${this.node.stepId}". Continuing loop.`,
-          { workflow: { step_id: this.node.stepId } }
-        );
-        this.wfExecutionRuntimeManager.navigateToNextNode();
-        return;
-      }
-    }
+    this.stepExecutionRuntime.startStep();
 
     this.workflowLogger.logDebug(
       `flow.break triggered in step "${this.node.stepId}". Exiting enclosing loop.`,
       { workflow: { step_id: this.node.stepId } }
     );
 
+    this.stepExecutionRuntime.finishStep({ navigateToNode: this.node.loopExitNodeId });
+
+    this.wfExecutionRuntimeManager.unwindScopesToLoop();
     this.wfExecutionRuntimeManager.requestLoopBreak(this.node.loopStepId);
     this.wfExecutionRuntimeManager.navigateToNode(this.node.loopExitNodeId);
   }
