@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getDocument, getFieldValue, getFieldsToBeFilteredOn } from './commons';
+import { getDocument, getFieldValue } from './commons';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -46,28 +46,6 @@ describe('getFieldValue', () => {
 
     it('returns undefined when path is missing', () => {
       expect(getFieldValue({ user: {} }, 'user.id')).toBeUndefined();
-    });
-  });
-});
-
-describe('getFieldsToBeFilteredOn', () => {
-  // Single-field identity (e.g. generic) uses a simplified path and does not expose euidFields.
-  // Use an inline composition equivalent to entity.id for this test.
-  const singleFieldEuidFields = [{ composition: [{ field: 'entity.id' }] }];
-
-  describe('flattened documents', () => {
-    it('returns values for flattened doc', () => {
-      const result = getFieldsToBeFilteredOn({ 'entity.id': 'e-flat' }, singleFieldEuidFields);
-      expect(result.rankingPosition).toBe(0);
-      expect(result.values).toEqual({ 'entity.id': 'e-flat' });
-    });
-  });
-
-  describe('nested documents (existing behavior)', () => {
-    it('returns values for nested doc', () => {
-      const result = getFieldsToBeFilteredOn({ entity: { id: 'e-nested' } }, singleFieldEuidFields);
-      expect(result.rankingPosition).toBe(0);
-      expect(result.values).toEqual({ 'entity.id': 'e-nested' });
     });
   });
 });

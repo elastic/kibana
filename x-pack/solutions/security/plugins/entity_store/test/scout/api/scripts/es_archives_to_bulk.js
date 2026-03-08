@@ -8,7 +8,7 @@
 /**
  * One-off script: reads data.json (ES archive doc format) and prints
  * Elasticsearch bulk NDJSON to stdout for manual testing.
- * Usage: node to_bulk.js
+ * Usage: node es_archives_to_bulk.js
  */
 
 const fs = require('fs');

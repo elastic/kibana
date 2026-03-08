@@ -40,7 +40,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       responseType: 'json',
       body: {},
     });
-    expect([200, 201]).toContain(response.statusCode);
+    expect(response.statusCode).toBe(201);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -126,7 +126,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     'user: ESQL from doc with user.name + entity.namespace returns exactly that document',
     async ({ esClient }) => {
       const docSource = {
-        user: { name: 'arnlod.schmidt' },
+        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
         event: { module: 'entityanalytics_ad' },
       };
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);

@@ -44,7 +44,7 @@ apiTest.describe(
         responseType: 'json',
         body: {},
       });
-      expect([200, 201]).toContain(response.statusCode);
+      expect(response.statusCode).toBe(201);
 
       const entityTypesBody = { entityTypes: ['generic'] };
 

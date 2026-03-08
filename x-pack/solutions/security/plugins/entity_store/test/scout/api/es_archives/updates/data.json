@@ -522,6 +522,7 @@
       "event": { "kind": "asset", "module": "entityanalytics_ad" },
       "user": {
         "name": "arnlod.schmidt",
+        "domain": "elastic.co",
         "entity": {
           "id": "arnlod.schmidt"
         }

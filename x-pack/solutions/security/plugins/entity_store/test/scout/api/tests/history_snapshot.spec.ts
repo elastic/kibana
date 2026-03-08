@@ -35,7 +35,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
       responseType: 'json',
       body: { historySnapshot: { frequency: '24h' } },
     });
-    expect([200, 201]).toContain(installResponse.statusCode);
+    expect(installResponse.statusCode).toBe(201);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'

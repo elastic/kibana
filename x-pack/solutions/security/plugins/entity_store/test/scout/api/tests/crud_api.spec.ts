@@ -41,7 +41,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       responseType: 'json',
       body: {},
     });
-    expect([200, 201]).toContain(response.statusCode);
+    expect(response.statusCode).toBe(201);
   });
 
   apiTest.afterAll(async ({ apiClient }) => {

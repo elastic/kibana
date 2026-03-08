@@ -44,7 +44,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       responseType: 'json',
       body: {},
     });
-    expect([200, 201]).toContain(response.statusCode);
+    expect(response.statusCode).toBe(201);
 
     await esArchiver.loadIfNeeded(
       'x-pack/solutions/security/plugins/entity_store/test/scout/api/es_archives/updates'
@@ -128,7 +128,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     'user: DSL from doc with user.name + event.module returns exactly that document',
     async ({ esClient }) => {
       const docSource = {
-        user: { name: 'arnlod.schmidt' },
+        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
         event: { module: 'entityanalytics_ad' },
       };
       const dsl = getEuidDslFilterBasedOnDocument('user', docSource);
@@ -143,7 +143,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const total = getTotal(result.hits);
       expect(total).toBe(1);
       expect(result.hits.hits[0]._source).toMatchObject({
-        user: { name: 'arnlod.schmidt' },
+        user: { name: 'arnlod.schmidt', domain: 'elastic.co' },
         event: { module: 'entityanalytics_ad' },
       });
     }

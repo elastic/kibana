@@ -94,6 +94,8 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'client.user.email' }),
     collect({ source: 'source.user.email' }),
 
+    newestValue({ source: 'entity.namespace' }),
+
     collect({ source: 'user.domain' }),
     collect({ source: 'user.email' }),
     collect({ source: 'user.name' }),

@@ -336,14 +336,14 @@ export const expectedUserEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
-    _id: 'ced91c89d402644cb087ef445f394fe7',
+    _id: '28ac9cb0b4ccfb93ec0cab9046747514',
     _source: {
       '@timestamp': '2026-01-20T12:05:04.000Z',
       entity: {
         name: 'arnlod.schmidt',
         type: 'Identity',
-        id: 'user:arnlod.schmidt@active_directory',
-        EngineMetadata: { Type: 'user', UntypedId: 'arnlod.schmidt@active_directory' },
+        id: 'user:arnlod.schmidt@elastic.co@active_directory',
+        EngineMetadata: { Type: 'user', UntypedId: 'arnlod.schmidt@elastic.co@active_directory' },
       },
     },
   },
