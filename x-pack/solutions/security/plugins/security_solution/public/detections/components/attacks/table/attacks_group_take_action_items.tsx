@@ -60,10 +60,13 @@ export function AttacksGroupTakeActionItems({
     refetchQuery();
   }, [invalidateAttackDiscoveriesCache, refetchQuery]);
 
+  const telemetrySource = 'attacks_page_group_take_action';
+
   const { items: assignItems, panels: assignPanels } = useAttackAssigneesContextMenuItems({
     attacksWithAssignees,
     onSuccess,
     closePopover,
+    telemetrySource,
   });
 
   const attacksWithWorkflowStatus = useMemo(() => {
@@ -76,6 +79,7 @@ export function AttacksGroupTakeActionItems({
     attacksWithWorkflowStatus,
     onSuccess,
     closePopover,
+    telemetrySource,
   });
 
   const attacksWithTags = useMemo(() => {
@@ -86,6 +90,7 @@ export function AttacksGroupTakeActionItems({
     attacksWithTags,
     onSuccess,
     closePopover,
+    telemetrySource,
   });
 
   const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
@@ -93,6 +98,7 @@ export function AttacksGroupTakeActionItems({
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
     attacksWithTimelineAlerts,
     closePopover,
+    telemetrySource,
   });
 
   const attacksWithCase = useMemo(
@@ -112,10 +118,12 @@ export function AttacksGroupTakeActionItems({
     closePopover,
     title: attack.title,
     attacksWithCase,
+    telemetrySource,
   });
   const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,
     closePopover,
+    telemetrySource,
   });
 
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(

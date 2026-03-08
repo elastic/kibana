@@ -67,6 +67,8 @@ export const runSuiteCmd: Command<void> = {
       'trace-es-api-key',
       'evaluations-es-url',
       'evaluations-es-api-key',
+      'evaluations-kbn-url',
+      'evaluations-kbn-api-key',
       'phoenix-base-url',
       'phoenix-api-key',
     ],
@@ -146,6 +148,16 @@ export const runSuiteCmd: Command<void> = {
     const evaluationsEsApiKey = flagsReader.string('evaluations-es-api-key');
     if (evaluationsEsApiKey) {
       envOverrides.EVALUATIONS_ES_API_KEY = evaluationsEsApiKey;
+    }
+
+    const evaluationsKbnUrl = flagsReader.string('evaluations-kbn-url');
+    if (evaluationsKbnUrl) {
+      envOverrides.EVALUATIONS_KBN_URL = evaluationsKbnUrl;
+    }
+
+    const evaluationsKbnApiKey = flagsReader.string('evaluations-kbn-api-key');
+    if (evaluationsKbnApiKey) {
+      envOverrides.EVALUATIONS_KBN_API_KEY = evaluationsKbnApiKey;
     }
 
     const phoenixBaseUrl = flagsReader.string('phoenix-base-url');
