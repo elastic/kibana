@@ -80,8 +80,8 @@ describe('parseOasdiff', () => {
   it('maps other ERR level entries to operation_breaking', () => {
     const result = parseOasdiff([
       entry({
-        id: 'request-parameter-removed',
-        text: 'parameter removed',
+        id: 'some-unknown-breaking-check',
+        text: 'something broke',
         operation: 'POST',
         path: '/api/test',
       }),
@@ -91,17 +91,101 @@ describe('parseOasdiff', () => {
         type: 'operation_breaking',
         path: '/api/test',
         method: 'POST',
-        reason: 'parameter removed',
+        reason: 'something broke',
       },
     ]);
   });
 
-  it('filters out WARN level entries (level 2)', () => {
-    expect(parseOasdiff([entry({ level: 2 })])).toEqual([]);
+  it('maps request-property-removed to request_property_removed', () => {
+    const result = parseOasdiff([
+      entry({
+        id: 'request-property-removed',
+        text: 'request property removed',
+        operation: 'PUT',
+        path: '/api/test',
+      }),
+    ]);
+    expect(result).toEqual([
+      {
+        type: 'request_property_removed',
+        path: '/api/test',
+        method: 'PUT',
+        reason: 'request property removed',
+      },
+    ]);
+  });
+
+  it('maps request-parameter-removed to parameter_removed', () => {
+    const result = parseOasdiff([
+      entry({
+        id: 'request-parameter-removed',
+        text: 'parameter removed',
+        operation: 'GET',
+        path: '/api/test',
+      }),
+    ]);
+    expect(result).toEqual([
+      { type: 'parameter_removed', path: '/api/test', method: 'GET', reason: 'parameter removed' },
+    ]);
+  });
+
+  it('maps response-required-property-removed to response_property_removed', () => {
+    const result = parseOasdiff([
+      entry({
+        id: 'response-required-property-removed',
+        text: 'required response property removed',
+        operation: 'GET',
+        path: '/api/test',
+      }),
+    ]);
+    expect(result).toEqual([
+      {
+        type: 'response_property_removed',
+        path: '/api/test',
+        method: 'GET',
+        reason: 'required response property removed',
+      },
+    ]);
+  });
+
+  it('maps response-optional-property-removed to response_property_removed', () => {
+    const result = parseOasdiff([
+      entry({
+        id: 'response-optional-property-removed',
+        text: 'optional response property removed',
+        operation: 'GET',
+        path: '/api/test',
+      }),
+    ]);
+    expect(result).toEqual([
+      {
+        type: 'response_property_removed',
+        path: '/api/test',
+        method: 'GET',
+        reason: 'optional response property removed',
+      },
+    ]);
+  });
+
+  it('includes promoted warning IDs at level 2', () => {
+    const result = parseOasdiff([
+      entry({ id: 'request-property-removed', level: 2 }),
+      entry({ id: 'request-parameter-removed', level: 2 }),
+      entry({ id: 'response-optional-property-removed', level: 2 }),
+    ]);
+    expect(result).toHaveLength(3);
+  });
+
+  it('excludes non-promoted warning IDs at level 2', () => {
+    expect(parseOasdiff([entry({ id: 'request-body-all-of-removed', level: 2 })])).toEqual([]);
+  });
+
+  it('filters out non-promoted WARN level entries (level 2)', () => {
+    expect(parseOasdiff([entry({ id: 'some-warning', level: 2 })])).toEqual([]);
   });
 
   it('filters out INFO level entries (level 1)', () => {
-    expect(parseOasdiff([entry({ level: 1 })])).toEqual([]);
+    expect(parseOasdiff([entry({ id: 'some-info', level: 1 })])).toEqual([]);
   });
 
   it('returns only ERR entries from mixed input', () => {
