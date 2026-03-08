@@ -15,17 +15,11 @@ describe('applyFieldEvaluations', () => {
     getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
   ).fieldEvaluations!;
 
-  it('returns entity.namespace null when event.module is null or missing', () => {
-    expect(applyFieldEvaluations({}, userEvaluations)).toEqual({ 'entity.namespace': null });
-    expect(applyFieldEvaluations({ event: {} }, userEvaluations)).toEqual({
-      'entity.namespace': null,
-    });
-    expect(applyFieldEvaluations({ event: { module: null } }, userEvaluations)).toEqual({
-      'entity.namespace': null,
-    });
-    expect(applyFieldEvaluations({ event: { module: '' } }, userEvaluations)).toEqual({
-      'entity.namespace': null,
-    });
+  it('omits entity.namespace when event.module is null or missing (no clause matches)', () => {
+    expect(applyFieldEvaluations({}, userEvaluations)).toEqual({});
+    expect(applyFieldEvaluations({ event: {} }, userEvaluations)).toEqual({});
+    expect(applyFieldEvaluations({ event: { module: null } }, userEvaluations)).toEqual({});
+    expect(applyFieldEvaluations({ event: { module: '' } }, userEvaluations)).toEqual({});
   });
 
   it('maps okta and entityanalytics_okta to okta', () => {

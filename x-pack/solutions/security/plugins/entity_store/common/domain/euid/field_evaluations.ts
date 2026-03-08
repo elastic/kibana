@@ -33,16 +33,16 @@ function getSourceValue(doc: any, source: string): string | undefined {
  *
  * @param doc - The document (flat or nested)
  * @param fieldEvaluations - List of evaluations from identityField.fieldEvaluations
- * @returns Map of destination field name to evaluated value (string or null). Omit destinations when source is missing and no clause matches.
+ * @returns Map of destination field name to evaluated value (string). Destinations are omitted when source is missing and no clause matches.
  */
 export function applyFieldEvaluations(
   doc: any,
   fieldEvaluations: FieldEvaluation[]
-): Record<string, string | null> {
-  const result: Record<string, string | null> = {};
+): Record<string, string> {
+  const result: Record<string, string> = {};
   for (const evaluation of fieldEvaluations) {
     const sourceValue = getSourceValue(doc, evaluation.source);
-    let value: string | null | undefined;
+    let value: string | undefined;
     for (const clause of evaluation.whenClauses) {
       if (sourceValue !== undefined && clause.sourceMatchesAny.includes(sourceValue)) {
         value = clause.then;
@@ -50,7 +50,7 @@ export function applyFieldEvaluations(
       }
     }
     if (value === undefined) {
-      value = sourceValue ?? null;
+      value = sourceValue;
     }
     if (value !== undefined) {
       result[evaluation.destination] = value;
