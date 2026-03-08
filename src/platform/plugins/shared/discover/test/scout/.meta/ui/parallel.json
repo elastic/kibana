@@ -1,5 +1,5 @@
 {
-  "sha1": "80ccbb6602dda037ed6e72036df9630944789429",
+  "sha1": "c3d6dc7ca0a937d744b6259d61e8e0e5c1149f0c",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -10,6 +10,20 @@
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 14,
         "column": 16
+      }
+    },
+    {
+      "id": "61762fc85e5e046-883e55fae4bd272",
+      "title": "Flyout system Emotion cache stability opening a flyout after a cascade close does not corrupt the Emotion style cache",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/flyout_stability/flyout_emotion_cache.spec.ts",
+        "line": 28,
+        "column": 12
       }
     },
     {
