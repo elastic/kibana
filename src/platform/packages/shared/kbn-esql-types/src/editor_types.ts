@@ -27,6 +27,21 @@ export interface ESQLControlsContext {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   /** Function to be called after cancelling the control creation **/
   onCancelControl: () => void;
+
+  /**
+   * Optional: Provide additional state to attach to the clipboard when copying ES|QL.
+   *
+   * The editor will call this with the variable names found in the copied text selection.
+   * If a state object is returned, the editor may attach it to the `text/html` clipboard payload.
+   */
+  getControlsForClipboard?: (variableNames: string[]) => Record<string, unknown> | undefined;
+
+  /**
+   * Optional: Receive pasted controls state from a rich clipboard payload.
+   *
+   * The editor will invoke this during paste if a supported `text/html` payload is detected.
+   */
+  onPasteControlsFromClipboard?: (controlsState: Record<string, unknown>) => void | Promise<void>;
 }
 
 export interface ESQLQueryStats {

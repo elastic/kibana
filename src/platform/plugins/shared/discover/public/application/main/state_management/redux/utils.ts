@@ -127,6 +127,59 @@ export const parseControlGroupJson = (
   }
 };
 
+export const filterControlGroupStateByVariableNames = (
+  panels: ControlPanelsState<OptionsListESQLControlState> | undefined,
+  variableNames: string[]
+): ControlPanelsState<OptionsListESQLControlState> | undefined => {
+  if (!panels || variableNames.length === 0) return undefined;
+  const wanted = new Set(variableNames);
+
+  const filtered = Object.entries(panels).reduce(
+    (acc: ControlPanelsState<OptionsListESQLControlState>, [panelId, panel]) => {
+      if (panel.type === ESQL_CONTROL && wanted.has(panel.variable_name)) {
+        acc[panelId] = panel;
+      }
+      return acc;
+    },
+    {}
+  );
+
+  return Object.keys(filtered).length > 0 ? filtered : undefined;
+};
+
+export const mergeControlGroupStatesByVariableName = (
+  current: ControlPanelsState<OptionsListESQLControlState> | undefined,
+  incoming: ControlPanelsState<OptionsListESQLControlState> | undefined
+): ControlPanelsState<OptionsListESQLControlState> | undefined => {
+  if (!incoming || Object.keys(incoming).length === 0) {
+    return current;
+  }
+
+  const incomingVariables = new Set(
+    Object.values(incoming)
+      .filter((panel) => panel.type === ESQL_CONTROL)
+      .map((panel) => panel.variable_name)
+  );
+
+  const base: ControlPanelsState<OptionsListESQLControlState> = Object.entries(
+    current ?? {}
+  ).reduce((acc: ControlPanelsState<OptionsListESQLControlState>, [panelId, panel]) => {
+    if (panel.type === ESQL_CONTROL && incomingVariables.has(panel.variable_name)) {
+      return acc;
+    }
+    acc[panelId] = panel;
+    return acc;
+  }, {});
+
+  const merged = { ...base };
+  for (const [panelId, panel] of Object.entries(incoming)) {
+    const nextId = merged[panelId] ? uuid() : panelId;
+    merged[nextId] = panel;
+  }
+
+  return merged;
+};
+
 /**
  * @param panels - The control panels state, which may be null.
  * @description Extracts ESQL variables from the control panels state.

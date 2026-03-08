@@ -224,6 +224,13 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
      * This function reverts the UI to its previous state or closes a modal.
      */
     onCancelControl?: () => void;
+
+    /**
+     * Optional clipboard integration for rich copy/paste of ES|QL queries + controls.
+     * This is currently used by Discover as a POC.
+     */
+    getControlsForClipboard?: (variableNames: string[]) => Record<string, unknown> | undefined;
+    onPasteControlsFromClipboard?: (controlsState: Record<string, unknown>) => void | Promise<void>;
     /**
      * A React Node that will be rendered as a wrapper for the UI controls
      * associated with the ES|QL variables. This allows for custom layout or
@@ -998,6 +1005,9 @@ export const QueryBarTopRow = React.memo(
                     onSaveControl: props.esqlVariablesConfig.onSaveControl,
                     onCancelControl: props.esqlVariablesConfig.onCancelControl ?? (() => {}),
                     supportsControls: true,
+                    getControlsForClipboard: props.esqlVariablesConfig.getControlsForClipboard,
+                    onPasteControlsFromClipboard:
+                      props.esqlVariablesConfig.onPasteControlsFromClipboard,
                   }
                 : undefined
             }

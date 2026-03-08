@@ -76,7 +76,9 @@ export {
   createTabItem,
   getSerializedSearchSourceDataViewDetails,
   parseControlGroupJson,
+  filterControlGroupStateByVariableNames,
   extractEsqlVariables,
+  mergeControlGroupStatesByVariableName,
 } from './utils';
 
 export {

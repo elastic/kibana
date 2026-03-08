@@ -14,7 +14,9 @@ import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-g
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   extractEsqlVariables,
+  filterControlGroupStateByVariableNames,
   internalStateActions,
+  mergeControlGroupStatesByVariableName,
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
@@ -49,6 +51,10 @@ export const useESQLVariables = ({
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
   getActivePanels: () => ControlPanelsState<OptionsListESQLControlState> | undefined;
+  getControlsForClipboard: (
+    variableNames: string[]
+  ) => ControlPanelsState<OptionsListESQLControlState> | undefined;
+  onPasteControlsFromClipboard: (controlsState: Record<string, unknown>) => void | Promise<void>;
 } => {
   const dispatch = useInternalStateDispatch();
   const fetchData = useCurrentTabAction(internalStateActions.fetchData);
@@ -148,8 +154,37 @@ export const useESQLVariables = ({
     return getDefinedControlGroupState(currentControlGroupState) || {};
   }, [currentControlGroupState]);
 
+  const getControlsForClipboard = useCallback(
+    (variableNames: string[]) => {
+      return filterControlGroupStateByVariableNames(currentControlGroupState, variableNames);
+    },
+    [currentControlGroupState]
+  );
+
+  const onPasteControlsFromClipboard = useCallback(
+    async (controlsState: Record<string, unknown>) => {
+      if (!controlsState || typeof controlsState !== 'object') {
+        return;
+      }
+
+      const incoming = controlsState as unknown as ControlPanelsState<OptionsListESQLControlState>;
+
+      const merged = mergeControlGroupStatesByVariableName(currentControlGroupState, incoming);
+      dispatch(
+        updateAttributes({
+          attributes: {
+            controlGroupState: merged,
+          },
+        })
+      );
+    },
+    [currentControlGroupState, dispatch, updateAttributes]
+  );
+
   return {
     onSaveControl,
     getActivePanels,
+    getControlsForClipboard,
+    onPasteControlsFromClipboard,
   };
 };

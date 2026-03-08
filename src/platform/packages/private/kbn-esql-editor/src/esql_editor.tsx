@@ -113,6 +113,59 @@ import type { EsqlLanguageDeps } from './types';
 
 const esqlDepsByModelUri = new Map<string, EsqlLanguageDeps>();
 
+const KBN_ESQL_CLIPBOARD_MARKER_ATTR = 'data-kbn-esql-clipboard';
+const KBN_ESQL_CLIPBOARD_MARKER_VALUE = '1';
+const KBN_ESQL_CLIPBOARD_CONTROLS_ATTR = 'data-controls-json';
+
+const escapeHtmlText = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const escapeHtmlAttribute = (value: string) =>
+  value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const extractEsqlVariableNamesFromText = (text: string): string[] => {
+  const names = new Set<string>();
+  const variableRegex = /\?\??([a-zA-Z_][a-zA-Z0-9_]*)/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = variableRegex.exec(text)) !== null) {
+    if (match[1]) {
+      names.add(match[1]);
+    }
+  }
+
+  return [...names];
+};
+
+const buildKbnEsqlClipboardHtml = (queryText: string, controlsStateJson: string): string => {
+  const escapedControlsJson = escapeHtmlAttribute(controlsStateJson);
+  const escapedQueryText = escapeHtmlText(queryText);
+
+  return `<span ${KBN_ESQL_CLIPBOARD_MARKER_ATTR}="${KBN_ESQL_CLIPBOARD_MARKER_VALUE}" ${KBN_ESQL_CLIPBOARD_CONTROLS_ATTR}="${escapedControlsJson}">${escapedQueryText}</span>`;
+};
+
+const tryExtractControlsStateFromKbnEsqlClipboardHtml = (
+  html: string
+): Record<string, unknown> | undefined => {
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const el = doc.querySelector(
+      `[${KBN_ESQL_CLIPBOARD_MARKER_ATTR}="${KBN_ESQL_CLIPBOARD_MARKER_VALUE}"]`
+    );
+    const json = el?.getAttribute(KBN_ESQL_CLIPBOARD_CONTROLS_ATTR);
+    if (!json) return undefined;
+    const parsed = JSON.parse(json) as Record<string, unknown>;
+    return parsed;
+  } catch {
+    return undefined;
+  }
+};
+
 // Single shared provider per language; resolves callbacks per Monaco model.
 const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
   getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
@@ -1244,6 +1297,67 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   // Add editor key bindings
                   addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
+
+                  // Rich clipboard copy/paste support (POC used by Discover)
+                  const domNode = editor.getDomNode();
+                  if (domNode) {
+                    const onCopy = (event: ClipboardEvent) => {
+                      const clipboardData = event.clipboardData;
+                      if (!clipboardData) return;
+
+                      const model = editor.getModel();
+                      const selections = editor.getSelections();
+                      if (!model || !selections || selections.length === 0) return;
+
+                      const hasNonEmptySelection = selections.some((s) => !s.isEmpty());
+                      if (!hasNonEmptySelection) return;
+
+                      const selectedText = selections
+                        .filter((s) => !s.isEmpty())
+                        .map((s) => model.getValueInRange(s))
+                        .join('\n');
+
+                      const variableNames = extractEsqlVariableNamesFromText(selectedText);
+                      if (variableNames.length === 0) return;
+
+                      const controlsState =
+                        controlsContextRef.current?.getControlsForClipboard?.(variableNames);
+                      if (!controlsState || Object.keys(controlsState).length === 0) return;
+
+                      // We only override the clipboard if we have a rich payload to add.
+                      event.preventDefault();
+                      clipboardData.setData('text/plain', selectedText);
+                      clipboardData.setData(
+                        'text/html',
+                        buildKbnEsqlClipboardHtml(selectedText, JSON.stringify(controlsState))
+                      );
+                    };
+
+                    const onPaste = (event: ClipboardEvent) => {
+                      const clipboardData = event.clipboardData;
+                      if (!clipboardData) return;
+
+                      const html = clipboardData.getData('text/html');
+                      if (!html) return;
+
+                      const controlsState = tryExtractControlsStateFromKbnEsqlClipboardHtml(html);
+                      if (!controlsState) return;
+
+                      void controlsContextRef.current?.onPasteControlsFromClipboard?.(
+                        controlsState
+                      );
+                      // Do not prevent default; Monaco will paste text/plain as usual.
+                    };
+
+                    domNode.addEventListener('copy', onCopy);
+                    domNode.addEventListener('paste', onPaste);
+                    commandDisposables.push({
+                      dispose: () => {
+                        domNode.removeEventListener('copy', onCopy);
+                        domNode.removeEventListener('paste', onPaste);
+                      },
+                    });
+                  }
 
                   // Store disposables for cleanup
                   const currentEditor = editorRef.current;

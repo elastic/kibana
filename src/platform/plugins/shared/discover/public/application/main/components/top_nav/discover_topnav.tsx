@@ -110,12 +110,13 @@ export const DiscoverTopNav = ({
     },
     [dispatch, updateESQLQuery]
   );
-  const { onSaveControl, getActivePanels } = useESQLVariables({
-    isEsqlMode,
-    currentEsqlVariables: esqlVariables,
-    controlGroupApi,
-    onUpdateESQLQuery,
-  });
+  const { onSaveControl, getActivePanels, getControlsForClipboard, onPasteControlsFromClipboard } =
+    useESQLVariables({
+      isEsqlMode,
+      currentEsqlVariables: esqlVariables,
+      controlGroupApi,
+      onUpdateESQLQuery,
+    });
 
   const onOpenQueryInNewTab = useCallback(
     async (tabName: string, esqlQuery: string) => {
@@ -383,6 +384,8 @@ export const DiscoverTopNav = ({
             ? {
                 esqlVariables: esqlVariables ?? [],
                 onSaveControl,
+                getControlsForClipboard,
+                onPasteControlsFromClipboard,
                 controlsWrapper: (
                   <ControlGroupRenderer
                     onApiAvailable={setControlGroupApi}
