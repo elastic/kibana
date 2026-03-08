@@ -13,7 +13,7 @@ import { ENTITY_STORE_STATUS } from '../../../domain/constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { getMissingPrivileges } from '../utils/get_missing_privileges';
-import { AssetManagerClient } from '../../../domain/asset_manager';
+import type { AssetManagerClient } from '../../../domain/asset_manager';
 
 export function registerInitMaintainers(router: EntityStorePluginRouter) {
   router.versioned
