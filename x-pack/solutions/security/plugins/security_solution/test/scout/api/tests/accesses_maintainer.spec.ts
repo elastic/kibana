@@ -7,6 +7,7 @@
 
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { INTEGRATION_CONFIGS } from '../../../../server/lib/entity_analytics/entity_store/maintainers/accesses/integrations';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -16,6 +17,7 @@ import {
   FF_ENABLE_ENTITY_STORE_V2,
 } from '../fixtures/constants';
 import {
+  INTEGRATION_TEST_CONFIGS,
   bulkIngestEvents,
   ensureDataStream,
   cleanupDataStream,
@@ -28,47 +30,74 @@ function toArray(value: unknown): string[] {
   return Array.isArray(value) ? (value as string[]) : [value as string];
 }
 
-apiTest.describe('Accesses Frequently/Infrequently Maintainer', { tag: ENTITY_STORE_TAGS }, () => {
-  let defaultHeaders: Record<string, string>;
+/** Resolve a dot-separated path from a nested _source object. */
+function getField(source: Record<string, unknown>, path: string): unknown {
+  const parts = path.split('.');
+  let current: unknown = source;
+  for (const part of parts) {
+    if (current == null || typeof current !== 'object') return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
-    defaultHeaders = {
-      ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
-    };
+for (const integration of INTEGRATION_CONFIGS) {
+  const testConfig = INTEGRATION_TEST_CONFIGS[integration.id];
+  if (!testConfig) {
+    throw new Error(
+      `Missing IntegrationTestConfig for "${integration.id}". ` +
+        'Add an entry to INTEGRATION_TEST_CONFIGS in helpers.ts.'
+    );
+  }
 
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
+  apiTest.describe(`Accesses Maintainer [${integration.name}]`, { tag: ENTITY_STORE_TAGS }, () => {
+    let defaultHeaders: Record<string, string>;
 
-    const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(installResponse.statusCode).toBe(201);
+    apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient }) => {
+      const credentials = await samlAuth.asInteractiveUser('admin');
+      defaultHeaders = {
+        ...credentials.cookieHeader,
+        ...COMMON_HEADERS,
+      };
 
-    await ensureDataStream(esClient);
-    const ingestedCount = await bulkIngestEvents(esClient);
-    expect(ingestedCount).toBe(16000);
-  });
+      await kbnClient.uiSettings.update({
+        [FF_ENABLE_ENTITY_STORE_V2]: true,
+      });
 
-  apiTest.afterAll(async ({ apiClient, esClient }) => {
-    await apiClient
-      .post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      // Clean up any leftover entity store from a previous run
+      await apiClient
+        .post(ENTITY_STORE_ROUTES.UNINSTALL, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        })
+        .catch(() => {});
+
+      const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {},
-      })
-      .catch(() => {});
+      });
+      expect(installResponse.statusCode).toBe(201);
 
-    await cleanupDataStream(esClient);
-  });
+      await ensureDataStream(esClient, testConfig);
+      const ingestedCount = await bulkIngestEvents(esClient, testConfig);
+      expect(ingestedCount).toBe(16000);
+    });
 
-  apiTest(
-    'Should compute access relationships from Elastic Defend events',
-    async ({ apiClient, esClient }) => {
+    apiTest.afterAll(async ({ apiClient, esClient }) => {
+      await apiClient
+        .post(ENTITY_STORE_ROUTES.UNINSTALL, {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {},
+        })
+        .catch(() => {});
+
+      await cleanupDataStream(esClient, testConfig);
+    });
+
+    apiTest('Should compute access relationships from events', async ({ apiClient, esClient }) => {
       const maintainerResponse = await apiClient.post(MAINTAINER_ROUTES.RUN, {
         headers: defaultHeaders,
         responseType: 'json',
@@ -113,115 +142,123 @@ apiTest.describe('Accesses Frequently/Infrequently Maintainer', { tag: ENTITY_ST
 
       for (const hit of entities.hits.hits) {
         const source = hit._source as Record<string, unknown>;
-        const entityId = source['entity.id'] as string;
+        const entityId = getField(source, 'entity.id') as string;
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const expected = expectedRelationships.get(entityId)!;
         expect(expected).toBeDefined();
 
-        const actualFrequent = toArray(source['entity.relationships.accesses_frequently']).sort();
+        const actualFrequent = toArray(
+          getField(source, 'entity.relationships.accesses_frequently')
+        ).sort();
         const actualInfrequent = toArray(
-          source['entity.relationships.accesses_infrequently']
+          getField(source, 'entity.relationships.accesses_infrequently')
         ).sort();
 
         expect(actualFrequent).toStrictEqual(expected.accesses_frequently.sort());
         expect(actualInfrequent).toStrictEqual(expected.accesses_infrequently.sort());
       }
-    }
-  );
+    });
 
-  apiTest(
-    'Should assign accesses_frequently when access count exceeds threshold',
-    async ({ esClient }) => {
-      const entities = await esClient.search({
-        index: LATEST_INDEX,
-        query: {
-          bool: {
-            filter: {
-              wildcard: { 'entity.id': 'user:test-user-003@*' },
+    apiTest(
+      'Should assign accesses_frequently when access count exceeds threshold',
+      async ({ esClient }) => {
+        const entities = await esClient.search({
+          index: LATEST_INDEX,
+          query: {
+            bool: {
+              filter: {
+                wildcard: { 'entity.id': 'user:test-user-003@*' },
+              },
             },
           },
-        },
-        sort: [{ 'entity.id': 'asc' }],
-        size: 10,
-      });
+          sort: [{ 'entity.id': 'asc' }],
+          size: 10,
+        });
 
-      expect(entities.hits.hits).toHaveLength(2);
+        expect(entities.hits.hits).toHaveLength(2);
 
-      for (const hit of entities.hits.hits) {
-        const source = hit._source as Record<string, unknown>;
+        for (const hit of entities.hits.hits) {
+          const source = hit._source as Record<string, unknown>;
 
-        expect(toArray(source['entity.relationships.accesses_frequently'])).toHaveLength(1);
-        expect(toArray(source['entity.relationships.accesses_infrequently'])).toHaveLength(0);
+          expect(
+            toArray(getField(source, 'entity.relationships.accesses_frequently'))
+          ).toHaveLength(1);
+          expect(
+            toArray(getField(source, 'entity.relationships.accesses_infrequently'))
+          ).toHaveLength(0);
+        }
       }
-    }
-  );
+    );
 
-  apiTest(
-    'Should assign accesses_infrequently when access count is at or below threshold',
-    async ({ esClient }) => {
-      const entities = await esClient.search({
-        index: LATEST_INDEX,
-        query: {
-          bool: {
-            filter: {
-              term: { 'entity.id': 'user:test-user-001@test-host-002' },
+    apiTest(
+      'Should assign accesses_infrequently when access count is at or below threshold',
+      async ({ esClient }) => {
+        const entities = await esClient.search({
+          index: LATEST_INDEX,
+          query: {
+            bool: {
+              filter: {
+                term: { 'entity.id': 'user:test-user-001@test-host-002' },
+              },
             },
           },
-        },
-        size: 1,
-      });
+          size: 1,
+        });
 
-      expect(entities.hits.hits).toHaveLength(1);
+        expect(entities.hits.hits).toHaveLength(1);
 
-      const source = entities.hits.hits[0]._source as Record<string, unknown>;
+        const source = entities.hits.hits[0]._source as Record<string, unknown>;
 
-      expect(toArray(source['entity.relationships.accesses_frequently'])).toHaveLength(0);
-      expect(toArray(source['entity.relationships.accesses_infrequently'])).toStrictEqual([
-        'test-host-002',
-      ]);
-    }
-  );
-
-  apiTest(
-    'Should assign both accesses_frequently and accesses_infrequently for user-006',
-    async ({ esClient }) => {
-      const entities = await esClient.search({
-        index: LATEST_INDEX,
-        query: {
-          bool: {
-            filter: {
-              wildcard: { 'entity.id': 'user:test-user-006@*' },
-            },
-          },
-        },
-        sort: [{ 'entity.id': 'asc' }],
-        size: 10,
-      });
-
-      expect(entities.hits.hits).toHaveLength(6);
-
-      const frequentHosts: string[] = [];
-      const infrequentHosts: string[] = [];
-
-      for (const hit of entities.hits.hits) {
-        const source = hit._source as Record<string, unknown>;
-        const freq = toArray(source['entity.relationships.accesses_frequently']);
-        const infreq = toArray(source['entity.relationships.accesses_infrequently']);
-        frequentHosts.push(...freq);
-        infrequentHosts.push(...infreq);
+        expect(
+          toArray(getField(source, 'entity.relationships.accesses_frequently'))
+        ).toHaveLength(0);
+        expect(
+          toArray(getField(source, 'entity.relationships.accesses_infrequently'))
+        ).toStrictEqual(['test-host-002']);
       }
+    );
 
-      expect(frequentHosts.sort()).toStrictEqual([
-        'test-host-006',
-        'test-host-007',
-        'test-host-008',
-      ]);
-      expect(infrequentHosts.sort()).toStrictEqual([
-        'test-host-009',
-        'test-host-010',
-        'test-host-011',
-      ]);
-    }
-  );
-});
+    apiTest(
+      'Should assign both accesses_frequently and accesses_infrequently for user-006',
+      async ({ esClient }) => {
+        const entities = await esClient.search({
+          index: LATEST_INDEX,
+          query: {
+            bool: {
+              filter: {
+                wildcard: { 'entity.id': 'user:test-user-006@*' },
+              },
+            },
+          },
+          sort: [{ 'entity.id': 'asc' }],
+          size: 10,
+        });
+
+        expect(entities.hits.hits).toHaveLength(6);
+
+        const frequentHosts: string[] = [];
+        const infrequentHosts: string[] = [];
+
+        for (const hit of entities.hits.hits) {
+          const source = hit._source as Record<string, unknown>;
+          const freq = toArray(getField(source, 'entity.relationships.accesses_frequently'));
+          const infreq = toArray(getField(source, 'entity.relationships.accesses_infrequently'));
+          frequentHosts.push(...freq);
+          infrequentHosts.push(...infreq);
+        }
+
+        expect(frequentHosts.sort()).toStrictEqual([
+          'test-host-006',
+          'test-host-007',
+          'test-host-008',
+        ]);
+        expect(infrequentHosts.sort()).toStrictEqual([
+          'test-host-009',
+          'test-host-010',
+          'test-host-011',
+        ]);
+      }
+    );
+  });
+}

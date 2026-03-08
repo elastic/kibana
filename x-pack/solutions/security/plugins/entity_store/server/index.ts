@@ -19,5 +19,5 @@ export type { EntityStoreSetupContract } from './types';
 export type {
   RegisterEntityMaintainerConfig,
   EntityMaintainerState,
-} from './tasks/entity_maintainer/types';
-export { CRUDClient } from './domain/crud_client';
+} from './tasks/entity_maintainers/types';
+export { CRUDClient } from './domain/crud/crud_client';

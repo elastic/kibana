@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { EsClient } from '@kbn/scout-security';
-import { ELASTIC_DEFEND_INDEX, ELASTIC_DEFEND_TEMPLATE } from './constants';
 
-interface AccessPair {
+export interface AccessPair {
   userId: string;
   userName: string;
   hostId: string;
@@ -16,6 +16,20 @@ interface AccessPair {
   hostIp: string;
   count: number;
   expectedRelationship: 'accesses_frequently' | 'accesses_infrequently';
+}
+
+/**
+ * Per-integration test configuration: everything needed to set up a data stream,
+ * generate events, and tear down after the test.
+ * When adding a new server-side integration to INTEGRATION_CONFIGS, add a
+ * corresponding IntegrationTestConfig to INTEGRATION_TEST_CONFIGS below.
+ */
+export interface IntegrationTestConfig {
+  indexName: string;
+  templateName: string;
+  indexPatterns: string[];
+  templateMappings: Record<string, MappingProperty>;
+  generateEvent: (pair: AccessPair, index: number) => Record<string, unknown>;
 }
 
 /**
@@ -242,22 +256,120 @@ function generateElasticDefendEvent(pair: AccessPair, index: number): Record<str
   };
 }
 
+const ELASTIC_DEFEND_MAPPINGS: Record<string, MappingProperty> = {
+  '@timestamp': { type: 'date' },
+  event: {
+    properties: {
+      action: { type: 'keyword' },
+      outcome: { type: 'keyword' },
+      category: { type: 'keyword' },
+      kind: { type: 'keyword' },
+      module: { type: 'keyword' },
+      type: { type: 'keyword' },
+      dataset: { type: 'keyword' },
+      id: { type: 'keyword' },
+      agent_id_status: { type: 'keyword' },
+      created: { type: 'date' },
+    },
+  },
+  host: {
+    properties: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+      hostname: { type: 'keyword' },
+      domain: { type: 'keyword' },
+      ip: { type: 'ip' },
+      mac: { type: 'keyword' },
+      architecture: { type: 'keyword' },
+      os: {
+        properties: {
+          family: { type: 'keyword' },
+          full: { type: 'keyword' },
+          name: { type: 'keyword' },
+          platform: { type: 'keyword' },
+          type: { type: 'keyword' },
+          version: { type: 'keyword' },
+        },
+      },
+    },
+  },
+  user: {
+    properties: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+      email: { type: 'keyword' },
+      domain: { type: 'keyword' },
+    },
+  },
+  process: {
+    properties: {
+      Ext: {
+        properties: {
+          ancestry: { type: 'keyword' },
+          session_info: {
+            properties: {
+              authentication_package: { type: 'keyword' },
+              logon_type: { type: 'keyword' },
+            },
+          },
+        },
+      },
+      executable: { type: 'keyword' },
+      name: { type: 'keyword' },
+      pid: { type: 'long' },
+    },
+  },
+  agent: {
+    properties: {
+      id: { type: 'keyword' },
+      type: { type: 'keyword' },
+      version: { type: 'keyword' },
+    },
+  },
+  data_stream: {
+    properties: {
+      dataset: { type: 'keyword' },
+      namespace: { type: 'keyword' },
+      type: { type: 'keyword' },
+    },
+  },
+  message: { type: 'text' },
+};
+
+/**
+ * Registry of test configs keyed by server-side integration ID.
+ * When adding a new integration to INTEGRATION_CONFIGS on the server,
+ * add a corresponding entry here to enable test coverage.
+ */
+export const INTEGRATION_TEST_CONFIGS: Record<string, IntegrationTestConfig> = {
+  elastic_defend: {
+    indexName: 'logs-endpoint.events.security-default',
+    templateName: 'scout-elastic-defend-events',
+    indexPatterns: ['logs-endpoint.events.security-*'],
+    templateMappings: ELASTIC_DEFEND_MAPPINGS,
+    generateEvent: generateElasticDefendEvent,
+  },
+};
+
 const BULK_CHUNK_SIZE = 2000;
 
-export async function bulkIngestEvents(esClient: EsClient): Promise<number> {
+export async function bulkIngestEvents(
+  esClient: EsClient,
+  config: IntegrationTestConfig
+): Promise<number> {
   const allDocs: Record<string, unknown>[] = [];
 
   let globalIndex = 0;
   for (const pair of ACCESS_PAIRS) {
     for (let i = 0; i < pair.count; i++) {
-      allDocs.push(generateElasticDefendEvent(pair, globalIndex));
+      allDocs.push(config.generateEvent(pair, globalIndex));
       globalIndex++;
     }
   }
 
   for (let offset = 0; offset < allDocs.length; offset += BULK_CHUNK_SIZE) {
     const chunk = allDocs.slice(offset, offset + BULK_CHUNK_SIZE);
-    const operations = chunk.flatMap((doc) => [{ create: { _index: ELASTIC_DEFEND_INDEX } }, doc]);
+    const operations = chunk.flatMap((doc) => [{ create: { _index: config.indexName } }, doc]);
 
     const result = await esClient.bulk({
       operations,
@@ -277,12 +389,15 @@ export async function bulkIngestEvents(esClient: EsClient): Promise<number> {
   return allDocs.length;
 }
 
-export async function ensureDataStream(esClient: EsClient): Promise<void> {
-  await cleanupDataStream(esClient);
+export async function ensureDataStream(
+  esClient: EsClient,
+  config: IntegrationTestConfig
+): Promise<void> {
+  await cleanupDataStream(esClient, config);
 
   await esClient.indices.putIndexTemplate({
-    name: ELASTIC_DEFEND_TEMPLATE,
-    index_patterns: ['logs-endpoint.events.security-*'],
+    name: config.templateName,
+    index_patterns: config.indexPatterns,
     data_stream: {},
     priority: 500,
     template: {
@@ -291,96 +406,20 @@ export async function ensureDataStream(esClient: EsClient): Promise<void> {
         number_of_replicas: 0,
       },
       mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
-          event: {
-            properties: {
-              action: { type: 'keyword' },
-              outcome: { type: 'keyword' },
-              category: { type: 'keyword' },
-              kind: { type: 'keyword' },
-              module: { type: 'keyword' },
-              type: { type: 'keyword' },
-              dataset: { type: 'keyword' },
-              id: { type: 'keyword' },
-              agent_id_status: { type: 'keyword' },
-              created: { type: 'date' },
-            },
-          },
-          host: {
-            properties: {
-              id: { type: 'keyword' },
-              name: { type: 'keyword' },
-              hostname: { type: 'keyword' },
-              domain: { type: 'keyword' },
-              ip: { type: 'ip' },
-              mac: { type: 'keyword' },
-              architecture: { type: 'keyword' },
-              os: {
-                properties: {
-                  family: { type: 'keyword' },
-                  full: { type: 'keyword' },
-                  name: { type: 'keyword' },
-                  platform: { type: 'keyword' },
-                  type: { type: 'keyword' },
-                  version: { type: 'keyword' },
-                },
-              },
-            },
-          },
-          user: {
-            properties: {
-              id: { type: 'keyword' },
-              name: { type: 'keyword' },
-              email: { type: 'keyword' },
-              domain: { type: 'keyword' },
-            },
-          },
-          process: {
-            properties: {
-              Ext: {
-                properties: {
-                  ancestry: { type: 'keyword' },
-                  session_info: {
-                    properties: {
-                      authentication_package: { type: 'keyword' },
-                      logon_type: { type: 'keyword' },
-                    },
-                  },
-                },
-              },
-              executable: { type: 'keyword' },
-              name: { type: 'keyword' },
-              pid: { type: 'long' },
-            },
-          },
-          agent: {
-            properties: {
-              id: { type: 'keyword' },
-              type: { type: 'keyword' },
-              version: { type: 'keyword' },
-            },
-          },
-          data_stream: {
-            properties: {
-              dataset: { type: 'keyword' },
-              namespace: { type: 'keyword' },
-              type: { type: 'keyword' },
-            },
-          },
-          message: { type: 'text' },
-        },
+        properties: config.templateMappings,
       },
     },
   });
 
-  await esClient.indices.createDataStream({ name: ELASTIC_DEFEND_INDEX });
+  await esClient.indices.createDataStream({ name: config.indexName });
 }
 
-export async function cleanupDataStream(esClient: EsClient): Promise<void> {
-  await esClient.indices.deleteDataStream({ name: ELASTIC_DEFEND_INDEX }).catch(() => {});
-
-  await esClient.indices.deleteIndexTemplate({ name: ELASTIC_DEFEND_TEMPLATE }).catch(() => {});
+export async function cleanupDataStream(
+  esClient: EsClient,
+  config: IntegrationTestConfig
+): Promise<void> {
+  await esClient.indices.deleteDataStream({ name: config.indexName }).catch(() => {});
+  await esClient.indices.deleteIndexTemplate({ name: config.templateName }).catch(() => {});
 }
 
 /**

@@ -41,7 +41,7 @@ export async function upsertEntityRelationships(
   const entities = records.map((r) => ({ type: entityType, doc: buildEntityDoc(r) }));
 
   logger.info(`Upserting ${entities.length} entity relationship records via CRUD bulk API`);
-  const errors = await crudClient.upsertEntitiesBulk(entities, true);
+  const errors = await crudClient.upsertEntitiesBulk({ objects: entities, force: true });
 
   const upserted = records.length - errors.length;
   if (errors.length > 0) {

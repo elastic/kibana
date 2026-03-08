@@ -26,7 +26,7 @@ export const ENTITY_STORE_ROUTES = {
   INSTALL: stripLeadingSlash(BASE_ENTITY_STORE_ROUTES.INSTALL),
   UNINSTALL: stripLeadingSlash(BASE_ENTITY_STORE_ROUTES.UNINSTALL),
   FORCE_LOG_EXTRACTION: (entityType: string) =>
-    `internal/security/entity-store/${entityType}/force-log-extraction`,
+    `internal/security/entity_store/${entityType}/force_log_extraction`,
 };
 
 export const MAINTAINER_ROUTES = {
@@ -35,7 +35,4 @@ export const MAINTAINER_ROUTES = {
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
-export const ELASTIC_DEFEND_INDEX = 'logs-endpoint.events.security-default';
-export const ELASTIC_DEFEND_TEMPLATE = 'scout-elastic-defend-events';
-export const UPDATES_INDEX = '.entities.v2.updates.security_default';
 export const LATEST_INDEX = '.entities.v2.latest.security_default';
