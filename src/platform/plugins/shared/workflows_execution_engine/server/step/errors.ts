@@ -87,7 +87,7 @@ export class ResponseSizeLimitError extends ExecutionError {
     super({
       type: 'StepSizeLimitExceeded',
       message:
-        `Step "${stepName}" output was stopped because it exceeded the ` +
+        `Step "${stepName}" output exceeded the ` +
         `${formatBytes(limitBytes)} size limit. ` +
         `Configure 'max-step-size' at the step or workflow level to increase the limit, ` +
         `or reduce the response size (e.g., filter fields, limit results).`,

@@ -121,6 +121,16 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
     this.connectorExecutor = connectorExecutor as any;
     this.workflowExecutionRuntime = workflowExecutionRuntime;
 
+    // Graph nodes use `stepId` instead of `name`. When the factory passes a
+    // graph node directly (e.g. for ES/Kibana steps), bridge the gap so that
+    // error messages and APM spans always have a human-readable step name.
+    if (!this.step.name) {
+      const graphStepId = (step as any).stepId;
+      if (graphStepId) {
+        (this.step as any).name = graphStepId;
+      }
+    }
+
     // Auto-populate max-step-size from the graph node configuration.
     // This ensures every step respects the YAML limit regardless of how
     // the subclass constructs its step object.
@@ -156,19 +166,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     try {
       input = await this.getInput();
-
-      // Enforce input size limit before executing the step.
-      // Prevents oversized template-rendered inputs from being passed to _run().
-      if (input != null) {
-        const maxBytes = this.getMaxResponseBytes();
-        if (maxBytes > 0) {
-          const inputSize = safeOutputSize(input);
-          if (inputSize > 0 && inputSize > maxBytes) {
-            throw new ResponseSizeLimitError(maxBytes, `${this.step.name} (input)`);
-          }
-        }
-      }
-
       this.stepExecutionRuntime.setInput(input);
       const result = await this._run(input);
 
