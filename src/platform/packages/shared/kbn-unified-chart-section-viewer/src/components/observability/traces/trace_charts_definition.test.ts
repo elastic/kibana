@@ -34,6 +34,9 @@ describe('trace_charts_definition', () => {
       });
 
       expect(result?.esqlQuery).toContain(unmappedFieldsPrefix);
+      expect(result?.esqlQuery).toContain(
+        'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
+      );
       expect(result?.esqlQuery).toContain('TO_STRING(event.outcome) == "failure"');
       expect(result?.esqlQuery).toContain('TO_STRING(status.code) == "Error"');
     });
@@ -102,7 +105,10 @@ describe('trace_charts_definition', () => {
 
       expect(result?.esqlQuery).toContain(unmappedFieldsPrefix);
       expect(result?.esqlQuery).toContain(
-        'duration_ms_ecs = ROUND(transaction.duration.us) / 1000'
+        'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
+      );
+      expect(result?.esqlQuery).toContain(
+        'duration_ms_ecs = CASE(transaction.duration.us IS NOT NULL, TO_DOUBLE(transaction.duration.us) / 1000, span.duration.us IS NOT NULL, TO_DOUBLE(span.duration.us) / 1000, NULL)'
       );
       expect(result?.esqlQuery).toContain('duration_ms_otel = ROUND(duration) / 1000 / 1000');
       expect(result?.esqlQuery).toContain(
@@ -162,6 +168,9 @@ describe('trace_charts_definition', () => {
       });
 
       expect(result?.esqlQuery).toContain(unmappedFieldsPrefix);
+      expect(result?.esqlQuery).toContain(
+        'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
+      );
       expect(result?.esqlQuery).toContain('id = COALESCE(transaction.id, span.id)');
       expect(result?.esqlQuery).toContain('COUNT(id)');
       expect(result?.esqlQuery).toContain('TO_STRING(processor.event) == "transaction"');

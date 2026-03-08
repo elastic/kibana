@@ -44,7 +44,11 @@ describe('PUT /internal/spaces/space/{id}/solution', () => {
       basePath: httpService.basePath,
     });
 
-    const clientServiceStart = clientService.start(coreStart, featuresPluginMock.createStart());
+    const clientServiceStart = clientService.start(
+      coreStart,
+      featuresPluginMock.createStart(),
+      undefined
+    );
 
     const spacesServiceStart = service.start({
       basePath: coreStart.http.basePath,

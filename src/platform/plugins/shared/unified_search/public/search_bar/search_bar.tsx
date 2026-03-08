@@ -559,7 +559,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       text: toMountPoint(
         <FormattedMessage
           id="unifiedSearch.search.searchBar.backgroundSearch.toast.text"
-          defaultMessage="{name} is running now. <link>Check its progress here</link>"
+          defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
             link: (chunks: React.ReactNode) => (

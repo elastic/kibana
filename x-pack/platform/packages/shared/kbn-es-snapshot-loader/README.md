@@ -1,16 +1,26 @@
 # @kbn/es-snapshot-loader
 
-Load Elasticsearch snapshots for testing environments. Provides two operations:
+Load Elasticsearch snapshots for testing environments. Provides three operations:
 
+- **create** - Create a snapshot in a writable Elasticsearch repository (`gcs` or `fs`)
 - **restore** - Basic snapshot restore directly to Elasticsearch
 - **replay** - Restore with timestamp transformation for data streams, making historical data appear fresh
 
 ## Repository Types
 
-`@kbn/es-snapshot-loader` supports two repository strategies:
+`@kbn/es-snapshot-loader` supports three repository strategies:
 
 - `url` (default): read-only URL repositories backed by `file://` paths
 - `gcs`: Google Cloud Storage repositories
+- `fs`: File system repositories backed by a shared/local filesystem path
+
+Repository support matrix:
+
+| Repository Type | Restore/Replay | Create               |
+| --------------- | -------------- | -------------------- |
+| `url`           | Yes            | No (read-only in ES) |
+| `gcs`           | Yes            | Yes                  |
+| `fs`            | Yes            | Yes                  |
 
 ### URL Repository (`file://`)
 
@@ -27,6 +37,10 @@ yarn es snapshot --E path.repo="/tmp/es-snapshots"
 For GCS repositories, Elasticsearch must be configured with GCS credentials in the keystore using a credentials file setting such as `gcs.client.default.credentials_file`.
 
 With the Scout `evals_tracing` server config, this is handled automatically when `GCS_CREDENTIALS` is set. The config writes the env var value to a temp file and passes `gcs.client.default.credentials_file=<temp-file>` so `kbn-es` routes it through keystore `add-file`.
+
+### FS Repository
+
+For FS repositories, Elasticsearch must have `path.repo` configured in `elasticsearch.yml`, and the configured repository `location` must be under one of the allowed `path.repo` directories.
 
 ## Creating Snapshots
 
@@ -72,6 +86,29 @@ The snapshot repository path you used when creating the snapshot becomes the `--
 
 ## CLI Usage
 
+### Create
+
+Create a snapshot in a writable repository:
+
+```bash
+# Create to GCS using API key auth
+node scripts/es_snapshot_loader create \
+  --repo-type gcs \
+  --gcs-bucket my-snapshots \
+  --gcs-base-path evals/2026-03 \
+  --snapshot-name my-snapshot-2026-03-02 \
+  --es-url https://my-cluster.elastic.cloud:443 \
+  --es-api-key <base64-encoded-api-key> \
+  --indices "logs-*,metrics-*"
+
+# Create to a local/shared filesystem repository
+node scripts/es_snapshot_loader create \
+  --repo-type fs \
+  --fs-location /mount/backups/my-snapshot \
+  --snapshot-name local-snapshot-001 \
+  --es-url http://elastic:changeme@localhost:9200
+```
+
 ### Restore
 
 Restore a snapshot directly to Elasticsearch:
@@ -99,6 +136,23 @@ node scripts/es_snapshot_loader restore \
   --snapshot-url file:///path/to/snapshot \
   --es-url http://elastic:changeme@localhost:9200 \
   --indices "my-index-*,other-index-*"
+
+# Restore into temporary indices
+node scripts/es_snapshot_loader restore \
+  --repo-type gcs \
+  --gcs-bucket obs-ai-datasets \
+  --gcs-base-path otel-demo/snapshots \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --indices "my-features-*" \
+  --rename-pattern "(.+)" \
+  --rename-replacement "tmp-$1"
+
+# Restore with allow-no-matches (succeed even if no indices match)
+node scripts/es_snapshot_loader restore \
+  --snapshot-url file:///path/to/snapshot \
+  --es-url http://elastic:changeme@localhost:9200 \
+  --indices "optional-index-*" \
+  --allow-no-matches
 ```
 
 ### Replay
@@ -137,24 +191,34 @@ node scripts/es_snapshot_loader replay \
 
 | Flag              | Description                                                                          |
 | ----------------- | ------------------------------------------------------------------------------------ |
-| `--repo-type`     | Repository type (`url` or `gcs`, default: `url`)                                    |
+| `--repo-type`     | Repository type (`url`, `gcs`, or `fs`; default: `url`)                             |
 | `--snapshot-url`  | URL snapshot directory for `url` repositories (`file://...`)                        |
 | `--gcs-bucket`    | GCS bucket name (required when using `gcs`)                                          |
 | `--gcs-base-path` | Optional base path in the GCS bucket                                                 |
 | `--gcs-client`    | Optional Elasticsearch GCS client name                                               |
+| `--fs-location`   | FS repository location (required when using `fs`)                                   |
+| `--fs-compress`   | Enable compression for FS repository snapshots                                       |
 | `--snapshot-name` | Snapshot name to restore/replay (default: latest SUCCESS snapshot in the repository) |
 | `--es-url`        | Elasticsearch URL with credentials (e.g., `http://elastic:changeme@localhost:9200`) |
+| `--es-api-key`    | Base64-encoded Elasticsearch API key. Overrides credentials embedded in `--es-url`  |
 | `--kibana-url`    | Kibana URL for ES requests proxied through Kibana (e.g., `http://localhost:5601`)   |
 
 Notes:
-- `--snapshot-url` and any `--gcs-*` flags are mutually exclusive.
-- `--snapshot-url` is required unless `--repo-type gcs` is used.
+- `--es-api-key` can be used with `create`, `restore`, and `replay`.
+- Auth precedence is `--es-api-key` > credentials in `--es-url` > no auth.
+- `--snapshot-url`, `--gcs-*`, and `--fs-*` repository flags are mutually exclusive.
+- `--repo-type url` requires `--snapshot-url`.
+- `--repo-type gcs` requires `--gcs-bucket`.
+- `--repo-type fs` requires `--fs-location`.
 
 ### Restore-specific Options
 
-| Flag        | Description                               |
-| ----------- | ----------------------------------------- |
-| `--indices` | Comma-separated index patterns to restore |
+| Flag                    | Description                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------ |
+| `--indices`             | Comma-separated index patterns to restore                                                        |
+| `--rename-pattern`      | Regex applied to index names during restore (ES `rename_pattern`). Must pair with `--rename-replacement` |
+| `--rename-replacement`  | Replacement string for renamed indices (ES `rename_replacement`). Must pair with `--rename-pattern`      |
+| `--allow-no-matches`    | When set, a restore that matches no indices succeeds silently instead of throwing an error        |
 
 ### Replay-specific Options
 
@@ -180,6 +244,27 @@ const result = await restoreSnapshot({
 
 if (result.success) {
   console.log(`Restored ${result.restoredIndices.length} indices`);
+}
+```
+
+### Restore with Rename and Allow No Matches
+
+```typescript
+import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
+
+const result = await restoreSnapshot({
+  esClient,
+  log,
+  repository: createGcsRepository({ bucket: 'my-bucket', basePath: 'snapshots' }),
+  snapshotName: 'my-snapshot',
+  indices: ['features-*'],
+  renamePattern: '(.+)',
+  renameReplacement: 'tmp-$1',
+  allowNoMatches: true,
+});
+
+if (result.success) {
+  console.log(`Restored ${result.restoredIndices.length} indices to temp location`);
 }
 ```
 
@@ -256,6 +341,19 @@ describe('my test suite', () => {
 - GCS repositories:
   - Elasticsearch must be configured with GCS credentials in keystore (for example `gcs.client.default.credentials_file`)
   - The configured GCS client must be able to access the snapshot bucket/base path
+- FS repositories:
+  - Elasticsearch must have `path.repo` configured in `elasticsearch.yml`
+  - The configured `--fs-location` must be included under the allowed `path.repo` paths
+
+### For Create
+
+- GCS repositories:
+  - Elasticsearch must be configured with GCS credentials in keystore (for example `gcs.client.default.credentials_file`)
+  - The configured GCS client must have write access to the target bucket/base path
+- FS repositories:
+  - Elasticsearch must have `path.repo` configured in `elasticsearch.yml`
+  - The configured `--fs-location` must be included under the allowed `path.repo` paths
+- URL repositories are not supported for create because URL repositories are read-only in Elasticsearch
 
 ### For Replay
 

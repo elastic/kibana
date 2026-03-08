@@ -1,5 +1,5 @@
 {
-  "sha1": "a9a52816a7abff7332d8573055a61fea68f97904",
+  "sha1": "98249506cdde26d697fa2fe7ecfa5366f37df095",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
@@ -102,6 +102,174 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
         "line": 184,
+        "column": 7
+      }
+    },
+    {
+      "id": "9082eebebe78920-33093de5f8fcb9a",
+      "title": "Wired Streams - Auto-detect Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "9082eebebe78920-f0326d4f97245d4",
+      "title": "Wired Streams - Auto-detect Flow can switch to Wired Streams mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "9082eebebe78920-ee9bd3ab8308158",
+      "title": "Wired Streams - Auto-detect Flow command includes wired streams flag when Wired Streams mode is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_auto_detect.spec.ts",
+        "line": 54,
+        "column": 7
+      }
+    },
+    {
+      "id": "e1ab92206d8acec-0e80c07f0161c16",
+      "title": "Wired Streams - Elastic Agent Kubernetes Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "e1ab92206d8acec-99b05466d3c6123",
+      "title": "Wired Streams - Elastic Agent Kubernetes Flow command includes wired streams config when Wired Streams mode is selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_elastic_agent_kubernetes.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-445ce2ae56d207b",
+      "title": "Wired Streams - Enable Modal Confirmation Flow shows confirmation modal when selecting Wired Streams for the first time",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 36,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-db55e0180f71bb9",
+      "title": "Wired Streams - Enable Modal Confirmation Flow canceling the modal keeps Classic ingestion selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-e473bf221733fdd",
+      "title": "Wired Streams - Enable Modal Confirmation Flow confirming the modal enables Wired Streams and switches ingestion mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 82,
+        "column": 9
+      }
+    },
+    {
+      "id": "6e7ab256b5ad810-da6770c1a8091b1",
+      "title": "Wired Streams - Enable Modal Confirmation Flow modal does not appear if Wired Streams is already enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_enable_modal.spec.ts",
+        "line": 112,
+        "column": 9
+      }
+    },
+    {
+      "id": "2576eba90687dc8-f26b12b1dd62949",
+      "title": "Wired Streams - OTel Host Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "2576eba90687dc8-b578a9b97adb569",
+      "title": "Wired Streams - OTel Host Flow can switch between ingestion modes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_host.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "13fea49ba796590-306b56360167eea",
+      "title": "Wired Streams - OTel Kubernetes Flow shows ingestion selector with correct options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/wired_streams_otel_kubernetes.spec.ts",
+        "line": 24,
         "column": 7
       }
     }
