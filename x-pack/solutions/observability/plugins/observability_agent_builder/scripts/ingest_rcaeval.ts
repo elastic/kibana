@@ -24,7 +24,7 @@
  *   - Metrics → bulk indexed into metrics-rcaeval.re3-default
  *
  * Usage:
- *   npx tsx scripts/ingest_rcaeval.ts
+ *   npx tsx scripts/ingest_rcaeval.ts                         # list available cases
  *   npx tsx scripts/ingest_rcaeval.ts --case adservice_f4/1
  *   npx tsx scripts/ingest_rcaeval.ts --window 2h --es-url http://elastic:changeme@localhost:9200
  *   npx tsx scripts/ingest_rcaeval.ts --skip-traces --skip-metrics  # logs only
@@ -32,7 +32,7 @@
  * Options:
  *   --es-url <url>            Elasticsearch URL (default: http://elastic:changeme@localhost:9200)
  *   --window <duration>       Time window to map data into, relative to now (default: 1h)
- *   --case <name>             Single case to ingest, e.g. "adservice_f4/1" (default: all)
+ *   --case <name>             Single case to ingest, e.g. "adservice_f4/1" (lists cases if omitted)
  *   --source <path>           Local RE3-OB directory instead of downloading
  *   --clean                   Delete data streams and exit (removes all ingested data)
  *   --otlp-endpoint <url>     OTLP endpoint for traces (default: http://localhost:4318)
@@ -520,6 +520,18 @@ async function main() {
     return;
   }
 
+  const dataDir = await ensureDataset(opts.source);
+
+  if (!opts.caseName) {
+    const cases = discoverCases(dataDir);
+    console.log(`Available cases (${cases.length}):`);
+    for (const c of cases) {
+      console.log(`  ${c.faultService}_${c.faultType}/${c.instance}`);
+    }
+    console.log(`\nRun with --case <name> to ingest a single case.`);
+    return;
+  }
+
   const ingestTraces = !opts.skipTraces;
   const ingestMetrics = !opts.skipMetrics;
 
@@ -528,7 +540,7 @@ async function main() {
   console.log(`ES URL:   ${maskPassword(opts.esUrl)}`);
   console.log(`Window:   ${opts.window} (${windowMs}ms)`);
   console.log(`Signals:  logs${ingestTraces ? ', traces' : ''}${ingestMetrics ? ', metrics' : ''}`);
-  if (opts.caseName) console.log(`Case:     ${opts.caseName}`);
+  console.log(`Case:     ${opts.caseName}`);
   if (ingestTraces) console.log(`OTLP:     ${opts.otlpEndpoint}`);
   console.log();
 
@@ -546,7 +558,6 @@ async function main() {
     console.log(`EDOT Collector reachable at ${opts.otlpEndpoint}`);
   }
 
-  const dataDir = await ensureDataset(opts.source);
   console.log();
 
   const cases = discoverCases(dataDir, opts.caseName);
