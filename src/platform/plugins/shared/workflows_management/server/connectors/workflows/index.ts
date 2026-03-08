@@ -172,11 +172,12 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           throw new Error(`Missing subActionParams. Received: ${JSON.stringify(params)}`);
         }
 
-        const {
-          workflowId,
-          summaryMode = true,
-          alertStates = { new: true, ongoing: false, recovered: false },
-        } = subActionParams;
+        const { workflowId, summaryMode = true } = subActionParams;
+        const resolvedAlertStates = {
+          new: subActionParams.alertStates?.new !== false,
+          ongoing: subActionParams.alertStates?.ongoing === true,
+          recovered: subActionParams.alertStates?.recovered === true,
+        };
         if (!workflowId) {
           throw new Error(
             `Missing required workflowId parameter. Received params: ${JSON.stringify(params)}`
@@ -189,9 +190,10 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           alert_count: { active: 0, recovered: 0, ignored: 0 },
         };
         const filteredAlerts = {
-          new: alertStates.new !== false ? alerts.new : emptyAlertGroup,
-          ongoing: alertStates.ongoing === true ? alerts.ongoing : emptyAlertGroup,
-          recovered: alertStates.recovered === true ? alerts.recovered : emptyAlertGroup,
+          ...alerts,
+          new: resolvedAlertStates.new ? alerts.new : emptyAlertGroup,
+          ongoing: resolvedAlertStates.ongoing ? alerts.ongoing : emptyAlertGroup,
+          recovered: resolvedAlertStates.recovered ? alerts.recovered : emptyAlertGroup,
         };
 
         const alertEvent = buildAlertEvent({
@@ -208,7 +210,7 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             inputs: { event: alertEvent },
             spaceId,
             summaryMode,
-            alertStates,
+            alertStates: resolvedAlertStates,
           },
         };
       } catch (error) {
