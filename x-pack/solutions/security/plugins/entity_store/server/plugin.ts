@@ -88,7 +88,7 @@ export class EntityStorePlugin
         setup: () => Promise.resolve({}),
       },
       core,
-    })
+    });
     return {
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
         registerEntityMaintainerTask({

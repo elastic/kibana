@@ -55,7 +55,7 @@ export function registerInitMaintainers(router: EntityStorePluginRouter) {
  * Returns an error response if validation fails, or null if validation passes.
  */
 async function validateInitMaintainersRequest(
-  assetManagerClient: AssetManagerClient, 
+  assetManagerClient: AssetManagerClient,
   req: KibanaRequest,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse | null> {
