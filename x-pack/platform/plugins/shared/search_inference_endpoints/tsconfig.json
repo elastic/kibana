@@ -40,10 +40,10 @@
     "@kbn/react-query",
     "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
-    "@kbn/core-saved-objects-server",
     "@kbn/core-http-router-server-mocks",
     "@kbn/logging-mocks",
-    "@kbn/cloud-connect-plugin"
+    "@kbn/cloud-connect-plugin",
+    "@kbn/core-logging-server-mocks"
   ],
   "exclude": [
     "target/**/*"
