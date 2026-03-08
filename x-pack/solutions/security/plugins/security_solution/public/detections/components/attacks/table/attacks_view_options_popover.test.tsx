@@ -9,6 +9,10 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { AttacksViewOptionsPopover } from './attacks_view_options_popover';
 import { TABLE_SECTION_TEST_ID } from './table_section';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+
+jest.mock('../../../../common/lib/kibana');
 
 describe('AttacksViewOptionsPopover', () => {
   const defaultProps = {
@@ -17,6 +21,19 @@ describe('AttacksViewOptionsPopover', () => {
     showAttacksOnly: true,
     onToggleShowAttacksOnly: jest.fn(),
   };
+
+  const reportEvent = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
+    });
+  });
 
   it('renders the view options button', () => {
     const { getByTestId } = render(<AttacksViewOptionsPopover {...defaultProps} />);
@@ -45,6 +62,10 @@ describe('AttacksViewOptionsPopover', () => {
 
     fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-show-anonymized-switch`));
     expect(defaultProps.onToggleShowAnonymized).toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ViewOptionChanged, {
+      option: 'showAnonymized',
+      enabled: true,
+    });
   });
 
   it('calls onToggleShowAttacksOnly when the attacks only switch is toggled', async () => {
@@ -58,6 +79,10 @@ describe('AttacksViewOptionsPopover', () => {
 
     fireEvent.click(getByTestId(`${TABLE_SECTION_TEST_ID}-show-attacks-only-switch`));
     expect(defaultProps.onToggleShowAttacksOnly).toHaveBeenCalled();
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.ViewOptionChanged, {
+      option: 'showAttacksOnly',
+      enabled: false,
+    });
   });
 
   it('renders switches with correct checked state', async () => {

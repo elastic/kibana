@@ -151,6 +151,12 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
+    // If the execution is already aborted, do not start the step, navigate to make the execution finish properly
+    if (this.stepExecutionRuntime.abortController.signal.aborted) {
+      this.workflowExecutionRuntime.navigateToNextNode();
+      return;
+    }
+
     let input: any;
     this.stepExecutionRuntime.startStep();
     // flush event logs after start step
