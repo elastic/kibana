@@ -61,7 +61,7 @@ export interface CasePersistedAttributes {
     id: string;
     version: number;
   } | null;
-  extended_fields?: Record<string, unknown> | null;
+  extended_fields?: Record<string, string>;
 }
 
 type CasePersistedCustomFields = Array<{
