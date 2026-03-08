@@ -104,7 +104,7 @@ export async function executor(
   } = execOptions;
 
   const { method, url } = config;
-  const { body: data, fetcher } = params;
+  const { body: data } = params;
 
   const [axiosConfig, axiosConfigError] = await getAxiosConfig({
     connectorId: actionId,
@@ -139,10 +139,6 @@ export async function executor(
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
-      ...(fetcher?.max_content_length != null && {
-        maxContentLength: fetcher.max_content_length,
-        maxBodyLength: fetcher.max_content_length,
-      }),
     })
   );
 
