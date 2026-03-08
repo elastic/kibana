@@ -12,13 +12,15 @@ import { parseDuration } from '../../../utils';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { MonitorableNode, NodeImplementation } from '../../node_implementation';
 
 export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, MonitorableNode {
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    private workflowLogger?: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
@@ -27,14 +29,40 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
 
   public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): void {
     const timeoutMs = parseDuration(this.node.timeout);
-    const whenStepStartedTime = new Date(
-      this.wfExecutionRuntimeManager.getWorkflowExecution().startedAt
-    ).getTime();
+    const workflowExecution = this.wfExecutionRuntimeManager.getWorkflowExecution();
+    const whenStepStartedTime = new Date(workflowExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;
 
     if (currentStepDuration > timeoutMs) {
-      const timeoutError = new Error('Failed due to workflow timeout');
+      const elapsedSeconds = Math.round(currentStepDuration / 1000);
+      const currentNodeId = monitoredStepExecutionRuntime.node?.id;
+      const currentStepId = monitoredStepExecutionRuntime.node?.stepId;
+
+      const timeoutError = new Error(
+        `Failed due to workflow timeout: execution exceeded the configured timeout of ${this.node.timeout} ` +
+          `(elapsed: ${elapsedSeconds}s). Timed out at step '${currentStepId ?? currentNodeId ?? 'unknown'}' ` +
+          `at ${new Date(currentTimeMs).toISOString()}.`
+      );
+
+      this.workflowLogger?.logError(
+        `Workflow timed out after ${elapsedSeconds}s (configured timeout: ${this.node.timeout})`,
+        {
+          event: {
+            action: 'workflow-timeout',
+            category: ['workflow'],
+            outcome: 'failure',
+          },
+          tags: ['workflow', 'execution', 'timeout'],
+          workflow: {
+            execution_id: workflowExecution.id,
+            current_step: currentStepId ?? currentNodeId,
+            timeout_configured: this.node.timeout,
+            elapsed_seconds: elapsedSeconds,
+          },
+        }
+      );
+
       monitoredStepExecutionRuntime.abortController.abort();
       monitoredStepExecutionRuntime.failStep(timeoutError);
 
@@ -55,7 +83,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
         }
       }
 
-      // Errase error because otherwise execution will be marked "failed"
+      // Erase error because otherwise execution will be marked "failed"
       this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }
