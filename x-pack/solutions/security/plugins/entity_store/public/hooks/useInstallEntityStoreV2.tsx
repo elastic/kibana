@@ -19,6 +19,10 @@ export interface Services {
   spaces: SpacesPluginStart;
 }
 
+interface EntityStoreV1StatusResponse {
+  status: EntityStoreStatus;
+}
+
 const statusRequestQuery = {
   include_components: false,
 } as const satisfies StatusRequestQuery;
@@ -26,6 +30,10 @@ const statusRequestQuery = {
 const getStatusRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.STATUS,
   query: { apiVersion: '2', ...statusRequestQuery },
+};
+
+const getStatusV1Request: HttpFetchOptionsWithPath = {
+  path: '/api/entity_store/status',
 };
 
 const installAllEntitiesRequest: HttpFetchOptionsWithPath = {
@@ -52,12 +60,16 @@ export const useInstallEntityStoreV2 = (services: Services) => {
         if (!isEntityStoreV2Enabled) return;
 
         const space = await services.spaces.getActiveSpace();
+        // Install v2 and remove v1 in default namespace AND every namespace where v1 is currently installed
+        if (space.id !== 'default' && !(await isEntityStoreV1Installed(services.http)))
+          return;
+
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
-        const installed = isEntityStoreInstalled(statusResponse.status);
+        const isEntityStoreV2Installed = isEntityStoreInstalled(statusResponse.status);
         // Entity store already installed → init entity maintainers only (any space).
-        if (installed) {
+        if (isEntityStoreV2Installed) {
           await services.http.post(initEntityMaintainersRequest);
           return;
         }
@@ -78,3 +90,9 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
 const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
   status !== EntityStoreStatus.enum.not_installed;
+
+export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
+  const response = await http.get<EntityStoreV1StatusResponse>(getStatusV1Request);
+
+  return isEntityStoreInstalled(response.status);
+};

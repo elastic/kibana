@@ -37,7 +37,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         },
       },
       wrapMiddlewares(async (ctx, req, res) => {
-        const { logger, assetManager, entityMaintainersClient } = await ctx.entityStore;
+        const { logger, assetManagerClient: assetManager, entityMaintainersClient } = await ctx.entityStore;
         const { entityTypes } = req.body;
         logger.debug(`uninstalling entities: [${entityTypes.join(', ')}]`);
 
@@ -45,8 +45,8 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         const installedTypes = new Set(engines.map((e) => e.type));
         const toUninstall = entityTypes.filter((type) => installedTypes.has(type));
 
-        await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
         await entityMaintainersClient.removeAll();
+        await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
 
         return res.ok({ body: { ok: true } });
       })
