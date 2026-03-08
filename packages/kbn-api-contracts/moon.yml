@@ -19,7 +19,6 @@ project:
     sourceRoot: packages/kbn-api-contracts
 dependsOn:
   - '@kbn/dev-cli-runner'
-  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
