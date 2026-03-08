@@ -76,6 +76,19 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityStoreGlobalStateType);
 
+    registerEntityMaintainerTask({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: {
+        id: 'entity_maintainers_test',
+        interval: '1m',
+        initialState: {},
+        run: () => Promise.resolve({}),
+        description: 'Test maintainer',
+        setup: () => Promise.resolve({}),
+      },
+      core,
+    })
     return {
       registerEntityMaintainer: (config: RegisterEntityMaintainerConfig) =>
         registerEntityMaintainerTask({

@@ -19,7 +19,7 @@ import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
-import { CRUDClient } from '../../domain/crud_client';
+import { CRUDClient } from '../../domain/crud';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
