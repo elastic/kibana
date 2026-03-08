@@ -11385,6 +11385,57 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ALERTING_BACKFILL_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_BACKFILL_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/rules/backfill\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "lineNumber": 218,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ALERTING_BACKFILL_FIND_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_BACKFILL_FIND_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/rules/backfill/_find\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "lineNumber": 219,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ALERTING_BACKFILL_SCHEDULE_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ALERTING_BACKFILL_SCHEDULE_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/alerting/rules/backfill/_schedule\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "lineNumber": 220,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.ALERTING_FEATURE_ID",
         "type": "string",
         "tags": [],
@@ -11394,7 +11445,7 @@
           "\"alerts\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 238,
+        "lineNumber": 244,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11884,7 +11935,7 @@
           "\"/internal/alerting/rules/gaps\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 217,
+        "lineNumber": 223,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11901,7 +11952,7 @@
           "\"/internal/alerting/rules/gaps/auto_fill_scheduler\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 232,
+        "lineNumber": 238,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11918,7 +11969,7 @@
           "\"/internal/alerting/rules/gaps/_fill_by_id\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 229,
+        "lineNumber": 235,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11935,7 +11986,7 @@
           "\"/internal/alerting/rules/gaps/_find\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 220,
+        "lineNumber": 226,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11952,7 +12003,7 @@
           "\"/internal/alerting/rules/gaps/_get_rules\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 223,
+        "lineNumber": 229,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11969,7 +12020,7 @@
           "\"/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 226,
+        "lineNumber": 232,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11986,7 +12037,7 @@
           "\"/internal/alerting/_global_execution_summary\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 235,
+        "lineNumber": 241,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12300,7 +12351,7 @@
           "200"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "lineNumber": 239,
+        "lineNumber": 245,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
