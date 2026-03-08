@@ -289,9 +289,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
 
+    // APIs that return 204 No Content or 304 Not Modified have no body to parse.
+    // Return an empty object so the step succeeds with `output: {}`.
     if (response.status === 204 || response.status === 304) {
-      return { status: response.status };
+      return {};
     }
+
     return response.json();
   }
 }

@@ -71,7 +71,8 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
     mockedFetch.mockResolvedValue({
       ok: true,
       status: 200,
-      text: jest.fn().mockResolvedValue(JSON.stringify({ success: true })),
+      json: jest.fn().mockResolvedValue({ success: true }),
+      text: jest.fn().mockResolvedValue('OK'),
     } as any);
 
     jest.clearAllMocks();
@@ -688,10 +689,11 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   });
 
   describe('empty response body handling (204 No Content)', () => {
-    it('should succeed with status-only output when response body is empty', async () => {
+    it('should succeed with empty output when response is 204 No Content', async () => {
       mockedFetch.mockResolvedValue({
         ok: true,
         status: 204,
+        json: jest.fn(),
         text: jest.fn().mockResolvedValue(''),
       } as any);
 
@@ -715,13 +717,14 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await (kibanaStep as any)._run(step.with);
 
       expect(result.error).toBeUndefined();
-      expect(result.output).toEqual({ status: 204 });
+      expect(result.output).toEqual({});
     });
 
-    it('should include _debug info alongside status for empty responses when debug is true', async () => {
+    it('should include _debug info for empty responses when debug is true', async () => {
       mockedFetch.mockResolvedValue({
         ok: true,
         status: 204,
+        json: jest.fn(),
         text: jest.fn().mockResolvedValue(''),
       } as any);
 
@@ -746,7 +749,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await (kibanaStep as any)._run(step.with);
 
       expect(result.error).toBeUndefined();
-      expect(result.output.status).toBe(204);
       expect(result.output._debug).toBeDefined();
       expect(result.output._debug.method).toBe('DELETE');
     });
@@ -755,6 +757,7 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       mockedFetch.mockResolvedValue({
         ok: true,
         status: 200,
+        json: jest.fn().mockResolvedValue({ id: 'case-1', title: 'Test' }),
         text: jest.fn().mockResolvedValue(JSON.stringify({ id: 'case-1', title: 'Test' })),
       } as any);
 
