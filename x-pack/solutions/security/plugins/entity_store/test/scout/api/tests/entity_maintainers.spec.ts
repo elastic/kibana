@@ -69,7 +69,7 @@ const buildRoleDescriptor = ({
 const getRoleWithoutTargetIndexPrivileges = () => buildRoleDescriptor({ withTargetIndex: false });
 const getRoleWithoutSavedObjectCreate = () => buildRoleDescriptor({ withSavedObjectCreate: false });
 
-apiTest.describe.only('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, () => {
   apiTest.describe('privilege checks', () => {
     apiTest.beforeEach(async ({ kbnClient }) => {
       await kbnClient.uiSettings.update({
