@@ -814,9 +814,21 @@ export class WorkflowsExecutionEnginePlugin
         );
       }
 
+      const resumedBy = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: executionId,
-        context: { ...workflowExecution.context, resumeInput: input },
+        context: {
+          ...workflowExecution.context,
+          resumeInput: input,
+          resumedBy,
+          resumedAt: new Date().toISOString(),
+          resumeChannel: 'kibana',
+        },
       });
 
       await workflowTaskManager.scheduleImmediateResume({

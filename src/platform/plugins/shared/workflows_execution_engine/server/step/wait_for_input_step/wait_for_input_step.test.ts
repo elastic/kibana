@@ -45,11 +45,12 @@ describe('WaitForInputStepImpl', () => {
 
     mockWorkflowRuntime = {
       navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({ context: {} }),
+      getWorkflowExecution: jest.fn().mockReturnValue({ id: 'exec-abc', context: {} }),
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
       logDebug: jest.fn(),
+      logEvent: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
     underTest = new WaitForInputStepImpl(
@@ -96,7 +97,8 @@ describe('WaitForInputStepImpl', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
-        context: { resumeInput, otherKey: 'preserved' },
+        id: 'exec-abc',
+        context: { resumeInput, resumedBy: 'jane.doe', otherKey: 'preserved' },
       } as any);
     });
 
@@ -108,7 +110,7 @@ describe('WaitForInputStepImpl', () => {
     it('should clear resumeInput from context while preserving other keys', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { otherKey: 'preserved' },
+        context: { resumedBy: 'jane.doe', otherKey: 'preserved' },
       });
     });
 
@@ -130,12 +132,33 @@ describe('WaitForInputStepImpl', () => {
       await underTest.run();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
+
+    it('should emit a hitl:resumed audit log event with responder identity and channel', async () => {
+      await underTest.run();
+      expect(workflowLogger.logEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Workflow exec-abc resumed by jane.doe via kibana',
+          level: 'debug',
+          event: expect.objectContaining({
+            action: 'hitl:resumed',
+            category: ['workflow'],
+            outcome: 'success',
+          }),
+          labels: expect.objectContaining({
+            responder: 'jane.doe',
+            resume_channel: 'kibana',
+            execution_id: 'exec-abc',
+          }),
+        })
+      );
+    });
   });
 
   describe('resume run — exiting wait state with no input', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
         context: {},
       } as any);
     });
@@ -164,6 +187,7 @@ describe('WaitForInputStepImpl', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
         context: null,
       } as any);
     });

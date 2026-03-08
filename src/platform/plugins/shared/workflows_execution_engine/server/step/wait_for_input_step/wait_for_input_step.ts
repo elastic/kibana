@@ -39,6 +39,9 @@ export class WaitForInputStepImpl implements NodeImplementation {
   private resume(): void {
     const context = this.workflowRuntime.getWorkflowExecution().context;
     const resumeInput = context?.resumeInput as Record<string, unknown> | undefined;
+    const ctx = context as Record<string, unknown> | null | undefined;
+    const resumedBy = typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown';
+    const executionId = this.workflowRuntime.getWorkflowExecution().id;
 
     this.stepExecutionRuntime.finishStep(resumeInput);
 
@@ -48,8 +51,20 @@ export class WaitForInputStepImpl implements NodeImplementation {
       this.stepExecutionRuntime.updateWorkflowExecution({ context: restContext });
     }
 
-    this.workflowLogger.logDebug(`Step '${this.node.stepId}' resumed with human input`, {
-      event: { action: 'hitl:resumed' },
+    this.workflowLogger.logEvent({
+      message: `Workflow ${executionId} resumed by ${resumedBy} via kibana`,
+      level: 'debug',
+      event: {
+        action: 'hitl:resumed',
+        category: ['workflow'],
+        outcome: 'success',
+        provider: 'workflow-engine',
+      },
+      labels: {
+        responder: resumedBy,
+        resume_channel: 'kibana',
+        execution_id: executionId,
+      },
     });
 
     this.workflowRuntime.navigateToNextNode();
