@@ -136,6 +136,7 @@ export function normalizeUrl(url: string): string {
 }
 
 // todo this needs better name
+/*
 export interface RequestResult {
   // Status code of the request, e.g., 200
   statusCode: number;
@@ -152,6 +153,7 @@ export interface RequestResult {
   // The time, in milliseconds, that the last request took
   timeElapsedMs: number;
 }
+  */
 
 /**
  *  Sorts the request data by statusCode in increasing order and

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 import { EditorContentSpinner } from '../../components/editor_content_spinner';
 import { MonacoEditor } from './monaco_editor';
 import { useEditorReadContext } from '../../contexts';
+import { getAutocompleteInfo } from '../../../services';
 
 interface Props {
   loading: boolean;
@@ -18,8 +20,29 @@ interface Props {
   setInputEditorValue: (value: string) => void;
 }
 
+// move to shared const
+const DEBOUNCE_DELAY = 500;
+
 export const InputPanel = ({ loading, inputEditorValue, setInputEditorValue }: Props) => {
   const { currentTextObject, customParsedRequestsProvider } = useEditorReadContext();
+
+  // const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
+  const [, setFetchingAutocompleteEntities] = useState(false);
+
+  useEffect(() => {
+    const debouncedSetFechingAutocompleteEntities = debounce(
+      setFetchingAutocompleteEntities,
+      DEBOUNCE_DELAY
+    );
+    const subscription = getAutocompleteInfo().isLoading$.subscribe(
+      debouncedSetFechingAutocompleteEntities
+    );
+
+    return () => {
+      subscription.unsubscribe();
+      debouncedSetFechingAutocompleteEntities.cancel();
+    };
+  }, []);
 
   if (!currentTextObject) return null;
 

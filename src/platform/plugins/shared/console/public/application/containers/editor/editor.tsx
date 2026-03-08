@@ -67,8 +67,10 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const editorDispatch = useEditorActionContext();
 
   // used for showing a loading state when fetching autocomplete entities
-  const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
+  // const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
+  const [fetchingAutocompleteEntities] = useState(false);
 
+  // only used in two places, make small class
   const [firstPanelSize, secondPanelSize] = storage.get(StorageKeys.SIZE, [
     INITIAL_PANEL_SIZE,
     INITIAL_PANEL_SIZE,
@@ -76,6 +78,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
+  // only used in two places, make small class
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const onPanelSizeChange = useCallback(
     debounce((sizes) => {
@@ -84,8 +87,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     []
   );
 
-  // how can localStorage concerns be centralized?
-
+  // logic should be moved into state update OR into a class
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedUpdateLocalStorageValue = useCallback(
     debounce((newValue: string | undefined) => {
