@@ -7,6 +7,7 @@
 
 import type { ToolSelection } from '../tools';
 import type { SkillSelection } from '../skills';
+import type { UserIdAndName } from '../base/users';
 
 /**
  * The type of an agent.
@@ -14,6 +15,12 @@ import type { SkillSelection } from '../skills';
  */
 export enum AgentType {
   chat = 'chat',
+}
+
+export enum AgentVisibility {
+  Private = 'private',
+  Public = 'public',
+  Shared = 'shared',
 }
 
 /**
@@ -46,6 +53,14 @@ export interface AgentDefinition {
    * Built-in agents are readonly, user-created agent are not.
    */
   readonly: boolean;
+  /**
+   * Visibility controls who can read and write this agent.
+   */
+  visibility?: AgentVisibility;
+  /**
+   * Agent owner metadata.
+   */
+  created_by?: UserIdAndName;
   /**
    * Optional labels used to organize or filter agents
    */

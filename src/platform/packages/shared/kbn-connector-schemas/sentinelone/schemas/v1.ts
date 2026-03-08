@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 /* eslint-disable @typescript-eslint/naming-convention */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SUB_ACTION } from '../constants';
 
 // Connector schema

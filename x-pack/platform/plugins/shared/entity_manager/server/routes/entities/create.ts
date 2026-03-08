@@ -6,7 +6,7 @@
  */
 
 import { createEntityDefinitionQuerySchema, entityDefinitionSchema } from '@kbn/entities-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { EntityDefinitionIdInvalid } from '../../lib/entities/errors/entity_definition_id_invalid';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';

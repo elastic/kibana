@@ -34,7 +34,8 @@ const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
     content: schema.string({
       meta: { description: 'Content of the reference.' },
     }),
-  })
+  }),
+  { maxSize: 100 }
 );
 
 const SKILL_ID_PARAMS_SCHEMA = schema.object({
@@ -173,6 +174,7 @@ export function registerSkillsRoutes({
                 }),
                 {
                   defaultValue: [],
+                  maxSize: 100,
                   meta: {
                     description: 'Tool IDs from the tool registry that this skill references.',
                   },
@@ -247,6 +249,7 @@ export function registerSkillsRoutes({
                     meta: { description: 'Updated tool ID.' },
                   }),
                   {
+                    maxSize: 100,
                     meta: { description: 'Updated tool IDs from the tool registry.' },
                   }
                 )

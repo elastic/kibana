@@ -6,4 +6,15 @@
  */
 
 export { DATA_SOURCES_ROUTE } from './routes';
-export { DATA_SOURCES_FULL_TITLE, DATA_SOURCES_SHORT_TITLE } from './constants';
+export {
+  DATA_SOURCES_FULL_TITLE,
+  DATA_SOURCES_SHORT_TITLE,
+  BULK_DELETE_API_ROUTE,
+} from './constants';
+export type {
+  DeleteDataSourceAndRelatedResourcesResult,
+  BulkDeleteDataSourceResult,
+  BulkDeleteDataSourcesResponse,
+} from './types';
+export { slugify } from './utils/slugify';
+export { getWorkflowPrefix, getToolPrefix } from './utils/data_source_prefixes';
