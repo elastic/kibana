@@ -1036,6 +1036,8 @@
       "@kbn/elasticsearch-client-xpack-plugin/*": ["x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client/*"],
       "@kbn/embeddable-alerts-table-plugin": ["x-pack/platform/plugins/shared/embeddable_alerts_table"],
       "@kbn/embeddable-alerts-table-plugin/*": ["x-pack/platform/plugins/shared/embeddable_alerts_table/*"],
+      "@kbn/embeddable-bwc-migrations": ["src/platform/packages/private/kbn-embeddable-bwc-migrations"],
+      "@kbn/embeddable-bwc-migrations/*": ["src/platform/packages/private/kbn-embeddable-bwc-migrations/*"],
       "@kbn/embeddable-examples-plugin": ["examples/embeddable_examples"],
       "@kbn/embeddable-examples-plugin/*": ["examples/embeddable_examples/*"],
       "@kbn/embeddable-plugin": ["src/platform/plugins/shared/embeddable"],

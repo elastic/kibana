@@ -40,7 +40,6 @@ import { capabilitiesProvider } from './capabilities_provider';
 import type { DashboardPluginSetup, DashboardPluginStart } from './types';
 import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { registerDashboardUsageCollector } from './usage/register_collector';
-import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerRoutes, create, read, update, deleteDashboard } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
@@ -115,10 +114,6 @@ export class DashboardPlugin
         }
       );
     }
-
-    plugins.embeddable.registerEmbeddableFactory(
-      dashboardPersistableStateServiceFactory(plugins.embeddable)
-    );
 
     core.uiSettings.register(getUISettings());
 

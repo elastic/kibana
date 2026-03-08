@@ -1,0 +1,22 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/embeddable-plugin",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/utility-types",
+    "@kbn/controls-constants",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/std",
+    "@kbn/content-management-utils",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+  ]
+}

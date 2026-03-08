@@ -22,7 +22,6 @@ import { capabilitiesProvider } from './capabilities_provider';
 import { VisualizationsStorage } from './content_management';
 
 import type { VisualizationsServerSetup, VisualizationsServerStart } from './types';
-import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType, registerReadOnlyVisType } from './saved_objects';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { getTransforms } from '../common/embeddable/transforms/get_transforms';
@@ -46,15 +45,8 @@ export class VisualizationsPlugin
   ) {
     this.logger.debug('visualizations: Setup');
 
-    const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
-      plugins.data.search.searchSource
-    );
-    core.savedObjects.registerType(getVisualizationSavedObjectType(getSearchSourceMigrations));
+    core.savedObjects.registerType(getVisualizationSavedObjectType());
     core.capabilities.registerProvider(capabilitiesProvider);
-
-    plugins.embeddable.registerEmbeddableFactory(
-      makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
-    );
 
     plugins.embeddable.registerTransforms(VISUALIZE_EMBEDDABLE_TYPE, { getTransforms });
 

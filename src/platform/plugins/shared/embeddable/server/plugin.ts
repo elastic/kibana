@@ -32,6 +32,9 @@ import type { EmbeddableTransformsSetup } from './embeddable_transforms/types';
 import { getTransformsRegistry } from './embeddable_transforms/registry';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
+  /**
+   * @deprecated Do not use. Register transforms instead.
+   */
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   /*
    * Use registerDrilldown to register transforms and schema for a drilldown type.
@@ -52,6 +55,11 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
   registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => void;
+
+  /**
+   * @deprecated returns all migrate functions as registered in the legacy serverside embeddable framework.
+   * Do not use. Remove when all Embeddable types have their migrations moved to kbn-embeddable-bwc-migrations
+   */
   getAllMigrations: () => MigrateFunctionsObject;
 }
 

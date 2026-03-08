@@ -6526,6 +6526,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/embeddable-bwc-migrations@link:src/platform/packages/private/kbn-embeddable-bwc-migrations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/embeddable-examples-plugin@link:examples/embeddable_examples":
   version "0.0.0"
   uid ""
