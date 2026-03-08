@@ -45,14 +45,18 @@ git show base OAS → oasdiff diff → parse → filter to TF APIs → apply all
 
 oasdiff detects these as breaking:
 
-| Change Type                 | Example                                     |
-| --------------------------- | ------------------------------------------- |
-| **Path removed**            | `DELETE /api/spaces/space` removed entirely |
-| **Method removed**          | `POST` removed from `/api/fleet/agents`     |
-| **Required property added** | New required `email` field on request body  |
-| **Optional made required**  | `filter` query param becomes required       |
-| **Property removed**        | Response field `name` removed               |
-| **Type changed**            | `id` changed from string to number          |
+| Change Type                   | oasdiff ID(s)                                                                 | Example                                             |
+| ----------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- |
+| **Path removed**              | `api-path-removed-without-deprecation`                                        | `DELETE /api/spaces/space` removed entirely         |
+| **Method removed**            | `api-removed-without-deprecation`, `api-removed-before-sunset`                | `POST` removed from `/api/fleet/agents`             |
+| **Request property removed**  | `request-property-removed` ⚠️                                                 | Request body field `name` removed                   |
+| **Parameter removed**         | `request-parameter-removed` ⚠️                                                | Query param `filter` removed from `GET /api/agents` |
+| **Response property removed** | `response-required-property-removed`, `response-optional-property-removed` ⚠️ | Response field `id` removed from `200` response     |
+| **Required property added**   | `new-required-request-property`                                               | New required `email` field on request body          |
+| **Optional made required**    | `request-parameter-became-required`                                           | `filter` query param becomes required               |
+| **Type changed**              | `response-property-type-changed`                                              | `id` changed from string to number                  |
+
+⚠️ oasdiff classifies these as warnings, but they are promoted to blocking here because Terraform provider configurations depend on these fields.
 
 ## Allowlist
 
