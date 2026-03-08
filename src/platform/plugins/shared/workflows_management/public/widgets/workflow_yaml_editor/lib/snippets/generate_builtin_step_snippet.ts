@@ -51,7 +51,7 @@ export function generateBuiltInStepSnippet(
       break;
     case 'while':
       parameters = {
-        condition: 'steps.while_step.inner_step.output: "value"',
+        condition: 'steps.inner_step.output: "value"',
         steps: [{ name: 'inner-step', type: '# Add step type here' }],
       };
       break;
