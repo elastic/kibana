@@ -333,7 +333,7 @@ describe('CasePostRequestRt', () => {
     const request = {
       ...defaultRequest,
       template: { id: 'template-id', version: 1 },
-      [CASE_EXTENDED_FIELDS]: { field1: { foo: 'bar' } },
+      [CASE_EXTENDED_FIELDS]: { field1: 'bar' },
     };
 
     const query = CasePostRequestRt.decode(request);
