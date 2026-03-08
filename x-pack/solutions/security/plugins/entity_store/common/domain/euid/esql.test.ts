@@ -201,10 +201,10 @@ describe('getFieldEvaluationsEsql', () => {
     expect(getFieldEvaluationsEsql('service')).toBe(undefined);
   });
 
-  it('returns EVAL fragment for user entity.namespace from event.module', () => {
+  it('returns EVAL fragment for user entity.namespace from event.module using MV_FIRST', () => {
     const result = getFieldEvaluationsEsql('user');
     expect(result).toContain('entity.namespace = CASE(');
-    expect(result).toContain('event.module');
+    expect(result).toContain('MV_FIRST(event.module)');
     expect(result).toContain('"okta"');
     expect(result).toContain('"entra_id"');
     expect(result).toContain('"microsoft_365"');

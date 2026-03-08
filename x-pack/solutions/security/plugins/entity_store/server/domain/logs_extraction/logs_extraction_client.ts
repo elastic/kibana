@@ -20,7 +20,7 @@ import {
   buildLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  extractPaginationParams,
+  extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
@@ -325,7 +325,7 @@ export class LogsExtractionClient {
       });
 
       totalCount += esqlResponse.values.length;
-      pagination = extractPaginationParams(esqlResponse, docsLimit);
+      pagination = extractMainPaginationParams(esqlResponse, docsLimit);
       if (esqlResponse.values.length > 0) {
         pages++;
       }

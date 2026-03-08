@@ -57,6 +57,27 @@ describe('applyFieldEvaluations', () => {
     });
   });
 
+  it('when event.module is a list, uses first element for matching and fallback', () => {
+    expect(applyFieldEvaluations({ event: { module: ['okta'] } }, userEvaluations)).toEqual({
+      'entity.namespace': 'okta',
+    });
+    expect(
+      applyFieldEvaluations({ event: { module: ['other', 'okta'] } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'other' });
+    expect(
+      applyFieldEvaluations(
+        { event: { module: ['entityanalytics_entra_id', 'azure'] } },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('when event.module is a list and no clause matches, uses first element as fallback', () => {
+    expect(
+      applyFieldEvaluations({ event: { module: ['custom_a', 'custom_b'] } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'custom_a' });
+  });
+
   it('returns empty object when fieldEvaluations is empty', () => {
     expect(applyFieldEvaluations({ event: { module: 'okta' } }, [])).toEqual({});
   });

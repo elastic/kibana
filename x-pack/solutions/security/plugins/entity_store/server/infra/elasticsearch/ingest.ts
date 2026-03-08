@@ -47,14 +47,21 @@ export const updateByQueryWithScript = async (
   return { updated, total };
 };
 
+export type IngestEntitiesTransformDocument = (
+  doc: Record<string, unknown>
+) => Record<string, unknown>;
+
 interface IngestEntitiesParams {
   esClient: ElasticsearchClient;
   esqlResponse: ESQLSearchResponse;
-  esIdField: string;
+  /** When provided, documents are upserted by this field as _id. When omitted, bulk create is used and Elasticsearch generates IDs. */
+  esIdField?: string;
   targetIndex: string;
   logger: Logger;
   abortController?: AbortController;
   fieldsToIgnore?: string[];
+  /** Optional transform applied to each document before indexing (e.g. add @timestamp, reshape for entity type). */
+  transformDocument?: IngestEntitiesTransformDocument;
 }
 
 /**
@@ -66,6 +73,9 @@ interface IngestEntitiesParams {
  * - Processes one row at a time (minimal memory footprint)
  * - Automatic batching via flushBytes (default 5MB)
  * - No intermediate arrays or full document collections in memory
+ *
+ * When esIdField is provided: uses update with doc_as_upsert (upsert by _id).
+ * When esIdField is omitted: uses create and Elasticsearch auto-generates _id.
  */
 export async function ingestEntities({
   esClient,
@@ -75,6 +85,7 @@ export async function ingestEntities({
   logger,
   abortController,
   fieldsToIgnore,
+  transformDocument,
 }: IngestEntitiesParams) {
   const options: TransportRequestOptions = {};
   if (abortController?.signal) {
@@ -84,60 +95,63 @@ export async function ingestEntities({
   const { columns, values } = esqlResponse;
   if (values.length === 0) return;
 
-  // Find the index of the identity field column
-  const identityFieldIndex = columns.findIndex((col) => col.name === esIdField);
-  if (identityFieldIndex === -1) {
-    throw new Error(`Identity field "${esIdField}" not found in ESQL response columns`);
+  const useUpsertById = esIdField !== undefined;
+  let identityFieldIndex = -1;
+  if (useUpsertById) {
+    identityFieldIndex = columns.findIndex((col) => col.name === esIdField);
+    if (identityFieldIndex === -1) {
+      throw new Error(`Identity field "${esIdField}" not found in ESQL response columns`);
+    }
   }
+
+  const ignoreSet = new Set(fieldsToIgnore ?? []);
 
   // Generator function that yields documents one at a time from columnar format
   async function* documentGenerator() {
     for (const row of values) {
-      // Build document object on-demand, one row at a time
       const doc: Record<string, unknown> = {};
       for (let i = 0; i < row.length; i++) {
-        if (
-          // It's not the id field
-          columns[i].name !== esIdField &&
-          // It's not in the ignored fields list
-          !(fieldsToIgnore || []).includes(columns[i].name) &&
-          // It's not null
-          row[i] !== null
-        ) {
-          doc[columns[i].name] = row[i];
+        const colName = columns[i].name;
+        const skip =
+          (useUpsertById && colName === esIdField) || ignoreSet.has(colName) || row[i] === null;
+        if (!skip) {
+          doc[colName] = row[i];
         }
       }
-      // Attach the document ID for use in onDocument callback
-      yield { _id: row[identityFieldIndex] as string, ...doc };
+      const finalDoc = transformDocument ? transformDocument(doc) : doc;
+      if (useUpsertById) {
+        yield { _id: row[identityFieldIndex] as string, ...finalDoc };
+      } else {
+        yield finalDoc;
+      }
     }
   }
 
-  // This processes documents one at a time and handles batching automatically
   await esClient.helpers.bulk(
     {
       datasource: documentGenerator(),
       index: targetIndex,
       refresh: true,
       flushBytes: BATCH_SIZE,
-      concurrency: 1, // Process sequentially to minimize memory
+      concurrency: 1,
       retries: 2,
       onDocument: (doc) => {
-        const { _id, ...document } = doc;
-        return [
-          {
-            update: {
-              _index: targetIndex,
-              _id: _id as string,
-              retry_on_conflict: RETRY_ON_CONFLICT,
+        if (useUpsertById) {
+          const { _id, ...document } = doc as { _id: string; [k: string]: unknown };
+          return [
+            {
+              update: {
+                _index: targetIndex,
+                _id,
+                retry_on_conflict: RETRY_ON_CONFLICT,
+              },
             },
-          },
-          { doc: document, doc_as_upsert: true },
-        ];
+            { doc: document, doc_as_upsert: true },
+          ];
+        }
+        return [{ create: {} }, doc];
       },
       onDrop: (dropped) => {
-        // Log dropped documents but don't throw - allows bulk operation to continue
-        // The helpers.bulk will return stats about failed documents
-        // You can check the return value if you need to handle failures
         const errorReason = dropped.error?.reason || 'unknown error';
         logger.error(`entity dropped from bulk operation (reason: ${errorReason})`);
       },

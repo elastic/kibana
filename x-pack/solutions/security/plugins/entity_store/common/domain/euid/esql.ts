@@ -76,16 +76,20 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
   return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
 }
 
+/**
+ * Supports source fields that are arrays by using MV_FIRST.
+ */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, source, whenClauses } = evaluation;
+  const firstSource = `MV_FIRST(${source})`;
   const caseParts: string[] = [];
   for (const clause of whenClauses) {
     const conditions = clause.sourceMatchesAny
-      .map((v) => `${source} == "${escapeEsqlString(v)}"`)
+      .map((v) => `${firstSource} == "${escapeEsqlString(v)}"`)
       .join(' OR ');
     caseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
   }
-  caseParts.push(source);
+  caseParts.push(firstSource);
   return `${destination} = CASE(${caseParts.join(', ')})`;
 }
 
@@ -112,6 +116,7 @@ export function getFieldEvaluationsEsql(entityType: EntityType) {
 /**
  * Returns an ESQL WHERE condition requiring all identityField.fieldEvaluations source fields to be NOT NULL and not empty.
  * Use in the main query filter so only documents with source data reach the EVAL step (performance).
+ * Supports source fields that are arrays by using MV_FIRST.
  */
 export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
@@ -122,7 +127,9 @@ export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
   if (!evaluations || evaluations.length === 0) {
     return undefined;
   }
-  const conditions = evaluations.map((e) => `(${esqlIsNotNullOrEmpty(e.source)})`).join(' AND ');
+  const conditions = evaluations
+    .map((e) => `(${esqlIsNotNullOrEmpty(`MV_FIRST(${e.source})`)})`)
+    .join(' AND ');
   return conditions;
 }
 

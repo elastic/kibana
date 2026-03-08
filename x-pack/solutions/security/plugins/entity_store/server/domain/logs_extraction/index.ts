@@ -6,16 +6,4 @@
  */
 
 export { LogsExtractionClient } from './logs_extraction_client';
-export {
-  CcsLogsExtractionClient,
-  type CcsExtractToUpdatesParams,
-  type CcsExtractToUpdatesResult,
-} from './ccs_logs_extraction_client';
-export {
-  HASHED_ID_FIELD,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  buildRemainingLogsCountQuery,
-  buildLogsExtractionEsqlQuery,
-  extractPaginationParams,
-  type PaginationParams,
-} from './logs_extraction_query_builder';
+export { CcsLogsExtractionClient } from './ccs_logs_extraction_client';

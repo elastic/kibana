@@ -21,6 +21,8 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     fieldEvaluations: [
       {
         destination: 'entity.namespace',
+        // we support multiple values in event.module. It's needed for CCS extraction
+        // the logic is first value in event.module that matches any of the whenClauses
         source: 'event.module',
         whenClauses: [
           { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },

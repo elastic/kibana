@@ -18,7 +18,8 @@ function getSourceValue(doc: any, source: string): string | undefined {
     return undefined;
   }
   if (Array.isArray(value)) {
-    return value.length > 0 ? String(value[0]) : undefined;
+    const first = value[0];
+    return first !== undefined && first !== null ? String(first) : undefined;
   }
   if (typeof value === 'object') {
     return undefined;
@@ -28,7 +29,7 @@ function getSourceValue(doc: any, source: string): string | undefined {
 
 /**
  * Applies field evaluations to a document and returns a map of destination field to value.
- * First matching whenClause wins; if none matches, falls back to source value.
+ * First matching whenClause wins; if none matches, falls back to source value (first value if array).
  * Used before euid resolution so that getFieldValue(doc, 'entity.namespace') etc. see computed values.
  *
  * @param doc - The document (flat or nested)
@@ -42,9 +43,12 @@ export function applyFieldEvaluations(
   const result: Record<string, string> = {};
   for (const evaluation of fieldEvaluations) {
     const sourceValue = getSourceValue(doc, evaluation.source);
+    if (sourceValue === undefined) {
+      continue;
+    }
     let value: string | undefined;
     for (const clause of evaluation.whenClauses) {
-      if (sourceValue !== undefined && clause.sourceMatchesAny.includes(sourceValue)) {
+      if (clause.sourceMatchesAny.includes(sourceValue)) {
         value = clause.then;
         break;
       }
@@ -52,9 +56,7 @@ export function applyFieldEvaluations(
     if (value === undefined) {
       value = sourceValue;
     }
-    if (value !== undefined) {
-      result[evaluation.destination] = value;
-    }
+    result[evaluation.destination] = value;
   }
   return result;
 }

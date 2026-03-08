@@ -43,7 +43,6 @@ export interface BulkObjectResponse {
 interface UpsertEntitiesBulkParams {
   objects: BulkObject[];
   force?: boolean;
-  timestampGenerator?: () => string;
 }
 
 export class CRUDClient {
@@ -103,19 +102,12 @@ export class CRUDClient {
   public async upsertEntitiesBulk({
     objects,
     force = false,
-    timestampGenerator,
   }: UpsertEntitiesBulkParams): Promise<BulkObjectResponse[]> {
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk upsert`);
     for (const { type: entityType, doc } of objects) {
-      const readyDoc = validateAndTransformDocForUpsert(
-        entityType,
-        this.namespace,
-        doc,
-        force,
-        timestampGenerator
-      );
+      const readyDoc = validateAndTransformDocForUpsert(entityType, this.namespace, doc, force);
       operations.push({ create: {} }, readyDoc);
     }
 

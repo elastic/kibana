@@ -30,6 +30,7 @@ const MAIN_ENTITY_ID_FIELD = 'entity.id';
 const ENTITY_NAME_FIELD = 'entity.name';
 const ENTITY_TYPE_FIELD = 'entity.type';
 const TIMESTAMP_FIELD = '@timestamp';
+const EVENT_KIND_FIELD = 'event.kind';
 
 const METADATA_FIELDS = ['_index'];
 
@@ -45,9 +46,9 @@ const DEFAULT_FIELDS_TO_KEEP = [
 
 const CCS_FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
+  MAIN_ENTITY_ID_FIELD,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  // Keep it for debug visibility purposes
-  ENGINE_METADATA_UNTYPED_ID_FIELD,
+  EVENT_KIND_FIELD,
 ];
 
 const RECENT_DATA_PREFIX = 'recent';
@@ -55,6 +56,29 @@ const RECENT_DATA_PREFIX = 'recent';
 function recentData(dest: string) {
   return `${RECENT_DATA_PREFIX}.${dest}`;
 }
+
+interface PaginationFields {
+  /** Column name for the timestamp cursor in the ESQL response */
+  timestampField: string;
+  /** Column name for the id cursor in the ESQL response */
+  idField: string;
+  /** ESQL expression for the id in the pagination WHERE clause (e.g. recent.entity.EngineMetadata.UntypedId or entity.id) */
+  idFieldExprForWhere: string;
+}
+
+/** Pagination fields for main logs extraction (uses recent-data id in WHERE). */
+const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
+  timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  idField: ENGINE_METADATA_UNTYPED_ID_FIELD,
+  idFieldExprForWhere: recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+};
+
+/** Pagination fields for CCS logs extraction (uses entity.id in WHERE). */
+const CCS_PAGINATION_FIELDS: PaginationFields = {
+  timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  idField: MAIN_ENTITY_ID_FIELD,
+  idFieldExprForWhere: MAIN_ENTITY_ID_FIELD,
+};
 
 export interface PaginationParams {
   timestampCursor: string;
@@ -147,7 +171,11 @@ export function buildLogsExtractionEsqlQuery({
   | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
       ENGINE_METADATA_UNTYPED_ID_FIELD
     )} ASC
-  ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
+  ${getPaginationWhereClause(
+    MAIN_EXTRACTION_PAGINATION_FIELDS,
+    pagination,
+    recoveryId ? { fromDateISO, recoveryId } : undefined
+  )}
   | LIMIT ${docsLimit}` +
     // Main entity id: type-prefixed (when needed) for LOOKUP JOIN
     `
@@ -181,6 +209,7 @@ export interface CcsLogsExtractionQueryParams {
   docsLimit: number;
   recoveryId?: string;
   pagination?: PaginationParams;
+  paginationFields?: PaginationFields;
 }
 
 /**
@@ -201,23 +230,19 @@ export function buildCcsLogsExtractionEsqlQuery({
     ${buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })}` +
     buildFieldEvaluations(type) +
     // Using the same structure as the main logs extraction re-use fields to perform the aggregation
-    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
-      withTypeId: true,
-    })}
+    `| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}
     | STATS
       ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
-      ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} = MIN(${TIMESTAMP_FIELD}),
+      ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
       ${aggregationStats(fields, false)}
-      BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
-      | EVAL
-        ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = ${recentData(
-      ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD
-    )},
-        ${ENGINE_METADATA_UNTYPED_ID_FIELD} = ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
-    | SORT ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} ASC, ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )} ASC
-    ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
+      BY ${MAIN_ENTITY_ID_FIELD}
+    | EVAL ${EVENT_KIND_FIELD} = "asset"
+    | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${MAIN_ENTITY_ID_FIELD} ASC
+    ${getPaginationWhereClause(
+      CCS_PAGINATION_FIELDS,
+      pagination,
+      recoveryId ? { fromDateISO, recoveryId } : undefined
+    )}
     | KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}
     | LIMIT ${docsLimit}`
   );
@@ -231,7 +256,7 @@ function aggregationStats(fields: EntityField[], renameToRecent: boolean = true)
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${source} IS NOT NULL`;
         case 'prefer_newest_value':
           return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         case 'prefer_oldest_value':
@@ -330,6 +355,7 @@ function castSrcType(field: EntityField) {
 }
 
 function getPaginationWhereClause(
+  paginationFields: PaginationFields,
   pagination?: PaginationParams,
   paginationRecovery?: { fromDateISO: string; recoveryId: string }
 ) {
@@ -338,47 +364,62 @@ function getPaginationWhereClause(
   }
 
   if (paginationRecovery) {
-    return buildPaginationWhereClause({
-      timestampCursor: paginationRecovery.fromDateISO,
-      idCursor: paginationRecovery.recoveryId,
-    });
+    return buildPaginationWhereClause(
+      { timestampCursor: paginationRecovery.fromDateISO, idCursor: paginationRecovery.recoveryId },
+      paginationFields.idFieldExprForWhere
+    );
   }
 
   if (pagination) {
-    return buildPaginationWhereClause(pagination);
+    return buildPaginationWhereClause(pagination, paginationFields.idFieldExprForWhere);
   }
+
+  return '';
 }
 
-function buildPaginationWhereClause({ timestampCursor, idCursor }: PaginationParams) {
+function buildPaginationWhereClause(
+  { timestampCursor, idCursor }: PaginationParams,
+  idFieldExprForWhere: string
+) {
   return `| WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${timestampCursor}") 
             OR (${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} == TO_DATETIME("${timestampCursor}") 
-                AND ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} > "${idCursor}")`;
+                AND ${idFieldExprForWhere} > "${idCursor}")`;
 }
 
-export function extractPaginationParams(
+export function extractMainPaginationParams(
   esqlResponse: ESQLSearchResponse,
   maxDocs: number
+): PaginationParams | undefined {
+  return extractPaginationParams(esqlResponse, maxDocs, MAIN_EXTRACTION_PAGINATION_FIELDS);
+}
+
+export function extractCcsPaginationParams(
+  esqlResponse: ESQLSearchResponse,
+  maxDocs: number
+): PaginationParams | undefined {
+  return extractPaginationParams(esqlResponse, maxDocs, CCS_PAGINATION_FIELDS);
+}
+
+function extractPaginationParams(
+  esqlResponse: ESQLSearchResponse,
+  maxDocs: number,
+  paginationFields: PaginationFields
 ): PaginationParams | undefined {
   const count = esqlResponse.values.length;
   if (count === 0 || count < maxDocs) {
     return undefined;
   }
 
+  const { timestampField, idField } = paginationFields;
   const columns = esqlResponse.columns;
-  const timestampFieldIdx = columns.findIndex(
-    ({ name }) => name === ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD
-  );
+  const timestampFieldIdx = columns.findIndex(({ name }) => name === timestampField);
   if (timestampFieldIdx === -1) {
-    throw new Error(
-      `${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} not found in esql response, internal logic error`
-    );
+    throw new Error(`${timestampField} not found in esql response, internal logic error`);
   }
 
-  const idFieldIdx = columns.findIndex(({ name }) => name === ENGINE_METADATA_UNTYPED_ID_FIELD);
+  const idFieldIdx = columns.findIndex(({ name }) => name === idField);
   if (idFieldIdx === -1) {
-    throw new Error(
-      `${ENGINE_METADATA_UNTYPED_ID_FIELD} not found in esql response, internal logic error`
-    );
+    throw new Error(`${idField} not found in esql response, internal logic error`);
   }
 
   const lastResult = esqlResponse.values[esqlResponse.values.length - 1];
