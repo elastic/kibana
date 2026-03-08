@@ -264,7 +264,33 @@ describe('convertToWorkflowGraph', () => {
   });
 
   describe('foreach with max-iterations', () => {
-    it('should pass maxIterations and onLimit from max-iterations config', () => {
+    it('should default onLimit to continue for number shorthand', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'foreachStep',
+            type: 'foreach',
+            foreach: '[1,2,3,4,5]',
+            'max-iterations': 3,
+            steps: [
+              {
+                name: 'innerStep',
+                type: 'slack',
+                connectorId: 'slack',
+                with: { message: 'hello' },
+              } as ConnectorStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+      const exitNode = executionGraph.node('exitForeach_foreachStep') as ExitForeachNode;
+      expect(exitNode.maxIterations).toBe(3);
+      expect(exitNode.onLimit).toBe('continue');
+    });
+
+    it('should pass maxIterations and onLimit from object form', () => {
       const workflowDefinition = {
         steps: [
           {

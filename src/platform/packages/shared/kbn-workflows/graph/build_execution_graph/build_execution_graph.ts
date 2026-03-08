@@ -17,6 +17,7 @@ import type {
   IfStep,
   KibanaStep,
   LoopStepProps,
+  MaxIterations,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
@@ -804,6 +805,15 @@ function insertGraphBetweenNodes(
   });
 }
 
+function normalizeMaxIterations(raw?: MaxIterations): {
+  maxIterations?: number;
+  onLimit?: 'continue' | 'fail';
+} {
+  if (raw == null) return {};
+  if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
+  return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
+}
+
 function createForeachGraph(
   stepId: string,
   foreachStep: ForEachStep,
@@ -824,15 +834,15 @@ function createForeachGraph(
   };
   context.stack.push(enterForeachNode);
   graph.setNode(enterForeachNodeId, enterForeachNode);
-  const maxIter = foreachStep['max-iterations'];
+  const { maxIterations, onLimit } = normalizeMaxIterations(foreachStep['max-iterations']);
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
     stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
-    maxIterations: maxIter?.limit,
-    onLimit: maxIter?.['on-limit'],
+    maxIterations,
+    onLimit,
   };
   graph.setNode(exitNodeId, exitForeachNode);
   let innerGraph = createStepsSequence(foreachStep.steps || [], context);
