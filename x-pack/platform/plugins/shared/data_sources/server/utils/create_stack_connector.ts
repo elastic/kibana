@@ -88,15 +88,9 @@ function buildSecretsFromMCPConnectorConfig(
     case 'bearer':
       secrets.token = credentials;
       break;
-    case 'apiKey': {
+    case 'apiKey':
       secrets.apiKey = credentials;
-      if (config.apiKeyHeaderName) {
-        secrets.secretHeaders = {
-          [config.apiKeyHeaderName]: credentials,
-        };
-      }
       break;
-    }
     case 'basic': {
       // credentials is in the format "username:password"
       secrets.user = credentials.split(':')[0];

@@ -24,7 +24,10 @@ import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 import { groupingOptions, groupingSettings } from './grouping_settings/grouping_configs';
 import { EmptyResultsPrompt } from './empty_results_prompt';
 import { useGroupStats } from './grouping_settings/use_group_stats';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
@@ -36,6 +39,32 @@ jest.mock('../../alerts_table/alerts_grouping', () => ({
 }));
 jest.mock('./empty_results_prompt', () => ({
   EmptyResultsPrompt: jest.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
+}));
+jest.mock('./attacks_view_options_popover', () => ({
+  AttacksViewOptionsPopover: jest.fn(
+    ({ showAnonymized, onToggleShowAnonymized, showAttacksOnly, onToggleShowAttacksOnly }) => (
+      <div data-test-subj="mock-attacks-view-options-popover">
+        <button
+          type="button"
+          data-test-subj="mock-toggle-anonymized"
+          onClick={onToggleShowAnonymized}
+          role="switch"
+          aria-checked={showAnonymized}
+        >
+          {'Anonymized'}
+        </button>
+        <button
+          type="button"
+          data-test-subj="mock-toggle-attacks-only"
+          onClick={onToggleShowAttacksOnly}
+          role="switch"
+          aria-checked={showAttacksOnly}
+        >
+          {'Attacks Only'}
+        </button>
+      </div>
+    )
+  ),
 }));
 jest.mock('./grouping_settings/use_group_stats');
 
@@ -49,6 +78,8 @@ const mockEmptyResultsPrompt = EmptyResultsPrompt as unknown as jest.Mock;
 const mockUseExpandableFlyoutApi = useExpandableFlyoutApi as jest.Mock;
 const mockUseGroupStats = useGroupStats as jest.Mock;
 
+const reportEvent = jest.fn();
+
 const defaultProps: Parameters<typeof TableSection>[0] = {
   assignees: [],
   pageFilters: [],
@@ -60,6 +91,13 @@ const defaultProps: Parameters<typeof TableSection>[0] = {
 
 describe('<TableSection />', () => {
   beforeEach(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent,
+        },
+      },
+    });
     mockUseGetDefaultGroupTitleRenderers.mockReturnValue({
       defaultGroupTitleRenderers: jest.fn(),
     });
@@ -127,6 +165,31 @@ describe('<TableSection />', () => {
           isLoading: true,
         })
       );
+    });
+  });
+
+  it('should report telemetry when openAttackDetailsFlyout is called', async () => {
+    mockUseAttackGroupHandler.mockReturnValue({
+      getAttack: jest.fn().mockReturnValue({ id: 'attack-1' }),
+      isLoading: false,
+    });
+
+    render(
+      <TestProviders>
+        <TableSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalled();
+    });
+
+    const { openAttackDetailsFlyout } = mockUseGetDefaultGroupTitleRenderers.mock.calls[0][0];
+    openAttackDetailsFlyout('group-1', {});
+
+    expect(reportEvent).toHaveBeenCalledWith(AttacksEventTypes.DetailsFlyoutOpened, {
+      id: 'attack-1',
+      source: 'attacks_page_table',
     });
   });
 
@@ -304,19 +367,13 @@ describe('<TableSection />', () => {
     });
   });
 
-  describe('showAnonymizedSwitch', () => {
+  describe('view options', () => {
     beforeEach(() => {
-      (useUserData as jest.Mock).mockReturnValue([
-        {
-          loading: false,
-        },
-      ]);
-      (useListsConfig as jest.Mock).mockReturnValue({
-        loading: false,
-      });
+      (useUserData as jest.Mock).mockReturnValue([{ loading: false }]);
+      (useListsConfig as jest.Mock).mockReturnValue({ loading: false });
     });
 
-    it('should render the show anonymized switch', async () => {
+    it('should render the view options popover', async () => {
       const { getByTestId } = render(
         <TestProviders>
           <TableSection {...defaultProps} />
@@ -324,157 +381,145 @@ describe('<TableSection />', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId(`${TABLE_SECTION_TEST_ID}-show-anonymized`)).toBeInTheDocument();
+        expect(getByTestId('mock-attacks-view-options-popover')).toBeInTheDocument();
       });
     });
 
-    it('should render the switch as unchecked by default', async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
+    describe('showAnonymized', () => {
+      it('should default to unchecked (false)', async () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
 
-      await waitFor(() => {
-        const switchElement = getByTestId(
-          `${TABLE_SECTION_TEST_ID}-show-anonymized`
-        ) as HTMLButtonElement;
-        expect(switchElement).toHaveAttribute('aria-checked', 'false');
-      });
-    });
-
-    it('should toggle the switch state when clicked', async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        const switchElement = getByTestId(
-          `${TABLE_SECTION_TEST_ID}-show-anonymized`
-        ) as HTMLButtonElement;
-        expect(switchElement).toHaveAttribute('aria-checked', 'false');
+        await waitFor(() => {
+          const toggle = getByTestId('mock-toggle-anonymized');
+          expect(toggle).toHaveAttribute('aria-checked', 'false');
+        });
       });
 
-      const switchElement = getByTestId(
-        `${TABLE_SECTION_TEST_ID}-show-anonymized`
-      ) as HTMLButtonElement;
+      it('should toggle state when clicked', async () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
 
-      await act(async () => {
-        switchElement.click();
+        const toggle = await waitFor(() => getByTestId('mock-toggle-anonymized'));
+
+        await act(async () => {
+          toggle.click();
+        });
+
+        await waitFor(() => {
+          expect(toggle).toHaveAttribute('aria-checked', 'true');
+        });
       });
 
-      await waitFor(() => {
-        expect(switchElement).toHaveAttribute('aria-checked', 'true');
-      });
-    });
+      it('should pass showAnonymized state to useGetDefaultGroupTitleRenderers', async () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
 
-    it('should pass the additional controls in additionalToolbarControls to GroupedAlertsTable', async () => {
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
+        await waitFor(() => {
+          expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith(
+            expect.objectContaining({ showAnonymized: false })
+          );
+        });
 
-      await waitFor(() => {
-        expect(mockGroupedAlertsTable).toHaveBeenCalled();
-      });
+        const toggle = getByTestId('mock-toggle-anonymized');
+        await act(async () => {
+          toggle.click();
+        });
 
-      const lastCall =
-        mockGroupedAlertsTable.mock.calls[mockGroupedAlertsTable.mock.calls.length - 1][0];
-      expect(lastCall.additionalToolbarControls).toBeDefined();
-      expect(Array.isArray(lastCall.additionalToolbarControls)).toBe(true);
-      expect(lastCall.additionalToolbarControls).toHaveLength(2);
-    });
-
-    it('should pass showAnonymized=false to useGetDefaultGroupTitleRenderers by default', async () => {
-      render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          getAttack: expect.any(Function),
-          showAnonymized: false,
-          isLoading: false,
-          openAttackDetailsFlyout: expect.any(Function),
+        await waitFor(() => {
+          expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith(
+            expect.objectContaining({ showAnonymized: true })
+          );
         });
       });
     });
 
-    it('should pass showAnonymized=true to useGetDefaultGroupTitleRenderers when switch is toggled on', async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
+    describe('showAttacksOnly', () => {
+      it('should default to checked (true)', async () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
 
-      await waitFor(() => {
-        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          getAttack: expect.any(Function),
-          showAnonymized: false,
-          isLoading: false,
-          openAttackDetailsFlyout: expect.any(Function),
+        await waitFor(() => {
+          const toggle = getByTestId('mock-toggle-attacks-only');
+          expect(toggle).toHaveAttribute('aria-checked', 'true');
         });
       });
 
-      const switchElement = getByTestId(
-        `${TABLE_SECTION_TEST_ID}-show-anonymized`
-      ) as HTMLButtonElement;
+      it('should toggle state when clicked', async () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
 
-      await act(async () => {
-        switchElement.click();
-      });
+        const toggle = await waitFor(() => getByTestId('mock-toggle-attacks-only'));
 
-      await waitFor(() => {
-        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          getAttack: expect.any(Function),
-          showAnonymized: true,
-          isLoading: false,
-          openAttackDetailsFlyout: expect.any(Function),
+        await act(async () => {
+          toggle.click();
         });
-      });
-    });
 
-    it('should update showAnonymized back to false when switch is toggled off', async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <TableSection {...defaultProps} />
-        </TestProviders>
-      );
-
-      const switchElement = getByTestId(
-        `${TABLE_SECTION_TEST_ID}-show-anonymized`
-      ) as HTMLButtonElement;
-
-      // Toggle on
-      await act(async () => {
-        switchElement.click();
-      });
-
-      await waitFor(() => {
-        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          getAttack: expect.any(Function),
-          showAnonymized: true,
-          isLoading: false,
-          openAttackDetailsFlyout: expect.any(Function),
+        await waitFor(() => {
+          expect(toggle).toHaveAttribute('aria-checked', 'false');
         });
       });
 
-      // Toggle off
-      await act(async () => {
-        switchElement.click();
+      it('should add exists filter for ALERT_ATTACK_IDS when true', async () => {
+        render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(GroupedAlertsTable).toHaveBeenCalled();
+          const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[
+            (GroupedAlertsTable as unknown as jest.Mock).mock.calls.length - 1
+          ];
+          const hasFilter = props.defaultFilters.some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (f: any) =>
+              f.meta?.key === ALERT_ATTACK_IDS &&
+              f.meta?.type === 'exists' &&
+              f.query?.exists?.field === ALERT_ATTACK_IDS
+          );
+          expect(hasFilter).toBe(true);
+        });
       });
 
-      await waitFor(() => {
-        expect(mockUseGetDefaultGroupTitleRenderers).toHaveBeenCalledWith({
-          getAttack: expect.any(Function),
-          showAnonymized: false,
-          isLoading: false,
-          openAttackDetailsFlyout: expect.any(Function),
+      it('should remove exists filter for ALERT_ATTACK_IDS when toggled false', async () => {
+        const { getByTestId } = render(
+          <TestProviders>
+            <TableSection {...defaultProps} />
+          </TestProviders>
+        );
+
+        const toggle = await waitFor(() => getByTestId('mock-toggle-attacks-only'));
+
+        await act(async () => {
+          toggle.click();
+        });
+
+        await waitFor(() => {
+          const [props] = (GroupedAlertsTable as unknown as jest.Mock).mock.calls[
+            (GroupedAlertsTable as unknown as jest.Mock).mock.calls.length - 1
+          ];
+          const hasFilter = props.defaultFilters.some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (f: any) => f.meta?.key === ALERT_ATTACK_IDS
+          );
+          expect(hasFilter).toBe(false);
         });
       });
     });

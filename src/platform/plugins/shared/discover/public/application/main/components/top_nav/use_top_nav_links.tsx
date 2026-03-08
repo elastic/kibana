@@ -243,6 +243,23 @@ export const useTopNavLinks = ({
     if (services.capabilities.discover_v2.save) {
       const isEmbeddedEditor = services.embeddableEditor.isEmbeddedEditor();
 
+      const savedAsButton = {
+        run: async () => {
+          await onSaveDiscoverSession({
+            initialCopyOnSave: true,
+            services,
+            state,
+          });
+        },
+        id: 'saveAs',
+        order: 1,
+        label: i18n.translate('discover.localMenu.saveAsTitle', {
+          defaultMessage: 'Save as',
+        }),
+        iconType: 'save',
+        testId: 'interactiveSaveMenuItem',
+      };
+
       newAppMenuRegistry.setPrimaryActionItem({
         id: 'save',
         label: isEmbeddedEditor
@@ -272,6 +289,7 @@ export const useTopNavLinks = ({
           ...(isEmbeddedEditor
             ? {
                 items: [
+                  savedAsButton,
                   {
                     run: () => services.embeddableEditor.transferBackToEditor(),
                     id: 'cancel',
@@ -293,20 +311,7 @@ export const useTopNavLinks = ({
                   : undefined,
                 items: [
                   {
-                    run: async () => {
-                      await onSaveDiscoverSession({
-                        initialCopyOnSave: true,
-                        services,
-                        state,
-                      });
-                    },
-                    id: 'saveAs',
-                    order: 1,
-                    label: i18n.translate('discover.localMenu.saveAsTitle', {
-                      defaultMessage: 'Save as',
-                    }),
-                    iconType: 'save',
-                    testId: 'interactiveSaveMenuItem',
+                    ...savedAsButton,
                     disableButton: !persistedDiscoverSession,
                   },
                   {

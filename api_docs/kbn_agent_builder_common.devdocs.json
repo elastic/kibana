@@ -2932,7 +2932,7 @@
         "label": "AgentAnswerStepConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 117,
+        "lineNumber": 132,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2950,7 +2950,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 118,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2968,7 +2968,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 122,
+            "lineNumber": 137,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3260,7 +3260,7 @@
         "label": "AgentConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 70,
+        "lineNumber": 85,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3278,7 +3278,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 71,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3296,7 +3296,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 78,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3321,7 +3321,7 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 85,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3339,7 +3339,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 90,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3364,7 +3364,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 95,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3389,7 +3389,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 100,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3407,7 +3407,7 @@
           "\nDefinition of a agentBuilder agent."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 23,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3422,7 +3422,7 @@
               "\nId of the agent"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 27,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3446,7 +3446,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 31,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3461,7 +3461,7 @@
               "\nHuman-readable name for the agent."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 35,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3476,7 +3476,7 @@
               "\nHuman-readable description for the agent."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 39,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3491,7 +3491,57 @@
               "\nread-only attribute.\nBuilt-in agents are readonly, user-created agent are not."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 43,
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentDefinition.visibility",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visibility",
+            "description": [
+              "\nVisibility controls who can read and write this agent."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentVisibility",
+                "text": "AgentVisibility"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-common",
+            "id": "def-common.AgentDefinition.created_by",
+            "type": "Object",
+            "tags": [],
+            "label": "created_by",
+            "description": [
+              "\nAgent owner metadata."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.UserIdAndName",
+                "text": "UserIdAndName"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3509,7 +3559,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 48,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3527,7 +3577,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 52,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3545,7 +3595,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 56,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3563,7 +3613,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 60,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3587,7 +3637,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 64,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3603,7 +3653,7 @@
         "label": "AgentResearchStepConfiguration",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 106,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3621,7 +3671,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 107,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3639,7 +3689,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-            "lineNumber": 111,
+            "lineNumber": 126,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3706,7 +3756,7 @@
           "\nBrowser API tool metadata that can be transmitted between browser and server.\n\nThis represents a browser-side tool definition in a serializable format.\nHandlers are not serializable, so they are excluded from this metadata type.\n"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/browser_tool_metadata.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3721,7 +3771,7 @@
               "\nUnique identifier for the tool.\nMust use underscores (not dots) to comply with OpenAI API requirements.\nShould follow naming convention: consumer_domain_action\nExample: 'set_time_range', 'update_filters'"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/browser_tool_metadata.ts",
-            "lineNumber": 19,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3736,7 +3786,7 @@
               "\nDescription of what the tool does.\nThis is provided to the LLM to help it understand when and how to use the tool."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/browser_tool_metadata.ts",
-            "lineNumber": 27,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3744,18 +3794,59 @@
           {
             "parentPluginId": "@kbn/agent-builder-common",
             "id": "def-common.BrowserApiToolMetadata.schema",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [
               "\nJSON Schema representation of the tool's parameters.\nGenerated from the tool's Zod schema."
             ],
             "signature": [
-              "JsonSchema7TypeUnion",
-              " & JsonSchema7Meta"
+              "{ [k: string]: unknown; $schema?: \"https://json-schema.org/draft/2020-12/schema\" | \"http://json-schema.org/draft-07/schema#\" | undefined; $id?: string | undefined; $anchor?: string | undefined; $ref?: string | undefined; $dynamicRef?: string | undefined; $dynamicAnchor?: string | undefined; $vocabulary?: Record<string, boolean> | undefined; $comment?: string | undefined; $defs?: Record<string, ",
+              "JSONSchema",
+              "> | undefined; type?: \"string\" | \"number\" | \"boolean\" | \"object\" | \"integer\" | \"null\" | \"array\" | undefined; additionalItems?: ",
+              "_JSONSchema",
+              " | undefined; unevaluatedItems?: ",
+              "_JSONSchema",
+              " | undefined; prefixItems?: ",
+              "_JSONSchema",
+              "[] | undefined; items?: ",
+              "_JSONSchema",
+              " | ",
+              "_JSONSchema",
+              "[] | undefined; contains?: ",
+              "_JSONSchema",
+              " | undefined; additionalProperties?: ",
+              "_JSONSchema",
+              " | undefined; unevaluatedProperties?: ",
+              "_JSONSchema",
+              " | undefined; properties?: Record<string, ",
+              "_JSONSchema",
+              "> | undefined; patternProperties?: Record<string, ",
+              "_JSONSchema",
+              "> | undefined; dependentSchemas?: Record<string, ",
+              "_JSONSchema",
+              "> | undefined; propertyNames?: ",
+              "_JSONSchema",
+              " | undefined; if?: ",
+              "_JSONSchema",
+              " | undefined; then?: ",
+              "_JSONSchema",
+              " | undefined; else?: ",
+              "_JSONSchema",
+              " | undefined; allOf?: ",
+              "JSONSchema",
+              "[] | undefined; anyOf?: ",
+              "JSONSchema",
+              "[] | undefined; oneOf?: ",
+              "JSONSchema",
+              "[] | undefined; not?: ",
+              "_JSONSchema",
+              " | undefined; multipleOf?: number | undefined; maximum?: number | undefined; exclusiveMaximum?: number | undefined; minimum?: number | undefined; exclusiveMinimum?: number | undefined; maxLength?: number | undefined; minLength?: number | undefined; pattern?: string | undefined; maxItems?: number | undefined; minItems?: number | undefined; uniqueItems?: boolean | undefined; maxContains?: number | undefined; minContains?: number | undefined; maxProperties?: number | undefined; minProperties?: number | undefined; required?: string[] | undefined; dependentRequired?: Record<string, string[]> | undefined; enum?: (string | number | boolean | null)[] | undefined; const?: string | number | boolean | null | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; default?: unknown; deprecated?: boolean | undefined; readOnly?: boolean | undefined; writeOnly?: boolean | undefined; examples?: unknown[] | undefined; format?: string | undefined; contentMediaType?: string | undefined; contentEncoding?: string | undefined; contentSchema?: ",
+              "JSONSchema",
+              " | undefined; _prefault?: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/browser_tool_metadata.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5958,7 +6049,7 @@
           "<TType, TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5973,7 +6064,7 @@
               "\nA unique id for this tool."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5991,7 +6082,7 @@
               "TType"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6006,7 +6097,7 @@
               "\nThe description for this tool, which will be exposed to the LLM."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6021,7 +6112,7 @@
               "\nIndicate whether this tool is editable by users or not."
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6039,7 +6130,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6057,7 +6148,7 @@
               "TConfig"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6091,7 +6182,7 @@
           "<TType, TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-        "lineNumber": 71,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6106,14 +6197,52 @@
               "\nthe JSON schema associated with this tool's input parameters."
             ],
             "signature": [
-              "{ type: \"object\"; properties: Record<string, ",
-              "JsonSchema7Type",
-              ">; additionalProperties?: boolean | ",
-              "JsonSchema7Type",
-              " | undefined; required?: string[] | undefined; }"
+              "{ [k: string]: unknown; $schema?: \"https://json-schema.org/draft/2020-12/schema\" | \"http://json-schema.org/draft-07/schema#\" | undefined; $id?: string | undefined; $anchor?: string | undefined; $ref?: string | undefined; $dynamicRef?: string | undefined; $dynamicAnchor?: string | undefined; $vocabulary?: Record<string, boolean> | undefined; $comment?: string | undefined; $defs?: Record<string, ",
+              "JSONSchema",
+              "> | undefined; type?: \"string\" | \"number\" | \"boolean\" | \"object\" | \"integer\" | \"null\" | \"array\" | undefined; additionalItems?: ",
+              "_JSONSchema",
+              " | undefined; unevaluatedItems?: ",
+              "_JSONSchema",
+              " | undefined; prefixItems?: ",
+              "_JSONSchema",
+              "[] | undefined; items?: ",
+              "_JSONSchema",
+              " | ",
+              "_JSONSchema",
+              "[] | undefined; contains?: ",
+              "_JSONSchema",
+              " | undefined; additionalProperties?: ",
+              "_JSONSchema",
+              " | undefined; unevaluatedProperties?: ",
+              "_JSONSchema",
+              " | undefined; properties?: Record<string, ",
+              "_JSONSchema",
+              "> | undefined; patternProperties?: Record<string, ",
+              "_JSONSchema",
+              "> | undefined; dependentSchemas?: Record<string, ",
+              "_JSONSchema",
+              "> | undefined; propertyNames?: ",
+              "_JSONSchema",
+              " | undefined; if?: ",
+              "_JSONSchema",
+              " | undefined; then?: ",
+              "_JSONSchema",
+              " | undefined; else?: ",
+              "_JSONSchema",
+              " | undefined; allOf?: ",
+              "JSONSchema",
+              "[] | undefined; anyOf?: ",
+              "JSONSchema",
+              "[] | undefined; oneOf?: ",
+              "JSONSchema",
+              "[] | undefined; not?: ",
+              "_JSONSchema",
+              " | undefined; multipleOf?: number | undefined; maximum?: number | undefined; exclusiveMaximum?: number | undefined; minimum?: number | undefined; exclusiveMinimum?: number | undefined; maxLength?: number | undefined; minLength?: number | undefined; pattern?: string | undefined; maxItems?: number | undefined; minItems?: number | undefined; uniqueItems?: boolean | undefined; maxContains?: number | undefined; minContains?: number | undefined; maxProperties?: number | undefined; minProperties?: number | undefined; required?: string[] | undefined; dependentRequired?: Record<string, string[]> | undefined; enum?: (string | number | boolean | null)[] | undefined; const?: string | number | boolean | null | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; default?: unknown; deprecated?: boolean | undefined; readOnly?: boolean | undefined; writeOnly?: boolean | undefined; examples?: unknown[] | undefined; format?: string | undefined; contentMediaType?: string | undefined; contentEncoding?: string | undefined; contentSchema?: ",
+              "JSONSchema",
+              " | undefined; _prefault?: unknown; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6652,6 +6781,20 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.AgentVisibility",
+        "type": "Enum",
+        "tags": [],
+        "label": "AgentVisibility",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.ChatEventType",
         "type": "Enum",
         "tags": [],
@@ -6780,7 +6923,7 @@
           "\nPossible types of tools"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/definition.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6801,7 +6944,7 @@
           "24"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
-        "lineNumber": 81,
+        "lineNumber": 83,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6958,7 +7101,7 @@
           "\"elastic-ai-agent\""
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 21,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7318,7 +7461,7 @@
           " | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 128,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7334,7 +7477,7 @@
           "\nThe type of an agent.\nOnly one type for now, this enum is mostly here for future-proofing."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7813,7 +7956,7 @@
           "(\"platform.core.search\" | \"platform.core.list_indices\" | \"platform.core.get_index_mapping\" | \"platform.core.get_document_by_id\" | \"platform.core.get_workflow_execution_status\")[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
-        "lineNumber": 69,
+        "lineNumber": 71,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7839,7 +7982,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
-        "lineNumber": 62,
+        "lineNumber": 64,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7865,7 +8008,7 @@
           ".error, Object>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 144,
+        "lineNumber": 149,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8172,7 +8315,7 @@
           ".other, T>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/tool_result.ts",
-        "lineNumber": 131,
+        "lineNumber": 136,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8399,7 +8542,7 @@
           "[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts",
-        "lineNumber": 135,
+        "lineNumber": 150,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8426,6 +8569,25 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.skillCreateRequestSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "skillCreateRequestSchema",
+        "description": [
+          "\nZod schema for validating skill create request bodies."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
+        "lineNumber": 53,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.skillIdMaxLength",
         "type": "number",
         "tags": [],
@@ -8436,6 +8598,25 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
         "lineNumber": 10,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-common",
+        "id": "def-common.skillUpdateRequestSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "skillUpdateRequestSchema",
+        "description": [
+          "\nZod schema for validating skill update request bodies."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
+        "lineNumber": 72,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -10026,54 +10207,6 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.skillCreateRequestSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "skillCreateRequestSchema",
-        "description": [
-          "\nZod schema for validating skill create request bodies."
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ id: ",
-          "ZodString",
-          "; name: ",
-          "ZodString",
-          "; description: ",
-          "ZodString",
-          "; content: ",
-          "ZodString",
-          "; referenced_content: ",
-          "ZodOptional",
-          "<",
-          "ZodArray",
-          "<",
-          "ZodObject",
-          "<{ name: ",
-          "ZodString",
-          "; relativePath: ",
-          "ZodString",
-          "; content: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { name: string; content: string; relativePath: string; }, { name: string; content: string; relativePath: string; }>, \"many\">>; tool_ids: ",
-          "ZodArray",
-          "<",
-          "ZodString",
-          ", \"many\">; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { id: string; name: string; description: string; content: string; tool_ids: string[]; referenced_content?: { name: string; content: string; relativePath: string; }[] | undefined; }, { id: string; name: string; description: string; content: string; tool_ids: string[]; referenced_content?: { name: string; content: string; relativePath: string; }[] | undefined; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
-        "lineNumber": 53,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
         "id": "def-common.skillIdRegexp",
         "type": "Object",
         "tags": [],
@@ -10084,60 +10217,6 @@
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
         "lineNumber": 11,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/agent-builder-common",
-        "id": "def-common.skillUpdateRequestSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "skillUpdateRequestSchema",
-        "description": [
-          "\nZod schema for validating skill update request bodies."
-        ],
-        "signature": [
-          "ZodObject",
-          "<{ name: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; description: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; content: ",
-          "ZodOptional",
-          "<",
-          "ZodString",
-          ">; referenced_content: ",
-          "ZodOptional",
-          "<",
-          "ZodArray",
-          "<",
-          "ZodObject",
-          "<{ name: ",
-          "ZodString",
-          "; relativePath: ",
-          "ZodString",
-          "; content: ",
-          "ZodString",
-          "; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { name: string; content: string; relativePath: string; }, { name: string; content: string; relativePath: string; }>, \"many\">>; tool_ids: ",
-          "ZodOptional",
-          "<",
-          "ZodArray",
-          "<",
-          "ZodString",
-          ", \"many\">>; }, \"strip\", ",
-          "ZodTypeAny",
-          ", { name?: string | undefined; description?: string | undefined; content?: string | undefined; referenced_content?: { name: string; content: string; relativePath: string; }[] | undefined; tool_ids?: string[] | undefined; }, { name?: string | undefined; description?: string | undefined; content?: string | undefined; referenced_content?: { name: string; content: string; relativePath: string; }[] | undefined; tool_ids?: string[] | undefined; }>"
-        ],
-        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/skills/validation.ts",
-        "lineNumber": 72,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
