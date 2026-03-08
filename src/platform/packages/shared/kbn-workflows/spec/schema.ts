@@ -177,18 +177,14 @@ export const TimeoutPropSchema = z.object({
 });
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
-export const MaxIterationsObjectSchema = z.object({
+export const MaxIterationsSchema = z.object({
   limit: z.number().int().positive(),
-  'on-limit': z.enum(['continue', 'fail']).optional().default('continue'),
+  'on-limit': z.enum(['continue', 'fail']),
 });
-
-export const MaxIterationsSchema = z
-  .union([z.number().int().positive(), MaxIterationsObjectSchema])
-  .optional();
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
 export const LoopStepPropsSchema = z.object({
-  'max-iterations': MaxIterationsSchema,
+  'max-iterations': MaxIterationsSchema.optional(),
   'iteration-timeout': DurationSchema.optional(),
   'iteration-on-failure': WorkflowOnFailureSchema.optional(),
 });

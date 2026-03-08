@@ -129,6 +129,7 @@ export const runCheckPackageDocs = async (log: ToolingLog, flags: CliFlags) => {
     const apiMapResult = buildApiMap(
       setupResult.project,
       setupResult.plugins,
+      setupResult.allPlugins,
       log,
       transaction,
       optionsWithChecks
@@ -160,13 +161,13 @@ export const runCheckPackageDocs = async (log: ToolingLog, flags: CliFlags) => {
 
     if (failingPlugins.length > 0) {
       log.error(
-        `Validation failed for ${failingPlugins.length} plugin(s): ${failingPlugins
-          .map((plugin) => plugin.pluginId)
+        `Validation failed for ${failingPlugins.length} package(s): ${failingPlugins
+          .map(({ pluginId }) => pluginId)
           .join(', ')}.`
       );
       process.exitCode = 1;
     } else {
-      log.info('All plugins passed validation.');
+      log.info('All packages passed validation.');
     }
   } catch (error) {
     transaction?.setOutcome('failure');
