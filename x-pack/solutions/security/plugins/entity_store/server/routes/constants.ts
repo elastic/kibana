@@ -7,7 +7,7 @@
 
 import type { AuthzEnabled } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
-import { HistorySnapshotState, LogExtractionConfig } from '../domain/definitions/saved_objects';
+import { HistorySnapshotState, LogExtractionConfig } from '../domain/saved_objects';
 
 export const DEFAULT_ENTITY_STORE_PERMISSIONS: AuthzEnabled = {
   requiredPrivileges: ['securitySolution'],

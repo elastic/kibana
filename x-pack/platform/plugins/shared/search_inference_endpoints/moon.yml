@@ -48,6 +48,8 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
+  - '@kbn/logging-mocks'
+  - '@kbn/cloud-connect-plugin'
 tags:
   - plugin
   - prod

@@ -24,12 +24,12 @@ import type { Logger } from '@kbn/logging';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AssetManager } from './domain/asset_manager';
+import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
-import type { HistorySnapshotClient } from './domain/history_snapshot_client';
-import type { CRUDClient } from './domain/crud_client';
+import type { HistorySnapshotClient } from './domain/history_snapshot';
+import type { CRUDClient } from './domain/crud';
 import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
@@ -50,7 +50,7 @@ export interface EntityStoreStartPlugins {
 export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   logger: Logger;
-  assetManager: AssetManager;
+  assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
   resolutionClient: ResolutionClient;
