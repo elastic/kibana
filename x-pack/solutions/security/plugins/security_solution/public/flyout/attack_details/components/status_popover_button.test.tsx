@@ -75,7 +75,7 @@ describe('StatusPopoverButton (attack details)', () => {
     jest.clearAllMocks();
 
     (useAttackWorkflowStatusContextMenuItems as jest.Mock).mockImplementation(
-      ({ onSuccess }: { onSuccess: () => void }) => ({
+      ({ onSuccess, telemetrySource }: { onSuccess: () => void; telemetrySource?: string }) => ({
         items: [
           {
             name: 'Mark as acknowledged',
@@ -87,6 +87,20 @@ describe('StatusPopoverButton (attack details)', () => {
           },
         ],
         panels: [],
+      })
+    );
+  });
+
+  test('it passes the correct telemetry source', () => {
+    render(
+      <TestProviders>
+        <StatusPopoverButton enrichedFieldInfo={enrichedFieldInfo} />
+      </TestProviders>
+    );
+
+    expect(useAttackWorkflowStatusContextMenuItems).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetrySource: 'attacks_page_flyout_header',
       })
     );
   });
