@@ -59,9 +59,12 @@ export const getStepIconType = (nodeType: string): EuiIconType => {
       break;
     case 'enter-foreach':
     case 'foreach':
+    case 'enter-while':
+    case 'while':
       iconType = 'refresh';
       break;
     case 'foreach-iteration':
+    case 'while-iteration':
       iconType = 'tokenNumber';
       break;
 
