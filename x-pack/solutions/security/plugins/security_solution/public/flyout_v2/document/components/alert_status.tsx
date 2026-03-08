@@ -6,24 +6,27 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { getUserDisplayName } from '@kbn/user-profile-components';
+import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_WORKFLOW_STATUS_UPDATED_AT, ALERT_WORKFLOW_USER } from '@kbn/rule-data-utils';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import React, { memo, useMemo } from 'react';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { WORKFLOW_STATUS_DETAILS_TEST_ID, WORKFLOW_STATUS_TITLE_TEST_ID } from './test_ids';
-import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { useDocumentDetailsContext } from '../../shared/context';
-import { getField } from '../../shared/utils';
 
+interface AlertStatusProps {
+  hit: DataTableRecord;
+}
 /**
  * Displays info about who last updated the alert's workflow status and when.
  */
-export const AlertStatus = memo(() => {
-  const { getFieldsData } = useDocumentDetailsContext();
-  const statusUpdatedBy = getFieldsData('kibana.alert.workflow_user');
-  const statusUpdatedAt = getField(getFieldsData('kibana.alert.workflow_status_updated_at'));
-
-  const result = useBulkGetUserProfiles({ uids: new Set(statusUpdatedBy) });
+export const AlertStatus = memo(({ hit }: AlertStatusProps) => {
+  const statusUpdatedBy = getFieldValue(hit, ALERT_WORKFLOW_USER) as string | null;
+  const statusUpdatedAt = getFieldValue(hit, ALERT_WORKFLOW_STATUS_UPDATED_AT) as string | null;
+  const result = useBulkGetUserProfiles({
+    uids: new Set(statusUpdatedBy ? [statusUpdatedBy] : []),
+  });
   const user = result.data?.[0]?.user;
 
   const lastStatusChange = useMemo(
@@ -44,7 +47,7 @@ export const AlertStatus = memo(() => {
     [statusUpdatedAt, user]
   );
 
-  if (!statusUpdatedBy || !statusUpdatedAt || result.isLoading || user == null) {
+  if (!statusUpdatedBy || !statusUpdatedAt || user == null) {
     return null;
   }
 

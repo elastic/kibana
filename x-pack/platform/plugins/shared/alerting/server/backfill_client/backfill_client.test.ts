@@ -239,8 +239,7 @@ const mockCreatePointInTimeFinderAsInternalUser = (
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/256405
-describe.skip('BackfillClient', () => {
+describe('BackfillClient', () => {
   let backfillClient: BackfillClient;
   let isSystemAction: jest.Mock;
 
@@ -275,7 +274,6 @@ describe.skip('BackfillClient', () => {
           title: 'Alerting Backfill Rule Run',
           priority: TaskPriority.Low,
           createTaskRunner: expect.any(Function),
-          maxConcurrency: 3,
         },
       });
     });
