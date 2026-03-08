@@ -430,6 +430,7 @@ export const WhileStepSchema = BaseStepSchema.extend({
       'Repeat steps while condition is true (do-while semantics — first iteration always runs). Access iteration index via {{ while.iteration }}'
     ),
   ...WhileStepConfigSchema.shape,
+  ...StepWithIfConditionSchema.shape,
   ...LoopStepPropsSchema.shape,
   ...TimeoutPropSchema.shape,
 });
