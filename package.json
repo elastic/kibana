@@ -167,7 +167,6 @@
     "@hapi/inert": "7.1.0",
     "@hapi/wreck": "18.1.0",
     "@hello-pangea/dnd": "18.0.1",
-    "@internationalized/date": "^3.11.0",
     "@kbn/aad-fixtures-plugin": "link:x-pack/platform/test/alerting_api_integration/common/plugins/aad",
     "@kbn/access-control-test-plugin": "link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin",
     "@kbn/actions-plugin": "link:x-pack/platform/plugins/shared/actions",

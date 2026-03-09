@@ -30,11 +30,6 @@ interface PanelCommonProps extends PropsWithChildren {
   className?: string;
 }
 
-interface PanelBodyProps extends PanelCommonProps {
-  /** @default s */
-  padding?: 's' | false;
-}
-
 interface PanelSpacingProps {
   /** @default both */
   spacingSide?: 'block' | 'inline' | 'both' | 'none';
@@ -71,25 +66,15 @@ export const PanelHeader = ({
   );
 };
 
-interface SubPanelHeadingProps extends PanelCommonProps {
-  /** Called before navigating back. Use to restore state or run cleanup. */
-  onGoBack?: () => void;
-}
-
 /** Heading used inside `PanelHeader` for sub-panels (panels navigated to from the main panel). */
-export const SubPanelHeading = ({ className, children, onGoBack }: SubPanelHeadingProps) => {
+export const SubPanelHeading = ({ className, children }: PanelCommonProps) => {
   const { goBack, canGoBack } = useDateRangePickerPanelNavigation();
   const euiThemeContext = useEuiTheme();
   const styles = subPanelHeadingStyles(euiThemeContext);
 
-  const handleGoBack = () => {
-    onGoBack?.();
-    goBack();
-  };
-
   if (canGoBack) {
     return (
-      <button css={[styles.root, styles.button]} className={className} onClick={handleGoBack}>
+      <button css={[styles.root, styles.button]} className={className} onClick={goBack}>
         <EuiIcon type="sortLeft" aria-hidden="true" />
         <>{children}</>
       </button>
@@ -107,11 +92,11 @@ export const SubPanelHeading = ({ className, children, onGoBack }: SubPanelHeadi
  * Scrollable body section of a panel. Sits between `PanelHeader` and `PanelFooter`.
  * Will fill the vertical space (flew-grow: 1), and can scroll.
  */
-export const PanelBody = ({ className, children, padding = 's' }: PanelBodyProps) => {
+export const PanelBody = ({ className, children }: PanelCommonProps) => {
   const euiThemeContext = useEuiTheme();
 
   return (
-    <div css={panelBodyStyles(euiThemeContext, padding).root} className={className}>
+    <div css={panelBodyStyles(euiThemeContext).root} className={className}>
       {children}
     </div>
   );
