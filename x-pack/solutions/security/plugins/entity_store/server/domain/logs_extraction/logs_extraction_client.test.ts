@@ -23,7 +23,7 @@ import {
   type EngineDescriptorClient,
   type EntityStoreGlobalState,
   type EntityStoreGlobalStateClient,
-} from '../definitions/saved_objects';
+} from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
