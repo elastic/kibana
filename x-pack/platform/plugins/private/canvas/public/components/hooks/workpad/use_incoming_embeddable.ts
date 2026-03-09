@@ -7,7 +7,9 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { asyncForEach } from '@kbn/std';
 import { fromExpression } from '@kbn/interpreter';
+import { transformType } from '@kbn/embeddable-plugin/public';
 import { ErrorStrings } from '../../../../i18n';
 import { CANVAS_APP } from '../../../../common/lib';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
@@ -39,69 +41,82 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
   const incomingEmbeddables = stateTransferService.getIncomingEmbeddablePackage(CANVAS_APP, true);
 
   useEffect(() => {
+    let canceled = false;
     if (isByValueEnabled && incomingEmbeddables?.length) {
       // handle each incoming embeddable
-      incomingEmbeddables.forEach(({ embeddableId, serializedState: incomingState, type }) => {
-        // retrieve existing element
-        const originalElement = selectedPage.elements.find(
-          ({ id }: CanvasElement) => id === embeddableId
-        );
-
-        if (originalElement) {
-          const originalAst = fromExpression(originalElement!.expression);
-
-          const functionIndex = originalAst.chain.findIndex(({ function: fn }) =>
-            ['embeddable', 'savedVisualization'].includes(fn)
+      asyncForEach(
+        incomingEmbeddables,
+        async ({ embeddableId, serializedState: incomingState, type }) => {
+          // retrieve existing element
+          const originalElement = selectedPage.elements.find(
+            ({ id }: CanvasElement) => id === embeddableId
           );
 
-          if (functionIndex === -1) {
-            dispatch(fetchAllRenderables());
-            return;
-          }
+          if (originalElement) {
+            const originalAst = fromExpression(originalElement!.expression);
 
-          if (originalAst.chain[functionIndex].function === 'savedVisualization') {
-            notifyService.error(strings.getConvertToLensUnsupportedSavedVisualization());
-            dispatch(fetchAllRenderables());
-            return;
-          }
+            const functionIndex = originalAst.chain.findIndex(({ function: fn }) =>
+              ['embeddable', 'savedVisualization'].includes(fn)
+            );
 
-          const originalState = decode(
-            originalAst.chain[functionIndex].arguments.config[0] as string
-          );
+            if (functionIndex === -1) {
+              dispatch(fetchAllRenderables());
+              return;
+            }
 
-          const originalType = originalAst.chain[functionIndex].arguments.type[0];
+            if (originalAst.chain[functionIndex].function === 'savedVisualization') {
+              notifyService.error(strings.getConvertToLensUnsupportedSavedVisualization());
+              dispatch(fetchAllRenderables());
+              return;
+            }
 
-          // clear out resolved arg for old embeddable
-          const argumentPath = [embeddableId, 'expressionRenderable'];
-          dispatch(clearValue({ path: argumentPath }));
+            const originalState = decode(
+              originalAst.chain[functionIndex].arguments.config[0] as string
+            );
 
-          let updatedState;
+            const originalType = await transformType(
+              originalAst.chain[functionIndex].arguments.type[0] as string
+            );
+            if (canceled) {
+              return;
+            }
 
-          // if type was changed, we should not provide originalInput
-          if (originalType !== type) {
-            updatedState = incomingState;
+            // clear out resolved arg for old embeddable
+            const argumentPath = [embeddableId, 'expressionRenderable'];
+            dispatch(clearValue({ path: argumentPath }));
+
+            let updatedState;
+
+            // if type was changed, we should not provide originalInput
+            if (originalType !== type) {
+              updatedState = incomingState;
+            } else {
+              updatedState = { ...originalState, ...incomingState };
+            }
+            const expression = embeddableInputToExpression(updatedState, type, undefined, true);
+
+            dispatch(
+              updateEmbeddableExpression({
+                elementId: originalElement.id,
+                embeddableExpression: expression,
+              })
+            );
+
+            // update resolved args
+            dispatch(fetchEmbeddableRenderable(originalElement.id));
+
+            // select new embeddable element
+            dispatch(selectToplevelNodes([embeddableId]));
           } else {
-            updatedState = { ...originalState, ...incomingState };
+            const expression = embeddableInputToExpression(incomingState, type, undefined, true);
+            dispatch(addElement(selectedPage.id, { expression }));
           }
-          const expression = embeddableInputToExpression(updatedState, type, undefined, true);
-
-          dispatch(
-            updateEmbeddableExpression({
-              elementId: originalElement.id,
-              embeddableExpression: expression,
-            })
-          );
-
-          // update resolved args
-          dispatch(fetchEmbeddableRenderable(originalElement.id));
-
-          // select new embeddable element
-          dispatch(selectToplevelNodes([embeddableId]));
-        } else {
-          const expression = embeddableInputToExpression(incomingState, type, undefined, true);
-          dispatch(addElement(selectedPage.id, { expression }));
         }
-      });
+      );
+
+      return () => {
+        canceled = true;
+      };
     }
   }, [dispatch, notifyService, selectedPage, incomingEmbeddables, isByValueEnabled]);
 };
