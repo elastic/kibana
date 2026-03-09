@@ -669,9 +669,10 @@ describe('QUEUED execution cancellation', () => {
   });
 });
 
-describe('promoteNextQueuedIfNeeded orchestration', () => {
+describe('releaseSlotAndPromote orchestration', () => {
   let plugin: any;
   let mockRepo: any;
+  let mockSemaphoreRepo: any;
   let mockTaskManager: any;
   let mockLogger: Logger;
   let mockRequest: any;
@@ -699,11 +700,14 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
 
     mockRepo = {
       getWorkflowExecutionById: jest.fn(),
-      getRunningExecutionsByConcurrencyGroup: jest.fn(),
-      getQueuedExecutionsByConcurrencyGroup: jest.fn(),
+      getQueuedExecutionsByConcurrencyGroup: jest.fn().mockResolvedValue([]),
       promoteQueuedExecution: jest.fn(),
       updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
       searchWorkflowExecutions: jest.fn().mockResolvedValue([]),
+    };
+    mockSemaphoreRepo = {
+      tryAcquireSlot: jest.fn().mockResolvedValue(true),
+      releaseSlot: jest.fn().mockResolvedValue(undefined),
     };
     mockTaskManager = {
       scheduleExecutionTask: jest.fn().mockResolvedValue(undefined),
@@ -718,19 +722,30 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
     const { WorkflowsExecutionEnginePlugin } = jest.requireActual('./plugin');
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     plugin.workflowExecutionRepository = mockRepo;
+    plugin.concurrencySemaphoreRepository = mockSemaphoreRepo;
     plugin.workflowTaskManager = mockTaskManager;
   });
 
   it('should promote oldest queued execution when a slot frees up', async () => {
     mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([]);
     mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
       { id: 'queued-1', workflowId: 'wf-1' },
     ]);
     mockRepo.promoteQueuedExecution.mockResolvedValue('updated');
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'completed-exec'
+    );
+    expect(mockSemaphoreRepo.tryAcquireSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'queued-1',
+      1
+    );
     expect(mockRepo.promoteQueuedExecution).toHaveBeenCalledWith('queued-1');
     expect(mockTaskManager.scheduleExecutionTask).toHaveBeenCalledWith({
       executionId: 'queued-1',
@@ -747,7 +762,6 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
       },
     });
     mockRepo.getWorkflowExecutionById.mockResolvedValue(execution);
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([]);
     mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
       { id: 'queued-1', workflowId: 'wf-1' },
       { id: 'queued-2', workflowId: 'wf-1' },
@@ -755,7 +769,7 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
     ]);
     mockRepo.promoteQueuedExecution.mockResolvedValue('updated');
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
     expect(mockRepo.promoteQueuedExecution).toHaveBeenCalledTimes(3);
     expect(mockTaskManager.scheduleExecutionTask).toHaveBeenCalledTimes(3);
@@ -763,70 +777,77 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
 
   it('should not promote when no slots are available', async () => {
     mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(['active-exec-1']);
+    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+      { id: 'queued-1', workflowId: 'wf-1' },
+    ]);
+    mockSemaphoreRepo.tryAcquireSlot.mockResolvedValue(false);
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
-    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
     expect(mockRepo.promoteQueuedExecution).not.toHaveBeenCalled();
+    expect(mockTaskManager.scheduleExecutionTask).not.toHaveBeenCalled();
   });
 
-  it('should exclude terminal triggering execution from active count', async () => {
+  it('should release semaphore slot for terminal triggering execution', async () => {
     mockRepo.getWorkflowExecutionById.mockResolvedValue(
       makeExecution({ status: ExecutionStatus.COMPLETED })
     );
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([]);
-    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([]);
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
-    expect(mockRepo.getRunningExecutionsByConcurrencyGroup).toHaveBeenCalledWith(
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
       'group-1',
       'default',
-      'completed-exec' // excluded because status is terminal
+      'completed-exec'
     );
   });
 
-  it('should NOT exclude non-terminal triggering execution from active count', async () => {
+  it('should NOT release semaphore slot for non-terminal triggering execution', async () => {
     mockRepo.getWorkflowExecutionById.mockResolvedValue(
       makeExecution({ status: ExecutionStatus.WAITING })
     );
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue(['completed-exec']);
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
-    expect(mockRepo.getRunningExecutionsByConcurrencyGroup).toHaveBeenCalledWith(
-      'group-1',
-      'default',
-      undefined // NOT excluded because WAITING is non-terminal and occupies a slot
-    );
+    expect(mockSemaphoreRepo.releaseSlot).not.toHaveBeenCalled();
   });
 
   it('should skip promotion when CAS returns noop (concurrent promoter won)', async () => {
-    mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([]);
+    mockRepo.getWorkflowExecutionById
+      .mockResolvedValueOnce(makeExecution())
+      .mockResolvedValueOnce({ id: 'queued-1', status: ExecutionStatus.PENDING });
     mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
       { id: 'queued-1', workflowId: 'wf-1' },
     ]);
     mockRepo.promoteQueuedExecution.mockResolvedValue('noop');
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
     expect(mockRepo.promoteQueuedExecution).toHaveBeenCalledWith('queued-1');
     expect(mockTaskManager.scheduleExecutionTask).not.toHaveBeenCalled();
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledTimes(1);
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'completed-exec'
+    );
   });
 
   it('should revert to QUEUED when task scheduling fails after promotion', async () => {
     mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
-    mockRepo.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([]);
     mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
       { id: 'queued-1', workflowId: 'wf-1' },
     ]);
     mockRepo.promoteQueuedExecution.mockResolvedValue('updated');
     mockTaskManager.scheduleExecutionTask.mockRejectedValue(new Error('TM unavailable'));
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'queued-1'
+    );
     expect(mockRepo.updateWorkflowExecution).toHaveBeenCalledWith(
       { id: 'queued-1', status: ExecutionStatus.QUEUED },
       { refresh: 'wait_for' }
@@ -845,9 +866,9 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
       })
     );
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
-    expect(mockRepo.getRunningExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
+    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
   });
 
   it('should no-op when execution has no concurrency group key', async () => {
@@ -855,23 +876,23 @@ describe('promoteNextQueuedIfNeeded orchestration', () => {
       makeExecution({ concurrencyGroupKey: undefined })
     );
 
-    await plugin.promoteNextQueuedIfNeeded('completed-exec', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
-    expect(mockRepo.getRunningExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
+    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
   });
 
   it('should no-op when execution is not found', async () => {
     mockRepo.getWorkflowExecutionById.mockResolvedValue(null);
 
-    await plugin.promoteNextQueuedIfNeeded('nonexistent', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('nonexistent', 'default', mockRequest);
 
-    expect(mockRepo.getRunningExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
+    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
   });
 
   it('should no-op when repository or task manager is not initialized', async () => {
     plugin.workflowExecutionRepository = undefined;
 
-    await plugin.promoteNextQueuedIfNeeded('exec-1', 'default', mockRequest);
+    await plugin.releaseSlotAndPromote('exec-1', 'default', mockRequest);
 
     expect(mockRepo.getWorkflowExecutionById).not.toHaveBeenCalled();
   });
