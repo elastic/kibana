@@ -76,6 +76,11 @@ export function generateBuiltInStepSnippet(
         with: { duration: '5s' },
       };
       break;
+    case 'waitForInput':
+      parameters = {
+        with: { message: 'User action is required' },
+      };
+      break;
     case 'workflow.execute':
     case 'workflow.executeAsync':
       parameters = {

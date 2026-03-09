@@ -22,7 +22,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
 
@@ -31,12 +32,26 @@ interface WorkflowStepExecutionDetailsProps {
   stepExecution?: WorkflowStepExecutionDto;
   workflowExecutionDuration?: number;
   isLoadingStepData?: boolean;
+  workflowExecutionStatus?: ExecutionStatus;
+  resumeMessage?: string;
+  shouldAutoResume?: boolean;
 }
 
 export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDetailsProps>(
-  ({ workflowExecutionId, stepExecution, workflowExecutionDuration, isLoadingStepData }) => {
+  ({
+    workflowExecutionId,
+    stepExecution,
+    workflowExecutionDuration,
+    isLoadingStepData,
+    workflowExecutionStatus,
+    resumeMessage,
+    shouldAutoResume = false,
+  }) => {
+    // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
-      () => Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)),
+      () =>
+        Boolean(stepExecution?.status && isTerminalStatus(stepExecution.status)) ||
+        stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT,
       [stepExecution?.status]
     );
 
@@ -97,9 +112,15 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
         <WorkflowExecutionOverview
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
+          showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
+          executionId={workflowExecutionId}
+          resumeMessage={resumeMessage}
+          shouldAutoResume={shouldAutoResume}
         />
       );
     }
+
+    const showResumeUI = stepExecution.status === ExecutionStatus.WAITING_FOR_INPUT;
 
     return (
       <EuiPanel
@@ -115,6 +136,15 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           gutterSize="m"
           css={{ height: '100%', overflow: 'hidden' }}
         >
+          {showResumeUI && (
+            <EuiFlexItem grow={false}>
+              <ResumeExecutionButton
+                executionId={workflowExecutionId}
+                resumeMessage={resumeMessage}
+                autoOpen={shouldAutoResume}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiTabs expand>
               {tabs.map((tab) => (

@@ -12,6 +12,7 @@ import type {
   DataSetGraphNode,
   ElasticsearchGraphNode,
   KibanaGraphNode,
+  WaitForInputGraphNode,
   WaitGraphNode,
 } from './nodes/base';
 import type {
@@ -44,6 +45,9 @@ export const isKibana = (node: GraphNodeUnion): node is KibanaGraphNode =>
   node.type.startsWith('kibana.');
 
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
+
+export const isWaitForInput = (node: GraphNodeUnion): node is WaitForInputGraphNode =>
+  node.type === 'waitForInput';
 
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
   node.type === 'data.set';

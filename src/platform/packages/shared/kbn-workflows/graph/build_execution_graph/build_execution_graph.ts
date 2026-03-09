@@ -20,6 +20,7 @@ import type {
   StepWithIfCondition,
   StepWithOnFailure,
   TimeoutProp,
+  WaitForInputStep,
   WaitStep,
   WorkflowExecuteAsyncStep,
   WorkflowExecuteStep,
@@ -52,6 +53,7 @@ import type {
   ExitTryBlockNode,
   GraphNodeUnion,
   KibanaGraphNode,
+  WaitForInputGraphNode,
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
@@ -140,6 +142,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitWaitStep(currentStep as WaitStep, context);
   }
 
+  if ((currentStep as WaitForInputStep).type === 'waitForInput') {
+    return visitWaitForInputStep(currentStep as WaitForInputStep, context);
+  }
+
   if ((currentStep as DataSetStep).type === 'data.set') {
     return visitDataSetStep(currentStep as DataSetStep, context);
   }
@@ -179,6 +185,26 @@ export function visitWaitStep(
     },
   };
   graph.setNode(waitNode.id, waitNode);
+
+  return graph;
+}
+
+export function visitWaitForInputStep(
+  currentStep: WaitForInputStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const waitForInputNode: WaitForInputGraphNode = {
+    id: stepId,
+    type: 'waitForInput',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(waitForInputNode.id, waitForInputNode);
 
   return graph;
 }

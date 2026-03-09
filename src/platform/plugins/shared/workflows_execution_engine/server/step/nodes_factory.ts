@@ -20,6 +20,7 @@ import type {
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
+  WaitForInputGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
@@ -60,6 +61,7 @@ import {
   ExitStepTimeoutZoneNodeImpl,
   ExitWorkflowTimeoutZoneNodeImpl,
 } from './timeout_zone_step';
+import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step';
 import { WaitStepImpl } from './wait_step/wait_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
@@ -258,6 +260,13 @@ export class NodesFactory {
         return new WaitStepImpl(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           node as any,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger
+        );
+      case 'waitForInput':
+        return new WaitForInputStepImpl(
+          node as WaitForInputGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
