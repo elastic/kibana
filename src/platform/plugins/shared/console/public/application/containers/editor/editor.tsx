@@ -20,7 +20,6 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import type { TextObject } from '../../../../common/text_object';
 
 import { NetworkRequestStatusBar } from '../../components';
@@ -36,9 +35,10 @@ import { InputPanel } from './input_panel';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 import { useStyles } from './editor_styles';
 import { PanelStorage } from './panel_storage';
+import { DEBOUNCE_DELAY } from '../../const';
+import { editorI18n } from './editor_i18n';
 
 const PANEL_MIN_SIZE = '20%';
-const DEBOUNCE_DELAY = 500;
 
 interface Props {
   loading: boolean;
@@ -157,9 +157,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                         setInputEditorValue('');
                       }}
                     >
-                      {i18n.translate('console.editor.clearConsoleInputButton', {
-                        defaultMessage: 'Clear this input',
-                      })}
+                      {editorI18n.clearConsoleInputButton}
                     </EuiButtonEmpty>
                   </EuiSplitPanel.Inner>
                 )}
@@ -168,9 +166,11 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
             <EuiResizableButton
               css={styles.resizerButton}
-              aria-label={i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
-                defaultMessage: "Press left/right to adjust panels' sizes",
-              })}
+              aria-label={
+                isVerticalLayout
+                  ? editorI18n.adjustPanelSizeVertical
+                  : editorI18n.adjustPanelSizeHorizontal
+              }
             />
 
             <EuiResizablePanel
@@ -205,9 +205,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                           data-test-subj="clearConsoleOutput"
                           onClick={() => dispatch({ type: 'cleanRequest', payload: undefined })}
                         >
-                          {i18n.translate('console.editor.clearConsoleOutputButton', {
-                            defaultMessage: 'Clear this output',
-                          })}
+                          {editorI18n.clearConsoleOutputButton}
                         </EuiButtonEmpty>
                       </EuiFlexItem>
 
