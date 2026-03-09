@@ -52,7 +52,6 @@ export enum CorrelationEndpointType {
   FAILED_TRANSACTION_RATE = 'failedTransactionRate',
 }
 
-
 export interface UnifiedCorrelation {
   fieldName: string;
   fieldValue: string | number;
