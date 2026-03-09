@@ -10,7 +10,7 @@ import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/ap
 import type { Logger } from '@kbn/logging';
 import { ENTITY_ID_FIELD } from '../../../common/domain/definitions/common_fields';
 import { getFieldValue } from '../../../common/domain/euid/commons';
-import { getLatestEntitiesIndexName } from '../assets/latest_index';
+import { getLatestEntitiesIndexName } from '../asset_manager/latest_index';
 import {
   ChainResolutionError,
   EntitiesNotFoundError,
