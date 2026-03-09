@@ -22,11 +22,14 @@ import type {
   BaseAuthenticationProvider,
 } from './providers';
 import {
+  AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
   HTTPAuthenticationProvider,
   KerberosAuthenticationProvider,
   OIDCAuthenticationProvider,
+  PKIAuthenticationProvider,
   SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
 } from './providers';
 import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
@@ -125,10 +128,10 @@ const providerMap = new Map<
   [BasicAuthenticationProvider.type, BasicAuthenticationProvider],
   [KerberosAuthenticationProvider.type, KerberosAuthenticationProvider],
   [SAMLAuthenticationProvider.type, SAMLAuthenticationProvider],
-  // [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
-  // [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
-  // [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
-  // [AnonymousAuthenticationProvider.type, AnonymousAuthenticationProvider],
+  [TokenAuthenticationProvider.type, TokenAuthenticationProvider],
+  [OIDCAuthenticationProvider.type, OIDCAuthenticationProvider],
+  [PKIAuthenticationProvider.type, PKIAuthenticationProvider],
+  [AnonymousAuthenticationProvider.type, AnonymousAuthenticationProvider],
 ]);
 
 /**
@@ -347,7 +350,7 @@ export class Authenticator {
       const authenticationResult = await provider.login(
         request,
         attempt.value,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSessionValue! : null
       );
 
       securityTelemetry.recordLoginDuration(performance.now() - startTime, {
@@ -560,7 +563,7 @@ export class Authenticator {
     // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
     // available then `getSessionValue` should have returned `null`.
     const provider = this.providers.get(existingSessionValue.provider.name)!;
-    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    const authenticationResult = await provider.authenticate(request, existingSessionValue);
     if (!authenticationResult.notHandled()) {
       const sessionUpdateResult = await this.updateSessionValue(request, {
         provider: existingSessionValue.provider,
@@ -593,7 +596,7 @@ export class Authenticator {
       // hence, we can't assume that this provider exists, so we have to check it.
       const provider = this.providers.get(suggestedProviderName);
       if (provider) {
-        return provider.logout(request, sessionValue?.state ?? null);
+        return provider.logout(request, sessionValue ?? null);
       }
     } else {
       // In case logout is called and we cannot figure out what provider is supposed to handle it,

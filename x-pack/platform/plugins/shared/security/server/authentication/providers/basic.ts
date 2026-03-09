@@ -60,13 +60,8 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider<Prov
    * Performs initial login request using username and password.
    * @param request Request instance.
    * @param attempt User credentials.
-   * @param [state] Optional state object associated with the provider.
    */
-  public async login(
-    request: KibanaRequest,
-    { username, password }: ProviderLoginAttempt,
-    state?: ProviderState | null
-  ) {
+  public async login(request: KibanaRequest, { username, password }: ProviderLoginAttempt) {
     this.logger.debug('Trying to perform a login.');
 
     const authHeaders = {
@@ -127,14 +122,14 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider<Prov
   /**
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       return DeauthenticationResult.notHandled();
     }
 
@@ -163,8 +158,8 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider<Prov
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders = { authorization: session.state.authorization };
     try {
-      const authHeaders = { authorization: session.state.authorization };
       const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');

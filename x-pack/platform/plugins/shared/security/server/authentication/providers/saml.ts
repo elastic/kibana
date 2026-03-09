@@ -166,14 +166,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * Performs initial login request using SAMLResponse payload.
    * @param request Request instance.
    * @param attempt Login attempt description.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
   public async login(
     request: KibanaRequest,
     attempt: ProviderLoginAttempt,
-    state?: ProviderState | null
+    session?: SessionValue<ProviderState> | null
   ) {
     this.logger.debug('Trying to perform a login.');
+
+    const state = session?.state;
 
     // It may happen that Kibana is re-configured to use different realm for the same provider name,
     // we should clear such session and log user out.
@@ -189,12 +191,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
         this.logger.warn(message);
         return AuthenticationResult.failed(Boom.badRequest(message));
       }
-      return this.authenticateViaHandshake(request, attempt.redirectURL, state);
+      return this.authenticateViaHandshake(request, attempt.redirectURL, session);
     }
 
     const { samlResponse, relayState } = attempt;
-    const authenticationResult = state
-      ? await this.authenticateViaState(request, state)
+    const authenticationResult = session?.state
+      ? await this.authenticateViaState(request, session)
       : AuthenticationResult.notHandled();
 
     // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
@@ -276,10 +278,12 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
   /**
    * Invalidates SAML/UIAM access token if it exists.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
+
+    const state = session?.state;
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
     // and user will eventually be redirected to the home page to log in. But when SAML SLO is
@@ -296,7 +300,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     // redirect to the `loggedOut` URL instead.
     const isIdPInitiatedSLORequest = isSAMLRequestQuery(request.query);
     const isSPInitiatedSLOResponse = isSAMLResponseQuery(request.query);
-    if (state === undefined && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
+    if (session === undefined && !isIdPInitiatedSLORequest && !isSPInitiatedSLOResponse) {
       this.logger.debug('There is no SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
     }
@@ -621,21 +625,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    */
   private async authenticateViaState(request: KibanaRequest, session: SessionValue<ProviderState>) {
     this.logger.debug('Trying to authenticate via state.');
-    if (!session.state.accessToken) {
+
+    const { accessToken } = session.state;
+    if (!accessToken) {
       this.logger.debug('Access token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    const authHeaders: Record<string, string> | undefined = this.isUiamToken(
-      session.state.accessToken
-    )
-      ? this.options.uiam.getAuthenticationHeaders(session.state.accessToken)
-      : {
-          authorization: new HTTPAuthorizationHeader(
-            'Bearer',
-            session.state.accessToken
-          ).toString(),
-        };
+    const authHeaders: Record<string, string> | undefined = this.isUiamToken(accessToken)
+      ? this.options.uiam.getAuthenticationHeaders(accessToken)
+      : { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() };
 
     try {
       const user = await this.getUser(request, authHeaders, session);
@@ -888,7 +887,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
    * initiate handshake right away, otherwise we'll redirect user to a dedicated page where we capture URL hash fragment
    * first and only then initiate SAML handshake.
    * @param request Request instance.
-   * @param state Optional state object associated with the provider.
+   * @param session Optional session object associated with the provider.
    */
   private initiateAuthenticationHandshake(
     request: KibanaRequest,
@@ -914,7 +913,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
       )}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
-      { state: state ? state : null }
+      { state: session ? session.state : null }
     );
   }
 

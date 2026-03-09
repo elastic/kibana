@@ -106,21 +106,21 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
   /**
    * Invalidates access token retrieved in exchange for SPNEGO token if it exists.
    * @param request Request instance.
-   * @param state State value previously stored by the provider.
+   * @param [session] Optional session object associated with the provider.
    */
-  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+  public async logout(request: KibanaRequest, session?: SessionValue<ProviderState> | null) {
     this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // Having a `null` session means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
-    if (state === undefined) {
+    if (session === undefined) {
       this.logger.debug('There is no access token invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    if (state) {
+    if (session?.state) {
       try {
-        await this.options.tokens.invalidate(state);
+        await this.options.tokens.invalidate(session.state);
       } catch (err) {
         this.logger.debug(
           () => `Failed invalidating access and/or refresh tokens: ${getDetailedErrorMessage(err)}`
@@ -244,10 +244,11 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider<P
       return AuthenticationResult.notHandled();
     }
 
+    const authHeaders = {
+      authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
+    };
+
     try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', session.state.accessToken).toString(),
-      };
       const user = await this.getUser(request, authHeaders, session);
 
       this.logger.debug('Request has been authenticated via state.');

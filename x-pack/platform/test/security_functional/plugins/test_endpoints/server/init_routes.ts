@@ -476,7 +476,11 @@ export function initRoutes(
         body: schema.object({ apiKey: schema.maybe(schema.string()) }),
       },
       security: {
-        authc: { enabled: 'optional' },
+        authc: {
+          enabled: 'optional',
+          reason:
+            'UIAM test endpoints may use explicit API key credentials instead of session auth',
+        },
         authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
       },
     },
@@ -505,7 +509,11 @@ export function initRoutes(
         body: schema.object({ apiKey: schema.maybe(schema.string()) }),
       },
       security: {
-        authc: { enabled: 'optional' },
+        authc: {
+          enabled: 'optional',
+          reason:
+            'UIAM test endpoints may use explicit API key credentials instead of session auth',
+        },
         authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
       },
     },
@@ -543,7 +551,11 @@ export function initRoutes(
         }),
       },
       security: {
-        authc: { enabled: 'optional' },
+        authc: {
+          enabled: 'optional',
+          reason:
+            'UIAM test endpoints may use explicit API key credentials instead of session auth',
+        },
         authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
       },
     },
@@ -603,7 +615,11 @@ export function initRoutes(
         }),
       },
       security: {
-        authc: { enabled: 'optional' },
+        authc: {
+          enabled: 'optional',
+          reason:
+            'UIAM test endpoints may use explicit API key credentials instead of session auth',
+        },
         authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
       },
     },
@@ -658,7 +674,11 @@ export function initRoutes(
         }),
       },
       security: {
-        authc: { enabled: 'optional' },
+        authc: {
+          enabled: 'optional',
+          reason:
+            'UIAM test endpoints may use explicit API key credentials instead of session auth',
+        },
         authz: { enabled: false, reason: 'Test endpoint for UIAM API key operations' },
       },
     },

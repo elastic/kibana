@@ -110,12 +110,12 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
    * this method if it doesn't support initial login request.
    * @param request Request instance.
    * @param loginAttempt Login attempt associated with the provider.
-   * @param [state] Optional state object associated with the provider.
+   * @param [session] Optional session object associated with the provider.
    */
   async login(
     request: KibanaRequest,
     loginAttempt: unknown,
-    state?: unknown
+    session?: SessionValue<TState> | null
   ): Promise<AuthenticationResult> {
     return AuthenticationResult.notHandled();
   }
@@ -134,9 +134,12 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
   /**
    * Invalidates user session associated with the request.
    * @param request Request instance.
-   * @param [state] Optional state object associated with the provider that needs to be invalidated.
+   * @param [session] Optional session object associated with the provider.
    */
-  abstract logout(request: KibanaRequest, state?: unknown): Promise<DeauthenticationResult>;
+  abstract logout(
+    request: KibanaRequest,
+    session?: SessionValue<TState> | null
+  ): Promise<DeauthenticationResult>;
 
   /**
    * Returns HTTP authentication scheme that provider uses within `Authorization` HTTP header that
