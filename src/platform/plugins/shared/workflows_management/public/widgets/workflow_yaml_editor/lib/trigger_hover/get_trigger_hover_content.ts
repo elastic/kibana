@@ -201,7 +201,7 @@ export function getTriggerHoverContent(
 
 /**
  * Detect if the given YAML path is under a trigger and return that trigger's type value.
- * Accepts path to the type field (triggers.N.type) or anywhere under a trigger (triggers.N or triggers.N.with, etc.).
+ * Accepts path to the type field (triggers.N.type) or anywhere under a trigger (triggers.N, triggers.N.on, etc.).
  */
 export function getTriggerTypeAtPath(
   yamlPath: (string | number)[],
