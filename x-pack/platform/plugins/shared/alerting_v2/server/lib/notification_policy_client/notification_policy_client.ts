@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { NotificationPolicyBulkAction, NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
 import {
   createNotificationPolicyDataSchema,
   updateNotificationPolicyDataSchema,
@@ -31,6 +31,19 @@ import type {
   SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
+
+const resolveActionAttrs = (
+  action: NotificationPolicyBulkAction
+): Partial<NotificationPolicySavedObjectAttributes> => {
+  switch (action.action) {
+    case 'enable':
+      return { enabled: true, snoozedUntil: undefined };
+    case 'disable':
+      return { enabled: false, snoozedUntil: undefined };
+    case 'snooze':
+      return { snoozedUntil: action.snoozed_until };
+  }
+};
 
 const toAuthResponse = (
   auth: NotificationPolicySavedObjectAttributes['auth']
@@ -230,28 +243,28 @@ export class NotificationPolicyClient {
   public async bulkActionNotificationPolicies({
     actions,
   }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
+    const userProfileUid = await this.getUserProfileUid();
+    const now = new Date().toISOString();
+
+    const objects = actions.map((action) => ({
+      id: action.id,
+      attrs: {
+        ...resolveActionAttrs(action),
+        updatedBy: userProfileUid,
+        updatedAt: now,
+      },
+    }));
+
+    const results = await this.notificationPolicySavedObjectService.bulkUpdate({ objects });
+
     const errors: Array<{ id: string; message: string }> = [];
     let processed = 0;
 
-    for (const action of actions) {
-      try {
-        switch (action.action) {
-          case 'enable':
-            await this.enableNotificationPolicy({ id: action.id });
-            break;
-          case 'disable':
-            await this.disableNotificationPolicy({ id: action.id });
-            break;
-          case 'snooze':
-            await this.snoozeNotificationPolicy({
-              id: action.id,
-              snoozedUntil: action.snoozed_until,
-            });
-            break;
-        }
+    for (const result of results) {
+      if ('error' in result) {
+        errors.push({ id: result.id, message: result.error.message });
+      } else {
         processed++;
-      } catch (e) {
-        errors.push({ id: action.id, message: e.message });
       }
     }
 

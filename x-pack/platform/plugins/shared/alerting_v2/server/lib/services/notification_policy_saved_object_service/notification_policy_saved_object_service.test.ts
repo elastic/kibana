@@ -276,4 +276,71 @@ describe('NotificationPolicySavedObjectService', () => {
       );
     });
   });
+
+  describe('bulkUpdate', () => {
+    it('returns empty array when objects is empty without calling the client', async () => {
+      const result = await service.bulkUpdate({ objects: [] });
+
+      expect(result).toEqual([]);
+      expect(mockSoClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('sends partial attributes and returns id and version for each object', async () => {
+      mockSoClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'v2',
+          },
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'v3',
+          },
+        ],
+      });
+
+      const result = await service.bulkUpdate({
+        objects: [
+          { id: 'policy-1', attrs: { enabled: true } },
+          { id: 'policy-2', attrs: { enabled: false } },
+        ],
+      });
+
+      expect(result).toEqual([
+        { id: 'policy-1', version: 'v2' },
+        { id: 'policy-2', version: 'v3' },
+      ]);
+      expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith([
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1', attributes: { enabled: true } },
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2', attributes: { enabled: false } },
+      ]);
+    });
+
+    it('returns errors for failed objects', async () => {
+      const soError = { statusCode: 404, error: 'Not Found', message: 'Not found' };
+      mockSoClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-missing',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: soError,
+          },
+        ],
+      });
+
+      const result = await service.bulkUpdate({
+        objects: [{ id: 'policy-missing', attrs: { enabled: true } }],
+      });
+
+      expect(result).toEqual([{ id: 'policy-missing', error: soError }]);
+    });
+  });
 });

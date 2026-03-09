@@ -781,78 +781,96 @@ describe('NotificationPolicyClient', () => {
   });
 
   describe('bulkActionNotificationPolicies', () => {
-    it('processes mixed bulk actions and returns results', async () => {
-      const createExistingAttributes = (
-        name: string
-      ): NotificationPolicySavedObjectAttributes => ({
-        name,
-        description: `${name} description`,
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        auth: {
-          apiKey: 'some-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
-        createdBy: 'elastic_profile_uid',
-        createdAt: '2024-12-01T00:00:00.000Z',
-        updatedBy: 'elastic_profile_uid',
-        updatedAt: '2024-12-01T00:00:00.000Z',
+    it('issues a single bulkUpdate with partial attrs for mixed actions', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzMsMV0=',
+          },
+          {
+            id: 'policy-2',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzQsMV0=',
+          },
+          {
+            id: 'policy-3',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: 'WzUsMV0=',
+          },
+        ],
       });
-
-      mockSavedObjectsClient.get
-        .mockResolvedValueOnce({
-          id: 'policy-1',
-          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          attributes: createExistingAttributes('policy-1'),
-          references: [],
-          version: 'WzEsMV0=',
-        })
-        .mockResolvedValueOnce({
-          id: 'policy-2',
-          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          attributes: createExistingAttributes('policy-2'),
-          references: [],
-          version: 'WzIsMV0=',
-        });
-
-      mockSavedObjectsClient.update
-        .mockResolvedValueOnce({
-          id: 'policy-1',
-          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {} as NotificationPolicySavedObjectAttributes,
-          references: [],
-          version: 'WzMsMV0=',
-        })
-        .mockResolvedValueOnce({
-          id: 'policy-2',
-          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          attributes: {} as NotificationPolicySavedObjectAttributes,
-          references: [],
-          version: 'WzQsMV0=',
-        });
 
       const res = await client.bulkActionNotificationPolicies({
         actions: [
           { id: 'policy-1', action: 'enable' },
           { id: 'policy-2', action: 'disable' },
+          { id: 'policy-3', action: 'snooze', snoozed_until: '2025-06-01T12:00:00.000Z' },
         ],
       });
 
-      expect(res).toEqual({
-        processed: 2,
-        total: 2,
-        errors: [],
-      });
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: {
+            enabled: true,
+            snoozedUntil: undefined,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-2',
+          attributes: {
+            enabled: false,
+            snoozedUntil: undefined,
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-3',
+          attributes: {
+            snoozedUntil: '2025-06-01T12:00:00.000Z',
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          },
+        },
+      ]);
+
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+
+      expect(res).toEqual({ processed: 3, total: 3, errors: [] });
     });
 
-    it('collects errors for failed actions', async () => {
-      mockSavedObjectsClient.get.mockRejectedValueOnce(
-        SavedObjectsErrorHelpers.createGenericNotFoundError(
-          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-          'missing-policy'
-        )
-      );
+    it('collects errors from bulkUpdate response', async () => {
+      mockSavedObjectsClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'missing-policy',
+            type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+            attributes: {} as NotificationPolicySavedObjectAttributes,
+            references: [],
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [notification_policy/missing-policy] not found',
+            },
+          },
+        ],
+      });
 
       const res = await client.bulkActionNotificationPolicies({
         actions: [{ id: 'missing-policy', action: 'enable' }],
