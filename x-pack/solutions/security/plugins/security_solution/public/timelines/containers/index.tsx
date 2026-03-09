@@ -280,11 +280,14 @@ export const useTimelineEventsHandler = ({
 
                 setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {
+                  const rawHits = response.rawResponse?.hits;
+                  const rawEvents =
+                    rawHits && 'hits' in rawHits ? (rawHits.hits as EsHitRecord[]) : [];
+
                   const newTimelineResponse = {
                     ...prevResponse,
                     events: getTimelineEvents(response.edges),
-                    // @ts-ignore
-                    rawEvents: (response.rawResponse?.hits?.hits ?? []) as EsHitRecord[],
+                    rawEvents,
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,

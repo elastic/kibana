@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiSkeletonText, EuiTreeView } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -12,7 +13,6 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ALERT_ANCESTORS_ID, ALERT_RULE_INDICES } from '../../../../common/field_maps/field_names';
-import type { RuleParams } from '../../../../server/lib/detection_engine/rule_schema';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import type { StatsNode } from '../hooks/use_alert_prevalence_from_process_tree';
@@ -54,8 +54,7 @@ export const AnalyzerPreview = memo(
 
     const alertIndices = useMemo(() => {
       const ruleIndices = getFieldValue(hit, ALERT_RULE_INDICES) as string[];
-      const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as RuleParams;
-      // @ts-ignore
+      const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as { index: string };
       const ruleParametersIndices = ruleParameters ? [ruleParameters.index] : [];
       return ruleIndices?.length > 0 ? ruleIndices : ruleParametersIndices;
     }, [hit]);
