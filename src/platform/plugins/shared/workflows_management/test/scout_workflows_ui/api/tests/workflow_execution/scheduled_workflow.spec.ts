@@ -54,24 +54,22 @@ steps:
 // FLAKY: https://github.com/elastic/security-team/issues/16272
 spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
-  let spaceId: string;
   let workflowId: string;
 
-  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ apiServices }) => {
     spaceTest.setTimeout(60_000);
     workflowsApi = apiServices.workflowsApi;
-    spaceId = scoutSpace.id;
 
-    const created = await workflowsApi.create(spaceId, SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML);
+    const created = await workflowsApi.create(SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML);
     workflowId = created.id;
   });
 
   spaceTest.afterAll(async () => {
-    await workflowsApi.deleteAll(spaceId);
+    await workflowsApi.deleteAll();
   });
 
   spaceTest('enabling a scheduled workflow triggers executions automatically', async () => {
-    await workflowsApi.update(spaceId, workflowId, { enabled: true });
+    await workflowsApi.update(workflowId, { enabled: true });
 
     const { results } = await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
@@ -104,7 +102,7 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
   });
 
   spaceTest('disabling a scheduled workflow stops new executions from firing', async () => {
-    await workflowsApi.update(spaceId, workflowId, { enabled: true });
+    await workflowsApi.update(workflowId, { enabled: true });
 
     await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
@@ -114,7 +112,7 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
       errorMessage: 'No executions appeared after enabling the workflow',
     });
 
-    await workflowsApi.update(spaceId, workflowId, { enabled: false });
+    await workflowsApi.update(workflowId, { enabled: false });
 
     const { results: beforeDisable } = await workflowsApi.getExecutions(workflowId);
     const countBeforeDisable = beforeDisable.length;
@@ -137,7 +135,6 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
       // If the scheduler is reentrant, it must wait for the previous run to finish
       // before starting the next one, so consecutive starts should be >5s apart.
       const createdLongRunningWorkflow = await workflowsApi.create(
-        spaceId,
         LONG_RUNNING_SCHEDULED_WORKFLOW_YAML
       );
 
@@ -152,7 +149,7 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
             r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
           }`,
       });
-      await workflowsApi.update(spaceId, createdLongRunningWorkflow.id, { enabled: false });
+      await workflowsApi.update(createdLongRunningWorkflow.id, { enabled: false });
       const { results } = await workflowsApi.getExecutions(createdLongRunningWorkflow.id);
 
       // Wait for every execution to reach a terminal state

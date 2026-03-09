@@ -36,23 +36,23 @@ interface GetWorkflowExecutionOptions {
 }
 
 export class WorkflowsApiService {
-  constructor(private readonly kbnClient: KbnClient) {}
+  constructor(private readonly spaceId: string, private readonly kbnClient: KbnClient) {}
 
   /** POST /api/workflows — create a single workflow from YAML. */
-  async create(spaceId: string, yaml: string): Promise<WorkflowDetailDto> {
+  async create(yaml: string): Promise<WorkflowDetailDto> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'POST',
-      path: `/s/${spaceId}/api/workflows`,
+      path: `/s/${this.spaceId}/api/workflows`,
       body: { yaml },
     });
     return response.data;
   }
 
   /** POST /api/workflows/_bulk_create — create multiple workflows at once. */
-  async bulkCreate(spaceId: string, yamls: string[]): Promise<BulkCreateResult> {
+  async bulkCreate(yamls: string[]): Promise<BulkCreateResult> {
     const response = await this.kbnClient.request<BulkCreateResult>({
       method: 'POST',
-      path: `/s/${spaceId}/api/workflows/_bulk_create`,
+      path: `/s/${this.spaceId}/api/workflows/_bulk_create`,
       body: { workflows: yamls.map((y) => ({ yaml: y })) },
     });
     return response.data;
@@ -60,34 +60,33 @@ export class WorkflowsApiService {
 
   /** PUT /api/workflows/{id} — partially update a workflow (e.g. toggle enabled). */
   async update(
-    spaceId: string,
     id: string,
     body: Partial<Pick<WorkflowDetailDto, 'name' | 'description' | 'enabled' | 'yaml'>>
   ): Promise<WorkflowDetailDto> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
       method: 'PUT',
-      path: `/s/${spaceId}/api/workflows/${id}`,
+      path: `/s/${this.spaceId}/api/workflows/${id}`,
       body,
     });
     return response.data;
   }
 
   /** DELETE /api/workflows — delete workflows by IDs. */
-  async bulkDelete(spaceId: string, ids: string[]): Promise<void> {
+  async bulkDelete(ids: string[]): Promise<void> {
     if (ids.length > 0) {
       await this.kbnClient.request({
         method: 'DELETE',
-        path: `/s/${spaceId}/api/workflows`,
+        path: `/s/${this.spaceId}/api/workflows`,
         body: { ids },
       });
     }
   }
 
   /** POST /api/workflows/search + DELETE — delete all workflows in a space. */
-  async deleteAll(spaceId: string): Promise<void> {
+  async deleteAll(): Promise<void> {
     const response = await this.kbnClient.request<{ results?: Array<{ id: string }> }>({
       method: 'POST',
-      path: `/s/${spaceId}/api/workflows/search`,
+      path: `/s/${this.spaceId}/api/workflows/search`,
       body: { size: 10000, page: 1 },
     });
 
@@ -95,7 +94,7 @@ export class WorkflowsApiService {
     if (workflowIds.length > 0) {
       await this.kbnClient.request({
         method: 'DELETE',
-        path: `/s/${spaceId}/api/workflows`,
+        path: `/s/${this.spaceId}/api/workflows`,
         body: { ids: workflowIds },
       });
     }
@@ -104,7 +103,7 @@ export class WorkflowsApiService {
   async run(id: string, inputs: Record<string, unknown>): Promise<{ workflowExecutionId: string }> {
     const response = await this.kbnClient.request<{ workflowExecutionId: string }>({
       method: 'POST',
-      path: `/s/workflows/${id}/run`,
+      path: `/s/${this.spaceId}/api/workflows/${id}/run`,
       body: { inputs },
     });
     return response.data;
@@ -117,7 +116,7 @@ export class WorkflowsApiService {
     const { includeInput = false, includeOutput = false } = options;
     const response = await this.kbnClient.request<WorkflowExecutionDto>({
       method: 'GET',
-      path: `/s/workflowExecutions/${workflowExecutionId}?includeInput=${includeInput}&includeOutput=${includeOutput}`,
+      path: `/s/${this.spaceId}/api/workflowExecutions/${workflowExecutionId}?includeInput=${includeInput}&includeOutput=${includeOutput}`,
     });
     return response.data;
   }
@@ -133,7 +132,7 @@ export class WorkflowsApiService {
       page: number;
     }>({
       method: 'GET',
-      path: `/s/workflowExecutions?workflowId=${workflowId}&size=${size}&page=${page}`,
+      path: `/s/${this.spaceId}/api/workflowExecutions?workflowId=${workflowId}&size=${size}&page=${page}`,
     });
     return response.data;
   }

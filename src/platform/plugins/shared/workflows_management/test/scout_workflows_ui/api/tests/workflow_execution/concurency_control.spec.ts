@@ -54,19 +54,11 @@ spaceTest.describe(
   'Workflow execution concurrency control',
   { tag: tags.deploymentAgnostic },
   () => {
-    let workflowsApi: WorkflowsApiService;
-    let spaceId: string;
-
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
-      workflowsApi = apiServices.workflowsApi;
-      spaceId = scoutSpace.id;
+    spaceTest.afterAll(async ({ apiServices }) => {
+      await apiServices.workflowsApi.deleteAll();
     });
 
-    spaceTest.afterAll(async () => {
-      await workflowsApi.deleteAll(spaceId);
-    });
-
-    async function runConcurrencyWorkflow(workflowId: string) {
+    async function runConcurrencyWorkflow(workflowsApi: WorkflowsApiService, workflowId: string) {
       const events = [
         { env: 'dev', problem: 'issue-1' },
         { env: 'prod', problem: 'issue-2' },
@@ -90,7 +82,9 @@ spaceTest.describe(
       const terminalExecutions = await Promise.all(
         scheduledExecutions.map((scheduledExecution) =>
           workflowsApi
-            .waitForTermination({ workflowExecutionId: scheduledExecution.workflowExecutionId })
+            .waitForTermination({
+              workflowExecutionId: scheduledExecution.workflowExecutionId,
+            })
             .then((execution) => ({
               execution,
               concurrencyKey: scheduledExecution.concurrencyKey,
@@ -115,13 +109,15 @@ spaceTest.describe(
 
     spaceTest(
       'cancel-in-progress strategy cancels previous executions and completes the latest',
-      async () => {
-        const createdWorkflow = await workflowsApi.create(
-          spaceId,
+      async ({ apiServices }) => {
+        const createdWorkflow = await apiServices.workflowsApi.create(
           getConcurrencyWorkflowYaml('cancel-in-progress')
         );
 
-        const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(createdWorkflow.id);
+        const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
+          apiServices.workflowsApi,
+          createdWorkflow.id
+        );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
           expect(executions.length).toBeGreaterThan(0);
@@ -145,13 +141,15 @@ spaceTest.describe(
 
     spaceTest(
       'drop strategy drops new executions until there is an already running execution',
-      async () => {
-        const createdWorkflow = await workflowsApi.create(
-          spaceId,
+      async ({ apiServices }) => {
+        const createdWorkflow = await apiServices.workflowsApi.create(
           getConcurrencyWorkflowYaml('drop')
         );
 
-        const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(createdWorkflow.id);
+        const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
+          apiServices.workflowsApi,
+          createdWorkflow.id
+        );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
           expect(executions.length).toBeGreaterThan(0);
