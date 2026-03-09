@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { getListArrayMock } from '../../../../detection_engine/schemas/types/lists.mock';
 import {
   getCreateEqlRuleSchemaMock,
@@ -27,9 +27,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('strips any unknown values', () => {
@@ -50,9 +48,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('[rule_id, description] does not validate', () => {
@@ -63,9 +59,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('[rule_id, description, from] does not validate', () => {
@@ -77,9 +71,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('[rule_id, description, from, to] does not validate', () => {
@@ -92,9 +84,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('[rule_id, description, from, to, name] does not validate', () => {
@@ -108,9 +98,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('[rule_id, description, from, to, name, severity] does not validate', () => {
@@ -125,9 +113,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "type: Invalid discriminator value. Expected 'eql' | 'query' | 'saved_query' | 'threshold' | 'threat_match' | 'machine_learning' | 'new_terms' | 'esql'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('type: Invalid input');
   });
 
   test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
@@ -143,7 +129,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'risk_score: Invalid input: expected number, received undefined'
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
@@ -160,7 +148,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'risk_score: Invalid input: expected number, received undefined'
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
@@ -178,7 +168,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'risk_score: Invalid input: expected number, received undefined'
+    );
   });
 
   test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
@@ -198,7 +190,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
@@ -218,7 +210,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('risk_score: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'risk_score: Invalid input: expected number, received undefined'
+    );
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
@@ -239,7 +233,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
@@ -261,7 +255,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
@@ -280,7 +274,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
@@ -303,7 +297,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You can send in a namespace', () => {
@@ -314,7 +308,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You can send in an empty array to threat', () => {
@@ -325,7 +319,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
@@ -362,7 +356,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('allows references to be sent as valid', () => {
@@ -373,7 +367,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('references cannot be numbers', () => {
@@ -385,7 +379,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'references.0: Expected string, received number'
+      'references.0: Invalid input: expected string, received number'
     );
   });
 
@@ -397,7 +391,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('index.0: Expected string, received number');
+    expect(stringifyZodError(result.error)).toEqual(
+      'index.0: Invalid input: expected string, received number'
+    );
   });
 
   test('saved_query type can have filters with it', () => {
@@ -408,7 +404,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('filters cannot be a string', () => {
@@ -419,7 +415,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('filters: Expected array, received string');
+    expect(stringifyZodError(result.error)).toEqual(
+      'filters: Invalid input: expected array, received string'
+    );
   });
 
   test('language validates with kuery', () => {
@@ -430,7 +428,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language validates with lucene', () => {
@@ -441,7 +439,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('language does not validate with something made up', () => {
@@ -453,7 +451,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      "language: Invalid enum value. Expected 'kuery' | 'lucene', received 'something-made-up'"
+      'language: Invalid option: expected one of "kuery"|"lucene"'
     );
   });
 
@@ -466,7 +464,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'max_signals: Number must be greater than or equal to 1'
+      'max_signals: Too small: expected number to be >=1'
     );
   });
 
@@ -479,7 +477,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'max_signals: Number must be greater than or equal to 1'
+      'max_signals: Too small: expected number to be >=1'
     );
   });
 
@@ -491,7 +489,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You can optionally send in an array of tags', () => {
@@ -502,7 +500,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot send in an array of tags that are numbers', () => {
@@ -514,7 +512,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'tags.0: Expected string, received number, tags.1: Expected string, received number, tags.2: Expected string, received number'
+      'tags.0: Invalid input: expected string, received number, tags.1: Invalid input: expected string, received number, tags.2: Invalid input: expected string, received number'
     );
   });
 
@@ -541,7 +539,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('threat.0.framework: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'threat.0.framework: Invalid input: expected string, received undefined'
+    );
   });
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
@@ -563,7 +563,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('threat.0.tactic: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'threat.0.tactic: Invalid input: expected object, received undefined'
+    );
   });
 
   test('You can send in an array of threat that are missing "technique"', () => {
@@ -583,7 +585,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You can optionally send in an array of false positives', () => {
@@ -594,7 +596,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot send in an array of false positives that are numbers', () => {
@@ -606,7 +608,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'false_positives.0: Expected string, received number, false_positives.1: Expected string, received number'
+      'false_positives.0: Invalid input: expected string, received number, false_positives.1: Invalid input: expected string, received number'
     );
   });
 
@@ -619,7 +621,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'risk_score: Number must be less than or equal to 100'
+      'risk_score: Too big: expected number to be <=100'
     );
   });
 
@@ -632,7 +634,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'risk_score: Number must be greater than or equal to 0'
+      'risk_score: Too small: expected number to be >=0'
     );
   });
 
@@ -644,7 +646,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You can set the risk_score to 100', () => {
@@ -655,7 +657,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You can set meta to any object you want', () => {
@@ -668,7 +670,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot create meta as a string', () => {
@@ -679,7 +681,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('meta: Expected object, received string');
+    expect(stringifyZodError(result.error)).toEqual(
+      'meta: Invalid input: expected object, received string'
+    );
   });
 
   test('You can omit the query string when filters are present', () => {
@@ -691,7 +695,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('validates with timeline_id and timeline_title', () => {
@@ -703,7 +707,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
@@ -715,7 +719,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      "severity: Invalid enum value. Expected 'low' | 'medium' | 'high' | 'critical', received 'junk'"
+      'severity: Invalid option: expected one of "low"|"medium"|"high"|"critical"'
     );
   });
 
@@ -727,7 +731,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('actions.0.id: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'actions.0.id: Invalid input: expected string, received undefined'
+    );
   });
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
@@ -738,7 +744,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('actions.0.action_type_id: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'actions.0.action_type_id: Invalid input: expected string, received undefined'
+    );
   });
 
   test('You cannot send in an array of actions that are missing "params"', () => {
@@ -749,7 +757,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('actions.0.params: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'actions.0.params: Invalid input: expected object, received undefined'
+    );
   });
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
@@ -767,7 +777,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('actions.0.action_type_id: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'actions.0.action_type_id: Invalid input: expected string, received undefined'
+    );
   });
 
   describe('note', () => {
@@ -779,7 +791,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('You can set note to an empty string', () => {
@@ -790,7 +802,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('You cannot create note as an object', () => {
@@ -803,7 +815,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('note: Expected string, received object');
+      expect(stringifyZodError(result.error)).toEqual(
+        'note: Invalid input: expected string, received object'
+      );
     });
 
     test('empty name is not valid', () => {
@@ -815,7 +829,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'name: String must contain at least 1 character(s)'
+        'name: Too small: expected string to have >=1 characters'
       );
     });
 
@@ -828,7 +842,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'description: String must contain at least 1 character(s)'
+        'description: Too small: expected string to have >=1 characters'
       );
     });
 
@@ -849,7 +863,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
   });
 
@@ -878,7 +892,7 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseSuccess(result);
-    expect(result.data).toEqual(payload);
+    expect(result.data).toMatchObject(payload);
   });
 
   test('saved_id is required when type is saved_query and will not validate without it', () => {
@@ -886,7 +900,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('saved_id: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'saved_id: Invalid input: expected string, received undefined'
+    );
   });
 
   test('threshold is required when type is threshold and will not validate without it', () => {
@@ -894,7 +910,9 @@ describe('rules schema', () => {
 
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('threshold: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'threshold: Invalid input: expected object, received undefined'
+    );
   });
 
   test('threshold rules fail validation if threshold is not greater than 0', () => {
@@ -904,7 +922,7 @@ describe('rules schema', () => {
     const result = RuleCreateProps.safeParse(payload);
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'threshold.value: Number must be greater than or equal to 1'
+      'threshold.value: Too small: expected number to be >=1'
     );
   });
 
@@ -928,7 +946,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
@@ -950,7 +968,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
@@ -973,7 +991,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        "exceptions_list.0.list_id: Required, exceptions_list.0.type: Required, exceptions_list.0.namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'not a namespace type'"
+        'exceptions_list.0.list_id: Invalid input: expected string, received undefined, exceptions_list.0.type: Invalid option: expected one of "detection"|"rule_default"|"endpoint"|"endpoint_trusted_apps"|"endpoint_trusted_devices"|"endpoint_events"|"endpoint_host_isolation_exceptions"|"endpoint_blocklists", exceptions_list.0.namespace_type: Invalid option: expected one of "agnostic"|"single"'
       );
     });
 
@@ -995,7 +1013,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
   });
 
@@ -1005,7 +1023,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validation fails without them', () => {
@@ -1015,7 +1033,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'threat_query: Required, threat_mapping: Required, threat_index: Required'
+        'threat_query: Invalid input: expected string, received undefined, threat_mapping: Invalid input: expected array, received undefined, threat_index: Invalid input: expected array, received undefined'
       );
     });
 
@@ -1026,7 +1044,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'threat_mapping: Array must contain at least 1 element(s)'
+        'threat_mapping: Too small: expected array to have >=1 items'
       );
     });
   });
@@ -1037,7 +1055,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     it('should drop the "index" property', () => {
@@ -1074,7 +1092,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('"data_view_id" cannot be a number', () => {
@@ -1086,7 +1104,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'data_view_id: Expected string, received number'
+        'data_view_id: Invalid input: expected string, received number'
       );
     });
 
@@ -1095,7 +1113,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
@@ -1103,7 +1121,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('it should validate a type of "threat_match" with "data_view_id" defined', () => {
@@ -1111,7 +1129,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('it should validate a type of "threshold" with "data_view_id" defined', () => {
@@ -1119,7 +1137,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('it should drop "data_view_id" when passed to "machine_learning" rules', () => {
@@ -1137,7 +1155,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('You cannot pass empty object for investigation_fields', () => {
@@ -1150,7 +1168,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('investigation_fields.field_names: Required');
+      expect(stringifyZodError(result.error)).toEqual(
+        'investigation_fields.field_names: Invalid input: expected array, received undefined'
+      );
     });
 
     test('You can send in investigation_fields', () => {
@@ -1161,7 +1181,7 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseSuccess(result);
-      expect(result.data).toEqual(payload);
+      expect(result.data).toMatchObject(payload);
     });
 
     test('You cannot send in an empty array of investigation_fields.field_names', () => {
@@ -1173,7 +1193,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'investigation_fields.field_names: Array must contain at least 1 element(s)'
+        'investigation_fields.field_names: Too small: expected array to have >=1 items'
       );
     });
 
@@ -1186,7 +1206,7 @@ describe('rules schema', () => {
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        'investigation_fields.field_names.0: Expected string, received number, investigation_fields.field_names.1: Expected string, received number, investigation_fields.field_names.2: Expected string, received number'
+        'investigation_fields.field_names.0: Invalid input: expected string, received number, investigation_fields.field_names.1: Invalid input: expected string, received number, investigation_fields.field_names.2: Invalid input: expected string, received number'
       );
     });
 
@@ -1198,7 +1218,9 @@ describe('rules schema', () => {
 
       const result = RuleCreateProps.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('investigation_fields.field_names: Required');
+      expect(stringifyZodError(result.error)).toEqual(
+        'investigation_fields.field_names: Invalid input: expected array, received undefined'
+      );
     });
   });
 
@@ -1233,7 +1255,7 @@ describe('rules schema', () => {
 
         const result = RuleCreateProps.safeParse(payload);
         expectParseSuccess(result);
-        expect(result.data).toEqual(payload);
+        expect(result.data).toMatchObject(payload);
       });
       test('should throw error if alert suppression duration is absent for "threshold" rule type', () => {
         const payload = {
@@ -1247,7 +1269,7 @@ describe('rules schema', () => {
         const result = RuleCreateProps.safeParse(payload);
         expectParseError(result);
         expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
-          `"alert_suppression.duration: Required"`
+          `"alert_suppression.duration: Invalid input: expected object, received undefined"`
         );
       });
     });
@@ -1276,7 +1298,7 @@ describe('rules schema', () => {
 
           const result = RuleCreateProps.safeParse(payload);
           expectParseSuccess(result);
-          expect(result.data).toEqual(payload);
+          expect(result.data).toMatchObject(payload);
         });
 
         test(`should throw error if suppression fields not valid for "${ruleType}" rule`, () => {
@@ -1291,7 +1313,7 @@ describe('rules schema', () => {
           const result = RuleCreateProps.safeParse(payload);
           expectParseError(result);
           expect(stringifyZodError(result.error)).toEqual(
-            'alert_suppression.group_by: Expected array, received string'
+            'alert_suppression.group_by: Invalid input: expected array, received string, alert_suppression.group_by: Too big: expected string to have <=3 characters'
           );
         });
 
@@ -1306,7 +1328,9 @@ describe('rules schema', () => {
 
           const result = RuleCreateProps.safeParse(payload);
           expectParseError(result);
-          expect(stringifyZodError(result.error)).toEqual('alert_suppression.group_by: Required');
+          expect(stringifyZodError(result.error)).toEqual(
+            'alert_suppression.group_by: Invalid input: expected array, received undefined'
+          );
         });
 
         test(`should drop fields that are not in suppression schema for "${ruleType}" rule`, () => {

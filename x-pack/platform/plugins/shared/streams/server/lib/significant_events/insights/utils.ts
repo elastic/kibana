@@ -7,20 +7,15 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
-import type { Insight } from '@kbn/streams-schema';
+import type { InsightCore } from '@kbn/streams-schema';
 import type { Query } from '../../../../common/queries';
 import { parseError } from '../../streams/errors/parse_error';
 import { SecurityError } from '../../streams/errors/security_error';
-import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './schema';
+import { SUBMIT_INSIGHTS_TOOL_NAME, parseInsightsWithErrors } from './client/insight_tool';
 
 export interface QueryData {
   title: string;
-  kql: string;
-  feature?: {
-    name: string;
-    filter: Condition;
-  };
+  esql: string;
   currentCount: number;
   sampleEvents: string[];
 }
@@ -34,7 +29,7 @@ const CURRENT_WINDOW_MINUTES = 15;
 export function extractInsightsFromResponse(
   response: { toolCalls?: Array<{ function: { name: string; arguments: unknown } }> },
   logger: Logger
-): Insight[] {
+): InsightCore[] {
   if (!response.toolCalls || response.toolCalls.length === 0) {
     logger.warn('LLM response has no tool calls');
     return [];
@@ -118,10 +113,7 @@ export async function collectQueryData({
 
   return {
     title: query.query.title,
-    kql: query.query.kql.query,
-    feature: query.query.feature
-      ? { name: query.query.feature.name, filter: query.query.feature.filter }
-      : undefined,
+    esql: query.query.esql.query,
     currentCount,
     sampleEvents,
   };

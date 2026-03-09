@@ -490,6 +490,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openAlertRuleInManagement(RULE_NAME);
 
       // change rule configuration
+      await testSubjects.click('ruleActionsButton');
       await testSubjects.click('openEditRuleFlyoutButton');
       await queryBar.setQuery('message:msg-1');
       await filterBar.addFilter({ field: 'message.keyword', operation: 'is', value: 'msg-1' });
