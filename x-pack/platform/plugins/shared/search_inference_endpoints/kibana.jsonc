@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-inference-endpoints",
+  "owner": "@elastic/search-kibana",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "searchInferenceEndpoints",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchInferenceEndpoints"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "features",
+      "licensing",
+      "management",
+      "ml",
+      "share",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "cloudConnect",
+      "console",
+      "serverless",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

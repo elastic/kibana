@@ -53,7 +53,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, crudClient } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Upsert Bulk api called');
         const { engines } = await assetManager.getStatus();
