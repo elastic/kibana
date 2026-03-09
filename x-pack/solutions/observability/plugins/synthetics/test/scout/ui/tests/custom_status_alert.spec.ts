@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-test.describe('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
+// backported as flaky
+test.describe.skip('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
   let configId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
