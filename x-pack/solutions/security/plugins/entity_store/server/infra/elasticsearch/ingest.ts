@@ -105,19 +105,21 @@ export async function ingestEntities({
   }
 
   const ignoreSet = new Set(fieldsToIgnore ?? []);
+  const columnMeta = columns.map((col) => ({
+    name: col.name,
+    skip: (useUpsertById && col.name === esIdField) || ignoreSet.has(col.name),
+    isIdField: useUpsertById && col.name === esIdField,
+  }));
 
   // Generator function that yields documents one at a time from columnar format
   async function* documentGenerator() {
     for (const row of values) {
       const doc: Record<string, unknown> = {};
       for (let i = 0; i < row.length; i++) {
-        const colName = columns[i].name;
-        const skip =
-          (useUpsertById && colName === esIdField) || ignoreSet.has(colName) || row[i] === null;
-        if (!skip) {
-          doc[colName] = row[i];
-        }
+        const { name, skip } = columnMeta[i];
+        if (!skip && row[i] !== null) doc[name] = row[i];
       }
+
       const finalDoc = transformDocument ? transformDocument(doc) : doc;
       if (useUpsertById) {
         yield { _id: row[identityFieldIndex] as string, ...finalDoc };
