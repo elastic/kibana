@@ -130,6 +130,56 @@ describe('Inference Settings API', () => {
       await expect(mockRouter.callRoute({})).rejects.toThrowError(error);
     });
 
+    it('should return empty defaults when SO returns .error with 404', async () => {
+      mockSOClient.get.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        error: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Saved object not found',
+        },
+        attributes: {},
+        references: [],
+      });
+
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          _meta: { id: INFERENCE_SETTINGS_ID },
+          data: { features: [] },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('should return customError when SO returns .error with non-404', async () => {
+      mockSOClient.get.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        error: {
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Access denied',
+        },
+        attributes: {},
+        references: [],
+      });
+
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: {
+          message: 'Access denied',
+          attributes: {
+            error: 'Forbidden',
+          },
+        },
+      });
+    });
+
     it('should use hidden types client', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -288,6 +338,38 @@ describe('Inference Settings API', () => {
             errors: expect.arrayContaining([
               expect.stringContaining('Duplicate endpoint_ids in feature "agent_builder"'),
             ]),
+          },
+        },
+      });
+    });
+
+    it('should return customError when SO create returns .error', async () => {
+      mockSOClient.create.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        error: {
+          statusCode: 409,
+          error: 'Conflict',
+          message: 'Version conflict',
+        },
+        attributes: {},
+        references: [],
+      });
+
+      await mockRouter.callRoute({
+        body: {
+          features: [
+            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+          ],
+        },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message: 'Version conflict',
+          attributes: {
+            error: 'Conflict',
           },
         },
       });
