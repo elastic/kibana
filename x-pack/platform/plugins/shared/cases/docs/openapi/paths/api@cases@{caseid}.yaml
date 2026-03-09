@@ -2,6 +2,9 @@ get:
   summary: Get case information
   operationId: getCaseDefaultSpace
   description: >
+    Returns case details. The response does not include a comments property; 
+    use the find case comments API to retrieve comments. The totalComment field 
+    reflects the actual number of user comments on the case.
     You must have `read` privileges for the **Cases** feature in the
     **Management**, **Observability**, or **Security** section of the Kibana
     feature privileges, depending on the owner of the case you're seeking.
@@ -9,7 +12,6 @@ get:
     - cases
   parameters:
     - $ref: '../components/parameters/case_id.yaml'
-    - $ref: '../components/parameters/includeComments.yaml'
   responses:
     '200':
       description: Indicates a successful call.

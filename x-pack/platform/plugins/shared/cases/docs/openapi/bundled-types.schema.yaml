@@ -75,7 +75,7 @@ paths:
             curl \
               --request DELETE 'https://localhost:5601/api/cases?ids=%5B%22030e6e34-6470-4001-864f-b229511ad188%22%2C%22e662ff34-0493-4538-b9d1-6706ced02ff2%22%5D' \
               --header "Authorization: $API_KEY" \
-              --header "Content-Type: application/json"
+              --header "Content-Type: application/json" \
               --header "kbn-xsrf: true"
         - label: Console
           lang: console
@@ -218,7 +218,7 @@ paths:
       summary: Get case settings
       operationId: getCaseConfigurationDefaultSpace
       description: |
-        Get setting details such as the closure type, custom fields, templatse, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
+        Get setting details such as the closure type, custom fields, templates, and the default connector for cases. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on where the cases were created.
       tags:
         - cases
       parameters:
@@ -797,12 +797,11 @@ paths:
       summary: Get case information
       operationId: getCaseDefaultSpace
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Returns case details. The response does not include a comments property; use the find case comments API to retrieve comments. The totalComment field reflects the actual number of user comments on the case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       tags:
         - cases
       parameters:
         - $ref: '#/components/parameters/case_id'
-        - $ref: '#/components/parameters/includeComments'
       responses:
         '200':
           description: Indicates a successful call.
@@ -942,7 +941,7 @@ paths:
                 $ref: '#/components/schemas/response_4xx'
   /api/cases/{caseId}/comments/_find:
     get:
-      summary: Find case comments and alerts
+      summary: Find case comments
       operationId: findCaseCommentsDefaultSpace
       description: |
         Retrieves a paginated list of comments for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
@@ -1053,7 +1052,7 @@ paths:
     get:
       summary: Find case activity
       description: |
-        Retrives a paginated list of user activity for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Retrieves a paginated list of user activity for a case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       operationId: findCaseActivityDefaultSpace
       tags:
         - cases
@@ -1371,14 +1370,6 @@ components:
       schema:
         type: string
         example: 9c235210-6834-11ea-a78c-6ffb38a34414
-    includeComments:
-      in: query
-      name: includeComments
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      deprecated: true
-      schema:
-        type: boolean
-        default: true
     comment_id:
       in: path
       name: commentId
@@ -3248,6 +3239,7 @@ components:
             parent: null
         settings:
           syncAlerts: true
+          extractObservables: false
         owner: cases
         customFields:
           - type: text
@@ -3268,6 +3260,7 @@ components:
         description: A case description.
         settings:
           syncAlerts: true
+          extractObservables: false
         owner: cases
         customFields:
           - key: d312efda-ec2b-42ec-9e2c-84981795c581
@@ -3317,6 +3310,7 @@ components:
               - tag-1
             settings:
               syncAlerts: true
+              extractObservables: false
             customFields:
               - key: fcc6840d-eb14-42df-8aaf-232201a705ec
                 type: toggle
@@ -3337,6 +3331,7 @@ components:
             - tag-1
           settings:
             syncAlerts: true
+            extractObservables: false
           owner: cases
           description: A case description.
           duration: null
@@ -3402,6 +3397,7 @@ components:
             description: Case description
             settings:
               syncAlerts: true
+              extractObservables: false
             owner: cases
             customFields:
               - type: text
@@ -3670,26 +3666,10 @@ components:
         - tag 1
         - tag 2
     get_case_response:
-      summary: Retrieves information about a case including its comments.
+      summary: Retrieves information about a case. The response omits comments; use the find case comments API to retrieve them. totalComment reflects the actual number of user comments.
       value:
         id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
         version: WzM2LDFd
-        comments:
-          - id: 2134c1d0-02c2-11ed-85f2-4f7c222ca2fa
-            version: WzM3LDFd
-            type: user
-            owner: cases
-            comment: A new comment
-            created_at: '2023-10-13T15:40:32.335Z'
-            created_by:
-              email: null
-              full_name: null
-              username: elastic
-              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-            pushed_at: null
-            pushed_by: null
-            updated_at: null
-            updated_by: null
         totalComment: 1
         totalAlerts: 0
         title: Case title 1
@@ -3697,6 +3677,7 @@ components:
           - tag 1
         settings:
           syncAlerts: true
+          extractObservables: false
         owner: cases
         category: null
         customFields:
@@ -3733,12 +3714,13 @@ components:
           fields: null
         external_service: null
     get_case_observability_response:
-      summary: Retrieves information about an Observability case including its alerts and comments.
+      summary: Retrieves information about an Observability case. The response omits comments; use the find case comments API to retrieve them. totalComment reflects the actual number of user comments.
       value:
         description: An Observability case description.
         owner: observability
         settings:
           syncAlerts: false
+          extractObservables: false
         tags:
           - observability
           - tag 1
@@ -3773,43 +3755,6 @@ components:
         version: WzI0NywyXQ==
         totalComment: 1
         totalAlerts: 1
-        comments:
-          - alertId:
-              - a6e12ac4-7bce-457b-84f6-d7ce8deb8446
-            index:
-              - .internal.alerts-observability.logs.alerts-default-000001
-            type: alert
-            rule:
-              id: 03e4eb87-62ca-4e5d-9570-3d7625e9669d
-              name: Observability rule
-            owner: observability
-            created_at: '2023-11-06T19:29:38.424Z'
-            created_by:
-              email: null
-              full_name: null
-              username: elastic
-              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-            pushed_at: null
-            pushed_by: null
-            updated_at: null
-            updated_by: null
-            id: 59d438d0-79a9-4864-8d4b-e63adacebf6e
-            version: WzY3LDJd
-          - comment: The first comment.
-            type: user
-            owner: observability
-            created_at: '2023-11-06T19:29:57.812Z'
-            created_by:
-              email: null
-              full_name: null
-              username: elastic
-              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-            pushed_at: null
-            pushed_by: null
-            updated_at: null
-            updated_by: null
-            id: d99342d3-3aa3-4b80-90ec-a702607604f5
-            version: WzcyLDJd
     get_case_alerts_response:
       summary: Retrieves all alerts attached to a case
       value:
@@ -3985,6 +3930,7 @@ components:
           - tag 1
         settings:
           syncAlerts: true
+          extractObservables: false
         owner: cases
         duration: null
         severity: low
