@@ -52,7 +52,8 @@ steps:
       duration: 11s
 `;
 
-apiTest.describe('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
+// FLAKY: https://github.com/elastic/security-team/issues/16272
+apiTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let workflowsApi: WorkflowsApiService;
   let workflowId: string;
