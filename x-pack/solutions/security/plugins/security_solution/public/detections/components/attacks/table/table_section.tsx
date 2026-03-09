@@ -21,6 +21,8 @@ import { useDataTableFilters } from '../../../../common/hooks/use_data_table_fil
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import {
@@ -104,6 +106,10 @@ export const TableSection = React.memo(
 
     const { to, from } = useGlobalTime();
 
+    const {
+      services: { telemetry },
+    } = useKibana();
+
     const [{ loading: userInfoLoading }] = useUserData();
 
     const { loading: listsConfigLoading } = useListsConfig();
@@ -151,9 +157,13 @@ export const TableSection = React.memo(
               },
             },
           });
+          telemetry.reportEvent(AttacksEventTypes.DetailsFlyoutOpened, {
+            id: attack.id,
+            source: 'attacks_page_table',
+          });
         }
       },
-      [dataView, getAttack, openFlyout]
+      [dataView, getAttack, openFlyout, telemetry]
     );
 
     const { defaultGroupTitleRenderers } = useGetDefaultGroupTitleRenderers({
