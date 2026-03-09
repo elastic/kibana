@@ -1433,8 +1433,7 @@
   },
   "entity-store-global-state": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "epm-packages": {
     "dynamic": false,
@@ -1442,6 +1441,17 @@
       "additional_spaces_installed_kibana": {
         "index": false,
         "type": "flattened"
+      },
+      "dependencies": {
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "es_index_patterns": {
         "dynamic": false,
@@ -1507,6 +1517,9 @@
         "type": "keyword"
       },
       "internal": {
+        "type": "boolean"
+      },
+      "is_dependency": {
         "type": "boolean"
       },
       "keep_policies_up_to_date": {
