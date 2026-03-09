@@ -1,0 +1,101 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  API_VERSIONS,
+  EVALS_DATASET_EXAMPLE_URL,
+  INTERNAL_API_ACCESS,
+  UpdateEvaluationDatasetExampleRequestBody,
+  UpdateEvaluationDatasetExampleRequestParams,
+  buildRouteValidationWithZod,
+} from '@kbn/evals-common';
+import { PLUGIN_ID } from '../../../common';
+import { ExampleAlreadyExistsError } from '../../storage/example_already_exists_error';
+import type { RouteDependencies } from '../register_routes';
+
+export const registerUpdateExampleRoute = ({ router, logger }: RouteDependencies) => {
+  router.versioned
+    .put({
+      path: EVALS_DATASET_EXAMPLE_URL,
+      access: INTERNAL_API_ACCESS,
+      security: {
+        authz: { requiredPrivileges: [PLUGIN_ID] },
+      },
+      summary: 'Update evaluation dataset example',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: {
+            params: buildRouteValidationWithZod(UpdateEvaluationDatasetExampleRequestParams),
+            body: buildRouteValidationWithZod(UpdateEvaluationDatasetExampleRequestBody),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { datasetId, exampleId } = request.params;
+          const { input, output, metadata } = request.body;
+          const coreContext = await context.core;
+          const evalsContext = await context.evals;
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const datasetClient = evalsContext.datasetService.getClient(esClient);
+          const dataset = await datasetClient.get(datasetId);
+
+          if (!dataset) {
+            return response.notFound({
+              body: { message: `Evaluation dataset not found: ${datasetId}` },
+            });
+          }
+
+          if (!dataset.examples.some((example) => example.id === exampleId)) {
+            return response.notFound({
+              body: { message: `Evaluation dataset example not found: ${exampleId}` },
+            });
+          }
+
+          const updatedExample = await datasetClient.updateExample(exampleId, {
+            input,
+            output,
+            metadata,
+          });
+
+          if (!updatedExample) {
+            return response.notFound({
+              body: { message: `Evaluation dataset example not found: ${exampleId}` },
+            });
+          }
+
+          return response.ok({
+            body: {
+              id: updatedExample.id,
+              dataset_id: updatedExample.dataset_id,
+              input: updatedExample.input,
+              output: updatedExample.output,
+              metadata: updatedExample.metadata,
+              created_at: updatedExample.created_at,
+              updated_at: updatedExample.updated_at,
+            },
+          });
+        } catch (error) {
+          if (error instanceof ExampleAlreadyExistsError) {
+            return response.customError({
+              statusCode: 409,
+              body: { message: error.message },
+            });
+          }
+
+          logger.error(`Failed to update evaluation dataset example: ${error}`);
+          return response.customError({
+            statusCode: 500,
+            body: { message: 'Failed to update evaluation dataset example' },
+          });
+        }
+      }
+    );
+};
