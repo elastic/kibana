@@ -82,17 +82,16 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
 
 const { useAgentEdit } = jest.requireMock('../../../hooks/agents/use_agent_edit');
 
-const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: false } },
-});
-
-function renderWithIntl(ui: React.ReactElement) {
+const renderWithIntl = (ui: React.ReactElement) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
   return render(
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en">{ui}</IntlProvider>
     </QueryClientProvider>
   );
-}
+};
 
 describe('AgentForm', () => {
   beforeEach(() => {

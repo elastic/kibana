@@ -10,12 +10,23 @@ import {
   securityServiceMock,
   elasticsearchServiceMock,
 } from '@kbn/core/server/mocks';
+import { APPLICATION_PREFIX } from '@kbn/security-plugin/common/constants';
 import {
   hasAgentVisibilityAccessOverrideFromRequest,
   getAgentApiAccessFromRequest,
   getUserFromRequest,
 } from './utils';
 import { apiPrivileges } from '../../common/features';
+
+const EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST = {
+  application: [
+    {
+      application: `${APPLICATION_PREFIX}.kibana`,
+      resources: ['*'],
+      privileges: ['agent_builder:agent_visibility_access_override'],
+    },
+  ],
+};
 
 describe('getUserFromRequest', () => {
   let security: ReturnType<typeof securityServiceMock.createStart>;
@@ -104,6 +115,9 @@ describe('hasAgentVisibilityAccessOverrideFromRequest', () => {
 
     expect(result).toBe(true);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST
+    );
   });
 
   it('returns false when privilege check does not authorize override privilege', async () => {
@@ -119,6 +133,20 @@ describe('hasAgentVisibilityAccessOverrideFromRequest', () => {
 
     expect(result).toBe(false);
     expect(esClient.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST
+    );
+  });
+
+  it('returns false when privilege check throws (fail closed)', async () => {
+    esClient.security.hasPrivileges.mockRejectedValue(new Error('Elasticsearch unavailable'));
+
+    const result = await hasAgentVisibilityAccessOverrideFromRequest({ esClient });
+
+    expect(result).toBe(false);
+    expect(esClient.security.hasPrivileges).toHaveBeenCalledWith(
+      EXPECTED_VISIBILITY_OVERRIDE_HAS_PRIVILEGES_REQUEST
+    );
   });
 });
 

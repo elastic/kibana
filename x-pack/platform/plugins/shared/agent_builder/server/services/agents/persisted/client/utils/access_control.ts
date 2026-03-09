@@ -28,7 +28,7 @@ export const hasReadAccess = ({
   source: AgentProperties;
   user: UserIdAndName;
   hasAgentVisibilityAccessOverride: boolean;
-}) =>
+}): boolean =>
   hasAgentReadAccess({
     visibility: source.visibility,
     owner: sourceToOwner(source),
@@ -44,7 +44,7 @@ export const hasWriteAccess = ({
   source: AgentProperties;
   user: UserIdAndName;
   hasAgentVisibilityAccessOverride: boolean;
-}) =>
+}): boolean =>
   hasAgentWriteAccess({
     visibility: source.visibility,
     owner: sourceToOwner(source),
@@ -86,7 +86,7 @@ export const validateVisibilityUpdateAccess = ({
   update: AgentUpdateRequest;
   user: UserIdAndName;
   hasAgentVisibilityAccessOverride: boolean;
-}) => {
+}): boolean => {
   const isVisibilityChange =
     update.visibility !== undefined &&
     update.visibility !== (source.visibility ?? AgentVisibility.Public);

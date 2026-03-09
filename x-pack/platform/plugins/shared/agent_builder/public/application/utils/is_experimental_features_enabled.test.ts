@@ -26,10 +26,12 @@ describe('isExperimentalFeaturesEnabled', () => {
     expect(client.get).toHaveBeenCalledWith(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false);
   });
 
-  it('returns undefined when uiSettingsClient.get returns undefined', () => {
+  it('returns false by default when setting is not configured', () => {
     const { client } = settingsServiceMock.createStartContract();
-    (client.get as jest.Mock).mockReturnValue(undefined);
+    (client.get as jest.Mock).mockImplementation(
+      (_key: string, defaultValue: boolean) => defaultValue
+    );
 
-    expect(isExperimentalFeaturesEnabled(client)).toBeUndefined();
+    expect(isExperimentalFeaturesEnabled(client)).toBe(false);
   });
 });

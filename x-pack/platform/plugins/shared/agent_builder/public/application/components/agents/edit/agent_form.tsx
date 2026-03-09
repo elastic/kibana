@@ -31,7 +31,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import { filterToolsBySelection, type AgentDefinition } from '@kbn/agent-builder-common';
+import {
+  filterToolsBySelection,
+  isAgentOwner,
+  type AgentDefinition,
+} from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -55,6 +59,7 @@ import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useCurrentUser } from '../../../hooks/agents/use_current_user';
 import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
 const BUTTON_IDS = {
@@ -84,6 +89,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { services } = useKibana();
   const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.uiSettings);
   const { manageAgents } = useUiPrivileges();
+  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -145,6 +151,12 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     onSaveSuccess,
     onSaveError,
   });
+
+  const ownerIsCurrentUser = isAgentOwner({
+    owner: agentState?.created_by,
+    currentUser: currentUser ?? undefined,
+  });
+  const canEditAgent = !experimentalFeaturesEnabled || manageAgents || ownerIsCurrentUser;
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
@@ -234,7 +246,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             control={control}
             formState={formState}
             isCreateMode={isCreateMode}
-            isFormDisabled={isFormDisabled || !manageAgents}
+            isFormDisabled={isFormDisabled || !canEditAgent}
             owner={agentState?.created_by}
           />
         ),
@@ -249,7 +261,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             control={control}
             tools={tools}
             isLoading={isLoading}
-            isFormDisabled={isFormDisabled || !manageAgents}
+            isFormDisabled={isFormDisabled || !canEditAgent}
           />
         ),
         append: (
@@ -271,11 +283,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       formState,
       isCreateMode,
       isFormDisabled,
+      canEditAgent,
       tools,
       isLoading,
       euiTheme,
       activeToolsCount,
-      manageAgents,
       agentState?.created_by,
     ]
   );
@@ -480,7 +492,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           )
         }
         rightSideItems={[
-          ...(!manageAgents
+          ...(!canEditAgent
             ? []
             : !isCreateMode
             ? [
@@ -524,7 +536,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               ]
             : [renderSaveButton({ size: 'm' })]),
           renderChatButton({ size: 'm' }),
-          ...(!manageAgents
+          ...(!canEditAgent
             ? []
             : !isCreateMode
             ? [
@@ -631,7 +643,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{renderChatButton()}</EuiFlexItem>
-          {manageAgents && <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>}
+          {canEditAgent && <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>}
         </EuiFlexGroup>
       </KibanaPageTemplate.BottomBar>
     </KibanaPageTemplate>

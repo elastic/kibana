@@ -62,18 +62,22 @@ export const hasAgentVisibilityAccessOverrideFromRequest = async ({
 }: {
   esClient: ElasticsearchClient;
 }): Promise<boolean> => {
-  const { has_all_requested: hasAgentVisibilityAccessOverride } =
-    await esClient.security.hasPrivileges({
-      application: [
-        {
-          application: KIBANA_APPLICATION,
-          resources: ['*'],
-          privileges: [VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE],
-        },
-      ],
-    });
+  try {
+    const { has_all_requested: hasAgentVisibilityAccessOverride } =
+      await esClient.security.hasPrivileges({
+        application: [
+          {
+            application: KIBANA_APPLICATION,
+            resources: ['*'],
+            privileges: [VISIBILITY_ACCESS_OVERRIDE_PRIVILEGE],
+          },
+        ],
+      });
 
-  return hasAgentVisibilityAccessOverride;
+    return hasAgentVisibilityAccessOverride;
+  } catch {
+    return false;
+  }
 };
 
 export const getAgentApiAccessFromRequest = async ({

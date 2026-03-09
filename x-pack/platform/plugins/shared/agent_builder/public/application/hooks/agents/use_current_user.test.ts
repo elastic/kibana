@@ -81,4 +81,19 @@ describe('useCurrentUser', () => {
     expect(result.current.currentUser).toBeNull();
     expect(result.current.isLoading).toBe(false);
   });
+
+  it('maps query data to currentUser', () => {
+    mockUseQuery.mockReturnValue({
+      data: { uid: 'user-123', user: { username: 'testuser' } },
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useCurrentUser({ enabled: true }));
+
+    expect(result.current.currentUser).toEqual({
+      id: 'user-123',
+      username: 'testuser',
+    });
+    expect(result.current.isLoading).toBe(false);
+  });
 });

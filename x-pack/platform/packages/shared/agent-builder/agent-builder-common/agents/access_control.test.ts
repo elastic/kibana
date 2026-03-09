@@ -49,6 +49,14 @@ describe('isAgentOwner', () => {
     const sameIdUser: UserIdAndName = { id: 'owner-id', username: 'different-username' };
     expect(isAgentOwner({ owner, currentUser: sameIdUser })).toBe(true);
   });
+
+  test('returns false when both ids are defined but differ (no username fallback)', () => {
+    const ownerWithId: UserIdAndName = { id: 'owner-id', username: 'alice' };
+    const userSameUsernameDifferentId: UserIdAndName = { id: 'other-id', username: 'alice' };
+    expect(isAgentOwner({ owner: ownerWithId, currentUser: userSameUsernameDifferentId })).toBe(
+      false
+    );
+  });
 });
 
 describe('canChangeAgentVisibility', () => {

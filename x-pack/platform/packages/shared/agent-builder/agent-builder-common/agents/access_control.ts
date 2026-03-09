@@ -18,8 +18,8 @@ export const isAgentOwner = ({
   if (!owner || !currentUser) {
     return false;
   }
-  if (currentUser.id !== undefined && currentUser.id === owner.id) {
-    return true;
+  if (owner.id !== undefined && currentUser.id !== undefined) {
+    return owner.id === currentUser.id;
   }
   return owner.username === currentUser.username;
 };

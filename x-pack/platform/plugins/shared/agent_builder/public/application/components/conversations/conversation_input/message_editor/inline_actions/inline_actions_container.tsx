@@ -48,16 +48,13 @@ export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
   return (
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
-      {
-        // TODO:
-        isExperimentalFeaturesEnabled(settings.client) && (
-          <InlineActionPopover
-            triggerMatch={triggerMatch}
-            onClose={onClose}
-            anchorPosition={anchorPosition}
-          />
-        )
-      }
+      {isExperimentalFeaturesEnabled(settings.client) && (
+        <InlineActionPopover
+          triggerMatch={triggerMatch}
+          onClose={onClose}
+          anchorPosition={anchorPosition}
+        />
+      )}
     </div>
   );
 };

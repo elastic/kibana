@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import type { Capabilities, CoreSetup } from '@kbn/core/server';
+import type { Capabilities, CoreSetup, CoreStart } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createVisibilityAccessOverrideSwitcher } from './visibility_access_override_switcher';
 import { hasAgentVisibilityAccessOverrideFromRequest } from '../services/utils';
+
+function createStartServicesWithScopedEsClient(
+  asCurrentUser: object
+): Awaited<ReturnType<CoreSetup['getStartServices']>> {
+  const coreStart: CoreStart = coreMock.createStart();
+  const asScoped = jest.fn().mockReturnValue({ asCurrentUser });
+  Object.assign(coreStart.elasticsearch.client, { asScoped });
+  return [coreStart, {}, {}];
+}
 
 const minimalCapabilities: Capabilities = {
   navLinks: {},
@@ -49,17 +58,9 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
   it('returns agentBuilder.hasAgentVisibilityAccessOverride true when privilege check grants override', async () => {
     mockHasAgentVisibilityAccessOverrideFromRequest.mockResolvedValue(true);
     const asCurrentUser = {};
-    const getStartServices = jest.fn().mockResolvedValue([
-      {
-        elasticsearch: {
-          client: {
-            asScoped: jest.fn().mockReturnValue({ asCurrentUser }),
-          },
-        },
-      },
-      {},
-      {},
-    ] as unknown as Awaited<ReturnType<CoreSetup['getStartServices']>>);
+    const getStartServices = jest
+      .fn()
+      .mockResolvedValue(createStartServicesWithScopedEsClient(asCurrentUser));
     const switcher = createSwitcher(getStartServices);
     const request = httpServerMock.createKibanaRequest();
 
@@ -79,17 +80,9 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
   it('returns empty object when privilege check does not grant override', async () => {
     mockHasAgentVisibilityAccessOverrideFromRequest.mockResolvedValue(false);
     const asCurrentUser = {};
-    const getStartServices = jest.fn().mockResolvedValue([
-      {
-        elasticsearch: {
-          client: {
-            asScoped: jest.fn().mockReturnValue({ asCurrentUser }),
-          },
-        },
-      },
-      {},
-      {},
-    ] as unknown as Awaited<ReturnType<CoreSetup['getStartServices']>>);
+    const getStartServices = jest
+      .fn()
+      .mockResolvedValue(createStartServicesWithScopedEsClient(asCurrentUser));
     const switcher = createSwitcher(getStartServices);
     const request = httpServerMock.createKibanaRequest();
 
@@ -123,17 +116,9 @@ describe('createVisibilityAccessOverrideSwitcher', () => {
       new Error('Elasticsearch unavailable')
     );
     const asCurrentUser = {};
-    const getStartServices = jest.fn().mockResolvedValue([
-      {
-        elasticsearch: {
-          client: {
-            asScoped: jest.fn().mockReturnValue({ asCurrentUser }),
-          },
-        },
-      },
-      {},
-      {},
-    ] as unknown as Awaited<ReturnType<CoreSetup['getStartServices']>>);
+    const getStartServices = jest
+      .fn()
+      .mockResolvedValue(createStartServicesWithScopedEsClient(asCurrentUser));
     const switcher = createSwitcher(getStartServices);
     const request = httpServerMock.createKibanaRequest();
 

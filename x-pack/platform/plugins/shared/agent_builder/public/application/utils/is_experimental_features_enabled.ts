@@ -8,6 +8,6 @@
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { IUiSettingsClient } from '@kbn/core/public';
 
-export function isExperimentalFeaturesEnabled(uiSettingsClient: IUiSettingsClient) {
-  return uiSettingsClient.get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false);
+export function isExperimentalFeaturesEnabled(uiSettingsClient: IUiSettingsClient): boolean {
+  return uiSettingsClient.get(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, false) ?? false;
 }
