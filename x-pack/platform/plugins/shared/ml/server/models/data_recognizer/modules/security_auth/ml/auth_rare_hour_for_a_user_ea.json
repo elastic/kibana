@@ -19,7 +19,8 @@
       "host.name",
       "user.name",
       "user.id",
-      "host.id"
+      "host.id",
+      "event.module"
     ]
   },
   "allow_lazy_open": true,

@@ -19,7 +19,8 @@
       "host.id",
       "user.name",
       "user.id",
-      "source.ip"
+      "source.ip",
+      "event.module"
     ],
     "model_prune_window": "30d"
   },

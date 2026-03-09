@@ -1,5 +1,5 @@
 {
-  "job_id": "azure_activitylogs_rare_event_action_for_a_username_euid",
+  "job_id": "azure_activitylogs_rare_event_action_for_a_username_ea",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -18,13 +18,6 @@
           }
         }
       ]
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
     }
   }
 }
