@@ -1360,6 +1360,21 @@ paths:
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
+                    skills:
+                      items:
+                        additionalProperties: false
+                        description: Skill selection configuration for the agent.
+                        type: object
+                        properties:
+                          skill_ids:
+                            description: Array of skill IDs. Use "*" to select all built-in skills.
+                            items:
+                              description: Skill ID to be available to the agent.
+                              type: string
+                            type: array
+                        required:
+                          - skill_ids
+                      type: array
                     tools:
                       items:
                         additionalProperties: false
@@ -1673,6 +1688,21 @@ paths:
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
+                    skills:
+                      items:
+                        additionalProperties: false
+                        description: Skill selection configuration for the agent.
+                        type: object
+                        properties:
+                          skill_ids:
+                            description: Array of skill IDs. Use "*" to select all built-in skills.
+                            items:
+                              description: Skill ID to be available to the agent.
+                              type: string
+                            type: array
+                        required:
+                          - skill_ids
+                      type: array
                     tools:
                       items:
                         additionalProperties: false
