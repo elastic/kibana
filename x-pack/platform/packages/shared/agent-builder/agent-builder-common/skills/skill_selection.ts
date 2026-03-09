@@ -44,6 +44,8 @@ export interface SkillSelection {
 
 /**
  * Returns true if the given skill ID matches the provided skill selection.
+ * @param skillId - Skill ID to check
+ * @param skillSelection - Array of skill selections
  */
 export const skillMatchSelection = (skillId: string, skillSelection: SkillSelection[]): boolean => {
   return skillSelection.some(
@@ -55,6 +57,7 @@ export const skillMatchSelection = (skillId: string, skillSelection: SkillSelect
 
 /**
  * Returns true if the skill selection includes the wildcard.
+ * @param skillSelection - Array of skill selections to check
  */
 export const hasSkillSelectionWildcard = (skillSelection: SkillSelection[]): boolean => {
   return skillSelection.some((selection) =>
@@ -64,6 +67,7 @@ export const hasSkillSelectionWildcard = (skillSelection: SkillSelection[]): boo
 
 /**
  * Extracts all explicit (non-wildcard) skill IDs from a skill selection.
+ * @param skillSelection - Array of skill selections
  */
 export const getExplicitSkillIds = (skillSelection: SkillSelection[]): string[] => {
   return skillSelection.flatMap((selection) =>

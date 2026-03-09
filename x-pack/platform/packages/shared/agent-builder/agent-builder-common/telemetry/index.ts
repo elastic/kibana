@@ -11,4 +11,7 @@ export {
   agentBuilderServerEbtEvents,
   type AgentBuilderTelemetryEventsMap,
   type AgentBuilderEventTypes,
+  type ReportSkillCreatedParams,
+  type ReportSkillUpdatedParams,
+  type ReportSkillDeletedParams,
 } from './agent_builder_events';

@@ -7,10 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 
+/** Maximum allowed length for a skill ID. */
 export const skillIdMaxLength = 64;
+/** Maximum allowed length for a skill name. */
 export const skillNameMaxLength = 64;
+/** Regex for valid skill IDs (lowercase alphanumeric, hyphens, underscores). */
 export const skillIdRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+/** Regex for valid skill names. */
 export const skillNameRegexp = /^[a-zA-Z0-9](?:[a-zA-Z0-9 _-]*[a-zA-Z0-9])?$/;
+/** Maximum number of tools a skill can reference. */
 export const maxToolsPerSkill = 5;
 
 const skillNameSchema = z
@@ -85,6 +90,7 @@ export const skillUpdateRequestSchema = z.object({
 /**
  * Validates a skill ID has the right format.
  * Returns an error message if it fails, undefined otherwise.
+ * @param skillId - Skill ID to validate
  */
 export const validateSkillId = (skillId: string): string | undefined => {
   if (!skillIdRegexp.test(skillId)) {

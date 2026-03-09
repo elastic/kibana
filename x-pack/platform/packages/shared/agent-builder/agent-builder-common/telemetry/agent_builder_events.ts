@@ -97,15 +97,21 @@ export interface ReportToolCreatedParams {
   tool_type: string;
 }
 
+/** Telemetry params reported when a user-created skill is created. */
 export interface ReportSkillCreatedParams {
+  /** Identifier of the created skill. */
   skill_id: string;
 }
 
+/** Telemetry params reported when a user-created skill is updated. */
 export interface ReportSkillUpdatedParams {
+  /** Identifier of the updated skill. */
   skill_id: string;
 }
 
+/** Telemetry params reported when a user-created skill is deleted. */
 export interface ReportSkillDeletedParams {
+  /** Identifier of the deleted skill. */
   skill_id: string;
 }
 
@@ -141,8 +147,11 @@ export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
   [AGENT_BUILDER_EVENT_TYPES.ToolCreated]: ReportToolCreatedParams;
+  /** Fired when a user-created skill is created. */
   [AGENT_BUILDER_EVENT_TYPES.SkillCreated]: ReportSkillCreatedParams;
+  /** Fired when a user-created skill is updated. */
   [AGENT_BUILDER_EVENT_TYPES.SkillUpdated]: ReportSkillUpdatedParams;
+  /** Fired when a user-created skill is deleted. */
   [AGENT_BUILDER_EVENT_TYPES.SkillDeleted]: ReportSkillDeletedParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundComplete]: ReportRoundCompleteParams;
   [AGENT_BUILDER_EVENT_TYPES.RoundError]: ReportRoundErrorParams;
