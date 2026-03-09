@@ -6,7 +6,7 @@
  */
 
 import { parsePluginZipFile, PluginArchiveError } from './parse_plugin_zip_file';
-import type { ZipArchive } from './open_zip_archive';
+import type { ZipArchive } from '../archive';
 
 const createMockArchive = (files: Record<string, string>): ZipArchive => {
   return {

@@ -11,9 +11,13 @@ import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { pipeline } from 'stream/promises';
 import { createWriteStream, deleteFile, getSafePath } from '@kbn/fs';
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
-import { openZipArchive, type ZipArchive } from './open_zip_archive';
-import { parsePluginZipFile, PluginArchiveError } from './parse_plugin_zip_file';
-import { createScopedArchive, detectArchiveRootPrefix } from './create_scoped_archive';
+import {
+  openZipArchive,
+  createScopedArchive,
+  detectArchiveRootPrefix,
+  type ZipArchive,
+} from '../archive';
+import { parsePluginZipFile, PluginArchiveError } from '../parsing';
 import { resolvePluginUrl, type ResolvePluginUrlOptions } from './resolve_plugin_url';
 
 const VOLUME = 'agent_builder';

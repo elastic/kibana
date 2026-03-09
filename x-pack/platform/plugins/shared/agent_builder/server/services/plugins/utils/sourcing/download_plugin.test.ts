@@ -6,20 +6,20 @@
  */
 
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
-import type { ZipArchive } from './open_zip_archive';
+import type { ZipArchive } from '../archive';
 
 const mockOpenZipArchive = jest.fn();
-jest.mock('./open_zip_archive', () => ({
+jest.mock('../archive', () => ({
   openZipArchive: (...args: unknown[]) => mockOpenZipArchive(...args),
 }));
 
 const mockParsePluginZipFile = jest.fn();
-jest.mock('./parse_plugin_zip_file', () => ({
+jest.mock('../parsing', () => ({
   parsePluginZipFile: (...args: unknown[]) => mockParsePluginZipFile(...args),
   PluginArchiveError: class extends Error {},
 }));
 
-import { parsePluginFromFile } from './parse_plugin_from_url';
+import { parsePluginFromFile } from './download_plugin';
 
 describe('parsePluginFromFile', () => {
   let mockArchive: jest.Mocked<ZipArchive>;

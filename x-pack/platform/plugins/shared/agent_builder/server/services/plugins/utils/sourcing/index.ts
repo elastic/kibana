@@ -6,22 +6,17 @@
  */
 
 export {
-  openZipArchive,
-  createScopedArchive,
-  detectArchiveRootPrefix,
-  type ZipArchive,
-} from './archive';
-export { parsePluginZipFile, PluginArchiveError, parseSkillFile } from './parsing';
-export {
   parseGithubUrl,
   getGithubArchiveUrl,
   isGithubUrl,
   type GithubUrlInfo,
+} from './parse_github_url';
+export {
   resolvePluginUrl,
   type ResolvedPluginUrl,
   type ZipPluginUrl,
   type GithubPluginUrl,
-  parsePluginFromUrl,
-  parsePluginFromFile,
-  saveUploadedFile,
-} from './sourcing';
+  type ResolvePluginUrlOptions,
+} from './resolve_plugin_url';
+export { parsePluginFromUrl, parsePluginFromFile } from './download_plugin';
+export { saveUploadedFile } from './save_uploaded_file';

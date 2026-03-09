@@ -12,7 +12,7 @@ import type {
   ParsedSkillFile,
   UnmanagedPluginAssets,
 } from '@kbn/agent-builder-common';
-import type { ZipArchive } from './open_zip_archive';
+import type { ZipArchive } from '../archive';
 import { parseSkillFile } from './parse_skill_file';
 
 const manifestPaths = ['.claude-plugin/plugin.json', 'plugin.json'];
