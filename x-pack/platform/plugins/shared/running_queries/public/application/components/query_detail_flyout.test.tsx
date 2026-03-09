@@ -38,7 +38,7 @@ describe('QueryDetailFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the Inspect in Discover button when traceId and locator are available', async () => {
+  it('renders the trace ID as a link when traceId and locator are available', async () => {
     const query = createQuery({ traceId: 'trace-123' });
     const discoverLocator = {
       getRedirectUrl: jest.fn(() => '/app/discover#/?_a=()'),
@@ -72,8 +72,8 @@ describe('QueryDetailFlyout', () => {
       />
     );
 
-    expect(
-      await screen.findByTestId('runningQueriesFlyoutInspectInDiscoverButton')
-    ).toBeInTheDocument();
+    const link = await screen.findByTestId('runningQueriesFlyoutTraceIdLink');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveTextContent('trace-123');
   });
 });

@@ -11,11 +11,14 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiLink,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFlyoutHeader,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -57,13 +60,6 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
   const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
-  const inspectInDiscoverLabel = i18n.translate(
-    'xpack.runningQueries.flyout.inspectInDiscoverLabel',
-    {
-      defaultMessage: 'Inspect in Discover',
-    }
-  );
-
   const flyoutAriaLabel = i18n.translate('xpack.runningQueries.flyout.ariaLabel', {
     defaultMessage: 'Running query details',
   });
@@ -89,7 +85,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
   return (
     <EuiFlyout aria-label={flyoutAriaLabel} onClose={onClose} size="m" maxWidth={691}>
-      <EuiFlyoutBody>
+      <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
@@ -107,81 +103,9 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
             <EuiBadge color="hollow">{query.queryType}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
+      </EuiFlyoutHeader>
 
-        {query.traceId && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('xpack.runningQueries.flyout.traceIdLabel', {
-                      defaultMessage: 'Trace ID',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">{query.traceId}</EuiText>
-              </EuiFlexItem>
-              {inspectInDiscoverLinkProps ? (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="discoverApp"
-                    data-test-subj="runningQueriesFlyoutInspectInDiscoverButton"
-                    aria-label={inspectInDiscoverLabel}
-                    {...inspectInDiscoverLinkProps}
-                  >
-                    {inspectInDiscoverLabel}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </>
-        )}
-
-        <EuiSpacer size="s" />
-
-        <EuiText size="s">
-          <strong>
-            {i18n.translate('xpack.runningQueries.flyout.sourceLabel', {
-              defaultMessage: 'Source',
-            })}
-          </strong>{' '}
-          {source ? (
-            <>{source}</>
-          ) : (
-            <EuiText color="subdued">
-              <em>{notAvailableLabel}</em>
-            </EuiText>
-          )}
-        </EuiText>
-
-        {query.xOpaqueId && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate('xpack.runningQueries.flyout.xOpaqueIdLabel', {
-                      defaultMessage: 'Opaque ID',
-                    })}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={true}>
-                <EuiText size="s" css={{ wordBreak: 'break-all' }}>
-                  {query.xOpaqueId}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
-
-        <EuiSpacer size="l" />
-
+      <EuiFlyoutBody>
         <EuiPanel hasBorder paddingSize="l">
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -228,9 +152,43 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
         <EuiSpacer size="l" />
 
+        <EuiDescriptionList
+          type="column"
+          columnWidths={[1, 7]}
+          listItems={[
+            ...(query.traceId
+              ? [
+                  {
+                    title: i18n.translate('xpack.runningQueries.flyout.traceIdLabel', {
+                      defaultMessage: 'Trace ID',
+                    }),
+                    description: inspectInDiscoverLinkProps ? (
+                      <EuiLink
+                        data-test-subj="runningQueriesFlyoutTraceIdLink"
+                        external
+                        {...inspectInDiscoverLinkProps}
+                      >
+                        {query.traceId}
+                      </EuiLink>
+                    ) : (
+                      query.traceId
+                    ),
+                  },
+                ]
+              : []),
+            {
+              title: i18n.translate('xpack.runningQueries.flyout.sourceLabel', {
+                defaultMessage: 'Source',
+              }),
+              description: source || <em>{notAvailableLabel}</em>,
+            },
+          ]}
+        />
+
         {query.query && (
           <>
-            <EuiTitle size="xs">
+            <EuiSpacer size="l" />
+            <EuiTitle size="s">
               <h3>
                 {i18n.translate('xpack.runningQueries.flyout.queryLabel', {
                   defaultMessage: 'Query',
@@ -254,6 +212,25 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               isCopyable
             >
               {query.query}
+            </EuiCodeBlock>
+          </>
+        )}
+
+        {query.xOpaqueId && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('xpack.runningQueries.flyout.opaqueIDLabel', {
+                  defaultMessage: 'Opaque ID',
+                })}
+              </h3>
+            </EuiTitle>
+
+            <EuiSpacer size="s" />
+
+            <EuiCodeBlock lineNumbers isCopyable>
+              {query.xOpaqueId}
             </EuiCodeBlock>
           </>
         )}

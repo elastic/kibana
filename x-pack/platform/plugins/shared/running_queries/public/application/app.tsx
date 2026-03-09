@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -151,25 +152,52 @@ const RunningQueriesAppWithData: React.FC = () => {
           />
         }
         rightSideItems={[
-          <EuiFlexGroup key="refresh-group" alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexGroup
+            key="refresh-group"
+            alignItems="flexStart"
+            gutterSize="m"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {secondsAgo < 60
-                  ? i18n.translate('xpack.runningQueries.lastUpdatedLessThanOneMinute', {
-                      defaultMessage: 'Updated <1m ago',
-                    })
-                  : i18n.translate('xpack.runningQueries.lastUpdatedMinutes', {
-                      defaultMessage: 'Updated {minutes} min ago',
-                      values: { minutes: Math.floor(secondsAgo / 60) },
-                    })}
-              </EuiText>
+              <EuiButtonEmpty
+                iconType="popout"
+                iconSide="right"
+                href="https://elastic.co"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {i18n.translate('xpack.runningQueries.queryHistoryButton', {
+                  defaultMessage: 'Query history',
+                })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="refresh" isLoading={isRefreshing} onClick={handleRefresh}>
-                {i18n.translate('xpack.runningQueries.refreshButton', {
-                  defaultMessage: 'Refresh',
-                })}
-              </EuiButton>
+              <EuiFlexGroup
+                direction="column"
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="refresh" isLoading={isRefreshing} onClick={handleRefresh}>
+                    {i18n.translate('xpack.runningQueries.refreshButton', {
+                      defaultMessage: 'Refresh',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {secondsAgo < 60
+                      ? i18n.translate('xpack.runningQueries.lastUpdatedLessThanOneMinute', {
+                          defaultMessage: 'Updated <1m ago',
+                        })
+                      : i18n.translate('xpack.runningQueries.lastUpdatedMinutes', {
+                          defaultMessage: 'Updated {minutes} min ago',
+                          values: { minutes: Math.floor(secondsAgo / 60) },
+                        })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>,
         ]}
