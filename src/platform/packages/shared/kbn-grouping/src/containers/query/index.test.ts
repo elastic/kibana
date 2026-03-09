@@ -92,6 +92,24 @@ describe('group selector', () => {
       expect(result.query.bool.filter.length).toEqual(2);
     });
 
+    it('Sets unitsCount filter when provided', () => {
+      const result = getGroupingQuery({
+        ...mocktestProps1,
+        unitsCountFilter: {
+          term: { 'kibana.alert.workflow_status': 'open' },
+        },
+      });
+
+      expect(result.aggs.unitsCount).toEqual({
+        filter: { term: { 'kibana.alert.workflow_status': 'open' } },
+        aggs: {
+          filtered_unitsCount: {
+            value_count: { field: 'groupByField' },
+          },
+        },
+      });
+    });
+
     it('groupByField script should contain logic which gets all values of groupByField', () => {
       const scriptResponse = {
         source: dedent(`
@@ -210,6 +228,21 @@ describe('group selector', () => {
           value: 20,
         },
       });
+    });
+
+    it('parseGroupingQuery hoists filtered_unitsCount.value if present', () => {
+      const filteredAggs = {
+        ...groupingAggs,
+        unitsCount: {
+          doc_count: 100,
+          filtered_unitsCount: {
+            value: 42,
+          },
+        },
+      };
+      // @ts-expect-error Mocking partial ES aggregation shape
+      const result = parseGroupingQuery('source.ip', mocktestProps1.uniqueValue, filteredAggs) as GroupingAggregation<{}>;
+      expect(result.unitsCount).toEqual({ value: 42 });
     });
 
     it('parseGroupingQuery parses and formats fields witih multiple values', () => {
