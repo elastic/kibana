@@ -238,9 +238,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
             defaultMessage="Showing {start}-{end} of {total} {skills}"
             values={{
               start: <strong>{Math.min(pageIndex * pageSize + 1, filteredSkills.length)}</strong>,
-              end: (
-                <strong>{Math.min((pageIndex + 1) * pageSize, filteredSkills.length)}</strong>
-              ),
+              end: <strong>{Math.min((pageIndex + 1) * pageSize, filteredSkills.length)}</strong>,
               total: filteredSkills.length,
               skills: <strong>{labels.skills.title}</strong>,
             }}
