@@ -9,7 +9,12 @@ import type { Subscription } from 'rxjs';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { INFERENCE_ENDPOINTS_APP_ID, PLUGIN_TITLE } from '../common/constants';
+import {
+  INFERENCE_ENDPOINTS_APP_ID,
+  MODEL_SETTINGS_APP_ID,
+  MODEL_SETTINGS_PLUGIN_TITLE,
+  PLUGIN_TITLE,
+} from '../common/constants';
 import { docLinks } from '../common/doc_links';
 import type {
   AppPluginSetupDependencies,
@@ -19,6 +24,7 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from './types';
 import { registerLocators } from './locators';
+import { isModelSettingsEnabled } from './feature_flag';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -26,9 +32,10 @@ export class SearchInferenceEndpointsPlugin
   private config: SearchInferenceEndpointsConfigType;
   private registeredApp?: ManagementApp;
   private licenseSubscription?: Subscription;
-
+  private isServerless: boolean;
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -54,6 +61,27 @@ export class SearchInferenceEndpointsPlugin
         return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
       },
     });
+    const isEnabled = isModelSettingsEnabled(core.uiSettings);
+    const shouldRegisterModelSettingsApp = this.isServerless
+      ? this.config.modelSettingsEnabled && isEnabled
+      : isEnabled;
+    if (shouldRegisterModelSettingsApp) {
+      this.registeredApp = plugins.management.sections.section.machineLearning.registerApp({
+        id: MODEL_SETTINGS_APP_ID,
+        title: MODEL_SETTINGS_PLUGIN_TITLE,
+        order: 2,
+        async mount({ element, history }: ManagementAppMountParams) {
+          const { renderModelSettingsUIApp } = await import('./model_settings_application');
+          const [coreStart, depsStart] = await core.getStartServices();
+          const startDeps: AppPluginStartDependencies = {
+            ...depsStart,
+            history,
+          };
+
+          return renderModelSettingsUIApp(coreStart, startDeps, element);
+        },
+      });
+    }
 
     this.registeredApp.disable();
 
