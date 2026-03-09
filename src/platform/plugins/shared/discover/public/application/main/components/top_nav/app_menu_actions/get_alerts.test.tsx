@@ -43,9 +43,6 @@ const getAlertsMenuItem = async ({
     adHocDataViews: [],
     isEsqlMode,
     authorizedRuleTypeIds,
-    actions: {
-      updateAdHocDataViews: jest.fn(),
-    },
   };
 
   return getAlertsAppMenuItem({

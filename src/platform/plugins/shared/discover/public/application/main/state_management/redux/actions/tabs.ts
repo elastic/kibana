@@ -52,7 +52,13 @@ export const setTabs: InternalStateThunkActionCreator<
   function setTabsThunkFn(
     dispatch,
     getState,
-    { runtimeStateManager, tabsStorageManager, services, getCascadedDocumentsStateManager }
+    {
+      runtimeStateManager,
+      tabsStorageManager,
+      getCascadedDocumentsStateManager,
+      getContextAwarenessToolkit,
+      services,
+    }
   ) {
     const previousState = getState();
     const discoverSessionChanged =
@@ -88,6 +94,7 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({
         services,
         cascadedDocumentsStateManager: getCascadedDocumentsStateManager(tab.id),
+        toolkit: getContextAwarenessToolkit(tab.id),
         initialValues: {
           unifiedHistogramLayoutPropsMap: tab.duplicatedFromId
             ? selectInitialUnifiedHistogramLayoutPropsMap(runtimeStateManager, tab.duplicatedFromId)
@@ -444,7 +451,8 @@ export const openInNewTab: InternalStateThunkActionCreator<
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
     }
-  ]
+  ],
+  Promise<void>
 > = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
@@ -482,11 +490,10 @@ export const openInNewTab: InternalStateThunkActionCreator<
     );
   };
 
-export const openInNewTabExtPointAction: InternalStateThunkActionCreator<[OpenInNewTabParams]> = ({
-  query,
-  tabLabel,
-  timeRange,
-}) =>
+export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
+  [OpenInNewTabParams],
+  Promise<void>
+> = ({ query, tabLabel, timeRange }) =>
   function openInNewTabExtPointActionThunkFn(dispatch) {
     const appState: TabState['appState'] = { query };
     const globalState: TabState['globalState'] = { timeRange };
@@ -505,7 +512,8 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
     {
       searchSession: UISession;
     }
-  ]
+  ],
+  Promise<void>
 > = ({ searchSession }) =>
   async function openSearchSessionInNewTabThunkFn(dispatch) {
     const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;

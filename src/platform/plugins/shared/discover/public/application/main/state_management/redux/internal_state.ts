@@ -32,11 +32,13 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
+import type { ContextAwarenessToolkit } from '../../../../context_awareness/toolkit';
 import {
   type RuntimeStateManager,
   selectTabRuntimeInternalState,
   selectTabRuntimeState,
 } from './runtime_state';
+import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -579,17 +581,27 @@ export interface InternalStateDependencies {
   tabsStorageManager: TabsStorageManager;
   searchSessionManager: DiscoverSearchSessionManager;
   getInternalState$: () => Observable<DiscoverInternalState>;
+  getContextAwarenessToolkit: (tabId: string) => ContextAwarenessToolkit;
   getCascadedDocumentsStateManager: (tabId: string) => CascadedDocumentsStateManager;
 }
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const createInternalStateStore = (
-  options: Omit<InternalStateDependencies, 'getInternalState$' | 'getCascadedDocumentsStateManager'>
+  options: Omit<
+    InternalStateDependencies,
+    'getInternalState$' | 'getContextAwarenessToolkit' | 'getCascadedDocumentsStateManager'
+  >
 ) => {
   const optionsWithStore: InternalStateDependencies = {
     ...options,
     getInternalState$: () => from(internalState),
+    getContextAwarenessToolkit: (tabId: string) => {
+      return createContextAwarenessToolkit({
+        internalState,
+        tabId,
+      });
+    },
     getCascadedDocumentsStateManager: (tabId) => {
       return createCascadedDocumentsStateManager({
         internalState,

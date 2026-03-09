@@ -20,6 +20,7 @@ import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/d
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
+import { internalStateActions } from '../../../state_management/redux';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
@@ -42,12 +43,7 @@ const CreateAlertFlyout: React.FC<{
   onFinishAction: () => void;
   stateContainer: DiscoverStateContainer;
 }> = ({ stateContainer, discoverParams, services, onFinishAction = () => {} }) => {
-  const {
-    dataView,
-    isEsqlMode,
-    adHocDataViews,
-    actions: { updateAdHocDataViews },
-  } = discoverParams;
+  const { dataView, isEsqlMode, adHocDataViews } = discoverParams;
   const {
     triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
   } = services;
@@ -104,9 +100,11 @@ const CreateAlertFlyout: React.FC<{
       consumer={'alerts'}
       onCancel={onFinishAction}
       onSubmit={onFinishAction}
-      onChangeMetaData={(metadata: EsQueryAlertMetaData) =>
-        updateAdHocDataViews(metadata.adHocDataViewList)
-      }
+      onChangeMetaData={(metadata: EsQueryAlertMetaData) => {
+        void stateContainer.internalState.dispatch(
+          internalStateActions.updateAdHocDataViews(metadata.adHocDataViewList)
+        );
+      }}
       ruleTypeId={ES_QUERY_ID}
       initialValues={{ params: getParams() }}
       validConsumers={EsQueryValidConsumer}

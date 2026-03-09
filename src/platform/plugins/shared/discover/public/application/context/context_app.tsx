@@ -20,16 +20,17 @@ import {
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { popularizeField, useColumns } from '@kbn/unified-data-table';
+import { useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -48,23 +49,29 @@ export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
   referrer?: string;
+  addFilter: DocViewFilterFn;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  setExpandedDoc: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
 
-export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
+export const ContextApp = ({
+  dataView,
+  anchorId,
+  referrer,
+  addFilter,
+  expandedDoc,
+  initialDocViewerTabId,
+  docViewerRef,
+  setExpandedDoc,
+}: ContextAppProps) => {
   const styles = useMemoCss(componentStyles);
 
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
-  const {
-    locator,
-    uiSettings,
-    capabilities,
-    dataViews,
-    navigation,
-    filterManager,
-    core,
-    fieldsMetadata,
-  } = services;
+  const { locator, uiSettings, capabilities, dataViews, navigation, core, fieldsMetadata } =
+    services;
 
   /**
    * Context app state
@@ -199,23 +206,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     ]
   );
 
-  const addFilter = useCallback(
-    async (field: DataViewField | string, values: unknown, operation: '+' | '-') => {
-      const newFilters = generateFilters(filterManager, field, values, operation, dataView);
-      filterManager.addFilters(newFilters);
-      if (dataViews) {
-        const fieldName = typeof field === 'string' ? field : field.name;
-        await popularizeField(dataView, fieldName, dataViews, capabilities);
-        void scopedEBTManager.trackFilterAddition({
-          fieldName: fieldName === '_exists_' ? String(values) : fieldName,
-          filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
-          fieldsMetadata,
-        });
-      }
-    },
-    [filterManager, dataView, dataViews, capabilities, scopedEBTManager, fieldsMetadata]
-  );
-
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
@@ -290,6 +280,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                 successorCount={appState.successorCount}
                 setAppState={stateContainer.setAppState}
                 addFilter={addFilter as DocViewFilterFn}
+                expandedDoc={expandedDoc}
+                initialDocViewerTabId={initialDocViewerTabId}
+                docViewerRef={docViewerRef}
+                setExpandedDoc={setExpandedDoc}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}

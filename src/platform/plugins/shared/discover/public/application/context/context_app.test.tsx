@@ -19,21 +19,28 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 
 const mockNavigationPlugin = {
   ui: { TopNavMenu: mockTopNavMenu, AggregateQueryTopNavMenu: mockTopNavMenu },
 } as unknown as NavigationPublicStart;
 const services = createDiscoverServicesMock();
-const addFiltersMock = jest.spyOn(services.filterManager, 'addFilters');
-const updateSavedObjectMock = jest.spyOn(services.dataViews, 'updateSavedObject');
 
 services.navigation = mockNavigationPlugin;
 services.uiSettings = uiSettingsMock;
 
 describe('ContextApp test', () => {
+  const addFilterMock = jest.fn();
+  const setExpandedDocMock = jest.fn();
+  const docViewerRef = React.createRef<DocViewerApi>();
   const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
+    addFilter: addFilterMock,
+    expandedDoc: undefined,
+    initialDocViewerTabId: undefined,
+    docViewerRef,
+    setExpandedDoc: setExpandedDocMock,
   };
 
   const topNavProps = {
@@ -64,7 +71,7 @@ describe('ContextApp test', () => {
     });
   });
 
-  it('should set filters correctly', async () => {
+  it('should call addFilter', async () => {
     const component = mountComponent();
 
     await act(async () => {
@@ -75,15 +82,7 @@ describe('ContextApp test', () => {
       );
     });
 
-    expect(addFiltersMock.mock.calls.length).toBe(1);
-    expect(addFiltersMock.mock.calls[0][0]).toEqual([
-      {
-        $state: { store: 'appState' },
-        meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
-        query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
-      },
-    ]);
-    expect(updateSavedObjectMock.mock.calls.length).toBe(1);
-    expect(updateSavedObjectMock.mock.calls[0]).toEqual([dataViewMock, 0, true]);
+    expect(addFilterMock).toHaveBeenCalledTimes(1);
+    expect(addFilterMock).toHaveBeenCalledWith('message', '2021-06-08T07:52:19.000Z', '+');
   });
 });

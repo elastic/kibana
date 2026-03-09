@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, firstValueFrom, merge } from 'rxjs';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -28,8 +28,11 @@ import {
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
@@ -40,6 +43,7 @@ import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_ap
 import type { SearchEmbeddableState } from '../../common/embeddable/types';
 import type { SearchEmbeddableApi } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
+import { type ContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
@@ -80,9 +84,6 @@ export const getSearchEmbeddableFactory = ({
         solutionNavId,
       });
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
-      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
-        scopedEbtManager,
-      });
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -220,6 +221,60 @@ export const getSearchEmbeddableFactory = ({
         },
       });
 
+      const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
+        const dataView = api.dataViews$.getValue()?.[0];
+        if (!dataView || !mapping) {
+          return;
+        }
+
+        const fieldName = typeof mapping === 'string' ? mapping : mapping.name;
+
+        let newFilters = generateFilters(
+          discoverServices.filterManager,
+          fieldName,
+          values,
+          operation,
+          dataView
+        );
+        newFilters = newFilters.map((filter) => ({
+          ...filter,
+          $state: { store: FilterStateStore.APP_STATE },
+        }));
+
+        await startServices.executeTriggerActions(ON_APPLY_FILTER, {
+          embeddable: api,
+          filters: newFilters,
+        });
+      };
+
+      const enableDocumentViewer =
+        runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !== undefined
+          ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
+          : true;
+
+      const expandedDoc$ = new BehaviorSubject<DataTableRecord | undefined>(undefined);
+      const initialDocViewerTabId$ = new BehaviorSubject<string | undefined>(undefined);
+
+      const setExpandedDoc = (
+        doc: DataTableRecord | undefined,
+        options?: { initialTabId?: string }
+      ) => {
+        expandedDoc$.next(doc);
+        initialDocViewerTabId$.next(options?.initialTabId);
+      };
+
+      const toolkit: ContextAwarenessToolkit = {
+        actions: {
+          addFilter,
+          setExpandedDoc: enableDocumentViewer ? setExpandedDoc : undefined,
+        },
+      };
+
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+        toolkit,
+      });
+
       const unsubscribeFromFetch = initializeFetch({
         api: {
           ...api,
@@ -250,6 +305,23 @@ export const getSearchEmbeddableFactory = ({
             api.dataViews$
           );
 
+          const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
+          const initialDocViewerTabId = useObservable(
+            initialDocViewerTabId$,
+            initialDocViewerTabId$.getValue()
+          );
+          const docViewerRef = useRef<DocViewerApi>(null);
+
+          const onUpdateSelectedTabId = useCallback((tabId: string | undefined) => {
+            initialDocViewerTabId$.next(tabId);
+          }, []);
+
+          useEffect(() => {
+            if (initialDocViewerTabId) {
+              docViewerRef.current?.setSelectedTabId(initialDocViewerTabId);
+            }
+          }, [initialDocViewerTabId]);
+
           useEffect(() => {
             return () => {
               drilldownsManager.cleanup();
@@ -279,30 +351,6 @@ export const getSearchEmbeddableFactory = ({
             return dataViews![0];
           }, [dataViews]);
 
-          const onAddFilter = useCallback<DocViewFilterFn>(
-            async (field, value, operator) => {
-              if (!dataView || !field) return;
-
-              let newFilters = generateFilters(
-                discoverServices.filterManager,
-                field,
-                value,
-                operator,
-                dataView
-              );
-              newFilters = newFilters.map((filter) => ({
-                ...filter,
-                $state: { store: FilterStateStore.APP_STATE },
-              }));
-
-              await startServices.executeTriggerActions(ON_APPLY_FILTER, {
-                embeddable: api,
-                filters: newFilters,
-              });
-            },
-            [dataView]
-          );
-
           const renderAsFieldStatsTable = useMemo(
             () => isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings),
             [savedSearch, dataView]
@@ -322,7 +370,7 @@ export const getSearchEmbeddableFactory = ({
                         fetchContext$,
                       }}
                       dataView={dataView!}
-                      onAddFilter={isEsqlMode(savedSearch) ? undefined : onAddFilter}
+                      onAddFilter={isEsqlMode(savedSearch) ? undefined : addFilter}
                       stateManager={searchEmbeddable.stateManager}
                     />
                   ) : (
@@ -337,14 +385,18 @@ export const getSearchEmbeddableFactory = ({
                         onAddFilter={
                           runtimeState.nonPersistedDisplayOptions?.enableFilters === false
                             ? undefined
-                            : onAddFilter
+                            : addFilter
                         }
-                        enableDocumentViewer={
-                          runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer !==
-                          undefined
-                            ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
-                            : true
+                        enableDocumentViewer={enableDocumentViewer}
+                        expandedDoc={enableDocumentViewer ? expandedDoc : undefined}
+                        initialDocViewerTabId={
+                          enableDocumentViewer ? initialDocViewerTabId : undefined
                         }
+                        onUpdateSelectedTabId={
+                          enableDocumentViewer ? onUpdateSelectedTabId : undefined
+                        }
+                        docViewerRef={docViewerRef}
+                        setExpandedDoc={enableDocumentViewer ? setExpandedDoc : undefined}
                         stateManager={searchEmbeddable.stateManager}
                       />
                     </CellActionsProvider>

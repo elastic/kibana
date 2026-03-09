@@ -15,7 +15,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
-import type { ScopedProfilesManager } from '../../../../context_awareness';
+import type { ContextAwarenessToolkit, ScopedProfilesManager } from '../../../../context_awareness';
 import type { TabState } from './types';
 import type { ScopedDiscoverEBTManager } from '../../../../ebt_manager';
 import { selectTab } from './selectors';
@@ -77,18 +77,22 @@ type InitialUnifiedHistogramLayoutPropsMap = Record<
 
 export const createTabRuntimeState = ({
   services,
+  toolkit,
   cascadedDocumentsStateManager,
   initialValues,
 }: {
   services: DiscoverServices;
+  toolkit: ContextAwarenessToolkit;
   cascadedDocumentsStateManager: CascadedDocumentsStateManager;
   initialValues?: {
     unifiedHistogramLayoutPropsMap?: InitialUnifiedHistogramLayoutPropsMap;
   };
 }): ReactiveTabRuntimeState => {
   const scopedEbtManager = services.ebtManager.createScopedEBTManager();
-  const scopedProfilesManager: ScopedProfilesManager =
-    services.profilesManager.createScopedProfilesManager({ scopedEbtManager });
+  const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
+    scopedEbtManager,
+    toolkit,
+  });
   const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
     services,
     scopedProfilesManager,

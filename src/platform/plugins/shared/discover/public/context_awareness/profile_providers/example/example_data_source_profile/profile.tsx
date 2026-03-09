@@ -62,9 +62,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       },
     }),
     getDocViewer:
-      (prev, { context }) =>
+      (prev, { context, toolkit }) =>
       (params) => {
-        const { openInNewTab, updateESQLQuery } = params.actions;
+        const { openInNewTab, updateESQLQuery } = toolkit.actions;
         const recordId = params.record.id;
         const prevValue = prev(params);
 
@@ -270,16 +270,24 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         recommendedFields: exampleRecommendedFieldNames,
       };
     },
-    getChartSectionConfiguration: (prev) => (params) => {
-      return {
-        ...prev(params),
-        renderChartSection: (props) => (
-          <ChartWithCustomButtons {...props} actions={params.actions} />
-        ),
-        localStorageKeyPrefix: 'discover:exampleDataSource',
-        replaceDefaultChart: true,
-      };
-    },
+    getChartSectionConfiguration:
+      (prev, { toolkit }) =>
+      () => {
+        return {
+          ...prev(),
+          renderChartSection: (props) => (
+            <ChartWithCustomButtons
+              {...props}
+              actions={{
+                openInNewTab: toolkit.actions.openInNewTab,
+                updateESQLQuery: toolkit.actions.updateESQLQuery,
+              }}
+            />
+          ),
+          localStorageKeyPrefix: 'discover:exampleDataSource',
+          replaceDefaultChart: true,
+        };
+      },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

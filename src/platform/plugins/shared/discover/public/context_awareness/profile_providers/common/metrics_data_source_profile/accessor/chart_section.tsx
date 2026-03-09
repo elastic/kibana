@@ -18,9 +18,9 @@ import {
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../../../../application/main/state_management/redux';
-import type { ChartSectionConfigurationExtensionParams } from '../../../../types';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
+import type { ContextAwarenessToolkitActions } from '../../../../toolkit';
 import { buildMetricsInfoQuery } from '../utils/append_metrics_info';
 import { fetchMetricsInfo } from '../utils/fetch_metrics_info';
 
@@ -80,9 +80,11 @@ function useMetricsInfoFetch(
  * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
  * Triggers METRICS_INFO fetch when in Metrics Experience.
  */
-const MetricsExperienceGridWrapper = (
-  props: ChartSectionProps & { actions: ChartSectionConfigurationExtensionParams['actions'] }
-) => {
+type MetricsExperienceGridWrapperProps = ChartSectionProps & {
+  actions: ContextAwarenessToolkitActions;
+};
+
+const MetricsExperienceGridWrapper = ({ actions, ...props }: MetricsExperienceGridWrapperProps) => {
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -99,7 +101,7 @@ const MetricsExperienceGridWrapper = (
   return (
     <UnifiedMetricsExperienceGrid
       {...props}
-      actions={props.actions}
+      actions={actions}
       breakdownField={breakdownField}
       onBreakdownFieldChange={onBreakdownFieldChange}
     />
@@ -108,12 +110,12 @@ const MetricsExperienceGridWrapper = (
 
 export const createChartSection =
   (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
-  (prev) =>
-  (params) => {
+  (prev, { toolkit }) =>
+  () => {
     return {
-      ...prev(params),
+      ...prev(),
       renderChartSection: (props) => {
-        return <MetricsExperienceGridWrapper {...props} actions={params.actions} />;
+        return <MetricsExperienceGridWrapper {...props} actions={toolkit.actions} />;
       },
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
