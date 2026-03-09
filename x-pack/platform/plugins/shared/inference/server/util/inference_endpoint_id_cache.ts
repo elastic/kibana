@@ -36,7 +36,7 @@ export class InferenceEndpointIdCache {
 
   async has(id: string): Promise<boolean> {
     if (this.knownIds.has(id)) {
-      this.updateCacheIfExpired(); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
+      void this.updateCacheIfExpired(); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
       return true;
     }
     await this.updateCacheIfExpired(); // id not in cache, make sure we have latest data before returning
