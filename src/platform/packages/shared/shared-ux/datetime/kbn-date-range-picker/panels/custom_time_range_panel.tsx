@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect, useMemo, type FormEvent } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  type FormEvent,
+  type MouseEvent,
+} from 'react';
 
 import { css } from '@emotion/react';
 import moment from 'moment';
@@ -22,8 +29,12 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
+  EuiFormFieldset,
+  EuiButtonEmpty,
+  EuiFormAppend,
   useGeneratedHtmlId,
+  copyToClipboard,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import {
@@ -45,6 +56,7 @@ import {
   DEFAULT_DATE_FORMAT,
   UNIT_SHORT_TO_FULL_MAP,
 } from '../constants';
+import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 
 const UNIT_DIRECTION_OPTIONS = [
   ...Object.entries(UNIT_SHORT_TO_FULL_MAP).map(([short, full]) => ({
@@ -173,55 +185,59 @@ const DatePartPicker = ({ label, state, onChange }: DatePartPickerProps) => {
 
   return (
     <div>
-      <EuiFormRow label={label}>
-        <EuiButtonGroup
-          legend={label}
-          options={tabOptions}
-          idSelected={selectedTabId}
-          onChange={onTabChange}
-          isFullWidth
-        />
-      </EuiFormRow>
+      <EuiFormFieldset legend={{ children: label }}>
+        <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
+          <EuiButtonGroup
+            legend={label}
+            options={tabOptions}
+            idSelected={selectedTabId}
+            onChange={onTabChange}
+            buttonSize="compressed"
+            isFullWidth
+          />
 
-      {state.tab === DATE_TYPE_RELATIVE && (
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false} style={{ width: 80 }}>
-            <EuiFieldNumber
+          {state.tab === DATE_TYPE_RELATIVE && (
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false} style={{ width: 80 }}>
+                <EuiFieldNumber
+                  compressed
+                  value={state.relative.count}
+                  onChange={onCountChange}
+                  min={0}
+                  aria-label="Count"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSelect
+                  compressed
+                  options={UNIT_DIRECTION_OPTIONS}
+                  value={`${state.relative.unit}_${state.relative.isFuture ? 'future' : 'past'}`}
+                  onChange={onUnitDirectionChange}
+                  aria-label="Unit and direction"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+
+          {state.tab === DATE_TYPE_ABSOLUTE && (
+            <EuiFieldText
               compressed
-              value={state.relative.count}
-              onChange={onCountChange}
-              min={0}
-              aria-label="Count"
+              value={state.absoluteText}
+              onChange={onAbsoluteTextChange}
+              aria-label={`${label} absolute date`}
             />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSelect
-              compressed
-              options={UNIT_DIRECTION_OPTIONS}
-              value={`${state.relative.unit}_${state.relative.isFuture ? 'future' : 'past'}`}
-              onChange={onUnitDirectionChange}
-              aria-label="Unit and direction"
-            />
-          </EuiFlexItem>
+          )}
+
+          {state.tab === DATE_TYPE_NOW && (
+            <EuiText size="xs" color="subdued">
+              <p>
+                {label === 'Start date' ? 'Start' : 'End'} time will be set to the time of the
+                refresh.
+              </p>
+            </EuiText>
+          )}
         </EuiFlexGroup>
-      )}
-
-      {state.tab === DATE_TYPE_ABSOLUTE && (
-        <EuiFieldText
-          compressed
-          value={state.absoluteText}
-          onChange={onAbsoluteTextChange}
-          aria-label={`${label} absolute date`}
-        />
-      )}
-
-      {state.tab === DATE_TYPE_NOW && (
-        <EuiText size="xs" color="subdued">
-          <p>
-            {label === 'Start date' ? 'Start' : 'End'} time will be set to the time of the refresh.
-          </p>
-        </EuiText>
-      )}
+      </EuiFormFieldset>
     </div>
   );
 };
@@ -231,22 +247,57 @@ interface ShorthandDisplayProps {
 }
 
 /** Read-only shorthand display with help text. */
-const ShorthandDisplay = ({ value }: ShorthandDisplayProps) => (
-  <EuiFormRow
-    label="Shorthand"
-    helpText={
-      <>
-        You can type this directly in the time picker to get the same time range
-        <br />
-        <EuiLink href="#" target="_blank" external>
-          Shorthand syntax
-        </EuiLink>
-      </>
-    }
-  >
-    <EuiFieldText compressed value={value} readOnly aria-label="Shorthand" />
-  </EuiFormRow>
-);
+const ShorthandDisplay = ({ value }: ShorthandDisplayProps) => {
+  const { navigateTo } = useDateRangePickerPanelNavigation();
+  const [isCopied, setIsCopied] = useState(false);
+
+  const documentationPanelId = 'documentation-panel';
+
+  const copy = (event: MouseEvent) => {
+    event.preventDefault();
+    copyToClipboard(value);
+    setIsCopied(true);
+  };
+
+  return (
+    <EuiFormRow
+      label="Shorthand"
+      helpText={
+        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs" responsive={false}>
+          <p>You can type this directly in the time picker to get the same time range</p>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              iconSide="right"
+              iconType="documentation"
+              flush="both"
+              onClick={() => navigateTo(documentationPanelId)}
+            >
+              Shorthand syntax
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    >
+      <EuiFieldText
+        append={
+          <EuiToolTip content={isCopied ? 'Shorthand copied' : 'Copy shorthand to clipboard'}>
+            <EuiFormAppend
+              iconLeft="copy"
+              element="button"
+              onClick={copy}
+              onBlur={() => setIsCopied(false)}
+            />
+          </EuiToolTip>
+        }
+        compressed
+        value={value}
+        readOnly
+        aria-label="Shorthand"
+      />
+    </EuiFormRow>
+  );
+};
 
 /** Panel for specifying a custom absolute or relative time range. */
 export function CustomTimeRangePanel() {
@@ -293,9 +344,11 @@ export function CustomTimeRangePanel() {
       <PanelBody>
         <PanelBodySection>
           <form id={formId} onSubmit={onSubmit} css={formStyles}>
-            <DatePartPicker label="Start date" state={startState} onChange={setStartState} />
-            <DatePartPicker label="End date" state={endState} onChange={setEndState} />
-            <ShorthandDisplay value={shorthandText} />
+            <EuiFlexGroup gutterSize="l" direction="column" responsive={false}>
+              <DatePartPicker label="Start date" state={startState} onChange={setStartState} />
+              <DatePartPicker label="End date" state={endState} onChange={setEndState} />
+              <ShorthandDisplay value={shorthandText} />
+            </EuiFlexGroup>
           </form>
         </PanelBodySection>
       </PanelBody>
