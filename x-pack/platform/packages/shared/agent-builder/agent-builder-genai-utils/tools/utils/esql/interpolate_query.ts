@@ -6,7 +6,7 @@
  */
 
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
-import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@kbn/esql-language';
+import { esql, WrappingPrettyPrinter, type WrappingPrettyPrinterOptions } from '@elastic/esql';
 
 const defaultPrintOpts: WrappingPrettyPrinterOptions = {
   wrap: 80,
@@ -21,7 +21,12 @@ export const interpolateEsqlQuery = (
   params: Record<string, EsqlToolParamValue | null>,
   printOpts: WrappingPrettyPrinterOptions = defaultPrintOpts
 ): string => {
-  const query = esql(template, params);
+  // Filter out null params — they represent optional parameters that weren't provided.
+  // inlineParams() cannot handle null values and would throw "cannot inline parameter".
+  const nonNullParams = Object.fromEntries(
+    Object.entries(params).filter(([, value]) => value !== null)
+  );
+  const query = esql(template, nonNullParams);
   query.inlineParams();
   return WrappingPrettyPrinter.print(query.ast, printOpts);
 };

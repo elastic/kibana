@@ -6,13 +6,12 @@
  */
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { streamQueryInputSchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
 import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
-import { assertFeatureNotChanged } from '../utils/assert_feature_not_changed';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -97,25 +96,11 @@ const upsertQueryRoute = createServerRoute({
     await assertEnterpriseLicense(licensing);
 
     const definition = await streamsClient.getStream(streamName);
-    await assertFeatureNotChanged({
-      queryClient,
-      streamName,
-      queries: [{ id: queryId, feature: body.feature }],
-    });
-    const existingQueries = await queryClient.bulkGetByIds(streamName, [queryId]);
-    const existingQuery = existingQueries[0]?.query;
-    const timestamp = new Date().toISOString();
-    const createdAt = existingQuery ? existingQuery.created_at : timestamp;
-    const updatedAt = existingQuery ? timestamp : undefined;
-
     await queryClient.upsert(definition, {
       id: queryId,
       affected_streams: [streamName],
       title: body.title,
-      feature: body.feature,
-      kql: {
-        query: body.kql.query,
-      },
+      esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
       description: body.description,
@@ -124,8 +109,6 @@ const upsertQueryRoute = createServerRoute({
       category: body.category,
       source: body.source,
       model: body.model,
-      created_at: createdAt,
-      updated_at: updatedAt,
     });
 
     return {
@@ -205,7 +188,7 @@ const bulkQueriesRoute = createServerRoute({
       operations: z.array(
         z.union([
           z.object({
-            index: streamQueryInputSchema,
+            index: streamQuerySchema,
           }),
           z.object({
             delete: z.object({ id: z.string() }),
@@ -229,11 +212,6 @@ const bulkQueriesRoute = createServerRoute({
     } = params;
 
     const definition = await streamsClient.getStream(streamName);
-
-    const indexOperations = operations.flatMap((op) =>
-      'index' in op ? [{ id: op.index.id, feature: op.index.feature }] : []
-    );
-    await assertFeatureNotChanged({ queryClient, streamName, queries: indexOperations });
 
     await queryClient.bulk(definition, operations);
 

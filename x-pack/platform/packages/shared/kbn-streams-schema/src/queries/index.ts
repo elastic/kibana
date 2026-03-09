@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import type { Condition } from '@kbn/streamlang';
-import { conditionSchema } from '@kbn/streamlang';
+import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
+
+export interface EsqlQuery {
+  query: string;
+}
+
+export const esqlQuerySchema: z.Schema<EsqlQuery> = z.object({
+  query: z.string(),
+});
 
 interface StreamQueryBase {
   id: string;
@@ -31,27 +37,7 @@ export type StreamQuerySource = z.infer<typeof streamQuerySourceSchema>;
 
 export interface StreamQuery extends StreamQueryBase {
   affected_streams: string[];
-  /**
-   * @deprecated Use esql.query instead. Will be removed in a future version.
-   */
-  feature?: {
-    name: string;
-    filter: Condition;
-    type: 'system';
-  };
-  /**
-   * @deprecated Use esql.query instead. Will be removed in a future version.
-   */
-  kql: {
-    query: string;
-  };
-  /**
-   * Full ES|QL query built from the stream indices, KQL query, and feature filter.
-   * Example: FROM stream,stream.* | WHERE KQL("message: error")
-   */
-  esql: {
-    query: string;
-  };
+  esql: EsqlQuery;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
@@ -65,65 +51,28 @@ export interface StreamQuery extends StreamQueryBase {
   updated_at?: string;
 }
 
-const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
+const streamQueryBaseSchema = z.object({
   id: NonEmptyString,
   title: NonEmptyString,
+}) satisfies z.Schema<StreamQueryBase>;
+
+export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
+  affected_streams: z.array(z.string()),
+  severity_score: z.number().optional(),
+  evidence: z.array(z.string()).optional(),
+  esql: esqlQuerySchema,
 });
 
-export type StreamQueryInput = Omit<StreamQuery, 'esql'>;
-
-export const streamQueryInputSchema: z.Schema<StreamQueryInput> = z.intersection(
-  streamQueryBaseSchema,
-  z.object({
-    affected_streams: z.array(NonEmptyString).min(1),
-    feature: z
-      .object({
-        name: NonEmptyString,
-        filter: conditionSchema,
-        type: z.literal('system'),
-      })
-      .optional(),
-    kql: z.object({
-      query: z.string(),
-    }),
-    severity_score: z.number().optional(),
-    evidence: z.array(z.string()).optional(),
-    description: z.string().optional(),
-    type: streamQueryTypeSchema,
-    category: streamQueryCategorySchema,
-    tags: z.array(z.string()).optional(),
-    source: streamQuerySourceSchema,
-    model: z.string().optional(),
-  })
-);
-
-export const streamQuerySchema: z.Schema<StreamQuery> = z.intersection(
-  streamQueryInputSchema,
-  z.object({
-    esql: z.object({
-      query: z.string().describe('Full ES|QL query.'),
-    }),
-    created_at: z.string().datetime().optional(),
-    updated_at: z.string().datetime().optional(),
-  })
-);
-
 export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema]))
+  z.record(
+    z.string(),
+    z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema])
+  )
 );
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
-  feature: z
-    .object({
-      name: NonEmptyString,
-      filter: conditionSchema,
-      type: z.literal('system'),
-    })
-    .optional(),
-  kql: z.object({
-    query: z.string(),
-  }),
+  esql: esqlQuerySchema,
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   description: z.string().optional(),
@@ -134,12 +83,19 @@ export const upsertStreamQueryRequestSchema = z.object({
   model: z.string().optional(),
 });
 
+export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
+
+export interface QueryLinkFilters {
+  ruleUnbacked?: RuleUnbackedFilter;
+}
+
 export interface GetQueriesFilters {
   streamName?: string | string[];
   type?: StreamQueryType[];
   category?: StreamQueryCategory[];
   source?: StreamQuerySource[];
   search?: string;
+  ruleUnbacked?: RuleUnbackedFilter;
 }
 
 export interface QueryRuleOccurrencesHistogramBucket {

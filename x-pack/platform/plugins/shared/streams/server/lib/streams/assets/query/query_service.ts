@@ -9,7 +9,7 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { buildEsqlQuery } from '@kbn/streams-schema';
+import { ensureMetadata } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../fields';
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
-import { computeRuleId } from './helpers/query';
+import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 
 export class QueryService {
   constructor(
@@ -84,9 +84,16 @@ export class QueryService {
 
             // Uses the wired stream pattern as a best-effort fallback:
             // the definition is not available in the sync storage migration callback.
-            const esqlQuery = buildEsqlQuery([streamName, `${streamName}.*`], input);
+            const esqlQuery = buildEsqlQueryFromKql([streamName, `${streamName}.*`], input);
             migrated = { ...migrated, [QUERY_ESQL_QUERY]: esqlQuery };
           }
+
+          // Ensure METADATA _id, _source is present on all stored queries —
+          // covers documents written before METADATA was mandatory.
+          migrated = {
+            ...migrated,
+            [QUERY_ESQL_QUERY]: ensureMetadata(migrated[QUERY_ESQL_QUERY] as string),
+          };
 
           // Back-fill rule_id for pre-existing documents using the KQL query as the hash
           // input — this preserves the IDs of rules that were already created before rule_id

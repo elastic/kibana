@@ -58,8 +58,7 @@ describe('content pack tree helpers', () => {
           {
             id: 'keep',
             title: 'keep query',
-            kql: { query: 'keep' },
-            esql: { query: '' },
+            esql: { query: 'FROM logs | LIMIT 1' },
             affected_streams: ['root.child1.nested'],
             type: 'match',
             tags: [],
@@ -93,8 +92,7 @@ describe('content pack tree helpers', () => {
         {
           id: 'keep',
           title: 'keep query',
-          kql: { query: 'keep' },
-          esql: { query: '' },
+          esql: { query: 'FROM logs | LIMIT 1' },
           affected_streams: ['root.child1.nested'],
           type: 'match',
           tags: [],
@@ -109,8 +107,7 @@ describe('content pack tree helpers', () => {
           {
             id: 'keep',
             title: 'keep query',
-            kql: { query: 'keep' },
-            esql: { query: '' },
+            esql: { query: 'FROM logs | LIMIT 1' },
             affected_streams: ['root'],
             type: 'match',
             tags: [],
@@ -118,8 +115,7 @@ describe('content pack tree helpers', () => {
           {
             id: 'drop',
             title: 'drop query',
-            kql: { query: 'drop' },
-            esql: { query: '' },
+            esql: { query: 'FROM logs | LIMIT 10' },
             affected_streams: ['root'],
             type: 'match',
             tags: [],
@@ -143,8 +139,7 @@ describe('content pack tree helpers', () => {
         {
           id: 'keep',
           title: 'keep query',
-          kql: { query: 'keep' },
-          esql: { query: '' },
+          esql: { query: 'FROM logs | LIMIT 1' },
           affected_streams: ['root'],
           type: 'match',
           tags: [],
@@ -291,8 +286,7 @@ describe('content pack tree helpers', () => {
               {
                 id: 'one',
                 title: 'title',
-                kql: { query: 'qty: one' },
-                esql: { query: '' },
+                esql: { query: 'FROM logs | WHERE qty == "one"' },
                 affected_streams: ['logs'],
                 type: 'match',
                 tags: [],
@@ -312,8 +306,7 @@ describe('content pack tree helpers', () => {
               {
                 id: 'one',
                 title: 'title',
-                kql: { query: 'qty: two' },
-                esql: { query: '' },
+                esql: { query: 'FROM logs | WHERE qty == "two"' },
                 affected_streams: ['logs'],
                 type: 'match',
                 tags: [],

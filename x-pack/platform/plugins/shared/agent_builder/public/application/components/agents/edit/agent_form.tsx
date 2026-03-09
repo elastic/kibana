@@ -413,6 +413,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               <EuiFlexItem grow={false}>
                 <AgentAvatar
                   size="l"
+                  agentId={editingAgentId}
                   name={agentName}
                   symbol={agentAvatarSymbol}
                   color={agentAvatarColor}
@@ -475,7 +476,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         size="m"
                         isDisabled={isSaveDisabled}
                         display="fill"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
                       />
                     }

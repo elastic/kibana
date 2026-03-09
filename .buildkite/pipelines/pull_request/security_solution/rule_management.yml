@@ -8,10 +8,12 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 8
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
@@ -27,6 +29,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
@@ -42,6 +46,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
@@ -57,6 +63,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
@@ -72,6 +80,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
@@ -83,10 +93,12 @@ steps:
     depends_on:
       - build
     timeout_in_minutes: 60
-    parallelism: 5
+    parallelism: 6
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
@@ -102,6 +114,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
@@ -117,6 +131,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
@@ -132,6 +148,8 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
@@ -147,4 +165,6 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1

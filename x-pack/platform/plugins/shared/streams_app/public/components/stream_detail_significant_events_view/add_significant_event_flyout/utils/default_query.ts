@@ -12,14 +12,10 @@ export function defaultQuery({ streamName }: { streamName: string }): StreamQuer
   return {
     id: v4(),
     title: '',
-    kql: {
-      query: '',
-    },
     esql: {
       query: '',
     },
     affected_streams: [streamName],
-    feature: undefined,
     type: 'match',
     tags: [],
   };

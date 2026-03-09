@@ -24,6 +24,8 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -38,11 +40,13 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -151,9 +155,15 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getGlobalRuleEventLogList: (
     props: GlobalRuleEventLogListProps
   ) => ReactElement<GlobalRuleEventLogListProps>;
+  /**
+   * Get the alert formatter for a specific rule type.
+   * Returns the formatter function if the rule type has one registered, undefined otherwise.
+   */
+  getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
 }
 
 interface PluginsSetup {
+  security: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   cloud?: CloudSetup;
@@ -161,6 +171,7 @@ interface PluginsSetup {
 }
 
 interface PluginsStart {
+  security: SecurityPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
@@ -179,6 +190,7 @@ interface PluginsStart {
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPublicStart;
   share: SharePluginStart;
+  cps?: CPSPluginStart;
 }
 
 export class Plugin
@@ -214,6 +226,13 @@ export class Plugin
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
+    };
+
+    const getCasesPlugin = async (): Promise<CasesService | undefined> => {
+      const { cases: casesResponse } = await core.plugins.onStart<{
+        cases: CasesService;
+      }>('cases');
+      return casesResponse.found ? casesResponse.contract : undefined;
     };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
@@ -305,6 +324,8 @@ export class Plugin
             return renderRulesPageApp({
               ...coreStart,
               actions: plugins.actions,
+              getCasesPlugin,
+              security: pluginsStart.security,
               cloud: plugins.cloud,
               data: pluginsStart.data,
               dataViews: pluginsStart.dataViews,
@@ -330,6 +351,7 @@ export class Plugin
               fieldsMetadata: pluginsStart.fieldsMetadata,
               contentManagement: pluginsStart.contentManagement,
               share: pluginsStart.share,
+              cps: pluginsStart.cps,
               uiActions: pluginsStart.uiActions,
             });
           },
@@ -385,6 +407,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
+            security: pluginsStart.security,
             cloud: plugins.cloud,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
@@ -411,6 +434,7 @@ export class Plugin
             contentManagement: pluginsStart.contentManagement,
             share: pluginsStart.share,
             uiActions: pluginsStart.uiActions,
+            cps: pluginsStart.cps,
           });
         },
       });
@@ -488,6 +512,7 @@ export class Plugin
           return renderApp({
             ...coreStart,
             actions: plugins.actions,
+            security: pluginsStart.security,
             data: pluginsStart.data,
             dataViews: pluginsStart.dataViews,
             dataViewEditor: pluginsStart.dataViewEditor,
@@ -655,6 +680,12 @@ export class Plugin
             snoozeSchedule: rule.snoozeSchedule,
           }),
         };
+      },
+      getAlertFormatter: (ruleTypeId: string): AlertFormatter | undefined => {
+        if (!this.ruleTypeRegistry.has(ruleTypeId)) {
+          return undefined;
+        }
+        return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
     };
   }

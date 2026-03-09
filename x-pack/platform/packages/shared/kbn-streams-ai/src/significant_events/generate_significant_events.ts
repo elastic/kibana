@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { Feature, Streams, System } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
+import { ensureMetadata, getSourcesForStream, replaceFromSources } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { dateRangeQuery, fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -31,7 +28,7 @@ import {
 } from './tools/tool_usage';
 
 interface Query {
-  kql: string;
+  esql: string;
   title: string;
   description: string;
   category: SignificantEventType;
@@ -44,42 +41,21 @@ function getErrorMessage(error: unknown): string {
 }
 
 /**
- * Given a list of field names extracted from a KQL expression and a set of
- * mapped fields, returns the subset of field names that do not match any
- * mapped field. Wildcard patterns (e.g. `server.*`) are matched against all
- * mapped fields using regex conversion.
- */
-export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string>): string[] => {
-  return fieldNames.filter((fieldName) => {
-    if (fieldName.includes('*')) {
-      const regex = new RegExp('^' + fieldName.replace(/\*/g, '.*') + '$');
-      return !Array.from(mappedFields).some((mapped) => regex.test(mapped));
-    }
-    return !mappedFields.has(fieldName);
-  });
-};
-
-/**
- * Generate significant event definitions, based on:
- * - the description of the system (or stream if system is undefined)
- * - dataset analysis
- * - for the given significant event types
+ * Generate significant event definitions using a reasoning agent that fetches
+ * stream features (including computed dataset analysis) via tool calls.
  */
 export async function generateSignificantEvents({
   stream,
-  system,
   esClient,
   start,
   end,
   getFeatures,
   inferenceClient,
   signal,
-  sampleDocsSize,
   systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
-  system?: System;
   esClient: ElasticsearchClient;
   start: number;
   end: number;
@@ -91,7 +67,6 @@ export async function generateSignificantEvents({
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-  sampleDocsSize?: number;
   systemPrompt: string;
 }): Promise<{
   queries: Query[];
@@ -101,49 +76,16 @@ export async function generateSignificantEvents({
   logger.debug('Starting significant event generation');
 
   const toolUsage = createDefaultSignificantEventsToolUsage();
-  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
 
-  if (system?.filter) {
-    logger.trace('Describing dataset for significant event generation (with filter)');
-    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-      describeDataset({
-        sampleDocsSize,
-        start,
-        end,
-        esClient,
-        index: stream.name,
-        filter: conditionToQueryDsl(system.filter),
-      })
-    );
-    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
-  }
-
-  const fieldCapsResponse = await esClient
-    .fieldCaps({
-      index: stream.name,
-      fields: '*',
-      index_filter: {
-        bool: {
-          filter: dateRangeQuery(start, end),
-        },
-      },
-    })
-    .catch((error) => {
-      throw new Error(
-        `Failure to retrieve mappings to determine field eligibility: ${error.message}`
-      );
-    });
-
-  const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
+  const targetSources = getSourcesForStream(stream);
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: system?.name || stream.name,
-        description: system?.description || stream.description,
-        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
+        name: stream.name,
+        description: stream.description,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
@@ -197,41 +139,33 @@ export async function generateSignificantEvents({
           const queries = toolCall.function.arguments.queries;
           let hasFailures = false;
 
-          const queryValidationResults = queries.map((query) => {
-            try {
-              fromKueryExpression(query.kql);
+          const queryValidationResults = await Promise.all(
+            queries.map(async (query) => {
+              try {
+                const rewritten = ensureMetadata(replaceFromSources(query.esql, targetSources));
 
-              const fieldNames = getKqlFieldNamesFromExpression(query.kql);
-              const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
+                await esClient.esql.query({
+                  query: `${rewritten}\n| LIMIT 0`,
+                  format: 'json',
+                });
 
-              if (unmappedFields.length > 0) {
+                return {
+                  query: { ...query, esql: rewritten },
+                  valid: true,
+                  status: 'Added',
+                  error: undefined,
+                };
+              } catch (error) {
                 hasFailures = true;
                 return {
                   query,
                   valid: false,
                   status: 'Failed to add',
-                  error: `Query references unmapped fields: ${unmappedFields.join(
-                    ', '
-                  )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
+                  error: getErrorMessage(error),
                 };
               }
-
-              return {
-                query,
-                valid: true,
-                status: 'Added',
-                error: undefined,
-              };
-            } catch (error) {
-              hasFailures = true;
-              return {
-                query,
-                valid: false,
-                status: 'Failed to add',
-                error: getErrorMessage(error),
-              };
-            }
-          });
+            })
+          );
           if (hasFailures) {
             toolUsage.add_queries.failures += 1;
           }

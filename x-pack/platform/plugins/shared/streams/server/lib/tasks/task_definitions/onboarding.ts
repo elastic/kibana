@@ -279,10 +279,9 @@ export async function persistQueries(
       index: {
         id: v4(),
         affected_streams: [streamName],
-        kql: query.kql,
+        esql: query.esql,
         title: query.title,
         description: query.description,
-        feature: query.feature,
         severity_score: query.severity_score,
         evidence: query.evidence,
         category: query.category,

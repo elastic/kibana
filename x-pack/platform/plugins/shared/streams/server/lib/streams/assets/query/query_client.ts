@@ -15,16 +15,16 @@ import type { IScopedClusterClient, Logger, SavedObjectsClientContract } from '@
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type {
   GetQueriesFilters,
+  QueryLinkFilters,
   QueryRuleOccurrences,
+  RuleUnbackedFilter,
   StreamQuery,
   StreamQueryCategory,
-  StreamQueryInput,
   StreamQuerySource,
   StreamQueryType,
   Streams,
 } from '@kbn/streams-schema';
-import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
-import { isArray, isEqual } from 'lodash';
+import { isArray } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
+import type { QUERY_FEATURE_TYPE } from '../fields';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -47,7 +48,6 @@ import {
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
-  QUERY_FEATURE_TYPE,
   QUERY_KQL_BODY,
   QUERY_MODEL,
   QUERY_SEVERITY_SCORE,
@@ -67,10 +67,6 @@ import { computeRuleId } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
-export interface QueryLinkFilters {
-  ruleBacked?: boolean;
-}
-
 interface TermQueryOpts {
   queryEmptyString: boolean;
 }
@@ -87,28 +83,26 @@ function termQuery<T extends string>(
   return [{ term: { [field]: value } }];
 }
 
-function ruleBackedFilter(value: boolean | undefined): QueryDslQueryContainer[] {
-  if (value === undefined) {
-    return [];
+function ruleUnbackedFilter(value: RuleUnbackedFilter = 'exclude'): QueryDslQueryContainer[] {
+  switch (value) {
+    case 'include':
+      return [];
+    case 'only':
+      return termQuery(RULE_BACKED, false);
+    case 'exclude':
+      // Also include legacy docs that predate the rule_backed field.
+      return [
+        {
+          bool: {
+            should: [
+              { term: { [RULE_BACKED]: true } },
+              { bool: { must_not: [{ exists: { field: RULE_BACKED } }] } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ];
   }
-
-  if (!value) {
-    return termQuery(RULE_BACKED, false);
-  }
-
-  // When filtering for rule-backed queries, also include legacy docs
-  // that predate the rule_backed field.
-  return [
-    {
-      bool: {
-        should: [
-          { term: { [RULE_BACKED]: true } },
-          { bool: { must_not: [{ exists: { field: RULE_BACKED } }] } },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-  ];
 }
 
 function termsQuery<T extends string>(
@@ -147,14 +141,8 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
   definition: Streams.all.Definition,
   asset: TQueryLink
 ): QueryLink {
-  const indices = getIndexPatternsForStream(definition);
   return {
     ...asset,
-    query: {
-      ...asset.query,
-      affected_streams: [definition.name],
-      esql: { query: buildEsqlQuery(indices, asset.query) },
-    },
     [ASSET_UUID]: getQueryLinkUuid(definition.name, asset),
     stream_name: definition.name,
   };
@@ -162,7 +150,6 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
-  [QUERY_KQL_BODY]: string;
   [QUERY_ESQL_QUERY]: string;
   [QUERY_AFFECTED_STREAMS]?: string[];
   [QUERY_SEVERITY_SCORE]?: number;
@@ -226,19 +213,12 @@ function fromStorage(link: StoredQueryLink): QueryLink {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
       affected_streams: storageFields[QUERY_AFFECTED_STREAMS] ?? [link[STREAM_NAME]],
-      kql: {
-        query: storageFields[QUERY_KQL_BODY],
-      },
+      /**
+       * The storageClient migrateSource converts the `kql` and `feature` filter to esql, making safe their removal here.
+       */
       esql: {
         query: storageFields[QUERY_ESQL_QUERY],
       },
-      feature: storageFields[QUERY_FEATURE_NAME]
-        ? {
-            name: storageFields[QUERY_FEATURE_NAME],
-            filter: JSON.parse(storageFields[QUERY_FEATURE_FILTER]),
-            type: 'system',
-          }
-        : undefined,
       severity_score: storageFields[QUERY_SEVERITY_SCORE],
       evidence: storageFields[QUERY_EVIDENCE],
       description: storageFields[QUERY_DESCRIPTION],
@@ -260,11 +240,7 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
     ...rest,
     [STREAM_NAME]: definition.name,
     [QUERY_TITLE]: query.title,
-    [QUERY_KQL_BODY]: query.kql.query,
     [QUERY_ESQL_QUERY]: query.esql.query,
-    [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
-    [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
-    [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
     [QUERY_DESCRIPTION]: query.description,
@@ -282,10 +258,7 @@ function toStorage(definition: Streams.all.Definition, request: QueryLinkRequest
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
-  return (
-    currentQuery.kql.query !== nextQuery.kql.query ||
-    !isEqual(currentQuery.feature, nextQuery.feature)
-  );
+  return currentQuery.esql.query !== nextQuery.esql.query;
 }
 
 function toQueryLinkFromQuery({
@@ -412,7 +385,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...ruleBackedFilter(filters?.ruleBacked),
+      ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
@@ -444,6 +417,7 @@ export class QueryClient {
       ...termsQuery(QUERY_TYPE, filters?.type),
       ...termsQuery(QUERY_CATEGORY, filters?.category),
       ...termsQuery(QUERY_SOURCE, filters?.source),
+      ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
     const should = [
@@ -594,7 +568,7 @@ export class QueryClient {
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
   async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    return this.getQueryLinks([], { ruleBacked: false });
+    return this.getQueryLinks([], { ruleUnbacked: 'only' });
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -626,7 +600,7 @@ export class QueryClient {
     const filter = [
       ...termsQuery(STREAM_NAME, streamNames),
       ...termQuery(ASSET_TYPE, 'query'),
-      ...ruleBackedFilter(filters?.ruleBacked),
+      ...ruleUnbackedFilter(filters?.ruleUnbacked),
     ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
@@ -737,6 +711,10 @@ export class QueryClient {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesToCreate.push(link);
         allNextQueryLinks.push(link);
+      } else if (!currentLink.rule_backed) {
+        // Unbacked queries have no rule, so breaking-change handling doesn't apply.
+        // Preserve the link as-is and update only the query content.
+        allNextQueryLinks.push({ ...currentLink, query });
       } else if (hasBreakingChange(currentLink.query, query)) {
         const link = toQueryLinkFromQuery({ query, stream });
         nextQueriesUpdatedWithBreakingChange.push(link);
@@ -748,7 +726,10 @@ export class QueryClient {
       }
     }
 
-    const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
+    // Only delete rule-backed queries that are no longer in the input list.
+    const currentQueriesToDelete = currentQueryLinks.filter(
+      (link) => link.rule_backed && !nextIds.has(link.query.id)
+    );
     const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
       nextQueriesUpdatedWithBreakingChange.some((updated) => updated.query.id === link.query.id)
     );
@@ -766,13 +747,13 @@ export class QueryClient {
         [ASSET_ID]: link[ASSET_ID],
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
-        rule_backed: true,
+        rule_backed: link.rule_backed,
         rule_id: link.rule_id,
       }))
     );
   }
 
-  public async upsert(definition: Streams.all.Definition, query: StreamQueryInput) {
+  public async upsert(definition: Streams.all.Definition, query: StreamQuery) {
     const stream = definition.name;
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
@@ -812,11 +793,10 @@ export class QueryClient {
 
   public async bulk(
     definition: Streams.all.Definition,
-    operations: Array<{ index?: StreamQueryInput; delete?: { id: string } }>,
+    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;
-    const indices = getIndexPatternsForStream(definition);
 
     if (!this.isSignificantEventsEnabled) {
       this.dependencies.logger.debug(
@@ -842,7 +822,6 @@ export class QueryClient {
             affected_streams: [stream],
             created_at: currentQuery?.created_at ?? timestamp,
             updated_at: currentQuery ? timestamp : undefined,
-            esql: { query: buildEsqlQuery(indices, nextQuery) },
           };
 
           return [nextQuery.id, query] as const;
@@ -860,7 +839,7 @@ export class QueryClient {
           return update ? { ...link, query: update } : link;
         }),
       ...operations
-        .filter((operation) => operation.index && !currentIds.has(operation.index!.id))
+        .filter((operation) => operation.index && !currentIds.has(operation.index.id))
         .map((operation) =>
           toQueryLinkFromQuery({
             query: indexOperationsMap.get(operation.index!.id)!,
@@ -906,7 +885,7 @@ export class QueryClient {
       return { promoted: 0 };
     }
 
-    const unbacked = await this.getQueryLinks([streamName], { ruleBacked: false });
+    const unbacked = await this.getQueryLinks([streamName], { ruleUnbacked: 'only' });
     const idSet = new Set(queryIds);
     const toPromote = unbacked
       .filter((link) => idSet.has(link.query.id))
@@ -998,20 +977,18 @@ export class QueryClient {
       });
   }
 
-  private toCreateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
-    const { rule_id: ruleId } = query;
-    const indices = getIndexPatternsForStream(definition);
+  private toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
+    const { rule_id: ruleId, query } = queryLink;
 
-    const esqlQuery = buildEsqlQuery(indices, query.query, true);
     return {
       data: {
-        name: query.query.title,
+        name: query.title,
         consumer: 'streams',
         alertTypeId: 'streams.rules.esql',
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: esqlQuery,
+          query: query.esql.query,
         },
         enabled: true,
         tags: ['streams', definition.name],
@@ -1025,18 +1002,17 @@ export class QueryClient {
     };
   }
 
-  private toUpdateRuleParams(query: QueryLink, definition: Streams.all.Definition) {
-    const { rule_id: ruleId } = query;
-    const indices = getIndexPatternsForStream(definition);
-    const esqlQuery = buildEsqlQuery(indices, query.query, true);
+  private toUpdateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
+    const { rule_id: ruleId, query } = queryLink;
+
     return {
       id: ruleId,
       data: {
-        name: query.query.title,
+        name: query.title,
         actions: [],
         params: {
           timestampField: '@timestamp',
-          query: esqlQuery,
+          query: query.esql.query,
         },
         tags: ['streams', definition.name],
         schedule: {

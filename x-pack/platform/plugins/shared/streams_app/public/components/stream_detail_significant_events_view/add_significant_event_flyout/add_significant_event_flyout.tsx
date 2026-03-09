@@ -19,7 +19,6 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { TaskStatus, type StreamQuery, type Streams } from '@kbn/streams-schema';
@@ -37,7 +36,7 @@ import { ManualFlowForm } from './manual_flow_form/manual_flow_form';
 import type { Flow, SaveData } from './types';
 import { defaultQuery } from './utils/default_query';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { validateQuery } from './common/validate_query';
+import { validateEsqlQuery } from './common/validate_query';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTaskPolling } from '../../../hooks/use_task_polling';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
@@ -167,29 +166,12 @@ export function AddSignificantEventFlyout({
 
       setGeneratedQueries(
         completedQueries
-          .map((nextQuery) => ({
-            ...nextQuery,
-            /**
-             * Older task results schema was saving `kql` property as
-             * string with the KQL body. New schema follow the StreamQuery
-             * interface and saves `kql` as `{ query: string }`.
-             */
-            kql: typeof nextQuery.kql === 'string' ? { query: nextQuery.kql } : nextQuery.kql,
-          }))
-          .filter((nextQuery) => {
-            const validation = validateQuery({
-              title: nextQuery.title,
-              kql: nextQuery.kql,
-            });
-            return validation.kql.isInvalid === false;
-          })
+          .filter((nextQuery) => validateEsqlQuery(nextQuery.esql.query).isInvalid === false)
           .map((nextQuery) => ({
             id: v4(),
             affected_streams: [definition.stream.name],
-            kql: nextQuery.kql,
             esql: nextQuery.esql,
             title: nextQuery.title,
-            feature: nextQuery.feature,
             severity_score: nextQuery.severity_score,
             evidence: nextQuery.evidence,
             type: nextQuery.type,
@@ -319,14 +301,10 @@ export function AddSignificantEventFlyout({
                       <EuiSpacer size="m" />
                       <ManualFlowForm
                         isSubmitting={isSubmitting}
-                        isEditMode={isEditMode}
                         setQuery={(next: StreamQuery) => setQueries([next])}
                         query={queries[0]}
-                        setCanSave={(next: boolean) => {
-                          setCanSave(next);
-                        }}
+                        setCanSave={setCanSave}
                         definition={definition.stream}
-                        dataViews={dataViewsFetch.value ?? []}
                       />
                     </>
                   )}
@@ -397,9 +375,6 @@ export function AddSignificantEventFlyout({
                             query: {
                               ...queries[0],
                               source: 'user_created',
-                              feature: queries[0].feature
-                                ? omit(queries[0].feature, 'description')
-                                : undefined,
                             },
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
@@ -410,9 +385,6 @@ export function AddSignificantEventFlyout({
                             queries: queries.map((nextQuery) => ({
                               ...nextQuery,
                               source: 'ai_generated',
-                              feature: nextQuery.feature
-                                ? omit(nextQuery.feature, 'description')
-                                : undefined,
                             })),
                           }).finally(() => setIsSubmitting(false));
                           break;

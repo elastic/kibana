@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { QueriesGetResponse, QueriesOccurrencesGetResponse } from '@kbn/streams-schema';
 import { orderBy } from 'lodash';
 import {
@@ -16,6 +16,7 @@ import {
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { queryStatusSchema, toRuleUnbackedFilter } from '../../../utils/query_status';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -78,7 +79,7 @@ export const promoteUnbackedQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const all = await queryClient.getQueryLinks([], { ruleBacked: false });
+    const all = await queryClient.getQueryLinks([], { ruleUnbacked: 'include' });
     const requestedQueryIds = params?.body?.queryIds ?? [];
 
     let toPromote = all;
@@ -121,28 +122,29 @@ const getQueriesRoute = createServerRoute({
     query: z.object({
       search: z.string().optional().describe('Query string to filter significant events queries'),
       streamName: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
+        .optional()
         .describe('Stream names to filter significant events'),
       type: z
         .preprocess(
           (val) => (typeof val === 'string' ? [val] : val),
-          z.array(streamQueryTypeSchema).optional()
+          z.array(streamQueryTypeSchema)
         )
+        .optional()
         .describe('Query types to filter by'),
       category: z
         .preprocess(
           (val) => (typeof val === 'string' ? [val] : val),
-          z.array(streamQueryCategorySchema).optional()
+          z.array(streamQueryCategorySchema)
         )
+        .optional()
         .describe('Query categories to filter by'),
       source: z
         .preprocess(
           (val) => (typeof val === 'string' ? [val] : val),
-          z.array(streamQuerySourceSchema).optional()
+          z.array(streamQuerySourceSchema)
         )
+        .optional()
         .describe('Query sources to filter by'),
       page: z.coerce.number().int().min(1).optional().describe('Page number (1-based)'),
       perPage: z.coerce
@@ -152,6 +154,7 @@ const getQueriesRoute = createServerRoute({
         .max(1000)
         .optional()
         .describe('Number of items per page'),
+      status: queryStatusSchema,
     }),
   }),
   options: {
@@ -171,7 +174,16 @@ const getQueriesRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { search, streamName, type, category, source, page = 1, perPage = 10 } = params.query;
+    const {
+      search,
+      streamName,
+      type,
+      category,
+      source,
+      page = 1,
+      perPage = 10,
+      status,
+    } = params.query;
 
     const [queries, unbackedQueryLinks] = await Promise.all([
       queryClient.getQueries({
@@ -180,8 +192,9 @@ const getQueriesRoute = createServerRoute({
         category,
         source,
         search: search?.trim(),
+        ruleUnbacked: toRuleUnbackedFilter(status),
       }),
-      queryClient.getQueryLinks(streamName ?? [], { ruleBacked: false }),
+      queryClient.getQueryLinks(streamName ?? [], { ruleUnbacked: 'only' }),
     ]);
 
     const sortedQueries = orderBy(
@@ -214,28 +227,29 @@ const getQueriesOccurrencesRoute = createServerRoute({
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       search: z.string().optional().describe('Query string to filter significant events queries'),
       streamName: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
+        .optional()
         .describe('Stream names to filter significant events'),
       type: z
         .preprocess(
           (val) => (typeof val === 'string' ? [val] : val),
-          z.array(streamQueryTypeSchema).optional()
+          z.array(streamQueryTypeSchema)
         )
+        .optional()
         .describe('Query types to filter by'),
       category: z
         .preprocess(
           (val) => (typeof val === 'string' ? [val] : val),
-          z.array(streamQueryCategorySchema).optional()
+          z.array(streamQueryCategorySchema)
         )
+        .optional()
         .describe('Query categories to filter by'),
       source: z
         .preprocess(
           (val) => (typeof val === 'string' ? [val] : val),
-          z.array(streamQuerySourceSchema).optional()
+          z.array(streamQuerySourceSchema)
         )
+        .optional()
         .describe('Query sources to filter by'),
     }),
   }),

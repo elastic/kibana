@@ -38,11 +38,14 @@ import {
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { Section } from './constants';
@@ -62,6 +65,8 @@ const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'))
 
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
+  getCasesPlugin?: () => Promise<CasesService | undefined>;
+  security: SecurityPluginStart;
   cloud?: CloudSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -89,6 +94,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   share?: SharePluginStart;
   contentManagement?: ContentManagementPublicStart;
   uiActions?: UiActionsStart;
+  cps?: CPSPluginStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {

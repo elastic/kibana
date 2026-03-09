@@ -39,6 +39,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import type { StreamQuery } from '@kbn/streams-schema';
+import { StreamsESQLEditor } from '../../../esql_query_editor';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { SeveritySelector } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/severity_selector';
@@ -143,10 +144,7 @@ export function QueryDetailsFlyout({
       {
         ...item,
         title: title.trim(),
-        kql: {
-          ...item.kql,
-          query: query.trim(),
-        },
+        esql: { query: query.trim() },
         severity_score: severityScore,
       },
       primaryStreamName
@@ -249,7 +247,7 @@ export function QueryDetailsFlyout({
               <EuiFlexItem>
                 <InfoPanel title={QUERY_INFORMATION_TITLE}>
                   <QueryInformationRow title={QUERY_LABEL}>
-                    <EuiCodeBlock language="kql" paddingSize="none" transparentBackground>
+                    <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
                       {getDisplayQueryValue(item)}
                     </EuiCodeBlock>
                   </QueryInformationRow>
@@ -370,14 +368,15 @@ export function QueryDetailsFlyout({
                     disabled={isSaving}
                   />
                 </EuiFormRow>
-                <EuiFormRow label={QUERY_LABEL}>
-                  <EuiFieldText
-                    data-test-subj="queriesTableQueryDetailsFlyoutQueryInput"
-                    value={query}
-                    onChange={(event) => setQuery(event.target.value)}
-                    disabled={isSaving}
-                  />
-                </EuiFormRow>
+                <StreamsESQLEditor
+                  query={{ esql: query }}
+                  onTextLangQueryChange={(newQuery) => setQuery(newQuery.esql)}
+                  onTextLangQuerySubmit={async (newQuery) => {
+                    if (newQuery?.esql) setQuery(newQuery.esql);
+                  }}
+                  dataTestSubj="queriesTableQueryDetailsFlyoutQueryInput"
+                  isDisabled={isSaving}
+                />
                 <EuiFormRow label={SEVERITY_LABEL}>
                   <SeveritySelector
                     severityScore={severityScore}
@@ -442,11 +441,7 @@ export function QueryDetailsFlyout({
 }
 
 function getQueryInputValue(query: StreamQuery) {
-  if (!query.kql?.query) {
-    return '';
-  }
-
-  return typeof query.kql.query === 'string' ? query.kql.query : JSON.stringify(query.kql.query);
+  return query.esql?.query ?? '';
 }
 
 function getDisplayQueryValue(query: StreamQuery) {

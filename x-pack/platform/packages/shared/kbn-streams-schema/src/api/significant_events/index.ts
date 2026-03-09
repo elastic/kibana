@@ -50,7 +50,7 @@ interface SignificantEventsGetResponse {
 
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
-  'occurrences' | 'change_points' | 'kql'
+  'occurrences' | 'change_points' | 'esql'
 >;
 
 type GeneratedSignificantEventQuery = Omit<StreamQuery, 'id' | 'affected_streams'>;
