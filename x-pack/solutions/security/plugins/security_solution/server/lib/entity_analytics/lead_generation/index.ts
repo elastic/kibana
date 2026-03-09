@@ -14,6 +14,21 @@ export {
   createBehavioralAnalysisModule,
   createAlertAnalysisModule,
 } from './observation_modules';
+export {
+  createEntityRetriever,
+  entityRecordToLeadEntity,
+  type EntityRetriever,
+  type EntityRetrieverDeps,
+} from './entity_retriever';
+export {
+  createEntityEnricher,
+  type EntityEnricher,
+  type EntityEnricherDeps,
+  type EnrichedLeadEntity,
+  type EntityEnrichment,
+  type RiskEnrichment,
+  type AlertEnrichment,
+} from './entity_enricher';
 export type {
   Lead,
   LeadEntity,

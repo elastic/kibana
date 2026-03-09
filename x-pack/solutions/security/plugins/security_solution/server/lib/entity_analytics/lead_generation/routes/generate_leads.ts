@@ -7,10 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type {
+  ElasticsearchClient,
   IKibanaResponse,
   Logger,
   StartServicesAccessor,
-  ElasticsearchClient,
 } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
@@ -31,11 +31,10 @@ import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
 import { createRiskScoreModule } from '../observation_modules/risk_score_module';
 import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
-import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import type { LeadEntity, Lead } from '../types';
+import { createEntityRetriever } from '../entity_retriever';
+import type { Lead } from '../types';
 
 const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
-const ENTITY_PAGE_SIZE = 1000;
 
 const GenerateLeadsRequestBody = z.object({
   connectorId: z.string().optional(),
@@ -99,19 +98,18 @@ export const generateLeadsRoute = (
 
           const routeStart = Date.now();
 
+          const retriever = createEntityRetriever({ esClient, logger, spaceId });
           const fetchStart = Date.now();
-          const entityRecords = await fetchAllEntityStoreRecords(esClient, spaceId, logger);
+          const leadEntities = await retriever.fetchAllEntities();
           logger.info(
             `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
-              entityRecords.length
+              leadEntities.length
             } records)`
           );
 
-          if (entityRecords.length === 0) {
+          if (leadEntities.length === 0) {
             return response.ok({ body: { leads: [], total: 0 } });
           }
-
-          const leadEntities: LeadEntity[] = entityRecords.map(entityRecordToLeadEntity);
 
           const engine = createLeadGenerationEngine({ logger });
           engine.registerModule(createRiskScoreModule({ esClient, logger, spaceId }));
@@ -162,67 +160,6 @@ export const generateLeadsRoute = (
         }
       }
     );
-};
-
-// ---------------------------------------------------------------------------
-// Entity Store fetching — paginated via search_after to handle large deployments
-// ---------------------------------------------------------------------------
-
-const fetchAllEntityStoreRecords = async (
-  esClient: ElasticsearchClient,
-  spaceId: string,
-  logger: Logger
-): Promise<Entity[]> => {
-  const results: Entity[] = [];
-
-  for (const entityType of ['user', 'host'] as const) {
-    const index = `.entities.v1.latest.security_${entityType}_${spaceId}`;
-    let searchAfter: unknown[] | undefined;
-
-    while (true) {
-      try {
-        const resp = await esClient.search<Entity>({
-          index,
-          size: ENTITY_PAGE_SIZE,
-          ignore_unavailable: true,
-          // _id tiebreaker ensures stable pagination across pages with same timestamp
-          sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
-          ...(searchAfter ? { search_after: searchAfter } : {}),
-          query: { match_all: {} },
-        });
-
-        const hits = resp.hits.hits;
-        for (const hit of hits) {
-          if (hit._source) results.push(hit._source);
-        }
-
-        if (hits.length < ENTITY_PAGE_SIZE) break;
-        searchAfter = hits[hits.length - 1].sort as unknown[];
-      } catch (error) {
-        logger.warn(
-          `[LeadGeneration] Failed to fetch ${entityType} records from "${index}": ${error}`
-        );
-        break;
-      }
-    }
-  }
-
-  return results;
-};
-
-// ---------------------------------------------------------------------------
-// Entity conversion
-// ---------------------------------------------------------------------------
-
-const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
-  const entityField = (record as Record<string, unknown>).entity as
-    | { name?: string; type?: string }
-    | undefined;
-  return {
-    record,
-    type: entityField?.type ?? 'unknown',
-    name: entityField?.name ?? 'unknown',
-  };
 };
 
 // ---------------------------------------------------------------------------
