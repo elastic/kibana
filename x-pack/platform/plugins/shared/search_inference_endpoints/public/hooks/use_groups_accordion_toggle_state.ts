@@ -26,6 +26,9 @@ export const useGroupsAccordionToggleState = (
   inferenceEndpoints: InferenceAPIConfigResponse[],
   groupBy: GroupByViewOptions
 ): UseGroupsAccordionToggleStateResult => {
+  const [groupByView, setGroupByView] = useState<GroupByViewOptions>(groupBy);
+  const [groupToggleState, setGroupToggleState] = useState<Record<string, boolean>>({});
+
   const allGroupIds = useMemo(() => {
     const groupedMap = inferenceEndpoints.reduce<Record<string, GroupedInferenceEndpointsData>>(
       GroupByReducer(groupBy),
@@ -36,9 +39,16 @@ export const useGroupsAccordionToggleState = (
     return list.map((g) => g.groupId);
   }, [inferenceEndpoints, groupBy]);
 
-  const [groupToggleState, setGroupToggleState] = useState<Record<string, boolean>>({});
-
   useEffect(() => {
+    if (groupBy !== groupByView) {
+      // When GroupBy selection changes, reset all groups to open
+      setGroupByView(groupBy);
+      setGroupToggleState(
+        allGroupIds.reduce<Record<string, boolean>>((acc, id) => ({ ...acc, [id]: true }), {})
+      );
+      return;
+    }
+
     setGroupToggleState((prev) => {
       let changed = false;
       const next = { ...prev };
@@ -50,7 +60,7 @@ export const useGroupsAccordionToggleState = (
       }
       return changed ? next : prev;
     });
-  }, [allGroupIds]);
+  }, [allGroupIds, groupBy, groupByView]);
 
   const expandAll = useCallback(() => {
     setGroupToggleState(
