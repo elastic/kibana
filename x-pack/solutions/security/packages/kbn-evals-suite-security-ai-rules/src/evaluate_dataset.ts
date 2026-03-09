@@ -510,6 +510,14 @@ export function createEvaluateDataset({
             const taskResult = await chatClient.generateRule(input.prompt);
 
             if (!taskResult.generatedRule) {
+              if (expected?.category === 'negative') {
+                // Negative-case prompts are expected to be rejected. Treat a refusal as success
+                // so dataset summaries don't misclassify correct behavior as an "agent error".
+                succeeded++;
+                log.info('[Task] Negative case: model refused to generate a rule (expected)');
+                return {};
+              }
+
               const isMissingIndex =
                 taskResult.error && /could not discover a suitable index/i.test(taskResult.error);
               if (isMissingIndex) {
