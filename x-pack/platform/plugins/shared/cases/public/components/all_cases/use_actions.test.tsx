@@ -279,6 +279,38 @@ describe('useActions', () => {
     });
   });
 
+  it('does not show close reason modal when selecting closed for an already closed case', async () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: TestProviders,
+    });
+
+    const comp = result.current.actions!.render({
+      ...basicCase,
+      status: CaseStatuses.closed,
+      totalAlerts: 2,
+      settings: {
+        ...basicCase.settings,
+        syncAlerts: true,
+      },
+    }) as React.ReactElement;
+    renderWithTestingProviders(comp);
+
+    await user.click(screen.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
+
+    await user.click(screen.getByTestId(`case-action-status-panel-${basicCase.id}`));
+    await waitForEuiContextMenuPanelTransition();
+
+    await user.click(screen.getByTestId('cases-bulk-action-status-closed'));
+
+    expect(
+      screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+    ).not.toBeInTheDocument();
+    expect(updateCasesSpy).not.toHaveBeenCalled();
+  });
+
   it('change the severity of the case', async () => {
     const updateCasesSpy = jest.spyOn(api, 'updateCases');
 

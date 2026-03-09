@@ -106,7 +106,10 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
     return statusAction
       .getActions([theCase])
       .map((statusActionMenuItem: EuiContextMenuPanelItemDescriptor) => {
-        if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
+        if (
+          statusActionMenuItem.key === 'cases-bulk-action-status-closed' &&
+          theCase.status !== CaseStatuses.closed
+        ) {
           return {
             ...statusActionMenuItem,
             onClick: openCloseCaseModal,
