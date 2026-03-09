@@ -6,7 +6,7 @@
  */
 
 /**
- * Author information from the Claude plugin manifest.
+ * Author information from the plugin manifest.
  */
 export interface PluginManifestAuthor {
   name: string;

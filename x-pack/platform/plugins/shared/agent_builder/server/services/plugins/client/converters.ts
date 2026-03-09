@@ -127,20 +127,13 @@ export const updateRequestToEs = ({
   update: PluginUpdateRequest;
   updateDate?: Date;
 }): PluginProperties => {
+  const { unmanaged_assets: unmanagedAssets, manifest, ...rest } = update;
   return {
     ...current,
-    ...(update.version !== undefined && { version: update.version }),
-    ...(update.description !== undefined && { description: update.description }),
-    ...(update.manifest !== undefined && {
-      manifest: {
-        ...current.manifest,
-        ...update.manifest,
-      },
-    }),
-    ...(update.source_url !== undefined && { source_url: update.source_url }),
-    ...(update.skill_ids !== undefined && { skill_ids: update.skill_ids }),
-    ...(update.unmanaged_assets !== undefined && {
-      unmanaged_assets: unmanagedAssetsToEs(update.unmanaged_assets),
+    ...rest,
+    manifest: { ...current.manifest, ...manifest },
+    ...(unmanagedAssets !== undefined && {
+      unmanaged_assets: unmanagedAssetsToEs(unmanagedAssets),
     }),
     updated_at: updateDate.toISOString(),
   };
