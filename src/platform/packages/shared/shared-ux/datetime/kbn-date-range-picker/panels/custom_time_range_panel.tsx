@@ -12,6 +12,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   type FormEvent,
   type MouseEvent,
 } from 'react';
@@ -49,8 +50,8 @@ import {
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { dateMathToRelativeParts } from '../format';
-import { getOptionInputText } from '../utils';
-import type { DateType } from '../types';
+import { getOptionInputText, getOptionShorthand } from '../utils';
+import type { DateType, DateOffset, TimeUnit } from '../types';
 import {
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_RELATIVE,
@@ -59,32 +60,27 @@ import {
   UNIT_SHORT_TO_FULL_MAP,
 } from '../constants';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
+import { customTimeRangePanelTexts } from '../translations';
 
 const UNIT_DIRECTION_OPTIONS = [
   ...Object.entries(UNIT_SHORT_TO_FULL_MAP).map(([short, full]) => ({
     value: `${short}_past`,
-    text: `${full}s ago`,
+    text: customTimeRangePanelTexts.unitPastSuffix(full),
   })),
-  { value: '', text: '─────', disabled: true },
+  { value: '', text: customTimeRangePanelTexts.separatorOption, disabled: true },
   ...Object.entries(UNIT_SHORT_TO_FULL_MAP).map(([short, full]) => ({
     value: `${short}_future`,
-    text: `${full}s from now`,
+    text: customTimeRangePanelTexts.unitFutureSuffix(full),
   })),
 ];
 
-interface RelativeState {
-  count: number;
-  unit: string;
-  isFuture: boolean;
-}
-
 interface DatePartState {
-  tab: DateType;
-  relative: RelativeState;
+  type: DateType;
+  relativeOffset: DateOffset;
   absoluteText: string;
 }
 
-const DEFAULT_RELATIVE: RelativeState = { count: 15, unit: 'm', isFuture: false };
+const DEFAULT_RELATIVE: DateOffset = { count: -15, unit: 'm' };
 
 /** Derives the initial state for one side (start or end) from the context time range. */
 function deriveInitialState(
@@ -92,11 +88,14 @@ function deriveInitialState(
   date: Date | null,
   dateType: DateType
 ): DatePartState {
+  // TODO: temporary default format, will be refactored
+  const formatAbsolute = (d: Date | null) => moment(d ?? undefined).format(DEFAULT_DATE_FORMAT);
+
   if (dateType === DATE_TYPE_NOW) {
     return {
-      tab: DATE_TYPE_NOW,
-      relative: DEFAULT_RELATIVE,
-      absoluteText: moment().format(DEFAULT_DATE_FORMAT),
+      type: DATE_TYPE_NOW,
+      relativeOffset: DEFAULT_RELATIVE,
+      absoluteText: formatAbsolute(null),
     };
   }
 
@@ -104,29 +103,36 @@ function deriveInitialState(
     const parts = dateMathToRelativeParts(dateString);
     if (parts) {
       return {
-        tab: DATE_TYPE_RELATIVE,
-        relative: { count: parts.count, unit: parts.unit, isFuture: parts.isFuture },
-        absoluteText: date ? moment(date).format(DEFAULT_DATE_FORMAT) : '',
+        type: DATE_TYPE_RELATIVE,
+        relativeOffset: {
+          count: parts.isFuture ? parts.count : -parts.count,
+          unit: parts.unit as TimeUnit,
+          roundTo: parts.round as TimeUnit | undefined,
+        },
+        absoluteText: formatAbsolute(date),
       };
     }
   }
 
   return {
-    tab: DATE_TYPE_ABSOLUTE,
-    relative: DEFAULT_RELATIVE,
-    absoluteText: date ? moment(date).format(DEFAULT_DATE_FORMAT) : dateString,
+    type: DATE_TYPE_ABSOLUTE,
+    relativeOffset: DEFAULT_RELATIVE,
+    absoluteText: date
+      ? moment(date).format(DEFAULT_DATE_FORMAT)
+      : dateString || formatAbsolute(null),
   };
 }
 
 /** Builds a datemath string from a single date part's local state. */
 function stateToDateMath(state: DatePartState): string {
-  switch (state.tab) {
+  switch (state.type) {
     case DATE_TYPE_NOW:
       return 'now';
     case DATE_TYPE_RELATIVE: {
-      const { count, unit, isFuture } = state.relative;
-      const operator = isFuture ? '+' : '-';
-      return `now${operator}${count}${unit}`;
+      const { count, unit, roundTo } = state.relativeOffset;
+      const operator = count >= 0 ? '+' : '-';
+      const round = roundTo ? `/${roundTo}` : '';
+      return `now${operator}${Math.abs(count)}${unit}${round}`;
     }
     case DATE_TYPE_ABSOLUTE:
       return state.absoluteText;
@@ -148,27 +154,29 @@ const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) 
 
   const tabOptions = useMemo(
     () => [
-      { id: `${tabGroupId}_${DATE_TYPE_RELATIVE}`, label: 'Relative' },
-      { id: `${tabGroupId}_${DATE_TYPE_ABSOLUTE}`, label: 'Absolute' },
-      { id: `${tabGroupId}_${DATE_TYPE_NOW}`, label: 'Now' },
+      { id: `${tabGroupId}_${DATE_TYPE_RELATIVE}`, label: customTimeRangePanelTexts.relativeTab },
+      { id: `${tabGroupId}_${DATE_TYPE_ABSOLUTE}`, label: customTimeRangePanelTexts.absoluteTab },
+      { id: `${tabGroupId}_${DATE_TYPE_NOW}`, label: customTimeRangePanelTexts.nowTab },
     ],
     [tabGroupId]
   );
 
-  const selectedTabId = `${tabGroupId}_${state.tab}`;
+  const selectedTabId = `${tabGroupId}_${state.type}`;
 
   const onTabChange = useCallback(
     (optionId: string) => {
-      const tab = optionId.split('_').pop() as DateType;
-      onChange({ ...state, tab });
+      const type = optionId.split('_').pop() as DateType;
+      onChange({ ...state, type });
     },
     [state, onChange]
   );
 
   const onCountChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const count = Math.max(0, parseInt(e.target.value, 10) || 0);
-      onChange({ ...state, relative: { ...state.relative, count } });
+      const raw = Math.max(0, parseInt(e.target.value, 10) || 0);
+      const isFuture = state.relativeOffset.count >= 0;
+      const count = isFuture ? raw : -raw;
+      onChange({ ...state, relativeOffset: { ...state.relativeOffset, count } });
     },
     [state, onChange]
   );
@@ -176,9 +184,15 @@ const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) 
   const onUnitDirectionChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const [unit, dir] = e.target.value.split('_');
+      const isFuture = dir === 'future';
+      const absCount = Math.abs(state.relativeOffset.count);
       onChange({
         ...state,
-        relative: { ...state.relative, unit, isFuture: dir === 'future' },
+        relativeOffset: {
+          ...state.relativeOffset,
+          unit: unit as TimeUnit,
+          count: isFuture ? absCount : -absCount,
+        },
       });
     },
     [state, onChange]
@@ -190,6 +204,8 @@ const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) 
     },
     [state, onChange]
   );
+
+  const isStart = label === customTimeRangePanelTexts.startDateLabel;
 
   return (
     <div>
@@ -204,43 +220,46 @@ const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) 
             isFullWidth
           />
 
-          {state.tab === DATE_TYPE_RELATIVE && (
+          {state.type === DATE_TYPE_RELATIVE && (
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false} style={{ width: 80 }}>
                 <EuiFieldNumber
                   compressed
-                  value={state.relative.count}
+                  value={Math.abs(state.relativeOffset.count)}
                   onChange={onCountChange}
                   min={0}
-                  aria-label="Count"
+                  aria-label={customTimeRangePanelTexts.countAriaLabel}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiSelect
                   compressed
                   options={UNIT_DIRECTION_OPTIONS}
-                  value={`${state.relative.unit}_${state.relative.isFuture ? 'future' : 'past'}`}
+                  value={`${state.relativeOffset.unit}_${
+                    state.relativeOffset.count >= 0 ? 'future' : 'past'
+                  }`}
                   onChange={onUnitDirectionChange}
-                  aria-label="Unit and direction"
+                  aria-label={customTimeRangePanelTexts.unitDirectionAriaLabel}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
 
-          {state.tab === DATE_TYPE_ABSOLUTE && (
+          {state.type === DATE_TYPE_ABSOLUTE && (
             <EuiFieldText
               compressed
               value={state.absoluteText}
               onChange={onAbsoluteTextChange}
-              aria-label={`${label} absolute date`}
+              aria-label={customTimeRangePanelTexts.absoluteDateAriaLabel(label)}
             />
           )}
 
-          {state.tab === DATE_TYPE_NOW && (
+          {state.type === DATE_TYPE_NOW && (
             <EuiText size="xs" color="subdued">
               <p>
-                {label === 'Start date' ? 'Start' : 'End'} time will be set to the time of the
-                refresh.
+                {isStart
+                  ? customTimeRangePanelTexts.nowStartHelpText
+                  : customTimeRangePanelTexts.nowEndHelpText}
               </p>
             </EuiText>
           )}
@@ -269,27 +288,31 @@ const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) 
 
 interface ShorthandDisplayProps {
   value: string;
+  /** When true, show "(not available)" and disable the copy button. */
+  isDisabled?: boolean;
 }
 
 /** Read-only shorthand display with help text. */
-const ShorthandDisplay = ({ value }: ShorthandDisplayProps) => {
+const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
   const { navigateTo } = useDateRangePickerPanelNavigation();
   const [isCopied, setIsCopied] = useState(false);
 
   const documentationPanelId = 'documentation-panel';
 
+  const displayValue = isDisabled ? customTimeRangePanelTexts.notAvailable : value;
+
   const copy = (event: MouseEvent) => {
     event.preventDefault();
-    copyToClipboard(value);
+    copyToClipboard(displayValue);
     setIsCopied(true);
   };
 
   return (
     <EuiFormRow
-      label="Shorthand"
+      label={customTimeRangePanelTexts.shorthandLabel}
       helpText={
         <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs" responsive={false}>
-          <p>You can type this directly in the time picker to get the same time range</p>
+          <p>{customTimeRangePanelTexts.shorthandHelpText}</p>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="xs"
@@ -298,7 +321,7 @@ const ShorthandDisplay = ({ value }: ShorthandDisplayProps) => {
               flush="both"
               onClick={() => navigateTo(documentationPanelId)}
             >
-              Shorthand syntax
+              {customTimeRangePanelTexts.shorthandSyntaxLink}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -306,19 +329,26 @@ const ShorthandDisplay = ({ value }: ShorthandDisplayProps) => {
     >
       <EuiFieldText
         append={
-          <EuiToolTip content={isCopied ? 'Shorthand copied' : 'Copy shorthand to clipboard'}>
+          <EuiToolTip
+            content={
+              isCopied
+                ? customTimeRangePanelTexts.shorthandCopied
+                : customTimeRangePanelTexts.copyShorthandTooltip
+            }
+          >
             <EuiFormAppend
               iconLeft="copy"
               element="button"
               onClick={copy}
               onBlur={() => setIsCopied(false)}
+              disabled={isDisabled}
             />
           </EuiToolTip>
         }
         compressed
-        value={value}
+        value={displayValue}
         readOnly
-        aria-label="Shorthand"
+        aria-label={customTimeRangePanelTexts.shorthandLabel}
       />
     </EuiFormRow>
   );
@@ -326,10 +356,13 @@ const ShorthandDisplay = ({ value }: ShorthandDisplayProps) => {
 
 /** Panel for specifying a custom absolute or relative time range. */
 export function CustomTimeRangePanel() {
-  const { timeRange, setText, applyRange, onPresetSave } = useDateRangePickerContext();
+  const { timeRange, text, setText, applyRange, onPresetSave } = useDateRangePickerContext();
   const formId = useGeneratedHtmlId({ prefix: 'customTimeRangeForm' });
   const saveCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
   const [saveAsPreset, setSaveAsPreset] = useState(false);
+
+  const originalTextRef = useRef(text);
+  const hasAppliedRef = useRef(false);
 
   const [startState, setStartState] = useState<DatePartState>(() =>
     deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0])
@@ -338,52 +371,99 @@ export function CustomTimeRangePanel() {
     deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1])
   );
 
-  const startDateMath = useMemo(() => stateToDateMath(startState), [startState]);
-  const endDateMath = useMemo(() => stateToDateMath(endState), [endState]);
-  const shorthandText = useMemo(
-    () => getOptionInputText({ start: startDateMath, end: endDateMath }),
-    [startDateMath, endDateMath]
+  const startDateString = useMemo(() => stateToDateMath(startState), [startState]);
+  const endDateString = useMemo(() => stateToDateMath(endState), [endState]);
+
+  const inputText = useMemo(
+    () => getOptionInputText({ start: startDateString, end: endDateString }),
+    [startDateString, endDateString]
+  );
+  const shorthandValue = useMemo(
+    () => getOptionShorthand({ start: startDateString, end: endDateString }),
+    [startDateString, endDateString]
   );
 
+  const isInternalChangeRef = useRef(false);
+
   useEffect(() => {
-    setText(shorthandText);
-  }, [shorthandText, setText]);
+    if (isInternalChangeRef.current) {
+      isInternalChangeRef.current = false;
+      return;
+    }
+    setStartState(deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0]));
+    setEndState(deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1]));
+  }, [timeRange.start, timeRange.end, timeRange.startDate, timeRange.endDate, timeRange.type]);
+
+  useEffect(() => {
+    isInternalChangeRef.current = true;
+    setText(inputText);
+  }, [inputText, startDateString, endDateString, setText]);
+
+  const endBeforeStart =
+    timeRange.startDate != null &&
+    timeRange.endDate != null &&
+    timeRange.endDate.getTime() <= timeRange.startDate.getTime();
+  const endError = endBeforeStart ? customTimeRangePanelTexts.endBeforeStartError : undefined;
+
+  const handleGoBack = useCallback(() => {
+    if (!hasAppliedRef.current) {
+      setText(originalTextRef.current);
+    }
+  }, [setText]);
 
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
+      hasAppliedRef.current = true;
+      if (saveAsPreset && onPresetSave) {
+        onPresetSave({ start: startDateString, end: endDateString, label: inputText });
+      }
       applyRange();
     },
-    [applyRange]
+    [applyRange, saveAsPreset, onPresetSave, startDateString, endDateString, inputText]
   );
 
   return (
     <PanelContainer>
       <PanelHeader>
-        <SubPanelHeading>Custom time range</SubPanelHeading>
+        <SubPanelHeading onGoBack={handleGoBack}>
+          {customTimeRangePanelTexts.heading}
+        </SubPanelHeading>
       </PanelHeader>
       <PanelBody spacingSide="both">
         <PanelBodySection>
           <form id={formId} onSubmit={onSubmit}>
             <EuiFlexGroup gutterSize="l" direction="column" responsive={false}>
-              <DatePartPicker label="Start date" state={startState} onChange={setStartState} />
-              <DatePartPicker label="End date" state={endState} onChange={setEndState} />
-              <ShorthandDisplay value={shorthandText} />
+              <DatePartPicker
+                label={customTimeRangePanelTexts.startDateLabel}
+                state={startState}
+                onChange={setStartState}
+              />
+              <DatePartPicker
+                label={customTimeRangePanelTexts.endDateLabel}
+                state={endState}
+                onChange={setEndState}
+                error={endError}
+              />
+              <ShorthandDisplay
+                value={shorthandValue ?? ''}
+                isDisabled={shorthandValue == null || timeRange.isInvalid}
+              />
             </EuiFlexGroup>
           </form>
         </PanelBodySection>
       </PanelBody>
       <PanelFooter
         primaryAction={
-          <EuiButton size="s" fill type="submit" form={formId}>
-            Apply
+          <EuiButton size="s" fill type="submit" form={formId} disabled={timeRange.isInvalid}>
+            {customTimeRangePanelTexts.applyButton}
           </EuiButton>
         }
       >
         {onPresetSave && (
           <EuiCheckbox
             id={saveCheckboxId}
-            label="Save as preset"
+            label={customTimeRangePanelTexts.saveAsPresetCheckbox}
             checked={saveAsPreset}
             onChange={(e) => setSaveAsPreset(e.target.checked)}
           />
