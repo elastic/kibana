@@ -38,6 +38,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { RRuleParams, RuleAction, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -152,6 +153,11 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getGlobalRuleEventLogList: (
     props: GlobalRuleEventLogListProps
   ) => ReactElement<GlobalRuleEventLogListProps>;
+  /**
+   * Get the alert formatter for a specific rule type.
+   * Returns the formatter function if the rule type has one registered, undefined otherwise.
+   */
+  getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
 }
 
 interface PluginsSetup {
@@ -659,6 +665,12 @@ export class Plugin
             snoozeSchedule: rule.snoozeSchedule,
           }),
         };
+      },
+      getAlertFormatter: (ruleTypeId: string): AlertFormatter | undefined => {
+        if (!this.ruleTypeRegistry.has(ruleTypeId)) {
+          return undefined;
+        }
+        return this.ruleTypeRegistry.get(ruleTypeId).format;
       },
     };
   }

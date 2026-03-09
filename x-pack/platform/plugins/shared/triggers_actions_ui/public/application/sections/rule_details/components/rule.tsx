@@ -85,6 +85,16 @@ export function RuleComponent({
     charts,
     uiSettings,
   } = useKibana().services;
+
+  const getAlertFormatter = useCallback(
+    (ruleTypeId: string) => {
+      if (!ruleTypeRegistry.has(ruleTypeId)) {
+        return undefined;
+      }
+      return ruleTypeRegistry.get(ruleTypeId).format;
+    },
+    [ruleTypeRegistry]
+  );
   // The lastReloadRequestTime should be updated when the refreshToken changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
@@ -139,6 +149,7 @@ export function RuleComponent({
           renderActionsCell={RuleAlertActionsCell}
           actionsColumnWidth={120}
           lastReloadRequestTime={lastReloadRequestTime}
+          getAlertFormatter={getAlertFormatter}
           services={{
             data,
             http,
@@ -155,6 +166,7 @@ export function RuleComponent({
     application,
     data,
     fieldFormats,
+    getAlertFormatter,
     http,
     alertsTableQuery,
     lastReloadRequestTime,

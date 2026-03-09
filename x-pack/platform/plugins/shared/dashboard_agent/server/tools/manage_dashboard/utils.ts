@@ -19,7 +19,7 @@ import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Failure record for tracking visualization errors.
@@ -38,7 +38,7 @@ export const getErrorMessage = (error: unknown): string => {
 };
 
 const visualizationAttachmentDataSchema = z.object({
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   query: z.string().optional(),
 });
 

@@ -32,6 +32,7 @@ import type {
   DataSourcesServerStartDependencies,
 } from '../types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE, type DataSourceAttributes } from '../saved_objects';
+import type { DeleteDataSourceAndRelatedResourcesResult } from '../../common';
 
 interface CreateDataSourceAndResourcesParams {
   name: string;
@@ -439,16 +440,6 @@ interface DeleteDataSourceAndRelatedResourcesParams {
   workflowManagement: DataSourcesServerSetupDependencies['workflowsManagement'];
   request: KibanaRequest;
   logger: Logger;
-}
-
-interface DeleteDataSourceAndRelatedResourcesResult {
-  success: boolean;
-  fullyDeleted: boolean;
-  remaining?: {
-    kscIds: string[];
-    toolIds: string[];
-    workflowIds: string[];
-  };
 }
 
 /**

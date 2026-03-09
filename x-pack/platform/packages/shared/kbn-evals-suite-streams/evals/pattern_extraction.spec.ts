@@ -150,7 +150,7 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
     try {
       const response = await kbnClient.request({
         method: 'POST',
-        path: `/internal/streams/logs/processing/_suggestions/${patternType}`,
+        path: `/internal/streams/logs.otel/processing/_suggestions/${patternType}`,
         body: {
           connector_id: connectorId,
           sample_messages: messages,
@@ -224,14 +224,14 @@ evaluate.describe('Pattern extraction quality evaluation', () => {
 
     const documents = messages.map((msg) => ({
       [fieldToParse]: msg,
-      'stream.name': 'logs',
+      'stream.name': 'logs.otel',
       '@timestamp': '2025-01-01',
     }));
 
     try {
       const response = await kbnClient.request({
         method: 'POST',
-        path: `/internal/streams/logs/processing/_simulate`,
+        path: `/internal/streams/logs.otel/processing/_simulate`,
         body: { documents, processing: { steps: [step] } },
       });
 

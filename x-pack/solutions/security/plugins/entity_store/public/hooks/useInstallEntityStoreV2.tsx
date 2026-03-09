@@ -64,4 +64,4 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 };
 
 const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>
-  status !== EntityStoreStatus.Values.not_installed;
+  status !== EntityStoreStatus.enum.not_installed;

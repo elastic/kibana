@@ -40,6 +40,9 @@ interface SourcesTableProps {
   onDelete: (source: ActiveSource) => void;
   selectedItems: ActiveSource[];
   onSelectionChange: (items: ActiveSource[]) => void;
+  onBulkDelete: () => void;
+  onSelectAll: () => void;
+  onClearSelection: () => void;
 }
 
 // CSS for hover-only quick actions
@@ -189,6 +192,9 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
   onDelete,
   selectedItems,
   onSelectionChange,
+  onBulkDelete,
+  onSelectAll,
+  onClearSelection,
 }) => {
   const {
     services: { application },
@@ -303,7 +309,14 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
       itemId="id"
       columns={columns}
       loading={isLoading}
-      childrenBetween={<SourcesUtilityBar selectedCount={selectedItems.length} />}
+      childrenBetween={
+        <SourcesUtilityBar
+          selectedCount={selectedItems.length}
+          onBulkDelete={onBulkDelete}
+          onSelectAll={onSelectAll}
+          onClearSelection={onClearSelection}
+        />
+      }
       search={{
         box: {
           incremental: true,

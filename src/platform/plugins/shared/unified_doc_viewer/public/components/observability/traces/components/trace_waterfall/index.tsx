@@ -100,13 +100,14 @@ export function TraceWaterfall({ traceId, docId, serviceName, dataView }: Props)
       ) : null}
       <ContentFrameworkSection
         id="trace-waterfall"
+        data-test-subj="unifiedDocViewerTraceSummarySection"
         title={sectionTitle}
         description={sectionTip}
         actions={actions}
       >
         {docId ? (
           <div
-            data-test-subj="unifiedDocViewerObservabilityTracesTraceWaterfallClickArea"
+            data-test-subj="unifiedDocViewerTraceSummaryTraceWaterfallClickArea"
             aria-label={fullScreenButtonLabel}
             tabIndex={0}
             onClick={() => setShowFullScreenWaterfall(true)}

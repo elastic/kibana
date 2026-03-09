@@ -15,6 +15,7 @@ import {
   getEntitiesAliasPattern,
 } from '../constants';
 import { getComponentTemplateName } from './component_templates';
+import { getLatestIndexIngestPipelineId } from './latest_index_ingest_pipeline';
 import { ALL_ENTITY_TYPES } from '../../../common/domain/definitions/entity_schema';
 
 // Mostly copied from x-pack/platform/plugins/shared/entity_manager/server/lib/entities/templates/entities_latest_template.ts
@@ -71,6 +72,7 @@ export const getLatestEntityIndexTemplateConfig = (
     settings: {
       index: {
         codec: 'best_compression',
+        default_pipeline: getLatestIndexIngestPipelineId(namespace),
         mapping: { total_fields: { limit: 2000 } },
         mode: 'lookup',
       },

@@ -6,7 +6,6 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { z, ZodObject } from '@kbn/zod';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
 import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
@@ -44,12 +43,15 @@ export const resolveToolParameters = (
 
 export const createHandler = (
   configuration: EsqlToolConfig
-): ToolHandlerFn<z.infer<ZodObject<any>>> => {
+): ToolHandlerFn<Record<string, unknown>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
 
     // Apply default values for parameters that weren't provided by the LLM
-    const resolvedParams = resolveToolParameters(configuration.params, params);
+    const resolvedParams = resolveToolParameters(
+      configuration.params,
+      params as Record<string, EsqlToolParamValue>
+    );
 
     const paramArray = Object.entries(resolvedParams).map(([param, value]) => ({ [param]: value }));
 

@@ -15382,10 +15382,6 @@
                 "path": "x-pack/solutions/search/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_explore_table_formulas.ts"
               },
               {
-                "plugin": "timelines",
-                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
-              },
-              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
@@ -15428,6 +15424,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-observability",

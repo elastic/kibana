@@ -7,7 +7,7 @@
 
 import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';

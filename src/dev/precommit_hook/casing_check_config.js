@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 export const IGNORE_PATTERNS = [
   // the gitignore: true option makes sure that we don't

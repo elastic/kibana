@@ -203,6 +203,11 @@ export class DiscoverApp {
     await expect(docViewer).toBeVisible({ timeout: 30_000 });
   }
 
+  async openAndWaitForDocViewerFlyout({ rowIndex }: { rowIndex: number }) {
+    await this.openDocumentDetails({ rowIndex });
+    await this.waitForDocViewerFlyoutOpen();
+  }
+
   async getDocTableIndex(index: number): Promise<string> {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
@@ -241,8 +246,12 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  getColumnHeader(name: string): Locator {
+    return this.page.testSubj.locator(`dataGridHeaderCell-${name}`);
+  }
+
   async clickFieldSort(field: string, sortOption: string) {
-    const header = this.page.testSubj.locator(`dataGridHeaderCell-${field}`);
+    const header = this.getColumnHeader(field);
     await header.click();
     await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
       state: 'visible',
@@ -274,7 +283,7 @@ export class DiscoverApp {
     return await Promise.all(columnLocators.map((locator) => locator.innerText()));
   }
 
-  async writeSearchQuery(query: string) {
+  async writeAndSubmitKqlQuery(query: string) {
     await this.page.testSubj.fill('queryInput', query);
     await expect(this.page.testSubj.locator('queryInput')).toHaveValue(query);
     await this.page.testSubj.click('querySubmitButton');
@@ -332,7 +341,7 @@ export class DiscoverApp {
     }
   }
 
-  async writeEsqlQuery(query: string) {
+  async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);
     await this.page.testSubj.click('querySubmitButton');

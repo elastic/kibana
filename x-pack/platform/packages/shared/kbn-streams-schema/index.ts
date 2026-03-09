@@ -29,7 +29,7 @@ export { getStreamTypeFromDefinition } from './src/helpers/get_stream_type_from_
 export type { StreamType } from './src/helpers/get_stream_type_from_definition';
 export { isRootStreamDefinition } from './src/helpers/is_root_stream_definition';
 export { isOtelStream } from './src/helpers/is_otel_stream';
-export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
@@ -53,6 +53,7 @@ export {
   extractWhereExpression,
   getFromSources,
   normalizeEsqlQuery,
+  replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
 
@@ -190,8 +191,6 @@ export {
   featureStatusSchema,
 } from './src/feature';
 
-export { type System, systemSchema, isSystem } from './src/system';
-
 export {
   type BaseSimulationError,
   type SimulationError,
@@ -211,6 +210,25 @@ export { TaskStatus, type TaskResult } from './src/tasks/types';
 export type { GenerateDescriptionResult } from './src/api/description_generation';
 export type { IdentifyFeaturesResult } from './src/api/features';
 
-export type { InsightsResult, Insight, InsightImpactLevel } from './src/insights';
+export {
+  type GenerateInsightsResult,
+  type Insight,
+  type InsightCore,
+  type InsightEvidence,
+  type InsightImpactLevel,
+  type InsightImpactLevelNumeric,
+  type InsightUserEvaluation,
+  type InsightMeta,
+  type SaveInsightBody,
+  insightSchema,
+  insightCoreSchema,
+  insightMetaSchema,
+  insightEvidenceSchema,
+  insightImpactLevelSchema,
+  insightImpactLevelNumericSchema,
+  insightUserEvaluationSchema,
+  INSIGHT_IMPACT_LEVEL_MAP,
+  getImpactLevel,
+} from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';

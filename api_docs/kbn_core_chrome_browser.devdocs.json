@@ -3998,42 +3998,6 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SolutionNavigationDefinition.homePage",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "homePage",
-            "description": [
-              "The page to navigate to when clicking on the Kibana (or custom) logo."
-            ],
-            "signature": [
-              "LinkId | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 276,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SolutionNavigationDefinition.dataTestSubj",
-            "type": "string",
-            "tags": [],
-            "label": "dataTestSubj",
-            "description": [
-              "data-test-subj attribute for the solution navigation."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 278,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4237,7 +4201,7 @@
           "<unknown>[] | undefined; iconToString?: string | undefined; nameToString?: string | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 286,
+        "lineNumber": 282,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4360,7 +4324,7 @@
           "> | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 282,
+        "lineNumber": 278,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -23,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Search Sessions Management UI', () => {
-    describe('New search sessions', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/255668
+    describe.skip('New search sessions', () => {
       before(async () => {
         await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');

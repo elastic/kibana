@@ -8,3 +8,6 @@
  */
 
 export * from './use_workflows';
+export * from './use_run_workflow';
+export * from './use_workflows_capabilities';
+export * from './use_workflows_ui_settings';

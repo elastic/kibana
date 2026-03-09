@@ -36,6 +36,10 @@ import {
   getUpdatesIndexTemplateId,
 } from './updates_index_template';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
+import {
+  installLatestIndexIngestPipeline,
+  deleteLatestIndexIngestPipeline,
+} from './latest_index_ingest_pipeline';
 
 interface ElasticsearchAssetOptions {
   esClient: ElasticsearchClient;
@@ -51,6 +55,7 @@ export async function installElasticsearchAssets({
   namespace,
 }: ElasticsearchAssetOptions): Promise<void> {
   try {
+    await installLatestIndexIngestPipeline(esClient, namespace, logger);
     await installComponentTemplates(esClient, definition, namespace, logger);
     await installIndexTemplates(esClient, namespace, logger);
     await installIndicesAndDataStreams(esClient, namespace, logger);
@@ -136,6 +141,7 @@ export async function uninstallElasticsearchAssets({
     await uninstallIndicesAndDataStreams(esClient, namespace, logger);
     await uninstallIndexTemplates(esClient, namespace, logger);
     await uninstallComponentTemplates(esClient, definition, namespace, logger);
+    await deleteLatestIndexIngestPipeline(esClient, namespace, logger);
   } catch (error) {
     logger.error(`error uninstalling assets: ${error}`);
     // TODO: degrade status?

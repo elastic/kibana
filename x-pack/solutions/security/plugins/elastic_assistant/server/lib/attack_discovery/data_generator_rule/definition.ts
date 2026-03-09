@@ -55,7 +55,10 @@ export const getAttackDiscoveryDataGeneratorRuleType = ({
       },
     },
     schemas: {
-      params: { type: 'zod', schema: CreateAttackDiscoveryAlertsParamsSchema },
+      params: {
+        type: 'zod',
+        schema: CreateAttackDiscoveryAlertsParamsSchema,
+      },
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,

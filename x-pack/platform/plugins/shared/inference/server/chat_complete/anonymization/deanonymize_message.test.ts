@@ -18,15 +18,11 @@ import type {
 } from '@kbn/inference-common';
 import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
 import { deanonymizeMessage } from './deanonymize_message';
-import { chunkEvent, messageEvent, tokensEvent } from '../../test_utils';
+import { chunkEvent, messageEvent, tokensEvent, createMask } from '../../test_utils';
 import { anonymizeMessages } from './anonymize_messages';
 import { RegexWorkerService } from './regex_worker_service';
 import type { AnonymizationWorkerConfig } from '../../config';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-
-function createMask(entityClass: string, value: string) {
-  return `${entityClass}_${Buffer.from(value).toString('hex').slice(0, 40)}`;
-}
 const testConfig = {
   enabled: false,
 } as AnonymizationWorkerConfig;
@@ -75,6 +71,7 @@ describe('deanonymizeMessage', () => {
     const anonymizationOutput: AnonymizationOutput = {
       messages: [originalUserMessage],
       anonymizations: [anonymization],
+      replacementsId: 'replacements-123',
     } as AnonymizationOutput;
 
     const chunks = [chunkEvent(`Hi, I am`), chunkEvent(`${mask}.`)];
@@ -98,6 +95,8 @@ describe('deanonymizeMessage', () => {
     // Content should be deanonymized
     expect(deanonymizedChunk.content).toBe(`Hi, I am ${value}.`);
     expect(deanonymizedMessage.content).toBe(`Hi, I am ${value}.`);
+    expect(deanonymizedChunk.metadata?.anonymization?.replacementsId).toBe('replacements-123');
+    expect(deanonymizedMessage.metadata?.anonymization?.replacementsId).toBe('replacements-123');
 
     // Original mask must be gone
     expect(deanonymizedChunk.content).not.toContain(mask);
@@ -214,11 +213,11 @@ describe('deanonymizeMessage', () => {
     );
   });
 
-  it('deanonymizes WEBSITE masks produced by anonymizeMessages', async () => {
+  it('deanonymizes HOST_NAME masks produced by anonymizeMessages', async () => {
     const websiteRule: AnonymizationRule = {
       type: 'RegExp',
       enabled: true,
-      entityClass: 'WEBSITE',
+      entityClass: 'HOST_NAME',
       pattern: '\\b(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}\\b',
     };
 
@@ -262,7 +261,7 @@ describe('deanonymizeMessage', () => {
       {
         start: urlStart,
         end: urlEnd,
-        entity: anonymizations.find((a) => a.entity.class_name === 'WEBSITE')!.entity,
+        entity: anonymizations.find((a) => a.entity.class_name === 'HOST_NAME')!.entity,
       },
     ];
 

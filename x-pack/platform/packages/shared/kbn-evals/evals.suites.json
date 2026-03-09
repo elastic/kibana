@@ -37,6 +37,18 @@
       ]
     },
     {
+      "id": "streams/significant-events",
+      "name": "Streams Significant Events",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/evals/significant_events/playwright.config.ts",
+      "tags": [
+        "platform",
+        "streams"
+      ],
+      "ciLabels": [
+        "evals:streams-sigevents"
+      ]
+    },
+    {
       "id": "llm-tasks",
       "name": "LLM Tasks",
       "configPath": "x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks/playwright.config.ts",
@@ -83,6 +95,19 @@
         "evals:endpoint"
       ],
       "serverConfigSet": "evals_endpoint"
+    },
+    {
+      "id": "entity-analytics",
+      "name": "Security Entity Analytics",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts",
+      "tags": [
+        "security",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:entity-analytics"
+      ],
+      "serverConfigSet": "evals_entity_analytics"
     }
   ]
 }

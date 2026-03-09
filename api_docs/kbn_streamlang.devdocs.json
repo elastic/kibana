@@ -510,16 +510,10 @@
             "text": "Condition"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.ESQLSingleAstItem",
-            "text": "ESQLSingleAstItem"
-          }
+          "ESQLSingleAstItem"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/condition_to_esql.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -541,7 +535,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/src/transpilers/esql/condition_to_esql.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,

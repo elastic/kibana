@@ -376,14 +376,15 @@ export default ({ getService }: FtrProviderContext) => {
           const ruleParams = getThresholdRuleParams();
           const { body } = await detectionsApi
             .createRule({
-              // @ts-expect-error we are testing the invalid payload
+              // we are testing the invalid payload
               body: omit(ruleParams, 'threshold'),
             })
             .expect(400);
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message: '[request body]: threshold: Required',
+            message:
+              '[request body]: threshold: Invalid input: expected object, received undefined',
             statusCode: 400,
           });
         });
@@ -402,7 +403,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message: '[request body]: threshold.field: Array must contain at most 5 element(s)',
+            message:
+              '[request body]: Invalid input: expected string, received array, Too big: expected array to have <=5 items',
             statusCode: 400,
           });
         });
@@ -421,7 +423,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).toEqual({
             error: 'Bad Request',
-            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
+            message: '[request body]: threshold.value: Too small: expected number to be >=1',
             statusCode: 400,
           });
         });
@@ -473,14 +475,13 @@ export default ({ getService }: FtrProviderContext) => {
             .createRule({
               body: {
                 ...getCustomQueryRuleParams(),
-                // @ts-expect-error type system doesn't allow to use the legacy format as params for getCustomQueryRuleParams()
                 investigation_fields: ['host.name'],
               },
             })
             .expect(400);
 
           expect(body.message).toBe(
-            '[request body]: investigation_fields: Expected object, received array'
+            '[request body]: investigation_fields: Invalid input: expected object, received array'
           );
         });
       });

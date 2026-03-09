@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RecommendedField, RecommendedQuery } from '@kbn/esql-types';
+import type { RecommendedField, RecommendedQuery, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { REGISTRY_EXTENSIONS_ROUTE } from '@kbn/esql-types';
 import type { HttpStart } from '@kbn/core/public';
-import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import { cacheParametrizedAsyncFunction } from './utils/cache';
 
 const getEditorExtensionsFromRegistry = async (
   http: HttpStart,
   queryString: string,
-  activeSolutionId: SolutionId
+  activeSolutionId: ESQLRegistrySolutionId
 ): Promise<{
   recommendedQueries: RecommendedQuery[];
   recommendedFields: RecommendedField[];

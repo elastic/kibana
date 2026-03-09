@@ -56,7 +56,7 @@ spaceTest.describe(
     });
 
     spaceTest('should paginate through metrics', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
 
       await spaceTest.step('pagination is visible', async () => {
@@ -94,7 +94,7 @@ spaceTest.describe(
     });
 
     spaceTest('should filter metrics using search', async ({ pageObjects }) => {
-      await pageObjects.discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
 

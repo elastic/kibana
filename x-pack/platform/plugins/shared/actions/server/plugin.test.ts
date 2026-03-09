@@ -9,7 +9,7 @@
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -802,15 +802,14 @@ describe('Actions Plugin', () => {
           expect(err.message).toMatchInlineSnapshot(`
             "[
               {
+                \\"origin\\": \\"string\\",
                 \\"code\\": \\"too_small\\",
                 \\"minimum\\": 1,
-                \\"type\\": \\"string\\",
                 \\"inclusive\\": true,
-                \\"exact\\": false,
-                \\"message\\": \\"String must contain at least 1 character(s)\\",
                 \\"path\\": [
                   \\"text\\"
-                ]
+                ],
+                \\"message\\": \\"Too small: expected string to have >=1 characters\\"
               }
             ]"
           `);

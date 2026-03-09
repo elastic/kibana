@@ -8,10 +8,7 @@
 import { deanonymize } from './deanonymize';
 import type { Anonymization, AssistantMessage, Message, UserMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-
-function createMask(entityClass: string, value: string) {
-  return `${entityClass}_${Buffer.from(value).toString('hex').slice(0, 40)}`;
-}
+import { createMask } from '../../test_utils';
 
 describe('deanonymize', () => {
   describe('email mask', () => {
