@@ -215,6 +215,8 @@ Use only verbs from this list. If a new verb is genuinely needed, propose it wit
 | `submit` | User submits a prompt or form for processing | `send`, `run` (for AI prompts) |
 | `run` | User manually triggers an on-demand execution | `execute`, `fire` |
 | `schedule` | User schedules a future or recurring action | `automate` |
+| `log_in` | User logs in |  |
+| `log_out` | User logs out |  |
 
 ## 4. Language for Human-Readable Fields
 
