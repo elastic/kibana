@@ -36,6 +36,7 @@ export {
   type ItemWithStatus,
   createMockFindItems,
   createSimpleMockFindItems,
+  extractTagIds,
   mockFindDashboards,
   mockFindMaps,
   mockFindFiles,
@@ -51,4 +52,4 @@ export {
 } from './user_profiles';
 
 // Services
-export { mockFavoritesClient } from './services';
+export { mockFavoritesClient, mockTagsService } from './services';

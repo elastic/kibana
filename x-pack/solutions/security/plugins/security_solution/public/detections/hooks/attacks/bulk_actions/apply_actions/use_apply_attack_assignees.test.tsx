@@ -9,13 +9,17 @@ import { renderHook, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import { useApplyAttackAssignees } from './use_apply_attack_assignees';
 import { useSetUnifiedAlertsAssignees } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees';
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
 
+jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_assignees');
 jest.mock('../confirmation_modal/use_update_attacks_modal');
 
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSetUnifiedAlertsAssignees = useSetUnifiedAlertsAssignees as jest.MockedFunction<
   typeof useSetUnifiedAlertsAssignees
 >;
@@ -32,16 +36,67 @@ function wrapper(props: { children: React.ReactNode }) {
 describe('useApplyAttackAssignees', () => {
   const mockMutateAsync = jest.fn();
   const mockShowModal = jest.fn();
+  const mockReportEvent = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient = new QueryClient();
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: mockReportEvent,
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
 
     mockUseSetUnifiedAlertsAssignees.mockReturnValue({
       mutateAsync: mockMutateAsync,
     } as unknown as ReturnType<typeof useSetUnifiedAlertsAssignees>);
 
     mockUseUpdateAttacksModal.mockReturnValue(mockShowModal);
+  });
+
+  it('should report telemetry with attack_only scope when user chooses attacks only', async () => {
+    mockShowModal.mockResolvedValue({ updateAlerts: false });
+    mockMutateAsync.mockResolvedValue({ updated: 2 });
+
+    const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
+
+    await act(async () => {
+      await result.current.applyAssignees({
+        assignees: { add: ['user1'], remove: [] },
+        attackIds: ['attack-1', 'attack-2'],
+        relatedAlertIds: ['alert-1', 'alert-2'],
+        telemetrySource: 'attacks_page_group_take_action',
+      });
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionAssigneeUpdated, {
+      source: 'attacks_page_group_take_action',
+      scope: 'attack_only',
+    });
+  });
+
+  it('should report telemetry with attack_and_related_alerts scope when user chooses both', async () => {
+    mockShowModal.mockResolvedValue({ updateAlerts: true });
+    mockMutateAsync.mockResolvedValue({ updated: 2 });
+
+    const { result } = renderHook(() => useApplyAttackAssignees(), { wrapper });
+
+    await act(async () => {
+      await result.current.applyAssignees({
+        assignees: { add: ['user1'], remove: [] },
+        attackIds: ['attack-1'],
+        relatedAlertIds: ['alert-1'],
+        telemetrySource: 'attacks_page_group_take_action',
+      });
+    });
+
+    expect(mockReportEvent).toHaveBeenCalledWith(AttacksEventTypes.ActionAssigneeUpdated, {
+      source: 'attacks_page_group_take_action',
+      scope: 'attack_and_related_alerts',
+    });
   });
 
   it('should show modal and update only attacks when user chooses attacks only', async () => {

@@ -29,7 +29,14 @@ import {
   useContentListConfig,
 } from '@kbn/content-list-provider';
 import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
-import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data';
+import {
+  MOCK_DASHBOARDS,
+  createMockFindItems,
+  extractTagIds,
+  mockTagsService,
+} from '@kbn/content-list-mock-data';
+
+export { mockTagsService };
 
 // =============================================================================
 // Mock Data
@@ -85,7 +92,7 @@ export const createStoryFindItems = (options?: {
 
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
-      filters: {},
+      filters: params.filters,
       sort: params.sort ?? { field: 'title', direction: 'asc' },
       page: params.page,
     });
@@ -97,8 +104,10 @@ export const createStoryFindItems = (options?: {
         description: item.attributes.description,
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        tags: extractTagIds(item.references),
       })),
       total: result.total,
+      counts: result.counts,
     };
   };
 };
