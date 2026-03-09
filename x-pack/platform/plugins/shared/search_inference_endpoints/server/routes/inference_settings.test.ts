@@ -180,6 +180,34 @@ describe('Inference Settings API', () => {
       });
     });
 
+    it('should include metadata in .error response', async () => {
+      mockSOClient.get.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        error: {
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'Something went wrong',
+          metadata: { cause: 'index_not_found' },
+        },
+        attributes: {},
+        references: [],
+      });
+
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: 'Something went wrong',
+          attributes: {
+            error: 'Internal Server Error',
+            cause: 'index_not_found',
+          },
+        },
+      });
+    });
+
     it('should use hidden types client', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
@@ -282,12 +310,29 @@ describe('Inference Settings API', () => {
         mockRouter.shouldThrow({ body: {} });
       });
 
+      it('should accept features at exactly maxSize (30)', () => {
+        const features = Array.from({ length: 30 }, (_, i) => ({
+          feature_id: `feature_${i}`,
+          endpoint_ids: ['.endpoint-a'],
+        }));
+        mockRouter.shouldValidate({ body: { features } });
+      });
+
       it('should reject features exceeding maxSize', () => {
         const features = Array.from({ length: 31 }, (_, i) => ({
           feature_id: `feature_${i}`,
           endpoint_ids: ['.endpoint-a'],
         }));
         mockRouter.shouldThrow({ body: { features } });
+      });
+
+      it('should accept endpoint_ids at exactly maxSize (30)', () => {
+        const endpointIds = Array.from({ length: 30 }, (_, i) => `.endpoint-${i}`);
+        mockRouter.shouldValidate({
+          body: {
+            features: [{ feature_id: 'agent_builder', endpoint_ids: endpointIds }],
+          },
+        });
       });
 
       it('should reject endpoint_ids exceeding maxSize', () => {
@@ -372,6 +417,61 @@ describe('Inference Settings API', () => {
             error: 'Conflict',
           },
         },
+      });
+    });
+
+    it('should include metadata in .error response', async () => {
+      mockSOClient.create.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        error: {
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'Something went wrong',
+          metadata: { cause: 'mapper_parsing_exception' },
+        },
+        attributes: {},
+        references: [],
+      });
+
+      await mockRouter.callRoute({
+        body: {
+          features: [
+            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+          ],
+        },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          message: 'Something went wrong',
+          attributes: {
+            error: 'Internal Server Error',
+            cause: 'mapper_parsing_exception',
+          },
+        },
+      });
+    });
+
+    it('should use hidden types client', async () => {
+      const settingsAttrs = {
+        features: [{ feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] }],
+      };
+
+      mockSOClient.create.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        created_at: '2025-01-01T00:00:00Z',
+        updated_at: '2025-01-01T00:00:00Z',
+        attributes: settingsAttrs,
+        references: [],
+      });
+
+      await mockRouter.callRoute({ body: settingsAttrs });
+
+      expect(mockCore.savedObjects.getClient).toHaveBeenCalledWith({
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
       });
     });
 

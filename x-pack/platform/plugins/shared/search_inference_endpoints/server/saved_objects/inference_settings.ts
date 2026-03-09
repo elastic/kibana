@@ -13,7 +13,7 @@ export const createInferenceSettingsSavedObjectType = (): SavedObjectsType => ({
   name: INFERENCE_SETTINGS_SO_TYPE,
   hidden: true,
   hiddenFromHttpApis: true,
-  namespaceType: 'multiple-isolated',
+  namespaceType: 'single',
   mappings: {
     dynamic: false,
     properties: {},

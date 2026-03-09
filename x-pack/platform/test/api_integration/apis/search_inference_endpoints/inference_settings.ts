@@ -17,6 +17,7 @@ const API_VERSION = '1' as const;
 
 export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const spacesService = getService('spaces');
 
   describe('inference_settings - /internal/search_inference_endpoints/settings', function () {
     before(async () => {
@@ -227,6 +228,136 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
           .auth(USERS.NO_ACCESS.username, USERS.NO_ACCESS.password)
           .expect(403);
+      });
+    });
+
+    describe('space isolation', function () {
+      const SPACE_A = 'inference-test-space-a';
+      const SPACE_B = 'inference-test-space-b';
+
+      const spaceApiPath = (spaceId: string) => `/s/${spaceId}${API_PATH}`;
+
+      before(async () => {
+        await spacesService.create({ id: SPACE_A, name: 'Space A', disabledFeatures: [] });
+        await spacesService.create({ id: SPACE_B, name: 'Space B', disabledFeatures: [] });
+      });
+
+      after(async () => {
+        await spacesService.delete(SPACE_A);
+        await spacesService.delete(SPACE_B);
+      });
+
+      afterEach(async () => {
+        await supertestWithoutAuth
+          .put(spaceApiPath(SPACE_A))
+          .send({ features: [] })
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        await supertestWithoutAuth
+          .put(spaceApiPath(SPACE_B))
+          .send({ features: [] })
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+      });
+
+      it('settings saved in one space should not be visible in another', async () => {
+        const settingsA = {
+          features: [
+            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+          ],
+        };
+
+        await supertestWithoutAuth
+          .put(spaceApiPath(SPACE_A))
+          .send(settingsA)
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .get(spaceApiPath(SPACE_B))
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        expect(body.data.features).toEqual([]);
+      });
+
+      it('settings saved in one space should be readable from the same space', async () => {
+        const settingsA = {
+          features: [
+            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+          ],
+        };
+
+        await supertestWithoutAuth
+          .put(spaceApiPath(SPACE_A))
+          .send(settingsA)
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .get(spaceApiPath(SPACE_A))
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        expect(body.data.features).toEqual(settingsA.features);
+      });
+
+      it('each space should maintain its own independent settings', async () => {
+        const settingsA = {
+          features: [
+            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+          ],
+        };
+
+        const settingsB = {
+          features: [{ feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] }],
+        };
+
+        await supertestWithoutAuth
+          .put(spaceApiPath(SPACE_A))
+          .send(settingsA)
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        await supertestWithoutAuth
+          .put(spaceApiPath(SPACE_B))
+          .send(settingsB)
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        const { body: bodyA } = await supertestWithoutAuth
+          .get(spaceApiPath(SPACE_A))
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        const { body: bodyB } = await supertestWithoutAuth
+          .get(spaceApiPath(SPACE_B))
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.ALL.username, USERS.ALL.password)
+          .expect(200);
+
+        expect(bodyA.data.features).toEqual(settingsA.features);
+        expect(bodyB.data.features).toEqual(settingsB.features);
       });
     });
   });
