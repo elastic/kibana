@@ -1,5 +1,5 @@
 {
-  "job_id": "rare_method_for_a_username_euid",
+  "job_id": "rare_method_for_a_username_ea",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -23,13 +23,6 @@
           }
         }
       ]
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
     }
   }
 }
