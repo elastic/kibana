@@ -16,14 +16,10 @@ import {
   ObltParallelWorkerFixtures,
 } from './types';
 
-<<<<<<< HEAD
-export const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
-=======
 /**
  * Should be used test spec files, running in parallel in isolated spaces against the same Kibana instance.
  */
 export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
->>>>>>> 726042c9a91 ([SLO] Migrate synthetics to scout !! (#225035))
   pageObjects: async (
     {
       pageObjects,
