@@ -79,7 +79,7 @@ export interface UserActivityUserInputFilter {
 export interface UserActivityUserInputTimeRange {
   /** ISO timestamp of the start of the selected time range in the date picker. */
   start?: string;
-  /** ISO timestamp of the end of the selected timerange in the date picker. */
+  /** ISO timestamp of the end of the selected time range in the date picker. */
   end?: string;
 }
 
