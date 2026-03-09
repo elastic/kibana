@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -31,7 +31,6 @@ import type {
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
 import type { PageScope } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { GroupTakeActionItems } from './types';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
@@ -67,19 +66,9 @@ export interface AlertsTableComponentProps {
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
   /**
-   * Data view scope
-   */
-  pageScope?: PageScope;
-  // TODO remove when we remove the newDataViewPickerEnabled feature flag
-  /**
-   * DataViewSpec object to use internally to fetch the data
-   */
-  dataViewSpec: DataViewSpec;
-  // TODO this should probably not be optional anymore once we remove the newDataViewPickerEnabled feature flag
-  /**
    * DataView object to use internally to fetch the data.
    */
-  dataView?: DataView;
+  dataView: DataView;
   defaultFilters?: Filter[];
   /**
    * Default values to display in the group selection dropdown.
@@ -95,6 +84,10 @@ export interface AlertsTableComponentProps {
    */
   groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
+  /**
+   * Data view scope
+   */
+  pageScope?: PageScope;
   renderChildComponent: GroupChildComponentRenderer<AlertsGroupingAggregation>;
   tableId: TableIdLiteral;
   to: string;
@@ -182,7 +175,6 @@ const useStorage = (storage: Storage, tableId: string) =>
 
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const {
     services: { storage, telemetry },
   } = useKibana();
@@ -230,11 +222,8 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   }, [dispatch, props.tableId, props.settings]);
 
   const fields = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? props.dataView?.fields.map((field) => field.spec) || []
-        : Object.values(props.dataViewSpec.fields || {}),
-    [newDataViewPickerEnabled, props.dataView?.fields, props.dataViewSpec.fields]
+    () => props.dataView.fields.map((field) => field.spec) || [],
+    [props.dataView?.fields]
   );
 
   const multiValueFieldsToFlatten = useMemo(
@@ -243,17 +232,11 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
   );
 
   const runtimeMappings = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? (props.dataView?.getRuntimeMappings() as RunTimeMappings)
-        : (props.dataViewSpec?.runtimeFieldMap as RunTimeMappings),
-    [newDataViewPickerEnabled, props.dataView, props.dataViewSpec?.runtimeFieldMap]
+    () => props.dataView?.getRuntimeMappings() as RunTimeMappings,
+    [props.dataView]
   );
 
-  const dataViewTitle = useMemo(
-    () => (newDataViewPickerEnabled ? props.dataView?.title : props.dataViewSpec.title),
-    [newDataViewPickerEnabled, props.dataView?.title, props.dataViewSpec.title]
-  );
+  const dataViewTitle = useMemo(() => props.dataView?.title, [props.dataView?.title]);
 
   const groupingOptions = useMemo(
     () => props.defaultGroupingOptions || DEFAULT_GROUPING_OPTIONS,

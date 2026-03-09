@@ -43,7 +43,6 @@ import { FormProvider, useController, useForm } from 'react-hook-form';
 import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
 import { useUpsellingMessage } from '../../../../hooks/use_upselling';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
@@ -59,12 +58,10 @@ import {
 } from '../../../../utils/default_date_settings';
 import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { filtersToInsightProviders } from './provider';
 import { useLicense } from '../../../../hooks/use_license';
 import { isProviderValid } from './helpers';
 import * as i18n from './translations';
-import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
 
 interface InsightComponentProps {
   label?: string;
@@ -294,14 +291,7 @@ const InsightEditorComponent = ({
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.default);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView } = useDataView(PageScope.default);
-  const dataViewName = newDataViewPickerEnabled
-    ? experimentalDataView.name
-    : oldSourcererDataView.name;
+  const { dataView } = useDataView(PageScope.default);
 
   const {
     unifiedSearch: {
@@ -309,12 +299,6 @@ const InsightEditorComponent = ({
     },
     uiSettings,
   } = useKibana().services;
-
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: PageScope.default,
-  });
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [providers, setProviders] = useState<Provider[][]>([[]]);
   const dateRangeChoices = useMemo(() => {
@@ -423,7 +407,7 @@ const InsightEditorComponent = ({
     );
   }, [labelController.field.value, providers, dataView]);
   const filtersStub = useMemo(() => {
-    const index = dataViewName ?? '*';
+    const index = dataView.name ?? '*';
     return [
       {
         $state: {
@@ -437,7 +421,7 @@ const InsightEditorComponent = ({
         },
       },
     ];
-  }, [dataViewName]);
+  }, [dataView.name]);
   const isPlatinum = useLicense().isAtLeast('platinum');
 
   return (

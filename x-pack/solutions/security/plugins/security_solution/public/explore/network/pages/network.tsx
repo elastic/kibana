@@ -13,7 +13,6 @@ import styled from '@emotion/styled';
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
@@ -41,7 +40,6 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
@@ -87,21 +85,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       return globalFilters;
     }, [tabName, globalFilters]);
 
-    const {
-      indicesExist: oldIndicesExist,
-      selectedPatterns: oldSelectedPatterns,
-      sourcererDataView: oldSourcererDataViewSpec,
-    } = useSourcererDataView();
-
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
     const { dataView, status } = useDataView(PageScope.explore);
-    const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
-
-    const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
-    const selectedPatterns = newDataViewPickerEnabled
-      ? experimentalSelectedPatterns
-      : oldSelectedPatterns;
+    const selectedPatterns = useSelectedPatterns(PageScope.explore);
+    const indicesExist = dataView.hasMatchedIndices();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -131,29 +117,27 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       () =>
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: oldSourcererDataViewSpec,
           dataView,
           queries: [query],
           filters: globalFilters,
         }),
-      [uiSettings, oldSourcererDataViewSpec, dataView, query, globalFilters]
+      [uiSettings, dataView, query, globalFilters]
     );
 
     const [tabsFilterQuery] = useMemo(
       () =>
         convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: oldSourcererDataViewSpec,
           dataView,
           queries: [query],
           filters: tabsFilters,
         }),
-      [uiSettings, oldSourcererDataViewSpec, dataView, query, tabsFilters]
+      [uiSettings, dataView, query, tabsFilters]
     );
 
     useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
-    if (newDataViewPickerEnabled && status === 'pristine') {
+    if (status === 'pristine') {
       return <PageLoader />;
     }
 
@@ -163,11 +147,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal>
-              <SiemSearchBar
-                dataView={dataView}
-                id={InputsModelId.global}
-                sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-              />
+              <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -205,7 +185,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <NetworkKpiComponent from={from} to={to} />
               </Display>
 
-              {capabilitiesFetched && !isInitializing && oldSourcererDataViewSpec ? (
+              {capabilitiesFetched && !isInitializing ? (
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />

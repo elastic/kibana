@@ -15,7 +15,6 @@ import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
@@ -25,7 +24,6 @@ jest.mock(
 );
 jest.mock('../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 
 const mockAnalyzerPreview = jest.fn((indices: string) => (
@@ -67,10 +65,6 @@ describe('AnalyzerPreviewContainer', () => {
     jest.clearAllMocks();
 
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      selectedPatterns: ['old-analyzer-pattern'],
-    });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['experimental-analyzer-pattern']);
     (useDataView as jest.Mock).mockReturnValue({
       status: 'ready',
@@ -182,7 +176,6 @@ describe('AnalyzerPreviewContainer', () => {
   it('should use the analyzer page scope hooks', () => {
     renderAnalyzerPreview();
 
-    expect(useSourcererDataView).toHaveBeenCalledWith(PageScope.analyzer);
     expect(useSelectedPatterns).toHaveBeenCalledWith(PageScope.analyzer);
     expect(useDataView).toHaveBeenCalledWith(PageScope.analyzer);
   });

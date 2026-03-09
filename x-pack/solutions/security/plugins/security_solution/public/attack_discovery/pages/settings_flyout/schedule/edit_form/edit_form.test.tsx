@@ -16,7 +16,6 @@ import { EditForm } from './edit_form';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { getDefaultQuery } from '../../../helpers';
 
 const mockConnectors: unknown[] = [
@@ -36,13 +35,9 @@ jest.mock('react-router', () => ({
   withRouter: jest.fn(),
 }));
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../common/hooks/use_connectors');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
 const onChangeMock = jest.fn();
 
 const defaultProps = {
@@ -94,11 +89,6 @@ describe.skip('EditForm', () => {
         },
       },
     } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
-
-    mockUseSourcererDataView.mockReturnValue({
-      sourcererDataView: {},
-      loading: false,
-    } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
 
     (useConnectors as jest.Mock).mockReturnValue({
       connectors: mockConnectors,
