@@ -27,7 +27,11 @@ import {
   type ElasticsearchConfigType,
   getCapabilitiesFromClient,
 } from '@kbn/core-elasticsearch-server-internal';
-import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
+import {
+  AgentManager,
+  configureClient,
+  getRequestHandlerFactory,
+} from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
@@ -208,6 +212,7 @@ const getElasticsearchClient = async (
       { dnsCacheTtlInSeconds: esClientConfig.dnsCacheTtl?.asSeconds() ?? 0 }
     ),
     kibanaVersion,
+    onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
   });
 };
 

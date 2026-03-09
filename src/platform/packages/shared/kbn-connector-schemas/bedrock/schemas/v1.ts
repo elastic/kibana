@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DEFAULT_MODEL } from '../constants';
 
 export const TelemetryMetadataSchema = z
@@ -21,6 +21,7 @@ export const TelemetryMetadataSchema = z
 export const ConfigSchema = z
   .object({
     apiUrl: z.string(),
+    region: z.string().optional(),
     defaultModel: z.string().default(DEFAULT_MODEL),
     contextWindowLength: z.coerce.number().optional(),
     temperature: z.coerce.number().optional(),

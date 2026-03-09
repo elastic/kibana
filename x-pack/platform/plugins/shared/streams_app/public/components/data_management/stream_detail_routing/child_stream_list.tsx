@@ -17,15 +17,17 @@ import {
   EuiToolTip,
   euiDragDropReorder,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
+import type { DraggableProvided } from '@hello-pangea/dnd';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { NestedView } from '../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
@@ -39,12 +41,15 @@ import {
 import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
 import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
+import { AdditionalChargesCallout } from '../shared/additional_charges_callout';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
+import { BulkCreateStreamsConfirmationModal } from './review_suggestions_form/bulk_create_streams_confirmation_modal';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
 import { NoDataEmptyPrompt } from './empty_prompt';
 import { SuggestionLoadingPrompt } from '../shared/suggestion_loading_prompt';
+import type { RoutingDefinitionWithUIAttributes } from './types';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
@@ -56,6 +61,35 @@ function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestin
 }
 
 type ChildStreamMode = 'ingestMode' | 'queryMode';
+
+const IdleRoutingStreamEntryWithPermissions = ({
+  availableStreams,
+  draggableProvided,
+  onEditClick,
+  routingRule,
+  canReorder,
+}: {
+  availableStreams: string[];
+  draggableProvided: DraggableProvided;
+  onEditClick: (id: string) => void;
+  routingRule: RoutingDefinitionWithUIAttributes;
+  canReorder: boolean;
+}) => {
+  const isEditingEnabled = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.edit', id: routingRule.id })
+  );
+
+  return (
+    <IdleRoutingStreamEntry
+      availableStreams={availableStreams}
+      draggableProvided={draggableProvided}
+      isEditingEnabled={isEditingEnabled}
+      onEditClick={onEditClick}
+      routingRule={routingRule}
+      canReorder={canReorder}
+    />
+  );
+};
 
 export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
   const { euiTheme } = useEuiTheme();
@@ -130,34 +164,64 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
 function IngestModeChildrenList({ availableStreams }: { availableStreams: string[] }) {
   const { euiTheme } = useEuiTheme();
   const { changeRule, createNewRule, editRule, reorderRules } = useStreamRoutingEvents();
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const aiFeatures = useAIFeatures();
   const { timeState } = useTimefilter();
   const {
     fetchSuggestions,
     isLoadingSuggestions,
     suggestions,
+    suggestionReason,
     resetForm,
     previewSuggestion,
     acceptSuggestion,
     rejectSuggestion,
     updateSuggestion,
+    selectedSuggestionNames,
+    toggleSuggestionSelection,
+    isSuggestionSelected,
+    bulkAcceptSuggestions,
+    selectAllSuggestions,
+    clearSuggestionSelection,
   } = useReviewSuggestionsForm();
 
-  const { currentRuleId, definition, routing } = routingSnapshot.context;
-  const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
-  const canReorderRoutingRules = routingSnapshot.can({ type: 'routingRule.reorder', routing });
+  const [showBulkAcceptModal, setShowBulkAcceptModal] = React.useState(false);
+  const { acknowledgeBulkFork } = useStreamRoutingEvents();
+  const isBulkForkComplete = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: { bulkForking: 'complete' } } })
+  );
+  const bulkForkResults = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.bulkFork?.results
+  );
+
+  const handleBulkAccept = () => {
+    setShowBulkAcceptModal(true);
+  };
+
+  const currentRuleId = useStreamsRoutingSelector((snapshot) => snapshot.context.currentRuleId);
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
+  const canCreateRoutingRules = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.create' })
+  );
+  const canReorderRoutingRules = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'routingRule.reorder', routing: snapshot.context.routing })
+  );
   const canManageRoutingRules = definition.privileges.manage;
   const maxNestingLevel = getSegments(definition.stream.name).length >= MAX_NESTING_LEVEL;
   const shouldDisplayCreateButton = definition.privileges.simulate;
   const CreateButtonComponent = aiFeatures && aiFeatures.enabled ? EuiButtonEmpty : EuiButton;
   const scrollToSuggestions = useScrollToActive(!!suggestions);
-  const isEditingOrReorderingStreams =
-    routingSnapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
-    routingSnapshot.matches({ ready: { ingestMode: 'reorderingRules' } });
+  const isEditingOrReorderingStreams = useStreamsRoutingSelector(
+    (snapshot) =>
+      snapshot.matches({ ready: { ingestMode: 'editingRule' } }) ||
+      snapshot.matches({ ready: { ingestMode: 'reorderingRules' } })
+  );
 
   // This isRefreshing tracks async gap between operation completion and server data arrival
-  const { isRefreshing } = routingSnapshot.context;
+  const isRefreshing = useStreamsRoutingSelector((snapshot) => snapshot.context.isRefreshing);
+
+  const showAdditionalChargesCallout =
+    !!aiFeatures?.isManagedAIConnector && !aiFeatures?.hasAcknowledgedAdditionalCharges;
 
   const hasData = routing.length > 0 || (aiFeatures?.enabled && suggestions);
 
@@ -192,17 +256,24 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
           wrap
         >
           {aiFeatures?.enabled && !isLoadingSuggestions && !suggestions && (
-            <EuiFlexItem grow={false}>
-              <GenerateSuggestionButton
-                size="s"
-                onClick={getSuggestionsForStream}
-                isLoading={isLoadingSuggestions}
-                isDisabled={isEditingOrReorderingStreams}
-                aiFeatures={aiFeatures}
-              >
-                {suggestPartitionsWithAIText}
-              </GenerateSuggestionButton>
-            </EuiFlexItem>
+            <>
+              <EuiFlexItem grow={false}>
+                <GenerateSuggestionButton
+                  size="s"
+                  onClick={getSuggestionsForStream}
+                  isLoading={isLoadingSuggestions}
+                  isDisabled={isEditingOrReorderingStreams}
+                  aiFeatures={aiFeatures}
+                >
+                  {suggestPartitionsWithAIText}
+                </GenerateSuggestionButton>
+              </EuiFlexItem>
+              {showAdditionalChargesCallout && (
+                <EuiFlexItem grow={false}>
+                  <AdditionalChargesCallout aiFeatures={aiFeatures} />
+                </EuiFlexItem>
+              )}
+            </>
           )}
           <EuiFlexItem grow={false}>
             <EuiToolTip
@@ -224,6 +295,28 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     );
   };
 
+  const handleBulkAcceptSuccess = useCallback(
+    (successfulNames: string[]) => {
+      bulkAcceptSuggestions(successfulNames);
+      setShowBulkAcceptModal(false);
+    },
+    [bulkAcceptSuggestions]
+  );
+
+  useEffect(() => {
+    if (isBulkForkComplete && !showBulkAcceptModal && bulkForkResults) {
+      const successfulNames = bulkForkResults.filter((r) => r.success).map((r) => r.name);
+      bulkAcceptSuggestions(successfulNames);
+      acknowledgeBulkFork();
+    }
+  }, [
+    isBulkForkComplete,
+    showBulkAcceptModal,
+    bulkForkResults,
+    bulkAcceptSuggestions,
+    acknowledgeBulkFork,
+  ]);
+
   return !hasData && !isLoadingSuggestions && !isRefreshing ? (
     <NoDataEmptyPrompt
       createNewRule={createNewRule}
@@ -231,19 +324,35 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
       isAiEnabled={!!aiFeatures?.enabled}
     >
       {aiFeatures?.enabled && (
-        <GenerateSuggestionButton
-          size="s"
-          onClick={getSuggestionsForStream}
-          isLoading={isLoadingSuggestions}
-          isDisabled={isEditingOrReorderingStreams}
-          aiFeatures={aiFeatures}
-        >
-          {suggestPartitionsWithAIText}
-        </GenerateSuggestionButton>
+        <>
+          <GenerateSuggestionButton
+            size="s"
+            onClick={getSuggestionsForStream}
+            isLoading={isLoadingSuggestions}
+            isDisabled={isEditingOrReorderingStreams}
+            aiFeatures={aiFeatures}
+          >
+            {suggestPartitionsWithAIText}
+          </GenerateSuggestionButton>
+          {showAdditionalChargesCallout && (
+            <>
+              <EuiSpacer size="s" />
+              <AdditionalChargesCallout aiFeatures={aiFeatures} />
+            </>
+          )}
+        </>
       )}
     </NoDataEmptyPrompt>
   ) : (
     <>
+      {showBulkAcceptModal && suggestions && (
+        <BulkCreateStreamsConfirmationModal
+          suggestions={suggestions}
+          selectedNames={selectedSuggestionNames}
+          onClose={() => setShowBulkAcceptModal(false)}
+          onSuccess={handleBulkAcceptSuccess}
+        />
+      )}
       {/* Scrollable routing rules container */}
       <EuiFlexItem
         grow={false}
@@ -282,13 +391,9 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                               routingRule={routingRule}
                             />
                           ) : (
-                            <IdleRoutingStreamEntry
+                            <IdleRoutingStreamEntryWithPermissions
                               availableStreams={availableStreams}
                               draggableProvided={provided}
-                              isEditingEnabled={routingSnapshot.can({
-                                type: 'routingRule.edit',
-                                id: routingRule.id,
-                              })}
                               onEditClick={editRule}
                               routingRule={routingRule}
                               canReorder={canReorderRoutingRules}
@@ -322,6 +427,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   onDismiss={resetForm}
                   onRegenerate={getSuggestionsForStream}
                   isDisabled={isEditingOrReorderingStreams}
+                  reason={suggestionReason}
                 />
               ) : (
                 <ReviewSuggestionsForm
@@ -335,6 +441,12 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   resetForm={resetForm}
                   suggestions={suggestions}
                   updateSuggestion={updateSuggestion}
+                  selectedSuggestionNames={selectedSuggestionNames}
+                  toggleSuggestionSelection={toggleSuggestionSelection}
+                  isSuggestionSelected={isSuggestionSelected}
+                  onBulkAccept={handleBulkAccept}
+                  selectAllSuggestions={selectAllSuggestions}
+                  clearSuggestionSelection={clearSuggestionSelection}
                 />
               )
             ) : null}
@@ -371,6 +483,18 @@ function QueryModeChildrenList() {
         overflow: auto;
       `}
     >
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          <p>
+            {i18n.translate('xpack.streams.queryModeChildrenList.isolationGuidance', {
+              defaultMessage:
+                'Query streams have their own data, separate from this stream. Select one below or open it in Discover to view its data.',
+            })}
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
       {/* Scrollable query streams container */}
       <EuiFlexItem
         grow={false}
@@ -402,7 +526,6 @@ function QueryModeChildrenList() {
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-
       {/* Create button */}
       {!isCreating && (
         <EuiFlexItem grow={false}>

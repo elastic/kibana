@@ -126,21 +126,15 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       // Build agentless config with cloud connectors if provided
       let agentlessConfig = baseAgentlessConfig;
       if (data.cloud_connector?.enabled) {
-        const inputsArray = data.inputs ? Object.entries(data.inputs) : [];
-        const input = inputsArray.find(([, pinput]) => pinput.enabled !== false);
-        const targetCsp = input?.[0].match(/aws|azure|gcp/)?.[0] as
-          | 'aws'
-          | 'azure'
-          | 'gcp'
-          | undefined;
-
         this.logger.debug(
-          `Configuring cloud connectors for cloud provider: ${targetCsp} from cloud_connector object`
+          `Configuring cloud connectors for cloud provider: ${
+            data.cloud_connector.target_csp || 'undefined'
+          } from cloud_connector object`
         );
         agentlessConfig = {
           ...baseAgentlessConfig,
           cloud_connectors: {
-            target_csp: targetCsp,
+            target_csp: data.cloud_connector.target_csp,
             enabled: true,
           },
         };

@@ -15,8 +15,7 @@ import {
   getUserFilter,
   getUserNameOrId,
 } from '.';
-
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 describe('getCombinedFilter', () => {
   describe('getSharedFilter', () => {

@@ -10,6 +10,7 @@ import type { SearchHit } from '../../../common/search_strategy';
 import type { AttackDetailsProps } from './types';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { FlyoutError } from '../shared/components/flyout_error';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useAttackDetails } from './hooks/use_attack_details';
 import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
 
@@ -22,6 +23,10 @@ export interface AttackDetailsContext {
    * Index name where the attack document is stored
    */
   indexName: string;
+  /**
+   * Scope id for preview panels and telemetry (e.g. space id or fallback)
+   */
+  scopeId: string;
   /**
    * The actual raw document object
    */
@@ -38,6 +43,10 @@ export interface AttackDetailsContext {
    * Field-browser-friendly representation of the event
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
+  /**
+   * Refetches the attack document from the server
+   */
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -54,26 +63,49 @@ export type AttackDetailsProviderProps = {
 
 export const AttackDetailsProvider = memo(
   ({ attackId, indexName, children }: AttackDetailsProviderProps) => {
+    const scopeId = useSpaceId();
     // data view side: browserFields + field-browser data
-    const { browserFields, dataFormattedForFieldBrowser, searchHit, getFieldsData, loading } =
-      useAttackDetails({
-        attackId,
-        indexName,
-      });
+    const {
+      browserFields,
+      dataFormattedForFieldBrowser,
+      searchHit,
+      getFieldsData,
+      loading,
+      refetch,
+    } = useAttackDetails({
+      attackId,
+      indexName,
+    });
 
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
-        attackId && browserFields && dataFormattedForFieldBrowser && indexName && searchHit
+        attackId &&
+        browserFields &&
+        dataFormattedForFieldBrowser &&
+        indexName &&
+        searchHit &&
+        scopeId
           ? {
               attackId,
               browserFields,
               indexName,
+              scopeId,
               searchHit,
               getFieldsData,
               dataFormattedForFieldBrowser,
+              refetch,
             }
           : undefined,
-      [attackId, browserFields, indexName, dataFormattedForFieldBrowser, searchHit, getFieldsData]
+      [
+        attackId,
+        browserFields,
+        indexName,
+        scopeId,
+        dataFormattedForFieldBrowser,
+        searchHit,
+        getFieldsData,
+        refetch,
+      ]
     );
 
     if (loading) {

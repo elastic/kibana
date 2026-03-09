@@ -98,6 +98,12 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * Creates an index for Elastic Security alerts. Calling this API is not
+required for the detection engine to function properly. You can create
+rules and alerts without calling this API.
+
+      */
   createAlertsIndex(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))

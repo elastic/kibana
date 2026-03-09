@@ -1,10 +1,31 @@
 {
-  "lastModified": "2026-01-30T09:09:02.895Z",
-  "sha1": "49203d30f2206cfc3ca9f7d2c72715b4a966aaab",
+  "sha1": "90b4a234c52bda5c42c1e1ea7a39b28455a0b15f",
   "tests": [
     {
       "id": "2e9661be655a029-bbe4bc87d5491d8",
       "title": "Workflows Extensions - Custom Step Definitions Approval should validate that all registered custom step definitions are approved by workflows-eng team",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-workplaceai",
+        "@cloud-serverless-workplaceai"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "e9644e578f7a84b-ea81a422591a428",
+      "title": "Workflows Extensions - Custom Trigger Definitions Approval should validate that all registered custom trigger definitions are approved by workflows-eng team",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
@@ -14,8 +35,8 @@
         "@svlWorkplaceAI"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/step_definitions_approval.spec.ts",
-        "line": 25,
+        "file": "src/platform/plugins/shared/workflows_extensions/test/scout/api/tests/trigger_definitions_approval.spec.ts",
+        "line": 26,
         "column": 12
       }
     }

@@ -54,8 +54,10 @@ import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { Subject } from 'rxjs';
 
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
+import type { AutomaticImportV2PluginStart } from '@kbn/automatic-import-v2-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { ReportingStart } from '@kbn/reporting-plugin/public';
 
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
@@ -140,10 +142,12 @@ export interface FleetStartDeps {
   customIntegrations: CustomIntegrationsStart;
   share: SharePluginStart;
   automaticImport?: AutomaticImportPluginStart;
+  automaticImportVTwo?: AutomaticImportV2PluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
   embeddable: EmbeddableStart;
   logsDataAccess: LogsDataAccessPluginStart;
+  reporting?: ReportingStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -151,6 +155,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   share: SharePluginStart;
   dashboard: DashboardStart;
   automaticImport?: AutomaticImportPluginStart;
+  automaticImportVTwo?: AutomaticImportV2PluginStart;
   cloud?: CloudSetup & CloudStart;
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
@@ -341,12 +346,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
             read: capabilities.fleetv2.settings_read as boolean,
             all: capabilities.fleetv2.settings_all as boolean,
           },
+          generateReports: {
+            all: capabilities.fleetv2.generate_report as boolean,
+          },
         },
         integrations: {
           all: capabilities.fleet.all as boolean,
           read: capabilities.fleet.read as boolean,
         },
-        subfeatureEnabled: true,
       }),
       packagePrivileges: calculatePackagePrivilegesFromCapabilities(capabilities),
       endpointExceptionsPrivileges:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf, Writable } from '@kbn/utility-types';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   PluginInitializerContext,
@@ -44,7 +44,8 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { AxiosInstance } from 'axios';
-import type { ActionsConfig, EnabledConnectorTypes } from './config';
+import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
+import { type ActionsConfig, type EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
@@ -183,6 +184,13 @@ export interface PluginStartContract {
   ): Params;
 
   isSystemActionConnector: (connectorId: string) => boolean;
+
+  /**
+   * Add a new dynamic InMemoryConnector to the inMemoryConnectors list if a connector with the id doesn't already exist.
+   * @param connector to add to the inMemoryConnectors list
+   * @returns boolean indicating whether the connector was added or not
+   */
+  registerDynamicConnector: (connector: InMemoryConnector) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -197,6 +205,7 @@ export interface ActionsPluginsSetup {
   monitoringCollection?: MonitoringCollectionSetup;
   serverless?: ServerlessPluginSetup;
   cloud: CloudSetup;
+  usageApi?: UsageApiSetup;
 }
 
 export interface ActionsPluginsStart {
@@ -354,13 +363,27 @@ export class ActionsPlugin
         eventLogIndex
       );
 
+      // We plan to remove the usage config from this plugin in the future in favor of the new Usage API plugin.
+      let usageApiConfig: Writable<ActionsConfig['usage']> = {};
+      if (plugins.usageApi?.config) {
+        usageApiConfig.enabled = plugins.usageApi?.config?.enabled;
+        usageApiConfig.url = plugins.usageApi?.config?.url;
+        if (plugins.usageApi?.config?.tls?.ca) {
+          // Normalize the CA path to the format expected by the ConnectorUsageReportingTask
+          usageApiConfig.ca = { path: plugins.usageApi.config.tls.ca };
+        }
+      } else {
+        // If no configuration is provided via the Usage API plugin, use the configuration from this plugin.
+        usageApiConfig = this.actionsConfig.usage;
+      }
+
       this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
         logger: this.logger,
         eventLogIndex,
         core,
         taskManager: plugins.taskManager,
         projectId: plugins.cloud.serverless.projectId,
-        config: this.actionsConfig.usage,
+        config: usageApiConfig,
       });
     }
 
@@ -686,6 +709,8 @@ export class ActionsPlugin
             inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
         );
       },
+      registerDynamicConnector: (connector: InMemoryConnector) =>
+        this.registerDynamicConnector(connector),
     };
   }
 
@@ -765,7 +790,7 @@ export class ActionsPlugin
 
   private setSystemActions = () => {
     const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
-    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
+    this.inMemoryConnectors.push(...systemConnectors);
   };
 
   private throwIfSystemActionsInConfig = () => {
@@ -881,6 +906,19 @@ export class ActionsPlugin
     return async (getAxiosParams: GetAxiosInstanceWithAuthFnOpts) => {
       return await getAxiosInstanceFn(getAxiosParams);
     };
+  };
+
+  private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
+    if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      this.inMemoryConnectors.push({
+        ...connector,
+        isDynamic: true,
+        isPreconfigured: true,
+      });
+      this.logger.info(`Registered dynamic connector with id ${connector.id}`);
+      return true;
+    }
+    return false;
   };
 
   public stop() {

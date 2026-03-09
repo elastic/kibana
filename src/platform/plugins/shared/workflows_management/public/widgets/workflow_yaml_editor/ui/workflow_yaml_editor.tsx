@@ -19,16 +19,16 @@ import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
-  useFocusedStepOutline,
+  useFocusedStepDecoration,
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowIdDecorations,
 } from './decorations';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
@@ -41,6 +41,7 @@ import {
   selectEditorYamlDocument,
   selectSchema,
   setCursorPosition,
+  setIsYamlSynced,
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
@@ -52,7 +53,10 @@ import {
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  setHasYamlSchemaValidationErrors,
+  setIsTestModalOpen,
+} from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
@@ -61,14 +65,18 @@ import type { YamlValidationResult } from '../../../features/validate_workflow_y
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
+import { triggerSchemas } from '../../../trigger_schemas';
 import { interceptMonacoYamlProvider } from '../lib/autocomplete/intercept_monaco_yaml_provider';
-import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
 import type { ExecutionContext } from '../lib/execution_context/build_execution_context';
+import { buildExecutionContext } from '../lib/execution_context/build_execution_context';
+import { useLazyStepExecutionFetcher } from '../lib/execution_context/use_lazy_step_execution_fetcher';
 import { interceptMonacoYamlHoverProvider } from '../lib/hover/intercept_monaco_yaml_hover_provider';
 import {
   ElasticsearchMonacoConnectorHandler,
   GenericMonacoConnectorHandler,
+  HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
@@ -157,6 +165,13 @@ export const WorkflowYAMLEditor = ({
     [dispatch]
   );
 
+  const onSyncStateChange = useCallback(
+    (isSynced: boolean) => {
+      dispatch(setIsYamlSynced(isSynced));
+    },
+    [dispatch]
+  );
+
   const workflowYaml = useSelector(selectEditorYaml) ?? '';
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
   const hasChanges = useSelector(selectHasChanges);
@@ -169,13 +184,12 @@ export const WorkflowYAMLEditor = ({
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const stepExecutions = useSelector(selectStepExecutions);
-  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
-  stepExecutionsRef.current = stepExecutions;
 
   const execution = useSelector(selectExecution);
   const executionContextRef = useRef<ExecutionContext | null>(null);
 
   // Build execution context when step executions are available
+  // Steps will have status/error/state but no I/O - those are lazy-loaded on hover
   useEffect(() => {
     if (isExecutionYaml && stepExecutions) {
       executionContextRef.current = buildExecutionContext(stepExecutions, execution?.context);
@@ -183,6 +197,8 @@ export const WorkflowYAMLEditor = ({
       executionContextRef.current = null;
     }
   }, [isExecutionYaml, stepExecutions, execution?.context]);
+
+  const fetchStepExecutionDataRef = useLazyStepExecutionFetcher(execution?.id, stepExecutions);
 
   // Ref to track saving state for keyboard handlers
   const isSavingRef = useRef<boolean>(false);
@@ -206,7 +222,6 @@ export const WorkflowYAMLEditor = ({
   // Styles
   const styles = useWorkflowEditorStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
-  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   useWorkflowsMonacoTheme();
@@ -247,6 +262,12 @@ export const WorkflowYAMLEditor = ({
       yamlDocumentRef,
       workflowYamlSchema: workflowYamlSchema as z.ZodSchema,
     });
+
+  // Sync validation error state to Redux so sibling components (e.g. header toggle) can react
+  useEffect(() => {
+    const hasErrors = validationErrors.some((e) => e.severity === 'error');
+    dispatch(setHasYamlSchemaValidationErrors(hasErrors));
+  }, [validationErrors, dispatch]);
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -343,16 +364,23 @@ export const WorkflowYAMLEditor = ({
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
+        const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
+        registerMonacoConnectorHandler(workflowExecuteHandler);
+
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
 
+        const httpHandler = new HttpMonacoConnectorStepHandler();
+        registerMonacoConnectorHandler(httpHandler);
+
         // Create unified providers with template expression support
         const providerConfig = {
           getYamlDocument: () => yamlDocumentRef.current || null,
           getExecutionContext: () => executionContextRef.current,
+          fetchStepExecutionData: (stepId: string) => fetchStepExecutionDataRef.current(stepId),
           options: {
             http,
             notifications,
@@ -389,6 +417,8 @@ export const WorkflowYAMLEditor = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useFocusedStepDecoration(editorRef.current);
+
   // Decorations
   useTriggerTypeDecorations({
     editor: editorRef.current,
@@ -415,6 +445,12 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     isEditorMounted,
     readOnly: isExecutionYaml,
+  });
+
+  useWorkflowIdDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
   });
 
   const updateContainerPosition = (
@@ -444,7 +480,12 @@ export const WorkflowYAMLEditor = ({
     }
 
     const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
-      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+      dispatch(
+        setCursorPosition({
+          lineNumber: event.position.lineNumber,
+          column: event.position.column,
+        })
+      );
     });
 
     return () => disposable.dispose();
@@ -467,8 +508,15 @@ export const WorkflowYAMLEditor = ({
       if (!model || !editor) {
         return;
       }
-      if (isTriggerType(action.id)) {
-        insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+      if (isTriggerType(action.id) || triggerSchemas.isRegisteredTriggerId(action.id)) {
+        const triggerDefinition = triggerSchemas.getTriggerDefinition(action.id);
+        insertTriggerSnippet(
+          model,
+          yamlDocumentCurrent,
+          action.id,
+          editor,
+          triggerDefinition?.snippets?.condition
+        );
       } else {
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
@@ -528,7 +576,7 @@ export const WorkflowYAMLEditor = ({
   }, [workflowJsonSchemaStrict, notifications]);
 
   return (
-    <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
+    <div css={css([styles.container, stepExecutionStyles])} ref={containerRef}>
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
@@ -583,10 +631,12 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
           options={options}
           schemas={schemas}
           value={workflowYaml}
           enableFindAction={true}
+          dataTestSubj="workflowYamlEditor"
         />
       </div>
       <div css={styles.validationErrorsContainer}>

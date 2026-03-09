@@ -19,6 +19,7 @@ import {
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import {
   registerResolveRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -56,6 +57,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id} with allowApiAccess true', 
     httpSetup = await server.setup({
       context: contextService.setup({ pluginDependencies: new Map() }),
       executionContext: executionContextServiceMock.createInternalSetupContract(),
+      userActivity: userActivityServiceMock.createInternalSetupContract(),
     });
 
     handlerContext = coreMock.createRequestHandlerContext();

@@ -12,7 +12,7 @@
         "label": "ChromeBadge",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/types.ts",
-        "lineNumber": 14,
+        "lineNumber": 13,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25,7 +25,7 @@
             "label": "text",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -38,7 +38,7 @@
             "label": "tooltip",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -55,7 +55,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -119,38 +119,20 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeBreadcrumbsAppendExtension.content",
-            "type": "Function",
+            "type": "CompoundType",
             "tags": [],
             "label": "content",
-            "description": [],
+            "description": [
+              "\nThe extension content as a React node."
+            ],
             "signature": [
-              "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 25,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-public.ChromeBreadcrumbsAppendExtension.content.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
-                "lineNumber": 19,
-                "columnNumber": 64,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
@@ -165,7 +147,7 @@
               "number | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 26,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -235,7 +217,7 @@
             "tags": [],
             "label": "reset",
             "description": [
-              "\nResets the document title to it's initial value.\n(meaning the one present in the title meta at application load.)"
+              "\nResets the document title to its initial value.\n(meaning the one present in the title meta at application load.)"
             ],
             "signature": [
               "() => void"
@@ -264,7 +246,7 @@
           "ChromeHelpExtensionMenuCustomLink"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 102,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -279,7 +261,7 @@
               "\nHighest priority items are listed at the top of the list of links."
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 104,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -295,7 +277,7 @@
         "label": "ChromeHelpExtension",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -310,7 +292,7 @@
               "\nProvide your plugin's name to create a header for separation"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 20,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -322,14 +304,14 @@
             "tags": [],
             "label": "links",
             "description": [
-              "\nCreates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button"
+              "\nCreates unified links for sending users to documentation or a custom link/button"
             ],
             "signature": [
               "ChromeHelpExtensionMenuLink",
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -341,15 +323,15 @@
             "tags": [],
             "label": "content",
             "description": [
-              "\nCustom content to occur below the list of links"
+              "\nCustom content to render below the list of links. Receives menu actions and returns a ReactNode.\n"
             ],
             "signature": [
-              "((element: HTMLDivElement, menuActions: ",
+              "((menuActions: ",
               "ChromeHelpMenuActions",
-              ") => () => void) | undefined"
+              ") => React.ReactNode) | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -359,31 +341,14 @@
                 "id": "def-public.ChromeHelpExtension.content.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "HTMLDivElement"
-                ],
-                "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-                "lineNumber": 31,
-                "columnNumber": 14,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-public.ChromeHelpExtension.content.$2",
-                "type": "Object",
-                "tags": [],
                 "label": "menuActions",
                 "description": [],
                 "signature": [
                   "ChromeHelpMenuActions"
                 ],
                 "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-                "lineNumber": 31,
-                "columnNumber": 39,
+                "lineNumber": 40,
+                "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -407,7 +372,7 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 82,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -425,7 +390,7 @@
               "\"custom\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 84,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -440,7 +405,7 @@
               "\nURL of the link"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 88,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -455,10 +420,10 @@
               "\nContent of the button (in lieu of `children`)"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 92,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -476,61 +441,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 96,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.ChromeHelpExtensionMenuDiscussLink",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeHelpExtensionMenuDiscussLink",
-        "description": [],
-        "signature": [
-          "ChromeHelpExtensionMenuDiscussLink",
-          " extends ",
-          "ChromeHelpExtensionLinkBase"
-        ],
-        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 56,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpExtensionMenuDiscussLink.linkType",
-            "type": "string",
-            "tags": [],
-            "label": "linkType",
-            "description": [
-              "\nCreates a generic give feedback link with comment icon"
-            ],
-            "signature": [
-              "\"discuss\""
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 58,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpExtensionMenuDiscussLink.href",
-            "type": "string",
-            "tags": [],
-            "label": "href",
-            "description": [
-              "\nURL to discuss page.\ni.e. `https://discuss.elastic.co/c/${appName}`"
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 62,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -551,7 +462,7 @@
           "ChromeHelpExtensionLinkBase"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 69,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -569,7 +480,7 @@
               "\"documentation\""
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 71,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -584,82 +495,7 @@
               "\nURL to documentation page.\ni.e. `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/${appName}.html`,"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 75,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-public.ChromeHelpExtensionMenuGitHubLink",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChromeHelpExtensionMenuGitHubLink",
-        "description": [],
-        "signature": [
-          "ChromeHelpExtensionMenuGitHubLink",
-          " extends ",
-          "ChromeHelpExtensionLinkBase"
-        ],
-        "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 40,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpExtensionMenuGitHubLink.linkType",
-            "type": "string",
-            "tags": [],
-            "label": "linkType",
-            "description": [
-              "\nCreates a link to a new github issue in the Kibana repo"
-            ],
-            "signature": [
-              "\"github\""
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 42,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpExtensionMenuGitHubLink.labels",
-            "type": "Array",
-            "tags": [],
-            "label": "labels",
-            "description": [
-              "\nInclude at least one app-specific label to be applied to the new github issue"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 46,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeHelpExtensionMenuGitHubLink.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [
-              "\nProvides initial text for the title of the issue"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 50,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -675,7 +511,7 @@
         "label": "ChromeHelpMenuActions",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -691,7 +527,7 @@
               "() => void"
             ],
             "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -709,7 +545,7 @@
         "label": "ChromeHelpMenuLink",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-        "lineNumber": 19,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -722,7 +558,7 @@
             "label": "title",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 21,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -738,7 +574,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 22,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -754,7 +590,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 23,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -772,7 +608,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 24,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -788,7 +624,7 @@
         "label": "ChromeNavControl",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -804,7 +640,25 @@
               "number | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeNavControl.content",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "content",
+            "description": [
+              "\nThe content to render for this nav control as a React node."
+            ],
+            "signature": [
+              "React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -813,35 +667,80 @@
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeNavControl.mount",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "mount",
             "description": [],
             "signature": [
-              "(element: HTMLElement) => ",
-              "UnmountCallback"
+              "MountPoint",
+              "<HTMLElement> | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 16,
+            "lineNumber": 21,
             "columnNumber": 3,
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
-            "returnComment": [],
-            "children": [
+            "references": [
               {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-public.ChromeNavControl.mount.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
-                "lineNumber": 19,
-                "columnNumber": 64,
-                "deprecated": false,
-                "trackAdoption": false
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-components/src/shared/header_nav_controls.tsx"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/public/plugin.tsx"
+              },
+              {
+                "plugin": "spaces",
+                "path": "x-pack/platform/plugins/shared/spaces/public/nav_control/nav_control.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.tsx"
+              },
+              {
+                "plugin": "aiAssistantManagementSelection",
+                "path": "src/platform/plugins/shared/ai_assistant_management/selection/public/plugin.tsx"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/plugin.tsx"
+              },
+              {
+                "plugin": "feedback",
+                "path": "x-pack/platform/plugins/private/feedback/public/plugin.tsx"
+              },
+              {
+                "plugin": "globalSearchBar",
+                "path": "x-pack/platform/plugins/private/global_search_bar/public/plugin.tsx"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/public/nav_control/nav_control_service.test.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistantApp",
+                "path": "x-pack/solutions/observability/plugins/observability_ai_assistant_app/public/plugin.tsx"
+              },
+              {
+                "plugin": "searchAssistant",
+                "path": "x-pack/solutions/search/plugins/search_assistant/public/plugin.tsx"
+              },
+              {
+                "plugin": "newsfeed",
+                "path": "src/platform/plugins/shared/newsfeed/public/plugin.tsx"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/public/plugin.tsx"
+              },
+              {
+                "plugin": "inspectComponent",
+                "path": "src/platform/plugins/private/inspect_component/public/plugin.tsx"
+              },
+              {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/public/plugin.tsx"
               }
             ]
           }
@@ -858,7 +757,7 @@
           "\n{@link ChromeNavControls | APIs} for registering new controls to be displayed in the navigation bar.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-        "lineNumber": 27,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -878,7 +777,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 44,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -894,7 +793,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 45,
+                "lineNumber": 50,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -918,7 +817,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 47,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -934,7 +833,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 48,
+                "lineNumber": 53,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -958,7 +857,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 50,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -974,7 +873,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 51,
+                "lineNumber": 56,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -998,7 +897,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 53,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1014,7 +913,7 @@
                   "ChromeNavControl"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 54,
+                "lineNumber": 59,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1027,10 +926,12 @@
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeNavControls.setHelpMenuLinks",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "setHelpMenuLinks",
             "description": [
-              "Set the help menu links"
+              "\nSet the help menu links"
             ],
             "signature": [
               "(links: ",
@@ -1038,10 +939,20 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-            "lineNumber": 56,
+            "lineNumber": 61,
             "columnNumber": 3,
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/services/nav_controls/nav_controls_service.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/chrome/browser-internal/src/chrome_api.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "@kbn/core-chrome-browser",
@@ -1055,7 +966,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/nav_controls.ts",
-                "lineNumber": 57,
+                "lineNumber": 65,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1408,48 +1319,6 @@
               }
             ],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeNavLinks.enableForcedAppSwitcherNavigation",
-            "type": "Function",
-            "tags": [],
-            "label": "enableForcedAppSwitcherNavigation",
-            "description": [
-              "\nEnable forced navigation mode, which will trigger a page refresh\nwhen a nav link is clicked and only the hash is updated.\n"
-            ],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
-            "lineNumber": 113,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeNavLinks.getForceAppSwitcherNavigation$",
-            "type": "Function",
-            "tags": [],
-            "label": "getForceAppSwitcherNavigation$",
-            "description": [
-              "\nAn observable of the forced app switcher state."
-            ],
-            "signature": [
-              "() => ",
-              "Observable",
-              "<boolean>"
-            ],
-            "path": "src/core/packages/chrome/browser/src/nav_links.ts",
-            "lineNumber": 127,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1468,7 +1337,7 @@
           " extends NodeDefinitionBase"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 162,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1483,7 +1352,7 @@
               "Optional id, if not passed a \"link\" must be provided."
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1501,7 +1370,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1516,7 +1385,7 @@
               "Path in the tree of the node"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1535,7 +1404,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1554,7 +1423,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1572,7 +1441,7 @@
               "boolean | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 185,
+            "lineNumber": 186,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1785,7 +1654,7 @@
         "label": "ChromeSetBreadcrumbsParams",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-        "lineNumber": 30,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1807,7 +1676,7 @@
               "[]; absolute?: boolean | undefined; } | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
-            "lineNumber": 32,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1823,7 +1692,7 @@
         "label": "ChromeSetProjectBreadcrumbsParams",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 191,
+        "lineNumber": 192,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1836,7 +1705,7 @@
             "label": "absolute",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 193,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1854,11 +1723,30 @@
           "\nChromeSetup exposes APIs available during the setup phase."
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeSetup.sidebar",
+            "type": "Object",
+            "tags": [],
+            "label": "sidebar",
+            "description": [
+              "{@link SidebarSetup}"
+            ],
+            "signature": [
+              "SidebarSetup"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -1871,7 +1759,7 @@
           "\nChromeStart allows plugins to customize the global chrome header UI and\nenrich the UX with additional information about the current location of the\nbrowser.\n"
         ],
         "path": "src/core/packages/chrome/browser/src/contracts.ts",
-        "lineNumber": 34,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1889,7 +1777,7 @@
               "ChromeNavLinks"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 61,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1907,7 +1795,7 @@
               "ChromeNavControls"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 63,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1925,7 +1813,7 @@
               "ChromeRecentlyAccessed"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 65,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1943,7 +1831,7 @@
               "ChromeDocTitle"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 67,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1963,7 +1851,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 70,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1983,7 +1871,7 @@
               "(isVisible: boolean) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 75,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1999,7 +1887,7 @@
                   "boolean"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 80,
+                "lineNumber": 83,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2025,7 +1913,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 82,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2047,7 +1935,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 87,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2064,7 +1952,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 90,
+                "lineNumber": 93,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2086,7 +1974,7 @@
               "(node: React.ReactNode) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 92,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2102,7 +1990,7 @@
                   "React.ReactNode"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 95,
+                "lineNumber": 98,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2128,7 +2016,29 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 97,
+            "lineNumber": 100,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.getBreadcrumbs",
+            "type": "Function",
+            "tags": [],
+            "label": "getBreadcrumbs",
+            "description": [
+              "\nGet the current list of breadcrumbs synchronously"
+            ],
+            "signature": [
+              "() => ",
+              "ChromeBreadcrumb",
+              "[]"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2152,7 +2062,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 102,
+            "lineNumber": 110,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2169,7 +2079,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 105,
+                "lineNumber": 113,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2187,7 +2097,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 105,
+                "lineNumber": 113,
                 "columnNumber": 54,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2213,7 +2123,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 107,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2235,7 +2145,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 112,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2252,7 +2162,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 135,
+                "lineNumber": 144,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2278,7 +2188,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 137,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2292,7 +2202,7 @@
             "tags": [],
             "label": "setBreadcrumbsAppendExtension",
             "description": [
-              "\nMount an element next to the last breadcrumb"
+              "\nRender an element next to the last breadcrumb.\n"
             ],
             "signature": [
               "(breadcrumbsAppendExtension: ",
@@ -2300,7 +2210,7 @@
               ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 142,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2316,7 +2226,7 @@
                   "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 146,
+                "lineNumber": 167,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2340,7 +2250,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 149,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2352,14 +2262,14 @@
                 "tags": [],
                 "label": "badges",
                 "description": [
-                  "- Array of {@link ChromeBreadcrumbsBadge } to display in the breadcrumbs area."
+                  "- Array of {@link ChromeBreadcrumbsBadge} to display in the breadcrumbs area."
                 ],
                 "signature": [
                   "ChromeBreadcrumbsBadge",
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 173,
+                "lineNumber": 194,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2385,7 +2295,7 @@
               "> | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 175,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2407,7 +2317,7 @@
               "> | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 180,
+            "lineNumber": 201,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2425,7 +2335,7 @@
                   "> | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 183,
+                "lineNumber": 204,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2449,7 +2359,7 @@
               "[]) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 185,
+            "lineNumber": 206,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2466,7 +2376,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 188,
+                "lineNumber": 209,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2492,7 +2402,7 @@
               "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 190,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2514,7 +2424,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 195,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2530,7 +2440,7 @@
                   "ChromeGlobalHelpExtensionMenuLink"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 199,
+                "lineNumber": 220,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2556,7 +2466,7 @@
               " | undefined>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 202,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2570,7 +2480,7 @@
             "tags": [],
             "label": "setHelpExtension",
             "description": [
-              "\nOverride the current set of custom help content"
+              "\nOverride the current set of custom help content.\nUse {@link ChromeHelpExtension.content} to render custom React content below the links."
             ],
             "signature": [
               "(helpExtension?: ",
@@ -2578,7 +2488,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 207,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2595,7 +2505,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 210,
+                "lineNumber": 232,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2617,7 +2527,7 @@
               "(url: string) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 212,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2635,7 +2545,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 216,
+                "lineNumber": 238,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2659,7 +2569,7 @@
               "<string>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 218,
+            "lineNumber": 240,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2681,7 +2591,7 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 223,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2698,7 +2608,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 228,
+                "lineNumber": 250,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2722,7 +2632,7 @@
               "<boolean>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 230,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2744,7 +2654,7 @@
               ") => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 235,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2762,7 +2672,7 @@
                   "ChromeStyle"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 239,
+                "lineNumber": 261,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2788,7 +2698,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 241,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2805,12 +2715,28 @@
             "signature": [
               "{ getIsCollapsed$(): ",
               "Observable",
-              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; getIsFeedbackBtnVisible$: () => ",
-              "Observable",
-              "<boolean>; setIsFeedbackBtnVisible: (isVisible: boolean) => void; }"
+              "<boolean>; setIsCollapsed(isCollapsed: boolean): void; }"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 246,
+            "lineNumber": 268,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.sidebar",
+            "type": "Object",
+            "tags": [],
+            "label": "sidebar",
+            "description": [
+              "\n{@link SidebarStart}"
+            ],
+            "signature": [
+              "SidebarStart"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 281,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2827,14 +2753,52 @@
             "signature": [
               "() => ",
               "Observable",
-              "<\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | null>"
+              "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
-            "lineNumber": 270,
+            "lineNumber": 286,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeStart.withProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "withProvider",
+            "description": [
+              "\nUsed only by the rendering service and KibanaRenderingContextProvider to wrap the rendering tree in the Chrome context providers"
+            ],
+            "signature": [
+              "(component: React.ReactNode) => React.ReactNode"
+            ],
+            "path": "src/core/packages/chrome/browser/src/contracts.ts",
+            "lineNumber": 291,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.ChromeStart.withProvider.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "component",
+                "description": [],
+                "signature": [
+                  "React.ReactNode"
+                ],
+                "path": "src/core/packages/chrome/browser/src/contracts.ts",
+                "lineNumber": 294,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -2848,7 +2812,7 @@
         "label": "ChromeUserBanner",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2856,38 +2820,18 @@
           {
             "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-public.ChromeUserBanner.content",
-            "type": "Function",
+            "type": "CompoundType",
             "tags": [],
             "label": "content",
             "description": [],
             "signature": [
-              "(element: HTMLDivElement) => ",
-              "UnmountCallback"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/browser/src/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-chrome-browser",
-                "id": "def-public.ChromeUserBanner.content.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "element",
-                "description": [],
-                "signature": [
-                  "T"
-                ],
-                "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
-                "lineNumber": 19,
-                "columnNumber": 64,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2900,7 +2844,7 @@
         "label": "CloudLink",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 99,
+        "lineNumber": 100,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2913,7 +2857,7 @@
             "label": "title",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2926,7 +2870,7 @@
             "label": "href",
             "description": [],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2942,7 +2886,7 @@
         "label": "CloudURLs",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 89,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2958,7 +2902,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2974,7 +2918,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2990,7 +2934,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3006,7 +2950,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3022,7 +2966,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3038,7 +2982,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3054,7 +2998,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 96,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3074,7 +3018,7 @@
           "<LinkId, Id, ChildrenId>"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 221,
+        "lineNumber": 222,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3093,7 +3037,7 @@
               "<LinkId, Id, ChildrenId>[]"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 231,
+            "lineNumber": 232,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3112,7 +3056,7 @@
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 235,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3128,7 +3072,7 @@
         "label": "NavigationTreeDefinitionUI",
         "description": [],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 243,
+        "lineNumber": 244,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3141,10 +3085,10 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 252,
+            "lineNumber": 253,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3161,7 +3105,7 @@
               "[]"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 253,
+            "lineNumber": 254,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3178,7 +3122,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 254,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3198,7 +3142,7 @@
           "<LinkId, Id, ChildrenId> extends NodeDefinitionBase"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 196,
+        "lineNumber": 197,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3216,7 +3160,7 @@
               "Id | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 209,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3234,7 +3178,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 211,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3252,7 +3196,7 @@
               "LinkId | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 213,
+            "lineNumber": 214,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3271,7 +3215,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 215,
+            "lineNumber": 216,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3290,10 +3234,685 @@
               "<LinkId, Id, ChildrenId>[] | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 217,
+            "lineNumber": 218,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarApp",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarApp",
+        "description": [
+          "\nApp-bound API obtained via `sidebar.getApp(appId)`.\nAll methods are present regardless of whether the app has a store.\nFor stateless apps, `actions` is undefined and `getState()` returns undefined."
+        ],
+        "signature": [
+          "SidebarApp",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.open",
+            "type": "Function",
+            "tags": [],
+            "label": "open",
+            "description": [
+              "Open sidebar to this app"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.actions",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "actions",
+            "description": [
+              "Bound actions to modify state. Undefined for stateless apps."
+            ],
+            "signature": [
+              "TActions"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.getState",
+            "type": "Function",
+            "tags": [],
+            "label": "getState",
+            "description": [
+              "Get current state. Returns undefined for stateless apps."
+            ],
+            "signature": [
+              "() => TState"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.getState$",
+            "type": "Function",
+            "tags": [],
+            "label": "getState$",
+            "description": [
+              "Observable of state. Emits undefined for stateless apps."
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<TState>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.getStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "getStatus",
+            "description": [
+              "Current app status"
+            ],
+            "signature": [
+              "() => ",
+              "SidebarAppStatus"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarApp.getStatus$",
+            "type": "Function",
+            "tags": [],
+            "label": "getStatus$",
+            "description": [
+              "Observable of app status"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "SidebarAppStatus",
+              ">"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarAppConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarAppConfig",
+        "description": [
+          "Config for sidebar app registration. `status` and `restoreOnReload` are optional with defaults."
+        ],
+        "signature": [
+          "SidebarAppConfig",
+          "<TState, TActions>"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppConfig.appId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "appId",
+            "description": [
+              "Unique identifier"
+            ],
+            "signature": [
+              "\"agentBuilder\" | `sidebarExample${string}`"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppConfig.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "App status. Defaults to `available`. Use the returned updater for async checks."
+            ],
+            "signature": [
+              "SidebarAppStatus",
+              " | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppConfig.restoreOnReload",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "restoreOnReload",
+            "description": [
+              "\nWhether to restore on page reload. Defaults to true.\nUse as last resort. Apps should use store state for restoration."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppConfig.loadComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "loadComponent",
+            "description": [
+              "Async component loader"
+            ],
+            "signature": [
+              "() => Promise<",
+              "SidebarComponentType",
+              "<TState, TActions>>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarAppConfig.store",
+            "type": "Object",
+            "tags": [],
+            "label": "store",
+            "description": [
+              "\nOptional store for state management. Created via `createSidebarStore`.\nIf omitted, the app is stateless and only receives `onClose` prop.\nState persists to localStorage."
+            ],
+            "signature": [
+              "SidebarStoreConfig",
+              "<TState, TActions> | undefined"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarSetup",
+        "description": [
+          "Sidebar setup contract"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 111,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarSetup.registerApp",
+            "type": "Function",
+            "tags": [],
+            "label": "registerApp",
+            "description": [
+              "Register a sidebar app"
+            ],
+            "signature": [
+              "<TState = undefined, TActions = undefined>(app: ",
+              "SidebarAppConfig",
+              "<TState, TActions>) => ",
+              "SidebarAppUpdater"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarSetup.registerApp.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "app",
+                "description": [],
+                "signature": [
+                  "SidebarAppConfig",
+                  "<TState, TActions>"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 115,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SidebarStart",
+        "description": [
+          "Sidebar start contract"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 141,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.isOpen$",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen$",
+            "description": [
+              "Observable of open state"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.isOpen",
+            "type": "Function",
+            "tags": [],
+            "label": "isOpen",
+            "description": [
+              "Whether sidebar is open"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 145,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.close",
+            "type": "Function",
+            "tags": [],
+            "label": "close",
+            "description": [
+              "Close sidebar"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 147,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getWidth$",
+            "type": "Function",
+            "tags": [],
+            "label": "getWidth$",
+            "description": [
+              "Observable of width"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<number>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "getWidth",
+            "description": [
+              "Get width"
+            ],
+            "signature": [
+              "() => number"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 151,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.setWidth",
+            "type": "Function",
+            "tags": [],
+            "label": "setWidth",
+            "description": [
+              "Set width"
+            ],
+            "signature": [
+              "(width: number) => void"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.setWidth.$1",
+                "type": "number",
+                "tags": [],
+                "label": "width",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 154,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getCurrentAppId$",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentAppId$",
+            "description": [
+              "Observable of current app ID"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "SidebarAppId",
+              " | null>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getCurrentAppId",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentAppId",
+            "description": [
+              "Get current app ID"
+            ],
+            "signature": [
+              "() => ",
+              "SidebarAppId",
+              " | null"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 157,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.hasApp",
+            "type": "Function",
+            "tags": [],
+            "label": "hasApp",
+            "description": [
+              "Check if app is registered"
+            ],
+            "signature": [
+              "(appId: ",
+              "SidebarAppId",
+              ") => boolean"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 159,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.hasApp.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "SidebarAppId"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 160,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getApp",
+            "type": "Function",
+            "tags": [],
+            "label": "getApp",
+            "description": [
+              "Get app-bound API"
+            ],
+            "signature": [
+              "<TState = undefined, TActions = undefined>(appId: ",
+              "SidebarAppId",
+              ") => ",
+              "SidebarApp",
+              "<TState, TActions>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.getApp.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "SidebarAppId"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 163,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.SidebarStart.getAppDefinition",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppDefinition",
+            "description": [
+              "Get app definition"
+            ],
+            "signature": [
+              "(appId: ",
+              "SidebarAppId",
+              ") => ",
+              "SidebarAppDefinition",
+              "<undefined, undefined>"
+            ],
+            "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+            "lineNumber": 165,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-public.SidebarStart.getAppDefinition.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "SidebarAppId"
+                ],
+                "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+                "lineNumber": 166,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3310,7 +3929,7 @@
           "<LinkId>"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 257,
+        "lineNumber": 258,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3325,10 +3944,10 @@
               "Unique id for the solution navigation."
             ],
             "signature": [
-              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 267,
+            "lineNumber": 268,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3343,7 +3962,7 @@
               "Title for the solution navigation."
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 269,
+            "lineNumber": 270,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3364,7 +3983,7 @@
               "<LinkId, string, string>>"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 271,
+            "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3383,43 +4002,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 273,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SolutionNavigationDefinition.homePage",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "homePage",
-            "description": [
-              "The page to navigate to when clicking on the Kibana (or custom) logo."
-            ],
-            "signature": [
-              "LinkId | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 275,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.SolutionNavigationDefinition.dataTestSubj",
-            "type": "string",
-            "tags": [],
-            "label": "dataTestSubj",
-            "description": [
-              "data-test-subj attribute for the solution navigation."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-            "lineNumber": 277,
+            "lineNumber": 274,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3438,10 +4021,10 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"metrics\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:roles\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_sources\" | \"workflows:workflows\""
+          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"streams\" | \"uptime\" | \"workflows\" | \"rules\" | \"metrics\" | \"dashboards\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"management\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataDriftPage\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:logRateAnalysisPage\" | \"ml:logPatternAnalysisPage\" | \"ml:changePointDetections\" | \"ml:changePointDetectionsPage\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:indexDataVisualizerPage\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"cloud_connect\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:overview\" | \"management:cross_cluster_replication\" | \"management:settings\" | \"management:dataViews\" | \"management:spaces\" | \"management:analytics\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:roles\" | \"management:filesManagement\" | \"management:trained_models\" | \"management:pipelines\" | \"management:maintenanceWindows\" | \"management:anomaly_detection\" | \"management:reporting\" | \"management:ad_settings\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:content_connectors\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:inference_endpoints\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:supplied_configurations\" | \"management:triggersActions\" | \"management:triggersActionsAlerts\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"management:genAiSettings\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchSynonyms\" | \"searchQueryRules\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchSynonyms:synonyms\" | \"elasticsearchIndices\" | \"elasticsearchIndexManagement\" | \"searchGettingStarted\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"inventory\" | \"logs:anomalies\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"observability-overview:cases\" | \"observability-overview:rules\" | \"observability-overview:alerts\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"uptime:Certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:configurations\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-vulnerability_dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:attacks\" | \"securitySolutionUI:ai_value\" | \"securitySolutionUI:ai_rule_creation\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:alert_detections\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoint_exceptions\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:rules-management\" | \"securitySolutionUI:scripts_library\" | \"securitySolutionUI:siem_readiness\" | \"securitySolutionUI:siem_migrations\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:siem_migrations-dashboards\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:trusted_devices\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-landing\" | \"securitySolutionUI:entity_analytics-privileged_user_monitoring\" | \"securitySolutionUI:entity_analytics-watchlists\" | \"securitySolutionUI:entity_analytics-overview\" | \"securitySolutionUI:entity_analytics-threat_hunting\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"securitySolutionUI:alert_summary\" | \"securitySolutionUI:configurations-integrations\" | \"securitySolutionUI:configurations-ai_settings\" | \"securitySolutionUI:configurations-basic_rules\" | \"securitySolutionUI:space-rules-health\" | \"securitySolutionUI:rule-health\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\" | \"workplace_ai\" | \"agent_builder\" | \"agent_builder:agents\" | \"agent_builder:tools\" | \"agent_builder:conversations\" | \"agent_builder:agents_create\" | \"data_sources\" | \"workflows:workflows\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 64,
+        "lineNumber": 65,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3482,7 +4065,7 @@
           " | \"securitySolutionUI\" | \"workplace_ai\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 47,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3499,10 +4082,10 @@
           "EuiBadgeProps",
           " & { badgeText: string; toolTipProps?: Partial<",
           "EuiToolTipProps",
-          "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined; }"
+          "> | undefined; renderCustomBadge?: ((props: { badgeText: string; }) => React.ReactElement<any>) | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/types.ts",
-        "lineNumber": 21,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3516,12 +4099,12 @@
         "label": "ChromeHelpExtensionLinkBase",
         "description": [],
         "signature": [
-          "{ target?: string | (string & {}) | undefined; 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
+          "{ 'data-test-subj'?: string | undefined; rel?: string | undefined; iconType?: ",
           "IconType",
-          " | undefined; }"
+          " | undefined; target?: string | (string & {}) | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 34,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3537,14 +4120,10 @@
         "signature": [
           "ChromeHelpExtensionMenuCustomLink",
           " | ",
-          "ChromeHelpExtensionMenuGitHubLink",
-          " | ",
-          "ChromeHelpExtensionMenuDiscussLink",
-          " | ",
           "ChromeHelpExtensionMenuDocumentationLink"
         ],
         "path": "src/core/packages/chrome/browser/src/help_extension.ts",
-        "lineNumber": 110,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3561,7 +4140,7 @@
           "\"project\" | \"classic\""
         ],
         "path": "src/core/packages/chrome/browser/src/types.ts",
-        "lineNumber": 33,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3578,7 +4157,7 @@
           "\"projects\" | \"deployment\" | \"userAndRoles\" | \"performance\" | \"billingAndSub\" | \"deployments\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3607,7 +4186,7 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 104,
+        "lineNumber": 105,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3630,7 +4209,7 @@
           "<unknown>[] | undefined; iconToString?: string | undefined; nameToString?: string | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 285,
+        "lineNumber": 282,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3647,7 +4226,7 @@
           "\"home\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 110,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3664,7 +4243,29 @@
           "\"home\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 110,
+        "lineNumber": 111,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-public.SidebarAppDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "SidebarAppDefinition",
+        "description": [
+          "Complete app definition after registration, with defaults applied"
+        ],
+        "signature": [
+          "SidebarAppConfig",
+          "<TState, TActions> & { status: ",
+          "SidebarAppStatus",
+          "; restoreOnReload: boolean; }"
+        ],
+        "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
+        "lineNumber": 93,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3681,7 +4282,7 @@
           "\"hidden\" | \"visible\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 108,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3695,10 +4296,10 @@
         "label": "SolutionId",
         "description": [],
         "signature": [
-          "\"security\" | \"workplaceai\" | \"oblt\" | \"es\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3716,6 +4317,10 @@
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
+          "> | undefined; es?: ",
+          "SolutionNavigationDefinition",
+          "<",
+          "AppDeepLinkId",
           "> | undefined; workplaceai?: ",
           "SolutionNavigationDefinition",
           "<",
@@ -3724,14 +4329,10 @@
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
-          "> | undefined; es?: ",
-          "SolutionNavigationDefinition",
-          "<",
-          "AppDeepLinkId",
           "> | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
-        "lineNumber": 281,
+        "lineNumber": 278,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

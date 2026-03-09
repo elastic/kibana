@@ -5,15 +5,12 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import moment from 'moment';
 
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-
+import type { EndpointMetadataService } from '../../metadata';
 import type { BuildWorkflowInsightParams } from '.';
-
 import {
   Category,
   SourceType,
@@ -21,7 +18,6 @@ import {
   ActionType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../../mocks';
-import type { EndpointMetadataService } from '../../metadata';
 import { groupEndpointIdsByOS } from '../helpers';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
@@ -55,19 +51,6 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         ],
       },
     ],
-    request: {
-      body: {
-        insightType: 'incompatible_antivirus',
-        endpointIds: ['endpoint-1'],
-        apiConfig: {
-          connectorId: 'connector-id-1',
-          actionTypeId: 'action-type-id-1',
-          model: 'model-1',
-        },
-        anonymizationFields: [],
-        subAction: 'invokeAI',
-      },
-    } as unknown as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>,
     endpointMetadataService,
     esClient: {
       search: jest.fn().mockResolvedValue({
@@ -76,6 +59,12 @@ describe('buildIncompatibleAntivirusWorkflowInsights', () => {
         },
       }),
     } as unknown as ElasticsearchClient,
+    options: {
+      insightType: 'incompatible_antivirus',
+      endpointIds: ['endpoint-1'],
+      connectorId: 'connector-id-1',
+      model: 'model-1',
+    },
   });
 
   const buildExpectedInsight = (os: string, signerField?: string, signerValue?: string) =>

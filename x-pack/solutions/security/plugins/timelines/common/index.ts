@@ -68,4 +68,10 @@ export type {
 
 export { Direction, EntityType, EMPTY_BROWSER_FIELDS } from './search_strategy';
 
-export { getDataFromFieldsHits, toArray, isGeoField, toObjectArrayOfStrings } from './utils';
+export {
+  getDataFromFieldsHits,
+  toArray,
+  isGeoField,
+  toObjectArrayOfStrings,
+  getTimelineFieldsDataFromHit,
+} from './utils';

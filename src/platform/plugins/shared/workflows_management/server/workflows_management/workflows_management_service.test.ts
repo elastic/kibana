@@ -15,6 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import { z } from '@kbn/zod/v4';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
@@ -112,6 +113,9 @@ describe('WorkflowsService', () => {
       actions: {
         getUnsecuredActionsClient: mockGetActionsClient,
         getActionsClientWithRequest: mockGetActionsClientWithRequest,
+      },
+      workflowsExtensions: {
+        getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
       },
     });
 
@@ -1486,6 +1490,76 @@ steps:
         })
       );
     });
+
+    it('should preserve YAML comments, formatting, and template expressions when toggling enabled', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const yamlWithComments = `# Workflow configuration
+name: Test Workflow
+description: A test workflow
+
+# Whether the workflow is active
+enabled: false
+
+triggers:
+  - type: manual
+
+steps:
+  # Create a Jira ticket
+  - type: console
+    name: first-step
+    with:
+      message: "{{ inputs.comment }}"`;
+
+      const existingDoc = {
+        _id: 'test-workflow-id',
+        _source: {
+          ...mockWorkflowDocument._source,
+          enabled: false,
+          yaml: yamlWithComments,
+          definition: {
+            name: 'Test Workflow',
+            enabled: false,
+            triggers: [{ type: 'manual' }],
+            steps: [
+              {
+                type: 'console',
+                name: 'first-step',
+                with: { message: '{{ inputs.comment }}' },
+              },
+            ],
+          },
+        },
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [existingDoc] } } as any);
+
+      // Toggle enabled without providing yaml (metadata-only update)
+      await service.updateWorkflow('test-workflow-id', { enabled: true }, 'default', mockRequest);
+
+      const indexCall = mockEsClient.index.mock.calls[0][0] as any;
+      const savedYaml = indexCall.document.yaml;
+
+      // enabled should be toggled
+      expect(savedYaml).toContain('enabled: true');
+      expect(savedYaml).not.toContain('enabled: false');
+
+      // Comments should be preserved
+      expect(savedYaml).toContain('# Workflow configuration');
+      expect(savedYaml).toContain('# Whether the workflow is active');
+      expect(savedYaml).toContain('# Create a Jira ticket');
+
+      // Template expressions should not be corrupted
+      expect(savedYaml).toContain('{{ inputs.comment }}');
+      expect(savedYaml).not.toContain('null');
+
+      // Blank lines should be preserved
+      expect((savedYaml.match(/\n\n/g) || []).length).toBeGreaterThanOrEqual(2);
+    });
   });
 
   describe('deleteWorkflows', () => {
@@ -2090,7 +2164,7 @@ steps:
   });
 
   describe('getWorkflowExecution', () => {
-    it('should return workflow execution with steps', async () => {
+    it('should return workflow execution with steps, excluding I/O by default', async () => {
       // Mock the get call for execution (using direct GET by ID)
       const mockExecutionGetResponse = {
         _id: 'execution-1',
@@ -2141,17 +2215,15 @@ steps:
         id: 'execution-1',
       });
 
-      // Verify the step executions search call
+      // Verify the step executions search call (includeInput/includeOutput default to false)
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
-          bool: {
-            must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],
-          },
+          match: { workflowRunId: 'execution-1' },
         },
+        _source: { excludes: ['input', 'output'] },
         sort: 'startedAt:desc',
-        from: 0,
-        size: 1000,
+        size: 10000,
       });
     });
 
@@ -2238,6 +2310,9 @@ steps:
         actions: {
           getUnsecuredActionsClient: mockGetActionsClient,
           getActionsClientWithRequest: mockGetActionsClientWithRequest,
+        },
+        workflowsExtensions: {
+          getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
         },
       });
 
@@ -2529,6 +2604,25 @@ steps:
         featureId: expect.any(String),
         includeSystemActionTypes: false,
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    const mockRequest = {} as any;
+
+    it('should resolve the schema and delegate to validateWorkflowYaml', async () => {
+      const mockSchema = z.object({ name: z.string() });
+      jest.spyOn(service, 'getWorkflowZodSchema').mockResolvedValue(mockSchema);
+
+      const result = await service.validateWorkflow('name: Test', 'my-space', mockRequest);
+
+      expect(service.getWorkflowZodSchema).toHaveBeenCalledWith(
+        { loose: false },
+        'my-space',
+        mockRequest
+      );
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
     });
   });
 });

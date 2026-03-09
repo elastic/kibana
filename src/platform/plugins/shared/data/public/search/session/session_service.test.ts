@@ -19,6 +19,10 @@ import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
 import type { CoreStart } from '@kbn/core/public';
+import { addInProgressSessionId } from './in_progress_session';
+
+jest.mock('./in_progress_session');
+const mockedAddInProgressSessionId = jest.mocked(addInProgressSessionId);
 
 const mockSavedObject: SearchSessionSavedObject = {
   id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
@@ -86,6 +90,8 @@ describe('Session service', () => {
     );
     state$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
     sessionService.state$.subscribe(state$);
+
+    jest.resetAllMocks();
   });
 
   describe('Session management', () => {
@@ -537,6 +543,27 @@ describe('Session service', () => {
     const searchSession = await sessionService.save({ entryPoint: 'test' });
 
     expect(searchSession.attributes.name).toBe(mockSavedObject.attributes.name);
+  });
+
+  test('save() calls addInProgressSessionId()', async () => {
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getLocatorData: async () => ({
+        id: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+
+    const sessionId = sessionService.start();
+    sessionService.trackSearch({
+      poll: jest.fn().mockResolvedValue(undefined),
+      abort: jest.fn().mockResolvedValue(undefined),
+    });
+
+    expect(mockedAddInProgressSessionId).toHaveBeenCalledTimes(0);
+    await sessionService.save({ entryPoint: 'test' });
+    expect(mockedAddInProgressSessionId).toHaveBeenNthCalledWith(1, sessionId);
   });
 
   describe("user doesn't have access to search session", () => {

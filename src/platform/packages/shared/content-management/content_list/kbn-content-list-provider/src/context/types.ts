@@ -45,6 +45,8 @@ export interface ContentListLabels {
   entity: string;
   /** Plural form of the entity name (e.g., "dashboards"). Should be i18n-translated. */
   entityPlural: string;
+  /** Placeholder text for the search input. Should be i18n-translated. */
+  searchPlaceholder?: string;
 }
 
 /**
@@ -74,19 +76,5 @@ export type ContentListConfig = ContentListCoreConfig & {
   dataSource: DataSourceConfig;
 };
 
-/**
- * Services provided to the content list provider to enable additional capabilities.
- *
- * @internal This interface is a placeholder for future service integrations.
- * @remarks
- * Planned services include:
- * - Tagging service for tag-based filtering.
- * - Favorites service for user favorites.
- * - Permissions service for access control.
- *
- * This interface is not yet used and may change without notice.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContentListServices {
-  // Future services will be added here.
-}
+// Re-export `ContentListServices` from the services module.
+export type { ContentListServices } from '../services';

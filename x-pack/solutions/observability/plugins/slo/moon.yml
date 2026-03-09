@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/alerting-plugin'
   - '@kbn/rison'
   - '@kbn/embeddable-plugin'
-  - '@kbn/embeddable-enhanced-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/es-query'
   - '@kbn/react-kibana-mount'
@@ -85,13 +84,14 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/core-http-server'
   - '@kbn/aiops-plugin'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
   - '@kbn/presentation-publishing'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/securitysolution-io-ts-utils'
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/datemath'
-  - '@kbn/presentation-containers'
   - '@kbn/dashboard-plugin'
   - '@kbn/monaco'
   - '@kbn/code-editor'
@@ -123,6 +123,11 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-observability'
   - '@kbn/observability-get-padded-alert-time-range-util'
+  - '@kbn/presentation-publishing-schemas'
+  - '@kbn/content-management-utils'
+  - '@kbn/observability-agent-builder-plugin'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/core-analytics-browser'
 tags:
   - plugin
   - prod
@@ -134,7 +139,6 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
-    - ./emotion.d.ts
     - '!target/**/*'
 tasks:
   jest:

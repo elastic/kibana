@@ -13,7 +13,6 @@ import { KBN_CERT_PATH, KBN_KEY_PATH, CA_CERT_PATH } from '@kbn/dev-utils';
 import type { UsageApiConfigSchema } from '../../config';
 import type { UsageRecord } from '../../types';
 
-import { USAGE_REPORTING_ENDPOINT } from '../../constants';
 import { UsageReportingService } from './usage_reporting_service';
 
 const mockedFetch = jest.spyOn(global, 'fetch');
@@ -70,7 +69,7 @@ describe('UsageReportingService', () => {
       const response = await service.reportUsage(records);
 
       expect(mockedFetch).toHaveBeenCalledTimes(1);
-      expect(mockedFetch).toHaveBeenCalledWith(`${url}${USAGE_REPORTING_ENDPOINT}`, {
+      expect(mockedFetch).toHaveBeenCalledWith(url, {
         method: 'post',
         body: JSON.stringify(records),
         headers: {
@@ -120,7 +119,7 @@ describe('UsageReportingService', () => {
       mockedFetch.mockResolvedValueOnce(mockResponse);
 
       const response = await service.reportUsage(records);
-      const url = `${DEFAULT_CONFIG.url}${USAGE_REPORTING_ENDPOINT}`;
+      const url = DEFAULT_CONFIG.url;
 
       expect(mockedFetch).toHaveBeenCalledTimes(1);
       expect(mockedFetch).toHaveBeenCalledWith(url, {
@@ -142,7 +141,7 @@ describe('UsageReportingService', () => {
       mockedFetch.mockResolvedValueOnce(mockResponse);
 
       const response = await service.reportUsage(records);
-      const url = `${DEFAULT_CONFIG.url}${USAGE_REPORTING_ENDPOINT}`;
+      const url = DEFAULT_CONFIG.url;
 
       expect(mockedFetch).toHaveBeenCalledTimes(1);
       expect(mockedFetch).toHaveBeenCalledWith(url, {

@@ -16,6 +16,8 @@ import {
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { getCellRenderers, getDefaultAppState, getChartSectionConfiguration } from './accessors';
+import { isValidNonTransformationalESQLQuery } from '../../../utils/is_valid_non_transformational_esql_query';
+import { DataSourceType } from '../../../../../common/data_sources';
 
 const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
 
@@ -32,7 +34,9 @@ export const createTracesDataSourceProfileProvider = ({
   resolve: (params) => {
     if (
       params.rootContext.solutionType === SolutionType.Observability &&
-      apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params))
+      apmContextService.tracesService.isTracesIndexPattern(extractIndexPatternFrom(params)) &&
+      (params.dataSource?.type === DataSourceType.DataView ||
+        isValidNonTransformationalESQLQuery(params.query))
     ) {
       return {
         isMatch: true,
