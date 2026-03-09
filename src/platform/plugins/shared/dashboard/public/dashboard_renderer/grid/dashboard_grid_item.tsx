@@ -23,7 +23,6 @@ import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_inter
 import { presentationUtilService } from '../../services/kibana_services';
 import { printViewportVisStyles } from '../print_styles';
 import { DASHBOARD_MARGIN_SIZE } from './constants';
-import { getHighlightStyles } from './highlight_styles';
 
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
