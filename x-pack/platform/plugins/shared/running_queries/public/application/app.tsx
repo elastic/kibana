@@ -141,7 +141,7 @@ const RunningQueriesAppWithData: React.FC = () => {
             defaultMessage="Real-time insights and control over query performance within your cluster. {learnMore}"
             values={{
               learnMore: (
-                <EuiLink href="https://elastic.co" target="_blank" external>
+                <EuiLink href="https://elastic.co" target="_blank" external css={{ whiteSpace: 'nowrap' }}>
                   <FormattedMessage
                     id="xpack.runningQueries.subtitle.learnMoreLink"
                     defaultMessage="Learn more"
