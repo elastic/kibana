@@ -35,7 +35,6 @@ import type {
   DocumentToExpressionReturnType,
   LensDocument,
 } from '@kbn/lens-common';
-import { isTextBasedPersistedState } from '@kbn/lens-common';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../../../common/constants';
 
 import { buildExpression } from './expression_helpers';
@@ -113,22 +112,6 @@ const getRefsForAdHocDataViewsFromContext = (
   return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
 };
 
-function getEsqlQueriesByDataViewId(datasourceStates: DatasourceStates): Record<string, string> {
-  const textBasedState = datasourceStates.textBased?.state;
-  const queries: Record<string, string> = {};
-
-  if (!isTextBasedPersistedState(textBasedState)) {
-    return queries;
-  }
-
-  for (const layer of Object.values(textBasedState.layers)) {
-    if (layer.index && layer.query?.esql) {
-      queries[layer.index] = layer.query.esql;
-    }
-  }
-  return queries;
-}
-
 export async function initializeDataViews(
   {
     dataViews,
@@ -200,8 +183,6 @@ export async function initializeDataViews(
 
   const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
 
-  const esqlQueries = getEsqlQueriesByDataViewId(datasourceStates);
-
   const indexPatterns = await loadIndexPatterns({
     dataViews,
     patterns: usedIndexPatternsIds,
@@ -209,7 +190,6 @@ export async function initializeDataViews(
     cache: {},
     adHocDataViews,
     http,
-    esqlQueries,
   });
 
   const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(

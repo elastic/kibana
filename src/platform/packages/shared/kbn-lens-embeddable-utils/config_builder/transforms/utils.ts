@@ -123,6 +123,7 @@ function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
     fieldAttrs: {},
     allowNoIndex: false,
     allowHidden: false,
+    ...(dataView.dataSourceType ? { type: dataView.dataSourceType } : {}),
   };
 }
 
@@ -409,6 +410,7 @@ export const buildDatasourceStates = (
               : {
                   type: 'adHocDataView',
                   ...index,
+                  ...(dataset.type === 'esql' ? { dataSourceType: 'esql' } : {}),
                 };
         }
       }
