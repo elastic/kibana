@@ -37,3 +37,4 @@ react-element-to-jsx-string
 @swc/core
 lightningcss
 tar-fs
+browserslist
