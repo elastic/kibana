@@ -108,17 +108,18 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
     }
   }, [selectedType, applySelection]);
 
-  const tooltipContent = i18n.translate(
-    'aiAssistantManagementSelection.navControl.openTheAgentBuilderSidebarLabel',
+  const openAIAssistantLabel = i18n.translate(
+    'aiAssistantManagementSelection.navControl.openAIAssistantLabel',
     {
       defaultMessage: 'Open AI Assistant',
     }
   );
+
   const AiAssistantHeaderButton = () => {
     return (
       <>
         <EuiShowFor sizes={['m', 'l', 'xl']}>
-          <EuiToolTip content={tooltipContent}>
+          <EuiToolTip content={openAIAssistantLabel}>
             <AiButton
               onClick={() => setModalOpen(true)}
               iconType="aiAssistantLogo"
@@ -133,14 +134,12 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
           </EuiToolTip>
         </EuiShowFor>
         <EuiShowFor sizes={['xs', 's']}>
-          <EuiToolTip content={tooltipContent}>
+          <EuiToolTip content={openAIAssistantLabel}>
             <AiButton
               iconOnly
               iconType="aiAssistantLogo"
               onClick={() => setModalOpen(true)}
-              aria-label={i18n.translate('aiAssistantManagementSelection.headerButton.ariaLabel', {
-                defaultMessage: 'Open the AI Assistant selector',
-              })}
+              aria-label={openAIAssistantLabel}
               variant="base"
               size="s"
               data-test-subj="aiAssistantHeaderButtonIcon"
