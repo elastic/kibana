@@ -54,7 +54,9 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
   const { definition, indexMode, includeMetadata = false } = options;
 
   if (Streams.QueryStream.Definition.is(definition)) {
-    // Use the ES|QL view name as the query source
+    // Query streams use their $.prefixed ES|QL view name directly (e.g. FROM $.cars.electric)
+    // rather than data stream index patterns. This is how users access query stream data —
+    // parent ingest stream patterns (e.g. FROM cars, cars.*) intentionally exclude them.
     return `FROM ${definition.query.view} | SORT @timestamp DESC`;
   }
 
