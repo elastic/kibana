@@ -31,6 +31,9 @@ export const ENTITY_STORE_ROUTES = {
   CRUD_UPSERT: (entityType: string) => `internal/security/entity_store/entities/${entityType}`,
   CRUD_UPSERT_BULK: 'internal/security/entity_store/entities/bulk',
   CRUD_DELETE: 'internal/security/entity_store/entities/',
+  RESOLUTION_LINK: 'internal/security/entity_store/resolution/link',
+  RESOLUTION_UNLINK: 'internal/security/entity_store/resolution/unlink',
+  RESOLUTION_GROUP: 'internal/security/entity_store/resolution/group',
   ENTITY_MAINTAINERS_GET: 'internal/security/entity_store/entity_maintainers',
   ENTITY_MAINTAINERS_START: (id: string) =>
     `internal/security/entity_store/entity_maintainers/start/${id}`,
