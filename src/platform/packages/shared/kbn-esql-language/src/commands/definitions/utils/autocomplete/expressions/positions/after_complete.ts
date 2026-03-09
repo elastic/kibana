@@ -21,7 +21,6 @@ import { SuggestionBuilder } from '../suggestion_builder';
 import { logicalOperators } from '../../../../all_operators';
 import {
   hasArbitraryExpressionSignature,
-  toSignatureState,
   isAmbiguousPosition,
   canAcceptMoreArgs,
   hasVariadicSignature,
@@ -62,14 +61,12 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return suggestions;
     }
 
-    const state = toSignatureState(functionParameterContext);
-
     // For repeating signatures (CASE): boolean at position 2,4,6... is a condition → suggest comma
-    if (isAmbiguousPosition(state)) {
+    if (isAmbiguousPosition(functionParameterContext)) {
       return [...suggestions, commaCompleteItem];
     }
 
-    if (canAcceptMoreArgs(state)) {
+    if (canAcceptMoreArgs(functionParameterContext)) {
       return [...suggestions, commaCompleteItem];
     }
 
@@ -82,9 +79,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     context?.columns,
     context?.unmappedFieldsStrategy
   );
-  const signatureState = functionParameterContext
-    ? toSignatureState(functionParameterContext)
-    : null;
+  const signatureState = functionParameterContext ?? null;
 
   const enrichedCtx = {
     ...ctx,

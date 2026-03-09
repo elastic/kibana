@@ -15,7 +15,6 @@ import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
 import { getExpressionType } from '../../../expressions';
 import {
   hasArbitraryExpressionSignature,
-  toSignatureState,
   doesParamAcceptType,
   canAcceptMoreArgs,
   hasVariadicSignature,
@@ -118,18 +117,18 @@ function handleCompleteOperator(
 
   // Add comma using decision engine for all operators in function context
   if (options.functionParameterContext) {
-    const state = toSignatureState(options.functionParameterContext);
-    const typeMatches = doesParamAcceptType(state, operatorReturnType, false);
+    const fnParamCtx = options.functionParameterContext;
+    const typeMatches = doesParamAcceptType(fnParamCtx, operatorReturnType, false);
 
     builder.addCommaIfNeeded({
       position: 'after_complete',
       typeMatches,
       isLiteral: false,
-      hasMoreParams: canAcceptMoreArgs(state),
-      isVariadic: hasVariadicSignature(state.signatures),
-      hasMoreMandatoryArgs: state.hasMoreMandatoryArgs,
+      hasMoreParams: canAcceptMoreArgs(fnParamCtx),
+      isVariadic: hasVariadicSignature(fnParamCtx.signatures),
+      hasMoreMandatoryArgs: fnParamCtx.hasMoreMandatoryArgs,
       isExpressionHeavy: hasArbitraryExpressionSignature(
-        options.functionParameterContext.functionDefinition?.signatures ?? []
+        fnParamCtx.functionDefinition?.signatures ?? []
       ),
       isCursorFollowedByComma: false,
     });

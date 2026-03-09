@@ -20,7 +20,6 @@ import {
 } from '../../../../../all_operators';
 import { normalizePreferredExpressionTypes } from '../../utils';
 import {
-  toSignatureState,
   areParamsHomogeneous,
   hasBooleanSignature,
   getAcceptedParamTypes,
@@ -120,16 +119,15 @@ const rules: Rule[] = [
       return null;
     }
 
-    const state = toSignatureState(functionParameterContext);
-    const acceptedTypes = getAcceptedParamTypes(state);
+    const acceptedTypes = getAcceptedParamTypes(functionParameterContext);
     const acceptsBoolean = acceptedTypes.includes('boolean');
     const acceptsAny = acceptedTypes.includes('any');
 
     // Special case: for homogeneous functions at first parameter, check if ANY signature accepts boolean
     // (not just validSignatures which may be filtered by current field type)
     const isFirstParamOfHomogeneous =
-      areParamsHomogeneous(state.signatures) &&
-      (functionParameterContext.currentParameterIndex ?? 0) === 0;
+      areParamsHomogeneous(functionParameterContext.signatures) &&
+      functionParameterContext.currentParameterIndex === 0;
 
     if (isFirstParamOfHomogeneous) {
       const allSignatures = functionParameterContext.functionDefinition?.signatures;
@@ -209,12 +207,11 @@ const rules: Rule[] = [
       return null;
     }
 
-    const state5 = toSignatureState(functionParameterContext);
-    if (!areParamsHomogeneous(state5.signatures)) {
+    if (!areParamsHomogeneous(functionParameterContext.signatures)) {
       return null;
     }
 
-    const isFirstParam = (functionParameterContext.currentParameterIndex ?? 0) === 0;
+    const isFirstParam = functionParameterContext.currentParameterIndex === 0;
     if (!isFirstParam) {
       return null;
     }
@@ -268,12 +265,11 @@ const rules: Rule[] = [
       return null;
     }
 
-    const state6 = toSignatureState(functionParameterContext);
-    if (!areParamsHomogeneous(state6.signatures)) {
+    if (!areParamsHomogeneous(functionParameterContext.signatures)) {
       return null;
     }
 
-    const isAfterFirst = (functionParameterContext.currentParameterIndex ?? 0) > 0;
+    const isAfterFirst = functionParameterContext.currentParameterIndex > 0;
     if (!isAfterFirst) {
       return null;
     }
@@ -305,13 +301,13 @@ const rules: Rule[] = [
 
     // Special case: editing the first parameter (expressionType matches firstParamType)
     if (firstType === expressionType) {
-      const rule6Signatures = functionParameterContext.validSignatures;
+      const matchingSignatures = functionParameterContext.validSignatures;
 
-      if (!rule6Signatures) {
+      if (!matchingSignatures) {
         return { shouldSuggest: false, reason: 'Missing validSignatures' };
       }
 
-      if (hasBooleanSignature(rule6Signatures)) {
+      if (hasBooleanSignature(matchingSignatures)) {
         return {
           shouldSuggest: true,
           reason: 'Can still switch signature at subsequent param',
@@ -347,17 +343,15 @@ const rules: Rule[] = [
       return null;
     }
 
-    const state7 = toSignatureState(functionParameterContext);
-
     // Do not constrain the first parameter for homogeneous functions
     if (
-      areParamsHomogeneous(state7.signatures) &&
-      (functionParameterContext.currentParameterIndex ?? 0) === 0
+      areParamsHomogeneous(functionParameterContext.signatures) &&
+      functionParameterContext.currentParameterIndex === 0
     ) {
       return null;
     }
 
-    const acceptedTypes = getAcceptedParamTypes(state7);
+    const acceptedTypes = getAcceptedParamTypes(functionParameterContext);
     const acceptsBooleanOrAny = acceptedTypes.includes('boolean') || acceptedTypes.includes('any');
     const allNumeric = acceptedTypes.every((paramType) => supportsArithmeticOperations(paramType));
 

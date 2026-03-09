@@ -13,7 +13,6 @@ import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../ut
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
 import {
   hasArbitraryExpressionSignature,
-  toSignatureState,
   hasVariadicSignature,
   hasRepeatingSignature,
   getAcceptedParamTypes,
@@ -21,7 +20,6 @@ import {
   isAmbiguousPosition,
   pairKeywordAndTextTypes,
 } from '../../../signature_analysis';
-import type { SignatureState } from '../../../signature_analysis';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';
@@ -71,14 +69,12 @@ async function handleFunctionParameterContext(
     return [];
   }
 
-  const state = toSignatureState(functionParamContext);
-
   // Empty paramDefinitions = no valid signature for this position → return []
   // Exception for variadic and repeating signature functions
   if (
     paramDefinitions.length === 0 &&
-    !hasVariadicSignature(state.signatures) &&
-    !hasRepeatingSignature(state.signatures)
+    !hasVariadicSignature(functionParamContext.signatures) &&
+    !hasRepeatingSignature(functionParamContext.signatures)
   ) {
     return [];
   }
@@ -91,7 +87,7 @@ async function handleFunctionParameterContext(
   }
 
   // Build composite suggestions (literals + fields + functions)
-  return buildCompositeSuggestions(functionParamContext, ctx, state);
+  return buildCompositeSuggestions(functionParamContext, ctx);
 }
 
 /** Try suggestions that are exclusive (if present, return only these) */
@@ -106,7 +102,7 @@ function tryExclusiveSuggestions(
   const enumItems = buildEnumValueSuggestions(
     paramDefinitions,
     functionDefinition!,
-    Boolean(functionParamContext.hasMoreMandatoryArgs),
+    functionParamContext.hasMoreMandatoryArgs,
     options.isCursorFollowedByComma ?? false
   );
   if (enumItems.length > 0) {
@@ -125,8 +121,7 @@ function tryExclusiveSuggestions(
 /** Build composite suggestions: literals + fields + functions */
 async function buildCompositeSuggestions(
   functionParamContext: FunctionParamContext,
-  ctx: ExpressionContext,
-  state: SignatureState
+  ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   const { functionDefinition } = functionParamContext;
   const { options } = ctx;
@@ -134,8 +129,7 @@ async function buildCompositeSuggestions(
   // Determine configuration
   const config = getParamSuggestionConfig(
     functionParamContext,
-    options.isCursorFollowedByComma ?? false,
-    state
+    options.isCursorFollowedByComma ?? false
   );
 
   const suggestions: ISuggestionItem[] = [];
@@ -169,7 +163,7 @@ function buildLiteralSuggestions(
   const { paramDefinitions, functionDefinition } = functionParamContext;
   const { command } = ctx;
 
-  const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
+  const { hasMoreMandatoryArgs } = functionParamContext;
   const suggestions: ISuggestionItem[] = [];
   const hasConstantOnlyParams = paramDefinitions.some(({ constantOnly }) => constantOnly);
 
@@ -191,7 +185,7 @@ function buildLiteralSuggestions(
   const isBucketFirstParam =
     matchesSpecialFunction(functionDefinition!.name, 'bucket') &&
     command.name === 'stats' &&
-    (functionParamContext.currentParameterIndex ?? 0) === 0;
+    functionParamContext.currentParameterIndex === 0;
 
   if (!isFtsFunction && !isBucketFirstParam && !hasConstantOnlyParams) {
     const builder = new SuggestionBuilder(ctx);
@@ -343,13 +337,10 @@ function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionP
 /** Derives suggestion configuration for next function parameter */
 function getParamSuggestionConfig(
   functionParamContext: FunctionParamContext,
-  isCursorFollowedByComma: boolean,
-  state: SignatureState
+  isCursorFollowedByComma: boolean
 ) {
-  const { functionDefinition } = functionParamContext;
-  const acceptedTypes = getAcceptedParamTypes(state) as FunctionParameterType[];
-
-  const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
+  const { functionDefinition, hasMoreMandatoryArgs } = functionParamContext;
+  const acceptedTypes = getAcceptedParamTypes(functionParamContext) as FunctionParameterType[];
 
   const commaContext: CommaContext = {
     position: 'empty_expression',
@@ -364,8 +355,8 @@ function getParamSuggestionConfig(
   return {
     acceptedTypes,
     shouldAddComma,
-    isRepeatingValuePosition: isAtRepeatingValuePosition(state),
-    isAmbiguousPosition: isAmbiguousPosition(state),
+    isRepeatingValuePosition: isAtRepeatingValuePosition(functionParamContext),
+    isAmbiguousPosition: isAmbiguousPosition(functionParamContext),
   };
 }
 

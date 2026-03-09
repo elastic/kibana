@@ -12,7 +12,13 @@ import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
-import { resolveSignatureContext } from './signature_analyzer';
+import { EDITOR_MARKER } from '../../../constants';
+import { resolveArgumentTypes } from '../../expressions';
+import {
+  getMatchingSignatures,
+  getParamAtPosition,
+  getParamDefsAtPosition,
+} from '../../signature_analysis';
 import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
@@ -60,7 +66,63 @@ export function buildExpressionFunctionParameterContext(
     return null;
   }
 
-  return resolveSignatureContext(fn, context, fnDefinition);
+  const { argTypes, literalMask } = resolveArgumentTypes(fn.args, {
+    columns: context?.columns,
+    unmappedFieldsStrategy: context?.unmappedFieldsStrategy,
+  });
+
+  const shouldGetNextArgument = fn.text.includes(EDITOR_MARKER);
+  let argIndex = Math.max(fn.args.length, 0);
+  if (!shouldGetNextArgument && argIndex) {
+    argIndex -= 1;
+  }
+
+  const isVariadicFn = fnDefinition.signatures.some((sig) => sig.minParams != null);
+  const hasMultipleSignatures = fnDefinition.signatures.length > 1;
+  const argsToCheckForFiltering =
+    isVariadicFn || shouldGetNextArgument || !hasMultipleSignatures ? argIndex : fn.args.length;
+
+  const validSignatures = getMatchingSignatures(
+    fnDefinition.signatures,
+    argTypes.slice(0, argsToCheckForFiltering),
+    literalMask.slice(0, argsToCheckForFiltering),
+    true,
+    true
+  );
+
+  const compatibleParamDefs = getParamDefsAtPosition(
+    getMatchingSignatures(
+      fnDefinition.signatures,
+      argTypes.slice(0, argIndex),
+      literalMask.slice(0, argIndex),
+      true,
+      true
+    ),
+    argIndex
+  );
+
+  const hasMoreMandatoryArgs = !validSignatures.some((signature) => {
+    const nextParam = getParamAtPosition(signature, argIndex + 1);
+
+    return nextParam === null || nextParam?.optional === true;
+  });
+
+  const firstArgumentType = argTypes[0];
+  const hasRepeating = fnDefinition.signatures.some((sig) => sig.isSignatureRepeating);
+  const firstValueType = hasRepeating ? argTypes[1] : undefined;
+
+  const signatures = validSignatures.length ? validSignatures : fnDefinition.signatures;
+
+  return {
+    signatures,
+    paramDefinitions: compatibleParamDefs,
+    hasMoreMandatoryArgs,
+    functionDefinition: fnDefinition,
+    firstArgumentType,
+    firstValueType,
+    currentParameterIndex: argIndex,
+    validSignatures,
+  };
 }
 
 /**

@@ -11,9 +11,8 @@ import type { ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import { within } from '@elastic/esql';
 import { suggestForExpression } from '../suggestion_engine';
 import type { ExpressionContext } from '../types';
-import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import { resolveSignatureContext } from '../signature_analyzer';
+import { buildExpressionFunctionParameterContext } from '../utils';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;
@@ -33,13 +32,7 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
   } = ctx;
 
   const functionExpression = expressionRoot as ESQLFunction;
-  const functionDefinition = getFunctionDefinition(functionExpression.name);
-
-  if (!functionDefinition || !context) {
-    return [];
-  }
-
-  const paramContext = resolveSignatureContext(functionExpression, context, functionDefinition);
+  const paramContext = buildExpressionFunctionParameterContext(functionExpression, context);
 
   if (!paramContext) {
     return [];

@@ -16,10 +16,18 @@ import {
   hasRepeatingSignature,
   hasArbitraryExpressionSignature,
 } from './traits';
-import type { SignatureState, FunctionParameterContext } from './types';
+
+interface SignatureInput {
+  signatures: Signature[];
+  paramDefinitions?: FunctionParameter[];
+  firstArgumentType?: string;
+  firstValueType?: string;
+  currentParameterIndex: number;
+  hasMoreMandatoryArgs?: boolean;
+}
 
 /** Detects when the cursor is on a value param position of a repeating signature such as `CASE`. */
-export function isAtRepeatingValuePosition(state: SignatureState): boolean {
+export function isAtRepeatingValuePosition(state: SignatureInput): boolean {
   return hasRepeatingSignature(state.signatures) && state.currentParameterIndex >= 1;
 }
 
@@ -29,7 +37,7 @@ export function isAtRepeatingValuePosition(state: SignatureState): boolean {
  * Example: in `CASE(cond1, value1, /)` the third param position could be either a new condition
  * or the final default value, so autocomplete should stay permissive.
  */
-export function isAmbiguousPosition(state: SignatureState): boolean {
+export function isAmbiguousPosition(state: SignatureInput): boolean {
   return (
     hasRepeatingSignature(state.signatures) &&
     state.currentParameterIndex >= 2 &&
@@ -38,7 +46,7 @@ export function isAmbiguousPosition(state: SignatureState): boolean {
 }
 
 /** Tells callers whether another argument can still be added. */
-export function canAcceptMoreArgs(state: SignatureState): boolean {
+export function canAcceptMoreArgs(state: SignatureInput): boolean {
   if (state.hasMoreMandatoryArgs) {
     return true;
   }
@@ -52,14 +60,14 @@ export function canAcceptMoreArgs(state: SignatureState): boolean {
 
 /** Checks whether the current param position accepts a given type. */
 export function isCurrentTypeCompatible(
-  state: SignatureState,
+  state: SignatureInput,
   givenType: SupportedDataType | 'unknown',
   givenIsLiteral: boolean
 ): boolean {
-  if (state.paramDefinitions.length > 0) {
-    return state.paramDefinitions.some((def) =>
-      argMatchesParamType(givenType, def.type, givenIsLiteral, false)
-    );
+  const paramDefs = state.paramDefinitions ?? [];
+
+  if (paramDefs.length > 0) {
+    return paramDefs.some((def) => argMatchesParamType(givenType, def.type, givenIsLiteral, false));
   }
 
   if (hasVariadicSignature(state.signatures) && state.firstArgumentType) {
@@ -71,11 +79,13 @@ export function isCurrentTypeCompatible(
 
 /** Checks a candidate expression against the current param position. */
 export function doesParamAcceptType(
-  state: SignatureState,
+  state: SignatureInput,
   expressionType: SupportedDataType | 'unknown',
   expressionIsLiteral: boolean
 ): boolean {
-  if (state.paramDefinitions.length === 0) {
+  const paramDefs = state.paramDefinitions ?? [];
+
+  if (paramDefs.length === 0) {
     if (hasVariadicSignature(state.signatures) && state.firstArgumentType) {
       return argMatchesParamType(
         expressionType,
@@ -88,7 +98,7 @@ export function doesParamAcceptType(
     return false;
   }
 
-  return state.paramDefinitions.some((def) =>
+  return paramDefs.some((def) =>
     argMatchesParamType(expressionType, def.type, expressionIsLiteral, false)
   );
 }
@@ -99,7 +109,7 @@ export function doesParamAcceptType(
  * Example: for `CASE(cond1, value1, /)` we return both `[boolean, any]` so the caller
  * can suggest either a new condition or a default value.
  */
-export function getCompatibleParamDefs(state: SignatureState): FunctionParameter[] {
+export function getCompatibleParamDefs(state: SignatureInput): FunctionParameter[] {
   const repeatingSignature = state.signatures.find((sig) => sig.isSignatureRepeating);
 
   if (repeatingSignature && state.currentParameterIndex >= repeatingSignature.params.length) {
@@ -112,7 +122,7 @@ export function getCompatibleParamDefs(state: SignatureState): FunctionParameter
     return [repeatingSignature.params[paramIndex]];
   }
 
-  return state.paramDefinitions;
+  return state.paramDefinitions ?? [];
 }
 
 /**
@@ -121,7 +131,7 @@ export function getCompatibleParamDefs(state: SignatureState): FunctionParameter
  * This keeps `CASE` permissive in condition/default param positions while still enforcing result-type
  * homogeneity once the first value branch is known.
  */
-export function getAcceptedParamTypes(state: SignatureState): FunctionParameterType[] {
+export function getAcceptedParamTypes(state: SignatureInput): FunctionParameterType[] {
   if (isAmbiguousPosition(state)) {
     return ['any'];
   }
@@ -150,8 +160,10 @@ export function getAcceptedParamTypes(state: SignatureState): FunctionParameterT
     return textualOrSingle(state.firstArgumentType);
   }
 
-  if (state.paramDefinitions.length > 0) {
-    const types = state.paramDefinitions.map(({ type }) => type);
+  const paramDefs = state.paramDefinitions ?? [];
+
+  if (paramDefs.length > 0) {
+    const types = paramDefs.map(({ type }) => type);
 
     return pairKeywordAndTextTypes(types);
   }
@@ -161,7 +173,7 @@ export function getAcceptedParamTypes(state: SignatureState): FunctionParameterT
 
 /** Checks a type at the current param position using the same rules as autocomplete. */
 export function isTypeAcceptedAtPosition(
-  state: SignatureState,
+  state: SignatureInput,
   expressionType: SupportedDataType | 'unknown',
   expressionIsLiteral: boolean
 ): boolean {
@@ -189,23 +201,6 @@ export function extractSignatureMapParams(
   return signatures.flatMap(({ params }) => params).find(({ mapParams }) => mapParams)?.mapParams;
 }
 
-/** Converts autocomplete context into the shared state used by this module. */
-export function toSignatureState(context: FunctionParameterContext): SignatureState {
-  const signatures =
-    context.validSignatures && context.validSignatures.length > 0
-      ? context.validSignatures
-      : context.functionDefinition?.signatures ?? [];
-
-  return {
-    signatures,
-    paramDefinitions: context.paramDefinitions ?? [],
-    firstArgumentType: context.firstArgumentType,
-    firstValueType: context.firstValueType,
-    currentParameterIndex: context.currentParameterIndex ?? 0,
-    hasMoreMandatoryArgs: Boolean(context.hasMoreMandatoryArgs),
-  };
-}
-
 /** Finds the largest declared arity in a signature set. */
 function maxParams(signatures: Signature[]): number {
   if (signatures.length === 0) {
@@ -223,7 +218,7 @@ function textualOrSingle(type: SupportedDataType | 'unknown'): FunctionParameter
 }
 
 /** Detects when a fixed-arity call is already at its last param position. */
-function isAtMaxParams(state: SignatureState): boolean {
+function isAtMaxParams(state: SignatureInput): boolean {
   if (hasVariadicSignature(state.signatures)) {
     return false;
   }
