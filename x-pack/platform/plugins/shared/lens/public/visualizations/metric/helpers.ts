@@ -70,26 +70,27 @@ export function getSecondaryLabelSelected(
   return { mode: 'custom', label: state.secondaryLabel ?? defaultSecondaryLabel };
 }
 
+function resolveDynamicTrendConfig(
+  secondaryTrend: MetricVisualizationState['secondaryTrend']
+): Pick<Extract<SecondaryTrend, { type: 'dynamic' }>, 'paletteId' | 'reversed'> {
+  if (secondaryTrend && secondaryTrend.type === 'dynamic') {
+    return secondaryTrend;
+  }
+  return getDefaultConfigForMode('dynamic') as Extract<SecondaryTrend, { type: 'dynamic' }>;
+}
+
 export function getTrendPalette(
   colorMode: SecondaryTrendType,
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
   theme: CoreTheme
-): [string, string, string] | undefined {
+): PaletteTriplet | undefined {
   if (colorMode !== 'dynamic') {
     return undefined;
   }
-  if (!secondaryTrend || secondaryTrend.type !== colorMode) {
-    const defaultConfig = getDefaultConfigForMode(colorMode) as Extract<
-      SecondaryTrend,
-      { type: 'dynamic' }
-    >;
-    const palette = getKbnPalettes(theme).get(defaultConfig.paletteId);
-    const colors = palette?.colors(3);
-    return (defaultConfig.reversed ? colors.reverse() : colors) as [string, string, string];
-  }
-  const palette = getKbnPalettes(theme).get(secondaryTrend.paletteId);
+  const { paletteId, reversed } = resolveDynamicTrendConfig(secondaryTrend);
+  const palette = getKbnPalettes(theme).get(paletteId);
   const colors = palette?.colors(3);
-  return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
+  return (reversed ? colors.reverse() : colors) as PaletteTriplet;
 }
 
 const reverseTriplet = ([a, b, c]: PaletteTriplet): PaletteTriplet => [c, b, a];
@@ -105,10 +106,7 @@ export function getSecondaryTrendPalettes(
   }
 
   const euiTheme = getEuiThemeVars(theme);
-  const { paletteId, reversed } =
-    secondaryTrend && secondaryTrend.type === 'dynamic'
-      ? secondaryTrend
-      : (getDefaultConfigForMode('dynamic') as Extract<SecondaryTrend, { type: 'dynamic' }>);
+  const { paletteId, reversed } = resolveDynamicTrendConfig(secondaryTrend);
 
   const mapped = getMappedSecondaryTrendPalettes(paletteId, euiTheme);
   const palette = mapped?.palette;
