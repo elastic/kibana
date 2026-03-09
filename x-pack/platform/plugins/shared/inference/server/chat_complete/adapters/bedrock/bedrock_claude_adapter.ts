@@ -52,9 +52,10 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       role: message.role,
       content: message.rawContent,
     }));
+    const cachePoint = { cachePoint: { type: 'default' as const } };
     const systemMessage = noToolUsage
-      ? [{ text: addNoToolUsageDirective(system) }]
-      : [{ text: system }];
+      ? [{ text: addNoToolUsageDirective(system) }, cachePoint]
+      : [{ text: system }, cachePoint];
     const bedRockTools =
       noToolUsage && !hasToolUseMessages ? [] : toolsToConverseBedrock(tools, messages);
     const connector = executor.getConnector();
