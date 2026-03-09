@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { selectMonitorListState } from '../../../state';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  fetchMonitorListAction,
+  getMonitorListPageStateWithDefaults,
+  selectMonitorListState,
+} from '../../../state';
 import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
@@ -50,13 +54,21 @@ export const useMonitorIntegrationStatus = (
   options?: UseMonitorIntegrationStatusOptions
 ): UseMonitorIntegrationStatusReturn => {
   const { configIds, providedMonitors } = options ?? {};
+  const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
   const [resetIds, setResetIds] = useState<Set<string>>(new Set());
 
   const {
     data: { monitors: listMonitors },
     loaded: listLoaded,
+    loading: listLoading,
   } = useSelector(selectMonitorListState);
+
+  useEffect(() => {
+    if (!providedMonitors && !listLoaded && !listLoading) {
+      dispatch(fetchMonitorListAction.get(getMonitorListPageStateWithDefaults()));
+    }
+  }, [dispatch, providedMonitors, listLoaded, listLoading]);
 
   const monitors = providedMonitors ?? listMonitors;
   const loaded = providedMonitors ? providedMonitors.length > 0 : listLoaded;
