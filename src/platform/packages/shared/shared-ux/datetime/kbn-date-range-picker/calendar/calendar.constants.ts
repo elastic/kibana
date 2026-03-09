@@ -22,3 +22,9 @@ export const MONTHS_TO_LOAD = 12;
 
 /** Half of MONTHS_TO_LOAD, used for centering today in the initial view. */
 export const HALF_MONTHS_TO_LOAD = MONTHS_TO_LOAD / 2;
+
+/**
+ * Number of off-screen items Virtuoso renders above and below the visible area.
+ * Higher values reduce blank flashes during fast scrolling at the cost of more DOM nodes.
+ */
+export const VIRTUOSO_OVERSCAN = 4;

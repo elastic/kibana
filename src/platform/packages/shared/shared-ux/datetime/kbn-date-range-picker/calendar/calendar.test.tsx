@@ -17,9 +17,9 @@ import { Calendar } from './calendar';
 const mockScrollToIndex = jest.fn();
 
 jest.mock('./calendar_view', () => ({
-  CalendarView: ({ month }: { month: Date }) => {
-    const year = month.getFullYear();
-    const monthNum = String(month.getMonth() + 1).padStart(2, '0');
+  CalendarView: ({ year, monthIndex }: { year: number; monthIndex: number }) => {
+    const monthNum = String(monthIndex + 1).padStart(2, '0');
+    const month = new Date(year, monthIndex, 1);
 
     return (
       <div data-test-subj="calendar-view" data-month={`${year}-${monthNum}`}>

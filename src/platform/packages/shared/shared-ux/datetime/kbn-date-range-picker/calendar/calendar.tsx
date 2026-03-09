@@ -22,18 +22,38 @@ import {
   getScrollDirectionIcon,
   type ScrollDirection,
 } from './calendar.utils';
-import { TODAY_INDEX, MONTHS_TO_LOAD, HALF_MONTHS_TO_LOAD } from './calendar.constants';
+import {
+  TODAY_INDEX,
+  MONTHS_TO_LOAD,
+  HALF_MONTHS_TO_LOAD,
+  VIRTUOSO_OVERSCAN,
+} from './calendar.constants';
 
 interface CalendarProps {
+  /** The selected date range. */
   range: DateRange | undefined;
+  /** Callback when the user changes the selected range. */
   onRangeChange: (range: DateRange | undefined) => void;
+  /**
+   * First day of the week: 0 for Sunday, 1 for Monday.
+   * @default 0
+   */
+  weekStartsOn?: 0 | 1;
 }
 
-export function Calendar({ range, onRangeChange }: CalendarProps) {
+/** Infinite-scroll calendar built on react-virtuoso. */
+export function Calendar({ range, onRangeChange, weekStartsOn }: CalendarProps) {
   const euiThemeContext = useEuiTheme();
   const styles = calendarStyles(euiThemeContext);
 
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+
+  const onRangeChangeRef = useRef(onRangeChange);
+  onRangeChangeRef.current = onRangeChange;
+  const stableOnRangeChange = useCallback(
+    (newRange: DateRange | undefined) => onRangeChangeRef.current(newRange),
+    []
+  );
 
   // Center the loaded range around the start date (if present) or today
   const [firstItemIndex, setFirstItemIndex] = useState(() => {
@@ -73,9 +93,17 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
   const renderMonth = useCallback(
     (index: number) => {
       const month = getMonthFromIndex(index, TODAY_INDEX);
-      return <CalendarView month={month} range={range} setRange={onRangeChange} />;
+      return (
+        <CalendarView
+          year={month.getFullYear()}
+          monthIndex={month.getMonth()}
+          range={range}
+          setRange={stableOnRangeChange}
+          weekStartsOn={weekStartsOn}
+        />
+      );
     },
-    [range, onRangeChange]
+    [range, stableOnRangeChange, weekStartsOn]
   );
 
   return (
@@ -89,7 +117,7 @@ export function Calendar({ range, onRangeChange }: CalendarProps) {
         startReached={handleStartReached}
         endReached={handleEndReached}
         rangeChanged={handleRangeChanged}
-        overscan={2}
+        overscan={VIRTUOSO_OVERSCAN}
       />
       {scrollDirection !== 'none' && (
         <EuiButtonEmpty

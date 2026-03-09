@@ -9,15 +9,7 @@
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type { DateRange } from 'react-day-picker';
-import {
-  EuiButton,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiToolTip,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
 
 import type { TimeRangeBounds } from '../types';
 import { Calendar } from '../calendar';
@@ -42,8 +34,8 @@ import {
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
-  const { euiTheme } = useEuiTheme();
-  const { applyRange, onPresetSave, setText, text, timeRange } = useDateRangePickerContext();
+  const { applyRange, onPresetSave, setText, text, timeRange, calendarOptions } =
+    useDateRangePickerContext();
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
   const [pendingFrom, setPendingFrom] = useState<Date | null>(null);
@@ -212,7 +204,11 @@ export function CalendarPanel() {
         </SubPanelHeading>
       </PanelHeader>
       <PanelBody>
-        <Calendar range={range} onRangeChange={handleRangeChange} />
+        <Calendar
+          range={range}
+          onRangeChange={handleRangeChange}
+          weekStartsOn={calendarOptions?.fdow}
+        />
       </PanelBody>
       <PanelFooter>
         <EuiFlexGroup

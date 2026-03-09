@@ -217,7 +217,7 @@ describe('CalendarPanel', () => {
       clickDay(15);
 
       expect(setText).toHaveBeenLastCalledWith(
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 30))
+        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59))
       );
     });
 
@@ -296,9 +296,9 @@ describe('CalendarPanel', () => {
       expect(applyRange).toHaveBeenCalledWith(
         {
           start: feb2026Local(10, 0, 0),
-          end: feb2026Local(15, 23, 30),
+          end: feb2026Local(15, 23, 59),
         },
-        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 30))
+        formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 59))
       );
     });
 

@@ -17,4 +17,4 @@ export const DEFAULT_START_MINUTE = 0;
 export const DEFAULT_END_HOUR = 23;
 
 /** Default minute for end date when no time source is available */
-export const DEFAULT_END_MINUTE = 30;
+export const DEFAULT_END_MINUTE = 59;
