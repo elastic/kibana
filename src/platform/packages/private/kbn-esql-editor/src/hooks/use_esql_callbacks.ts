@@ -26,12 +26,12 @@ import {
   getViews,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
-import { clearCacheWhenOld } from './helpers';
-import { getHistoryItems } from './history_local_storage';
-import type { ESQLEditorDeps } from './types';
-import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
-import { useCanCreateLookupIndex } from './lookup_join';
-import { useCanSuggestResourceBrowser } from './resource_browser/use_can_suggest_resource_browser';
+import { clearCacheWhenOld } from '../helpers';
+import { getHistoryItems } from '../history_local_storage';
+import type { ESQLEditorDeps } from '../types';
+import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
+import { useCanCreateLookupIndex } from '../lookup_join';
+import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;

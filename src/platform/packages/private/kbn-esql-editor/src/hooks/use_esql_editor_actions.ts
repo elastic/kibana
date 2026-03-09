@@ -9,8 +9,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { QuerySource } from '@kbn/esql-types';
-import type { EsqlEditorActions } from './editor_actions_context';
-import type { EsqlStarredQueriesService } from './editor_footer/esql_starred_queries_service';
+import type { EsqlEditorActions } from '../editor_actions_context';
+import type { EsqlStarredQueriesService } from '../editor_footer/esql_starred_queries_service';
 
 interface UseEsqlEditorActionsParams {
   code: string;
