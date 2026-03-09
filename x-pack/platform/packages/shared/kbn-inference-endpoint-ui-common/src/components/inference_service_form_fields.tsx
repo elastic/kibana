@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { SolutionView } from '@kbn/spaces-plugin/common';
 import {
   getFieldValidityAndErrorMessage,
@@ -107,7 +108,7 @@ interface InferenceServicesProps {
     allowTemperature?: boolean;
     enableEisPromoTour?: boolean;
     /** When set, only these task types will be available for selection in the form. */
-    allowedTaskTypes?: string[];
+    allowedTaskTypes?: InferenceTaskType[];
   };
   http: HttpSetup;
   toasts: IToasts;

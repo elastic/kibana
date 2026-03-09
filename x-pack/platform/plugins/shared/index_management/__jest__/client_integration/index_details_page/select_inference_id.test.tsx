@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
   installConsoleTruncationWarningFilter,
@@ -105,7 +106,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
     toasts?: unknown;
     isEdit?: boolean;
     enforceAdaptiveAllocations?: boolean;
-    allowedTaskTypes?: string[];
+    allowedTaskTypes?: InferenceTaskType[];
   }) => (
     <div data-test-subj="inference-flyout-wrapper">
       <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
