@@ -8,14 +8,15 @@
         "detector_description": "Detects rare GCP Audit event actions for a user.",
         "function": "rare",
         "by_field_name": "event.action",
-        "partition_field_name": "client.user.email",
+        "partition_field_name": "user.email",
         "detector_index": 0
       }
     ],
     "influencers": [
-      "client.user.email",
+      "user.email",
       "source.ip",
-      "source.geo.city_name"
+      "source.geo.city_name",
+      "event.module"
     ]
   },
   "allow_lazy_open": true,

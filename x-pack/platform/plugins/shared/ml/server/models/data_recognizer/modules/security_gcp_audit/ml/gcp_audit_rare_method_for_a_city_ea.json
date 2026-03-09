@@ -12,7 +12,7 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["client.user.email", "source.ip", "source.geo.city_name"]
+    "influencers": ["user.email", "source.ip", "source.geo.city_name", "event.module"]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
