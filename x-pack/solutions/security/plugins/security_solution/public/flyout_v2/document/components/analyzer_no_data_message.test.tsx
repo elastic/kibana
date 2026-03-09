@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AnalyzerPreviewNoDataMessage } from './analyser_no_data_message';
+import { AnalyzerPreviewNoDataMessage } from './analyzer_no_data_message';
 
 const renderNoDataMessage = () =>
   render(

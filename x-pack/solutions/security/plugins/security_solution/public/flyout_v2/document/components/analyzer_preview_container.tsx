@@ -19,7 +19,7 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { AnalyzerPreviewNoDataMessage } from './analyser_no_data_message';
+import { AnalyzerPreviewNoDataMessage } from './analyzer_no_data_message';
 
 export interface AnalyzerPreviewContainerProps {
   /**
