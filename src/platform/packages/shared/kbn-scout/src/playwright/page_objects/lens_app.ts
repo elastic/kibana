@@ -210,4 +210,12 @@ export class LensApp {
   getApplyFlyoutButton() {
     return this.page.getByTestId('applyFlyoutButton');
   }
+
+  getSecondaryFlyoutBackButton() {
+    return this.page.getByTestId('lns-indexPattern-dimensionContainerClose');
+  }
+
+  getInlineEditor() {
+    return this.page.getByTestId('customizeLens');
+  }
 }
