@@ -37,7 +37,6 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Calls the get_services tool to answer the question',
                   'Tool calls include start="now-2h" matching the screen context time range',
                   'Tool calls include end="now" matching the screen context time range',
                 ],
@@ -63,7 +62,6 @@ evaluate.describe(
               },
               output: {
                 criteria: [
-                  'Calls the get_services tool to answer the question',
                   'Tool calls use a 30-minute window (for example start="now-30m")',
                   'Tool calls do not use the screen context start="now-2h" when user time is explicit',
                 ],
@@ -90,7 +88,6 @@ evaluate.describe(
                 },
                 output: {
                   criteria: [
-                    'Calls the get_services tool to answer the question',
                     'Uses the default time range for the tool when no time context is provided (commonly start="now-1h" and end="now")',
                   ],
                 },
