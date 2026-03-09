@@ -14,7 +14,6 @@ import { once } from 'lodash';
 import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
-import { stripUnmappedKeys } from '../scope_tooling';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export function registerReadRoute(
@@ -63,15 +62,8 @@ export function registerReadRoute(
           req.params.id,
           isDashboardAppRequest
         );
-        const { data, warnings } = !isDashboardAppRequest
-          ? stripUnmappedKeys(result.data)
-          : { data: result.data, warnings: [] };
         return res.ok({
-          body: {
-            ...result,
-            data,
-            ...(warnings?.length && { warnings }),
-          },
+          body: result,
         });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {

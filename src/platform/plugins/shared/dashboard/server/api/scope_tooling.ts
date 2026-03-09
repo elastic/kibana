@@ -82,7 +82,7 @@ export function stripUnmappedKeys(dashboardState: Partial<DashboardState>) {
     data: {
       ...rest,
       panels: mappedPanels,
-    },
+    } as DashboardState,
     warnings,
   };
 }
