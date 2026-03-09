@@ -27,7 +27,7 @@ const createMockLeadEntity = (
       ...overrides.entity,
     },
     asset: { criticality: 'high_impact', ...overrides.asset },
-    ...(type === 'user' ? { user: { name } } : { host: { name } }),
+    [type]: { name },
     ...overrides,
   } as never,
   type,
@@ -245,6 +245,48 @@ describe('EntityEnricher', () => {
       expect(result).toHaveLength(2);
       expect(result[0].enrichment.risk?.history).toHaveLength(1);
       expect(result[1].enrichment.risk?.history).toHaveLength(1);
+    });
+
+    it('enriches service entities with alerts and risk', async () => {
+      const service = createMockLeadEntity('service', 'web-api');
+
+      esClient.search
+        .mockResolvedValueOnce({
+          aggregations: {
+            by_entity: {
+              buckets: [
+                {
+                  key: 'web-api',
+                  scores_over_time: {
+                    buckets: [{ key_as_string: '2025-01-01', avg_score: { value: 55 } }],
+                  },
+                },
+              ],
+            },
+          },
+        } as never)
+        .mockResolvedValueOnce({
+          aggregations: {
+            by_service: {
+              buckets: [
+                {
+                  key: 'web-api',
+                  doc_count: 3,
+                  severity_breakdown: { buckets: [{ key: 'medium', doc_count: 3 }] },
+                  distinct_rules: { buckets: [{ key: 'Service Anomaly', doc_count: 3 }] },
+                  top_alerts: { hits: { hits: [] } },
+                },
+              ],
+            },
+          },
+        } as never);
+
+      const result = await enricher.enrich([service]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].enrichment.risk?.history).toHaveLength(1);
+      expect(result[0].enrichment.alerts?.totalAlerts).toBe(3);
+      expect(result[0].enrichment.alerts?.topRuleNames).toEqual(['Service Anomaly']);
     });
 
     it('continues enrichment when risk history fetch fails', async () => {

@@ -13,7 +13,7 @@ import type { EntityRetriever } from './entity_retriever';
 const createMockEntityRecord = (type: string, name: string) => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   entity: { name, type, id: `${type}-${name}` },
-  ...(type === 'user' ? { user: { name } } : { host: { name } }),
+  [type]: { name },
 });
 
 describe('EntityRetriever', () => {
@@ -28,9 +28,10 @@ describe('EntityRetriever', () => {
   });
 
   describe('fetchAllEntities', () => {
-    it('fetches entities from both user and host indices', async () => {
+    it('fetches entities from user, host, and service indices', async () => {
       const userRecord = createMockEntityRecord('user', 'alice');
       const hostRecord = createMockEntityRecord('host', 'server-01');
+      const serviceRecord = createMockEntityRecord('service', 'web-api');
 
       esClient.search
         .mockResolvedValueOnce({
@@ -38,17 +39,22 @@ describe('EntityRetriever', () => {
         } as never)
         .mockResolvedValueOnce({
           hits: { hits: [{ _source: hostRecord, sort: ['2025-01-01', 'id2'] }] },
+        } as never)
+        .mockResolvedValueOnce({
+          hits: { hits: [{ _source: serviceRecord, sort: ['2025-01-01', 'id3'] }] },
         } as never);
 
       const result = await retriever.fetchAllEntities();
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(3);
       expect(result[0].type).toBe('user');
       expect(result[0].name).toBe('alice');
       expect(result[1].type).toBe('host');
       expect(result[1].name).toBe('server-01');
+      expect(result[2].type).toBe('service');
+      expect(result[2].name).toBe('web-api');
 
-      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenCalledTimes(3);
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: expect.stringContaining('security_user_default'),
@@ -59,6 +65,11 @@ describe('EntityRetriever', () => {
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: expect.stringContaining('security_host_default'),
+        })
+      );
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: expect.stringContaining('security_service_default'),
         })
       );
     });
@@ -84,14 +95,15 @@ describe('EntityRetriever', () => {
       ];
 
       esClient.search
-        .mockResolvedValueOnce({ hits: { hits: batch1 } } as never)
-        .mockResolvedValueOnce({ hits: { hits: batch2 } } as never)
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never);
+        .mockResolvedValueOnce({ hits: { hits: batch1 } } as never) // user page 1
+        .mockResolvedValueOnce({ hits: { hits: batch2 } } as never) // user page 2
+        .mockResolvedValueOnce({ hits: { hits: [] } } as never) // host
+        .mockResolvedValueOnce({ hits: { hits: [] } } as never); // service
 
       const result = await retriever.fetchAllEntities();
 
       expect(result).toHaveLength(1001);
-      expect(esClient.search).toHaveBeenCalledTimes(3);
+      expect(esClient.search).toHaveBeenCalledTimes(4);
 
       const secondCall = esClient.search.mock.calls[1][0] as Record<string, unknown>;
       expect(secondCall.search_after).toEqual(['2025-01-01', 'id-999']);
@@ -106,7 +118,8 @@ describe('EntityRetriever', () => {
               { _source: createMockEntityRecord('host', 'server-01'), sort: ['2025-01-01', 'id'] },
             ],
           },
-        } as never);
+        } as never)
+        .mockResolvedValueOnce({ hits: { hits: [] } } as never); // service
 
       const result = await retriever.fetchAllEntities();
 
@@ -127,7 +140,8 @@ describe('EntityRetriever', () => {
             ],
           },
         } as never)
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never);
+        .mockResolvedValueOnce({ hits: { hits: [] } } as never) // host
+        .mockResolvedValueOnce({ hits: { hits: [] } } as never); // service
 
       const result = await retriever.fetchAllEntities();
 

@@ -15,7 +15,7 @@ import type { LeadEntity } from './types';
 // ---------------------------------------------------------------------------
 
 const ENTITY_PAGE_SIZE = 1000;
-const SUPPORTED_ENTITY_TYPES = ['user', 'host'] as const;
+const SUPPORTED_ENTITY_TYPES = ['user', 'host', 'service'] as const;
 
 // ---------------------------------------------------------------------------
 // Entity Retriever
@@ -32,7 +32,7 @@ export interface EntityRetrieverDeps {
 }
 
 export interface EntityRetriever {
-  /** Fetch all user and host entities from Entity Store V2 (paginated via search_after). */
+  /** Fetch all user, host, and service entities from Entity Store V2 (paginated via search_after). */
   fetchAllEntities(): Promise<LeadEntity[]>;
 
   /** Fetch specific entities by type and name. */
