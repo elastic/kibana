@@ -57,7 +57,7 @@ function processCommand(
  * @returns An object containing sets of new columns, renamed column pairs, metadata columns, aggregates, and grouping.
  */
 export function getQuerySummary(query: string): ESQLCommandSummary {
-  const { root } = Parser.parseQuery(query);
+  const { root } = Parser.parse(query);
 
   const allNewColumns = new Set<string>();
   const allRenamedColumnsPairs = new Set<[string, string]>();
