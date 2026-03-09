@@ -28,7 +28,6 @@ export interface TemplateYamlEditorProps {
   onChange: (value: string) => void;
   isSaving?: boolean;
   isSaved?: boolean;
-  hasUnsavedChanges?: boolean;
 }
 
 const styles = {
@@ -63,7 +62,6 @@ export const TemplateYamlEditor = ({
   onChange,
   isSaving = false,
   isSaved = false,
-  hasUnsavedChanges = false,
 }: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
 

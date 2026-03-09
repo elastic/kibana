@@ -65,7 +65,9 @@ export const useValidationAccordionPositioning = (): UseValidationAccordionPosit
     setPortalNode(portalContainer);
 
     return () => {
-      document.body.removeChild(portalContainer);
+      if (portalContainer.parentNode) {
+        portalContainer.parentNode.removeChild(portalContainer);
+      }
     };
   }, []);
 

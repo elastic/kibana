@@ -34,7 +34,7 @@ describe('getCasesDeepLinks', () => {
     });
   });
 
-  it('it returns the deep links with a different base bath', () => {
+  it('it returns the deep links with a different base path', () => {
     const deepLinks = getCasesDeepLinks({ basePath: '/test' });
     expect(deepLinks).toEqual({
       id: 'cases',

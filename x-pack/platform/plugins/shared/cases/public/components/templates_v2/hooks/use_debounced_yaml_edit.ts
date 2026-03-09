@@ -40,6 +40,7 @@ export const useDebouncedYamlEdit = (
 
   const initialValueRef = useRef(value);
   const onChangeCallbackRef = useRef(onChangeCallback);
+  onChangeCallbackRef.current = onChangeCallback;
 
   useEffect(() => {
     onChangeCallbackRef.current(initialValueRef.current);
@@ -49,7 +50,7 @@ export const useDebouncedYamlEdit = (
     (newValue: string) => {
       const stateToSave = templateId ? { templateId, definition: newValue } : newValue;
       setStoredState(stateToSave);
-      onChangeCallback(newValue);
+      onChangeCallbackRef.current(newValue);
       setIsSaving(false);
       setIsSaved(true);
 
@@ -61,19 +62,24 @@ export const useDebouncedYamlEdit = (
         setIsSaved(false);
       }, SAVED_INDICATOR_DURATION_MS);
     },
-    [setStoredState, onChangeCallback, templateId]
+    [setStoredState, templateId]
   );
 
   const handleReset = useCallback(() => {
     const stateToSave = templateId ? { templateId, definition: initialValue } : initialValue;
     setStoredState(stateToSave);
-    onChangeCallback(initialValue);
-  }, [setStoredState, onChangeCallback, initialValue, templateId]);
+    onChangeCallbackRef.current(initialValue);
+  }, [setStoredState, initialValue, templateId]);
 
   const debouncedSave = useRef(debounce(handleSave, DEBOUNCE_DELAY_MS));
 
   useEffect(() => {
-    debouncedSave.current = debounce(handleSave, DEBOUNCE_DELAY_MS);
+    const debounced = debounce(handleSave, DEBOUNCE_DELAY_MS);
+    debouncedSave.current = debounced;
+
+    return () => {
+      debounced.cancel();
+    };
   }, [handleSave]);
 
   const onChange = useCallback((newValue: string) => {

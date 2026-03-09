@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import type { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import type { YamlEditorFormValues } from '../../components/template_form';
@@ -42,10 +42,6 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
     LOCAL_STORAGE_KEYS.templatesYamlEditorCreateState,
     exampleTemplateDefinition
   );
-
-  useEffect(() => {
-    form.reset();
-  }, [form]);
 
   const handleCreate = useCallback(
     async (data: YamlEditorFormValues) => {

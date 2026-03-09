@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useEffect } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -77,20 +77,9 @@ export const TemplatePreview = () => {
     }
   }, [values.definition]);
 
-  // Update last valid template when parsing succeeds
-  useEffect(() => {
-    if (parsedTemplate.success && parsedTemplate.data) {
-      lastValidTemplateRef.current = parsedTemplate.data;
-    }
-  }, [parsedTemplate]);
-
-  // Log errors to console when validation fails
-  useEffect(() => {
-    if (!parsedTemplate.success) {
-      // eslint-disable-next-line no-console
-      console.error('Template validation errors:', parsedTemplate.error);
-    }
-  }, [parsedTemplate]);
+  if (parsedTemplate.success && parsedTemplate.data) {
+    lastValidTemplateRef.current = parsedTemplate.data;
+  }
 
   // Use last valid template if current parsing failed
   const parsedTemplateData = parsedTemplate.success
