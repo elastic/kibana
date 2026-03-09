@@ -132,6 +132,7 @@ function getOpts() {
     source: raw.source,
     otlpEndpoint: raw['otlp-endpoint'] ?? DEFAULT_OTLP_ENDPOINT,
     clean: process.argv.includes('--clean'),
+    skipLogs: process.argv.includes('--skip-logs'),
     skipTraces: process.argv.includes('--skip-traces'),
     skipMetrics: process.argv.includes('--skip-metrics'),
   };
@@ -287,6 +288,54 @@ function discoverTraceFiles(dataDir: string, config: SystemConfig, dateFilter?: 
 
 const TRACE_FLUSH_SIZE = 1000;
 
+function detectTraceFormat(file: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    let resolved = false;
+    Papa.parse(createReadStream(file, 'utf-8'), {
+      header: true,
+      skipEmptyLines: true,
+      step: ({ data }: { data: Record<string, string> }, parser: Papa.Parser) => {
+        if (resolved) return;
+        const headers = Object.keys(data);
+        const hasTraceId =
+          headers.includes('traceID') ||
+          headers.includes('traceId') ||
+          headers.includes('trace_id');
+        const hasSpanId =
+          headers.includes('spanID') || headers.includes('spanId') || headers.includes('span_id');
+        resolved = true;
+        parser.abort();
+        resolve(hasTraceId && hasSpanId);
+      },
+      complete: () => {
+        if (!resolved) {
+          resolved = true;
+          resolve(false);
+        }
+      },
+    });
+  });
+}
+
+function buildSpanIdToServiceMap(file: string): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  return new Promise((resolve, reject) => {
+    Papa.parse(createReadStream(file, 'utf-8'), {
+      header: true,
+      skipEmptyLines: true,
+      step: ({ data }: { data: Record<string, string> }) => {
+        const rawSpanId = data.spanID || data.spanId || data.span_id || '';
+        const serviceName = data.serviceName || data.service_name || data.cmdb_id || '';
+        if (rawSpanId && serviceName) {
+          map.set(rawSpanId, serviceName);
+        }
+      },
+      complete: () => resolve(map),
+      error: (err: Error) => reject(err),
+    });
+  });
+}
+
 async function streamTraceSpansFromFile(
   file: string,
   range: TimestampRange,
@@ -297,9 +346,16 @@ async function streamTraceSpansFromFile(
   label: string
 ): Promise<number> {
   let totalExported = 0;
-  let formatDetected = false;
-  let isDistributed = false;
   let buffer: Record<string, string>[] = [];
+
+  const isDistributed = await detectTraceFormat(file);
+
+  let spanIdToService: Map<string, string> | undefined;
+  if (isDistributed) {
+    console.log(`  [${label}] Pre-scanning for span→service mapping...`);
+    spanIdToService = await buildSpanIdToServiceMap(file);
+    console.log(`  [${label}] Found ${spanIdToService.size.toLocaleString()} spans across services`);
+  }
 
   async function flushBuffer(): Promise<number> {
     if (buffer.length === 0) return 0;
@@ -307,7 +363,7 @@ async function streamTraceSpansFromFile(
     buffer = [];
 
     const resourceSpans = isDistributed
-      ? buildDistributedTraces(rows, range, windowMs, now)
+      ? buildDistributedTraces(rows, range, windowMs, now, spanIdToService!)
       : buildGraphTraces(rows, range, windowMs, now, systemKey);
 
     const spanCount = resourceSpans.reduce((sum, rs) => sum + rs.spans.length, 0);
@@ -326,19 +382,6 @@ async function streamTraceSpansFromFile(
       header: true,
       skipEmptyLines: true,
       step: ({ data }: { data: Record<string, string> }, parser: Papa.Parser) => {
-        if (!formatDetected) {
-          const headers = Object.keys(data);
-          const hasTraceId =
-            headers.includes('traceID') ||
-            headers.includes('traceId') ||
-            headers.includes('trace_id');
-          const hasSpanId =
-            headers.includes('spanID') || headers.includes('spanId') || headers.includes('span_id');
-          isDistributed = hasTraceId && hasSpanId;
-          formatDetected = true;
-        }
-
-        // Convert millisecond timestamps to seconds to match the range from log files
         const ts = parseInt(data.timestamp, 10);
         if (!isNaN(ts) && ts > 1e12) {
           data.timestamp = String(Math.round(ts / 1000));
@@ -379,9 +422,24 @@ function buildDistributedTraces(
   rows: Record<string, string>[],
   range: TimestampRange,
   windowMs: number,
-  now: number
+  now: number,
+  spanIdToService: Map<string, string>
 ): OtlpResourceSpans[] {
+  // For service_destination metrics, EDOT needs CLIENT (exit) spans with
+  // peer.service pointing to the target. We use the pre-built spanIdToService
+  // map to detect cross-service parent-child edges: when a span's parent
+  // belongs to a different service, we emit a synthetic CLIENT span under the
+  // parent's service with peer.service set to this span's service.
   const spansByService = new Map<string, OtlpSpan[]>();
+
+  function pushSpan(service: string, span: OtlpSpan) {
+    const existing = spansByService.get(service);
+    if (existing) {
+      existing.push(span);
+    } else {
+      spansByService.set(service, [span]);
+    }
+  }
 
   for (const row of rows) {
     const sec = parseInt(row.timestamp, 10);
@@ -395,34 +453,67 @@ function buildDistributedTraces(
     const rawTraceId = row.traceID || row.traceId || row.trace_id || '';
     const rawSpanId = row.spanID || row.spanId || row.span_id || '';
     const rawParentId =
-      row.parentSpanID || row.parentSpanId || row.parent_span_id || row.parent_id || '';
+      row.parentSpanID || row.parentSpanId || row.parent_span_id || row.parent_span || row.parent_id || '';
     const traceId = toHexId(rawTraceId, 32);
     const spanId = toHexId(rawSpanId, 16);
     const serviceName = row.serviceName || row.service_name || row.cmdb_id || 'unknown';
     const operationName = row.operationName || row.operation_name || row.methodName || 'request';
 
     const isRoot = !rawParentId || rawParentId === '0';
+    const parentService = isRoot ? undefined : spanIdToService.get(rawParentId);
+    const isCrossService = parentService !== undefined && parentService !== serviceName;
+
+    // Determine span kind:
+    // - Root spans → SERVER (entry point)
+    // - Cross-service child → SERVER (receiving a call from another service)
+    // - Same-service child → INTERNAL
+    let kind: number;
+    if (isRoot || isCrossService) {
+      kind = 2; // SERVER
+    } else {
+      kind = 0; // INTERNAL
+    }
+
     const span: OtlpSpan = {
       traceId,
       spanId,
       ...(rawParentId && rawParentId !== '0' ? { parentSpanId: toHexId(rawParentId, 16) } : {}),
       name: operationName,
-      kind: isRoot ? 2 : 3,
+      kind,
       startTimeUnixNano: startNano.toString(),
       endTimeUnixNano: endNano.toString(),
+      attributes: [
+        { key: 'span.name', value: { stringValue: operationName } },
+      ],
       status: { code: 1 },
     };
+    pushSpan(serviceName, span);
 
-    const existing = spansByService.get(serviceName);
-    if (existing) {
-      existing.push(span);
-    } else {
-      spansByService.set(serviceName, [span]);
+    // When this span is a cross-service entry, synthesize a CLIENT (exit) span
+    // under the calling service so EDOT produces service_destination metrics.
+    if (isCrossService) {
+      const exitSpanId = generateHexId(16);
+      const exitName = `call ${serviceName}`;
+      const exitSpan: OtlpSpan = {
+        traceId,
+        spanId: exitSpanId,
+        parentSpanId: toHexId(rawParentId, 16),
+        name: exitName,
+        kind: 3, // CLIENT
+        startTimeUnixNano: startNano.toString(),
+        endTimeUnixNano: endNano.toString(),
+        attributes: [
+          { key: 'span.name', value: { stringValue: exitName } },
+          { key: 'peer.service', value: { stringValue: serviceName } },
+        ],
+        status: { code: 1 },
+      };
+      pushSpan(parentService, exitSpan);
     }
   }
 
-  return Array.from(spansByService.entries()).map(([serviceName, spans]) => ({
-    serviceName,
+  return Array.from(spansByService.entries()).map(([svc, spans]) => ({
+    serviceName: svc,
     spans,
   }));
 }
@@ -434,8 +525,21 @@ function buildGraphTraces(
   now: number,
   systemKey: string
 ): OtlpResourceSpans[] {
-  // OpenRCA graph-style traces: each row is an edge (source → target) with latency
+  // OpenRCA graph-style traces: each row is an edge (source → target) with latency.
+  // We create a SERVER span on the source and a CLIENT (exit) span also on the source
+  // that represents the outgoing call to the target. The CLIENT span carries
+  // peer.service so EDOT can derive span.destination.service.resource and produce
+  // service_destination metrics.
   const spansByService = new Map<string, OtlpSpan[]>();
+
+  function pushSpan(service: string, span: OtlpSpan) {
+    const existing = spansByService.get(service);
+    if (existing) {
+      existing.push(span);
+    } else {
+      spansByService.set(service, [span]);
+    }
+  }
 
   for (const row of rows) {
     const sec = parseInt(row.timestamp, 10);
@@ -455,45 +559,40 @@ function buildGraphTraces(
     const startNano = BigInt(remappedMs) * 1_000_000n;
     const endNano = startNano + BigInt(durationUs) * 1000n;
 
-    // Root span for the source service
+    const rootName = target ? `${source} → ${target}` : `${source}`;
     const rootSpan: OtlpSpan = {
       traceId,
       spanId: rootSpanId,
-      name: target ? `${source} → ${target}` : `${source}`,
+      name: rootName,
       kind: 2, // SERVER
       startTimeUnixNano: startNano.toString(),
       endTimeUnixNano: endNano.toString(),
-      attributes: [{ key: 'openrca.system', value: { stringValue: systemKey } }],
+      attributes: [
+        { key: 'openrca.system', value: { stringValue: systemKey } },
+        { key: 'span.name', value: { stringValue: rootName } },
+      ],
       status: { code: 1 },
     };
+    pushSpan(source, rootSpan);
 
-    const existingSource = spansByService.get(source);
-    if (existingSource) {
-      existingSource.push(rootSpan);
-    } else {
-      spansByService.set(source, [rootSpan]);
-    }
-
-    // Child span for the target service (if present)
     if (target) {
-      const childSpanId = generateHexId(16);
-      const childSpan: OtlpSpan = {
+      const exitSpanId = generateHexId(16);
+      const exitName = `call ${target}`;
+      const exitSpan: OtlpSpan = {
         traceId,
-        spanId: childSpanId,
+        spanId: exitSpanId,
         parentSpanId: rootSpanId,
-        name: `${target} (called by ${source})`,
-        kind: 3, // CLIENT
+        name: exitName,
+        kind: 3, // CLIENT — exit span from source to target
         startTimeUnixNano: startNano.toString(),
         endTimeUnixNano: endNano.toString(),
+        attributes: [
+          { key: 'span.name', value: { stringValue: exitName } },
+          { key: 'peer.service', value: { stringValue: target } },
+        ],
         status: { code: 1 },
       };
-
-      const existingTarget = spansByService.get(target);
-      if (existingTarget) {
-        existingTarget.push(childSpan);
-      } else {
-        spansByService.set(target, [childSpan]);
-      }
+      pushSpan(source, exitSpan);
     }
   }
 
@@ -824,6 +923,7 @@ async function main() {
   }
 
   const windowMs = parseDuration(opts.window);
+  const ingestLogs = !opts.skipLogs;
   const ingestTraces = !opts.skipTraces;
   const ingestMetrics = !opts.skipMetrics;
 
@@ -831,7 +931,7 @@ async function main() {
   console.log('=================================');
   console.log(`ES URL:   ${maskPassword(opts.esUrl)}`);
   console.log(`Window:   ${opts.window} (${windowMs}ms)`);
-  console.log(`Signals:  logs${ingestTraces ? ', traces' : ''}${ingestMetrics ? ', metrics' : ''}`);
+  console.log(`Signals:  ${ingestLogs ? 'logs' : ''}${ingestTraces ? ', traces' : ''}${ingestMetrics ? ', metrics' : ''}`);
   console.log(`Systems:  ${opts.systems.join(', ')}`);
   if (opts.date) console.log(`Date:     ${opts.date}`);
   if (ingestTraces) console.log(`OTLP:     ${opts.otlpEndpoint}`);
@@ -883,7 +983,7 @@ async function main() {
     console.log(`Processing ${config.name}...`);
 
     // --- Discover all telemetry files ---
-    const logFiles = discoverLogFiles(dataDir, config, opts.date);
+    const logFiles = ingestLogs ? discoverLogFiles(dataDir, config, opts.date) : [];
     const traceFiles = ingestTraces ? discoverTraceFiles(dataDir, config, opts.date) : [];
     const metricFiles = ingestMetrics ? discoverMetricFiles(dataDir, config, opts.date) : [];
 
