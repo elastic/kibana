@@ -56,6 +56,9 @@ export const getConnectorList = async ({
     connectorId: ep.inferenceId,
     config: {
       inferenceId: ep.inferenceId,
+      providerConfig: {
+        model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+      },
       taskType: ep.taskType,
       service: ep.service,
       serviceSettings: ep.serviceSettings,

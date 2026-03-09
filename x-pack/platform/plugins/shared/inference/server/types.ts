@@ -9,6 +9,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   BoundInferenceClient,
@@ -160,7 +161,9 @@ export interface InferenceServerStart {
    * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
    * @returns A promise that resolves to an array of inference endpoints
    */
-  getInferenceEndpoints: (taskType?: string) => Promise<InferenceEndpoint[]>;
+  getInferenceEndpoints: (
+    taskType?: InferenceTaskType
+  ) => Promise<InferenceEndpoint[]>;
 
   /**
    * Retrieves a specific Elasticsearch inference endpoint by its ID.
