@@ -5,38 +5,29 @@
  * 2.0.
  */
 
-// NOTE: Some of the workaround logic in this file (for fixBrokenSchemaReferencesAndEnforceStrictValidation) is similar
-// to that found in src/platform/packages/shared/kbn-workflows/spec/lib/get_json_schema_from_yaml_schema.ts
-// from Workflows. We may be able to align / share these utilities in the future once both projects aren't
-// in flux.
-import type { JsonSchema7Type } from 'zod-to-json-schema';
-import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { z } from '@kbn/zod';
+// NOTE: This file uses Zod v4's native z.toJSONSchema() for JSON Schema conversion.
+// The fixup pipeline enforces strict additionalProperties and enhances the schema
+// with editor-friendly metadata (titles, snippets, etc.) for Monaco YAML.
+import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import { ACTION_METADATA_MAP } from '../actions/action_metadata';
 import type { StreamType } from '../../types/streamlang';
+import { conditionSchema as conditionZodSchema } from '../../types/conditions';
 
 /**
- * JSON Schema scaffold produced from the Streamlang Zod schema. The converter
- * always emits a root `$ref` that points into `definitions.StreamlangSchema`,
- * so we capture that structure here to provide type safety when we later
- * mutate the generated schema tree.
+ * JSON Schema produced by Zod v4's native `z.toJSONSchema()`. The output is a
+ * flat JSON Schema object (no `definitions` wrapper). We use a loose record
+ * type here since the downstream fixup pipeline accesses fields dynamically.
  */
-type StreamlangJsonSchema = JsonSchema7Type & {
-  $ref: '#/definitions/StreamlangSchema';
-  $schema: 'http://json-schema.org/draft-07/schema#';
-  definitions: {
-    StreamlangSchema: JsonSchema7Type;
-  };
-};
+type StreamlangJsonSchema = Record<string, unknown>;
 
 /**
  * Convert the Streamlang Zod schema into JSON Schema and run our fixup pipeline
  * so the result is consumable by Monaco YAML and other validation tooling.
  *
- * The raw output of `zod-to-json-schema` contains recursive references that
- * Monaco cannot resolve, and it omits strict `additionalProperties` flags.
- * This helper normalises those quirks before returning the schema artifact.
+ * Uses Zod v4's native `z.toJSONSchema()` for the conversion. The fixup
+ * pipeline enforces strict `additionalProperties` and enhances the schema
+ * with editor-friendly metadata (titles, snippets, etc.).
  *
  * @param streamlangSchema - The Zod schema to convert
  * @param streamType - Optional stream type to filter available actions (e.g., exclude manual_ingest_pipeline for wired streams)
@@ -45,14 +36,53 @@ export function getJsonSchemaFromStreamlangSchema(
   streamlangSchema: z.ZodType,
   streamType?: StreamType
 ): StreamlangJsonSchema {
-  // Generate the json schema from zod schema
-  const jsonSchema = zodToJsonSchema(streamlangSchema, {
-    name: 'StreamlangSchema',
-    target: 'jsonSchema7',
+  // Generate the JSON schema using Zod v4's native conversion
+  const jsonSchema = z.toJSONSchema(streamlangSchema, {
+    target: 'draft-7',
+    unrepresentable: 'any',
   });
 
   // Apply targeted fixes to make it valid for JSON Schema validators
   return fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema, streamType);
+}
+
+/**
+ * Inline top-level `$ref` pointers so Monaco YAML can traverse the full schema
+ * tree without needing to resolve references.
+ *
+ * Zod v4's `z.toJSONSchema()` emits `$ref` for recursive/shared schemas (e.g.
+ * `steps.items` and condition `where` clauses). The old `zodToJsonSchema` library
+ * inlined these, allowing Monaco to show hover documentation and autocomplete by
+ * walking the schema tree directly. We replicate that by deep-cloning the
+ * referenced definitions into the referencing locations.
+ *
+ * Only non-recursive references are inlined (we skip refs that would create
+ * infinite expansion by tracking the ref chain).
+ */
+/**
+ * Inline the `steps.items` `$ref` so Monaco YAML can traverse the processor
+ * schemas directly for hover documentation and autocomplete.
+ *
+ * Zod v4's `z.toJSONSchema()` emits `$ref` for reused schemas, while the old
+ * `zodToJsonSchema` library inlined them. Monaco YAML needs inline schemas to
+ * show hover documentation — it cannot resolve `$ref` for that purpose.
+ *
+ * We only inline the `steps.items` pointer (one level). Deeper `$ref`s (e.g.
+ * recursive condition schemas) are kept as-is since they were always references
+ * and inlining them would explode the schema size.
+ */
+function inlineStepsItemsRef(schema: any): void {
+  const stepsItems = schema?.properties?.steps?.items;
+  if (!stepsItems || typeof stepsItems.$ref !== 'string') {
+    return;
+  }
+
+  const resolved = resolveJsonPointer(schema, stepsItems.$ref);
+  if (!resolved) {
+    return;
+  }
+
+  schema.properties.steps.items = JSON.parse(JSON.stringify(resolved));
 }
 
 /**
@@ -126,9 +156,8 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
   let fixedSchemaString = schemaString;
 
   // Fix 1: Remove duplicate enum values
-  // zod-to-json-schema occasionally emits duplicated enum entries when multiple
-  // refinements point at the same literal. Validators dislike this, so we dedupe
-  // the list while preserving the original order.
+  // Deduplicates enum entries that can occur when multiple refinements point at the
+  // same literal. Validators dislike duplicate entries, so we dedupe while preserving order.
   fixedSchemaString = fixedSchemaString.replace(/"enum":\s*\[([^\]]+)\]/g, (match, enumValues) => {
     try {
       const values = JSON.parse(`[${enumValues}]`);
@@ -139,43 +168,13 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
     }
   });
 
-  // Fix 2: Break deeply nested references that cause infinite loops
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/StreamlangSchema\/properties\/steps\/items\/anyOf\/\d+\/properties\/where\/properties\/steps\/items\/anyOf\/\d+\/properties\/where\/properties\/steps"/g,
-    '"type": "array", "description": "Nested steps (recursion limited to prevent infinite loops)", "items": {"type": "object", "additionalProperties": false}'
-  );
-
-  // Fix 3: Fix bare allOf references
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/StreamlangSchema\/properties\/steps\/items\/anyOf\/\d+\/allOf\/\d+\/allOf\/\d+(?:\/allOf\/\d+)*"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Complex schema intersection (simplified due to broken allOf reference)"'
-  );
-
-  // Fix 4: Fix deeply nested allOf references with properties
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/StreamlangSchema\/properties\/steps\/items\/anyOf\/\d+\/allOf\/\d+\/allOf\/\d+\/properties\/[^"]+"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Nested configuration (simplified)"'
-  );
-
-  // Fix 5: Fix any remaining deeply nested broken references
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/[^"]*\/allOf\/\d+\/allOf\/\d+\/allOf\/\d+\/properties\/[^"]+"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Complex object (validation simplified)"'
-  );
-
-  // Fix 6: Fix any remaining bare allOf references (catch-all)
-  fixedSchemaString = fixedSchemaString.replace(
-    /"\$ref":"#\/definitions\/[^"]*\/allOf\/\d+\/allOf\/\d+(?:\/allOf\/\d+)*"/g,
-    '"type": "object", "properties": {}, "additionalProperties": false, "description": "Schema intersection (simplified due to broken reference)"'
-  );
-
   // Enforce strict validation: ensure all objects have additionalProperties: false
   try {
-    // After applying all text replacements we round-trip through JSON to obtain
-    // a mutable object graph again before running the recursive post-processors.
     const fixedSchema = JSON.parse(fixedSchemaString);
     fixAdditionalPropertiesInSchema(fixedSchema);
+    simplifyAnyOfTypeUnions(fixedSchema);
     enhanceStreamlangSchemaForEditor(fixedSchema, streamType);
+    inlineStepsItemsRef(fixedSchema);
     return fixedSchema;
   } catch (parseError) {
     throw new Error('Failed to fix additionalProperties in json schema');
@@ -193,7 +192,14 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(
  */
 
 function enhanceStreamlangSchemaForEditor(schema: any, streamType?: StreamType): void {
-  const stepsItems = schema?.definitions?.StreamlangSchema?.properties?.steps?.items;
+  // Zod v4's toJSONSchema produces a flat schema. The steps items may be a
+  // $ref pointer (for recursive schemas) rather than an inline definition,
+  // so we resolve it before processing.
+  let stepsItems = schema?.properties?.steps?.items;
+
+  if (stepsItems?.$ref) {
+    stepsItems = resolveJsonPointer(schema, stepsItems.$ref);
+  }
 
   if (!stepsItems || typeof stepsItems !== 'object') {
     // The steps array schema is missing or malformed; nothing to enhance.
@@ -997,4 +1003,169 @@ function addStepsPropertyToObject(
  */
 function deepClone<T = any>(value: T): T {
   return value === undefined ? value : (JSON.parse(JSON.stringify(value)) as T);
+}
+
+// ---------------------------------------------------------------------------
+// Standalone condition schema for the condition syntax editor
+// ---------------------------------------------------------------------------
+
+/**
+ * Get Monaco YAML schema configuration for the standalone condition editor.
+ *
+ * This generates a JSON Schema from the condition Zod schema and applies
+ * the same fixups used for the full Streamlang schema (enum dedup,
+ * additionalProperties enforcement) plus condition-specific transforms
+ * (anyOf flattening, operator snippets).
+ *
+ * @returns Schema configuration object for monaco-yaml, or null if generation fails
+ */
+export function getConditionMonacoSchemaConfig(): {
+  uri: string;
+  fileMatch: string[];
+  schema: object;
+} | null {
+  try {
+    const jsonSchema = z.toJSONSchema(conditionZodSchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+    });
+
+    const schema = fixConditionSchema(jsonSchema);
+    return {
+      uri: 'http://elastic.co/schemas/condition.json',
+      fileMatch: ['*'],
+      schema: schema as object,
+    };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.warn('Failed to generate condition JSON schema:', error);
+    return null;
+  }
+}
+
+function fixConditionSchema(schema: any): any {
+  let schemaString = JSON.stringify(schema);
+
+  // Dedup enum values (same fix as the Streamlang schema pipeline)
+  schemaString = schemaString.replace(/"enum":\s*\[([^\]]+)\]/g, (match, enumValues) => {
+    try {
+      const values = JSON.parse(`[${enumValues}]`);
+      const uniqueValues = [...new Set(values)];
+      return `"enum":${JSON.stringify(uniqueValues)}`;
+    } catch (e) {
+      return match;
+    }
+  });
+
+  const fixedSchema = JSON.parse(schemaString);
+  fixAdditionalPropertiesInSchema(fixedSchema);
+  flattenConditionOneOf(fixedSchema);
+  simplifyAnyOfTypeUnions(fixedSchema);
+  return fixedSchema;
+}
+
+/**
+ * Convert simple `anyOf` type-only unions into the compact `type: [...]` form.
+ *
+ * Zod v4 emits `anyOf: [{type:"string"},{type:"number"},{type:"boolean"}]`
+ * for `z.union([z.string(), z.number(), z.boolean()])`. Monaco YAML renders
+ * this as "||" in autocomplete, hiding the property description. The compact
+ * form `type: ["string","number","boolean"]` (valid in JSON Schema draft-07)
+ * makes Monaco fall back to showing the description instead.
+ */
+function simplifyAnyOfTypeUnions(obj: any, visited = new Set()): void {
+  if (typeof obj !== 'object' || obj === null || visited.has(obj)) {
+    return;
+  }
+  visited.add(obj);
+
+  if (Array.isArray(obj)) {
+    obj.forEach((item) => simplifyAnyOfTypeUnions(item, visited));
+    return;
+  }
+
+  if (
+    Array.isArray(obj.anyOf) &&
+    obj.anyOf.length > 0 &&
+    obj.anyOf.every(
+      (entry: any) =>
+        entry &&
+        typeof entry === 'object' &&
+        typeof entry.type === 'string' &&
+        Object.keys(entry).length === 1
+    )
+  ) {
+    obj.type = obj.anyOf.map((entry: any) => entry.type);
+    delete obj.anyOf;
+  }
+
+  for (const key of Object.keys(obj)) {
+    simplifyAnyOfTypeUnions(obj[key], visited);
+  }
+}
+
+/**
+ * Flatten the ConditionSchema's anyOf union into a single object with all
+ * properties merged. This prevents monaco-yaml from showing redundant "object"
+ * entries in autocomplete — only individual property names appear.
+ *
+ * Snippets are populated by calling `addFilterConditionSnippets` on the
+ * variants before flattening, then collecting their `defaultSnippets`.
+ */
+function flattenConditionOneOf(schema: any): void {
+  // Zod v4's z.toJSONSchema produces a flat schema: the condition anyOf lives
+  // at the root rather than nested inside definitions.ConditionSchema (old format).
+  const conditionDef = schema.anyOf
+    ? schema
+    : (schema.definitions || schema.$defs)?.ConditionSchema;
+
+  if (!conditionDef?.anyOf) {
+    return;
+  }
+
+  addFilterConditionSnippets(conditionDef);
+
+  const excludedProperties = new Set(['always', 'never']);
+  const mergedProperties: Record<string, any> = {};
+  const mergedSnippets: any[] = [];
+
+  function collect(node: any): void {
+    if (!node || typeof node !== 'object') return;
+    if (node.anyOf) {
+      node.anyOf.forEach((v: any) => collect(v));
+      return;
+    }
+    if (node.oneOf) {
+      node.oneOf.forEach((v: any) => collect(v));
+      return;
+    }
+    if (node.properties) {
+      const keys = Object.keys(node.properties);
+      if (keys.length === 1 && excludedProperties.has(keys[0])) {
+        return;
+      }
+      for (const [key, value] of Object.entries(node.properties)) {
+        if (!mergedProperties[key] && !excludedProperties.has(key)) {
+          mergedProperties[key] = value;
+        }
+      }
+    }
+    if (Array.isArray(node.defaultSnippets)) {
+      mergedSnippets.push(...node.defaultSnippets);
+    }
+  }
+
+  collect(conditionDef);
+
+  const { description } = conditionDef;
+  delete conditionDef.anyOf;
+  conditionDef.type = 'object';
+  conditionDef.properties = mergedProperties;
+  conditionDef.additionalProperties = false;
+  if (description) {
+    conditionDef.description = description;
+  }
+  if (mergedSnippets.length > 0) {
+    conditionDef.defaultSnippets = mergedSnippets;
+  }
 }
