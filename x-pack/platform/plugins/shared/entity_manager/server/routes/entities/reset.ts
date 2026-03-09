@@ -6,7 +6,7 @@
  */
 
 import { resetEntityDefinitionParamsSchema } from '@kbn/entities-schema';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
 import { InvalidTransformError } from '../../lib/entities/errors/invalid_transform_error';
