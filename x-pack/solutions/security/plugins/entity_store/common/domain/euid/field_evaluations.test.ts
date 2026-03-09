@@ -7,7 +7,56 @@
 
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { applyFieldEvaluations } from './field_evaluations';
+import { applyFieldEvaluations, getFieldValue } from './field_evaluations';
+
+describe('getFieldValue', () => {
+  it('returns string value when doc has flat field', () => {
+    expect(getFieldValue({ foo: 'bar' }, 'foo')).toBe('bar');
+    expect(getFieldValue({ a: 'x' }, 'a')).toBe('x');
+  });
+
+  it('returns value from nested path via get(doc, field) when flat key is missing', () => {
+    expect(getFieldValue({ event: { module: 'okta' } }, 'event.module')).toBe('okta');
+    expect(getFieldValue({ a: { b: { c: 'nested' } } }, 'a.b.c')).toBe('nested');
+  });
+
+  it('prefers flat key over nested path when both exist', () => {
+    const doc = { 'event.module': 'flat', event: { module: 'nested' } };
+    expect(getFieldValue(doc, 'event.module')).toBe('flat');
+  });
+
+  it('returns undefined when field is missing, null, or empty string', () => {
+    expect(getFieldValue({}, 'missing')).toBeUndefined();
+    expect(getFieldValue({ foo: null }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: undefined }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: '' }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ event: { module: null } }, 'event.module')).toBeUndefined();
+    expect(getFieldValue({ event: { module: '' } }, 'event.module')).toBeUndefined();
+  });
+
+  it('returns first element as string when value is array', () => {
+    expect(getFieldValue({ foo: ['a', 'b'] }, 'foo')).toBe('a');
+    expect(getFieldValue({ event: { module: ['okta'] } }, 'event.module')).toBe('okta');
+  });
+
+  it('returns undefined for empty array or array with null/undefined first element', () => {
+    expect(getFieldValue({ foo: [] }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: [null] }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: [undefined] }, 'foo')).toBeUndefined();
+  });
+
+  it('returns undefined when value is an object', () => {
+    expect(getFieldValue({ foo: {} }, 'foo')).toBeUndefined();
+    expect(getFieldValue({ foo: { bar: 1 } }, 'foo')).toBeUndefined();
+  });
+
+  it('converts number and boolean to string', () => {
+    expect(getFieldValue({ foo: 42 }, 'foo')).toBe('42');
+    expect(getFieldValue({ foo: 0 }, 'foo')).toBe('0');
+    expect(getFieldValue({ foo: true }, 'foo')).toBe('true');
+    expect(getFieldValue({ foo: false }, 'foo')).toBe('false');
+  });
+});
 
 describe('applyFieldEvaluations', () => {
   // User entity uses calculated identity with fieldEvaluations (entity.namespace from event.module)

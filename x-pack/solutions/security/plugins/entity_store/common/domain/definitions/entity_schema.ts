@@ -119,7 +119,5 @@ export type FieldEvaluationSource = z.infer<typeof fieldEvaluationSourceSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
 
 export function isSingleFieldIdentity(identity: EntityIdentity): identity is SingleFieldIdentity {
-  return (
-    'singleField' in identity && typeof (identity as SingleFieldIdentity).singleField === 'string'
-  );
+  return 'singleField' in identity;
 }

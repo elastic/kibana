@@ -41,7 +41,10 @@ import { applyFieldEvaluations } from './field_evaluations';
  * @param doc - The document to derive entity filter fields from. May be a flattened or nested shape.
  * @returns An ESQL filter string, or undefined if the document does not contain enough identifying information.
  */
-export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: any) {
+export function getEuidEsqlFilterBasedOnDocument(
+  entityType: EntityType,
+  doc: any
+): string | undefined {
   if (!doc) {
     return undefined;
   }
@@ -86,15 +89,19 @@ function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): str
 }
 
 /**
- * Supports source fields that are arrays by using MV_FIRST; multiple sources combined with CASE (first non-null and non-empty).
- * When there are multiple sources, assigns each to a variable (_src_<dest>0, _src_<dest>1, ...) then CASE over those vars for readability.
- * Emits EVAL lines then destination = CASE(effectiveSource IS NULL OR effectiveSource == "", fallbackValue, whenClauses..., effectiveSource).
+ * Builds the ESQL EVAL expression for a single field evaluation (e.g. mapping event.module / data_stream.dataset to entity.namespace).
+ *
+ * - Source values: each source is read with MV_FIRST so multi-value fields are supported; firstChunkOfField sources use SPLIT then MV_FIRST.
+ * - Multiple sources: each is assigned to a variable (_src_<dest>0, _src_<dest>1, ...), then an effective source is the first non-null, non-empty variable (CASE).
+ * - Destination: effective source is then mapped with CASE: if null/empty → fallbackValue; else if it matches a whenClause → clause's then; else → effective source as-is.
+ *
+ * Returns a comma-separated list of EVAL assignments (one or more lines).
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
   const { destination, sources, fallbackValue, whenClauses } = evaluation;
-  const sourceExpressions = sources.map((s) => sourceToEsqlExpression(s));
-  const baseName = `_src_${destination.replace(/\./g, '_')}`;
-  const effectiveSourceName = baseName;
+  const sourceExpressions = sources.map(sourceToEsqlExpression);
+  const sourceVariablesBaseName = `_src_${destination.replace(/\./g, '_')}`;
+  const effectiveSourceName = sourceVariablesBaseName;
   const destinationCaseParts: string[] = [
     `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), "${escapeEsqlString(
       fallbackValue
@@ -114,10 +121,10 @@ function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
     assignments.push(`${effectiveSourceName} = ${sourceExpressions[0]}`);
   } else {
     for (let i = 0; i < sourceExpressions.length; i++) {
-      assignments.push(`${baseName}${i} = ${sourceExpressions[i]}`);
+      assignments.push(`${sourceVariablesBaseName}${i} = ${sourceExpressions[i]}`);
     }
     const sourceVarCaseParts = sourceExpressions.flatMap((_, i) => {
-      const v = `${baseName}${i}`;
+      const v = `${sourceVariablesBaseName}${i}`;
       return [`(${v} IS NOT NULL AND ${v} != "")`, v];
     });
     sourceVarCaseParts.push('NULL');
@@ -134,9 +141,9 @@ function escapeEsqlString(s: string): string {
 
 /**
  * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
- * Use in a pipeline as | EVAL <result>. Returns empty string when there are no field evaluations.
+ * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
-export function getFieldEvaluationsEsql(entityType: EntityType) {
+export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
   const { identityField } = getEntityDefinitionWithoutId(entityType);
   if (isSingleFieldIdentity(identityField)) {
     return undefined;

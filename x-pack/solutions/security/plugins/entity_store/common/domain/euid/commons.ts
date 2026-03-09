@@ -88,9 +88,7 @@ export function getFieldsToBeFilteredOut(
   fieldsToBeFilteredOn: { values: FieldValue; rankingPosition: number }
 ): string[] {
   const euidFieldsBeforeRanking = euidFields.slice(0, fieldsToBeFilteredOn.rankingPosition);
-  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap((composition) =>
-    getCompositionFields(composition)
-  );
+  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap(getCompositionFields);
 
   const toFilterOut: string[] = [];
   for (const field of fieldsNotInTheId) {

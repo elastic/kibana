@@ -116,7 +116,7 @@ export class CcsLogsExtractionClient {
         const transformDocument = (doc: Record<string, unknown>) => {
           timestampIncrement++;
           const timestamp = momentToDate.add(timestampIncrement, 'ms').toISOString();
-          return transformDocForCcsUpsert(type, doc, timestamp);
+          return this.transformDocForCcsUpsert(type, doc, timestamp);
         };
 
         await ingestEntities({
@@ -135,33 +135,30 @@ export class CcsLogsExtractionClient {
 
     return { count: totalCount, pages };
   }
-}
 
-/**
- * Transforms a (unflattened) partial entity into an updates-index document for CCS.
- */
-function transformDocForCcsUpsert(
-  type: EntityType,
-  data: Partial<Entity>,
-  timestamp: string
-): Record<string, unknown> {
-  const doc: Record<string, unknown> = unflattenObject({
-    ...data,
-    '@timestamp': timestamp,
-  });
+  private transformDocForCcsUpsert(
+    type: EntityType,
+    data: Partial<Entity>,
+    timestamp: string
+  ): Record<string, unknown> {
+    const doc: Record<string, unknown> = unflattenObject({
+      ...data,
+      '@timestamp': timestamp,
+    });
 
-  if (type === EntityType.enum.generic) {
+    if (type === EntityType.enum.generic) {
+      return doc;
+    }
+
+    const entityDoc = get(doc, ['entity']);
+    const typeDoc = get(doc, [type, 'entity']);
+    const finalEntity = {
+      ...(typeDoc || {}),
+      ...(entityDoc || {}),
+    };
+
+    set(doc, [type, 'entity'], finalEntity);
+    delete doc.entity;
     return doc;
   }
-
-  const entityDoc = get(doc, ['entity']);
-  const typeDoc = get(doc, [type, 'entity']);
-  const finalEntity = {
-    ...(typeDoc || {}),
-    ...(entityDoc || {}),
-  };
-
-  set(doc, [type, 'entity'], finalEntity);
-  delete doc.entity;
-  return doc;
 }

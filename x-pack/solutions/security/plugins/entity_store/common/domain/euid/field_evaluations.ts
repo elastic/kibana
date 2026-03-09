@@ -8,11 +8,10 @@
 import { get } from 'lodash';
 import type { FieldEvaluation, FieldEvaluationSource } from '../definitions/entity_schema';
 
-function getFieldValue(doc: any, field: string): string | undefined {
+export function getFieldValue(doc: any, field: string): string | undefined {
   const flattened = doc[field];
-  const value =
-    flattened !== undefined && flattened !== null && flattened !== '' ? flattened : get(doc, field);
-  if (value === undefined || value === null || value === '') {
+  const value = isNotEmpty(flattened) ? flattened : get(doc, field);
+  if (!isNotEmpty(value)) {
     return undefined;
   }
   if (Array.isArray(value)) {
@@ -64,10 +63,9 @@ export function applyFieldEvaluations(
     if (sourceValue === undefined) {
       value = evaluation.fallbackValue;
     } else {
-      const resolved = sourceValue;
-      value = resolved;
+      value = sourceValue;
       for (const clause of evaluation.whenClauses) {
-        if (clause.sourceMatchesAny.includes(resolved)) {
+        if (clause.sourceMatchesAny.includes(value)) {
           value = clause.then;
           break;
         }
@@ -76,4 +74,8 @@ export function applyFieldEvaluations(
     result[evaluation.destination] = value;
   }
   return result;
+}
+
+function isNotEmpty(value: string): boolean {
+  return value !== undefined && value !== null && value !== '';
 }
