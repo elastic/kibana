@@ -14,6 +14,7 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
+import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -29,10 +30,9 @@ import type { PValuesResponse } from './queries/fetch_p_values';
 import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
-import { CorrelationType } from '../../../common/correlations/types';
+import { CorrelationEndpointType, CorrelationType } from '../../../common/correlations/types';
 import type { CorrelationsResponse } from '../../../common/correlations/types';
 import { fetchCorrelations } from './queries/fetch_correlations';
-import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -342,13 +342,9 @@ const pValuesTransactionsRoute = createApmServerRoute({
   },
 });
 
-const correlationTypeRt = t.union([
-  t.literal(CorrelationType.TRANSACTION_DURATION),
-  t.literal(CorrelationType.ERROR_RATE),
-  t.literal(CorrelationType.INFRASTRUCTURE_CPU),
-  t.literal(CorrelationType.INFRASTRUCTURE_MEMORY),
-  t.literal(CorrelationType.INFRASTRUCTURE_DISK),
-  t.literal(CorrelationType.INFRASTRUCTURE_NETWORK),
+const correlationEndpointTypeRt = t.union([
+  t.literal(CorrelationEndpointType.LATENCY),
+  t.literal(CorrelationEndpointType.FAILED_TRANSACTION_RATE),
 ]);
 
 const unifiedCorrelationsRoute = createApmServerRoute({
@@ -356,20 +352,15 @@ const unifiedCorrelationsRoute = createApmServerRoute({
   params: t.type({
     body: t.intersection([
       t.type({
-        correlationType: correlationTypeRt,
+        type: correlationEndpointTypeRt,
       }),
       t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
         fieldCandidates: t.array(t.string),
-        metricField: t.string,
         durationMin: toNumberRt,
         durationMax: toNumberRt,
         percentileThreshold: toNumberRt,
         includeHistogram: toBooleanRt,
       }),
-      environmentRt,
       kueryRt,
       rangeRt,
     ]),
@@ -386,59 +377,36 @@ const unifiedCorrelationsRoute = createApmServerRoute({
 
     const {
       body: {
-        correlationType,
-        serviceName,
-        transactionName,
-        transactionType,
+        type,
         start,
         end,
-        environment,
         kuery,
         fieldCandidates,
         durationMin,
         durationMax,
         percentileThreshold,
         includeHistogram,
-        // metricField is reserved for future infrastructure metrics support
-        metricField: _metricField,
       },
     } = resources.params;
 
-    // Determine if we should search aggregated transactions
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      config: resources.config,
-      apmEventClient,
-      kuery,
-      start,
-      end,
-    });
+    const correlationType =
+      type === CorrelationEndpointType.LATENCY
+        ? CorrelationType.TRANSACTION_DURATION
+        : CorrelationType.ERROR_RATE;
 
     return fetchCorrelations({
       apmEventClient,
       correlationType,
       start,
       end,
-      environment,
+      environment: ENVIRONMENT_ALL_VALUE,
       kuery,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-          ],
-        },
-      },
+      query: { bool: { filter: [] } },
       fieldCandidates,
       percentileThreshold,
       durationMin,
       durationMax,
       includeHistogram,
-      config: {
-        apm: {
-          searchAggregatedTransactions,
-        },
-      },
     });
   },
 });

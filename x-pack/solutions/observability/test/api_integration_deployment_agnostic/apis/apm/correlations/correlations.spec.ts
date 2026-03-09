@@ -7,7 +7,7 @@
 
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
-import { CorrelationType } from '@kbn/apm-plugin/common/correlations/types';
+import { CorrelationEndpointType } from '@kbn/apm-plugin/common/correlations/types';
 import type {
   CorrelationsResponse,
   UnifiedCorrelation,
@@ -43,23 +43,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const apmApiClient = getService('apmApi');
   const esArchiver = getService('esArchiver');
 
-  // This matches the parameters used for the other tab's queries in `../correlations/*`.
   const getOptions = () => ({
-    environment: 'ENVIRONMENT_ALL',
     start: '2020',
     end: '2021',
     kuery: '',
   });
 
-  describe('latency and failed transactions single correlations api', () => {
-    describe('transaction_duration without data', () => {
+  describe('latency and failure rate correlations api', () => {
+    describe('latency without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
           endpoint: 'POST /internal/apm/correlations',
           params: {
             body: {
               ...getOptions(),
-              correlationType: CorrelationType.TRANSACTION_DURATION,
+              type: CorrelationEndpointType.LATENCY,
               percentileThreshold: 95,
             },
           },
@@ -80,14 +78,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('error_rate without data', () => {
+    describe('failureRate without data', () => {
       it('handles the empty state', async () => {
         const unifiedResponse = await apmApiClient.readUser({
           endpoint: 'POST /internal/apm/correlations',
           params: {
             body: {
               ...getOptions(),
-              correlationType: CorrelationType.ERROR_RATE,
+              type: CorrelationEndpointType.FAILED_TRANSACTION_RATE,
               percentileThreshold: 95,
             },
           },
@@ -109,7 +107,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('transaction_duration with data', () => {
+    describe('latency with data', () => {
       before(async () => {
         await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
       });
@@ -123,7 +121,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               ...getOptions(),
-              correlationType: CorrelationType.TRANSACTION_DURATION,
+              type: CorrelationEndpointType.LATENCY,
               percentileThreshold: 95,
             },
           },
@@ -186,7 +184,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('error_rate with data', () => {
+    describe('failureRate with data', () => {
       before(async () => {
         await esArchiver.load(ARCHIVER_ROUTES['8.0.0']);
       });
@@ -200,7 +198,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               ...getOptions(),
-              correlationType: CorrelationType.ERROR_RATE,
+              type: CorrelationEndpointType.FAILED_TRANSACTION_RATE,
               percentileThreshold: 95,
             },
           },

@@ -47,6 +47,12 @@ export enum CorrelationType {
   INFRASTRUCTURE_NETWORK = 'infrastructure_network',
 }
 
+export enum CorrelationEndpointType {
+  LATENCY = 'latency',
+  FAILED_TRANSACTION_RATE = 'failedTransactionRate',
+}
+
+
 export interface UnifiedCorrelation {
   fieldName: string;
   fieldValue: string | number;
