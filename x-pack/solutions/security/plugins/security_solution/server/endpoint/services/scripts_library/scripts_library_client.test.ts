@@ -18,6 +18,8 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE } from '../../lib/scripts_library';
 import { createHapiReadableStreamMock } from '../actions/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { RuleParams } from '../../../lib/detection_engine/rule_schema';
+import type { SanitizedRule } from '@kbn/alerting-types';
 
 jest.mock('@kbn/files-plugin/server', () => {
   const actual = jest.requireActual('@kbn/files-plugin/server');
@@ -585,9 +587,9 @@ describe('scripts library client', () => {
     it('should error if script id is being used by rules', async () => {
       rulesClient.find.mockResolvedValue({
         page: 1,
-        per_page: 10,
+        perPage: 10,
         total: 1,
-        data: [{ id: 'rule-id', name: 'rule id 1 here' }],
+        data: [{ id: 'rule-id', name: 'rule id 1 here' } as unknown as SanitizedRule<RuleParams>],
       });
 
       await expect(scriptsClient.delete('1-2-3')).rejects.toThrow(
