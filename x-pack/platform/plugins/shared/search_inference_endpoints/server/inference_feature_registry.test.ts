@@ -106,14 +106,6 @@ describe('InferenceFeatureRegistry', () => {
       registry.lockRegistration();
       expect(() => registry.validateFeatures()).toThrow('parentFeatureId');
     });
-
-    it('rejects recommendedEndpoints count exceeding maxNumberOfEndpoints', () => {
-      registry.register(
-        createValidFeature({ maxNumberOfEndpoints: 1, recommendedEndpoints: ['ep1', 'ep2'] })
-      );
-      registry.lockRegistration();
-      expect(() => registry.validateFeatures()).toThrow('recommendedEndpoints');
-    });
   });
 
   describe('retrieval', () => {
@@ -127,7 +119,7 @@ describe('InferenceFeatureRegistry', () => {
       expect(all.map((f) => f.featureId)).toEqual(expect.arrayContaining(['a', 'b']));
     });
 
-    it('getAll() returns defensive copies', () => {
+    it('returns new array references on successive getAll() calls', () => {
       registry.register(createValidFeature({ featureId: 'a' }));
       registry.lockRegistration();
       registry.validateFeatures();
@@ -139,9 +131,11 @@ describe('InferenceFeatureRegistry', () => {
 
     it('get(featureId) returns a single feature', () => {
       registry.register(createValidFeature({ featureId: 'a' }));
+      registry.register(createValidFeature({ featureId: 'b' }));
+      registry.register(createValidFeature({ featureId: 'c' }));
       registry.lockRegistration();
       registry.validateFeatures();
-      expect(registry.get('a')).toEqual(expect.objectContaining({ featureId: 'a' }));
+      expect(registry.get('b')).toEqual(expect.objectContaining({ featureId: 'b' }));
     });
 
     it('get(featureId) returns undefined for unknown ID', () => {

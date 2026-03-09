@@ -128,20 +128,4 @@ describe('validateFeatures', () => {
       expect.objectContaining({ message: expect.stringContaining('parentFeatureId') })
     );
   });
-
-  it('rejects recommendedEndpoints count exceeding maxNumberOfEndpoints', () => {
-    const features = new Map<string, InferenceFeatureConfig>([
-      [
-        'a',
-        createValidFeature({
-          featureId: 'a',
-          maxNumberOfEndpoints: 1,
-          recommendedEndpoints: ['ep1', 'ep2'],
-        }),
-      ],
-    ]);
-    expect(() => validateFeatures(features)).toThrow(
-      expect.objectContaining({ message: expect.stringContaining('recommendedEndpoints') })
-    );
-  });
 });

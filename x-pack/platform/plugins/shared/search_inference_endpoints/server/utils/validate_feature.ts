@@ -87,7 +87,6 @@ export const validateFeature = (feature: InferenceFeatureConfig): void => {
  *
  * @param features - The map of registered features keyed by featureId.
  * @throws If a feature references a `parentFeatureId` that does not exist in the map.
- * @throws If a feature's `recommendedEndpoints` count exceeds its `maxNumberOfEndpoints`.
  */
 export const validateFeatures = (features: Map<string, InferenceFeatureConfig>): void => {
   for (const feature of features.values()) {
@@ -104,26 +103,6 @@ export const validateFeatures = (features: Map<string, InferenceFeatureConfig>):
           })
         );
       }
-    }
-
-    if (
-      feature.maxNumberOfEndpoints !== undefined &&
-      feature.recommendedEndpoints.length > feature.maxNumberOfEndpoints
-    ) {
-      throw new Error(
-        i18n.translate(
-          'xpack.searchInferenceEndpoints.featureRegistry.tooManyRecommendedEndpoints',
-          {
-            defaultMessage:
-              'Feature "{featureId}" has {count} recommendedEndpoints but maxNumberOfEndpoints is {max}.',
-            values: {
-              featureId: feature.featureId,
-              count: feature.recommendedEndpoints.length,
-              max: feature.maxNumberOfEndpoints,
-            },
-          }
-        )
-      );
     }
   }
 };
