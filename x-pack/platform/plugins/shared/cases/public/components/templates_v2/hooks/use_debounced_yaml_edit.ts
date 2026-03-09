@@ -78,7 +78,10 @@ export const useDebouncedYamlEdit = (
     debouncedSave.current = debounced;
 
     return () => {
-      debounced.cancel();
+      if (savedTimeoutRef.current) {
+        clearTimeout(savedTimeoutRef.current);
+      }
+      debounced.flush();
     };
   }, [handleSave]);
 
@@ -86,16 +89,6 @@ export const useDebouncedYamlEdit = (
     setIsSaving(true);
     setIsSaved(false);
     debouncedSave.current(newValue);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (savedTimeoutRef.current) {
-        clearTimeout(savedTimeoutRef.current);
-      }
-      debouncedSave.current.flush();
-      debouncedSave.current.cancel();
-    };
   }, []);
 
   return {

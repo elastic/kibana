@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { FieldSchema } from '../../../../common/types/domain/template/fields';
 import { MAX_TEMPLATES_PER_FILE, MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 import { checkTemplateExists } from '../utils';

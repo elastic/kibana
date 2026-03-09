@@ -228,7 +228,6 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
                     onChange={onYamlChange}
                     isSaving={isYamlSaving}
                     isSaved={isYamlSaved}
-                    hasUnsavedChanges={hasChanges}
                   />
                 </div>
               }
