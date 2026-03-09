@@ -54,13 +54,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('searches SLOs using kqlQuery', async () => {
       const testTag = `test-${Date.now()}`;
       const createResponse1 = await sloApi.create(
-        Object.assign({}, DEFAULT_SLO, { tags: ['test', testTag] }),
+        Object.assign({}, DEFAULT_SLO, { tags: ['test', testTag], groupBy: '*' }),
         adminRoleAuthc
       );
       const createResponse2 = await sloApi.create(
         Object.assign({}, DEFAULT_SLO, {
           name: 'something irrelevant foo',
           tags: ['test', testTag],
+          groupBy: '*',
         }),
         adminRoleAuthc
       );

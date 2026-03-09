@@ -100,6 +100,7 @@ export { EsResourceType } from './base/resources';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
+  AgentVisibility,
   AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,
