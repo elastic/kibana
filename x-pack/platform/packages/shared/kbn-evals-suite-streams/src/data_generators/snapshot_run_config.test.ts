@@ -34,13 +34,13 @@ describe('snapshot_run_config', () => {
     expect(mod.SIGEVENTS_SNAPSHOT_RUN).toBe('2026-02-26-test');
   });
 
-  it('resolveBasePath appends run id to basePathPrefix when SIGEVENTS_SNAPSHOT_RUN is set', async () => {
+  it('resolveBasePath prepends run id before basePathPrefix when SIGEVENTS_SNAPSHOT_RUN is set', async () => {
     process.env.SIGEVENTS_SNAPSHOT_RUN = '2026-02-26-test';
     jest.resetModules();
 
     const { resolveBasePath } = await import('./snapshot_run_config');
     expect(
       resolveBasePath({ bucket: GCS_BUCKET, basePathPrefix: OTEL_DEMO_GCS_BASE_PATH_PREFIX })
-    ).toBe('sigevents/otel-demo/2026-02-26-test');
+    ).toBe('2026-02-26-test/otel-demo');
   });
 });

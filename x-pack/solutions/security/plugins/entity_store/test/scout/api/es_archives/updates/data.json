@@ -22,7 +22,13 @@
     "source": {
       "@timestamp": "2026-01-20T12:05:00Z",
       "host": {
-        "id": "host-123"
+        "id": "host-123",
+        "entity": {
+          "behaviors": {
+            "rule_names": ["rule-a", "rule-b"],
+            "anomaly_job_ids": ["job-1"]
+          }
+        }
       }
     }
   }
@@ -38,7 +44,13 @@
       "@timestamp": "2026-01-20T12:05:01Z",
       "host": {
         "domain": "example.com",
-        "name": "server-01"
+        "name": "server-01",
+        "entity": {
+          "behaviors": {
+            "rule_names": ["rule-c"],
+            "anomaly_job_ids": ["job-2", "job-3"]
+          }
+        }
       }
     }
   }
