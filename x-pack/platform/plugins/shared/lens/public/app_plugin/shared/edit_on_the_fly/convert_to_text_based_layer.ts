@@ -119,10 +119,11 @@ function buildTextBasedState(
         const originalCol = layer.columns[sourceColumn.id] as
           | { params?: { format?: ValueFormatConfig } }
           | undefined;
-        const hadUserFormat =
+        const hadUserFormat = Boolean(
           originalCol?.params &&
-          'format' in originalCol.params &&
-          originalCol.params.format !== undefined;
+            'format' in originalCol.params &&
+            originalCol.params.format !== undefined
+        );
 
         if (hadUserFormat) {
           let format = sourceColumn.format;
