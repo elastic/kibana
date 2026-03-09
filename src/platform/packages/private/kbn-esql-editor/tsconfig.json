@@ -36,7 +36,6 @@
     "@kbn/licensing-types",
     "@kbn/index-editor",
     "@kbn/react-hooks",
-    "@kbn/react-kibana-context-theme",
     "@kbn/calculate-width-from-char-count",
     "@kbn/kql",
     "@kbn/ebt-tools",
