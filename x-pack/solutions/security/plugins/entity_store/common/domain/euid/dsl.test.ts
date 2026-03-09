@@ -250,12 +250,45 @@ const isNotEmptyClause = (field: string) => ({
 });
 
 describe('getEuidDslDocumentsContainsIdFilter', () => {
-  it('user: returns documentsFilter DSL (identity AND (asset OR iam branch))', () => {
+  it('user: returns documentsFilter DSL ', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
     expect(result).toEqual({
       bool: {
         must: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'event.outcome',
+                      },
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      match: {
+                        'event.outcome': 'failure',
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              must_not: {
+                match: {
+                  'event.kind': 'enrichment',
+                },
+              },
+            },
+          },
           {
             bool: {
               should: [
@@ -268,22 +301,51 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
           {
             bool: {
               should: [
-                { bool: { must: [{ match: { 'event.kind': 'asset' } }] } },
                 {
                   bool: {
                     must: [
-                      { terms: { 'event.category': ['iam'] } },
+                      {
+                        match: {
+                          'event.kind': 'asset',
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        terms: {
+                          'event.category': ['iam'],
+                        },
+                      },
                       {
                         bool: {
                           should: [
-                            { match: { 'event.type': 'user' } },
-                            { match: { 'event.type': 'creation' } },
-                            { match: { 'event.type': 'deletion' } },
-                            { match: { 'event.type': 'group' } },
+                            {
+                              match: {
+                                'event.type': 'user',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.type': 'creation',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.type': 'deletion',
+                              },
+                            },
+                            {
+                              match: {
+                                'event.type': 'group',
+                              },
+                            },
                           ],
                         },
                       },
-                      { bool: { must_not: { match: { 'event.kind': 'enrichment' } } } },
                     ],
                   },
                 },

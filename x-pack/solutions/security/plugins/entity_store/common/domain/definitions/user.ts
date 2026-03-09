@@ -50,6 +50,18 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
      */
     documentsFilter: {
       and: [
+        // exclude failure outcomes
+        {
+          or: [
+            { field: 'event.outcome', exists: false },
+            { field: 'event.outcome', neq: 'failure' },
+          ],
+        },
+
+        // exclude enrichment kind
+        { field: 'event.kind', neq: 'enrichment' },
+
+        // contains at least of the id fields
         {
           or: [
             isNotEmptyCondition('user.email'),
@@ -59,7 +71,10 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         },
         {
           or: [
+            // is asset kind
             { and: [{ field: 'event.kind', eq: 'asset' }] },
+
+            // or iam category of type user, creation, deletion, or group
             {
               and: [
                 { field: 'event.category', includes: 'iam' },
@@ -71,7 +86,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
                     { field: 'event.type', eq: 'group' },
                   ],
                 },
-                { field: 'event.kind', neq: 'enrichment' },
               ],
             },
           ],
@@ -95,6 +109,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'event.kind' }),
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),
+    collect({ source: 'event.outcome' }),
 
     newestValue({ source: 'entity.namespace' }),
 

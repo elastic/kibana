@@ -177,7 +177,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\"))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
   | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
@@ -194,6 +194,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
  event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
  event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
+ event.outcome = MV_DEDUPE(TOP(TO_STRING(event.outcome), 10)) WHERE event.outcome IS NOT NULL,
  entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
  user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
@@ -256,6 +257,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
  event.kind,
  event.category,
  event.type,
+ event.outcome,
  entity.namespace,
  user.domain,
  user.email,
@@ -1668,7 +1670,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\"))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
   | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
@@ -1686,6 +1688,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  recent.event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
  recent.event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
+ recent.event.outcome = MV_DEDUPE(TOP(TO_STRING(event.outcome), 10)) WHERE event.outcome IS NOT NULL,
  recent.entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
  recent.user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  recent.user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
@@ -1749,6 +1752,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 9),
  event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 9),
  event.type = MV_SLICE(MV_UNION(recent.event.type, event.type), 0, 9),
+ event.outcome = MV_SLICE(MV_UNION(recent.event.outcome, event.outcome), 0, 9),
  entity.namespace = COALESCE(recent.entity.namespace, entity.namespace),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
@@ -1813,6 +1817,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  event.kind,
  event.category,
  event.type,
+ event.outcome,
  entity.namespace,
  user.domain,
  user.email,
@@ -1908,6 +1913,6 @@ exports[`buildRemainingLogsCountQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\"))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
   | STATS document_count = COUNT()"
 `;
