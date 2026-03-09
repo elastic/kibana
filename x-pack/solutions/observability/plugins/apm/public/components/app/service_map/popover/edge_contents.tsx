@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+} from '../../../../../common/es_fields/apm';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { isEdge } from './utils';
 import type { ContentsProps } from './popover_content';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { isEdge } from './utils';
 
 type EdgeReturn = APIReturnType<'GET /internal/apm/service-map/dependency'>;
 
@@ -64,12 +68,18 @@ export function EdgeContents({
     '/services/{serviceName}/service-map',
     '/mobile-services/{serviceName}/service-map'
   );
-  const { offset, comparisonEnabled } = query;
+  const { offset, comparisonEnabled, rangeFrom, rangeTo, kuery } = query;
 
   const isEdgeSelection = isEdge(selection);
   const edgeSelectionData = isEdgeSelection ? selection.data : undefined;
+
   const sourceData = edgeSelectionData?.sourceData;
+  const targetData = edgeSelectionData?.targetData;
   const dependencies = edgeSelectionData?.resources;
+  const dependencyName =
+    targetData && SPAN_DESTINATION_SERVICE_RESOURCE in targetData
+      ? targetData[SPAN_DESTINATION_SERVICE_RESOURCE]
+      : undefined;
 
   const sourceServiceName =
     sourceData && SERVICE_NAME in sourceData ? sourceData[SERVICE_NAME] : undefined;
@@ -111,8 +121,33 @@ export function EdgeContents({
   }
 
   return (
-    <EuiFlexItem>
-      <StatsList data={data} isLoading={isLoading} />
-    </EuiFlexItem>
+    <>
+      <EuiFlexItem>
+        <StatsList data={data} isLoading={isLoading} />
+      </EuiFlexItem>
+      {sourceServiceName && dependencyName && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexItem>
+            <OpenInDiscover
+              dataTestSubj="apmEdgeContentsOpenInDiscoverButton"
+              variant="outlinedButton"
+              indexType="traces"
+              label={i18n.translate('xpack.apm.serviceMap.edgeContents.openInDiscover', {
+                defaultMessage: 'Explore traces',
+              })}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              queryParams={{
+                kuery,
+                serviceName: sourceServiceName,
+                environment,
+                dependencyName,
+              }}
+            />
+          </EuiFlexItem>
+        </>
+      )}
+    </>
   );
 }
