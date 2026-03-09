@@ -27,7 +27,7 @@ import { removeEmptyFields } from '../utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { TemplateSelector } from './templates';
 import { TemplateSelector as TemplateSelectorV2 } from './templates_v2';
-import { getInitialCaseValue } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { KibanaServices } from '../../common/lib/kibana';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
