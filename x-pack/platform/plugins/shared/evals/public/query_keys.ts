@@ -6,6 +6,12 @@
  */
 
 export const queryKeys = {
+  datasets: {
+    all: ['evals', 'datasets'] as const,
+    list: (filters?: { page?: number; perPage?: number }) =>
+      ['evals', 'datasets', 'list', filters] as const,
+    detail: (datasetId: string) => ['evals', 'datasets', 'detail', datasetId] as const,
+  },
   runs: {
     all: ['evals', 'runs'] as const,
     list: (filters?: {
@@ -17,6 +23,12 @@ export const queryKeys = {
     }) => ['evals', 'runs', 'list', filters] as const,
     detail: (runId: string) => ['evals', 'runs', 'detail', runId] as const,
     scores: (runId: string) => ['evals', 'runs', 'scores', runId] as const,
+    datasetExamples: (runId: string, datasetId: string) =>
+      ['evals', 'runs', 'datasets', 'examples', runId, datasetId] as const,
+  },
+  examples: {
+    all: ['evals', 'examples'] as const,
+    scores: (exampleId: string) => ['evals', 'examples', 'scores', exampleId] as const,
   },
   traces: {
     all: ['evals', 'traces'] as const,
