@@ -1428,9 +1428,7 @@
               "\nHandler to call to execute the tool."
             ],
             "signature": [
-              "(args: ",
-              "TypeOf",
-              "<RunInput>, context: ",
+              "(args: z.infer<RunInput>, context: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -1626,9 +1624,7 @@
                 "section": "def-common.ExecutableToolHandlerParams",
                 "text": "ExecutableToolHandlerParams"
               },
-              "<",
-              "TypeOf",
-              "<TSchema>>) => Promise<",
+              "<z.infer<TSchema>>) => Promise<",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -2242,9 +2238,7 @@
                 "section": "def-common.ToolHandlerFn",
                 "text": "ToolHandlerFn"
               },
-              "<",
-              "TypeOf",
-              "<TSchema>>>"
+              "<z.infer<TSchema>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
             "lineNumber": 36,
@@ -2562,13 +2556,7 @@
             "description": [],
             "signature": [
               "AttachmentBoundedTool",
-              "<",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]"
+              "<ZodObject<any>>[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/processed_input.ts",
             "lineNumber": 17,
@@ -4665,13 +4653,7 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              "<{}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
             "lineNumber": 23,
@@ -4731,13 +4713,7 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              "<{}, ZodObject<any>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
             "lineNumber": 28,
@@ -4984,13 +4960,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 52,
@@ -5052,13 +5022,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              ", {}, ZodObject<any>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 57,
@@ -5127,13 +5091,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 61,
@@ -5202,13 +5160,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 65,
@@ -5308,7 +5260,7 @@
               "\nExecute a tool."
             ],
             "signature": [
-              "<TParams extends object = Record<string, unknown>>(params: ",
+              "<TParams extends Record<string, unknown> = Record<string, unknown>>(params: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",

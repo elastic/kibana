@@ -108,7 +108,12 @@ describe('schema validation', () => {
     });
 
     it('should validate group overview state with all group_by options', () => {
-      const groupByOptions = ['slo.tags', 'status', 'slo.indicator.type'] as const;
+      const groupByOptions = [
+        'slo.tags',
+        'status',
+        'slo.indicator.type',
+        '_index', // remote cluster
+      ] as const;
 
       groupByOptions.forEach((groupBy) => {
         const state = {
@@ -119,6 +124,26 @@ describe('schema validation', () => {
         };
 
         expect(() => overviewEmbeddableSchema.validate(state)).not.toThrow();
+      });
+    });
+
+    it('should validate group overview state with group_by _index (remote cluster)', () => {
+      const state = {
+        group_filters: {
+          group_by: '_index' as const,
+          groups: ['remote-cluster-1', 'remote-cluster-2'],
+        },
+        overview_mode: 'groups' as const,
+      };
+
+      expect(() => overviewEmbeddableSchema.validate(state)).not.toThrow();
+      const result = overviewEmbeddableSchema.validate(state);
+      expect(result).toMatchObject({
+        group_filters: {
+          group_by: '_index',
+          groups: ['remote-cluster-1', 'remote-cluster-2'],
+        },
+        overview_mode: 'groups',
       });
     });
 
