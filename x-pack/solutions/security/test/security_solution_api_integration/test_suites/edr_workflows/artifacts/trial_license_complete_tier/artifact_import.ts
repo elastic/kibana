@@ -983,8 +983,108 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             });
 
             describe('compatibility with artifacts exported before space awareness - when artifacts have no ownerSpaceId', () => {
-              it('should add/not add global artifact tag to Endpoint exceptions/artifacts', async () => {});
-              it('should/should not import artifacts without global artifact privilege', async () => {});
+              if (artifact.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) {
+                it('should add add global artifact tag to Endpoint exceptions as they have been global', async () => {
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'imported-artifact',
+                          tags: [],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                  expect(items.length).toEqual(1);
+                  expect(items[0].tags).toContain(GLOBAL_ARTIFACT_TAG);
+                });
+              } else {
+                it(`should not add global artifact tag to ${artifact.name}`, async () => {
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'imported-artifact',
+                          tags: [],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                  expect(items.length).toEqual(1);
+                  expect(items[0].tags).not.toContain(GLOBAL_ARTIFACT_TAG);
+                });
+              }
+
+              if (artifact.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) {
+                it('should not import Endpoint exceptions without global artifact privilege, as they have been global', async () => {
+                  await supertest[artifact.listId].all
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        { item_id: 'imported-artifact', tags: [] },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [
+                        {
+                          error: {
+                            message:
+                              'EndpointArtifactError: Endpoint authorization failure. Management of global artifacts requires additional privilege (global artifact management)',
+                            status_code: 403,
+                          },
+                          item_id: 'imported-artifact',
+                          list_id: artifact.listId,
+                        },
+                      ],
+                      success: false,
+                      success_count: 1,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: false,
+                      success_count_exception_list_items: 0,
+                    } as ImportExceptionsResponseSchema);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                  expect(items.length).toEqual(0);
+                });
+              } else {
+                it('should import artifacts without global artifact privilege, as they are not global', async () => {
+                  await supertest[artifact.listId].all
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        { item_id: 'imported-artifact', tags: [] },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                  expect(items.length).toEqual(1);
+                });
+              }
             });
           });
         });
