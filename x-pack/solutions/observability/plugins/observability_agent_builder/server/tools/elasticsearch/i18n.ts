@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const progressMessages = {
   generatingTools: () => {
     return i18n.translate(
-      'xpack.observability.agent.tools.elasticsearch.progress.generatingTools',
+      'xpack.observabilityAgentBuilder.tools.elasticsearch.progress.generatingTools',
       {
         defaultMessage: 'Dynamically generating tools based on the user query',
       }
@@ -18,7 +18,7 @@ export const progressMessages = {
   },
   callingElasticsearchAgent: () => {
     return i18n.translate(
-      'xpack.observability.agent.tools.elasticsearch.progress.callingElasticsearchAgent',
+      'xpack.observabilityAgentBuilder.tools.elasticsearch.progress.callingElasticsearchAgent',
       {
         defaultMessage: 'Choosing the most appropriate Elasticsearch API',
       }
@@ -26,7 +26,7 @@ export const progressMessages = {
   },
   performingElasticsearchTool: () => {
     return i18n.translate(
-      'xpack.observability.agent.tools.elasticsearch.progress.performingElasticsearchTool',
+      'xpack.observabilityAgentBuilder.tools.elasticsearch.progress.performingElasticsearchTool',
       {
         defaultMessage: 'Executing the Elasticsearch tool',
       }
