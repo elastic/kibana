@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AttacksGroupTakeActionItems } from '../../detections/components/attacks/table/attacks_group_take_action_items';
-import { useAttackFromContext } from './hooks/use_attack_from_context';
 import {
   FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID,
   FLYOUT_FOOTER_TEST_ID,
@@ -29,8 +28,8 @@ export { FLYOUT_FOOTER_TEST_ID };
  * Bottom section of the flyout that contains the take action button
  */
 export const PanelFooter = () => {
-  const attack = useAttackFromContext();
-  const { refetch } = useAttackDetailsContext();
+  const { attackDiscovery, refetch } = useAttackDetailsContext();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => {
@@ -69,7 +68,7 @@ export const PanelFooter = () => {
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            {attack ? (
+            {attackDiscovery ? (
               <EuiPopover
                 id="AttackDetailsTakeActionPanel"
                 button={takeActionButton}
@@ -80,7 +79,7 @@ export const PanelFooter = () => {
                 repositionOnScroll
               >
                 <AttacksGroupTakeActionItems
-                  attack={attack}
+                  attack={attackDiscovery}
                   onActionSuccess={onActionSuccess}
                   closePopover={closePopover}
                   size="s"

@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
+import { getMockAttackDiscoveryAlerts } from '../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import type { AttackDetailsContext as AttackDetailsContextType } from './context';
 import { PanelFooter } from './footer';
 import { AttackDetailsContext } from './context';
@@ -16,47 +17,38 @@ import {
   FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID,
 } from './constants/test_ids';
 
-const createGetFieldsData = (overrides: Partial<Record<string, unknown>> = {}) => {
-  const defaults: Record<string, unknown> = {
-    'kibana.alert.attack_discovery.title': 'Test attack',
-    'kibana.alert.attack_discovery.alert_ids': ['alert-1'],
-    'kibana.alert.attack_discovery.replacements': {},
-    'kibana.alert.attack_discovery.summary_markdown': 'Summary',
-    'kibana.alert.attack_discovery.details_markdown': 'Details',
-    'kibana.alert.attack_discovery.api_config.connector_id': 'connector-1',
-    'kibana.alert.attack_discovery.api_config.name': 'My Connector',
-    'kibana.alert.rule.execution.uuid': 'gen-uuid-1',
-    'kibana.alert.workflow_status': 'open',
-    '@timestamp': '2025-01-01T00:00:00Z',
-  };
-  const data = { ...defaults, ...overrides };
-  return (field: string) => data[field] ?? null;
+const defaultSearchHit = {
+  _id: 'attack-1',
+  _source: {},
 };
 
-const mockContextValue = (getFieldsData: ReturnType<typeof createGetFieldsData>) =>
+const createMockContextValue = (
+  overrides: Partial<AttackDetailsContextType> = {}
+): AttackDetailsContextType =>
   ({
     attackId: 'attack-1',
+    attackDiscovery: getMockAttackDiscoveryAlerts()[0],
     indexName: '.alerts-default',
-    getFieldsData,
+    scopeId: 'default',
+    searchHit: defaultSearchHit,
+    getFieldsData: () => null,
     browserFields: {},
     dataFormattedForFieldBrowser: [],
-    searchHit: {},
     refetch: jest.fn(),
-  } as unknown as React.ComponentProps<typeof AttackDetailsContext.Provider>['value']);
+    ...overrides,
+  } as AttackDetailsContextType);
 
-const renderFooter = (
-  getFieldsData: ReturnType<typeof createGetFieldsData> = createGetFieldsData()
-) =>
+const renderFooter = (contextOverrides: Partial<AttackDetailsContextType> = {}) =>
   render(
     <TestProviders>
-      <AttackDetailsContext.Provider value={mockContextValue(getFieldsData)}>
+      <AttackDetailsContext.Provider value={createMockContextValue(contextOverrides)}>
         <PanelFooter />
       </AttackDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('PanelFooter', () => {
-  it('renders the footer with Take Action button when attack can be built from context', () => {
+  it('renders the footer with Take Action button when attackDiscovery is present', () => {
     renderFooter();
 
     expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
@@ -64,32 +56,15 @@ describe('PanelFooter', () => {
     expect(screen.getByRole('button', { name: 'Take action' })).toBeInTheDocument();
   });
 
-  it('does not render the Take Action button when a required field is missing', () => {
-    renderFooter(
-      createGetFieldsData({
-        'kibana.alert.attack_discovery.summary_markdown': null,
-      })
-    );
+  it('does not render the Take Action button when attackDiscovery is null', () => {
+    renderFooter({ attackDiscovery: null });
 
     expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(screen.queryByTestId(FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('does not render the Take Action button when attackId is missing', () => {
-    const getFieldsData = createGetFieldsData();
-    const contextWithoutAttackId: AttackDetailsContextType = {
-      ...mockContextValue(getFieldsData),
-      attackId: '',
-      indexName: '.alerts-default',
-    } as AttackDetailsContextType;
-
-    render(
-      <TestProviders>
-        <AttackDetailsContext.Provider value={contextWithoutAttackId}>
-          <PanelFooter />
-        </AttackDetailsContext.Provider>
-      </TestProviders>
-    );
+  it('does not render the Take Action button when attackId is empty and attackDiscovery is null', () => {
+    renderFooter({ attackId: '', attackDiscovery: null });
 
     expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(screen.queryByTestId(FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID)).not.toBeInTheDocument();
