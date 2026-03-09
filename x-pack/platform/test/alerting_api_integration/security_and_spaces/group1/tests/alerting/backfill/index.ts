@@ -12,5 +12,9 @@ export default function backfillTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./api_key'));
     loadTestFile(require.resolve('./schedule'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./find'));
+    loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./delete_rule'));
+    loadTestFile(require.resolve('./public_api'));
   });
 }
