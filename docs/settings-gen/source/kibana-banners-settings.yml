@@ -14,132 +14,66 @@ note: Banners are a [subscription feature](https://www.elastic.co/subscriptions)
 groups:
   - group: All settings
     id: general-banner-settings
-    # description: |
-    # example: |
     settings:
 
       - setting: xpack.banners.placement
-        # id:
         description: |
           Set to `top` to display a banner above the Elastic header.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
-        datatype: string
+        datatype: enum
         default: disabled
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
+        options:
+          - option: disabled
+          - option: top
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          ech: ga
+          self: ga
 
       - setting: xpack.banners.textContent
-        # id:
         description: |
           The text to display inside the banner, either plain text or Markdown.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: string
-        # default: disabled
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          ech: ga
+          self: ga
 
       - setting: xpack.banners.textColor
-        # id:
         description: |
           The color for the banner text.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: string
         default: '#8A6A0A'
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          ech: ga
+          self: ga
 
       - setting: xpack.banners.linkColor
-        # id:
         description: |
           The color for the banner link text.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: string
         default: '#0B64DD'
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga 9.1
+          ech: ga
+          self: ga
 
       - setting: xpack.banners.backgroundColor
-        # id:
         description: |
           The color of the banner background.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: string
         default: '#FFF9E8'
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          ech: ga
+          self: ga
 
       - setting: xpack.banners.disableSpaceBanners
-        # id:
         description: |
           If true, per-space banner overrides will be disabled.
-        # state: deprecated/hidden/tech-preview
-        # deprecation_details: ""
-        # note: ""
-        # tip: ""
-        # warning: ""
-        # important: ""
         datatype: bool
         default: false
-        # options:
-        #   - option:
-        #     description: ""
-        # type: static/dynamic
         applies_to:
-          deployment:
-            self: all
-         # example: |
+          stack: ga
+          ech: ga
+          self: ga
