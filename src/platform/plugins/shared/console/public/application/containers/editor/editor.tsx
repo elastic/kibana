@@ -37,6 +37,7 @@ import { useStyles } from './editor_styles';
 import { PanelStorage } from './panel_storage';
 import { DEBOUNCE_DELAY } from '../../const';
 import { editorI18n } from './editor_i18n';
+import { useResizerButtonStyles } from '../styles';
 
 const PANEL_MIN_SIZE = '20%';
 
@@ -51,7 +52,13 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     services: { objectStorageClient },
   } = useServicesContext();
   const styles = useStyles();
-  const panelStorage = useRef(new PanelStorage());
+  const resizerStyles = useResizerButtonStyles();
+
+  const panelStorage = useRef<PanelStorage | null>(null);
+  if (panelStorage.current === null) {
+    panelStorage.current = new PanelStorage();
+  }
+
   // only used to hide content
   const { currentTextObject } = useEditorReadContext();
 
@@ -165,7 +172,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
             </EuiResizablePanel>
 
             <EuiResizableButton
-              css={styles.resizerButton}
+              css={resizerStyles}
               aria-label={
                 isVerticalLayout
                   ? editorI18n.adjustPanelSizeVertical

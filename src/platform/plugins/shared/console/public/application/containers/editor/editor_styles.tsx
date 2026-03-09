@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { consoleEditorPanelStyles, useResizerButtonStyles } from '../styles';
+import { consoleEditorPanelStyles } from '../styles';
 
 export const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -21,8 +21,6 @@ export const useStyles = () => {
       position: relative;
       z-index: ${euiTheme.levels.menu};
     `,
-
-    resizerButton: useResizerButtonStyles(),
 
     // Consolidated styles for editor panels with positioning
     editorPanelPositioned: css`

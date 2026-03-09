@@ -16,7 +16,7 @@ export const editorI18n = {
   clearConsoleOutputButton: i18n.translate('console.editor.clearConsoleOutputButton', {
     defaultMessage: 'Clear this output',
   }),
-  adjustPanelSizeVertical: i18n.translate('console.editor.adjustPanelSizeAriaLabelVertical', {
+  adjustPanelSizeVertical: i18n.translate('console.editor.adjustPanelSizeAriaLabel', {
     defaultMessage: "Press up/down to adjust panels' sizes",
   }),
   adjustPanelSizeHorizontal: i18n.translate('console.editor.adjustPanelSizeAriaLabelHorizontal', {

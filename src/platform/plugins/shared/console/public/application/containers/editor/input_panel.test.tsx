@@ -14,6 +14,7 @@ import { Subject } from 'rxjs';
 import { InputPanel } from './input_panel';
 import { useEditorReadContext } from '../../contexts';
 import { getAutocompleteInfo } from '../../../services';
+import { DEBOUNCE_DELAY } from '../../const';
 
 const mockMonacoEditor = jest.fn((props: Record<string, unknown>) => (
   <div data-test-subj="mockMonacoEditor" {...props} />
@@ -186,7 +187,7 @@ describe('InputPanel', () => {
     expect(setFetchingAutocompleteEntities).not.toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(500);
+      jest.advanceTimersByTime(DEBOUNCE_DELAY);
     });
     expect(setFetchingAutocompleteEntities).toHaveBeenCalledWith(true);
 
@@ -237,7 +238,7 @@ describe('InputPanel', () => {
     expect(unsubscribe).toHaveBeenCalled();
 
     act(() => {
-      jest.advanceTimersByTime(500);
+      jest.advanceTimersByTime(DEBOUNCE_DELAY);
     });
 
     expect(setFetchingAutocompleteEntities).not.toHaveBeenCalled();
