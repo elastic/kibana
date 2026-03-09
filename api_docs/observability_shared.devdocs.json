@@ -1854,7 +1854,7 @@
         "label": "useControlPanels",
         "description": [],
         "signature": [
-          "(controlPanelConfigs: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }, dataView: ",
+          "(controlPanelConfigs: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }, dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1862,10 +1862,10 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }) => void]"
+          " | undefined) => [{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }, (state: { [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }) => void]"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-        "lineNumber": 116,
+        "lineNumber": 160,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1878,10 +1878,10 @@
             "label": "controlPanelConfigs",
             "description": [],
             "signature": [
-              "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }"
+              "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-            "lineNumber": 117,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1905,7 +1905,7 @@
               " | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-            "lineNumber": 118,
+            "lineNumber": 162,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4140,10 +4140,10 @@
         "label": "ControlPanels",
         "description": [],
         "signature": [
-          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; }; }"
+          "{ [x: string]: { order: number; type: string; } & { width?: \"small\" | \"medium\" | \"large\" | undefined; grow?: boolean | undefined; dataViewId?: string | undefined; fieldName?: string | undefined; title?: string | undefined; selectedOptions?: (string | number)[] | undefined; exclude?: boolean | undefined; existsSelected?: boolean | undefined; }; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/hooks/use_control_panels_url_state.ts",
-        "lineNumber": 35,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
