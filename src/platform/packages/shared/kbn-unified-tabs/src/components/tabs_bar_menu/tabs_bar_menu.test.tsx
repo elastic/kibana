@@ -287,4 +287,41 @@ describe('TabsBarMenu', () => {
     expect(title).toBeVisible();
     expect(title).toHaveTextContent('Preview of Closed Tab 1');
   });
+
+  it('hides the preview after restoring and reopening the menu', async () => {
+    const user = userEvent.setup({ pointerEventsCheck: 0 });
+    const propsWithPreview = {
+      ...defaultProps,
+      getPreviewData: (item: TabItem) => ({
+        title: `Preview of ${item.label}`,
+        query: { language: 'esql', query: 'SELECT * FROM table' },
+        status: TabStatus.DEFAULT,
+      }),
+      recentlyClosedItems: mockRecentlyClosedGroup,
+    };
+
+    render(<TabsBarMenu {...propsWithPreview} />);
+
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
+
+    await user.click(screen.getByText('2 tabs'));
+    const groupTabItem = await screen.findByTestId(
+      `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${mockRecentlyClosedGroup[0].id}`
+    );
+
+    await user.hover(groupTabItem);
+    const previewTitleTestId = `unifiedTabs_tabPreview_title_${mockRecentlyClosedGroup[0].id}`;
+    expect(await screen.findByTestId(previewTitleTestId)).toBeVisible();
+
+    await user.click(groupTabItem);
+    await user.click(menuButton);
+    await user.click(
+      screen.getByTestId(
+        `unifiedTabs_tabsMenu_recentlyClosedGroup_${mockRecentlyClosedGroup[0].closedAt}`
+      )
+    );
+
+    expect(screen.queryByTestId(previewTitleTestId)).not.toBeInTheDocument();
+  });
 });

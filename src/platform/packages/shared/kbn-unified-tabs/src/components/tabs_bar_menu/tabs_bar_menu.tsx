@@ -159,7 +159,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         return (
           <TabPreview
             showPreview={previewTabId === tab.id}
-            setShowPreview={() => setPreviewTabId((prev) => (prev === tab.id ? null : tab.id))}
+            setShowPreview={(show) => setPreviewTabId(show ? tab.id : null)}
             tabItem={{ id: tab.id, label: tab.label }}
             previewData={getPreviewData(tab)}
             previewDelay={0}
