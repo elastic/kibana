@@ -136,7 +136,9 @@ enabled:
   - x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_api/config.ts
-  - x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group1/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group2/config.ts
+  - x-pack/solutions/security/test/cloud_security_posture_functional/group3/config.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/config.agentless.ts
   - x-pack/solutions/security/test/cloud_security_posture_functional/data_views/config.ts
   - x-pack/platform/test/spaces_api_integration/deployment_agnostic/spaces_only/config.ts
