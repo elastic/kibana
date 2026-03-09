@@ -13,7 +13,7 @@
  * Provides CLI parsing, CSV handling (via papaparse), timestamp remapping,
  * Elasticsearch bulk indexing, index-template management, and log-level
  * inference — all the pieces that were previously duplicated across
- * ingest_loghub.ts and ingest_rcaeval.ts.
+ * ingest_loghub.ts, ingest_openrca.ts and ingest_rcaeval.ts.
  */
 
 import { createWriteStream } from 'node:fs';
@@ -332,7 +332,7 @@ export async function checkOtlpEndpoint(endpoint: string): Promise<boolean> {
   }
 }
 
-export type DatasetId = 'rcaeval-re3';
+export type DatasetId = 'openrca' | 'rcaeval-re3';
 
 const OTLP_CONCURRENCY = 3;
 
@@ -410,10 +410,53 @@ export async function deleteApmDataStreams(client: Client): Promise<void> {
 }
 
 export async function deleteAllDatasetStreams(client: Client): Promise<void> {
-  for (const pattern of ['logs-rcaeval.*', 'metrics-rcaeval.*']) {
+  for (const pattern of [
+    'logs-rcaeval.*',
+    'metrics-rcaeval.*',
+    'logs-openrca.*',
+    'metrics-openrca.*',
+  ]) {
     await deleteDataStream(client, pattern);
   }
   await deleteApmDataStreams(client);
+}
+
+export function generateHexId(length: number): string {
+  const bytes = new Uint8Array(length / 2);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+const HEX_RE = /^[0-9a-fA-F]+$/;
+const hexIdCache = new Map<string, string>();
+
+export function toHexId(input: string, length: number): string {
+  if (HEX_RE.test(input)) {
+    return input.padStart(length, '0').slice(-length);
+  }
+  const cached = hexIdCache.get(input);
+  if (cached) return cached;
+
+  // Simple numeric hash to convert arbitrary strings to stable hex IDs
+  let h1 = 2166136261;
+  let h2 = 16777619;
+  for (let i = 0; i < input.length; i++) {
+    const c = input.charCodeAt(i);
+    h1 = Math.imul(h1 + c, 16777619) % 4294967296;
+    h2 = Math.imul(h2 + c, 2166136261) % 4294967296;
+  }
+  const hex =
+    Math.abs(h1).toString(16).padStart(8, '0') +
+    Math.abs(h2).toString(16).padStart(8, '0') +
+    Math.abs(h1 + h2)
+      .toString(16)
+      .padStart(8, '0') +
+    Math.abs(h1 * 31 + h2)
+      .toString(16)
+      .padStart(8, '0');
+  const result = hex.slice(0, length);
+  hexIdCache.set(input, result);
+  return result;
 }
 
 // ---------------------------------------------------------------------------
