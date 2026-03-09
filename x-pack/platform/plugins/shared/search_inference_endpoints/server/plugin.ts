@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/core-security-server';
 
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
@@ -77,7 +78,7 @@ export class SearchInferenceEndpointsPlugin
       privileges: {
         all: {
           app: [],
-          api: [PLUGIN_ID],
+          api: [ApiPrivileges.manage(PLUGIN_ID)],
           catalogue: [],
           management: {
             ml: [INFERENCE_ENDPOINTS_APP_ID],

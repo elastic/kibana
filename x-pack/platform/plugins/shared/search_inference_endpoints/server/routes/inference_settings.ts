@@ -7,6 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
@@ -38,7 +39,7 @@ export const defineInferenceSettingsRoutes = ({
       path: APIRoutes.GET_INFERENCE_SETTINGS,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID],
+          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
         },
       },
     })
@@ -46,7 +47,7 @@ export const defineInferenceSettingsRoutes = ({
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID],
+            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
           },
         },
         validate: {},
@@ -105,7 +106,7 @@ export const defineInferenceSettingsRoutes = ({
       path: APIRoutes.PUT_INFERENCE_SETTINGS,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID],
+          requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
         },
       },
     })
@@ -113,7 +114,7 @@ export const defineInferenceSettingsRoutes = ({
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID],
+            requiredPrivileges: [ApiPrivileges.manage(PLUGIN_ID)],
           },
         },
         validate: {
