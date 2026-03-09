@@ -57,10 +57,12 @@ test.describe('MonitorAlerts', { tag: '@local-stateful-classic' }, () => {
     });
 
     await test.step('go to ML management page and find job', async () => {
-      await page.gotoApp('management/ml/anomaly_detection');
+      await page.gotoApp('management/insightsAndAlerting/jobsListLink');
+      await page.testSubj
+        .locator('mlSpacesManagementTable-anomaly-detector loaded')
+        .waitFor({ timeout: 20_000 });
       const jobIdCell = page.testSubj
-        .locator('mlJobListColumnId')
-        .locator('.euiTableCellContent')
+        .locator('mlSpaceManagementTableColumnId')
         .filter({ hasText: mlJobId });
       await expect(jobIdCell).toHaveCount(1);
     });

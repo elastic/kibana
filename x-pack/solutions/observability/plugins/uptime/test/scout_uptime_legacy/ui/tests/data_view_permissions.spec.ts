@@ -31,7 +31,9 @@ test.describe('DataViewPermissions', { tag: '@local-stateful-classic' }, () => {
 
     await pageObjects.uptimeOverview.clickExploreDataButton();
     await page.testSubj.locator('exploratoryViewMainContainer').waitFor();
-    await expect(page.locator('[data-testid="echLegendItemLabel"]')).toHaveText('browser');
+    await expect(
+      page.locator('.echLegendItem__label, [data-testid="echLegendItemLabel"]')
+    ).toHaveText('browser');
     await expect(page.testSubj.locator('o11yDataTypeBadge')).toHaveAttribute('title', 'Uptime');
     await expect(page.testSubj.locator('o11yReportMetricBadge')).toHaveAttribute(
       'title',
