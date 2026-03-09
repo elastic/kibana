@@ -11,6 +11,10 @@ import semverRcompare from 'semver/functions/rcompare';
 import semverGt from 'semver/functions/gt';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import pRetry from 'p-retry';
+
+import { LockAcquisitionError } from '@kbn/lock-manager';
+
 import { appContextService } from '../../../../app_context';
 
 import { type InstallablePackage, SO_SEARCH_LIMIT } from '../../../../../../common';
@@ -28,81 +32,95 @@ export async function stepResolveDependencies(context: InstallContext) {
     return;
   }
 
-  // default to false since https://github.com/elastic/package-registry/pull/1538
-  const isPrerelease = false;
+  await _runWithLock(async () => {
+    // if install request and not install dependencies Query dependendant packages
+    await withPackageSpan('Resolving dependencies', async () => {
+      // Check installed packages are compatible with dependencies of package to be installed
+      if (!context.skipDependencyCheck && !context.force) {
+        await verifyPackageDependencies(
+          context.savedObjectsClient,
+          context.packageInstallContext.packageInfo
+        );
+      }
+      // default to false since https://github.com/elastic/package-registry/pull/1538
+      const isPrerelease = false;
 
-  // if install request and not install dependencies Query dependendant packages
-  await withPackageSpan('Resolving dependencies', async () => {
-    // Check package dependencies
-    if (!context.skipDependencyCheck && !context.force) {
-      const dependants = await getDependantsPackages(
+      // Check dependencies
+      const resolvedDependencies = await buildDependencies(
         context.savedObjectsClient,
-        context.packageInstallContext.packageInfo.name
+        context.packageInstallContext.packageInfo,
+        { prerelease: isPrerelease }
       );
 
-      for (const dependant of dependants) {
-        const dependencyRequiredVersion = dependant.attributes.dependencies?.find(
-          (d) => d.name === context.packageInstallContext.packageInfo.name
-        )?.version;
-
-        if (
-          dependencyRequiredVersion &&
-          !semverSatisfies(
-            context.packageInstallContext.packageInfo.version,
-            dependencyRequiredVersion
-          )
-        ) {
-          throw new PackageDependencyError(
-            `Package ${context.packageInstallContext.packageInfo.name}@${context.packageInstallContext.packageInfo.version} is not compatible with dependant ${dependant.attributes.name}@${dependant.attributes.version}`
+      for (const dependency of resolvedDependencies) {
+        if (dependency.status === 'installed') {
+          logger.info(
+            `stepResolveDependencies: dependency ${dependency.name}@${dependency.resolvedVersion} is already installed`
+          );
+          continue;
+        } else if (dependency.status === 'to_install') {
+          logger.info(
+            `stepResolveDependencies: installing dependency ${dependency.name}@${dependency.resolvedVersion}`
+          );
+        } else if (dependency.status === 'to_update') {
+          logger.info(
+            `stepResolveDependencies: updating dependency ${dependency.name}@${dependency.resolvedVersion}`
           );
         }
+        if (dependency.status === 'to_install' || dependency.status === 'to_update') {
+          await installPackage({
+            installSource: 'registry',
+            savedObjectsClient: context.savedObjectsClient,
+            esClient: context.esClient,
+            pkgkey: pkgToPkgKey({ name: dependency.name, version: dependency.resolvedVersion }),
+            spaceId: context.spaceId,
+            force: context.force,
+            prerelease: isPrerelease,
+            isDependency: true,
+          });
+        }
       }
-    }
-
-    // Check dependencies
-    const resolvedDependencies = await buildDependencies(
-      context.savedObjectsClient,
-      context.packageInstallContext.packageInfo,
-      { prerelease: isPrerelease }
-    );
-
-    for (const dependency of resolvedDependencies) {
-      if (dependency.status === 'installed') {
-        logger.info(
-          `stepResolveDependencies: dependency ${dependency.name}@${dependency.resolvedVersion} is already installed`
-        );
-        continue;
-      } else if (dependency.status === 'to_install') {
-        logger.info(
-          `stepResolveDependencies: installing dependency ${dependency.name}@${dependency.resolvedVersion}`
-        );
-        await installPackage({
-          installSource: 'registry',
-          savedObjectsClient: context.savedObjectsClient,
-          esClient: context.esClient,
-          pkgkey: pkgToPkgKey({ name: dependency.name, version: dependency.resolvedVersion }),
-          spaceId: context.spaceId,
-          force: context.force,
-          prerelease: isPrerelease,
-          isDependency: true,
-        });
-      } else if (dependency.status === 'to_update') {
-        logger.info(
-          `stepResolveDependencies: updating dependency ${dependency.name}@${dependency.resolvedVersion}`
-        );
-        await installPackage({
-          installSource: 'registry',
-          savedObjectsClient: context.savedObjectsClient,
-          esClient: context.esClient,
-          pkgkey: pkgToPkgKey({ name: dependency.name, version: dependency.resolvedVersion }),
-          spaceId: context.spaceId,
-          force: context.force,
-          prerelease: isPrerelease,
-          isDependency: true,
-        });
-      }
-    }
+    });
   });
+}
+
+async function verifyPackageDependencies(
+  soClient: SavedObjectsClientContract,
+  packageInfo: InstallablePackage
+) {
+  const dependants = await getDependantsPackages(soClient, packageInfo.name);
+
+  for (const dependant of dependants) {
+    const dependencyRequiredVersion = dependant.attributes.dependencies?.find(
+      (d) => d.name === packageInfo.name
+    )?.version;
+
+    if (
+      dependencyRequiredVersion &&
+      !semverSatisfies(packageInfo.version, dependencyRequiredVersion)
+    ) {
+      throw new PackageDependencyError(
+        `Package ${packageInfo.name}@${packageInfo.version} is not compatible with dependant ${dependant.attributes.name}@${dependant.attributes.version}`
+      );
+    }
+  }
+}
+
+export async function _runWithLock(stepFn: () => Promise<void>) {
+  return await pRetry(
+    () =>
+      appContextService
+        .getLockManagerService()!
+        .withLock('package-resolve-dependencies', () => stepFn()),
+    {
+      onFailedAttempt: async (error) => {
+        if (!(error instanceof LockAcquisitionError)) {
+          throw error;
+        }
+      },
+      maxRetryTime: 30 * 1000, // Retry for 30s to get the lock
+    }
+  );
 }
 
 interface ResolvedDependency {
@@ -216,12 +234,11 @@ async function getCompatibleVersion(
 
   const allAvailableVersions = res.sort((a, b) => semverRcompare(a.version, b.version));
 
-  for (const registryPackage of allAvailableVersions) {
-    if (
-      versionConstrains.every((constrain) => semverSatisfies(registryPackage.version, constrain))
-    ) {
-      return registryPackage.version;
-    }
+  const compatible = allAvailableVersions.find((registryPackage) =>
+    versionConstrains.every((constrain) => semverSatisfies(registryPackage.version, constrain))
+  );
+  if (compatible) {
+    return compatible.version;
   }
 
   throw new PackageDependencyError(

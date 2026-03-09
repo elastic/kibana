@@ -28,6 +28,9 @@ import { stepResolveDependencies } from './step_resolve_dependencies';
 jest.mock('../../../../app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn(),
+    getLockManagerService: jest.fn().mockReturnValue({
+      withLock: jest.fn((_name: string, fn: () => Promise<void>) => fn()),
+    }),
   },
 }));
 jest.mock('../../get');
@@ -104,6 +107,7 @@ describe('stepResolveDependencies', () => {
 
     expect(mockedWithPackageSpan).not.toHaveBeenCalled();
     expect(mockedGetInstallation).not.toHaveBeenCalled();
+    expect(appContextService.getLockManagerService).not.toHaveBeenCalled();
   });
 
   it('does not run dependency check when skipDependencyCheck is true', async () => {
