@@ -3208,6 +3208,7 @@ paths:
                       - name
                       - relativePath
                       - content
+                  maxItems: 100
                   type: array
                 tool_ids:
                   default: []
@@ -3215,6 +3216,7 @@ paths:
                   items:
                     description: Tool ID from the tool registry.
                     type: string
+                  maxItems: 100
                   type: array
               required:
                 - id
@@ -3345,12 +3347,14 @@ paths:
                       - name
                       - relativePath
                       - content
+                  maxItems: 100
                   type: array
                 tool_ids:
                   description: Updated tool IDs from the tool registry.
                   items:
                     description: Updated tool ID.
                     type: string
+                  maxItems: 100
                   type: array
       responses: {}
       summary: Update a skill
