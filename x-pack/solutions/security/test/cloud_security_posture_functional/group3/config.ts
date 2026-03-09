@@ -8,6 +8,8 @@
 import { resolve } from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
+export type { SecurityTelemetryFtrProviderContext } from '../group1/config';
+
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseConfig = await readConfigFile(require.resolve('../group1/config.ts'));
   return {
