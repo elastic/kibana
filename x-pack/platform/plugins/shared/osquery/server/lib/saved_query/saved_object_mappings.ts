@@ -11,7 +11,6 @@ import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-se
 import {
   packAssetSavedObjectModelVersion1,
   packSavedObjectModelVersion1,
-  packSavedObjectModelVersion2,
   savedQueryModelVersion1,
 } from './saved_object_model_versions';
 import {
@@ -166,12 +165,6 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
         version: {
           type: 'keyword',
         },
-        schedule_id: {
-          type: 'keyword',
-        },
-        start_date: {
-          type: 'date',
-        },
         ecs_mapping: {
           dynamic: false,
           properties: {},
@@ -192,7 +185,6 @@ export const packType: SavedObjectsType = {
   mappings: packSavedObjectMappings,
   modelVersions: {
     1: packSavedObjectModelVersion1,
-    2: packSavedObjectModelVersion2,
   },
   management: {
     defaultSearchField: 'name',

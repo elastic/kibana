@@ -3271,12 +3271,6 @@
           "query": {
             "type": "text"
           },
-          "schedule_id": {
-            "type": "keyword"
-          },
-          "start_date": {
-            "type": "date"
-          },
           "timeout": {
             "type": "short"
           },
