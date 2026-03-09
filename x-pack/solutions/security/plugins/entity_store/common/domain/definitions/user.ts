@@ -71,8 +71,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         },
         {
           or: [
-            // is asset kind
-            { and: [{ field: 'event.kind', eq: 'asset' }] },
+            // is asset kind (use includes to allow multiple values
+            // CCS can ingest a document with multiple values)
+            { field: 'event.kind', includes: 'asset' },
 
             // or iam category of type user, creation, deletion, or group
             {

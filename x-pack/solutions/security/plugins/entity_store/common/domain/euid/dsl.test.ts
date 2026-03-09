@@ -302,14 +302,8 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
             bool: {
               should: [
                 {
-                  bool: {
-                    must: [
-                      {
-                        match: {
-                          'event.kind': 'asset',
-                        },
-                      },
-                    ],
+                  terms: {
+                    'event.kind': ['asset'],
                   },
                 },
                 {

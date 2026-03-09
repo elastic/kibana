@@ -13,6 +13,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
+      event.kind = COALESCE(LAST(event.kind, @timestamp), \\"asset\\"),
       entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
  host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
  host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL,
@@ -87,7 +88,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
  entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score IS NOT NULL,
  entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
       BY entity.id
-    | EVAL event.kind = \\"asset\\"
     | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC
     
     | KEEP entity.name,
@@ -177,7 +177,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
   | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
@@ -188,6 +188,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
+      event.kind = COALESCE(LAST(event.kind, @timestamp), \\"asset\\"),
       entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
  data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
@@ -246,7 +247,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
  host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE host.id IS NOT NULL,
  host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL
       BY entity.id
-    | EVAL event.kind = \\"asset\\"
     | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC
     | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\") 
             OR (entity.EngineMetadata.FirstSeenLogInPage == TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\") 
@@ -328,6 +328,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`]
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
+      event.kind = COALESCE(LAST(event.kind, @timestamp), \\"asset\\"),
       entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
  host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
  host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL,
@@ -402,7 +403,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`]
  entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score IS NOT NULL,
  entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
       BY entity.id
-    | EVAL event.kind = \\"asset\\"
     | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, entity.id ASC
     
     | KEEP entity.name,
@@ -1670,7 +1670,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
   | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
@@ -1913,6 +1913,6 @@ exports[`buildRemainingLogsCountQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
   | STATS document_count = COUNT()"
 `;

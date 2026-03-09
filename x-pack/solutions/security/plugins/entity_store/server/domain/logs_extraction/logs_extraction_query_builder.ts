@@ -233,10 +233,14 @@ export function buildCcsLogsExtractionEsqlQuery({
     `| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}
     | STATS
       ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
-      ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
+      ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),` +
+    // Get existing event.kind or fallback to asset
+    // so we follow ecs standards (and make sure we pass the filters)
+    `
+      ${EVENT_KIND_FIELD} = COALESCE(LAST(${EVENT_KIND_FIELD}, ${TIMESTAMP_FIELD}), "asset"),
       ${aggregationStats(fields, false)}
-      BY ${MAIN_ENTITY_ID_FIELD}
-    | EVAL ${EVENT_KIND_FIELD} = "asset"
+      BY ${MAIN_ENTITY_ID_FIELD}` +
+    `
     | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${MAIN_ENTITY_ID_FIELD} ASC
     ${getPaginationWhereClause(
       CCS_PAGINATION_FIELDS,
