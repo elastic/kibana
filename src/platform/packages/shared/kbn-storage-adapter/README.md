@@ -164,10 +164,6 @@ At construction time, the adapter extracts all property paths from the latest Zo
 
 The `__version` field is reserved and must not be defined in `storageSettings.schema.properties` — the adapter injects it automatically into the index template when versioning is enabled.
 
-#### Backward compatibility with `migrateSource`
-
-The `migrateSource` option continues to work and is called for legacy documents that don't have a `__version` field. When both `versioning` and `migrateSource` are provided, legacy documents go through `migrateSource` first and are then validated against the latest schema. New code should prefer `versioning` — `migrateSource` is deprecated.
-
 ### Lazy initialization
 
 The adapter lazily creates or updates the index template, index, and mappings on the first write operation. If the underlying index is deleted externally (e.g. manually from Elasticsearch), the adapter detects the 404 error, resets its internal state, and retries initialization automatically.

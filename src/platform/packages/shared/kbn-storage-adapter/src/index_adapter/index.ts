@@ -117,22 +117,11 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
 
 export interface StorageIndexAdapterOptions<TApplicationType> {
   /**
-   * If this callback is provided, it will be called on every _source before returned to the caller of the search or get methods.
-   * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
-   * This should be used as rarely as possible - in most cases, new properties should be added as optional.
-   *
-   * When `versioning` is also provided, `migrateSource` is only called for legacy documents
-   * that do not have a `__version` field (i.e. documents written before versioning was enabled).
-   * @deprecated Prefer using `versioning` with `defineVersioning()` for type-safe, incremental schema migrations.
-   */
-  migrateSource?: (document: Record<string, unknown>) => TApplicationType;
-
-  /**
    * When provided, enables per-document schema versioning.
    *
    * - On write: documents are validated against the latest schema and stamped with the current version.
    * - On read: documents are migrated through the version chain from their persisted version to the latest.
-   * - Documents without a version field (legacy) go through `migrateSource` (if provided) or the full migration chain from version 1.
+   * - Documents without a version field (legacy) are migrated through the full chain from version 1.
    *
    * Built with `defineVersioning(initialSchema).addVersion({ schema, migrate }).build()`.
    */
@@ -664,21 +653,11 @@ export class StorageIndexAdapter<
       const docVersion = source[VERSION_FIELD] as number | undefined;
       const { [VERSION_FIELD]: _, ...docWithoutVersion } = source;
 
-      if (docVersion !== undefined) {
-        return this.options.versioning.migrate(docWithoutVersion, docVersion);
-      }
-
-      if (this.options.migrateSource) {
-        const migrated = this.options.migrateSource(docWithoutVersion);
-        return this.options.versioning.latestSchema.parse(migrated) as TApplicationType;
-      }
-
-      return this.options.versioning.migrate(docWithoutVersion, 1);
+      return docVersion !== undefined
+        ? this.options.versioning.migrate(docWithoutVersion, docVersion)
+        : this.options.versioning.migrate(docWithoutVersion, 1);
     }
 
-    if (this.options.migrateSource) {
-      return this.options.migrateSource(source);
-    }
     return source as TApplicationType;
   };
 

@@ -262,32 +262,53 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
-    describe('migrates a document with a legacy property', () => {
-      let migratingClient: SimpleIStorageClient<typeof storageSettings>;
-      beforeAll(async () => {
-        adapter = createStorageIndexAdapter(storageSettings, {
-          migrateSource: (source) => {
-            return {
-              ...source,
-              migratedProp: String(source.foo).toUpperCase(),
-            } as StorageDocumentOf<typeof storageSettings>;
+    describe('migrates a document with versioning', () => {
+      const migratedStorageSettings = {
+        name: TEST_INDEX_NAME,
+        schema: {
+          properties: {
+            foo: { type: 'keyword' as const },
+            migratedProp: { type: 'keyword' as const },
           },
-        });
-        migratingClient = adapter.getClient();
-        await client.bulk({
+        },
+      } satisfies StorageSettings;
+
+      const v1 = z.object({ foo: z.string() }).passthrough();
+      const v2 = z.object({ foo: z.string(), migratedProp: z.string() }).passthrough();
+      const versioning = defineVersioning(v1)
+        .addVersion({
+          schema: v2,
+          migrate: (prev) => ({ ...prev, migratedProp: prev.foo.toUpperCase() }),
+        })
+        .build();
+
+      let migratingClient: SimpleIStorageClient<typeof migratedStorageSettings>;
+      beforeAll(async () => {
+        const plainAdapter = createStorageIndexAdapter(migratedStorageSettings);
+        await plainAdapter.getClient().bulk({
           operations: [
             {
               index: {
                 _id: 'otherdoc',
-                document: { foo: 'xyz' } as StorageDocumentOf<typeof storageSettings>,
+                document: {
+                  foo: 'xyz',
+                } as StorageDocumentOf<typeof migratedStorageSettings>,
               },
             },
           ],
         });
+
+        const migratingAdapter = new StorageIndexAdapter(
+          esClient,
+          loggerMock,
+          migratedStorageSettings,
+          { versioning }
+        );
+        migratingClient = migratingAdapter.getClient();
       });
 
       afterAll(async () => {
-        await client.clean();
+        await migratingClient.clean();
       });
 
       it('returns the migrated document on get', async () => {
@@ -304,13 +325,7 @@ describe('StorageIndexAdapter', () => {
           size: 1,
           query: {
             bool: {
-              filter: [
-                {
-                  term: {
-                    foo: 'xyz',
-                  },
-                },
-              ],
+              filter: [{ term: { foo: 'xyz' } }],
             },
           },
         });
@@ -645,34 +660,13 @@ describe('StorageIndexAdapter', () => {
     });
 
     describe('legacy document compatibility', () => {
-      it('uses migrateSource for documents without __version, then validates against latest schema', async () => {
+      it('treats documents without __version as v1 and migrates through the chain', async () => {
         const plainAdapter = new StorageIndexAdapter(
           esClient,
           loggerMock,
           versionedStorageSettings
         );
         await plainAdapter.getClient().index({ id: 'legacy1', document: { name: 'old' } });
-
-        const versioning = defineVersioning(v2Schema).build();
-        const versionedAdapter = new StorageIndexAdapter<
-          typeof versionedStorageSettings,
-          VersionedDoc
-        >(esClient, loggerMock, versionedStorageSettings, {
-          versioning,
-          migrateSource: (doc) => ({ ...doc, score: -1 } as VersionedDoc),
-        });
-
-        const getResponse = await versionedAdapter.getClient().get({ id: 'legacy1' });
-        expect(getResponse._source).toEqual({ name: 'old', score: -1 });
-      });
-
-      it('treats documents without __version as v1 when no migrateSource is provided', async () => {
-        const plainAdapter = new StorageIndexAdapter(
-          esClient,
-          loggerMock,
-          versionedStorageSettings
-        );
-        await plainAdapter.getClient().index({ id: 'legacy2', document: { name: 'old' } });
 
         const versioning = defineVersioning(v1Schema)
           .addVersion({ schema: v2Schema, migrate: (prev) => ({ ...prev, score: 0 }) })
@@ -682,7 +676,7 @@ describe('StorageIndexAdapter', () => {
           VersionedDoc
         >(esClient, loggerMock, versionedStorageSettings, { versioning });
 
-        const getResponse = await versionedAdapter.getClient().get({ id: 'legacy2' });
+        const getResponse = await versionedAdapter.getClient().get({ id: 'legacy1' });
         expect(getResponse._source).toEqual({ name: 'old', score: 0 });
       });
     });

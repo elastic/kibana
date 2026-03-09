@@ -10,10 +10,9 @@ import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import type { SystemStorageSettings } from './storage_settings';
 import { systemStorageSettings } from './storage_settings';
-import { SYSTEM_TYPE } from './fields';
 import { SystemClient } from './system_client';
 import type { StoredSystem } from './stored_system';
-import { storedSystemSchema } from './stored_system';
+import { systemVersioning } from './versioning';
 
 export class SystemService {
   constructor(
@@ -28,17 +27,7 @@ export class SystemService {
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('systems'),
       systemStorageSettings,
-      {
-        migrateSource: (system: Record<string, unknown>) => {
-          if (!(SYSTEM_TYPE in system)) {
-            const migrated = { ...system, [SYSTEM_TYPE]: 'system' } as StoredSystem;
-            storedSystemSchema.parse(migrated);
-            return migrated;
-          }
-
-          return system as unknown as StoredSystem;
-        },
-      }
+      { versioning: systemVersioning }
     );
 
     return new SystemClient({ storageClient: adapter.getClient() });

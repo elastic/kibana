@@ -12,8 +12,7 @@ import { FeatureClient } from './feature_client';
 import type { StoredFeature } from './stored_feature';
 import type { FeatureStorageSettings } from './storage_settings';
 import { featureStorageSettings } from './storage_settings';
-import { FEATURE_ID, FEATURE_PROPERTIES, FEATURE_SUBTYPE, FEATURE_UUID } from './fields';
-import { storedFeatureSchema } from './stored_feature';
+import { featureVersioning } from './versioning';
 
 export class FeatureService {
   constructor(
@@ -28,25 +27,7 @@ export class FeatureService {
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('features'),
       featureStorageSettings,
-      {
-        migrateSource: (source) => {
-          if (!(FEATURE_ID in source)) {
-            const migrated: Record<string, unknown> = {
-              ...source,
-              [FEATURE_ID]: source[FEATURE_UUID],
-              [FEATURE_SUBTYPE]: source['feature.name'],
-              [FEATURE_PROPERTIES]: source['feature.value'],
-            };
-            delete migrated['feature.name'];
-            delete migrated['feature.value'];
-
-            storedFeatureSchema.parse(migrated);
-            return migrated as unknown as StoredFeature;
-          }
-
-          return source as unknown as StoredFeature;
-        },
-      }
+      { versioning: featureVersioning }
     );
 
     return new FeatureClient({
