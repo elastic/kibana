@@ -108,6 +108,12 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
           } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
             event.preventDefault();
             onSubmit();
+          } else if (event.key === keys.ARROW_UP && messageEditor.isEmpty) {
+            if (messageEditor.recallPrevious()) {
+              event.preventDefault();
+            }
+          } else if (event.key === keys.ARROW_DOWN && messageEditor.recallNext()) {
+            event.preventDefault();
           }
         }}
       />

@@ -24,6 +24,13 @@ export interface MessageEditorInstance {
 
   /** Dismiss the active trigger menu */
   dismissTrigger: () => void;
+
+  /** Add a message to the input history */
+  pushHistory: (text: string) => void;
+  /** Navigate to the previous message in history. Returns true if navigated. */
+  recallPrevious: () => boolean;
+  /** Navigate to the next message in history. Returns true if navigated. */
+  recallNext: () => boolean;
 }
 
 /**
@@ -42,6 +49,10 @@ export interface MessageEditorInstance {
 export const useMessageEditor = (): MessageEditorInstance => {
   const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
+  const historyRef = useRef<string[]>([]);
+  const historyIndexRef = useRef(-1);
+  const draftRef = useRef('');
+
   const {
     match: triggerMatch,
     dismiss: dismissTrigger,
@@ -98,6 +109,69 @@ export const useMessageEditor = (): MessageEditorInstance => {
       },
       isEmpty,
       dismissTrigger,
+      pushHistory: (text: string) => {
+        if (text.trim()) {
+          historyRef.current.push(text);
+          historyIndexRef.current = -1;
+        }
+      },
+      recallPrevious: () => {
+        const history = historyRef.current;
+        if (history.length === 0) return false;
+
+        if (historyIndexRef.current === -1) {
+          // Starting to navigate: save current draft
+          draftRef.current = ref.current?.textContent ?? '';
+          historyIndexRef.current = history.length - 1;
+        } else if (historyIndexRef.current > 0) {
+          historyIndexRef.current -= 1;
+        } else {
+          return false;
+        }
+
+        const text = history[historyIndexRef.current];
+        if (ref.current) {
+          ref.current.textContent = text;
+          syncIsEmpty();
+          const selection = window.getSelection();
+          if (selection && ref.current.firstChild) {
+            selection.setPosition(ref.current.firstChild, text.length);
+          }
+        }
+        return true;
+      },
+      recallNext: () => {
+        if (historyIndexRef.current === -1) return false;
+
+        const history = historyRef.current;
+        historyIndexRef.current += 1;
+
+        if (historyIndexRef.current >= history.length) {
+          // Past the end: restore draft
+          historyIndexRef.current = -1;
+          const draft = draftRef.current;
+          if (ref.current) {
+            ref.current.textContent = draft;
+            syncIsEmpty();
+            const selection = window.getSelection();
+            if (selection && ref.current.firstChild) {
+              selection.setPosition(ref.current.firstChild, draft.length);
+            }
+          }
+          return true;
+        }
+
+        const text = history[historyIndexRef.current];
+        if (ref.current) {
+          ref.current.textContent = text;
+          syncIsEmpty();
+          const selection = window.getSelection();
+          if (selection && ref.current.firstChild) {
+            selection.setPosition(ref.current.firstChild, text.length);
+          }
+        }
+        return true;
+      },
     }),
     [isEmpty, syncIsEmpty, triggerMatch, dismissTrigger, handleTriggerInput]
   );

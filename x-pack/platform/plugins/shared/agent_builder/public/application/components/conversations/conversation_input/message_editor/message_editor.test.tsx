@@ -54,6 +54,9 @@ const createMockMessageEditor = (): MessageEditorInstance => {
     setContent: jest.fn(),
     isEmpty: false,
     dismissTrigger: jest.fn(),
+    pushHistory: jest.fn(),
+    recallPrevious: jest.fn(() => false),
+    recallNext: jest.fn(() => false),
   };
 };
 
@@ -223,6 +226,58 @@ describe('MessageEditor', () => {
     );
 
     expect(screen.getByTestId('messageEditor')).toHaveAttribute('aria-haspopup', 'dialog');
+  });
+
+  it('recalls previous message on ArrowUp when input is empty', () => {
+    const messageEditor = createMockMessageEditor();
+    messageEditor.isEmpty = true;
+    messageEditor.recallPrevious = jest.fn(() => true);
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    fireEvent.keyDown(editor, { key: 'ArrowUp' });
+
+    expect(messageEditor.recallPrevious).toHaveBeenCalled();
+  });
+
+  it('does not recall previous message on ArrowUp when input has content', () => {
+    const messageEditor = createMockMessageEditor();
+    messageEditor.isEmpty = false;
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    fireEvent.keyDown(editor, { key: 'ArrowUp' });
+
+    expect(messageEditor.recallPrevious).not.toHaveBeenCalled();
+  });
+
+  it('recalls next message on ArrowDown when navigating history', () => {
+    const messageEditor = createMockMessageEditor();
+    messageEditor.recallNext = jest.fn(() => true);
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    fireEvent.keyDown(editor, { key: 'ArrowDown' });
+
+    expect(messageEditor.recallNext).toHaveBeenCalled();
   });
 
   it('renders popover content when trigger is active', () => {

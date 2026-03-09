@@ -192,6 +192,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
       return;
     }
     const content = messageEditor.getContent();
+    messageEditor.pushHistory(content);
     sendMessage({ message: content });
     messageEditor.clear();
     onSubmit?.();
