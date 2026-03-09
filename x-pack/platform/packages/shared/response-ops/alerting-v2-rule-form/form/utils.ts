@@ -9,8 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 
 type TimeUnit = 's' | 'm' | 'h' | 'd';
+export const POSITIVE_INTEGER_REGEX = /^[1-9][0-9]*$/;
+export const INVALID_NUMBER_KEYS = ['-', '+', '.', 'e', 'E'];
 
-export const TIME_UNITS: Record<TimeUnit, string> = {
+const TIME_UNITS: Record<TimeUnit, string> = {
   s: i18n.translate('xpack.alertingV2.ruleForm.timeUnits.seconds', {
     defaultMessage: 'seconds',
   }),
@@ -30,6 +32,24 @@ export const getTimeOptions = (val: number = 1) =>
     value,
     text: val > 1 ? TIME_UNITS[value] : TIME_UNITS[value].slice(0, -1),
   }));
+
+export const getDurationUnitValue = (duration: string): TimeUnit => {
+  const durationRegex = /^(\d+)(s|m|h|d)$/;
+  const match = duration.match(durationRegex);
+  if (!match) {
+    return 'm';
+  }
+  return match[2] as TimeUnit;
+};
+
+export const getDurationNumberInItsUnit = (duration: string): number => {
+  const durationRegex = /^(\d+)(s|m|h|d)$/;
+  const match = duration.match(durationRegex);
+  if (!match) {
+    return 1;
+  }
+  return parseInt(match[1], 10);
+};
 
 export const getTimeFieldOptions = (
   fields: DataViewFieldMap
@@ -92,20 +112,11 @@ export const formatDuration = (duration: number, short: boolean = false): string
   return short ? `${seconds}s` : `${seconds} second${seconds > 1 ? 's' : ''}`;
 };
 
-export const getDurationUnitValue = (duration: string): TimeUnit => {
-  const durationRegex = /^(\d+)(s|m|h|d)$/;
-  const match = duration.match(durationRegex);
-  if (!match) {
-    return 'm';
+export const parsePositiveIntegerInput = (rawValue: string): number | undefined => {
+  const trimmedValue = rawValue.trim();
+  if (!POSITIVE_INTEGER_REGEX.test(trimmedValue)) {
+    return undefined;
   }
-  return match[2] as TimeUnit;
-};
 
-export const getDurationNumberInItsUnit = (duration: string): number => {
-  const durationRegex = /^(\d+)(s|m|h|d)$/;
-  const match = duration.match(durationRegex);
-  if (!match) {
-    return 1;
-  }
-  return parseInt(match[1], 10);
+  return parseInt(trimmedValue, 10);
 };

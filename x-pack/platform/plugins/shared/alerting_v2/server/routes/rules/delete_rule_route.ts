@@ -13,41 +13,46 @@ import { Request, Response } from '@kbn/core-di-server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { RouteSecurity } from '@kbn/core-http-server';
 
-import { RulesClient } from '../lib/rules_client';
-import { ALERTING_V2_API_PRIVILEGES } from '../lib/security/privileges';
-import { INTERNAL_ALERTING_V2_RULE_API_PATH } from './constants';
+import { RulesClient } from '../../lib/rules_client';
+import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
+import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
-const getRuleParamsSchema = schema.object({
+const deleteRuleParamsSchema = schema.object({
   id: schema.string(),
 });
 
 @injectable()
-export class GetRuleRoute {
-  static method = 'get' as const;
+export class DeleteRuleRoute {
+  static method = 'delete' as const;
   static path = `${INTERNAL_ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
     authz: {
-      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
+      requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
   static options = { access: 'internal' } as const;
   static validate = {
     request: {
-      params: getRuleParamsSchema,
+      params: deleteRuleParamsSchema,
     },
   } as const;
 
   constructor(
     @inject(Request)
-    private readonly request: KibanaRequest<TypeOf<typeof getRuleParamsSchema>, unknown, unknown>,
+    private readonly request: KibanaRequest<
+      TypeOf<typeof deleteRuleParamsSchema>,
+      unknown,
+      unknown,
+      'delete'
+    >,
     @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}
 
   async handle() {
     try {
-      const rule = await this.rulesClient.getRule({ id: this.request.params.id });
-      return this.response.ok({ body: rule });
+      await this.rulesClient.deleteRule({ id: this.request.params.id });
+      return this.response.noContent();
     } catch (e) {
       const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
       return this.response.customError({

@@ -58,11 +58,13 @@ export const GroupFieldSelect: React.FC = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
               defaultMessage: 'Group Fields',
             })}
+            fullWidth
             isInvalid={!!error}
             error={error?.message}
           >
             <EuiComboBox
               id={groupByRowId}
+              fullWidth
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}

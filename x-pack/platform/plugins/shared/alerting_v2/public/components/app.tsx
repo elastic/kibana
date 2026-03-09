@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { CreateRulePage } from './create_rule_page';
-import { RulesListPage } from './rules_list_page';
+import { RuleFormPage } from '../pages/rule_form_page/rule_form_page';
+import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { ListNotificationPoliciesPage } from '../pages/list_notification_policies_page/list_notification_policies_page';
 import { NotificationPolicyFormPage } from '../pages/notification_policy_form_page/notification_policy_form_page';
 
@@ -16,10 +16,10 @@ export const App = () => {
   return (
     <Routes>
       <Route path="/edit/:id">
-        <CreateRulePage />
+        <RuleFormPage />
       </Route>
       <Route path="/create">
-        <CreateRulePage />
+        <RuleFormPage />
       </Route>
       <Route path="/notification_policies/create">
         <NotificationPolicyFormPage />

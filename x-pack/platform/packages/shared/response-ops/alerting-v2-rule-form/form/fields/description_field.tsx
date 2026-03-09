@@ -61,6 +61,7 @@ export const DescriptionField: React.FC = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
             defaultMessage: 'Description',
           })}
+          fullWidth
           isInvalid={!!error}
           error={error?.message}
         >
@@ -68,6 +69,7 @@ export const DescriptionField: React.FC = () => {
             {...field}
             inputRef={ref}
             rows={2}
+            fullWidth
             isInvalid={!!error}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
               defaultMessage: 'Add an optional description for this rule...',

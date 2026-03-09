@@ -96,6 +96,10 @@ describe('NotificationPolicyFormFlyout', () => {
       createdAt: '2026-03-01T10:00:00.000Z',
       updatedBy: 'elastic',
       updatedAt: '2026-03-01T10:00:00.000Z',
+      auth: {
+        owner: 'elastic',
+        createdByUser: true,
+      },
     };
 
     renderFlyout({ onClose: jest.fn(), onUpdate, initialValues });
