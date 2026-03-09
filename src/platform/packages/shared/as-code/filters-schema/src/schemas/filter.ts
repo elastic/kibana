@@ -131,7 +131,7 @@ const singleConditionSchema = baseConditionSchema.extends(
   {
     meta: {
       description: 'Condition: is',
-      id: '@kbn/as-code-filters-schema_condition_is',
+      id: 'kbn-as-code-filters-schema_condition_is',
     },
   }
 );
@@ -154,7 +154,7 @@ const oneOfConditionSchema = baseConditionSchema.extends(
   {
     meta: {
       description: 'Condition: is one of',
-      id: '@kbn/as-code-filters-schema_condition_is_one_of',
+      id: 'kbn-as-code-filters-schema_condition_is_one_of',
     },
   }
 );
@@ -170,7 +170,7 @@ const rangeConditionSchema = baseConditionSchema.extends(
   {
     meta: {
       description: 'Condition: range',
-      id: '@kbn/as-code-filters-schema_condition_range',
+      id: 'kbn-as-code-filters-schema_condition_range',
     },
   }
 );
@@ -186,7 +186,7 @@ const existsConditionSchema = baseConditionSchema.extends(
   {
     meta: {
       description: 'Condition: exists',
-      id: '@kbn/as-code-filters-schema_condition_exists',
+      id: 'kbn-as-code-filters-schema_condition_exists',
     },
   }
 );
@@ -200,7 +200,7 @@ const conditionSchema = schema.discriminatedUnion(
   {
     meta: {
       description: 'A filter condition with strict operator/value type matching',
-      id: '@kbn/as-code-filters-schema_conditionSchema',
+      id: 'kbn-as-code-filters-schema_conditionSchema',
     },
   }
 );
@@ -227,7 +227,7 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
   {
     meta: {
       description: 'Condition filter',
-      id: '@kbn/as-code-filters-schema_asCodeConditionFilterSchema',
+      id: 'kbn-as-code-filters-schema_asCodeConditionFilterSchema',
     },
   }
 );
@@ -236,7 +236,7 @@ export const asCodeConditionFilterSchema = commonBasePropertiesSchema.extends(
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
  */
-const GROUP_FILTER_ID = '@kbn/as-code-filters-schema_groupFilter';
+const GROUP_FILTER_ID = 'kbn-as-code-filters-schema_groupFilter';
 export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
     type: schema.literal(ASCODE_FILTER_TYPE.GROUP),
@@ -259,7 +259,7 @@ export const asCodeGroupFilterSchema = commonBasePropertiesSchema.extends(
   {
     meta: {
       description: 'Grouped condition filter',
-      id: '@kbn/as-code-filters-schema_asCodeGroupFilterSchema',
+      id: 'kbn-as-code-filters-schema_asCodeGroupFilterSchema',
     },
   }
 );
@@ -294,7 +294,7 @@ export const asCodeDSLFilterSchema = commonBasePropertiesSchema.extends(
   {
     meta: {
       description: 'DSL filter',
-      id: '@kbn/as-code-filters-schema_asCodeDSLFilterSchema',
+      id: 'kbn-as-code-filters-schema_asCodeDSLFilterSchema',
     },
   }
 );
@@ -313,7 +313,7 @@ export const asCodeSpatialFilterSchema = commonBasePropertiesSchema.extends(
   {
     meta: {
       description: 'Spatial filter',
-      id: '@kbn/as-code-filters-schema_asCodeSpatialFilterSchema',
+      id: 'kbn-as-code-filters-schema_asCodeSpatialFilterSchema',
     },
   }
 );
@@ -333,7 +333,7 @@ export const asCodeFilterSchema = schema.discriminatedUnion(
   {
     meta: {
       description: 'A filter which can be a condition, group, DSL, or spatial',
-      id: '@kbn/as-code-filters-schema_asCodeFilterSchema',
+      id: 'kbn-as-code-filters-schema_asCodeFilterSchema',
     },
   }
 );

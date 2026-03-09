@@ -1,12 +1,10 @@
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
-    cancel_on_build_failing: true
     label: Build Kibana Distribution
     agents:
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
-      preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      zones: us-central1-a,us-central1-b,us-central1-c
       diskSizeGb: 200
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
@@ -17,13 +15,11 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/quick_checks.sh
-    cancel_on_build_failing: true
     label: 'Quick Checks'
     agents:
-      machineType: c4d-standard-8
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-8
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: quick_checks
     timeout_in_minutes: 60
@@ -33,13 +29,11 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/checks.sh
-    cancel_on_build_failing: true
     label: 'Checks'
     agents:
-      machineType: c4d-standard-2
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     timeout_in_minutes: 60
     key: checks
@@ -49,13 +43,11 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/lint.sh
-    cancel_on_build_failing: true
     label: 'Linting'
     agents:
-      machineType: c4d-standard-16
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-16
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting
     timeout_in_minutes: 60
@@ -65,13 +57,11 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/lint_with_types.sh
-    cancel_on_build_failing: true
     label: 'Linting (with types)'
     agents:
-      machineType: c4d-standard-32
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-32
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: linting_with_types
     timeout_in_minutes: 60
@@ -80,14 +70,26 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/lint_with_oxlint.sh
+    label: 'Linting (with oxlint)'
+    agents:
+      machineType: n2d-standard-16
+      preemptible: true
+      spotZones: us-central1-b,us-central1-c
+      diskSizeGb: 105
+    key: linting_with_oxlint
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - command: .buildkite/scripts/steps/checks/capture_oas_snapshot.sh
-    cancel_on_build_failing: true
     label: 'Check OAS Snapshot'
     agents:
-      machineType: c4d-standard-2
-      diskType: hyperdisk-balanced
+      machineType: n2d-standard-2
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
     key: check_oas_snapshot
     timeout_in_minutes: 60
     retry:
@@ -96,13 +98,11 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/typecheck/check_types.sh
-    cancel_on_build_failing: true
     label: 'Check Types'
     agents:
-      machineType: c4d-highmem-4
-      diskType: hyperdisk-balanced
+      machineType: n2d-highmem-4
       preemptible: true
-      spotZones: us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: check_types
     timeout_in_minutes: 60
@@ -112,7 +112,6 @@ steps:
           limit: 3
 
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
-    cancel_on_build_failing: true
     label: 'Pick Test Group Run Order'
     agents:
       machineType: n2-standard-2
@@ -129,7 +128,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
-    cancel_on_build_failing: true
     label: 'Scout Test Run Builder'
     agents:
       machineType: n2d-standard-8
@@ -146,7 +144,6 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
-    cancel_on_build_failing: true
     label: Mark CI Stats as ready
     agents:
       machineType: n2-standard-2
@@ -160,12 +157,11 @@ steps:
           limit: 1
 
   - command: .buildkite/scripts/steps/api_docs/build_api_docs.sh
-    cancel_on_build_failing: true
     label: 'Build API Docs'
     agents:
       machineType: n2-highmem-4
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: us-central1-b,us-central1-c,us-central1-f
       diskSizeGb: 105
     key: build_api_docs
     timeout_in_minutes: 60

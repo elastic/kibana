@@ -8,7 +8,8 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "public/**/*",
-    "common/**/*"
+    "common/**/*",
+    "test/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -74,6 +75,11 @@
     "@kbn/maintenance-windows-plugin",
     "@kbn/config",
     "@kbn/expect",
+    "@kbn/core-feature-flags-server-mocks",
+    "@kbn/core-feature-flags-server",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }

@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { getAgentlessGlobalDataTags } from '../../../common/services/agentless_policy_helper';
-import { isPackageLimited } from '../../../common/services';
+
 import type {
   PackagePolicy,
   FullAgentPolicyInput,
@@ -26,6 +26,7 @@ import { pkgToPkgKey } from '../epm/registry';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
+  FLEET_ENDPOINT_PACKAGE,
   GLOBAL_DATA_TAG_EXCLUDED_INPUTS,
   OTEL_COLLECTOR_INPUT_TYPE,
   USE_APM_VAR_NAME,
@@ -44,15 +45,15 @@ export function getInputId(
   packagePolicyId?: string,
   packageInfo?: PackageInfo
 ): string {
-  // Marks to skip appending input information to package policy ID to make it unique if package is "limited":
-  // this means that only one policy for the package can exist on the agent policy, so its ID is already unique
-  const appendInputId = packageInfo && isPackageLimited(packageInfo) ? false : true;
+  // Only the endpoint (Elastic Defend) package uses a simplified ID format for backward compatibility.
+  // All other packages (including other limited packages) use the standard format with type and policy template.
+  const useSimplifiedId = packageInfo?.name === FLEET_ENDPOINT_PACKAGE;
 
-  return appendInputId
-    ? `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
+  return useSimplifiedId
+    ? packagePolicyId || 'default'
+    : `${input.type}${input.policy_template ? `-${input.policy_template}` : ''}${
         packagePolicyId ? `-${packagePolicyId}` : ''
-      }`
-    : packagePolicyId || 'default';
+      }`;
 }
 
 export const storedPackagePolicyToAgentInputs = (
@@ -161,16 +162,22 @@ export const getFullInputStreams = (
                   return acc;
                 }, {} as { [k: string]: any }),
               };
-              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
-                // otelcol inputs are not going to have the data_stream type and dataset in
-                // the compiled stream, get them directly from the user-defined variables.
-                const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
-                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+              const dsTypeVar = stream.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value;
+              if (dsTypeVar) {
                 fullStream.data_stream = {
                   ...fullStream.data_stream,
-                  ...(dsTypeVar ? { type: dsTypeVar } : {}),
-                  ...(datasetVar ? { dataset: datasetVar } : {}),
+                  type: dsTypeVar,
                 };
+              }
+
+              if (input.type === OTEL_COLLECTOR_INPUT_TYPE) {
+                const datasetVar = stream.vars?.[DATASET_VAR_NAME]?.value;
+                if (datasetVar) {
+                  fullStream.data_stream = {
+                    ...fullStream.data_stream,
+                    dataset: datasetVar,
+                  };
+                }
 
                 const useAPMVar = stream.vars?.[USE_APM_VAR_NAME]?.value;
                 if (useAPMVar !== undefined) {

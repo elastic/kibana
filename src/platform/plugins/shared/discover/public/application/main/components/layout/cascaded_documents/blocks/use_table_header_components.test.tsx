@@ -9,9 +9,10 @@
 
 import React from 'react';
 import { renderHook, render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { EuiThemeProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { waitForEuiPopoverOpen, waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { useGetGroupBySelectorRenderer } from './use_table_header_components';
 
 describe('useTableHeaderComponents', () => {
@@ -41,9 +42,11 @@ describe('useTableHeaderComponents', () => {
       result.current(props.availableGroups, props.selectedGroups);
 
     render(
-      <IntlProvider locale="en">
-        <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
-      </IntlProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
 
     expect(await screen.findByTestId('discoverEnableCascadeLayoutSwitch')).toBeInTheDocument();
@@ -64,9 +67,11 @@ describe('useTableHeaderComponents', () => {
       result.current(props.availableGroups, props.selectedGroups);
 
     const { rerender } = render(
-      <IntlProvider locale="en">
-        <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
-      </IntlProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
 
     const groupSelectionButton = await screen.findByTestId('discoverEnableCascadeLayoutSwitch');
@@ -77,9 +82,11 @@ describe('useTableHeaderComponents', () => {
 
     // we rerender so the state updates and the popover can be seen
     rerender(
-      <IntlProvider locale="en">
-        <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
-      </IntlProvider>
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
     );
 
     await waitForEuiPopoverOpen();
@@ -90,5 +97,39 @@ describe('useTableHeaderComponents', () => {
     await user.click(screen.getByText('group2'));
 
     await waitFor(() => expect(mockCascadeGroupingChangeHandler).toHaveBeenCalledWith(['group2']));
+  });
+
+  it('displays a technical preview tooltip on hover', async () => {
+    const user = userEvent.setup();
+    const availableGroups = ['group1', 'group2'];
+    const selectedGroups = ['group1'];
+
+    const { result } = renderHook(() =>
+      useGetGroupBySelectorRenderer({
+        cascadeGroupingChangeHandler: mockCascadeGroupingChangeHandler,
+      })
+    );
+
+    const GroupBySelector = (props: { availableGroups: string[]; selectedGroups: string[] }) =>
+      result.current(props.availableGroups, props.selectedGroups);
+
+    render(
+      <EuiThemeProvider>
+        <I18nProvider>
+          <GroupBySelector availableGroups={availableGroups} selectedGroups={selectedGroups} />
+        </I18nProvider>
+      </EuiThemeProvider>
+    );
+
+    const groupSelectionButton = await screen.findByTestId('discoverEnableCascadeLayoutSwitch');
+
+    await user.hover(groupSelectionButton);
+
+    await waitForEuiToolTipVisible();
+
+    expect(screen.getByText('Cascade experience (Technical preview)')).toBeInTheDocument();
+    expect(
+      screen.getByText('This functionality is in technical preview and is subject to change.')
+    ).toBeInTheDocument();
   });
 });

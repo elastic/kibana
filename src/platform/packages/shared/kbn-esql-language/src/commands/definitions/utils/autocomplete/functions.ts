@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isFunctionExpression } from '../../../../ast/is';
+import { isAssignment, isFunctionExpression } from '@elastic/esql';
 
-import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '../../../../types';
+import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { FunctionParameterType } from '../../types';
 import { FunctionDefinitionTypes } from '../../types';
 import { getFunctionDefinition } from '../functions';

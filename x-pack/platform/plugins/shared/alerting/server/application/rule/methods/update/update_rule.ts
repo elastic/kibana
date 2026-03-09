@@ -13,7 +13,7 @@ import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
-import { getMappedParams } from '../../../../rules_client/common/mapped_params_utils';
+import { getMappedParams, addMissingUiamKeyTagIfNeeded } from '../../../../rules_client/common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -318,6 +318,14 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     errorMessage: 'Error updating rule: could not create API key',
   });
 
+  const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+    updateRuleData.tags,
+    apiKeyAttributes.uiamApiKey,
+    apiKeyAttributes.apiKeyCreatedByUser,
+    context.isServerless,
+    context.featureFlags
+  );
+
   const notifyWhen = getRuleNotifyWhenType(
     updateRuleData.notifyWhen ?? null,
     updateRuleData.throttle ?? null
@@ -327,6 +335,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     ...originalRule,
     ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
+    tags: tagsWithUiamCheck,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
     notifyWhen,

@@ -196,7 +196,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must be smaller than the data retention period (30d).',
+        message: 'Must not exceed the data retention period (30d).',
       });
     });
 
@@ -221,7 +221,7 @@ describe('streams DSL steps flyout validations', () => {
       );
 
       expect(result).toEqual({
-        message: 'Must be smaller than the data retention period (30d).',
+        message: 'Must not exceed the data retention period (30d).',
       });
     });
 

@@ -7,8 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PolicyArtifactsPageLabels } from '../artifacts/translations';
 
-export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
+export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS: Omit<
+  PolicyArtifactsPageLabels,
+  'layoutAboutMessage'
+> = Object.freeze({
   deleteModalTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventFilters.list.removeDialog.title',
     {
@@ -123,6 +127,10 @@ export const POLICY_ARTIFACT_EVENT_FILTERS_LABELS = Object.freeze({
   emptyUnexistingPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.eventFilters.empty.unexisting.action',
     { defaultMessage: 'Add event filters' }
+  ),
+  emptyUnexistingImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.eventFilters.empty.unexisting.importAction',
+    { defaultMessage: 'Import event filter list' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.eventFilters.list.totalItemCount', {

@@ -6,12 +6,12 @@
  */
 
 import {
-  getInitialCaseValue,
   trimUserFormData,
   getOwnerDefaultValue,
   createFormDeserializer,
   createFormSerializer,
 } from './utils';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
 import { ConnectorTypes, CaseSeverity, CustomFieldTypes } from '../../../common/types/domain';
 import { GENERAL_CASES_OWNER } from '../../../common';
 import { casesConfigurationsMock } from '../../containers/configure/mock';
