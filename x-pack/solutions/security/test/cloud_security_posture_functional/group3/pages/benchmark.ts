@@ -36,7 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('Access with valid user role', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/239363
+    it.skip('Access with valid user role', async () => {
       await cspSecurity.logout();
       await cspSecurity.login('csp_read_user');
       await benchmark.navigateToBenchnmarkPage();
