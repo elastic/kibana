@@ -17,9 +17,27 @@ import { registerZodV4Component } from '@kbn/router-to-openapispec';
 import { streamsOasDefinitions } from '@kbn/streams-schema';
 import { streamlangOasDefinitions } from '@kbn/streamlang';
 
+/**
+ * Schemas that require extra OAS properties beyond what Zod can express.
+ * Keyed by the same names as in `streamsOasDefinitions`.
+ */
+const streamDefinitionExtensions = {
+  StreamDefinition: {
+    discriminator: {
+      propertyName: 'type' as const,
+      mapping: {
+        wired: '#/components/schemas/WiredStreamDefinition',
+        classic: '#/components/schemas/ClassicStreamDefinition',
+        query: '#/components/schemas/QueryStreamDefinition',
+      },
+    },
+  },
+} as const;
+
 export function registerStreamsOasComponents() {
   for (const [name, schema] of Object.entries(streamsOasDefinitions)) {
-    registerZodV4Component(schema, name);
+    const extensions = streamDefinitionExtensions[name as keyof typeof streamDefinitionExtensions];
+    registerZodV4Component(schema, name, extensions);
   }
   for (const [name, schema] of Object.entries(streamlangOasDefinitions)) {
     registerZodV4Component(schema, name);

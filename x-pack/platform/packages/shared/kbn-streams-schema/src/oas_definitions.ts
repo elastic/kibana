@@ -18,14 +18,24 @@
 import { WiredStream } from './models/ingest/wired';
 import { ClassicStream, ClassicIngest } from './models/ingest/classic';
 import { WiredIngest } from './models/ingest/wired';
+import { QueryStream } from './models/query';
+import { streamDefinitionSchema } from './models/streams';
 import { fieldDefinitionSchema } from './fields';
 import { routingDefinitionSchema } from './models/ingest/routing';
 import { ingestStreamLifecycleSchema } from './models/ingest/lifecycle';
 
 export const streamsOasDefinitions = {
-  // Complete stream definitions
+  /**
+   * Top-level discriminated union of all stream definition variants.
+   * Registered with a `discriminator` extension so OAS code generators can
+   * produce typed structs without inspecting nested properties.
+   */
+  StreamDefinition: streamDefinitionSchema,
+
+  // Individual stream definition variants
   WiredStreamDefinition: WiredStream.Definition.right,
   ClassicStreamDefinition: ClassicStream.Definition.right,
+  QueryStreamDefinition: QueryStream.Definition.right,
 
   // Ingest configs
   WiredIngest: WiredIngest.right,

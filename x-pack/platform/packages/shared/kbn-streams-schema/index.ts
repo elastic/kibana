@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { Streams } from './src/models/streams';
+export { Streams, streamDefinitionSchema } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';

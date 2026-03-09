@@ -82,6 +82,7 @@ interface ClassicStreamDefaults {
 
 export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {
+    type: 'classic';
     ingest: ClassicIngest;
   }
 
@@ -109,6 +110,7 @@ export namespace ClassicStream {
 
 const ClassicStreamSchema = {
   Definition: z.object({
+    type: z.literal('classic'),
     ingest: ClassicIngest.right,
   }),
   Source: z.intersection(IngestBaseStream.Source.right, z.object({})),

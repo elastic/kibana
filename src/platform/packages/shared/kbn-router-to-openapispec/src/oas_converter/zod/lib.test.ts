@@ -662,5 +662,41 @@ describe('zod v4', () => {
       expect(result.shared).toHaveProperty('Tag');
       expect(result.schema).toEqual({ $ref: '#/components/schemas/Tag' });
     });
+
+    test('discriminator extension is merged into the component schema', () => {
+      const catSchema = z4.object({ type: z4.literal('cat'), meow: z4.string() });
+      const dogSchema = z4.object({ type: z4.literal('dog'), bark: z4.string() });
+      const petSchema = z4.union([catSchema, dogSchema]);
+
+      registerZodV4Component(catSchema, 'Cat');
+      registerZodV4Component(dogSchema, 'Dog');
+      registerZodV4Component(petSchema, 'Pet', {
+        discriminator: {
+          propertyName: 'type',
+          mapping: {
+            cat: '#/components/schemas/Cat',
+            dog: '#/components/schemas/Dog',
+          },
+        },
+      });
+
+      const body = z4.object({ pet: petSchema });
+      const result = convert(body as any);
+
+      // discriminator is present on the Pet component
+      expect(result.shared.Pet).toMatchObject({
+        discriminator: {
+          propertyName: 'type',
+          mapping: {
+            cat: '#/components/schemas/Cat',
+            dog: '#/components/schemas/Dog',
+          },
+        },
+      });
+
+      // no marker leaks through
+      const outputStr = JSON.stringify(result);
+      expect(outputStr).not.toContain('x-kbn-oas-component-id');
+    });
   });
 });
