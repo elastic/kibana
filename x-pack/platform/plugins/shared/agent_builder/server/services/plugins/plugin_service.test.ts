@@ -112,6 +112,7 @@ describe('PluginsService', () => {
       list: jest.fn(),
       has: jest.fn(),
       create: jest.fn(),
+      bulkCreate: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
       deleteByPluginId: jest.fn(),
@@ -177,7 +178,7 @@ describe('PluginsService', () => {
         mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
-        mockSkillClient.create.mockResolvedValue({} as any);
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
 
         const result = await start.installPlugin({
           request: mockRequest,
@@ -191,25 +192,29 @@ describe('PluginsService', () => {
 
         expect(mockClient.findByName).toHaveBeenCalledWith('my-plugin');
 
-        expect(mockSkillClient.create).toHaveBeenCalledTimes(2);
-        expect(mockSkillClient.create).toHaveBeenCalledWith({
-          id: 'my-plugin-pdf-processor',
-          name: 'PDF Processor',
-          description: 'Processes PDFs',
-          content: 'Skill instructions for PDF.',
-          referenced_content: [{ name: 'schema.json', relativePath: 'schema.json', content: '{}' }],
-          tool_ids: [],
-          plugin_id: 'my-plugin',
-        });
-        expect(mockSkillClient.create).toHaveBeenCalledWith({
-          id: 'my-plugin-code-reviewer',
-          name: 'code-reviewer',
-          description: '',
-          content: 'Review code.',
-          referenced_content: [],
-          tool_ids: [],
-          plugin_id: 'my-plugin',
-        });
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledTimes(1);
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledWith([
+          {
+            id: 'my-plugin-pdf-processor',
+            name: 'PDF Processor',
+            description: 'Processes PDFs',
+            content: 'Skill instructions for PDF.',
+            referenced_content: [
+              { name: 'schema.json', relativePath: 'schema.json', content: '{}' },
+            ],
+            tool_ids: [],
+            plugin_id: 'my-plugin',
+          },
+          {
+            id: 'my-plugin-code-reviewer',
+            name: 'code-reviewer',
+            description: '',
+            content: 'Review code.',
+            referenced_content: [],
+            tool_ids: [],
+            plugin_id: 'my-plugin',
+          },
+        ]);
 
         expect(mockClient.create).toHaveBeenCalledWith({
           name: 'my-plugin',
@@ -269,7 +274,7 @@ describe('PluginsService', () => {
         }
 
         expect(mockClient.create).not.toHaveBeenCalled();
-        expect(mockSkillClient.create).not.toHaveBeenCalled();
+        expect(mockSkillClient.bulkCreate).not.toHaveBeenCalled();
       });
 
       it('propagates errors from parsePluginFromUrl', async () => {
@@ -294,7 +299,7 @@ describe('PluginsService', () => {
         mockParsePluginFromFile.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
-        mockSkillClient.create.mockResolvedValue({} as any);
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
 
         const result = await start.installPlugin({
           request: mockRequest,
@@ -304,7 +309,7 @@ describe('PluginsService', () => {
         expect(mockParsePluginFromFile).toHaveBeenCalledWith('/tmp/plugin.zip');
         expect(mockParsePluginFromUrl).not.toHaveBeenCalled();
 
-        expect(mockSkillClient.create).toHaveBeenCalledTimes(2);
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledTimes(1);
 
         expect(mockClient.create).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -331,7 +336,7 @@ describe('PluginsService', () => {
         ).rejects.toThrow(/already installed/);
 
         expect(mockClient.create).not.toHaveBeenCalled();
-        expect(mockSkillClient.create).not.toHaveBeenCalled();
+        expect(mockSkillClient.bulkCreate).not.toHaveBeenCalled();
       });
 
       it('propagates errors from parsePluginFromFile', async () => {
@@ -356,7 +361,7 @@ describe('PluginsService', () => {
         mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
-        mockSkillClient.create.mockResolvedValue({} as any);
+        mockSkillClient.bulkCreate.mockResolvedValue([]);
 
         const result = await start.installPlugin({
           request: mockRequest,
@@ -366,17 +371,17 @@ describe('PluginsService', () => {
 
         expect(mockClient.findByName).toHaveBeenCalledWith('custom-name');
 
-        expect(mockSkillClient.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: 'custom-name-pdf-processor',
-            plugin_id: 'custom-name',
-          })
-        );
-        expect(mockSkillClient.create).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: 'custom-name-code-reviewer',
-            plugin_id: 'custom-name',
-          })
+        expect(mockSkillClient.bulkCreate).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              id: 'custom-name-pdf-processor',
+              plugin_id: 'custom-name',
+            }),
+            expect.objectContaining({
+              id: 'custom-name-code-reviewer',
+              plugin_id: 'custom-name',
+            }),
+          ])
         );
 
         expect(mockClient.create).toHaveBeenCalledWith(

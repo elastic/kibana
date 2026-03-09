@@ -34,6 +34,12 @@ export interface SkillClient {
    */
   delete(skillId: string): Promise<void>;
   /**
+   * Creates multiple skills in a single bulk request.
+   * Optimized for plugin installation where IDs are deterministic.
+   * Does not perform per-skill uniqueness checks.
+   */
+  bulkCreate(requests: PersistedSkillCreateRequest[]): Promise<SkillPersistedDefinition[]>;
+  /**
    * Deletes all skills associated with the given plugin.
    */
   deleteByPluginId(pluginId: string): Promise<void>;
@@ -127,6 +133,36 @@ class SkillClientImpl implements SkillClient {
     });
 
     return this.get(id);
+  }
+
+  async bulkCreate(requests: PersistedSkillCreateRequest[]): Promise<SkillPersistedDefinition[]> {
+    if (requests.length === 0) {
+      return [];
+    }
+
+    const creationDate = new Date();
+    const allAttributes = requests.map((createRequest) =>
+      createAttributes({ createRequest, space: this.space, creationDate })
+    );
+
+    await this.storage.getClient().bulk({
+      operations: allAttributes.map((attributes) => ({
+        index: { document: attributes, _id: attributes.id },
+      })),
+      throwOnFail: true,
+    });
+
+    return allAttributes.map((attributes) => ({
+      id: attributes.id,
+      name: attributes.name,
+      description: attributes.description,
+      content: attributes.content,
+      referenced_content: attributes.referenced_content,
+      tool_ids: attributes.tool_ids,
+      plugin_id: attributes.plugin_id,
+      created_at: attributes.created_at,
+      updated_at: attributes.updated_at,
+    }));
   }
 
   async update(id: string, update: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition> {

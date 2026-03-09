@@ -113,11 +113,12 @@ class PluginsServiceImpl implements PluginsService {
       );
     }
 
-    const skillIds = parsedArchive.skills.map((skill) => `${pluginName}-${skill.dirName}`);
+    const createRequests = parsedArchive.skills.map((skill) =>
+      toSkillCreateRequest({ skill, pluginName })
+    );
+    await skillClient.bulkCreate(createRequests);
 
-    for (const skill of parsedArchive.skills) {
-      await skillClient.create(toSkillCreateRequest({ skill, pluginName }));
-    }
+    const skillIds = createRequests.map((req) => req.id);
 
     const createRequest = parsedArchiveToCreateRequest({
       parsedArchive,

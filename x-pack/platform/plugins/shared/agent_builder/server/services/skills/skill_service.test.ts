@@ -27,6 +27,7 @@ jest.mock('./persisted/client', () => ({
     get: jest.fn().mockRejectedValue(new Error('not found')),
     list: jest.fn().mockResolvedValue([]),
     create: jest.fn(),
+    bulkCreate: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     deleteByPluginId: jest.fn(),
