@@ -13,6 +13,7 @@ import { NotificationPolicySavedObjectService } from './notification_policy_save
 export function createNotificationPolicySavedObjectService(): {
   notificationPolicySavedObjectService: NotificationPolicySavedObjectService;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  mockBulkGetDecryptedByIds: jest.SpyInstance;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockSavedObjectsClientFactory = jest.fn().mockReturnValue(mockSavedObjectsClient);
@@ -23,5 +24,13 @@ export function createNotificationPolicySavedObjectService(): {
     mockSpaces
   );
 
-  return { notificationPolicySavedObjectService, mockSavedObjectsClient };
+  const mockBulkGetDecryptedByIds = jest
+    .spyOn(notificationPolicySavedObjectService, 'bulkGetDecryptedByIds')
+    .mockResolvedValue([]);
+
+  return {
+    notificationPolicySavedObjectService,
+    mockSavedObjectsClient,
+    mockBulkGetDecryptedByIds,
+  };
 }

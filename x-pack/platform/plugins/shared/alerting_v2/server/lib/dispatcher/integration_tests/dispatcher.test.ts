@@ -7,11 +7,9 @@
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../../resources/alert_actions';
 import { ALERT_EVENTS_DATA_STREAM, type AlertEvent } from '../../../resources/alert_events';
-import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type {
   RuleSavedObjectAttributes,
   NotificationPolicySavedObjectAttributes,
@@ -336,31 +334,6 @@ const SUPPRESSION_USER_ACTIONS: AlertAction[] = [
   },
 ];
 
-const createMockEsoClient = (
-  npSoService: NotificationPolicySavedObjectServiceContract
-): EncryptedSavedObjectsClient =>
-  ({
-    createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockImplementation(async () => {
-      const { saved_objects: allPolicies } = await npSoService.find({
-        page: 1,
-        perPage: 1000,
-      });
-      return {
-        async *find() {
-          yield {
-            saved_objects: allPolicies.map((doc) => ({
-              id: doc.id,
-              type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-              attributes: doc.attributes,
-              references: [],
-            })),
-          };
-        },
-        close: jest.fn(),
-      };
-    }),
-  } as unknown as EncryptedSavedObjectsClient);
-
 const createMockWorkflowsManagement = (): WorkflowsServerPluginSetup['management'] =>
   ({
     getWorkflow: jest.fn().mockResolvedValue(null),
@@ -377,7 +350,6 @@ describe('DispatcherService integration tests', () => {
   let mockLoggerService: LoggerServiceContract;
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: NotificationPolicySavedObjectServiceContract;
-  let mockEsoClient: EncryptedSavedObjectsClient;
   let mockWfm: WorkflowsServerPluginSetup['management'];
 
   beforeAll(async () => {
@@ -416,15 +388,22 @@ describe('DispatcherService integration tests', () => {
 
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
-    mockEsoClient = createMockEsoClient(npSoService);
     mockWfm = createMockWorkflowsManagement();
+
+    jest.spyOn(npSoService, 'bulkGetDecryptedByIds').mockImplementation(async () => {
+      const { saved_objects: allPolicies } = await npSoService.find({
+        page: 1,
+        perPage: 1000,
+      });
+      return allPolicies.map((doc) => ({ id: doc.id, attributes: doc.attributes }));
+    });
 
     const pipeline = new DispatcherPipeline(mockLoggerService, [
       new FetchEpisodesStep(queryService),
       new FetchSuppressionsStep(queryService),
       new ApplySuppressionStep(),
       new FetchRulesStep(rulesSoService),
-      new FetchPoliciesStep(mockEsoClient),
+      new FetchPoliciesStep(npSoService),
       new EvaluateMatchersStep(),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
