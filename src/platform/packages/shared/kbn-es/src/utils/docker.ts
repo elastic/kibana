@@ -159,7 +159,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   resources?: string | string[];
   /** Configure ES serverless with UIAM support */
   uiam?: boolean;
-  /** Configuration for a linked project in Cross Project Search (CSP) mode */
+  /** Configuration for a linked project in Cross Project Search (CPS) mode */
   linkedProject?: { projectId: string; port: number };
 }
 
