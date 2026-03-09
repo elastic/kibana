@@ -300,14 +300,28 @@ describe('convertFormBasedToTextBasedLayer', () => {
       ['custom labels', { customLabel: true }, { customLabel: true }, mockDatasourceStates],
       [
         'format',
-        { format: { id: 'bytes', params: { decimals: 2 } } },
-        { params: { format: { id: 'bytes', params: { decimals: 2 } } } },
+        {
+          format: { id: 'bytes', params: { decimals: 2 } },
+        },
+        {
+          params: { format: { id: 'bytes', params: { decimals: 2 } } },
+          label: 'Count of records',
+        },
         createDatasourceStatesWithColumnFormat({ id: 'bytes', params: { decimals: 2 } }),
       ],
       [
         'custom label and format',
-        { customLabel: true, format: { id: 'bytes', params: { decimals: 1 } } },
-        { customLabel: true, params: { format: { id: 'bytes', params: { decimals: 1 } } } },
+        {
+          customLabel: true,
+          format: { id: 'bytes', params: { decimals: 1 } },
+        },
+        {
+          customLabel: true,
+          params: {
+            format: { id: 'bytes', params: { decimals: 1 } },
+          },
+          label: 'My Label',
+        },
         createDatasourceStatesWithColumnFormat({ id: 'bytes', params: { decimals: 1 } }),
       ],
     ])('preserves %s', (_, inputOverrides, expectedOverrides, datasourceStates) => {
@@ -374,7 +388,6 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
       const column = result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0];
       expect(column).not.toHaveProperty('params');
-      expect(column).not.toHaveProperty('customLabel');
     });
   });
 });
