@@ -373,8 +373,7 @@ const getSuggestions = (
   const isQuotedField = !!quotedFieldWithDotMatch;
   const bodyContentLines = bodyContentBeforePosition.split('\n');
   const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
-  const isUnmatchedEndpointQuotedContext =
-    !context.endpoint && hasUnclosedQuote(currentContentLine);
+  const isInsideQuotedString = hasUnclosedQuote(currentContentLine);
 
   // Adjust the range start column if we have a field with a dot
   let startColumn = wordUntilPosition.startColumn;
@@ -406,7 +405,7 @@ const getSuggestions = (
     filterTermsWithoutName(autocompleteSet)
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
-        if (isUnmatchedEndpointQuotedContext && usesStructuralSnippet(item)) {
+        if (isInsideQuotedString && usesStructuralSnippet(item)) {
           return false;
         }
 

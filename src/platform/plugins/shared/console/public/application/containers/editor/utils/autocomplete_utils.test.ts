@@ -402,7 +402,7 @@ describe('autocomplete_utils', () => {
       });
     });
 
-    it('filters structural suggestions in unmatched endpoint quoted context', async () => {
+    it('filters structural suggestions when cursor is inside an unclosed quote (unmatched endpoint)', async () => {
       const mockAutocompleteSet = [
         { name: '{' },
         { name: 'match_all', insertValue: '{' },
@@ -433,6 +433,44 @@ describe('autocomplete_utils', () => {
       const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
 
       expect(items.map((item) => item.label)).toEqual(['match_all']);
+    });
+
+    it('filters structural suggestions when cursor is inside an unclosed quote (matched endpoint)', async () => {
+      const mockAutocompleteSet = [
+        { name: '{' },
+        { name: 'type' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      const mockEndpoint = {
+        bodyAutocompleteRootComponents: [],
+      };
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = mockEndpoint;
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      const mockModel = {
+        getLineContent: () => 'PUT /test',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n  "mappings": {\n    "properties": {\n      "integer_field": "';
+          }
+          if (range.startLineNumber === 5 && range.startColumn === 1) {
+            return '      "integer_field": "';
+          }
+          return '';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 24, word: '' }),
+        getLineMaxColumn: () => 24,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 5, column: 24 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.map((item) => item.label)).toEqual(['type']);
     });
   });
 
