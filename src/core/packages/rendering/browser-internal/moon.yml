@@ -44,7 +44,6 @@ dependsOn:
   - '@kbn/global-redirect-app-links'
   - '@kbn/core-base-browser-internal'
   - '@kbn/core-base-browser-mocks'
-  - '@kbn/use-observable'
 tags:
   - shared-browser
   - package
