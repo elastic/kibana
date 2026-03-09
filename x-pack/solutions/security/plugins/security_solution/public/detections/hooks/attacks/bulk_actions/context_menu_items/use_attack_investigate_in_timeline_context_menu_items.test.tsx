@@ -81,6 +81,20 @@ describe('useAttackInvestigateInTimelineContextMenuItems', () => {
     });
   });
 
+  it('should pass telemetrySource to useBulkAttackInvestigateInTimelineItems', () => {
+    renderHook(() =>
+      useAttackInvestigateInTimelineContextMenuItems({
+        attacksWithTimelineAlerts: [{ attackId: 'attack-1', relatedAlertIds: ['alert-1'] }],
+        telemetrySource: 'attacks_page_group_take_action',
+      })
+    );
+
+    expect(mockUseBulkAttackInvestigateInTimelineItems).toHaveBeenCalledWith({
+      closePopover: undefined,
+      telemetrySource: 'attacks_page_group_take_action',
+    });
+  });
+
   it('should return empty panels', () => {
     const { result } = renderHook(() =>
       useAttackInvestigateInTimelineContextMenuItems({
