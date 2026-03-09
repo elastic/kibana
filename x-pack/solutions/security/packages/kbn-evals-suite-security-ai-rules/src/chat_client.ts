@@ -182,9 +182,10 @@ const mapGeneratedRule = (ruleData: Record<string, unknown>): Partial<ReferenceR
 
 const extractRuleFromSyncResponse = (response: ConverseResponse) => {
   const toolSteps =
-    response.steps?.filter(
-      (step) => step.type === 'tool_call' && step.tool_id === SECURITY_CREATE_DETECTION_RULE_TOOL_ID
-    ) ?? [];
+    response.steps?.filter((step) => {
+      const isToolStep = step.type === 'tool_call' || step.type === 'tool_result';
+      return isToolStep && step.tool_id === SECURITY_CREATE_DETECTION_RULE_TOOL_ID;
+    }) ?? [];
   const lastToolStep = toolSteps.at(-1);
   const extracted = extractRuleDataFromToolResults(lastToolStep?.results);
 
