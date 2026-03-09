@@ -20,7 +20,7 @@ import type {
 import type { WorkflowsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 import { WorkflowsApiService } from '../../common/apis/workflows';
-import { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
+import type { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 
 export interface WorkflowsApiServicesFixture extends ApiServicesFixture {
   workflows: WorkflowsApiService;
