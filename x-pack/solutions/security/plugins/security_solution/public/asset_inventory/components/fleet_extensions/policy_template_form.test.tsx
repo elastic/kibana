@@ -890,7 +890,6 @@ describe('<CloudAssetinventoryPolicyTemplateForm />', () => {
       expect(orgIdField).not.toBeInTheDocument();
 
       const projectIdField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
-      const credentialsJsonField = queryByTestId(GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON);
       const credentialsTypeSelector = queryByTestId(
         GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE
       );

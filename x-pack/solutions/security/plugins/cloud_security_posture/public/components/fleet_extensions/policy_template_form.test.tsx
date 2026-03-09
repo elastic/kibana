@@ -7,6 +7,7 @@
 import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useParams } from 'react-router-dom';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -18,8 +19,34 @@ import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_PROVIDER_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
-import { CspPolicyTemplateForm } from './policy_template_form';
+import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import {
+  ORGANIZATION_ACCOUNT,
+  SINGLE_ACCOUNT,
+  type NewPackagePolicy,
+  type PackageInfo,
+  type PackagePolicy,
+} from '@kbn/fleet-plugin/common';
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ, SetupTechnology } from '@kbn/fleet-plugin/public';
+import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
+import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
+
+import {
+  CLOUDBEAT_AWS,
+  CLOUDBEAT_AZURE,
+  CLOUDBEAT_EKS,
+  CLOUDBEAT_GCP,
+} from '../../../common/constants';
+
+import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
+import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
+import * as KibanaHook from '../../common/hooks/use_kibana';
+import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
+
+import { SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT } from '../test_subjects';
+
 import {
   getAwsPackageInfoMock,
   getMockPackageInfo,
@@ -35,33 +62,8 @@ import {
   getMockPolicyVulnMgmtAWS,
   getPackageInfoMock,
 } from './mocks';
-import {
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
-  type NewPackagePolicy,
-  type PackageInfo,
-  type PackagePolicy,
-} from '@kbn/fleet-plugin/common';
+import { CspPolicyTemplateForm } from './policy_template_form';
 import { getPosturePolicy, POLICY_TEMPLATE_FORM_DTS } from './utils';
-import {
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_GCP,
-} from '../../../common/constants';
-import { useParams } from 'react-router-dom';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public';
-import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
-import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
-import * as KibanaHook from '../../common/hooks/use_kibana';
-import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
-import { SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT } from '../test_subjects';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
 
 // mock useParams
 jest.mock('react-router-dom', () => ({
@@ -2195,5 +2197,4 @@ describe('<CspPolicyTemplateForm />', () => {
       })
     ).not.toBeInTheDocument();
   });
-
 });
