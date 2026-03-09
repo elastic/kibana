@@ -835,6 +835,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] }],
               read: [],
             },
@@ -876,8 +877,9 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [],
               enable: [],
-              read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-manual_run-sub-type', consumers: ['foo'] }],
+              read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
@@ -1036,6 +1038,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
@@ -1076,6 +1079,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
@@ -1241,6 +1245,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [],
             },
@@ -1491,6 +1496,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
@@ -1532,6 +1538,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
@@ -1671,6 +1678,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [],
             },
@@ -1711,6 +1719,7 @@ describe('featurePrivilegeIterator', () => {
             rule: {
               all: [],
               enable: [],
+              manage_rule_settings: [],
               manual_run: [],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
