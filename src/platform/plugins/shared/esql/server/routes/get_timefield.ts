@@ -115,17 +115,16 @@ export const registerGetTimeFieldRoute = (
       const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
       const { views } = await service.getViews().catch(() => ({ views: [] }));
       const viewNames = new Set(views.map(({ name }) => name));
+      const splitSources = sources
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
 
       try {
         // In case of subqueries we need to check all indices separately.
         // Otherwise, pass the full sources string to fieldCaps so Elasticsearch
         // evaluates the multi-index pattern holistically.
-        const indices = hasSubqueries
-          ? sources
-              .split(',')
-              .map((index) => index.trim())
-              .filter(Boolean)
-          : [sources];
+        const indices = hasSubqueries ? splitSources : [sources];
 
         if (!indices.length) {
           return response.ok({
@@ -158,11 +157,7 @@ export const registerGetTimeFieldRoute = (
         }
 
         // fieldCaps didn't find @timestamp — check if any sources are views
-        const allNames = sources
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean);
-        const viewSources = allNames.filter((name) => viewNames.has(name));
+        const viewSources = splitSources.filter((name) => viewNames.has(name));
 
         if (viewSources.length) {
           const viewChecks = await Promise.all(
