@@ -41,7 +41,9 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
 
       const timeoutError = new Error(
         `Failed due to workflow timeout: execution exceeded the configured timeout of ${this.node.timeout} ` +
-          `(elapsed: ${elapsedSeconds}s). Timed out at step '${currentStepId ?? currentNodeId ?? 'unknown'}' ` +
+          `(elapsed: ${elapsedSeconds}s). Timed out at step '${
+            currentStepId ?? currentNodeId ?? 'unknown'
+          }' ` +
           `at ${new Date(currentTimeMs).toISOString()}.`
       );
 
