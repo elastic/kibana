@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/core-analytics-browser'
   - '@kbn/expressions-plugin'
   - '@kbn/ebt-tools'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -68,7 +69,9 @@ fileGroups:
   src:
     - common/**/*
     - public/**/*
+    - server/**/*
     - public/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
 tasks:
   jest:

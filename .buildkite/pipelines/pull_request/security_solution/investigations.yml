@@ -7,6 +7,7 @@ steps:
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
+    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'

@@ -117,10 +117,12 @@ export default ({ getService }: FtrProviderContext) => {
           async function requestWithoutStreaming(
             body: AiopsLogRateAnalysisSchema<typeof apiVersion>
           ) {
+            const acceptEncoding = body.compressResponse === false ? 'identity' : 'gzip';
             const resp = await supertest
               .post(`/internal/aiops/log_rate_analysis`)
               .set('kbn-xsrf', 'kibana')
               .set(ELASTIC_HTTP_VERSION_HEADER, apiVersion)
+              .set('accept-encoding', acceptEncoding)
               .send(body)
               .expect(200);
 
@@ -169,12 +171,14 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           async function requestWithStreaming(body: AiopsLogRateAnalysisSchema<typeof apiVersion>) {
+            const acceptEncoding = body.compressResponse === false ? 'identity' : 'gzip';
             const resp = await fetch(`${kibanaServerUrl}/internal/aiops/log_rate_analysis`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
                 [ELASTIC_HTTP_VERSION_HEADER]: apiVersion,
                 'kbn-xsrf': 'stream',
+                'accept-encoding': acceptEncoding,
               },
               body: JSON.stringify(body),
             });
