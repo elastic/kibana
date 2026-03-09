@@ -96,10 +96,11 @@ const dashboardCanvasContentStyles = {
     minHeight: 0,
     display: 'flex',
   }),
-  searchBar: ({ euiTheme }: UseEuiTheme) => css({
-    flexShrink: 0,
-    padding: `0 ${euiTheme.size.s}`,
-  }),
+  searchBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      padding: `0 ${euiTheme.size.s}`,
+    }),
   callout: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginTop: euiTheme.size.s,
