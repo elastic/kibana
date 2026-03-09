@@ -38,7 +38,6 @@ const createStoreState = (overrides: Partial<Store> = {}): Store => {
     requestInFlight: false,
     lastResult: {
       data: null,
-      dataOrError: null,
     },
     ...overrides,
   };
@@ -65,7 +64,6 @@ describe('OutputPanel', () => {
               request: { data: '', method: 'GET', path: '/' },
             },
           ],
-          dataOrError: null,
         },
       })
     );
@@ -92,7 +90,6 @@ describe('OutputPanel', () => {
             },
             request: { data: '', method: 'GET', path: '/' },
           },
-          dataOrError: null,
         },
       })
     );
@@ -149,7 +146,6 @@ describe('OutputPanel', () => {
               request: { data: '', method: 'GET', path: '/' },
             },
           ],
-          dataOrError: null,
         },
       })
     );

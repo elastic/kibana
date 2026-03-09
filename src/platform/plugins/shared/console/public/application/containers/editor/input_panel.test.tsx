@@ -15,7 +15,9 @@ import { InputPanel } from './input_panel';
 import { useEditorReadContext } from '../../contexts';
 import { getAutocompleteInfo } from '../../../services';
 
-const mockMonacoEditor = jest.fn(() => <div data-test-subj="mockMonacoEditor" />);
+const mockMonacoEditor = jest.fn((props: Record<string, unknown>) => (
+  <div data-test-subj="mockMonacoEditor" {...props} />
+));
 
 jest.mock('../../contexts', () => ({
   useEditorReadContext: jest.fn(),
@@ -26,7 +28,7 @@ jest.mock('../../../services', () => ({
 }));
 
 jest.mock('./monaco_editor', () => ({
-  MonacoEditor: (props: unknown) => mockMonacoEditor(props),
+  MonacoEditor: (props: Record<string, unknown>) => mockMonacoEditor(props),
 }));
 
 jest.mock('../../components/editor_content_spinner', () => ({
