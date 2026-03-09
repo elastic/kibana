@@ -17,7 +17,7 @@ import { getAutocompleteInfo } from '../../../services';
 import { DEBOUNCE_DELAY } from '../../const';
 
 const mockMonacoEditor = jest.fn((props: Record<string, unknown>) => (
-  <div data-test-subj="mockMonacoEditor" {...props} />
+  <div data-test-subj="mockMonacoEditor" />
 ));
 
 jest.mock('../../contexts', () => ({
