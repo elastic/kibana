@@ -50,6 +50,28 @@ describe('securityAlertsProfileInitializer', () => {
     ).toBe(true);
   });
 
+  it('does not match non-alerts targets', () => {
+    expect(
+      securityAlertsProfileInitializer.shouldInitialize({
+        namespace: 'default',
+        target: {
+          type: 'index',
+          id: getAlertsDataViewTargetId('default'),
+        },
+      })
+    ).toBe(false);
+
+    expect(
+      securityAlertsProfileInitializer.shouldInitialize({
+        namespace: 'default',
+        target: {
+          type: ALERTS_DATA_VIEW_TARGET_TYPE,
+          id: 'security-solution-alert-other',
+        },
+      })
+    ).toBe(false);
+  });
+
   it('creates a profile when none exists', async () => {
     findProfileByTarget.mockResolvedValue(null);
     createProfile.mockResolvedValue({ id: 'test-id' });
