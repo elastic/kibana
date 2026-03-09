@@ -7,12 +7,12 @@
 
 import { tags } from '@kbn/scout';
 import moment from 'moment';
-import type { ErrorInsightParams } from '../src/clients/ai_insight_client';
+import type { ErrorInsightParams } from '../../src/clients/ai_insight_client';
 import {
   OTEL_DEMO_SNAPSHOT_NAME,
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
-} from '../src/data_generators/replay';
+} from '../../src/data_generators/replay';
 import { evaluate } from './evaluate_ai_insights';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
