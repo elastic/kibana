@@ -62,6 +62,8 @@ dependsOn:
   - '@kbn/core-chrome-sidebar-context'
   - '@kbn/core-chrome-sidebar'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/core-chrome-browser-context'
+  - '@kbn/core-chrome-browser-internal-types'
 tags:
   - shared-browser
   - package
