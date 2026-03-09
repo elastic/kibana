@@ -18,7 +18,24 @@ export interface UseFetchApmIndex {
   isError: boolean;
 }
 
+interface ApmIndicesData {
+  metric: string;
+  transaction: string;
+}
+
+export interface UseFetchApmIndices {
+  data: ApmIndicesData;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+}
+
 export function useFetchApmIndex(): UseFetchApmIndex {
+  const { data, ...rest } = useFetchApmIndices();
+  return { data: data.metric, ...rest };
+}
+
+export function useFetchApmIndices(): UseFetchApmIndices {
   const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
@@ -27,7 +44,10 @@ export function useFetchApmIndex(): UseFetchApmIndex {
       try {
         const response = await apmSourcesAccess.getApmIndices({ signal });
 
-        return response.metric ?? '';
+        return {
+          metric: response.metric ?? '',
+          transaction: response.transaction ?? '',
+        };
       } catch (error) {
         // ignore error
       }
@@ -36,7 +56,9 @@ export function useFetchApmIndex(): UseFetchApmIndex {
   });
 
   return {
-    data: isInitialLoading ? '' : data ?? '',
+    data: isInitialLoading
+      ? { metric: '', transaction: '' }
+      : data ?? { metric: '', transaction: '' },
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

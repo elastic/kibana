@@ -19,10 +19,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { useFetchApmIndices } from '../../../../hooks/use_fetch_apm_indices';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
+import { getDiscoverEsqlLink } from '../../utils/discover_links/get_discover_esql_link';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
 
@@ -35,6 +37,15 @@ export interface Props {
 
 export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, onBrushed }: Props) {
   const { discover, uiSettings } = useKibana().services;
+  const { data: apmIndices } = useFetchApmIndices();
+
+  const esqlLink = getDiscoverEsqlLink({
+    slo,
+    timeRange: { from: 'now-24h', to: 'now' },
+    discover,
+    apmTransactionIndex: apmIndices.transaction,
+  });
+
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,
@@ -109,24 +120,38 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
 
           <EuiFlexItem grow={0}>
             <EuiLink
-              color="text"
-              href={getDiscoverLink({
-                slo,
-                timeRange: {
-                  from: 'now-24h',
-                  to: 'now',
-                  mode: 'relative',
-                },
-                discover,
-                uiSettings,
-              })}
+              href={
+                esqlLink ??
+                getDiscoverLink({
+                  slo,
+                  timeRange: {
+                    from: 'now-24h',
+                    to: 'now',
+                    mode: 'relative',
+                  },
+                  discover,
+                  uiSettings,
+                })
+              }
               data-test-subj="sloDetailDiscoverLink"
             >
-              <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
-              <FormattedMessage
-                id="xpack.slo.sloDetails.viewEventsLink"
-                defaultMessage="View events"
-              />
+              {esqlLink ? (
+                <>
+                  <EuiIcon type="discoverApp" aria-hidden css={{ marginRight: '4px' }} />
+                  <FormattedMessage
+                    id="xpack.slo.sloDetails.openTracesLink"
+                    defaultMessage="Explore traces"
+                  />
+                </>
+              ) : (
+                <>
+                  <EuiIcon type="sortRight" aria-hidden css={{ marginRight: '4px' }} />
+                  <FormattedMessage
+                    id="xpack.slo.sloDetails.viewEventsLink"
+                    defaultMessage="View events"
+                  />
+                </>
+              )}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
