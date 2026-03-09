@@ -79,9 +79,11 @@ export const createRequestToEs = ({
 export const parsedArchiveToCreateRequest = ({
   parsedArchive,
   sourceUrl,
+  skillIds,
 }: {
   parsedArchive: ParsedPluginArchive;
   sourceUrl?: string;
+  skillIds: string[];
 }): PluginCreateRequest => {
   const { manifest, unmanagedAssets } = parsedArchive;
   return {
@@ -96,8 +98,7 @@ export const parsedArchiveToCreateRequest = ({
       keywords: manifest.keywords,
     },
     source_url: sourceUrl,
-    // TODO: must change when we properly add skills support
-    skill_ids: parsedArchive.skills.map((skill) => skill.meta.name ?? ''),
+    skill_ids: skillIds,
     unmanaged_assets: unmanagedAssets,
   };
 };

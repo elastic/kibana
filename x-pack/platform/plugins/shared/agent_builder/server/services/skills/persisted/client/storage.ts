@@ -27,6 +27,7 @@ const storageSettings = {
         properties: {},
       }),
       tool_ids: types.keyword({}),
+      plugin_id: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -41,6 +42,7 @@ export interface SkillProperties {
   content: string;
   referenced_content?: SkillReferencedContent[];
   tool_ids: string[];
+  plugin_id?: string;
   created_at: string;
   updated_at: string;
 }

@@ -126,8 +126,10 @@ const readSkills = async (
     const { meta, content: body } = parseSkillFile(content.toString('utf-8'));
 
     const referencedFiles = await readReferencedFiles(archive, skillDir, skillMdPath);
+    const dirName = skillDir.replace(/\/$/, '').split('/').pop()!;
 
     skills.push({
+      dirName,
       meta,
       content: body,
       referencedFiles,

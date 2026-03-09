@@ -52,6 +52,8 @@ export interface ParsedSkillMeta {
  * A fully parsed skill from a plugin archive.
  */
 export interface ParsedSkillFile {
+  /** Directory name of the skill within the archive (e.g. `pdf-processor`) */
+  dirName: string;
   /** Frontmatter metadata */
   meta: ParsedSkillMeta;
   /** Markdown body content (without frontmatter) */

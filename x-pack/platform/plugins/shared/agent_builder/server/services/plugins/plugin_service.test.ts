@@ -10,6 +10,7 @@ import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import { createPluginsService, type PluginsServiceStart } from './plugin_service';
 import type { PluginClient, PersistedPluginDefinition } from './client';
+import type { SkillClient } from '../skills/persisted/client';
 
 const mockParsePluginFromUrl = jest.fn();
 const mockParsePluginFromFile = jest.fn();
@@ -85,6 +86,7 @@ const createMockPersistedPlugin = (
 describe('PluginsService', () => {
   let start: PluginsServiceStart;
   let mockClient: jest.Mocked<PluginClient>;
+  let mockSkillClient: jest.Mocked<SkillClient>;
   const mockRequest = {} as KibanaRequest;
 
   beforeEach(() => {
@@ -98,6 +100,16 @@ describe('PluginsService', () => {
       create: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+    };
+
+    mockSkillClient = {
+      get: jest.fn(),
+      list: jest.fn(),
+      has: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      deleteByPluginId: jest.fn(),
     };
 
     mockCreateClient.mockReturnValue(mockClient);
@@ -115,12 +127,13 @@ describe('PluginsService', () => {
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
+      createScopedSkillClient: () => mockSkillClient,
     });
   });
 
   describe('getScopedClient', () => {
-    it('creates a client with the correct parameters', async () => {
-      const client = await start.getScopedClient({ request: mockRequest });
+    it('creates a client with the correct parameters', () => {
+      const client = start.getScopedClient({ request: mockRequest });
 
       expect(client).toBe(mockClient);
       expect(mockCreateClient).toHaveBeenCalledWith(
@@ -132,14 +145,33 @@ describe('PluginsService', () => {
   });
 
   describe('installPlugin', () => {
-    describe('from URL', () => {
-      it('parses the URL, creates the plugin record, and returns it', async () => {
-        const parsedArchive = createMockParsedArchive();
-        const persistedPlugin = createMockPersistedPlugin();
+    const archiveWithSkills = createMockParsedArchive({
+      skills: [
+        {
+          dirName: 'pdf-processor',
+          meta: { name: 'PDF Processor', description: 'Processes PDFs' },
+          content: 'Skill instructions for PDF.',
+          referencedFiles: [{ relativePath: 'schema.json', content: '{}' }],
+        },
+        {
+          dirName: 'code-reviewer',
+          meta: {},
+          content: 'Review code.',
+          referencedFiles: [],
+        },
+      ],
+    });
 
-        mockParsePluginFromUrl.mockResolvedValue(parsedArchive);
+    describe('from URL', () => {
+      it('parses the URL, creates skills and the plugin record, and returns it', async () => {
+        const persistedPlugin = createMockPersistedPlugin({
+          skill_ids: ['my-plugin-pdf-processor', 'my-plugin-code-reviewer'],
+        });
+
+        mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
+        mockSkillClient.create.mockResolvedValue({} as any);
 
         const result = await start.installPlugin({
           request: mockRequest,
@@ -151,6 +183,26 @@ describe('PluginsService', () => {
         );
 
         expect(mockClient.findByName).toHaveBeenCalledWith('my-plugin');
+
+        expect(mockSkillClient.create).toHaveBeenCalledTimes(2);
+        expect(mockSkillClient.create).toHaveBeenCalledWith({
+          id: 'my-plugin-pdf-processor',
+          name: 'PDF Processor',
+          description: 'Processes PDFs',
+          content: 'Skill instructions for PDF.',
+          referenced_content: [{ name: 'schema.json', relativePath: 'schema.json', content: '{}' }],
+          tool_ids: [],
+          plugin_id: 'my-plugin',
+        });
+        expect(mockSkillClient.create).toHaveBeenCalledWith({
+          id: 'my-plugin-code-reviewer',
+          name: 'code-reviewer',
+          description: '',
+          content: 'Review code.',
+          referenced_content: [],
+          tool_ids: [],
+          plugin_id: 'my-plugin',
+        });
 
         expect(mockClient.create).toHaveBeenCalledWith({
           name: 'my-plugin',
@@ -164,8 +216,8 @@ describe('PluginsService', () => {
             keywords: ['test'],
           },
           source_url: 'https://github.com/test/repo/tree/main/plugin',
-          skill_ids: [],
-          unmanaged_assets: parsedArchive.unmanagedAssets,
+          skill_ids: ['my-plugin-pdf-processor', 'my-plugin-code-reviewer'],
+          unmanaged_assets: archiveWithSkills.unmanagedAssets,
         });
 
         expect(result).toBe(persistedPlugin);
@@ -210,6 +262,7 @@ describe('PluginsService', () => {
         }
 
         expect(mockClient.create).not.toHaveBeenCalled();
+        expect(mockSkillClient.create).not.toHaveBeenCalled();
       });
 
       it('propagates errors from parsePluginFromUrl', async () => {
@@ -225,13 +278,16 @@ describe('PluginsService', () => {
     });
 
     describe('from file', () => {
-      it('parses the local file, creates the plugin record without source_url', async () => {
-        const parsedArchive = createMockParsedArchive();
-        const persistedPlugin = createMockPersistedPlugin({ source_url: undefined });
+      it('parses the local file, creates skills and the plugin record without source_url', async () => {
+        const persistedPlugin = createMockPersistedPlugin({
+          source_url: undefined,
+          skill_ids: ['my-plugin-pdf-processor', 'my-plugin-code-reviewer'],
+        });
 
-        mockParsePluginFromFile.mockResolvedValue(parsedArchive);
+        mockParsePluginFromFile.mockResolvedValue(archiveWithSkills);
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
+        mockSkillClient.create.mockResolvedValue({} as any);
 
         const result = await start.installPlugin({
           request: mockRequest,
@@ -241,10 +297,13 @@ describe('PluginsService', () => {
         expect(mockParsePluginFromFile).toHaveBeenCalledWith('/tmp/plugin.zip');
         expect(mockParsePluginFromUrl).not.toHaveBeenCalled();
 
+        expect(mockSkillClient.create).toHaveBeenCalledTimes(2);
+
         expect(mockClient.create).toHaveBeenCalledWith(
           expect.objectContaining({
             name: 'my-plugin',
             source_url: undefined,
+            skill_ids: ['my-plugin-pdf-processor', 'my-plugin-code-reviewer'],
           })
         );
 
@@ -265,6 +324,7 @@ describe('PluginsService', () => {
         ).rejects.toThrow(/already installed/);
 
         expect(mockClient.create).not.toHaveBeenCalled();
+        expect(mockSkillClient.create).not.toHaveBeenCalled();
       });
 
       it('propagates errors from parsePluginFromFile', async () => {
@@ -281,20 +341,29 @@ describe('PluginsService', () => {
   });
 
   describe('deletePlugin', () => {
-    it('delegates to client.delete', async () => {
+    it('deletes associated skills by plugin name, then deletes the plugin', async () => {
+      mockClient.get.mockResolvedValue(
+        createMockPersistedPlugin({ id: 'plugin-1', name: 'my-plugin' })
+      );
+      mockSkillClient.deleteByPluginId.mockResolvedValue(undefined);
       mockClient.delete.mockResolvedValue(undefined);
 
       await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
+      expect(mockClient.get).toHaveBeenCalledWith('plugin-1');
+      expect(mockSkillClient.deleteByPluginId).toHaveBeenCalledWith('my-plugin');
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
 
-    it('propagates errors from client.delete', async () => {
-      mockClient.delete.mockRejectedValue(new Error('Not found'));
+    it('propagates errors from client.get', async () => {
+      mockClient.get.mockRejectedValue(new Error('Not found'));
 
       await expect(
         start.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
       ).rejects.toThrow('Not found');
+
+      expect(mockSkillClient.deleteByPluginId).not.toHaveBeenCalled();
+      expect(mockClient.delete).not.toHaveBeenCalled();
     });
   });
 });

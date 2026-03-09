@@ -23,6 +23,7 @@ import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import { createMeteringService, type MeteringService } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
+import { createClient as createSkillClient } from './skills/persisted/client';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -191,6 +192,8 @@ export class ServiceManager {
       logger: logger.get('plugins'),
       elasticsearch,
       spaces,
+      createScopedSkillClient: ({ esClient, space }) =>
+        createSkillClient({ esClient, space, logger: logger.get('skills') }),
     });
 
     this.internalStart = {

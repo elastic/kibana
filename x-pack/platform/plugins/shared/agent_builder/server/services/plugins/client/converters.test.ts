@@ -238,6 +238,7 @@ describe('plugin converters', () => {
       const result = parsedArchiveToCreateRequest({
         parsedArchive: baseArchive,
         sourceUrl: 'https://github.com/test/plugin/archive/main.zip',
+        skillIds: [],
       });
 
       expect(result).toEqual({
@@ -272,6 +273,7 @@ describe('plugin converters', () => {
       const result = parsedArchiveToCreateRequest({
         parsedArchive: archive,
         sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
       });
       expect(result.version).toBe('0.0.0');
     });
@@ -284,16 +286,18 @@ describe('plugin converters', () => {
       const result = parsedArchiveToCreateRequest({
         parsedArchive: archive,
         sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
       });
       expect(result.description).toBe('');
     });
 
-    it('always sets skill_ids to an empty array', () => {
+    it('uses the provided skillIds', () => {
       const result = parsedArchiveToCreateRequest({
         parsedArchive: baseArchive,
         sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: ['my-plugin-skill-a', 'my-plugin-skill-b'],
       });
-      expect(result.skill_ids).toEqual([]);
+      expect(result.skill_ids).toEqual(['my-plugin-skill-a', 'my-plugin-skill-b']);
     });
   });
 

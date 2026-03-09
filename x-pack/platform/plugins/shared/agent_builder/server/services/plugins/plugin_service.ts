@@ -6,12 +6,16 @@
  */
 
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
-import { createBadRequestError, ParsedPluginArchive } from '@kbn/agent-builder-common';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { createBadRequestError } from '@kbn/agent-builder-common';
+import type { ParsedPluginArchive, ParsedSkillFile } from '@kbn/agent-builder-common';
+import type { PersistedSkillCreateRequest } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
 import { parsePluginFromUrl, parsePluginFromFile } from './utils';
+import type { SkillClient } from '../skills/persisted/client';
 
 type InstallPluginSource = { type: 'url'; url: string } | { type: 'file'; filePath: string };
 
@@ -19,7 +23,7 @@ type InstallPluginSource = { type: 'url'; url: string } | { type: 'file'; filePa
 export interface PluginsServiceSetup {}
 
 export interface PluginsServiceStart {
-  getScopedClient(options: { request: KibanaRequest }): Promise<PluginClient>;
+  getScopedClient(options: { request: KibanaRequest }): PluginClient;
   installPlugin(options: {
     request: KibanaRequest;
     source: InstallPluginSource;
@@ -36,6 +40,10 @@ export interface PluginsServiceStartDeps {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
+  createScopedSkillClient: (options: {
+    esClient: ElasticsearchClient;
+    space: string;
+  }) => SkillClient;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -53,7 +61,7 @@ class PluginsServiceImpl implements PluginsService {
     this.startDeps = deps;
 
     return {
-      getScopedClient: (options) => this.getScopedClient(options),
+      getScopedClient: (options) => this.getScopedClients(options).pluginClient,
       installPlugin: (options) => this.installPlugin(options),
       deletePlugin: (options) => this.deletePlugin(options),
     };
@@ -66,12 +74,18 @@ class PluginsServiceImpl implements PluginsService {
     return this.startDeps;
   }
 
-  private async getScopedClient({ request }: { request: KibanaRequest }): Promise<PluginClient> {
-    const { elasticsearch, logger, spaces } = this.getStartDeps();
+  private getScopedClients({ request }: { request: KibanaRequest }): {
+    pluginClient: PluginClient;
+    skillClient: SkillClient;
+  } {
+    const { elasticsearch, logger, spaces, createScopedSkillClient } = this.getStartDeps();
     const esClient = elasticsearch.client.asScoped(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces });
 
-    return createClient({ esClient, logger, space });
+    return {
+      pluginClient: createClient({ esClient, logger, space }),
+      skillClient: createScopedSkillClient({ esClient, space }),
+    };
   }
 
   private async installPlugin({
@@ -92,21 +106,28 @@ class PluginsServiceImpl implements PluginsService {
     }
 
     const { manifest } = parsedArchive;
-    const client = await this.getScopedClient({ request });
+    const { pluginClient, skillClient } = this.getScopedClients({ request });
 
-    const existing = await client.findByName(manifest.name);
+    const existing = await pluginClient.findByName(manifest.name);
     if (existing) {
       throw createBadRequestError(
         `Plugin '${manifest.name}' is already installed (id: ${existing.id}, version: ${existing.version}).`
       );
     }
 
+    const skillIds = parsedArchive.skills.map((skill) => `${manifest.name}-${skill.dirName}`);
+
+    for (const skill of parsedArchive.skills) {
+      await skillClient.create(toSkillCreateRequest({ skill, pluginName: manifest.name }));
+    }
+
     const createRequest = parsedArchiveToCreateRequest({
       parsedArchive,
       sourceUrl,
+      skillIds,
     });
 
-    return client.create(createRequest);
+    return pluginClient.create(createRequest);
   }
 
   private async deletePlugin({
@@ -116,7 +137,31 @@ class PluginsServiceImpl implements PluginsService {
     request: KibanaRequest;
     pluginId: string;
   }): Promise<void> {
-    const client = await this.getScopedClient({ request });
-    await client.delete(pluginId);
+    const { pluginClient, skillClient } = this.getScopedClients({ request });
+    const plugin = await pluginClient.get(pluginId);
+    await skillClient.deleteByPluginId(plugin.name);
+    await pluginClient.delete(pluginId);
   }
 }
+
+const toSkillCreateRequest = ({
+  skill,
+  pluginName,
+}: {
+  skill: ParsedSkillFile;
+  pluginName: string;
+}): PersistedSkillCreateRequest => {
+  return {
+    id: `${pluginName}-${skill.dirName}`,
+    name: skill.meta.name ?? skill.dirName,
+    description: skill.meta.description ?? '',
+    content: skill.content,
+    referenced_content: skill.referencedFiles.map((file) => ({
+      name: file.relativePath,
+      relativePath: file.relativePath,
+      content: file.content,
+    })),
+    tool_ids: [],
+    plugin_id: pluginName,
+  };
+};

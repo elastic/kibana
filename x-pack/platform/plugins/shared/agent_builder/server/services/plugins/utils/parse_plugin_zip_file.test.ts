@@ -52,6 +52,7 @@ describe('parsePluginZipFile', () => {
       description: 'A test plugin',
     });
     expect(result.skills).toHaveLength(1);
+    expect(result.skills[0].dirName).toBe('my-skill');
     expect(result.skills[0].meta).toEqual({
       name: 'my-skill',
       description: 'Does things',
@@ -176,6 +177,7 @@ describe('parsePluginZipFile', () => {
     const result = await parsePluginZipFile(archive);
 
     expect(result.skills).toHaveLength(1);
+    expect(result.skills[0].dirName).toBe('custom-skill');
     expect(result.skills[0].meta.name).toBe('custom-skill');
     expect(result.skills[0].content).toBe('Custom skill content.');
   });
@@ -193,9 +195,12 @@ describe('parsePluginZipFile', () => {
     const result = await parsePluginZipFile(archive);
 
     expect(result.skills).toHaveLength(2);
-    const skillNames = result.skills.map((s) => s.content);
-    expect(skillNames).toContain('Default skill content.');
-    expect(skillNames).toContain('Extra skill content.');
+    const dirNames = result.skills.map((s) => s.dirName);
+    expect(dirNames).toContain('default-skill');
+    expect(dirNames).toContain('extra-skill');
+    const skillContents = result.skills.map((s) => s.content);
+    expect(skillContents).toContain('Default skill content.');
+    expect(skillContents).toContain('Extra skill content.');
   });
 
   it('handles skills without frontmatter', async () => {
@@ -207,6 +212,7 @@ describe('parsePluginZipFile', () => {
     const result = await parsePluginZipFile(archive);
 
     expect(result.skills).toHaveLength(1);
+    expect(result.skills[0].dirName).toBe('simple');
     expect(result.skills[0].meta).toEqual({});
     expect(result.skills[0].content).toBe('Just instructions, no frontmatter.');
   });

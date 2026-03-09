@@ -30,9 +30,13 @@ export interface SkillClient {
   create(request: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition>;
   update(skillId: string, updates: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition>;
   /**
-   * Deletes a skill. Throws if the skill does not exist.
+   * Deletes a skill. Throws if the skill does not exist or is plugin-managed.
    */
   delete(skillId: string): Promise<void>;
+  /**
+   * Deletes all skills associated with the given plugin.
+   */
+  deleteByPluginId(pluginId: string): Promise<void>;
   has(skillId: string): Promise<boolean>;
 }
 
@@ -127,6 +131,13 @@ class SkillClientImpl implements SkillClient {
       throw createSkillNotFoundError({ skillId: id });
     }
 
+    const skill = fromEs(document);
+    if (skill.plugin_id) {
+      throw createBadRequestError(
+        `Skill '${id}' is managed by plugin '${skill.plugin_id}' and cannot be modified directly.`
+      );
+    }
+
     const updatedAttributes = updateDocument({
       current: document._source!,
       update,
@@ -148,10 +159,28 @@ class SkillClientImpl implements SkillClient {
     if (!document) {
       throw createSkillNotFoundError({ skillId: id });
     }
+
+    const skill = fromEs(document);
+    if (skill.plugin_id) {
+      throw createBadRequestError(
+        `Skill '${id}' is managed by plugin '${skill.plugin_id}' and cannot be deleted directly.`
+      );
+    }
+
     const result = await this.storage.getClient().delete({ id: document._id });
     if (result.result === 'not_found') {
       throw createSkillNotFoundError({ skillId: id });
     }
+  }
+
+  async deleteByPluginId(pluginId: string): Promise<void> {
+    await this.storage.getClient().deleteByQuery({
+      query: {
+        bool: {
+          filter: [createSpaceDslFilter(this.space), { term: { plugin_id: pluginId } }],
+        },
+      },
+    });
   }
 
   async has(id: string): Promise<boolean> {
