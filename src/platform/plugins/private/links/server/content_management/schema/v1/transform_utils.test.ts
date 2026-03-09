@@ -51,17 +51,22 @@ describe('Links content management transform utils', () => {
       const result = savedObjectToItem(
         makeSavedObject([
           {
-            id: 'second',
+            id: 'third',
             type: EXTERNAL_LINK_TYPE,
-            destination: 'https://second.co',
+            destination: 'https://third.co',
             order: 1,
           },
           { id: 'first', type: EXTERNAL_LINK_TYPE, destination: 'https://first.co' },
+          {
+            id: 'second',
+            type: EXTERNAL_LINK_TYPE,
+            destination: 'https://second.co',
+          },
         ])
       );
 
       const links = result.attributes.links!;
-      expect(links.map((l) => l.id)).toEqual(['first', 'second']);
+      expect(links.map((l) => l.id)).toEqual(['first', 'second', 'third']);
     });
   });
 
