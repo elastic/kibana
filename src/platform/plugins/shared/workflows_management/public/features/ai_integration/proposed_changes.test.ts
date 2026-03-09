@@ -48,8 +48,6 @@ const createMockEditor = () => {
       getValueInRange: jest.fn().mockReturnValue('original content'),
       getValue: jest.fn().mockReturnValue('full content'),
       pushEditOperations: jest.fn(),
-      pushUndoStop: jest.fn(),
-      onDidChangeContent: jest.fn().mockReturnValue({ dispose: jest.fn() }),
       getLanguageId: jest.fn().mockReturnValue('yaml'),
       getOptions: jest.fn().mockReturnValue({ tabSize: 2 }),
     }),
@@ -63,6 +61,7 @@ const createMockEditor = () => {
     getLayoutInfo: jest.fn().mockReturnValue({ contentLeft: 64 }),
     getPosition: jest.fn().mockReturnValue({ lineNumber: 5 }),
     revealLineInCenter: jest.fn(),
+    pushUndoStop: jest.fn(),
     changeViewZones: jest.fn((cb: (accessor: any) => void) => {
       cb({
         addZone: jest.fn(() => {
@@ -74,7 +73,6 @@ const createMockEditor = () => {
       });
     }),
     createDecorationsCollection: jest.fn().mockReturnValue(decorationsCollection),
-    pushUndoStop: jest.fn(),
     deltaDecorations: jest.fn().mockReturnValue([]),
   } as any;
 };
@@ -86,17 +84,23 @@ const createInsertChange = (id: string): ProposedChange => ({
   newText: '  - name: new_step\n    type: console\n',
 });
 
+const createReplaceChange = (id: string): ProposedChange => ({
+  proposalId: id,
+  type: 'replace',
+  startLine: 3,
+  endLine: 3,
+  newText: '  replaced_key: replaced_value',
+});
+
 describe('ProposalManager', () => {
   let manager: ProposalManager;
 
   beforeEach(() => {
-    jest.useFakeTimers();
     manager = new ProposalManager();
   });
 
   afterEach(() => {
     manager.dispose();
-    jest.useRealTimers();
   });
 
   it('initialize attaches keydown handler to editor DOM', () => {
@@ -105,6 +109,17 @@ describe('ProposalManager', () => {
 
     const domNode = editor.getDomNode();
     expect(domNode.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), true);
+  });
+
+  it('proposeChange applies edit to model immediately', () => {
+    const editor = createMockEditor();
+    manager.initialize(editor);
+
+    manager.proposeChange(createInsertChange('test-1'));
+
+    const model = editor.getModel();
+    expect(model.pushEditOperations).toHaveBeenCalledTimes(1);
+    expect(editor.pushUndoStop).toHaveBeenCalled();
   });
 
   it('proposeChange adds proposal to pending list', () => {
@@ -128,15 +143,17 @@ describe('ProposalManager', () => {
     expect(manager.getPendingProposals()).toHaveLength(2);
   });
 
-  it('acceptProposal applies edit to model and removes from pending', () => {
+  it('acceptProposal removes from pending without additional model edits', () => {
     const editor = createMockEditor();
     manager.initialize(editor);
     manager.proposeChange(createInsertChange('test-1'));
 
+    const model = editor.getModel();
+    const callCountAfterPropose = model.pushEditOperations.mock.calls.length;
+
     manager.acceptProposal('test-1');
 
-    const model = editor.getModel();
-    expect(model.pushEditOperations).toHaveBeenCalled();
+    expect(model.pushEditOperations).toHaveBeenCalledTimes(callCountAfterPropose);
     expect(manager.hasPendingProposals()).toBe(false);
   });
 
@@ -151,15 +168,17 @@ describe('ProposalManager', () => {
     expect(onAccept).toHaveBeenCalledWith('test-1');
   });
 
-  it('rejectProposal removes from pending without editing', () => {
+  it('rejectProposal undoes the edit and removes from pending', () => {
     const editor = createMockEditor();
     manager.initialize(editor);
     manager.proposeChange(createInsertChange('test-1'));
 
+    const model = editor.getModel();
+    const callCountAfterPropose = model.pushEditOperations.mock.calls.length;
+
     manager.rejectProposal('test-1');
 
-    const model = editor.getModel();
-    expect(model.pushEditOperations).not.toHaveBeenCalled();
+    expect(model.pushEditOperations).toHaveBeenCalledTimes(callCountAfterPropose + 1);
     expect(manager.hasPendingProposals()).toBe(false);
   });
 
@@ -211,7 +230,7 @@ describe('ProposalManager', () => {
     manager.proposeChange(createInsertChange('test-1'));
     expect(manager.hasPendingProposals()).toBe(true);
 
-    manager.rejectProposal('test-1');
+    manager.acceptProposal('test-1');
     expect(manager.hasPendingProposals()).toBe(false);
   });
 
@@ -223,5 +242,18 @@ describe('ProposalManager', () => {
 
     const domNode = editor.getDomNode();
     expect(domNode.removeEventListener).toHaveBeenCalledWith('keydown', expect.any(Function), true);
+  });
+
+  it('proposeChange stores undo info for replace type', () => {
+    const editor = createMockEditor();
+    manager.initialize(editor);
+
+    manager.proposeChange(createReplaceChange('test-replace'));
+
+    const proposals = manager.getPendingProposals();
+    expect(proposals).toHaveLength(1);
+    expect(proposals[0].originalContent).toBe('original content');
+    expect(proposals[0].undoEndLine).toBeDefined();
+    expect(proposals[0].undoEndColumn).toBeDefined();
   });
 });

@@ -18,12 +18,13 @@ export const getProposedChangesStyles = () => css`
     position: relative;
   }
 
+  /* View zone container — shows original (deleted) content */
   .wfDiffContainer {
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: rgba(36, 194, 146, 0.08);
-    border-left: 3px solid #24c292;
+    background: rgba(238, 76, 72, 0.06);
+    border-left: 3px solid #ee4c48;
     margin-right: 8px;
     min-width: 0;
   }
@@ -34,7 +35,9 @@ export const getProposedChangesStyles = () => css`
 
   .wfDiffLine {
     display: flex;
-    background-color: rgba(36, 194, 146, 0.12);
+    background-color: rgba(238, 76, 72, 0.1);
+    text-decoration: line-through;
+    opacity: 0.7;
   }
 
   .wfDiffLineContent {
@@ -151,10 +154,8 @@ export const getProposedChangesStyles = () => css`
     border-radius: 2px !important;
   }
 
-  /* Lines being replaced/deleted in the editor */
-  .wfDiffLineDeleteBg {
-    background-color: rgba(238, 76, 72, 0.15) !important;
-    text-decoration: line-through;
-    opacity: 0.6;
+  /* New lines added to the model by a proposal */
+  .wfDiffLineAddBg {
+    background-color: rgba(36, 194, 146, 0.12) !important;
   }
 `;
