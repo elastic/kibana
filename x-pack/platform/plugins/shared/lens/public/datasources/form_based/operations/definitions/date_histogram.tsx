@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
-import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,15 +31,16 @@ import {
   extendedBoundsToAst,
   intervalOptions,
   getCalculateAutoTimeExpression,
+  splitStringInterval,
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type {
   DateHistogramIndexPatternColumn,
-  DateRange,
   IndexPattern,
   FormBasedLayer,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
@@ -104,26 +104,28 @@ function getTimeZoneAndInterval(
   };
 }
 
-export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
-  if (interval !== 'm' && interval.endsWith('m')) {
-    return interval.replace('m', ' minutes');
+const ESQL_UNIT_MAP: Record<string, [string, string]> = {
+  ms: ['millisecond', 'milliseconds'],
+  s: ['second', 'seconds'],
+  m: ['minute', 'minutes'],
+  h: ['hour', 'hours'],
+  d: ['day', 'days'],
+  w: ['week', 'weeks'],
+  M: ['month', 'months'],
+  y: ['year', 'years'],
+};
+
+function mapToEsqlInterval(interval: string) {
+  const parsed = splitStringInterval(interval);
+  if (!parsed) return '1 hour';
+  const { value, unit } = parsed;
+  const n = value;
+  const pair = ESQL_UNIT_MAP[unit];
+  if (pair) {
+    const word = n === 1 ? pair[0] : pair[1];
+    return `${n} ${word}`;
   }
-  switch (interval) {
-    case '1M':
-      return '1 month';
-    case 'd':
-      return '1d';
-    case 'h':
-      return '1h';
-    case 'm':
-      return '1 minute';
-    case 's':
-      return '1s';
-    case 'ms':
-      return '1ms';
-    default:
-      return interval;
-  }
+  return interval;
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -236,18 +238,12 @@ export const dateHistogramOperation: OperationDefinition<
     const resolvedInterval =
       interval === 'auto'
         ? mapToEsqlInterval(
-            dateRange,
             calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
           )
-        : mapToEsqlInterval(dateRange, interval);
+        : mapToEsqlInterval(interval);
 
-    // Use columnId to make param name unique
-    const fieldKey = `field_${snakeCase(columnId)}`;
-    // The interval is a safe string like '30 minutes' or '1h' - it doesn't need parameter escaping
-    // and should be directly in the template (not as a string parameter which would be quoted)
     return {
-      template: `BUCKET(??${fieldKey}, ${resolvedInterval})`,
-      params: { [fieldKey]: column.sourceField },
+      template: `BUCKET(${esql.col(column.sourceField)}, ${resolvedInterval})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
