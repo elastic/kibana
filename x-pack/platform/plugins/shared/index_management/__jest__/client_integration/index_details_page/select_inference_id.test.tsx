@@ -10,13 +10,11 @@ import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  DEFAULT_ENDPOINTS,
   installConsoleTruncationWarningFilter,
   mockResendRequest,
   renderSelectInferenceId,
   setupInferenceEndpointsMocks,
 } from './select_inference_id.helpers';
-import { useLoadInferenceEndpoints } from '../../../public/application/services/api';
 
 const mockDispatch = jest.fn();
 const mockNavigateToUrl = jest.fn();
@@ -99,6 +97,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
   const MockInferenceFlyoutWrapper = ({
     onFlyoutClose,
     onSubmitSuccess,
+    allowedTaskTypes,
   }: {
     onFlyoutClose: () => void;
     onSubmitSuccess: (id: string) => void;
@@ -106,6 +105,7 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
     toasts?: unknown;
     isEdit?: boolean;
     enforceAdaptiveAllocations?: boolean;
+    allowedTaskTypes?: string[];
   }) => (
     <div data-test-subj="inference-flyout-wrapper">
       <button data-test-subj="mock-flyout-close" onClick={onFlyoutClose}>
@@ -117,6 +117,9 @@ jest.mock('@kbn/inference-endpoint-ui-common', () => {
       >
         Submit
       </button>
+      {allowedTaskTypes && (
+        <div data-test-subj="mock-allowed-task-types">{allowedTaskTypes.join(',')}</div>
+      )}
     </div>
   );
 
@@ -222,88 +225,19 @@ describe('SelectInferenceId', () => {
     });
   });
 
-  describe('WHEN incompatible endpoint is created via flyout', () => {
-    it('SHOULD NOT select the endpoint if its task type is incompatible', async () => {
-      const useLoadInferenceEndpointsMock = jest.mocked(useLoadInferenceEndpoints);
-
+  describe('WHEN endpoint is created optimistically', () => {
+    beforeEach(() => {
       setupInferenceEndpointsMocks();
-      renderSelectInferenceId({ initialValue: '' });
-
-      const button = await screen.findByTestId('inferenceIdButton');
-      await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
-
-      // After flyout submits 'new-endpoint-id', resendRequest returns data where
-      // that endpoint has an incompatible task_type (chat_completion)
-      mockResendRequest.mockImplementation(() => {
-        useLoadInferenceEndpointsMock.mockReturnValue({
-          data: [
-            ...DEFAULT_ENDPOINTS,
-            {
-              inference_id: 'new-endpoint-id',
-              task_type: 'chat_completion',
-              service: 'elastic',
-              service_settings: { model_id: 'rainbow-sprinkles' },
-            },
-          ] as InferenceAPIConfigResponse[],
-          isInitialRequest: false,
-          isLoading: false,
-          error: null,
-          resendRequest: mockResendRequest,
-        });
-      });
-
-      await user.click(button);
-      await user.click(await screen.findByTestId('createInferenceEndpointButton'));
-      expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
-
-      fireEvent.click(await screen.findByTestId('mock-flyout-submit'));
-
-      // The incompatible endpoint should NOT appear in the dropdown
-      await waitFor(() => {
-        expect(screen.queryByTestId('custom-inference_new-endpoint-id')).not.toBeInTheDocument();
-      });
-
-      // The button should still show the previous selection
-      expect(button).toHaveTextContent('.preconfigured-elser');
     });
 
-    it('SHOULD select the endpoint if its task type is compatible', async () => {
-      const useLoadInferenceEndpointsMock = jest.mocked(useLoadInferenceEndpoints);
+    it('SHOULD display newly created endpoint even if not in loaded list', async () => {
+      renderSelectInferenceId({ initialValue: 'newly-created-endpoint' });
 
-      setupInferenceEndpointsMocks();
-      renderSelectInferenceId({ initialValue: '' });
+      await user.click(await screen.findByTestId('inferenceIdButton'));
 
-      const button = await screen.findByTestId('inferenceIdButton');
-      await waitFor(() => expect(button).toHaveTextContent('.preconfigured-elser'));
-
-      // After flyout submits 'new-endpoint-id', resendRequest returns data where
-      // that endpoint has a compatible task_type (text_embedding)
-      mockResendRequest.mockImplementation(() => {
-        useLoadInferenceEndpointsMock.mockReturnValue({
-          data: [
-            ...DEFAULT_ENDPOINTS,
-            {
-              inference_id: 'new-endpoint-id',
-              task_type: 'text_embedding',
-              service: 'openai',
-              service_settings: { model_id: 'text-embedding-3-small' },
-            },
-          ] as InferenceAPIConfigResponse[],
-          isInitialRequest: false,
-          isLoading: false,
-          error: null,
-          resendRequest: mockResendRequest,
-        });
-      });
-
-      await user.click(button);
-      await user.click(await screen.findByTestId('createInferenceEndpointButton'));
-
-      fireEvent.click(await screen.findByTestId('mock-flyout-submit'));
-
-      await waitFor(() => {
-        expect(button).toHaveTextContent('new-endpoint-id');
-      });
+      const newEndpoint = await screen.findByTestId('custom-inference_newly-created-endpoint');
+      expect(newEndpoint).toBeInTheDocument();
+      expect(newEndpoint).toHaveAttribute('aria-checked', 'true');
     });
   });
 
@@ -319,6 +253,16 @@ describe('SelectInferenceId', () => {
       await user.click(await screen.findByTestId('createInferenceEndpointButton'));
 
       expect(await screen.findByTestId('inference-flyout-wrapper')).toBeInTheDocument();
+    });
+
+    it('SHOULD pass allowedTaskTypes to restrict endpoint creation to compatible types', async () => {
+      renderSelectInferenceId();
+
+      await user.click(await screen.findByTestId('inferenceIdButton'));
+      await user.click(await screen.findByTestId('createInferenceEndpointButton'));
+
+      const allowedTaskTypes = await screen.findByTestId('mock-allowed-task-types');
+      expect(allowedTaskTypes).toHaveTextContent('text_embedding,sparse_embedding');
     });
 
     describe('AND flyout close is triggered', () => {

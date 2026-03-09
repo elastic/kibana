@@ -106,38 +106,21 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     setIsInferencePopoverVisible(false);
   }, []);
 
-  const [pendingEndpointId, setPendingEndpointId] = useState<string | null>(null);
-
   const onSubmitSuccess = useCallback(
     (newEndpointId: string) => {
-      setPendingEndpointId(newEndpointId);
       resendRequest();
+      setValue(newEndpointId);
     },
-    [resendRequest]
+    [resendRequest, setValue]
   );
-
-  /**
-   * After the endpoints list refreshes, select the pending endpoint if it's compatible.
-   * If it's not compatible (e.g. chat_completion), clear the pending state without selecting it.
-   */
-  useEffect(() => {
-    if (pendingEndpointId && compatibleEndpoints?.endpointDefinitions) {
-      const isCompatible = compatibleEndpoints.endpointDefinitions.some(
-        (endpoint) => endpoint.inference_id === pendingEndpointId
-      );
-      if (isCompatible) {
-        setValue(pendingEndpointId);
-      }
-      setPendingEndpointId(null);
-    }
-  }, [pendingEndpointId, compatibleEndpoints, setValue]);
 
   /**
    * Computes the selectable options for the inference endpoint dropdown.
    * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
+   * Includes optimistic updates for newly created endpoints that may not be in the list yet.
    */
   const options: EuiSelectableOption<EndpointOptionData>[] = useMemo(() => {
-    return (
+    const selectableOptions: EuiSelectableOption<EndpointOptionData>[] =
       compatibleEndpoints?.endpointDefinitions?.map((endpoint) => {
         return {
           key: endpoint.inference_id,
@@ -146,8 +129,21 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           checked: value === endpoint.inference_id ? 'on' : undefined,
           description: endpoint.description,
         };
-      }) || []
-    );
+      }) || [];
+
+    // Optimistic update: if a value is set but not in the list, add it
+    // (handles race condition where backend hasn't updated yet after creating a new endpoint)
+    const isValueInOptions = selectableOptions.some((option) => option.label === value);
+    if (value && !isValueInOptions) {
+      selectableOptions.push({
+        key: value,
+        label: value,
+        checked: 'on',
+        'data-test-subj': `custom-inference_${value}`,
+        description: '',
+      });
+    }
+    return selectableOptions;
   }, [compatibleEndpoints, value]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
@@ -354,6 +350,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
+                allowedTaskTypes={['text_embedding', 'sparse_embedding']}
               />
             </Suspense>
           )}
