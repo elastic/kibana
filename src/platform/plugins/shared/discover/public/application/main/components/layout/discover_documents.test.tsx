@@ -11,77 +11,79 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
-import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTabRuntimeState } from '../../state_management/redux';
-import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
-import type { DiscoverServices } from '../../../../build_services';
+import { internalStateActions } from '../../state_management/redux';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
+import { BehaviorSubject } from 'rxjs';
+import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import { discoverServiceMock } from '../../../../__mocks__/services';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import type { DiscoverAppState } from '../../state_management/redux';
+import { createCustomizationService } from '../../../../customizations/customization_service';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { type ProfilesManager } from '../../../../context_awareness';
+import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 
 const singleEsHit = esHitsMock.slice(0, 1);
-
-const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
-  const toolkit = getDiscoverInternalStateMock({ services });
-
-  await toolkit.initializeTabs();
-  await toolkit.initializeSingleTab({
-    tabId: toolkit.getCurrentTab().id,
-  });
-
-  return { toolkit };
-};
+const customisationService = createCustomizationService();
 
 async function mountComponent({
   fetchStatus,
   hits,
-  toolkit,
-  isEsqlMode,
+  profilesManager,
+  isEsqlMode = false,
 }: {
   fetchStatus: FetchStatus;
   hits: EsHitRecord[];
-  toolkit?: ReturnType<typeof getDiscoverInternalStateMock>;
+  profilesManager?: ProfilesManager;
   isEsqlMode?: boolean;
 }) {
-  if (!toolkit) {
-    ({ toolkit } = await setup());
-  }
+  const services = discoverServiceMock;
 
-  if (isEsqlMode) {
-    // In this branch, ES|QL query fetching may call dataViews.create via getEsqlDataView.
-    // Ensure the mock returns a valid DataView to keep state updates stable in tests.
-    (toolkit.services.dataViews.create as jest.Mock).mockResolvedValue(dataViewMock);
-
-    toolkit.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: toolkit.getCurrentTab().id,
-        appState: {
-          dataSource: createEsqlDataSource(),
-          query: { esql: 'from *' },
-        },
-      })
-    );
-  }
-
-  const stateContainer = selectTabRuntimeState(
-    toolkit.runtimeStateManager,
-    toolkit.getCurrentTab().id
-  ).stateContainer$.getValue()!;
-
-  const testDocuments = {
-    fetchStatus,
-    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+  services.data.query.timefilter.timefilter.getTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  stateContainer.dataState.data$.documents$.next(testDocuments);
+  const documents$ = new BehaviorSubject({
+    fetchStatus,
+    result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
+  }) as DataDocuments$;
+  const stateContainer = getDiscoverStateMock({});
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
+      appState: isEsqlMode
+        ? {
+            dataSource: createEsqlDataSource(),
+            query: { esql: 'from *' },
+          }
+        : {
+            dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+          },
+    })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        searchSessionId: 'test',
+        isSearchSessionRestored: false,
+      },
+    })
+  );
 
-  // Prevent any further updates to documents$ from clearing test data
-  stateContainer.dataState.data$.documents$.next = jest.fn();
+  stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
     viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
@@ -91,10 +93,19 @@ async function mountComponent({
     onFieldEdited: jest.fn(),
   };
 
-  return renderWithI18n(
-    <DiscoverToolkitTestProvider toolkit={toolkit}>
+  profilesManager = profilesManager ?? services.profilesManager;
+  const scopedEbtManager = services.ebtManager.createScopedEBTManager();
+
+  renderWithI18n(
+    <DiscoverTestProvider
+      services={{ ...services, profilesManager }}
+      stateContainer={stateContainer}
+      customizationService={customisationService}
+      scopedProfilesManager={profilesManager.createScopedProfilesManager({ scopedEbtManager })}
+      scopedEbtManager={scopedEbtManager}
+    >
       <DiscoverDocuments {...props} />
-    </DiscoverToolkitTestProvider>
+    </DiscoverTestProvider>
   );
 }
 
@@ -153,15 +164,12 @@ describe('Discover documents layout', () => {
   });
 
   test('should set rounded width to state on resize column', async () => {
-    const { toolkit } = await setup();
-
-    toolkit.internalState.dispatch(
-      internalStateActions.updateAppState({
-        tabId: toolkit.getCurrentTab().id,
-        appState: {
-          grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
-        },
-      })
+    const state = {
+      grid: { columns: { timestamp: { width: 173 }, someField: { width: 197 } } },
+    } as DiscoverAppState;
+    const container = getDiscoverStateMock({});
+    container.internalState.dispatch(
+      container.injectCurrentTab(internalStateActions.updateAppState)({ appState: state })
     );
 
     onResize(
@@ -169,33 +177,24 @@ describe('Discover documents layout', () => {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      toolkit.getCurrentTab().appState.grid,
+      container.getCurrentTab().appState.grid,
       (grid) => {
-        toolkit.internalState.dispatch(
-          internalStateActions.updateAppState({
-            tabId: toolkit.getCurrentTab().id,
-            appState: { grid },
-          })
+        container.internalState.dispatch(
+          container.injectCurrentTab(internalStateActions.updateAppState)({ appState: { grid } })
         );
       }
     );
 
-    expect(toolkit.getCurrentTab().appState.grid?.columns?.someField.width).toEqual(206);
+    expect(container.getCurrentTab().appState.grid?.columns?.someField.width).toEqual(206);
   });
 
   describe('context awareness', () => {
     it('should pass cell renderers from profile', async () => {
-      const services = createDiscoverServicesMock();
       const { profilesManagerMock, rootProfileProviderMock } = createContextAwarenessMocks();
-      services.profilesManager = profilesManagerMock;
-      await services.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
+      discoverServiceMock.profilesManager = profilesManagerMock;
+      await discoverServiceMock.profilesManager.resolveRootProfile({ solutionNavId: 'test' });
 
-      const { toolkit } = await setup({ services });
-      await mountComponent({
-        fetchStatus: FetchStatus.COMPLETE,
-        hits: esHitsMock,
-        toolkit,
-      });
+      await mountComponent({ fetchStatus: FetchStatus.COMPLETE, hits: esHitsMock });
 
       expect(rootProfileProviderMock.profile.getCellRenderers).toHaveBeenCalled();
     });
