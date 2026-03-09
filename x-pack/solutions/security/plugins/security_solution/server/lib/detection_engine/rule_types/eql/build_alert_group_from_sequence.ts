@@ -409,7 +409,8 @@ export const objectPairIntersection = (a: object | undefined, b: object | undefi
         if (result === undefined) {
           // eslint-disable-next-line no-continue
           continue;
-        } else if (result.kind === 'nested') {
+        }
+        if (result.kind === 'nested') {
           const nextTarget: Record<string, unknown> = {};
           target[key] = nextTarget;
           stack.push([nextTarget, result.a, result.b]);
