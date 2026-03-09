@@ -126,7 +126,7 @@ const apmRoutes = {
               kuery: t.string,
               comparisonEnabled: toBooleanRt,
             }),
-            t.partial({
+            t.type({
               serviceGroup: t.string,
             }),
             t.partial({
@@ -140,6 +140,7 @@ const apmRoutes = {
           query: {
             environment: ENVIRONMENT_ALL.value,
             kuery: '',
+            serviceGroup: '',
           },
         },
       },

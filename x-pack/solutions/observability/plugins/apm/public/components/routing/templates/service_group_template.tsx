@@ -7,7 +7,7 @@
 
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonTitle, EuiIcon } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -52,8 +52,12 @@ export function ServiceGroupTemplate({
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
   const isAllServices = !serviceGroupId;
+  const linkQuery = useMemo(
+    () => ({ ...query, serviceGroup: serviceGroupId ?? '' }),
+    [query, serviceGroupId]
+  );
   const serviceGroupsLink = router.link('/service-groups', {
-    query: { ...query, serviceGroup: '' },
+    query: { ...linkQuery, serviceGroup: '' },
   });
 
   const serviceGroupsPageTitle = (
@@ -93,7 +97,7 @@ export function ServiceGroupTemplate({
               title: i18n.translate('xpack.apm.serviceInventory.breadcrumb.title', {
                 defaultMessage: 'Service inventory',
               }),
-              href: router.link('/services', { query }),
+              href: router.link('/services', { query: linkQuery }),
             },
             {
               title: i18n.translate('xpack.apm.serviceGroups.breadcrumb.title', {
@@ -103,7 +107,7 @@ export function ServiceGroupTemplate({
             },
             {
               title: serviceGroupName,
-              href: router.link('/services', { query }),
+              href: router.link('/services', { query: linkQuery }),
             },
             ...(selectedTab
               ? [
@@ -114,7 +118,7 @@ export function ServiceGroupTemplate({
                 ]
               : []),
           ],
-    [pagePath, pageTitle, query, router, selectedTab, serviceGroupName, serviceGroupsLink],
+    [pagePath, pageTitle, linkQuery, router, selectedTab, serviceGroupName, serviceGroupsLink],
     {
       omitRootOnServerless: true,
     }
@@ -171,7 +175,12 @@ type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
+  const {
+    query,
+    query: { serviceGroup: serviceGroupId },
+  } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
+
+  const linkQuery = { ...query, serviceGroup: serviceGroupId ?? '' };
 
   const tabs: ServiceGroupContextTab[] = [
     {
@@ -182,21 +191,21 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
       label: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
         defaultMessage: 'Inventory',
       }),
-      href: router.link('/services', { query }),
+      href: router.link('/services', { query: linkQuery }),
     },
     {
       key: 'service-map',
       label: i18n.translate('xpack.apm.serviceGroup.serviceMap', {
         defaultMessage: 'Service map',
       }),
-      href: router.link('/service-map', { query }),
+      href: router.link('/service-map', { query: linkQuery }),
     },
     {
       key: 'service-groups',
       label: i18n.translate('xpack.apm.serviceGroup.serviceGroups', {
         defaultMessage: 'Service groups',
       }),
-      href: router.link('/service-groups', { query }),
+      href: router.link('/service-groups', { query: linkQuery }),
     },
   ];
 
