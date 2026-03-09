@@ -391,7 +391,7 @@ export function fromAPItoLensState(config: PartitionState): PartitionLensWithout
       datasourceStates: layers,
       ...(internalReferences.length ? { internalReferences } : {}),
       visualization: visualizationState,
-      ...(Object.keys(adHocDataViews).length ? { adHocDataViews } : {}),
+      adHocDataViews,
     },
     references,
   };
