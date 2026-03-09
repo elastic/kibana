@@ -1,13 +1,18 @@
 steps:
   - trigger: elastic/kibana-vm-images
-    env:
-      IMAGES_CONFIG: kibana/base_image.yml
+    build:
+      meta_data:
+        env:
+          IMAGES_CONFIG: kibana/base_image.yml
   - trigger: elastic/kibana-vm-images
-    env:
-      IMAGES_CONFIG: kibana/packages_layer.yml
-      BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
+    build:
+      mata_data:
+        env:
+          IMAGES_CONFIG: kibana/packages_layer.yml
+          BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml"
   - trigger: elastic/kibana-vm-images
-    env:
-      IMAGES_CONFIG: kibana/image_cache.tpl.yml
-      BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
-
+    build:
+      mata_data:
+        env:
+          IMAGES_CONFIG: kibana/image_cache.tpl.yml
+          BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml"
