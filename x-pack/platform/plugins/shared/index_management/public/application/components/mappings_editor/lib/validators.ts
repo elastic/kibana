@@ -13,7 +13,8 @@ import type { NormalizedFields } from '../types';
 export const validateUniqueName = (
   { rootLevelFields, byId }: Pick<NormalizedFields, 'rootLevelFields' | 'byId'>,
   initialName: string | undefined = '',
-  parentId?: string
+  parentId?: string,
+  mappingViewFields?: Pick<NormalizedFields, 'rootLevelFields' | 'byId'>
 ) => {
   const validator: ValidationFunc = ({ value }) => {
     const existingNames = parentId
@@ -28,6 +29,23 @@ export const validateUniqueName = (
           defaultMessage: 'There is already a field with this name.',
         }),
       };
+    }
+
+    if (mappingViewFields && !parentId) {
+      const existingMappingNames = mappingViewFields.rootLevelFields.map(
+        (fieldId) => mappingViewFields.byId[fieldId].source.name
+      );
+      if (existingMappingNames.includes(value as string)) {
+        return {
+          message: i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.existingMappingNameValidationErrorMessage',
+            {
+              defaultMessage:
+                'A field with this name already exists in the index. Use a different name or edit the existing field.',
+            }
+          ),
+        };
+      }
     }
   };
 
