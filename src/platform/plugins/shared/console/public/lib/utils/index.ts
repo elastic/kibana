@@ -135,26 +135,6 @@ export function normalizeUrl(url: string): string {
   }
 }
 
-// todo this needs better name
-/*
-export interface RequestResult {
-  // Status code of the request, e.g., 200
-  statusCode: number;
-
-  // Status text of the request, e.g., OK
-  statusText: string;
-
-  // Method of the request, e.g., GET
-  method: string;
-
-  // The path of endpoint that was called, e.g., /_search
-  endpoint: string;
-
-  // The time, in milliseconds, that the last request took
-  timeElapsedMs: number;
-}
-  */
-
 /**
  *  Sorts the request data by statusCode in increasing order and
  *  returns the last one which will be rendered in network request status bar
