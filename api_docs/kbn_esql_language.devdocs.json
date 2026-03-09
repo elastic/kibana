@@ -4311,7 +4311,7 @@
           "CommandRegistry"
         ],
         "path": "src/platform/packages/shared/kbn-esql-language/src/commands/registry/index.ts",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
