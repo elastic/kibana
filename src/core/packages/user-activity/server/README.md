@@ -63,9 +63,23 @@ user_activity:
       fileName: /var/log/kibana/user_activity.log
       layout:
         type: json
+  filters:
+    - policy: keep
+      actions: [user_logged_in]
 ```
 
 The `appenders` option uses the same schema as the core logging service.
+
+### Filters
+
+You can optionally configure `user_activity.filters` to control which `event.action` values are logged.
+
+For an activity to be logged, its `event.action` must pass **all** configured filters:
+
+- `policy: keep` logs only the actions listed in `actions`
+- `policy: drop` logs all actions except those listed in `actions`
+
+If `filters` is not configured (or empty), all actions are eligible to be logged.
 
 ## Injected Context
 

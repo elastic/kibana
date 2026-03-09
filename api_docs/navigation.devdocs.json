@@ -58,7 +58,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-            "lineNumber": 48,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +75,7 @@
                   "<object>"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-                "lineNumber": 48,
+                "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -106,7 +106,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-            "lineNumber": 50,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -123,7 +123,7 @@
                   "<{}, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-                "lineNumber": 50,
+                "lineNumber": 52,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -140,7 +140,7 @@
                   "NavigationPublicSetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-                "lineNumber": 50,
+                "lineNumber": 52,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -171,7 +171,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-            "lineNumber": 58,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -187,7 +187,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-                "lineNumber": 59,
+                "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -204,7 +204,7 @@
                   "NavigationPublicStartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-                "lineNumber": 60,
+                "lineNumber": 62,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +224,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/navigation/public/plugin.tsx",
-            "lineNumber": 142,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

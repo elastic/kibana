@@ -214,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toBe(
-            '[request body]: max_signals: Number must be greater than or equal to 1'
+            '[request body]: max_signals: Too small: expected number to be >=1'
           );
         });
       });

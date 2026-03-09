@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/ingest-pipelines-plugin'
   - '@kbn/utility-types'
   - '@kbn/code-editor'
+  - '@kbn/monaco'
 tags:
   - plugin
   - prod
