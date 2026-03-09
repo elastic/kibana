@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod/v4';
+import type { AgentBuilderPluginSetupContract } from '../../types';
+
+export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
+
+const workflowYamlDiffStatusSchema = z.enum(['pending', 'accepted', 'declined']);
+
+const workflowYamlDiffDataSchema = z.object({
+  beforeYaml: z.string().describe('Original workflow YAML content before the proposed change'),
+  afterYaml: z.string().describe('Proposed workflow YAML content after the change'),
+  proposalId: z
+    .string()
+    .describe('Stable proposal identifier linking chat diff and Monaco proposal'),
+  status: workflowYamlDiffStatusSchema.default('pending'),
+  workflowId: z.string().optional().describe('The workflow ID'),
+  name: z.string().optional().describe('The workflow name'),
+});
+
+type WorkflowYamlDiffData = z.infer<typeof workflowYamlDiffDataSchema>;
+
+const buildUnifiedDiff = (beforeYaml: string, afterYaml: string): string => {
+  const beforeLines = beforeYaml.split('\n');
+  const afterLines = afterYaml.split('\n');
+  const maxLines = Math.max(beforeLines.length, afterLines.length);
+  const diffLines: string[] = [];
+
+  for (let index = 0; index < maxLines; index++) {
+    const before = beforeLines[index];
+    const after = afterLines[index];
+
+    if (before === after) {
+      if (before !== undefined) {
+        diffLines.push(` ${before}`);
+      }
+    } else {
+      if (before !== undefined) {
+        diffLines.push(`-${before}`);
+      }
+      if (after !== undefined) {
+        diffLines.push(`+${after}`);
+      }
+    }
+  }
+
+  return diffLines.join('\n');
+};
+
+const workflowYamlDiffAttachmentType = {
+  id: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
+  type: 'inline' as const,
+  validate: (input: unknown) => {
+    const parseResult = workflowYamlDiffDataSchema.safeParse(input);
+    if (parseResult.success) {
+      return { valid: true as const, data: parseResult.data };
+    }
+    return { valid: false as const, error: parseResult.error.message };
+  },
+  format: (attachment: { data: WorkflowYamlDiffData }) => {
+    const { data } = attachment;
+    const statusLabel = data.status.toUpperCase();
+    const diff = buildUnifiedDiff(data.beforeYaml, data.afterYaml);
+
+    return {
+      getRepresentation: () => ({
+        type: 'text' as const,
+        value: `Workflow YAML proposed diff
+Proposal ID: ${data.proposalId}
+Status: ${statusLabel}
+
+\`\`\`diff
+${diff}
+\`\`\`
+
+If the proposal is pending, user can accept or decline it from the workflow YAML diff attachment UI.`,
+      }),
+    };
+  },
+};
+
+export function registerWorkflowYamlDiffAttachment(
+  agentBuilder: AgentBuilderPluginSetupContract
+): void {
+  agentBuilder.attachments.registerType(workflowYamlDiffAttachmentType);
+}
