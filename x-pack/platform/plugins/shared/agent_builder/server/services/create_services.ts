@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
   InternalStartServices,
@@ -38,6 +39,11 @@ export class ServiceManager {
   private services?: ServiceInstances;
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
+  private readonly config: AgentBuilderConfig;
+
+  constructor(config: AgentBuilderConfig) {
+    this.config = config;
+  }
 
   setupServices({
     logger,
@@ -191,6 +197,7 @@ export class ServiceManager {
       logger: logger.get('plugins'),
       elasticsearch,
       spaces,
+      config: this.config,
     });
 
     this.internalStart = {

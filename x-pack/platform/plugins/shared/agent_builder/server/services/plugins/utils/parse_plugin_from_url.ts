@@ -14,9 +14,11 @@ import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
 import { openZipArchive, type ZipArchive } from './open_zip_archive';
 import { parsePluginZipFile, PluginArchiveError } from './parse_plugin_zip_file';
 import { createScopedArchive, detectArchiveRootPrefix } from './create_scoped_archive';
-import { resolvePluginUrl } from './resolve_plugin_url';
+import { resolvePluginUrl, type ResolvePluginUrlOptions } from './resolve_plugin_url';
 
 const VOLUME = 'agent_builder';
+
+export type ParsePluginFromUrlOptions = ResolvePluginUrlOptions;
 
 /**
  * Downloads a plugin from a URL, parses its contents, and returns
@@ -28,8 +30,11 @@ const VOLUME = 'agent_builder';
  * - `https://github.com/{owner}/{repo}/blob/{ref}/{path}/plugin.json` -- GitHub blob to manifest
  * - `https://example.com/plugin.zip` -- direct zip download
  */
-export const parsePluginFromUrl = async (url: string): Promise<ParsedPluginArchive> => {
-  const resolved = resolvePluginUrl(url);
+export const parsePluginFromUrl = async (
+  url: string,
+  options: ParsePluginFromUrlOptions = {}
+): Promise<ParsedPluginArchive> => {
+  const resolved = resolvePluginUrl(url, options);
 
   const { archive, cleanup } = await downloadAndOpenArchive(resolved.downloadUrl);
   try {

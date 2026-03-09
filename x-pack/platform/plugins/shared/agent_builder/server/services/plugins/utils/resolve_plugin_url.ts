@@ -27,6 +27,10 @@ export interface GithubPluginUrl {
 
 export type ResolvedPluginUrl = ZipPluginUrl | GithubPluginUrl;
 
+export interface ResolvePluginUrlOptions {
+  githubBaseUrl?: string;
+}
+
 /**
  * Classifies a URL and resolves it into a normalized descriptor
  * that `parsePluginFromUrl` can consume.
@@ -36,9 +40,14 @@ export type ResolvedPluginUrl = ZipPluginUrl | GithubPluginUrl;
  * - GitHub `plugin.json` blob URL (`/blob/`) -> derive the plugin folder, then same as above
  * - Direct `.zip` URL -> download the zip as-is
  */
-export const resolvePluginUrl = (url: string): ResolvedPluginUrl => {
-  if (isGithubUrl(url)) {
-    return resolveGithubUrl(url);
+export const resolvePluginUrl = (
+  url: string,
+  options: ResolvePluginUrlOptions = {}
+): ResolvedPluginUrl => {
+  const { githubBaseUrl } = options;
+
+  if (isGithubUrl(url, githubBaseUrl)) {
+    return resolveGithubUrl(url, githubBaseUrl);
   }
 
   if (looksLikeZipUrl(url)) {
@@ -50,9 +59,9 @@ export const resolvePluginUrl = (url: string): ResolvedPluginUrl => {
   );
 };
 
-const resolveGithubUrl = (url: string): GithubPluginUrl => {
-  const info = parseGithubUrl(url);
-  const downloadUrl = getGithubArchiveUrl(info);
+const resolveGithubUrl = (url: string, githubBaseUrl?: string): GithubPluginUrl => {
+  const info = parseGithubUrl(url, githubBaseUrl);
+  const downloadUrl = getGithubArchiveUrl(info, githubBaseUrl);
 
   const pluginPath = derivePluginPath(info.path);
 

@@ -10,6 +10,7 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  githubBaseUrl: schema.string({ defaultValue: 'https://github.com' }),
 });
 
 export type AgentBuilderConfig = TypeOf<typeof configSchema>;

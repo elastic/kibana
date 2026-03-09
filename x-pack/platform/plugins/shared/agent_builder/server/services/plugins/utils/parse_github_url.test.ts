@@ -173,3 +173,58 @@ describe('isGithubUrl', () => {
     expect(isGithubUrl('not-a-url')).toBe(false);
   });
 });
+
+describe('custom baseUrl', () => {
+  const baseUrl = 'http://localhost:9321';
+
+  describe('parseGithubUrl with custom baseUrl', () => {
+    it('parses a tree URL with a custom base', () => {
+      const result = parseGithubUrl(
+        'http://localhost:9321/owner/repo/tree/main/plugins/foo',
+        baseUrl
+      );
+
+      expect(result).toEqual({
+        owner: 'owner',
+        repo: 'repo',
+        ref: 'main',
+        path: 'plugins/foo',
+      });
+    });
+
+    it('parses a bare repo URL with a custom base', () => {
+      const result = parseGithubUrl('http://localhost:9321/owner/repo', baseUrl);
+
+      expect(result).toEqual({
+        owner: 'owner',
+        repo: 'repo',
+        ref: 'main',
+      });
+    });
+
+    it('rejects a github.com URL when a custom base is used', () => {
+      expect(() => parseGithubUrl('https://github.com/owner/repo/tree/main/path', baseUrl)).toThrow(
+        /Invalid GitHub URL/
+      );
+    });
+  });
+
+  describe('getGithubArchiveUrl with custom baseUrl', () => {
+    it('builds the archive URL using the custom base', () => {
+      const url = getGithubArchiveUrl({ owner: 'owner', repo: 'repo', ref: 'main' }, baseUrl);
+
+      expect(url).toBe('http://localhost:9321/owner/repo/archive/main.zip');
+    });
+  });
+
+  describe('isGithubUrl with custom baseUrl', () => {
+    it('matches URLs against the custom base', () => {
+      expect(isGithubUrl('http://localhost:9321/owner/repo/tree/main/path', baseUrl)).toBe(true);
+      expect(isGithubUrl('http://localhost:9321/owner/repo', baseUrl)).toBe(true);
+    });
+
+    it('rejects github.com URLs when a custom base is provided', () => {
+      expect(isGithubUrl('https://github.com/owner/repo', baseUrl)).toBe(false);
+    });
+  });
+});

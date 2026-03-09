@@ -28,8 +28,9 @@ describe('parsePluginFromFile', () => {
     jest.clearAllMocks();
 
     mockArchive = {
+      hasEntry: jest.fn().mockReturnValue(false),
       getEntryPaths: jest.fn().mockReturnValue([]),
-      readEntry: jest.fn(),
+      getEntryContent: jest.fn(),
       close: jest.fn(),
     };
     mockOpenZipArchive.mockResolvedValue(mockArchive);

@@ -14,21 +14,34 @@ export interface GithubUrlInfo {
   path?: string;
 }
 
-const githubUrlRegex =
-  /^https?:\/\/github\.com\/(?<owner>[^/]+)\/(?<repo>[^/]+?)(?:\.git)?(?:\/(?:tree|blob)\/(?<ref>[^/]+)(?:\/(?<path>.+))?)?$/;
+const DEFAULT_GITHUB_BASE_URL = 'https://github.com';
+
+const escapeForRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const buildGithubUrlRegex = (baseUrl: string): RegExp => {
+  const { host } = new URL(baseUrl);
+  return new RegExp(
+    `^https?:\\/\\/${escapeForRegex(
+      host
+    )}\\/(?<owner>[^/]+)\\/(?<repo>[^/]+?)(?:\\.git)?(?:\\/(?:tree|blob)\\/(?<ref>[^/]+)(?:\\/(?<path>.+))?)?$`
+  );
+};
+
+const defaultGithubUrlRegex = buildGithubUrlRegex(DEFAULT_GITHUB_BASE_URL);
 
 /**
  * Parses a GitHub repository URL into its components.
  *
  * Supported formats:
- * - `https://github.com/{owner}/{repo}`
- * - `https://github.com/{owner}/{repo}.git`
- * - `https://github.com/{owner}/{repo}/tree/{ref}`
- * - `https://github.com/{owner}/{repo}/tree/{ref}/{path}`
- * - `https://github.com/{owner}/{repo}/blob/{ref}/{path}`
+ * - `{baseUrl}/{owner}/{repo}`
+ * - `{baseUrl}/{owner}/{repo}.git`
+ * - `{baseUrl}/{owner}/{repo}/tree/{ref}`
+ * - `{baseUrl}/{owner}/{repo}/tree/{ref}/{path}`
+ * - `{baseUrl}/{owner}/{repo}/blob/{ref}/{path}`
  */
-export const parseGithubUrl = (url: string): GithubUrlInfo => {
-  const match = url.match(githubUrlRegex);
+export const parseGithubUrl = (url: string, baseUrl?: string): GithubUrlInfo => {
+  const regex = baseUrl ? buildGithubUrlRegex(baseUrl) : defaultGithubUrlRegex;
+  const match = url.match(regex);
   if (!match?.groups) {
     throw new Error(
       `Invalid GitHub URL: "${url}". Expected format: https://github.com/{owner}/{repo}/tree/{ref}/{path}`
@@ -49,13 +62,17 @@ export const parseGithubUrl = (url: string): GithubUrlInfo => {
 /**
  * Returns the URL to download the repository archive as a zip file.
  */
-export const getGithubArchiveUrl = ({ owner, repo, ref }: GithubUrlInfo): string => {
-  return `https://github.com/${owner}/${repo}/archive/${ref}.zip`;
+export const getGithubArchiveUrl = (
+  { owner, repo, ref }: GithubUrlInfo,
+  baseUrl: string = DEFAULT_GITHUB_BASE_URL
+): string => {
+  return `${baseUrl}/${owner}/${repo}/archive/${ref}.zip`;
 };
 
 /**
  * Checks whether a URL is a GitHub URL (tree, blob, or bare repo).
  */
-export const isGithubUrl = (url: string): boolean => {
-  return githubUrlRegex.test(url);
+export const isGithubUrl = (url: string, baseUrl?: string): boolean => {
+  const regex = baseUrl ? buildGithubUrlRegex(baseUrl) : defaultGithubUrlRegex;
+  return regex.test(url);
 };

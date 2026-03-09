@@ -10,6 +10,7 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { ParsedPluginArchive, ParsedSkillFile } from '@kbn/agent-builder-common';
 import type { PersistedSkillCreateRequest } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderConfig } from '../../config';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
@@ -40,6 +41,7 @@ export interface PluginsServiceStartDeps {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
+  config: AgentBuilderConfig;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -94,7 +96,8 @@ class PluginsServiceImpl implements PluginsService {
     let sourceUrl: string | undefined;
 
     if (source.type === 'url') {
-      parsedArchive = await parsePluginFromUrl(source.url);
+      const { config } = this.getStartDeps();
+      parsedArchive = await parsePluginFromUrl(source.url, { githubBaseUrl: config.githubBaseUrl });
       sourceUrl = source.url;
     } else {
       parsedArchive = await parsePluginFromFile(source.filePath);

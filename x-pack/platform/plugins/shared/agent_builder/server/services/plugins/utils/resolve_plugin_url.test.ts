@@ -117,4 +117,35 @@ describe('resolvePluginUrl', () => {
       expect(() => resolvePluginUrl('not-a-url')).toThrow(/Unsupported plugin URL/);
     });
   });
+
+  describe('custom githubBaseUrl', () => {
+    const githubBaseUrl = 'http://localhost:9321';
+
+    it('resolves a tree URL against the custom base', () => {
+      const result = resolvePluginUrl('http://localhost:9321/owner/repo/tree/main/plugins/foo', {
+        githubBaseUrl,
+      });
+
+      expect(result).toEqual({
+        type: 'github',
+        downloadUrl: 'http://localhost:9321/owner/repo/archive/main.zip',
+        pluginPath: 'plugins/foo',
+      });
+    });
+
+    it('resolves a bare repo URL against the custom base', () => {
+      const result = resolvePluginUrl('http://localhost:9321/owner/repo', { githubBaseUrl });
+
+      expect(result).toEqual({
+        type: 'github',
+        downloadUrl: 'http://localhost:9321/owner/repo/archive/main.zip',
+      });
+    });
+
+    it('treats a github.com URL as unsupported when a custom base is provided', () => {
+      expect(() => resolvePluginUrl('https://github.com/owner/repo', { githubBaseUrl })).toThrow(
+        /Unsupported plugin URL/
+      );
+    });
+  });
 });

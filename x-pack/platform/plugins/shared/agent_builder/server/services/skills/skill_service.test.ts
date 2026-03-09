@@ -29,6 +29,7 @@ jest.mock('./persisted/client', () => ({
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    deleteByPluginId: jest.fn(),
   })),
 }));
 
