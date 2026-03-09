@@ -209,16 +209,17 @@ export async function loadIndexPatterns({
   const esqlSpecsWithoutTimeField = adHocSpecs.filter(
     (spec) => !spec.timeFieldName && spec.title && spec.type === ESQL_TYPE
   );
-  const resolvedTimeFields: Record<string, string | undefined> = esqlSpecsWithoutTimeField.length
-    ? await resolveTimeFieldsForIndexPatterns(http, esqlSpecsWithoutTimeField)
-    : {};
+  const resolvedEsqlTimeFields: Record<string, string | undefined> =
+    esqlSpecsWithoutTimeField.length
+      ? await resolveTimeFieldsForEsqlIndexPatterns(http, esqlSpecsWithoutTimeField)
+      : {};
 
   indexPatterns.push(
     ...(await Promise.all(
       adHocSpecs.map(async (spec) => {
         const adHocDataview = await dataViews.create(spec);
         if (adHocDataview.type === ESQL_TYPE && !adHocDataview.timeFieldName && spec.title) {
-          const timeField = resolvedTimeFields[spec.title];
+          const timeField = resolvedEsqlTimeFields[spec.title];
           if (timeField) {
             adHocDataview.timeFieldName = timeField;
           }
@@ -239,7 +240,7 @@ export async function loadIndexPatterns({
   return indexPatternsObject;
 }
 
-async function resolveTimeFieldsForIndexPatterns(
+async function resolveTimeFieldsForEsqlIndexPatterns(
   http?: HttpStart,
   specs?: DataViewSpec[]
 ): Promise<Record<string, string | undefined>> {
