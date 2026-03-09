@@ -5,40 +5,79 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { EuiCallOut, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
-import { RulesApi } from '../services/rules_api';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { paths } from '../../constants';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-};
-
-export const CreateRulePage = () => {
+export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
   const isEditing = Boolean(ruleId);
-  const history = useHistory();
-  const rulesApi = useService(RulesApi);
+
+  if (isEditing && ruleId) {
+    return <EditRuleFormPageContent ruleId={ruleId} />;
+  }
+
+  return <RuleFormPageContent />;
+};
+
+const EditRuleFormPageContent = ({ ruleId }: { ruleId: string }) => {
+  const { data: rule, isLoading, isError, error } = useFetchRule(ruleId);
+
+  if (isLoading) {
+    return <EuiLoadingSpinner size="xl" />;
+  }
+
+  if (isError) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.alertingV2.ruleFormPage.loadErrorTitle"
+            defaultMessage="Failed to load rule"
+          />
+        }
+        color="danger"
+        iconType="error"
+        announceOnMount
+      >
+        {error instanceof Error ? error.message : String(error)}
+      </EuiCallOut>
+    );
+  }
+
+  if (!rule) {
+    return null;
+  }
+
+  const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
+
+  return <RuleFormPageContent ruleId={ruleId} initialQuery={initialQuery} />;
+};
+
+interface RuleFormPageContentProps {
+  ruleId?: string;
+  initialQuery?: string;
+}
+
+const RuleFormPageContent = ({ ruleId, initialQuery }: RuleFormPageContentProps) => {
+  const isEditing = Boolean(ruleId);
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const { navigateToUrl } = application;
+  const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
-
-  const [initialQuery, setInitialQuery] = useState(DEFAULT_QUERY);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [isLoadingRule, setIsLoadingRule] = useState(false);
 
   const ruleFormServices = useMemo(
     () => ({
@@ -51,49 +90,12 @@ export const CreateRulePage = () => {
     [http, data, dataViews, notifications, application]
   );
 
-  // Load existing rule for editing
-  useEffect(() => {
-    if (!ruleId) {
-      return;
-    }
-
-    let cancelled = false;
-    const loadRule = async () => {
-      setIsLoadingRule(true);
-      setLoadError(null);
-
-      try {
-        const rule = await rulesApi.getRule(ruleId);
-        if (cancelled) {
-          return;
-        }
-
-        // Set the initial query from the loaded rule
-        setInitialQuery(rule.evaluation?.query?.base ?? DEFAULT_QUERY);
-      } catch (err) {
-        if (!cancelled) {
-          setLoadError(getErrorMessage(err));
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingRule(false);
-        }
-      }
-    };
-
-    loadRule();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [ruleId, rulesApi]);
-
   const onSuccess = () => {
-    history.push('/');
+    navigateToUrl(basePath.prepend(paths.ruleList));
   };
 
   const onCancel = () => {
-    history.push('/');
+    navigateToUrl(basePath.prepend(paths.ruleList));
   };
 
   return (
@@ -114,31 +116,11 @@ export const CreateRulePage = () => {
         }
       />
       <EuiSpacer size="m" />
-
-      {loadError && (
-        <>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.alertingV2.createRule.loadErrorTitle"
-                defaultMessage="Failed to load rule"
-              />
-            }
-            color="danger"
-            iconType="error"
-            announceOnMount
-          >
-            {loadError}
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
-
       <StandaloneRuleForm
-        query={initialQuery}
+        query={initialQuery ?? DEFAULT_QUERY}
         services={ruleFormServices}
         includeYaml
-        isDisabled={isLoadingRule}
+        isDisabled={false}
         includeSubmission
         onSuccess={onSuccess}
         onCancel={onCancel}
