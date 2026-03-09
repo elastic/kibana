@@ -1,5 +1,5 @@
 {
-  "job_id": "suspicious_login_activity_ea",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],

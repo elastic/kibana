@@ -1,5 +1,5 @@
 {
-  "job_id": "azure_activitylogs_rare_event_action_for_a_username_ea",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
