@@ -551,6 +551,25 @@ EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwrigh
 
 This creates a dedicated `evaluationsEsClient` that connects to your evaluations cluster while `esClient` continues to use your test environment cluster.
 
+#### Using Separate Clusters and Kibana
+
+Use these settings when traces, evaluation results, or managed datasets live outside the default Scout Kibana/Elasticsearch pair.
+
+| Variable | CLI flag | Purpose |
+| --- | --- | --- |
+| `TRACING_ES_URL` | `--trace-es-url` | Sends trace-based evaluator queries to a separate monitoring Elasticsearch cluster. |
+| `EVALUATIONS_ES_URL` | `--evaluations-es-url` | Exports evaluation scores to a separate Elasticsearch cluster. |
+| `EVALUATIONS_KBN_URL` | `--evaluations-kbn-url` | Routes dataset upsert and dataset lookup operations to a separate Kibana instance. |
+| `EVALUATIONS_KBN_API_KEY` | `--evaluations-kbn-api-key` | Optional API key used for dataset Kibana operations when `EVALUATIONS_KBN_URL` is set. |
+
+#### Using a Separate Kibana for Dataset Operations
+
+By default, dataset sync (`POST /internal/evals/datasets/_upsert`) and dataset resolution by name use the same Kibana client as the eval run.
+If your datasets are curated in another Kibana instance, set `EVALUATIONS_KBN_URL` (or `--evaluations-kbn-url`) so dataset operations target that instance instead.
+
+When that remote Kibana should be accessed with an API key, set `EVALUATIONS_KBN_API_KEY` (or `--evaluations-kbn-api-key`).
+When `EVALUATIONS_KBN_API_KEY` is provided, requests use `Authorization: ApiKey ...`; otherwise URL-embedded credentials in `EVALUATIONS_KBN_URL` are used.
+
 ## Customizing Report Display
 
 By default, evaluation results are displayed in the terminal as a formatted table. You can override this behavior to create custom reports (e.g., JSON files, dashboards, or custom formats).
