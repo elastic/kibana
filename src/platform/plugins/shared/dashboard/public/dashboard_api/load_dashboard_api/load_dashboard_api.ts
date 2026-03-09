@@ -68,6 +68,7 @@ export async function loadDashboardApi({
     : undefined;
 
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
+  console.log('overrideState', overrideState);
   if (overrideState.panels) {
     overrideState.panels = await transformPanels(overrideState.panels, overrideState.references);
   }

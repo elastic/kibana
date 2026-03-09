@@ -14,7 +14,6 @@ import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
-import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 
 export function extractDashboardState(
   state?: unknown
@@ -52,7 +51,6 @@ export function extractDashboardState(
     }
 
     dashboardState = {
-      ...DEFAULT_DASHBOARD_STATE,
       ...dashboardState,
       ...extractSearchState(stateAsObject),
       ...(Object.keys(options).length && { options: { ...DEFAULT_DASHBOARD_OPTIONS, ...options } }),
