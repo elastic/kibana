@@ -317,8 +317,16 @@ describe('NotificationPolicySavedObjectService', () => {
         { id: 'policy-2', version: 'v3' },
       ]);
       expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith([
-        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1', attributes: { enabled: true } },
-        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-2', attributes: { enabled: false } },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-1',
+          attributes: { enabled: true },
+        },
+        {
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          id: 'policy-2',
+          attributes: { enabled: false },
+        },
       ]);
     });
 

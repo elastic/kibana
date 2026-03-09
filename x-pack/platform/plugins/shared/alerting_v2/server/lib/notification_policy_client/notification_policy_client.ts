@@ -6,7 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import type { NotificationPolicyBulkAction, NotificationPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  NotificationPolicyBulkAction,
+  NotificationPolicyResponse,
+} from '@kbn/alerting-v2-schemas';
 import {
   createNotificationPolicyDataSchema,
   updateNotificationPolicyDataSchema,
