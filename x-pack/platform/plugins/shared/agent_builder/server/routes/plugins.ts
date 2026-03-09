@@ -6,6 +6,7 @@
  */
 
 import type { Readable } from 'stream';
+import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
@@ -67,6 +68,9 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       {
         version: '2023-10-31',
         validate: false,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/plugins_list.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { plugins: pluginService } = getInternalServices();
@@ -104,6 +108,9 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
             params: pluginIdParamSchema,
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/plugins_get_by_id.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { pluginId } = request.params;
@@ -140,6 +147,9 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
             params: pluginIdParamSchema,
           },
         },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/plugins_delete.yaml'),
+        },
       },
       wrapHandler(async (ctx, request, response) => {
         const { pluginId } = request.params;
@@ -174,6 +184,9 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
           request: {
             body: installPluginBodySchema,
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/plugins_install.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
