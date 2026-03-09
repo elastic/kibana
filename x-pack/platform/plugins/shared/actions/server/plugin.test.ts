@@ -123,11 +123,6 @@ describe('Actions Plugin', () => {
           authorize: { lookbackWindow: '1h', limit: 100 },
           callback: { lookbackWindow: '1h', limit: 100 },
         },
-        auth: {
-          oauth_authorization_code: {
-            enabled: false,
-          },
-        },
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -160,7 +155,7 @@ describe('Actions Plugin', () => {
       );
     });
 
-    it('should register user_connector_token saved object type and encryption', async () => {
+    it('should always register user_connector_token saved object type and encryption', async () => {
       await plugin.setup(coreSetup, pluginsSetup);
       expect(coreSetup.savedObjects.registerType).toHaveBeenCalledWith(
         expect.objectContaining({ name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE })
@@ -535,11 +530,6 @@ describe('Actions Plugin', () => {
         oAuthRateLimit: {
           authorize: { lookbackWindow: '1h', limit: 100 },
           callback: { lookbackWindow: '1h', limit: 100 },
-        },
-        auth: {
-          oauth_authorization_code: {
-            enabled: false,
-          },
         },
       });
       plugin = new ActionsPlugin(context);

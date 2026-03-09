@@ -35,21 +35,18 @@ import {
 } from '../constants/saved_objects';
 import {
   actionTaskParamsModelVersions,
-  connectorModelVersions,
   connectorTokenModelVersions,
   oauthStateModelVersions,
   userConnectorTokenModelVersions,
 } from './model_versions';
-import { connectorModelVersionsWithAuthMode } from './model_versions/connector_model_versions';
-import { connectorTokenModelVersionsWithRefreshToken } from './model_versions/connector_token_model_versions';
+import { connectorModelVersions } from './model_versions/connector_model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   actionTypeRegistry: ActionTypeRegistry,
   taskManagerIndex: string,
-  inMemoryConnectors: InMemoryConnector[],
-  authorizationCodeEnabled: boolean
+  inMemoryConnectors: InMemoryConnector[]
 ) {
   savedObjects.registerType({
     name: ACTION_SAVED_OBJECT_TYPE,
@@ -78,9 +75,7 @@ export function setupSavedObjects(
         };
       },
     },
-    modelVersions: authorizationCodeEnabled
-      ? connectorModelVersionsWithAuthMode
-      : connectorModelVersions,
+    modelVersions: connectorModelVersions,
   });
 
   // Encrypted attributes
@@ -139,88 +134,77 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: false,
     },
-    modelVersions: authorizationCodeEnabled
-      ? connectorTokenModelVersionsWithRefreshToken(encryptedSavedObjects)
-      : connectorTokenModelVersions,
+    modelVersions: connectorTokenModelVersions(encryptedSavedObjects),
   });
-
-  const connectorTokenAttributesToEncrypt = new Set(['token']);
-  const connectorTokenAttributesToIncludeInAAD = new Set([
-    'connectorId',
-    'tokenType',
-    'expiresAt',
-    'createdAt',
-    'updatedAt',
-  ]);
-
-  if (authorizationCodeEnabled) {
-    connectorTokenAttributesToEncrypt.add('refreshToken');
-    connectorTokenAttributesToIncludeInAAD.add('refreshTokenExpiresAt');
-  }
 
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: connectorTokenAttributesToEncrypt,
-    attributesToIncludeInAAD: connectorTokenAttributesToIncludeInAAD,
+    attributesToEncrypt: new Set(['token', 'refreshToken']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+      'refreshTokenExpiresAt',
+    ]),
   });
 
-  if (authorizationCodeEnabled) {
-    savedObjects.registerType({
-      name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      hidden: true,
-      namespaceType: 'agnostic',
-      mappings: userConnectorTokenMappings,
-      management: {
-        importableAndExportable: false,
-      },
-      modelVersions: userConnectorTokenModelVersions,
-    });
+  savedObjects.registerType({
+    name: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: userConnectorTokenMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: userConnectorTokenModelVersions,
+  });
 
-    encryptedSavedObjects.registerType({
-      type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['credentials']),
-      attributesToIncludeInAAD: new Set([
-        'profileUid',
-        'connectorId',
-        'credentialType',
-        'expiresAt',
-        'refreshTokenExpiresAt',
-        'createdAt',
-        'updatedAt',
-      ]),
-    });
+  encryptedSavedObjects.registerType({
+    type: USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['credentials']),
+    attributesToIncludeInAAD: new Set([
+      'profileUid',
+      'connectorId',
+      'credentialType',
+      'expiresAt',
+      'refreshTokenExpiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
+  });
 
-    savedObjects.registerType({
-      name: OAUTH_STATE_SAVED_OBJECT_TYPE,
-      indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-      hidden: true,
-      namespaceType: 'agnostic',
-      mappings: oauthStateMappings,
-      management: {
-        importableAndExportable: false,
-      },
-      modelVersions: oauthStateModelVersions,
-      excludeOnUpgrade: async () => {
-        // Clean up expired states older than 1 hour
-        const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
-        return {
-          bool: {
-            must: [{ term: { type: 'oauth_state' } }, { range: { expiresAt: { lt: oneHourAgo } } }],
-          },
-        };
-      },
-    });
-    encryptedSavedObjects.registerType({
-      type: OAUTH_STATE_SAVED_OBJECT_TYPE,
-      attributesToEncrypt: new Set(['codeVerifier']),
-      attributesToIncludeInAAD: new Set([
-        'state',
-        'connectorId',
-        'spaceId',
-        'expiresAt',
-        'createdBy',
-      ]),
-    });
-  }
+  savedObjects.registerType({
+    name: OAUTH_STATE_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: oauthStateMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: oauthStateModelVersions,
+    excludeOnUpgrade: async () => {
+      const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+      return {
+        bool: {
+          must: [{ term: { type: 'oauth_state' } }, { range: { expiresAt: { lt: oneHourAgo } } }],
+        },
+      };
+    },
+  });
+
+  encryptedSavedObjects.registerType({
+    type: OAUTH_STATE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['codeVerifier']),
+    attributesToIncludeInAAD: new Set([
+      'state',
+      'connectorId',
+      'spaceId',
+      'expiresAt',
+      'createdBy',
+    ]),
+  });
 }

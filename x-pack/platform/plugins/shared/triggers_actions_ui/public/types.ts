@@ -441,7 +441,6 @@ export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
   enabledEmailServices: ActionsPublicPluginSetup['enabledEmailServices'];
   isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
-  authorizationCodeEnabled?: ActionsPublicPluginSetup['authorizationCodeEnabled'];
 }
 
 export interface RulesListFilters {

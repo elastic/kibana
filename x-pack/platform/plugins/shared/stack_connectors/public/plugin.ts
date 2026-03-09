@@ -49,9 +49,6 @@ export class StackConnectorsPublicPlugin
       registerConnectorTypesFromSpecs({
         connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
         uiSettingsPromise: core.getStartServices().then(([coreStart]) => coreStart.uiSettings),
-        actionSettings: {
-          authorizationCodeEnabled: actions.authorizationCodeEnabled ?? false,
-        },
       });
     }
   }

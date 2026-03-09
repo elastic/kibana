@@ -260,7 +260,6 @@ describe('get()', () => {
         id: 'preconfigured-1',
         inMemoryConnector,
         actionTypeRegistry,
-        authorizationCodeEnabled: false,
       });
       expect(getConnectorSoMock).not.toHaveBeenCalled();
     });
@@ -347,7 +346,7 @@ describe('get()', () => {
       expect(connectorFromInMemoryConnectorMock).not.toHaveBeenCalled();
     });
 
-    test('passes authorizationCodeEnabled: false to connectorFromInMemoryConnector when flag is off', async () => {
+    test('passes correct params to connectorFromInMemoryConnector', async () => {
       const inMemoryConnector: InMemoryConnector = {
         id: 'preconfigured-1',
         actionTypeId: '.slack',
@@ -376,7 +375,7 @@ describe('get()', () => {
       });
 
       expect(connectorFromInMemoryConnectorMock).toHaveBeenCalledWith(
-        expect.objectContaining({ authorizationCodeEnabled: false })
+        expect.objectContaining({ id: 'preconfigured-1', inMemoryConnector, actionTypeRegistry })
       );
     });
   });
@@ -410,6 +409,7 @@ describe('get()', () => {
         isSystemAction: false,
         isDeprecated: false,
         isConnectorTypeDeprecated: false,
+        authMode: 'shared',
       });
 
       expect(getConnectorSoMock).toHaveBeenCalledWith({
@@ -433,7 +433,7 @@ describe('get()', () => {
       });
 
       const result = await get({
-        context: { ...mockContext, authorizationCodeEnabled: true },
+        context: mockContext,
         id: '1',
       });
 
@@ -457,7 +457,7 @@ describe('get()', () => {
       });
 
       const result = await get({
-        context: { ...mockContext, authorizationCodeEnabled: true },
+        context: mockContext,
         id: '1',
       });
 
@@ -478,32 +478,11 @@ describe('get()', () => {
       });
 
       const result = await get({
-        context: { ...mockContext, authorizationCodeEnabled: true },
-        id: '1',
-      });
-
-      expect(result.authMode).toBe('shared');
-    });
-
-    test('omits authMode when authorizationCodeEnabled is false', async () => {
-      getConnectorSoMock.mockResolvedValueOnce({
-        id: '1',
-        type: 'action',
-        attributes: {
-          name: 'Test Connector',
-          actionTypeId: '.slack',
-          config: {},
-          isMissingSecrets: false,
-        },
-        references: [],
-      });
-
-      const result = await get({
         context: mockContext,
         id: '1',
       });
 
-      expect(result.authMode).toBeUndefined();
+      expect(result.authMode).toBe('shared');
     });
 
     test('sets isMissingSecrets correctly', async () => {

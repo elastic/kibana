@@ -57,7 +57,6 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     // recipient_allowlist is not exposed because it may contain sensitive information
     email: { domain_allowlist: true, recipient_allowlist: false, services: { enabled: true } },
     webhook: { ssl: { pfx: { enabled: true } } },
-    auth: { oauth_authorization_code: { enabled: true } },
   },
 };
 

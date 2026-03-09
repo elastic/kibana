@@ -13,7 +13,6 @@ import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit
 import { isConnectorDeprecated } from '../../lib';
 import type { GetParams } from './types';
 import { connectorFromInMemoryConnector } from '../../lib/connector_from_in_memory_connector';
-import { getAuthMode } from '../../lib/get_auth_mode';
 
 export async function get({
   context,
@@ -21,7 +20,6 @@ export async function get({
   throwIfSystemAction = true,
 }: GetParams): Promise<Connector> {
   const { actionTypeRegistry } = context;
-  const authorizationCodeEnabled = context.authorizationCodeEnabled ?? false;
   try {
     await context.authorization.ensureAuthorized({ operation: 'get' });
   } catch (error) {
@@ -66,7 +64,6 @@ export async function get({
       id,
       inMemoryConnector: foundInMemoryConnector,
       actionTypeRegistry,
-      authorizationCodeEnabled,
     });
   } else {
     const result = await getConnectorSo({
@@ -81,11 +78,6 @@ export async function get({
       })
     );
 
-    const authMode = getAuthMode(
-      result.attributes.authMode as Connector['authMode'] | undefined,
-      authorizationCodeEnabled
-    );
-
     connector = {
       id,
       actionTypeId: result.attributes.actionTypeId,
@@ -96,7 +88,9 @@ export async function get({
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
-      ...(authMode !== undefined ? { authMode } : {}),
+      authMode: result.attributes.authMode
+        ? (result.attributes.authMode as Connector['authMode'])
+        : 'shared',
     };
   }
 

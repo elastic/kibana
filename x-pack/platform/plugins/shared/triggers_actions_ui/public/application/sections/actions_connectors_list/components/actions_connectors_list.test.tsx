@@ -27,7 +27,6 @@ jest.mock('../../../..', () => ({
     services: {
       validateEmailAddresses: jest.fn(),
       enabledEmailServices: ['*'],
-      authorizationCodeEnabled: false,
     },
   }),
 }));

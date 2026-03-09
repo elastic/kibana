@@ -44,17 +44,15 @@ export interface TaskContext {
 }
 
 export const encryptionOverrides: EncryptedSavedObjectTypeRegistration[] = [
-  // Placeholder for manually specifying any previous versions of ESO registrations
-  // Example:
-  // {
-  //   type: 'connector_token',
-  //   attributesToEncrypt: new Set(['token']),
-  //   attributesToIncludeInAAD: new Set([
-  //     'connectorId',
-  //     'tokenType',
-  //     'expiresAt',
-  //     'createdAt',
-  //     'updatedAt',
-  //   ]),
-  // },
+  {
+    type: 'connector_token',
+    attributesToEncrypt: new Set(['token']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'tokenType',
+      'expiresAt',
+      'createdAt',
+      'updatedAt',
+    ]),
+  },
 ];

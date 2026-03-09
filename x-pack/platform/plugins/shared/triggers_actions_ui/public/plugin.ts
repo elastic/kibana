@@ -226,7 +226,6 @@ export class Plugin
       validateEmailAddresses: plugins.actions.validateEmailAddresses,
       enabledEmailServices: plugins.actions.enabledEmailServices,
       isWebhookSslWithPfxEnabled: plugins.actions.isWebhookSslWithPfxEnabled,
-      authorizationCodeEnabled: plugins.actions.authorizationCodeEnabled,
     };
 
     const getCasesPlugin = async (): Promise<CasesService | undefined> => {

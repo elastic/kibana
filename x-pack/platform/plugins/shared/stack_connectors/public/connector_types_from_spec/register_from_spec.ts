@@ -21,13 +21,9 @@ import {
 export function registerConnectorTypesFromSpecs({
   connectorTypeRegistry,
   uiSettingsPromise,
-  actionSettings: { authorizationCodeEnabled } = { authorizationCodeEnabled: false },
 }: {
   connectorTypeRegistry: TriggersAndActionsUIPublicPluginSetup['actionTypeRegistry'];
   uiSettingsPromise: Promise<IUiSettingsClient>;
-  actionSettings?: {
-    authorizationCodeEnabled: boolean;
-  };
 }) {
   // TODO: Clean this up when workflows:ui:enabled setting is removed.
   // This is a workaround to avoid making the whole thing async.
@@ -56,9 +52,7 @@ export function registerConnectorTypesFromSpecs({
   ]).then(([{ connectorsSpecs }, { generateFormFields }, { generateSchema }]) => {
     for (const spec of Object.values(connectorsSpecs)) {
       connectorTypeRegistry.register(
-        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema, {
-          authorizationCodeEnabled,
-        })
+        createConnectorTypeFromSpec(spec, ref, generateFormFields, generateSchema)
       );
     }
   });
@@ -68,10 +62,9 @@ const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   ref: { uiSettings?: IUiSettingsClient },
   generateFormFields: typeof import('@kbn/response-ops-form-generator').generateFormFields,
-  generateSchema: typeof import('./generate_schema').generateSchema,
-  { authorizationCodeEnabled }: { authorizationCodeEnabled: boolean }
+  generateSchema: typeof import('./generate_schema').generateSchema
 ): ActionTypeModel => {
-  const schema = generateSchema(spec, { authorizationCodeEnabled });
+  const schema = generateSchema(spec);
 
   return {
     id: spec.metadata.id,
