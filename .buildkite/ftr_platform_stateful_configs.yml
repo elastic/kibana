@@ -96,6 +96,8 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
+  - src/platform/test/functional/apps/discover/tabs4/config.ts
+  - src/platform/test/functional/apps/discover/tabs5/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
@@ -266,7 +268,8 @@ enabled:
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/saved_objects_management/config.ts
-  - x-pack/platform/test/functional/apps/saved_query_management/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/group1/config.ts
+  - x-pack/platform/test/functional/apps/saved_query_management/group2/config.ts
   - x-pack/platform/test/functional/apps/saved_query_management/config.v2.ts
   - x-pack/platform/test/functional/apps/security/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
