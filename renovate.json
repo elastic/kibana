@@ -2706,6 +2706,15 @@
       "labels": ["Team:Operations", "release_note:skip"],
       "minimumReleaseAge": "14 days",
       "enabled": true
+    },
+    {
+      "groupName": "browserslist",
+      "matchDepNames": ["browserslist"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "release_note:skip"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
     }
   ],
   "customManagers": [
