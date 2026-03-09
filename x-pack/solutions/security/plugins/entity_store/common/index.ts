@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as euidModule from './domain/euid';
 
 export const PLUGIN_ID = 'entityStore';
@@ -57,9 +57,14 @@ export const ENTITY_STORE_ROUTES = {
   START: `${ENTITY_STORE_BASE_ROUTE}/start`,
   STOP: `${ENTITY_STORE_BASE_ROUTE}/stop`,
   FORCE_LOG_EXTRACTION: `${ENTITY_STORE_BASE_ROUTE}/{entityType}/force_log_extraction`,
+  FORCE_HISTORY_SNAPSHOT: `${ENTITY_STORE_BASE_ROUTE}/force_history_snapshot`,
   CRUD_UPSERT: `${ENTITY_STORE_BASE_ROUTE}/entities/{entityType}`,
   CRUD_UPSERT_BULK: `${ENTITY_STORE_BASE_ROUTE}/entities/bulk`,
   CRUD_DELETE: `${ENTITY_STORE_BASE_ROUTE}/entities/`,
+  ENTITY_MAINTAINERS_START: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/start/{id}`,
+  ENTITY_MAINTAINERS_STOP: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/stop/{id}`,
+  ENTITY_MAINTAINERS_GET: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers`,
+  ENTITY_MAINTAINERS_INIT: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/init`,
 } as const satisfies Record<string, string>;
 
 export const getErrorMessage = (error: unknown): string => {

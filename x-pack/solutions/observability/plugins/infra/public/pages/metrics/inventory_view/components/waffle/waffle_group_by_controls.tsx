@@ -140,7 +140,7 @@ export const WaffleGroupByControls = ({
   const buttonBody =
     groupBy.length > 0 ? (
       groupBy
-        .map((g) => combinedOptions.find((o) => o.field === g.field))
+        .map((g) => combinedOptions?.find((o) => o.field === g.field))
         .filter((o) => o != null)
         // In this map the `o && o.field` is totally unnecessary but Typescript is
         // too stupid to realize that the filter above prevents the next map from being null
