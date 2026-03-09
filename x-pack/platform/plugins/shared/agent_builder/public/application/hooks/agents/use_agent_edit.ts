@@ -11,7 +11,6 @@ import {
   type AgentDefinition,
   AgentVisibility,
   type ToolSelection,
-  type UserIdAndName,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
 import { useSearchParams } from 'react-router-dom-v5-compat';
