@@ -29,6 +29,7 @@ import type {
   SortProcessor,
   ConcatProcessor,
   NetworkDirectionProcessor,
+  EnrichProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -160,6 +161,12 @@ export type IngestPipelineSortProcessor = RenameFieldsAndRemoveAction<
 export type IngestPipelineNetworkDirectionProcessor = RenameFieldsAndRemoveAction<
   NetworkDirectionProcessor,
   { where: 'if' }
+>;
+
+// Enrich
+export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
+  EnrichProcessor,
+  { to: 'target_field'; where: 'if' }
 >;
 
 // Manual Ingest Pipeline (escape hatch)
