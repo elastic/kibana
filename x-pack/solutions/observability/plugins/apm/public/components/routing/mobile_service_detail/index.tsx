@@ -256,7 +256,7 @@ export const mobileServiceDetailRoute = {
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
-          hidden: true,
+          showTimeComparison: true,
         },
       }),
       '/mobile-services/{serviceName}/logs': page({

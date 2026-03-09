@@ -14,7 +14,6 @@ import { ChartPointerEventContextProvider } from '../../../context/chart_pointer
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ApmOverview } from './apm_overview';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -47,7 +46,6 @@ export function ServiceOverview() {
 
   return (
     <>
-      <SearchBar showTimeComparison showTransactionTypeSelector showEnvironmentFilter />
       <AnnotationsContextProvider
         serviceName={serviceName}
         environment={environment}

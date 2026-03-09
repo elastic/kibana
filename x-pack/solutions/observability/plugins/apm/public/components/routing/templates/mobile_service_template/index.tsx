@@ -105,6 +105,7 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
 
   return (
     <ApmMainTemplate
+      searchBar={<MobileSearchBar {...searchBarOptions} />}
       pageHeader={{
         tabs,
         pageTitle: (
@@ -134,7 +135,6 @@ function TemplateWithContext({ title, children, selectedTabKey, searchBarOptions
         ),
       }}
     >
-      <MobileSearchBar {...searchBarOptions} />
       <ServiceAnomalyTimeseriesContextProvider>{children}</ServiceAnomalyTimeseriesContextProvider>
     </ApmMainTemplate>
   );

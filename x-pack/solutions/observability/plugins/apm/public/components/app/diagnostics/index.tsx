@@ -194,7 +194,6 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       data-test-subj="apmDiagnosticsTemplate"
       pageTitle="Diagnostics"
       showServiceGroupSaveButton={false}
-      selectedNavButton="serviceGroups"
       pageHeader={{
         iconType: 'magnifyWithExclamation',
         rightSideItems: [<RefreshButton />],

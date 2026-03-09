@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Breadcrumb } from '../../app/breadcrumb';
 import {
   indexLifecyclePhaseRt,
@@ -30,6 +31,7 @@ export const storageExplorer = {
         href="/storage-explorer"
       >
         <ApmMainTemplate
+          searchBar={<SearchBar />}
           pageHeader={{
             alignItems: 'center',
             pageTitle: i18n.translate('xpack.apm.views.storageExplorer.title', {

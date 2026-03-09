@@ -19,6 +19,7 @@ export function page<
   element,
   children,
   title,
+  searchBar,
   showServiceGroupSaveButton = false,
   params,
 }: {
@@ -26,6 +27,7 @@ export function page<
   element: React.ReactElement<any, any>;
   children?: TChildren;
   title: string;
+  searchBar?: React.ReactNode;
   showServiceGroupSaveButton?: boolean;
   params?: TParams;
 }): Record<
@@ -41,6 +43,7 @@ export function page<
         <Breadcrumb title={title} href={path} omitOnServerless>
           <ApmMainTemplate
             pageTitle={title}
+            searchBar={searchBar}
             showServiceGroupSaveButton={showServiceGroupSaveButton}
           >
             {element}

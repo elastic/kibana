@@ -22,6 +22,7 @@ export function ServiceGroupTemplate({
   pageHeader,
   pagePath,
   children,
+  searchBar,
   serviceGroupContextTab,
   ...pageTemplateProps
 }: {
@@ -29,13 +30,14 @@ export function ServiceGroupTemplate({
   pageHeader?: EuiPageHeaderProps;
   pagePath: string;
   children: React.ReactNode;
+  searchBar?: React.ReactNode;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
 } & KibanaPageTemplateProps) {
   const router = useApmRouter();
   const {
     query,
     query: { serviceGroup: serviceGroupId },
-  } = useAnyOfApmParams('/services', '/service-map');
+  } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
 
   const { data } = useFetcher(
     (callApmApi) => {
@@ -130,6 +132,7 @@ export function ServiceGroupTemplate({
     <ApmIndexSettingsContextProvider>
       <ApmMainTemplate
         pageTitle={serviceGroupsPageTitle}
+        searchBar={searchBar}
         pageHeader={{
           tabs,
           breadcrumbs: !isAllServices
@@ -154,8 +157,6 @@ export function ServiceGroupTemplate({
           ...pageHeader,
         }}
         showServiceGroupSaveButton={!isAllServices}
-        showServiceGroupsNav={isAllServices}
-        selectedNavButton={isAllServices ? 'allServices' : 'serviceGroups'}
         {...pageTemplateProps}
       >
         {children}
@@ -165,13 +166,13 @@ export function ServiceGroupTemplate({
 }
 
 type ServiceGroupContextTab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
-  key: 'service-inventory' | 'service-map';
+  key: 'service-inventory' | 'service-map' | 'service-groups';
   breadcrumbLabel?: string;
 };
 
 function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const router = useApmRouter();
-  const { query } = useAnyOfApmParams('/services', '/service-map');
+  const { query } = useAnyOfApmParams('/services', '/service-map', '/service-groups');
 
   const tabs: ServiceGroupContextTab[] = [
     {
@@ -179,15 +180,9 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
       breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
         defaultMessage: 'Inventory',
       }),
-      label: (
-        <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
-              defaultMessage: 'Inventory',
-            })}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      label: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
+        defaultMessage: 'Inventory',
+      }),
       href: router.link('/services', { query }),
     },
     {
@@ -196,6 +191,13 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
         defaultMessage: 'Service map',
       }),
       href: router.link('/service-map', { query }),
+    },
+    {
+      key: 'service-groups',
+      label: i18n.translate('xpack.apm.serviceGroup.serviceGroups', {
+        defaultMessage: 'Service groups',
+      }),
+      href: router.link('/service-groups', { query }),
     },
   ];
 
