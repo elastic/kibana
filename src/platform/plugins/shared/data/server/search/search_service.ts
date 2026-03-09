@@ -393,9 +393,15 @@ export class SearchService {
 
       const searchRequest$ = from(getSearchRequest());
       let isInternalSearchStored = false; // used to prevent tracking current search more than once
+      const { projectRouting, ...restOptions } = options;
       const search$ = searchRequest$.pipe(
         switchMap((searchRequest) =>
-          strategy.search(searchRequest, options, deps).pipe(
+          strategy.search(searchRequest, {
+            ...restOptions,
+            // projectRouting: "_alias:_origin", // I receive X of count
+            // projectRouting: "_alias:*", // I receive 2X of count
+            projectRouting: undefined, // I receive 2X of count but I'd expect origin to kick off
+          }, deps).pipe(
             concatMap((response) => {
               response = {
                 ...response,
