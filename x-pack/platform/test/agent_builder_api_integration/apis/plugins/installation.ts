@@ -39,8 +39,6 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Plugin Installation API', function () {
-    this.tags(['skipServerless']);
-
     let pluginsServer: PluginsTestServer;
     let serverUrl: string;
     let zipBuffer: Buffer;
