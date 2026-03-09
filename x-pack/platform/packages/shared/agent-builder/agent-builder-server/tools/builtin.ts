@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { ToolCallWithResult, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { EsqlToolDefinition } from '@kbn/agent-builder-common/tools/types/esql';
