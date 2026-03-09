@@ -55,6 +55,7 @@ export async function mapToEvaluationScoreDocuments({
         example: {
           id: exampleId,
           index: taskRun.exampleIndex,
+          input: taskRun.input ?? null,
           dataset: {
             id: datasetId,
             name: datasetName,

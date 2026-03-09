@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCallbacks } from '@kbn/esql-types';
+import type { ESQLCallbacks, RecommendedField } from '@kbn/esql-types';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import type { ESQLColumnData, GetColumnsByTypeFn } from '../../commands/registry/types';
@@ -15,6 +15,10 @@ import { QueryColumns } from '../../query_columns_service';
 
 export type ColumnsMap = Map<string, ESQLColumnData>;
 export type GetColumnMapFn = () => Promise<ColumnsMap>;
+
+const defaultExtensions: { recommendedFields: RecommendedField[] } = {
+  recommendedFields: [],
+};
 
 export function getColumnsByTypeRetriever(
   query: ESQLAstQueryExpression,
@@ -25,9 +29,21 @@ export function getColumnsByTypeRetriever(
   const getVariables = resourceRetriever?.getVariables;
   const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
 
-  const queryString = queryText;
-  const lastCharacterTyped = queryString[queryString.length - 1];
+  const lastCharacterTyped = queryText[queryText.length - 1];
   const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
+
+  let extensionsPromise: Promise<{ recommendedFields: RecommendedField[] }> | undefined;
+  const getExtensionsOnce = () => {
+    if (!extensionsPromise) {
+      extensionsPromise =
+        resourceRetriever
+          ?.getEditorExtensions?.(queryText)
+          .then((result) => result ?? defaultExtensions)
+          .catch(() => defaultExtensions) ?? Promise.resolve(defaultExtensions);
+    }
+    return extensionsPromise;
+  };
+
   return {
     getColumnsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -38,15 +54,11 @@ export function getColumnsByTypeRetriever(
         ...options,
         supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
-      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.(queryText)) ?? {
-        recommendedQueries: [],
-        recommendedFields: [],
-      };
-      const recommendedFieldsFromExtensions = editorExtensions.recommendedFields;
+      const editorExtensions = await getExtensionsOnce();
       const columns = await helpers.byType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(
         columns,
-        recommendedFieldsFromExtensions,
+        editorExtensions.recommendedFields,
         updatedOptions,
         await getVariables?.()
       );

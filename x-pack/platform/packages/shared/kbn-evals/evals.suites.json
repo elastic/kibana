@@ -72,15 +72,15 @@
       ]
     },
     {
-      "id": "obs-ai-assistant/ai_insights",
-      "name": "Observability AI Assistant (AI Insights)",
-      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/ai_insights/playwright.config.ts",
+      "id": "observability-ai",
+      "name": "Observability AI",
+      "configPath": "x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai/playwright.config.ts",
       "tags": [
         "observability",
-        "ai-assistant"
+        "observability-ai"
       ],
       "ciLabels": [
-        "evals:obs-ai-assistant-ai-insights"
+        "evals:observability-ai"
       ]
     },
     {
