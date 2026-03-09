@@ -10,9 +10,14 @@
 import { tags } from '@kbn/scout';
 
 export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
+export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
+
+export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
+  'metricsExperienceFlyoutOverviewTabDimensionItem';
 
 export const ESQL_QUERIES = {
   TS: `TS ${METRICS_TEST_INDEX_NAME}`,
+  TS_WILDCARD: `TS ${METRICS_TEST_INDEX_PATTERN}`,
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
 
