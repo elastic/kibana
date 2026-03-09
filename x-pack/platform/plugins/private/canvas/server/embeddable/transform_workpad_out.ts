@@ -48,11 +48,8 @@ export function transformPanelReferencesOut(
   panelReferences: SavedObjectReference[],
   panelRefName?: string
 ) {
-  console.log('panelReferences', panelReferences);
-  console.log('panelRefName', panelRefName);
   return panelRefName
     ? panelReferences.map((ref) => {
-        console.log('type', ref.type);
         return ref.name === panelRefName && BY_REF_TYPES.includes(ref.type)
           ? {
               ...ref,
