@@ -28,7 +28,7 @@ export type SearchInferenceEndpointsConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<SearchInferenceEndpointsConfig> = {
   exposeToBrowser: {
     ui: true,
-    modelSettingsEnabled: true,
+    modelSettingsEnabled: undefined,
   },
   schema: configSchema,
 };
