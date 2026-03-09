@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 export interface InferenceEndpoint {
