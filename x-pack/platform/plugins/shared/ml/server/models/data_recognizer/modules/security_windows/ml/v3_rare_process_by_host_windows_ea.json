@@ -20,6 +20,7 @@
       "host.id",
       "process.name",
       "user.name",
+      "user.id",
       "event.module"
     ]
   },

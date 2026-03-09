@@ -19,6 +19,7 @@
       "host.name",
       "host.id",
       "user.name",
+      "user.id",
       "event.module"
     ]
   },

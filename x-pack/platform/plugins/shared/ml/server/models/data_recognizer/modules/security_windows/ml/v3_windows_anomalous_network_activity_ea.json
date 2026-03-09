@@ -19,6 +19,7 @@
       "host.id",
       "process.name",
       "user.name",
+      "user.id",
       "destination.ip",
       "event.module"
     ]
