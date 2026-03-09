@@ -8,7 +8,8 @@
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate';
 
-evaluate.describe(
+// example evaluation to be removed
+evaluate.skip(
   'Observability Agent Greeting',
   { tag: tags.serverless.observability.complete },
   () => {
