@@ -666,7 +666,7 @@ function generateScheduledResponseDocuments(opts: {
   agentsPerExecution: number;
   errorRateValue: number;
 }): { documents: ScheduledResponseDocument[]; totalBuckets: number } {
-  const { numPacks, queriesPerPack, executionsPerQuery, agentsPerExecution, errorRateValue } = opts;
+  const { numPacks, executionsPerQuery, agentsPerExecution, errorRateValue } = opts;
   const documents: ScheduledResponseDocument[] = [];
 
   const now = Date.now();
@@ -683,9 +683,9 @@ function generateScheduledResponseDocuments(opts: {
   for (let packIdx = 0; packIdx < numPacks; packIdx++) {
     const packId = `scheduled-pack-${packIdx}`;
     const packName = `Scheduled Pack ${packIdx + 1}`;
-    const queryScheduleIds = Array.from({ length: queriesPerPack }, () => uuidv4());
+    const queryScheduleIds = Array.from({ length: opts.queriesPerPack }, () => uuidv4());
 
-    for (let queryIdx = 0; queryIdx < queriesPerPack; queryIdx++) {
+    for (let queryIdx = 0; queryIdx < opts.queriesPerPack; queryIdx++) {
       const scheduleId = queryScheduleIds[queryIdx];
 
       for (let execIdx = 0; execIdx < executionsPerQuery; execIdx++) {
