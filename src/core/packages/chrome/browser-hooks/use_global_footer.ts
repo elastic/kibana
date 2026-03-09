@@ -7,4 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { InternalChromeSetup, InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import type { ReactNode } from 'react';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Returns the current global footer `ReactNode` registered by the developer
+ * toolbar. **Internal** — not intended for plugin use.
+ */
+export function useGlobalFooter(): ReactNode {
+  const chrome = useChromeService();
+  return useObservable(chrome.getGlobalFooter$(), null);
+}

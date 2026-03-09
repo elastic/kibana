@@ -32,6 +32,16 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { RecentlyAccessedHistoryItem } from '@kbn/recently-accessed';
 
+/** @internal */
+export interface ChromeComponentsConfig {
+  isServerless: boolean;
+  kibanaVersion: string;
+  /** @deprecated Will be removed — compute from `basePath.prepend('/app/home')` instead. */
+  homeHref: string;
+  /** @deprecated Will be removed — read `docLinks.links.kibana.guide` instead. */
+  kibanaDocLink: string;
+}
+
 /**
  * Minimal application contract needed by Chrome components.
  * Replaces `InternalApplicationStart` to break the dependency on the private
@@ -41,13 +51,6 @@ export interface ChromeApplicationContext
   extends Pick<ApplicationStart, 'navigateToApp' | 'navigateToUrl' | 'currentAppId$'> {
   /** Current app's action menu mount point. */
   currentActionMenu$: Observable<MountPoint<HTMLElement> | undefined>;
-}
-
-interface ChromeComponentsConfig {
-  isServerless: boolean;
-  kibanaVersion: string;
-  homeHref: string;
-  kibanaDocLink: string;
 }
 
 interface NavControlsObservables {

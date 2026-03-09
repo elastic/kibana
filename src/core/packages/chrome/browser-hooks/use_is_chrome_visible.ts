@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { InternalChromeSetup, InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Returns `true` when the chrome UI (header and navigation) is currently
+ * visible.
+ */
+export function useIsChromeVisible(): boolean {
+  const chrome = useChromeService();
+  return useObservable(chrome.getIsVisible$(), chrome.getIsVisible());
+}

@@ -9,14 +9,12 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { combineLatest, map } from 'rxjs';
 import type { ChromeLayoutConfig } from '@kbn/core-chrome-layout-components';
 import {
   ChromeLayout,
   ChromeLayoutConfigProvider,
   SimpleDebugOverlay,
 } from '@kbn/core-chrome-layout-components';
-import useObservable from 'react-use/lib/useObservable';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
@@ -27,6 +25,13 @@ import {
   AppMenuBar,
   Sidebar,
 } from '@kbn/core-chrome-browser-components';
+import {
+  useChromeStyle,
+  useHasHeaderBanner,
+  useIsChromeVisible,
+  useSidebarWidth,
+} from '@kbn/core-chrome-browser-hooks';
+import { useGlobalFooter, useHasAppMenu } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,
@@ -78,30 +83,15 @@ export class GridLayout implements LayoutService {
 
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
-    const hasHeaderBanner$ = chrome.hasHeaderBanner$();
-    const chromeVisible$ = chrome.getIsVisible$();
-    const chromeStyle$ = chrome.getChromeStyle$();
     const debug = this.params.debug ?? false;
 
-    const hasAppMenu$ = combineLatest([application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
-      map(([menu, appMenu]) => !!menu || !!appMenu)
-    );
-
-    const footer$ = chrome.getGlobalFooter$();
-
-    const sidebarWidth$ = combineLatest([
-      chrome.sidebar.getWidth$(),
-      chrome.sidebar.isOpen$(),
-    ]).pipe(map(([width, isOpen]) => (isOpen ? width : 0)));
-
     return React.memo(() => {
-      // TODO: Get rid of observables https://github.com/elastic/kibana/issues/225265
-      const chromeVisible = useObservable(chromeVisible$, false);
-      const hasHeaderBanner = useObservable(hasHeaderBanner$, false);
-      const chromeStyle = useObservable(chromeStyle$, 'classic');
-      const hasAppMenu = useObservable(hasAppMenu$, false);
-      const footer: ReactNode = useObservable(footer$, null);
-      const sidebarWidth = useObservable(sidebarWidth$, 0);
+      const chromeVisible = useIsChromeVisible();
+      const hasHeaderBanner = useHasHeaderBanner();
+      const chromeStyle = useChromeStyle();
+      const hasAppMenu = useHasAppMenu();
+      const footer = useGlobalFooter();
+      const sidebarWidth = useSidebarWidth();
 
       const layoutConfig = {
         ...layoutConfigs[chromeStyle],

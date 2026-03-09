@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { InternalChromeSetup, InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+export { useGlobalFooter } from './use_global_footer';
+export { useHasAppMenu } from './use_has_app_menu';

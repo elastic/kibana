@@ -5234,6 +5234,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-browser-context@link:src/core/packages/chrome/browser-context":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-browser-hooks@link:src/core/packages/chrome/browser-hooks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-chrome-browser-internal-types@link:src/core/packages/chrome/browser-internal-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-browser-internal@link:src/core/packages/chrome/browser-internal":
   version "0.0.0"
   uid ""

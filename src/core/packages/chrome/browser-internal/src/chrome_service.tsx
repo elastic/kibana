@@ -231,8 +231,8 @@ export class ChromeService {
       },
     };
 
-    // 8. Return chrome API
-    return createChromeApi({
+    // 8. Return chrome API + componentDeps
+    const chrome = createChromeApi({
       state,
       services: {
         navControls,
@@ -244,6 +244,8 @@ export class ChromeService {
       componentDeps,
       sidebar,
     });
+
+    return chrome;
   }
 
   public stop() {

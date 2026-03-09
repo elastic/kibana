@@ -25,5 +25,6 @@
     "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-browser-components",
+    "@kbn/core-chrome-browser-hooks",
   ]
 }

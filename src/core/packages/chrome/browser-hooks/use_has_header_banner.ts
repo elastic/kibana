@@ -7,4 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { InternalChromeSetup, InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import { useObservable } from '@kbn/use-observable';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Returns `true` when a header banner is currently registered via
+ * `chrome.setHeaderBanner()`, `false` otherwise.
+ */
+export function useHasHeaderBanner(): boolean {
+  const chrome = useChromeService();
+  return useObservable(chrome.hasHeaderBanner$(), chrome.hasHeaderBanner());
+}

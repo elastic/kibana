@@ -30,6 +30,7 @@ export interface VisibilityStateDeps {
 
 export interface VisibilityState {
   isVisible$: Observable<boolean>;
+  getIsVisible: () => boolean;
   setIsVisible: (isVisible: boolean) => void;
 }
 
@@ -59,14 +60,23 @@ export const createVisibilityState = ({ application }: VisibilityStateDeps): Vis
     )
   );
 
+  let latestIsVisible = false;
+
+  const isVisible$ = combineLatest([appHidden$, forceHidden.$, isPrinting$]).pipe(
+    map(([appHidden, forceHiddenValue, isPrinting]) => {
+      return !appHidden && !forceHiddenValue && !isPrinting;
+    }),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
+  isVisible$.subscribe((v) => {
+    latestIsVisible = v;
+  });
+
   return {
-    isVisible$: combineLatest([appHidden$, forceHidden.$, isPrinting$]).pipe(
-      map(([appHidden, forceHiddenValue, isPrinting]) => {
-        return !appHidden && !forceHiddenValue && !isPrinting;
-      }),
-      distinctUntilChanged(),
-      shareReplay(1)
-    ),
+    isVisible$,
+    getIsVisible: () => latestIsVisible,
     setIsVisible: (isVisible: boolean) => forceHidden.set(!isVisible),
   };
 };

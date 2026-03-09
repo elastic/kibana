@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { InternalChromeSetup, InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+export { useChromeStyle } from './use_chrome_style';
+export { useActiveSolutionNavId } from './use_active_solution_nav_id';
+export { useHasHeaderBanner } from './use_has_header_banner';
+export { useIsChromeVisible } from './use_is_chrome_visible';
+export { useSidebarWidth } from './use_sidebar_width';
