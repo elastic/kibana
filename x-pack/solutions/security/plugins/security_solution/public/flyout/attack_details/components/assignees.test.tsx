@@ -133,6 +133,7 @@ describe('Assignees', () => {
             assignees: ['uid-1'],
           },
         ],
+        telemetrySource: 'attacks_page_flyout_header',
       })
     );
     const call = mockUseAttackAssigneesContextMenuItems.mock.calls[0][0];
