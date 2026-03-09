@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { type EsWorkflowStepExecution, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { StepExecutionDataStreamClient } from './data_stream';
 import { WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM } from './data_stream';
-import { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ReindexResponse } from '@elastic/elasticsearch/lib/api/types';
 
 export class StepExecutionRepository {
   constructor(
