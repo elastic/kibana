@@ -12,7 +12,7 @@ import type { Reference } from '@kbn/content-management-utils/src/types';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { LinksItem } from '../../../../common/content_management';
-import type { DashboardLink, ExternalLink, Link, LinksState, StoredLinksState } from './types';
+import type { Link, LinksState, StoredLink, StoredLinksState } from './types';
 import {
   extractReferences,
   injectReferences,
@@ -34,7 +34,7 @@ export function savedObjectToItem(
   const { references, attributes, ...rest } = savedObject;
 
   const links = injectReferences(
-    transformOrderedLinks(attributes.links ?? []) as StoredLinksState['links'],
+    transformOrderedLinks<StoredLink[]>(attributes.links ?? []),
     savedObject.references
   );
 
@@ -47,7 +47,7 @@ export function savedObjectToItem(
           ({
             ...link,
             ...(link.options && { options: getOptions(link.type, link.options) }),
-          } as DashboardLink | ExternalLink)
+          } as Link)
       ),
     },
     references: (references ?? []).filter(({ type }) => type === 'tag'),
@@ -58,9 +58,10 @@ export function itemToAttributes(state: LinksState): {
   attributes: StoredLinksState;
   references: Reference[];
 } {
-  const transformedLinks = transformOrderedLinks(state.links ?? []).map((link) => ({
+  const transformedLinks = transformOrderedLinks<Link[]>(state.links ?? []).map((link) => ({
+    ...link,
     id: link.id ?? uuidv4(),
-  })) as LinksState['links'];
+  }));
   const { links, references } = extractReferences(transformedLinks ?? []);
   return {
     attributes: {
@@ -73,11 +74,11 @@ export function itemToAttributes(state: LinksState): {
 
 // 9.3.0 state stored links with an `order` property instead of deriving their
 // order from their array position
-const transformOrderedLinks = (
-  links: Array<Link & { order?: number }> | StoredLinksState['links']
+const transformOrderedLinks = <T extends Link[] | StoredLink[]>(
+  links: Array<T[number] & { order?: number }>
 ) =>
   links
     .sort((linkA, linkB) => {
       return (linkA.order ?? 0) - (linkB.order ?? 0);
     })
-    .map((link) => omit(link, 'order'));
+    .map((link) => omit(link, 'order')) as T;
