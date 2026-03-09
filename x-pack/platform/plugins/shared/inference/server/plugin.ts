@@ -116,6 +116,7 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+    this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
 
     if (anonymizationEnabled) {
       this.logger.info(
@@ -238,7 +239,7 @@ export class InferencePlugin
       },
 
       getConnectorList: async (request: KibanaRequest) => {
-        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        const esClient = core.elasticsearch.client.asInternalUser;
         return getConnectorList({
           actions: pluginsStart.actions,
           request,
@@ -247,7 +248,7 @@ export class InferencePlugin
         });
       },
       getDefaultConnector: async (request: KibanaRequest) => {
-        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        const esClient = core.elasticsearch.client.asInternalUser;
         return loadDefaultConnector({
           actions: pluginsStart.actions,
           request,
@@ -256,7 +257,7 @@ export class InferencePlugin
         });
       },
       getConnectorById: async (id: string, request: KibanaRequest) => {
-        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+        const esClient = core.elasticsearch.client.asInternalUser;
         return getConnectorById({
           connectorId: id,
           actions: pluginsStart.actions,
@@ -265,13 +266,12 @@ export class InferencePlugin
           logger: this.logger,
         });
       },
-
-      getInferenceEndpoints: async (request: KibanaRequest, taskType?: string) => {
-        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+      getInferenceEndpoints: async (taskType?: string) => {
+        const esClient = core.elasticsearch.client.asInternalUser;
         return getInferenceEndpoints({ esClient, taskType });
       },
-      getInferenceEndpointById: async (inferenceId: string, request: KibanaRequest) => {
-        const esClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+      getInferenceEndpointById: async (inferenceId: string) => {
+        const esClient = core.elasticsearch.client.asInternalUser;
         return getInferenceEndpointById({ inferenceId, esClient });
       },
     };

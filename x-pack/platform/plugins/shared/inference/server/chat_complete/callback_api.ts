@@ -291,7 +291,7 @@ function resolveAndCreatePipeline({
   namespace: string;
   anonymization?: InferenceAnonymizationOptions;
 }) {
-  return from(endpointIdCache.has(connectorId, esClient)).pipe(
+  return from(endpointIdCache.has(connectorId)).pipe(
     switchMap((isInferenceEndpoint) => {
       const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
         ? async () => {

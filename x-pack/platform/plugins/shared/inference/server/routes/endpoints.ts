@@ -34,10 +34,7 @@ export function registerEndpointsRoute({
     async (context, request, response) => {
       try {
         const [, , inferenceStart] = await coreSetup.getStartServices();
-        const endpoints = await inferenceStart.getInferenceEndpoints(
-          request,
-          request.query.taskType
-        );
+        const endpoints = await inferenceStart.getInferenceEndpoints(request.query.taskType);
         return response.ok({ body: { endpoints } });
       } catch (e) {
         return response.customError({

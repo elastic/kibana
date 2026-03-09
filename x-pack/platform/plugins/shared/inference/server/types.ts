@@ -161,7 +161,6 @@ export interface InferenceServerStart {
    * @returns A promise that resolves to an array of inference endpoints
    */
   getInferenceEndpoints: (
-    request: KibanaRequest,
     taskType?: string
   ) => Promise<InferenceEndpoint[]>;
 
@@ -174,8 +173,7 @@ export interface InferenceServerStart {
    * @throws Error if the endpoint does not exist
    */
   getInferenceEndpointById: (
-    inferenceId: string,
-    request: KibanaRequest
+    inferenceId: string
   ) => Promise<InferenceEndpoint>;
 }
 

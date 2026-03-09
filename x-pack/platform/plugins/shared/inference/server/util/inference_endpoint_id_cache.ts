@@ -20,24 +20,33 @@ export class InferenceEndpointIdCache {
   private lastRefresh: number = 0;
   private refreshPromise: Promise<void> | null = null;
   private readonly ttlMs: number;
+  private esClient?: ElasticsearchClient;
 
-  constructor(options?: { ttlMs?: number }) {
+  constructor(options?: { ttlMs?: number, esClient?: ElasticsearchClient }) {
     this.ttlMs = options?.ttlMs ?? DEFAULT_TTL_MS;
+    if (options?.esClient) {
+      this.esClient = options.esClient;
+    }
   }
 
-  async has(id: string, esClient: ElasticsearchClient): Promise<boolean> {
+  setEsClient(esClient: ElasticsearchClient): void {
+    this.esClient = esClient;
+    this.invalidate();
+  }
+
+  async has(id: string): Promise<boolean> {
     if (this.knownIds.has(id)) {
-      this.updateCacheIfExpired(esClient); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
+      this.updateCacheIfExpired(); // deleted endpoints are very unlikely so safe to refresh lazily without awaiting
       return true;
     }
-    await this.updateCacheIfExpired(esClient); // id not in cache, make sure we have latest data before returning
+    await this.updateCacheIfExpired(); // id not in cache, make sure we have latest data before returning
     return this.knownIds.has(id);
   }
 
-  async updateCacheIfExpired(esClient: ElasticsearchClient): Promise<void> {
+  async updateCacheIfExpired(): Promise<void> {
     if (Date.now() - this.lastRefresh < this.ttlMs) return;
     if (!this.refreshPromise) {
-      this.refreshPromise = this.refresh(esClient).finally(() => {
+      this.refreshPromise = this.refresh().finally(() => {
         this.refreshPromise = null;
       });
     }
@@ -48,8 +57,11 @@ export class InferenceEndpointIdCache {
     this.lastRefresh = 0;
   }
 
-  private async refresh(esClient: ElasticsearchClient): Promise<void> {
-    const endpoints = await getInferenceEndpoints({ esClient, taskType: 'chat_completion' });
+  private async refresh(): Promise<void> {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client is not set');
+    }
+    const endpoints = await getInferenceEndpoints({ esClient: this.esClient, taskType: 'chat_completion' });
     this.knownIds = new Set(endpoints.map((ep) => ep.inferenceId));
     this.lastRefresh = Date.now();
   }

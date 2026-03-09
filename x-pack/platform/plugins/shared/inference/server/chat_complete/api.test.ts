@@ -74,7 +74,7 @@ describe('createChatCompleteApi', () => {
     logger = loggerMock.create();
     actions = actionsMock.createStart();
     regexWorker = createRegexWorkerServiceMock();
-    endpointIdCache = new InferenceEndpointIdCache();
+    endpointIdCache = new InferenceEndpointIdCache({ esClient: mockEsClient });
     const callbackApi = createChatCompleteCallbackApi({
       request,
       namespace: 'default',
@@ -123,6 +123,7 @@ describe('createChatCompleteApi', () => {
       request,
       actions,
       esClient: mockEsClient,
+      logger,
     });
   });
 
@@ -487,7 +488,6 @@ describe('createChatCompleteApi', () => {
       expect(resolveInferenceEndpointMock).toHaveBeenCalledWith({
         inferenceId: 'my-endpoint',
         esClient: mockEsClient,
-        logger,
       });
     });
 
