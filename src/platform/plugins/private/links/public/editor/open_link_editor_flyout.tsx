@@ -23,10 +23,6 @@ export interface LinksEditorProps {
 }
 
 /**
- * This editor has no context about other links, so it cannot determine order; order will be determined
- * by the **caller** (i.e. the panel editor, which contains the context about **all links**)
- */
-/**
  * @throws in case user cancels
  */
 export async function openLinkEditorFlyout({
