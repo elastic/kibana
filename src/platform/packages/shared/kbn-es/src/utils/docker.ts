@@ -1151,7 +1151,7 @@ export async function runLinkedServerlessCluster(log: ToolingLog, options: Serve
     })
   );
 
-  log.success(`Linked ES cluster running for CSP.
+  log.success(`Linked ES cluster running for CPS (Cross-Project Search).
   Project ID: ${chalk.bold.cyan(linkedProject.projectId)}
   HTTP port:  ${chalk.bold.cyan(String(linkedProject.port))}
   Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
