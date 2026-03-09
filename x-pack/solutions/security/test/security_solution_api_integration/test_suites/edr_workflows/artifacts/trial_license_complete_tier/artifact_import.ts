@@ -12,7 +12,10 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
-import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
+import {
+  GLOBAL_ARTIFACT_TAG,
+  IMPORTED_ARTIFACT_TAG,
+} from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/constants';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
   ExceptionListItemSchema,
@@ -130,8 +133,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
     if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
       describe('Endpoint exceptions move feature flag enabled', () => {
-        const CURRENT_SPACE_OWNER_ID = buildSpaceOwnerIdTag(CURRENT_SPACE_ID);
-        const OTHER_SPACE_OWNER_ID = buildSpaceOwnerIdTag(OTHER_SPACE_ID);
+        const CURRENT_SPACE_OWNER_TAG = buildSpaceOwnerIdTag(CURRENT_SPACE_ID);
+        const OTHER_SPACE_OWNER_TAG = buildSpaceOwnerIdTag(OTHER_SPACE_ID);
 
         const supertest: Record<
           (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
@@ -202,7 +205,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_ID] }]),
+                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_TAG] }]),
                     'import_data.ndjson'
                   )
                   .expect(403)
@@ -216,7 +219,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_ID] }]),
+                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_TAG] }]),
                     'import_data.ndjson'
                   )
                   .expect(403)
@@ -230,7 +233,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .on('error', createSupertestErrorLogger(log))
                   .attach(
                     'file',
-                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_ID] }]),
+                    buildImportBuffer(artifact.listId, [{ tags: [CURRENT_SPACE_OWNER_TAG] }]),
                     'import_data.ndjson'
                   )
                   .expect(200);
@@ -247,10 +250,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .attach(
                       'file',
                       buildImportBuffer(artifact.listId, [
-                        { tags: [CURRENT_SPACE_OWNER_ID] },
+                        { tags: [CURRENT_SPACE_OWNER_TAG] },
                         {
                           tags: [
-                            CURRENT_SPACE_OWNER_ID,
+                            CURRENT_SPACE_OWNER_TAG,
                             buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
 
                             // even if assigned to policy in other space, the tag is kept
@@ -275,11 +278,12 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   expect(items.length).toEqual(2);
                   expect(items[1].tags).toEqual([
-                    CURRENT_SPACE_OWNER_ID,
+                    CURRENT_SPACE_OWNER_TAG,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                     buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                    IMPORTED_ARTIFACT_TAG,
                   ]);
-                  expect(items[0].tags).toEqual([CURRENT_SPACE_OWNER_ID]);
+                  expect(items[0].tags).toEqual([CURRENT_SPACE_OWNER_TAG, IMPORTED_ARTIFACT_TAG]);
                 });
 
                 it('should not import per-policy artifacts to other spaces when importing without global artifact privilege', async () => {
@@ -290,11 +294,11 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .attach(
                       'file',
                       buildImportBuffer(artifact.listId, [
-                        { item_id: 'wrong-item', tags: [OTHER_SPACE_OWNER_ID] },
+                        { item_id: 'wrong-item', tags: [OTHER_SPACE_OWNER_TAG] },
                         {
                           item_id: 'good-item',
                           tags: [
-                            CURRENT_SPACE_OWNER_ID,
+                            CURRENT_SPACE_OWNER_TAG,
                             buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                           ],
                         },
@@ -338,11 +342,11 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       buildImportBuffer(artifact.listId, [
                         {
                           item_id: 'wrong-item',
-                          tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                          tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
                         },
                         {
                           item_id: 'good-item',
-                          tags: [CURRENT_SPACE_OWNER_ID],
+                          tags: [CURRENT_SPACE_OWNER_TAG],
                         },
                       ]),
                       'import_data.ndjson'
@@ -383,9 +387,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     .attach(
                       'file',
                       buildImportBuffer(artifact.listId, [
-                        { tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG] },
-                        { tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG] },
-                        { tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG] },
+                        { tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG] },
+                        { tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG] },
+                        { tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG] },
                       ]),
                       'import_data.ndjson'
                     )
@@ -415,7 +419,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           item_id: 'to-other-space',
                           tags: [
-                            OTHER_SPACE_OWNER_ID,
+                            OTHER_SPACE_OWNER_TAG,
                             buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                             buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
                           ],
@@ -438,10 +442,11 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   expect(items.length).toEqual(1);
                   expect(items[0].tags).toEqual([
-                    OTHER_SPACE_OWNER_ID,
+                    OTHER_SPACE_OWNER_TAG,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                     // policy id in other space is kept
                     buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                    IMPORTED_ARTIFACT_TAG,
                   ]);
                 });
 
@@ -464,7 +469,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           item_id: 'with-invalid-policy-id',
                           tags: [
-                            CURRENT_SPACE_OWNER_ID,
+                            CURRENT_SPACE_OWNER_TAG,
                             buildPerPolicyTag('i-do-not-exist'),
                             buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                             buildPerPolicyTag('me-neither'),
@@ -491,9 +496,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   // invalid policy ids are removed, valid ones are kept
                   expect(items[0].tags).toEqual([
-                    CURRENT_SPACE_OWNER_ID,
+                    CURRENT_SPACE_OWNER_TAG,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                     buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                    IMPORTED_ARTIFACT_TAG,
                   ]);
 
                   // changes indicated in a comment
@@ -526,7 +532,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .attach(
                     'file',
                     buildImportBuffer(artifact.listId, [
-                      { item_id: 'imported-artifact', tags: [CURRENT_SPACE_OWNER_ID] },
+                      { item_id: 'imported-artifact', tags: [CURRENT_SPACE_OWNER_TAG] },
                     ]),
                     'import_data.ndjson'
                   )
@@ -619,7 +625,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       ...existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace.artifact,
                       tags: [
                         buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
-                        OTHER_SPACE_OWNER_ID,
+                        OTHER_SPACE_OWNER_TAG,
                       ],
                     });
                 });
@@ -635,7 +641,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         buildImportBuffer(artifact.listId, [
                           {
                             name: "i'm imported!",
-                            tags: [CURRENT_SPACE_OWNER_ID],
+                            tags: [CURRENT_SPACE_OWNER_TAG],
                             item_id: 'imported-artifact',
                           },
                         ]),
@@ -687,7 +693,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         buildImportBuffer(artifact.listId, [
                           {
                             name: "i'm imported!",
-                            tags: [CURRENT_SPACE_OWNER_ID],
+                            tags: [CURRENT_SPACE_OWNER_TAG],
                             item_id: 'imported-artifact',
                           },
                         ]),
@@ -766,7 +772,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     ${buildListInfo(artifact.listId)}
                     ${JSON.stringify(
                       generator.generateEndpointArtifact(artifact.listId, {
-                        tags: [CURRENT_SPACE_OWNER_ID],
+                        tags: [CURRENT_SPACE_OWNER_TAG],
                       })
                     )}
                     ${JSON.stringify(
@@ -809,7 +815,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     buildImportBuffer(artifact.listId, [
                       {
                         item_id: 'imported-artifact',
-                        tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                        tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
                       },
                     ]),
                     'import_data.ndjson'
@@ -851,7 +857,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     buildImportBuffer(artifact.listId, [
                       {
                         item_id: 'imported-artifact',
-                        tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                        tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
                       },
                     ]),
                     'import_data.ndjson'
@@ -875,7 +881,6 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             it('should add a comment to imported artifacts with relevant data', async () => {
               await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
                 .post(`${EXCEPTION_LIST_URL}/_import`)
-                .query({ new_list: true })
                 .set('kbn-xsrf', 'true')
                 .on('error', createSupertestErrorLogger(log))
                 .attach(
@@ -883,13 +888,13 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   buildImportBuffer(artifact.listId, [
                     {
                       item_id: 'imported-artifact-without-existing-comment',
-                      tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
                       created_by: 'original-creator-1',
                       created_at: 'random-date-1',
                     },
                     {
                       item_id: 'imported-artifact-with-existing-comment',
-                      tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
                       created_by: 'original-creator-2',
                       created_at: 'random-date-2',
                       comments: [
@@ -945,7 +950,37 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               ]);
             });
 
-            it('should add a tag to imported artifacts', async () => {});
+            it('should add a tag to imported artifacts', async () => {
+              await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                .post(`${EXCEPTION_LIST_URL}/_import`)
+                .set('kbn-xsrf', 'true')
+                .on('error', createSupertestErrorLogger(log))
+                .attach(
+                  'file',
+                  buildImportBuffer(artifact.listId, [
+                    {
+                      item_id: 'imported-artifact',
+                      tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
+                    },
+                  ]),
+                  'import_data.ndjson'
+                )
+                .expect(200)
+                .expect({
+                  errors: [],
+                  success: true,
+                  success_count: 2,
+                  success_exception_lists: true,
+                  success_count_exception_lists: 1,
+                  success_exception_list_items: true,
+                  success_count_exception_list_items: 1,
+                } as ImportExceptionsResponseSchema);
+
+              const items = await fetchArtifacts(CURRENT_SPACE_ID);
+              expect(items.map(({ tags }) => tags)).toEqual([
+                [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG, IMPORTED_ARTIFACT_TAG],
+              ]);
+            });
 
             describe('compatibility with artifacts exported before space awareness - when artifacts have no ownerSpaceId', () => {
               it('should add/not add global artifact tag to Endpoint exceptions/artifacts', async () => {});

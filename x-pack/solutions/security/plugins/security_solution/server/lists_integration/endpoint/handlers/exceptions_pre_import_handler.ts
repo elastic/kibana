@@ -21,7 +21,10 @@ import {
 } from '../../../../common/endpoint/service/artifacts/utils';
 import { stringify } from '../../../endpoint/utils/stringify';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts/constants';
+import {
+  GLOBAL_ARTIFACT_TAG,
+  IMPORTED_ARTIFACT_TAG,
+} from '../../../../common/endpoint/service/artifacts/constants';
 import { EndpointArtifactExceptionValidationError } from '../validators/errors';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import {
@@ -119,6 +122,7 @@ export const getExceptionsPreImportHandler = (
 
     // --- Below are operations to prepare the imported data ---
     addImportedCommentToItems(data);
+    addImportedTagToItems(data);
 
     if (!overwrite) {
       return { data, overwrite };
@@ -292,6 +296,14 @@ const addImportedCommentToItems = (data: PromiseFromStreams): void => {
           }" at "${item.created_at ?? 'unknown'}".`,
         },
       ];
+    }
+  }
+};
+
+const addImportedTagToItems = (data: PromiseFromStreams): void => {
+  for (const item of data.items) {
+    if (!(item instanceof Error)) {
+      item.tags = [...(item.tags ?? []), IMPORTED_ARTIFACT_TAG];
     }
   }
 };
