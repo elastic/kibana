@@ -121,7 +121,7 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `kbnClient`
 - `esArchiver`
 - `samlAuth`
-- `linkedProject` (CPS only -- provides `esClient` and `esArchiver` for the linked cluster)
+- `linkedProject` (Cross-Project Search only -- provides `esClient` and `esArchiver` for the linked cluster)
 
 ```ts
 test.beforeAll(async ({ kbnClient }) => {
