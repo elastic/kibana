@@ -387,7 +387,6 @@ describe('runDiscoverPlaywrightConfigs', () => {
           manifest: {
             path: 'pluginLocalServerless/config.playwright.config.ts',
             exists: true,
-            lastModified: '2024-01-01T00:00:00Z',
             sha1: 'local789',
             tests: [
               {
