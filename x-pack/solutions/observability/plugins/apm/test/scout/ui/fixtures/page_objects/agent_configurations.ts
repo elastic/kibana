@@ -24,38 +24,21 @@ export class AgentConfigurationsPage {
     await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   async getCreateConfigurationButton() {
-    // Wait for the page to be fully loaded
-    this.page.getByRole('heading', { name: 'Configurations', exact: true });
-
     return this.page.getByText('Create configuration');
   }
 
   async isCreateConfigurationButtonAvailable() {
-    try {
-      const button = this.page.getByText('Create configuration');
-      await button.waitFor({ state: 'visible' });
-      return true;
-    } catch {
-      return false;
-    }
+    return await this.page.getByText('Create configuration').isVisible({ timeout: 2500 });
   }
 
   async hasPermissionsError() {
-    try {
-      this.page.getByRole('heading', { name: 'Configurations', exact: true });
-
-      return await this.page
-        .getByText('Your user may not have the sufficient permissions')
-        .isVisible();
-    } catch {
-      return false;
-    }
+    return await this.page
+      .getByText('Your user may not have the sufficient permissions')
+      .isVisible({ timeout: 2500 });
   }
 
   async clickCreateConfiguration() {
