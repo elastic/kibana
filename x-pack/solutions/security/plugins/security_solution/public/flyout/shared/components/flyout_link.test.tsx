@@ -18,6 +18,7 @@ import { RulePanelKey } from '../../rule_details/right';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useWhichFlyout } from '../../document_details/shared/hooks/use_which_flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import type { EntityIdentifiers } from '../../document_details/shared/utils';
 
 const mockedTelemetry = createTelemetryServiceMock();
 jest.mock('../../../common/lib/kibana', () => {
@@ -43,13 +44,15 @@ const renderFlyoutLink = (
   field: string,
   value: string,
   dataTestSuj?: string,
-  isFlyoutOpen?: boolean
+  isFlyoutOpen?: boolean,
+  entityIdentifiers?: EntityIdentifiers
 ) =>
   render(
     <TestProviders>
       <FlyoutLink
         field={field}
         value={value}
+        entityIdentifiers={entityIdentifiers}
         data-test-subj={dataTestSuj}
         scopeId={'scopeId'}
         ruleId={'ruleId'}
@@ -108,7 +111,10 @@ describe('<FlyoutLink />', () => {
     });
 
     it('should render a link to open host flyout', () => {
-      const { getByTestId } = renderFlyoutLink('host.name', 'host', 'host-link');
+      const { getByTestId } = renderFlyoutLink('host.name', 'host', 'host-link', false, {
+        'host.name': 'host',
+        'host.hostname': 'hostname',
+      });
       getByTestId('host-link').click();
 
       expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
@@ -116,8 +122,12 @@ describe('<FlyoutLink />', () => {
           id: HostPanelKey,
           params: {
             contextID: 'scopeId',
-            entityIdentifiers: { 'host.name': 'host' },
+            hostName: 'host',
             scopeId: 'scopeId',
+            entityIdentifiers: {
+              'host.name': 'host',
+              'host.hostname': 'hostname',
+            },
           },
         },
       });
@@ -127,13 +137,14 @@ describe('<FlyoutLink />', () => {
       const { getByTestId } = renderFlyoutLink('user.name', 'user', 'user-link');
       getByTestId('user-link').click();
 
-      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith({
+      expect(mockFlyoutApi.openFlyout).toHaveBeenLastCalledWith({
         right: {
           id: UserPanelKey,
           params: {
             contextID: 'scopeId',
-            entityIdentifiers: { 'user.name': 'user' },
+            userName: 'user',
             scopeId: 'scopeId',
+            entityIdentifiers: undefined,
           },
         },
       });

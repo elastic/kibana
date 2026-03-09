@@ -200,10 +200,11 @@ describe('<UserEntityOverview />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: UserPreviewPanelKey,
         params: {
-          contextID: mockContextValue.scopeId,
-          entityIdentifiers,
+          userName,
           scopeId: mockContextValue.scopeId,
           banner: USER_PREVIEW_BANNER,
+          contextID: mockContextValue.scopeId,
+          entityIdentifiers,
         },
       });
     });

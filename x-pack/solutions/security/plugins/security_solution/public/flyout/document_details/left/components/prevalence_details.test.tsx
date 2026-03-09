@@ -178,6 +178,7 @@ describe('PrevalenceDetails', () => {
       params: {
         contextID: panelContextValue.scopeId,
         entityIdentifiers: { 'host.name': 'test host' },
+        hostName: 'test host',
         scopeId: panelContextValue.scopeId,
         banner: HOST_PREVIEW_BANNER,
       },
@@ -189,6 +190,7 @@ describe('PrevalenceDetails', () => {
       params: {
         contextID: panelContextValue.scopeId,
         entityIdentifiers: { 'user.name': 'test user' },
+        userName: 'test user',
         scopeId: panelContextValue.scopeId,
         banner: USER_PREVIEW_BANNER,
       },

@@ -209,6 +209,7 @@ describe('<HostEntityContent />', () => {
         params: {
           contextID: mockContextValue.scopeId,
           entityIdentifiers,
+          hostName,
           scopeId: mockContextValue.scopeId,
           banner: HOST_PREVIEW_BANNER,
         },

@@ -280,6 +280,7 @@ describe('<UserDetails />', () => {
         params: {
           contextID: defaultProps.scopeId,
           entityIdentifiers: { 'host.name': 'test host' },
+          hostName: 'test host',
           scopeId: defaultProps.scopeId,
           banner: HOST_PREVIEW_BANNER,
         },
@@ -295,6 +296,7 @@ describe('<UserDetails />', () => {
             'host.ip': '100.XXX.XXX',
           },
           scopeId: defaultProps.scopeId,
+          userName: 'test user',
           banner: USER_PREVIEW_BANNER,
         },
       });
