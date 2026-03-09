@@ -77,7 +77,7 @@
         "{ [x: string]: never; }"
       ],
       "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
-      "lineNumber": 10,
+      "lineNumber": 12,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -87,18 +87,34 @@
     "start": {
       "parentPluginId": "evals",
       "id": "def-server.EvalsPluginStart",
-      "type": "Type",
+      "type": "Interface",
       "tags": [],
       "label": "EvalsPluginStart",
       "description": [],
-      "signature": [
-        "{ [x: string]: never; }"
-      ],
       "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
-      "lineNumber": 11,
+      "lineNumber": 13,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "evals",
+          "id": "def-server.EvalsPluginStart.datasetService",
+          "type": "Object",
+          "tags": [],
+          "label": "datasetService",
+          "description": [],
+          "signature": [
+            "DatasetService",
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/evals/server/types.ts",
+          "lineNumber": 14,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
