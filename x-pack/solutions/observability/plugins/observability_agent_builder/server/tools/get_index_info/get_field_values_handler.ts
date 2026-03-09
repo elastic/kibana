@@ -213,12 +213,16 @@ async function getTextFieldSampleValues(
 }
 
 /** Converts a wildcard pattern to a regex */
-function wildcardToRegex(pattern: string): RegExp {
-  return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`);
+export function wildcardToRegex(pattern: string): RegExp {
+  const escaped = pattern
+    .replace(/\\/g, '\\\\')
+    .replace(/[.+?^${}()|[\]]/g, '\\$&')
+    .replace(/\*/g, '.*');
+  return new RegExp(`^${escaped}$`);
 }
 
 /** Determines the category for a field type */
-function getFieldCategory(
+export function getFieldCategory(
   fieldType: string
 ): 'keyword' | 'numeric' | 'date' | 'boolean' | 'text' | 'unsupported' {
   if (KEYWORD_TYPES.includes(fieldType)) return 'keyword';
@@ -229,19 +233,19 @@ function getFieldCategory(
   return 'unsupported';
 }
 
-interface ResolvedValidField {
+export interface ResolvedValidField {
   field: string;
   fieldType: string;
   category: ReturnType<typeof getFieldCategory>;
 }
-interface ResolvedErrorField {
+export interface ResolvedErrorField {
   input: string;
   error: string;
 }
-type ResolvedField = ResolvedValidField | ResolvedErrorField;
+export type ResolvedField = ResolvedValidField | ResolvedErrorField;
 
 /** Resolves an input (field name or wildcard) to concrete fields or an error */
-function resolveInputToConcreteFields(
+export function resolveInputToConcreteFields(
   input: string,
   allFieldNames: string[],
   fieldNameToTypeMap: Record<string, string | undefined>
