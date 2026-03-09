@@ -114,6 +114,11 @@ export async function deleteNamespace(namespace: string): Promise<void> {
   try {
     await execa
       .command(
+        `kubectl delete deployments --all -n ${namespace} --grace-period=0 --ignore-not-found`
+      )
+      .catch(() => {});
+    await execa
+      .command(
         `kubectl delete pods --all -n ${namespace} --force --grace-period=0 --ignore-not-found`
       )
       .catch(() => {});
