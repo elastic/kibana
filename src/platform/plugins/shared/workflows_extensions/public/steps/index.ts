@@ -39,4 +39,13 @@ export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry
   stepRegistry.register(() =>
     import('./ai/ai_guardrails_step').then((m) => m.AiGuardrailsStepDefinition)
   );
+  stepRegistry.register(() =>
+    import('./data/data_stringify_json_step').then((m) => m.dataStringifyJsonStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_parse_json_step').then((m) => m.dataParseJsonStepDefinition)
+  );
+  stepRegistry.register(() =>
+    import('./data/data_concat_step').then((m) => m.dataConcatStepDefinition)
+  );
 };

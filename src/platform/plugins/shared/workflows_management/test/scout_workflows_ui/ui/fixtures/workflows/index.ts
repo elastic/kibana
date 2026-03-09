@@ -20,6 +20,7 @@ export {
   getIncompleteStepTypeYaml,
   getManualTriggerEventAutocompleteYaml,
   getAlertTriggerEventAutocompleteYaml,
+  getWorkflowWithCommentedVariablesYaml,
 } from './console_workflows';
 export {
   TEST_ALERTS_INDEX,
@@ -28,3 +29,16 @@ export {
   getCreateObsAlertRuleWorkflowYaml,
   getTriggerAlertWorkflowYaml,
 } from './alert_workflows';
+export {
+  getAssignAfterUseSameLine,
+  getAssignBeforeUseSameLine,
+  getCaptureAfterUseSameLine,
+  getCaptureBeforeUseSameLine,
+  getAssignAfterUseCrossLine,
+  getAssignBeforeUseCrossLine,
+  getCaptureAfterUseCrossLine,
+  getCaptureBeforeUseCrossLine,
+  getMixedAssignAndCaptureSameLine,
+  getMultipleAssignsInterleaved,
+  getCaptureUsedBeforeAndAfter,
+} from './variable_validation_workflows';
