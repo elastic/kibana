@@ -46,15 +46,6 @@ export interface PluginManifestProperties {
   keywords?: string[];
 }
 
-export interface PluginUnmanagedAssetsProperties {
-  commands: string[];
-  agents: string[];
-  hooks: string[];
-  mcp_servers: string[];
-  output_styles: string[];
-  lsp_servers: string[];
-}
-
 export interface PluginProperties {
   id: string;
   name: string;
@@ -64,7 +55,7 @@ export interface PluginProperties {
   manifest: PluginManifestProperties;
   source_url?: string;
   skill_ids: string[];
-  unmanaged_assets: PluginUnmanagedAssetsProperties;
+  unmanaged_assets: UnmanagedPluginAssets;
   created_at: string;
   updated_at: string;
 }
@@ -85,38 +76,4 @@ export const createStorage = ({
     logger,
     storageSettings
   );
-};
-
-/**
- * Converts public `UnmanagedPluginAssets` (camelCase) to the
- * storage representation (snake_case).
- */
-export const unmanagedAssetsToEs = (
-  assets: UnmanagedPluginAssets
-): PluginUnmanagedAssetsProperties => {
-  return {
-    commands: assets.commands,
-    agents: assets.agents,
-    hooks: assets.hooks,
-    mcp_servers: assets.mcpServers,
-    output_styles: assets.outputStyles,
-    lsp_servers: assets.lspServers,
-  };
-};
-
-/**
- * Converts the storage representation (snake_case) back to
- * public `UnmanagedPluginAssets` (camelCase).
- */
-export const unmanagedAssetsFromEs = (
-  props: PluginUnmanagedAssetsProperties
-): UnmanagedPluginAssets => {
-  return {
-    commands: props.commands,
-    agents: props.agents,
-    hooks: props.hooks,
-    mcpServers: props.mcp_servers,
-    outputStyles: props.output_styles,
-    lspServers: props.lsp_servers,
-  };
 };

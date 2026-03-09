@@ -6,7 +6,7 @@
  */
 
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
-import type { PluginProperties, PluginUnmanagedAssetsProperties } from './storage';
+import type { PluginProperties } from './storage';
 import type { PluginDocument } from './types';
 import {
   fromEs,
@@ -72,9 +72,9 @@ describe('plugin converters', () => {
           commands: ['commands/cmd1.md'],
           agents: [],
           hooks: [],
-          mcpServers: ['mcp-config.json'],
-          outputStyles: [],
-          lspServers: [],
+          mcp_servers: ['mcp-config.json'],
+          output_styles: [],
+          lsp_servers: [],
         },
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
@@ -120,9 +120,9 @@ describe('plugin converters', () => {
             commands: [],
             agents: [],
             hooks: [],
-            mcpServers: [],
-            outputStyles: [],
-            lspServers: [],
+            mcp_servers: [],
+            output_styles: [],
+            lsp_servers: [],
           },
         },
         space: 'my-space',
@@ -166,9 +166,9 @@ describe('plugin converters', () => {
             commands: [],
             agents: [],
             hooks: [],
-            mcpServers: [],
-            outputStyles: [],
-            lspServers: [],
+            mcp_servers: [],
+            output_styles: [],
+            lsp_servers: [],
           },
         },
         space: 'default',
@@ -178,7 +178,7 @@ describe('plugin converters', () => {
       expect(result.skill_ids).toEqual([]);
     });
 
-    it('converts unmanaged_assets from camelCase to snake_case', () => {
+    it('passes unmanaged_assets through directly', () => {
       const result = createRequestToEs({
         id: 'new-id',
         createRequest: {
@@ -190,9 +190,9 @@ describe('plugin converters', () => {
             commands: ['cmd.md'],
             agents: ['agent/'],
             hooks: ['hooks.json'],
-            mcpServers: ['mcp.json'],
-            outputStyles: ['styles/'],
-            lspServers: ['lsp.json'],
+            mcp_servers: ['mcp.json'],
+            output_styles: ['styles/'],
+            lsp_servers: ['lsp.json'],
           },
         },
         space: 'default',
@@ -228,9 +228,9 @@ describe('plugin converters', () => {
         commands: ['cmd.md'],
         agents: [],
         hooks: [],
-        mcpServers: ['mcp.json'],
-        outputStyles: [],
-        lspServers: [],
+        mcp_servers: ['mcp.json'],
+        output_styles: [],
+        lsp_servers: [],
       },
     };
 
@@ -258,9 +258,9 @@ describe('plugin converters', () => {
           commands: ['cmd.md'],
           agents: [],
           hooks: [],
-          mcpServers: ['mcp.json'],
-          outputStyles: [],
-          lspServers: [],
+          mcp_servers: ['mcp.json'],
+          output_styles: [],
+          lsp_servers: [],
         },
       });
     });
@@ -367,7 +367,7 @@ describe('plugin converters', () => {
       expect(result.skill_ids).toEqual(['new-skill']);
     });
 
-    it('converts updated unmanaged_assets to snake_case', () => {
+    it('updates unmanaged_assets', () => {
       const result = updateRequestToEs({
         current,
         update: {
@@ -375,9 +375,9 @@ describe('plugin converters', () => {
             commands: [],
             agents: [],
             hooks: [],
-            mcpServers: ['new-mcp.json'],
-            outputStyles: [],
-            lspServers: [],
+            mcp_servers: ['new-mcp.json'],
+            output_styles: [],
+            lsp_servers: [],
           },
         },
         updateDate: fixedDate,
@@ -390,7 +390,7 @@ describe('plugin converters', () => {
         mcp_servers: ['new-mcp.json'],
         output_styles: [],
         lsp_servers: [],
-      } satisfies PluginUnmanagedAssetsProperties);
+      });
     });
 
     it('does not modify fields that are not in the update', () => {
@@ -402,7 +402,7 @@ describe('plugin converters', () => {
 
       expect(result.version).toBe(current.version);
       expect(result.description).toBe(current.description);
-      expect(result.manifest).toBe(current.manifest);
+      expect(result.manifest).toEqual(current.manifest);
       expect(result.skill_ids).toBe(current.skill_ids);
       expect(result.unmanaged_assets).toBe(current.unmanaged_assets);
       expect(result.updated_at).toBe('2025-07-01T00:00:00.000Z');
@@ -432,9 +432,9 @@ describe('plugin converters', () => {
           commands: ['commands/cmd1.md'],
           agents: [],
           hooks: [],
-          mcpServers: ['mcp-config.json'],
-          outputStyles: [],
-          lspServers: [],
+          mcp_servers: ['mcp-config.json'],
+          output_styles: [],
+          lsp_servers: [],
         },
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',

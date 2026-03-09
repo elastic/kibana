@@ -6,13 +6,13 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { isPluginNotFoundError } from '@kbn/agent-builder-common';
+import { isPluginNotFoundError, type UnmanagedPluginAssets } from '@kbn/agent-builder-common';
 import { createClient, type PluginClient } from './client';
-import type { PluginProperties, PluginUnmanagedAssetsProperties } from './storage';
+import type { PluginProperties } from './storage';
 
 const testSpace = 'default';
 
-const emptyUnmanagedAssets: PluginUnmanagedAssetsProperties = {
+const emptyUnmanagedAssets: UnmanagedPluginAssets = {
   commands: [],
   agents: [],
   hooks: [],
@@ -214,9 +214,9 @@ describe('PluginClient', () => {
           commands: [],
           agents: [],
           hooks: [],
-          mcpServers: [],
-          outputStyles: [],
-          lspServers: [],
+          mcp_servers: [],
+          output_styles: [],
+          lsp_servers: [],
         },
       });
 
@@ -248,9 +248,9 @@ describe('PluginClient', () => {
             commands: [],
             agents: [],
             hooks: [],
-            mcpServers: [],
-            outputStyles: [],
-            lspServers: [],
+            mcp_servers: [],
+            output_styles: [],
+            lsp_servers: [],
           },
         });
         fail('Expected error to be thrown');

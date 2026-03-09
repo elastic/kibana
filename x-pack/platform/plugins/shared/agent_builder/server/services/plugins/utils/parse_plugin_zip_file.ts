@@ -201,9 +201,9 @@ const detectUnmanagedAssets = (
     commands: findAssetEntries(entries, defaultCommandsDir, manifest.commands),
     agents: findAssetEntries(entries, defaultAgentsDir, manifest.agents),
     hooks: findAssetEntries(entries, defaultHooksDir, manifest.hooks, defaultHooksConfig),
-    mcpServers: findAssetEntries(entries, undefined, manifest.mcpServers, defaultMcpConfig),
-    outputStyles: findAssetEntries(entries, defaultOutputStylesDir, manifest.outputStyles),
-    lspServers: findAssetEntries(entries, undefined, manifest.lspServers, defaultLspConfig),
+    mcp_servers: findAssetEntries(entries, undefined, manifest.mcpServers, defaultMcpConfig),
+    output_styles: findAssetEntries(entries, defaultOutputStylesDir, manifest.outputStyles),
+    lsp_servers: findAssetEntries(entries, undefined, manifest.lspServers, defaultLspConfig),
   };
 };
 

@@ -7,7 +7,6 @@
 
 import type { ParsedPluginArchive, PluginDefinition } from '@kbn/agent-builder-common';
 import type { PluginProperties } from './storage';
-import { unmanagedAssetsToEs, unmanagedAssetsFromEs } from './storage';
 import type {
   PluginDocument,
   PersistedPluginDefinition,
@@ -34,7 +33,7 @@ export const fromEs = (document: PluginDocument): PersistedPluginDefinition => {
     },
     source_url: src.source_url,
     skill_ids: src.skill_ids ?? [],
-    unmanaged_assets: unmanagedAssetsFromEs(src.unmanaged_assets),
+    unmanaged_assets: src.unmanaged_assets,
     created_at: src.created_at,
     updated_at: src.updated_at,
   };
@@ -66,7 +65,7 @@ export const createRequestToEs = ({
     },
     source_url: createRequest.source_url,
     skill_ids: createRequest.skill_ids ?? [],
-    unmanaged_assets: unmanagedAssetsToEs(createRequest.unmanaged_assets),
+    unmanaged_assets: createRequest.unmanaged_assets,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),
   };
@@ -127,14 +126,11 @@ export const updateRequestToEs = ({
   update: PluginUpdateRequest;
   updateDate?: Date;
 }): PluginProperties => {
-  const { unmanaged_assets: unmanagedAssets, manifest, ...rest } = update;
+  const { manifest, ...rest } = update;
   return {
     ...current,
     ...rest,
     manifest: { ...current.manifest, ...manifest },
-    ...(unmanagedAssets !== undefined && {
-      unmanaged_assets: unmanagedAssetsToEs(unmanagedAssets),
-    }),
     updated_at: updateDate.toISOString(),
   };
 };

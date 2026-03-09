@@ -153,8 +153,8 @@ describe('parsePluginZipFile', () => {
     );
     expect(result.unmanagedAssets.agents).toEqual(['agents/reviewer.md']);
     expect(result.unmanagedAssets.hooks).toEqual(['hooks/hooks.json']);
-    expect(result.unmanagedAssets.mcpServers).toEqual(['.mcp.json']);
-    expect(result.unmanagedAssets.lspServers).toEqual(['.lsp.json']);
+    expect(result.unmanagedAssets.mcp_servers).toEqual(['.mcp.json']);
+    expect(result.unmanagedAssets.lsp_servers).toEqual(['.lsp.json']);
   });
 
   it('reads skills from custom paths defined in manifest', async () => {
@@ -309,7 +309,7 @@ describe('parsePluginZipFile', () => {
     const result = await parsePluginZipFile(archive);
 
     expect(result.unmanagedAssets.commands).toContain('custom/cmd.md');
-    expect(result.unmanagedAssets.mcpServers).toContain('mcp-config.json');
+    expect(result.unmanagedAssets.mcp_servers).toContain('mcp-config.json');
   });
 
   it('collects multiple referenced files for a skill', async () => {

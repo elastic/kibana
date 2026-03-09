@@ -22,9 +22,9 @@ export interface UnmanagedPluginAssets {
   commands: string[];
   agents: string[];
   hooks: string[];
-  mcpServers: string[];
-  outputStyles: string[];
-  lspServers: string[];
+  mcp_servers: string[];
+  output_styles: string[];
+  lsp_servers: string[];
 }
 
 /**

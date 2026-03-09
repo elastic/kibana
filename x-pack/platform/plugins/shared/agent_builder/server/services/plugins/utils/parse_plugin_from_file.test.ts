@@ -44,9 +44,9 @@ describe('parsePluginFromFile', () => {
         commands: [],
         agents: [],
         hooks: [],
-        mcpServers: [],
-        outputStyles: [],
-        lspServers: [],
+        mcp_servers: [],
+        output_styles: [],
+        lsp_servers: [],
       },
     };
 
