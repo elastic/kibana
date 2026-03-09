@@ -185,6 +185,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
   const tabs: ServiceGroupContextTab[] = [
     {
       key: 'service-inventory',
+      'data-test-subj': 'serviceInventoryTab',
       breadcrumbLabel: i18n.translate('xpack.apm.serviceGroup.serviceInventory', {
         defaultMessage: 'Inventory',
       }),
@@ -195,6 +196,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
     },
     {
       key: 'service-map',
+      'data-test-subj': 'serviceMapTab',
       label: i18n.translate('xpack.apm.serviceGroup.serviceMap', {
         defaultMessage: 'Service map',
       }),
@@ -202,6 +204,7 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
     },
     {
       key: 'service-groups',
+      'data-test-subj': 'serviceGroupsTab',
       label: i18n.translate('xpack.apm.serviceGroup.serviceGroups', {
         defaultMessage: 'Service groups',
       }),
@@ -211,10 +214,11 @@ function useTabs(selectedTab: ServiceGroupContextTab['key']) {
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label, breadcrumbLabel }) => ({
+    .map(({ href, key, label, breadcrumbLabel, 'data-test-subj': dataTestSubj }) => ({
       href,
       label,
       isSelected: key === selectedTab,
       breadcrumbLabel,
+      'data-test-subj': dataTestSubj,
     }));
 }
