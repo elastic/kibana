@@ -8,9 +8,11 @@
 import { pipelineSuggestionTaskRoutes } from './pipeline_suggestion_task_route';
 import { suggestPartitionsRoute } from './suggest_partitions_route';
 import { unmanagedAssetsRoute } from './unmanaged_assets_route';
+import { restoreDataStreamRoute } from './restore_data_stream_route';
 
 export const internalManagementRoutes = {
   ...unmanagedAssetsRoute,
   ...suggestPartitionsRoute,
   ...pipelineSuggestionTaskRoutes,
+  ...restoreDataStreamRoute,
 };

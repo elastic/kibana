@@ -1327,6 +1327,13 @@ paths:
                 name:
                   description: Display name for the agent.
                   type: string
+                visibility:
+                  description: '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                  enum:
+                    - public
+                    - shared
+                    - private
+                  type: string
               required:
                 - id
                 - name
@@ -1627,6 +1634,13 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
+                  type: string
+                visibility:
+                  description: '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).'
+                  enum:
+                    - public
+                    - shared
+                    - private
                   type: string
       responses:
         '200':
@@ -73487,7 +73501,7 @@ components:
       type: object
       properties:
         reason:
-          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+          $ref: '#/components/schemas/Security_Detections_API_Reason'
         signal_ids:
           description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
@@ -73516,7 +73530,7 @@ components:
           additionalProperties: true
           type: object
         reason:
-          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+          $ref: '#/components/schemas/Security_Detections_API_Reason'
         status:
           enum:
             - closed
@@ -76323,8 +76337,12 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_QueryRuleCreateFields'
+    Security_Detections_API_Reason:
+      description: 'The reason for closing the alerts. Can be one of following predefined reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.'
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
+        - type: string
     Security_Detections_API_ReasonEnum:
-      description: The reason for closing the alerts
       enum:
         - false_positive
         - duplicate
