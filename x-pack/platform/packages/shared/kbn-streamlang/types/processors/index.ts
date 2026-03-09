@@ -677,6 +677,28 @@ export const networkDirectionProcessorSchema = z.intersection(
   ])
 ) satisfies z.Schema<NetworkDirectionProcessor>;
 
+/**
+ * Enrich processor
+ */
+
+export interface EnrichProcessor extends ProcessorBaseWithWhere {
+  action: 'enrich';
+  policy_name: string;
+  field: string;
+  to: string;
+  ignore_missing?: boolean;
+  override?: boolean;
+}
+
+export const enrichProcessorSchema = processorBaseWithWhereSchema.extend({
+  action: z.literal('enrich'),
+  policy_name: NonEmptyString,
+  field: StreamlangSourceField,
+  to: StreamlangTargetField,
+  ignore_missing: z.optional(z.boolean()),
+  override: z.optional(z.boolean()),
+}) satisfies z.Schema<EnrichProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -699,6 +721,7 @@ export type StreamlangProcessorDefinition =
   | SortProcessor
   | ConcatProcessor
   | NetworkDirectionProcessor
+  | EnrichProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -723,12 +746,13 @@ export const streamlangProcessorSchema = z.union([
   convertProcessorSchema,
   concatProcessorSchema,
   networkDirectionProcessorSchema,
+  enrichProcessorSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
 export const isProcessWithOverrideOption = createIsNarrowSchema(
   processorBaseSchema,
-  z.union([renameProcessorSchema, setProcessorSchema])
+  z.union([renameProcessorSchema, setProcessorSchema, enrichProcessorSchema])
 );
 
 export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
@@ -742,6 +766,7 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     redactProcessorSchema,
     mathProcessorSchema,
     splitProcessorSchema,
+    enrichProcessorSchema,
   ])
 );
 
