@@ -1,3 +1,5 @@
+name: Auto-approve bundled package updates
+
 on:
   pull_request:
     types:
