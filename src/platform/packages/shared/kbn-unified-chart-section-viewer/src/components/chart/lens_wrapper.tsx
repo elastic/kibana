@@ -6,10 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PresentationPanelQuickActionContext } from '@kbn/presentation-panel-plugin/public';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ACTION_EXPLORE_IN_DISCOVER_TAB } from '../../common/constants';
@@ -82,19 +84,19 @@ export function LensWrapper({
     }
   `;
 
+  const resolvedQuery = useMemo(
+    () => resolveEsqlVariables(lensProps.attributes.state.query, lensProps.esqlVariables),
+    [lensProps.attributes.state.query, lensProps.esqlVariables]
+  );
+
   const handleExploreInDiscoverTab = useCallback(
     () =>
       onExploreInDiscoverTab?.({
-        query: lensProps.attributes.state.query,
+        query: resolvedQuery,
         tabLabel: lensProps.attributes.title,
         timeRange: lensProps.timeRange,
       }),
-    [
-      lensProps.attributes.state.query,
-      lensProps.attributes.title,
-      lensProps.timeRange,
-      onExploreInDiscoverTab,
-    ]
+    [resolvedQuery, lensProps.attributes.title, lensProps.timeRange, onExploreInDiscoverTab]
   );
 
   const extraActions = useLensExtraActions({
@@ -128,4 +130,21 @@ export function LensWrapper({
       </PresentationPanelQuickActionContext.Provider>
     </div>
   );
+}
+
+function resolveEsqlVariables(
+  query: Query | AggregateQuery,
+  variables: ESQLControlVariable[] | undefined
+): Query | AggregateQuery {
+  if (!variables?.length || !('esql' in query)) {
+    return query;
+  }
+
+  let resolved = query.esql;
+  for (const { key, value } of variables) {
+    const literal = typeof value === 'string' ? `"${value}"` : String(value);
+    resolved = resolved.replaceAll(`?${key}`, literal);
+  }
+
+  return { esql: resolved };
 }

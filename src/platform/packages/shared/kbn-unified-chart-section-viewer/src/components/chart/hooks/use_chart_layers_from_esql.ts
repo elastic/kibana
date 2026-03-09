@@ -11,6 +11,7 @@ import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils'
 import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { MetricUnit } from '../../../types';
 import { useEsqlQueryInfo } from '../../../hooks';
@@ -25,6 +26,7 @@ interface ChartLayersFromEsqlProps {
   seriesType: LensSeriesLayer['seriesType'];
   services: UnifiedMetricsGridProps['services'];
   abortController?: AbortController;
+  variables?: ESQLControlVariable[];
 }
 
 export interface ChartLayersFromEsqlResult {
@@ -41,6 +43,7 @@ export const useChartLayersFromEsql = ({
   services,
   unit,
   abortController,
+  variables,
 }: ChartLayersFromEsqlProps): ChartLayersFromEsqlResult => {
   const queryInfo = useEsqlQueryInfo({ query });
 
@@ -55,9 +58,10 @@ export const useChartLayersFromEsql = ({
         search: services.data.search.search,
         signal: abortController?.signal,
         timeRange,
+        variables,
       }),
 
-    [query, services.data.search, abortController, timeRange]
+    [query, services.data.search, abortController, timeRange, variables]
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
