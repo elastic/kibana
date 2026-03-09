@@ -111,6 +111,26 @@ describe('TabsBarMenu', () => {
     expect(await screen.findByText('2 tabs')).toBeInTheDocument();
   });
 
+  it('shows individual recently closed tabs when they were not closed as a batch', async () => {
+    const user = userEvent.setup();
+    render(
+      <TabsBarMenu
+        {...defaultProps}
+        recentlyClosedItems={[
+          { id: 'closed1', label: 'Closed Tab 1', closedAt: now - 5 * 60 * 1000 },
+          { id: 'closed2', label: 'Closed Tab 2', closedAt: now - 10 * 60 * 1000 },
+        ]}
+      />
+    );
+
+    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    await user.click(menuButton);
+
+    expect(await screen.findByText('Recently closed')).toBeInTheDocument();
+    expect(await screen.findByText('Closed Tab 1')).toBeInTheDocument();
+    expect(await screen.findByText('Closed Tab 2')).toBeInTheDocument();
+  });
+
   it('can clear recently closed items', async () => {
     const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
