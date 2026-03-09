@@ -9,14 +9,16 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPanel,
   EuiSelectable,
-  EuiText,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
@@ -28,8 +30,6 @@ interface ClosingReasonOption {
   key?: string;
 }
 
-type CloseCaseModalStep = 'sync_decision' | 'reason_selection';
-
 const getDefaultClosingReasonOptions = (): Array<EuiSelectableOption<ClosingReasonOption>> => [
   { label: i18n.CLOSE_CASE_MODAL_REASON_CLOSE_WITHOUT_REASON, key: undefined },
   { label: i18n.CLOSE_CASE_MODAL_REASON_DUPLICATE, key: 'duplicate' },
@@ -40,13 +40,9 @@ const getDefaultClosingReasonOptions = (): Array<EuiSelectableOption<ClosingReas
 ];
 
 interface CloseCaseModalProps {
-  isSyncDecisionStep: boolean;
   closeReasonOptions: Array<EuiSelectableOption<ClosingReasonOption>>;
-  selectedClosingReason?: EuiSelectableOption<ClosingReasonOption>;
   onClose: () => void;
-  onCloseCaseOnly: () => void;
-  onGoToCloseReasonSelection: () => void;
-  onCloseCaseAndSyncAlerts: () => void;
+  onSubmit: () => void;
   onCloseReasonOptionsChange: (
     options: Array<EuiSelectableOption<ClosingReasonOption>>,
     event?: unknown,
@@ -55,52 +51,46 @@ interface CloseCaseModalProps {
 }
 
 const CloseCaseModalComponent = React.memo<CloseCaseModalProps>(
-  ({
-    isSyncDecisionStep,
-    closeReasonOptions,
-    selectedClosingReason,
-    onClose,
-    onCloseCaseOnly,
-    onGoToCloseReasonSelection,
-    onCloseCaseAndSyncAlerts,
-    onCloseReasonOptionsChange,
-  }) => (
+  ({ closeReasonOptions, onClose, onSubmit, onCloseReasonOptionsChange }) => (
     <EuiModal onClose={onClose} aria-label={i18n.CLOSE_CASE_MODAL_TITLE}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.CLOSE_CASE_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {isSyncDecisionStep ? (
-          <EuiText size="s">
-            <p>{i18n.CLOSE_CASE_MODAL_SYNC_DECISION_DESCRIPTION}</p>
-          </EuiText>
-        ) : (
-          <EuiSelectable
-            aria-label={i18n.CLOSE_CASE_MODAL_REASON_LABEL}
-            options={closeReasonOptions}
-            onChange={onCloseReasonOptionsChange}
-            singleSelection="always"
-            height={closeReasonOptions.length * 32}
-          >
-            {(list) => list}
-          </EuiSelectable>
-        )}
+        <EuiSelectable
+          aria-label={i18n.CLOSE_CASE_MODAL_REASON_LABEL}
+          options={closeReasonOptions}
+          onChange={onCloseReasonOptionsChange}
+          singleSelection="always"
+          height={240}
+          searchable
+        >
+          {(list, search) => (
+            <>
+              {search}
+              <EuiPanel
+                hasBorder={false}
+                hasShadow={false}
+                paddingSize="s"
+                css={{
+                  height: '240px',
+                }}
+              >
+                {list}
+              </EuiPanel>
+            </>
+          )}
+        </EuiSelectable>
       </EuiModalBody>
-      <EuiModalFooter>
-        {isSyncDecisionStep ? (
-          <>
-            <EuiButton onClick={onCloseCaseOnly}>
-              {i18n.CLOSE_CASE_MODAL_DO_NOT_SYNC_CLOSE_REASON}
-            </EuiButton>
-            <EuiButton onClick={onGoToCloseReasonSelection} fill>
-              {i18n.CLOSE_CASE_MODAL_SYNC_CLOSE_REASON}
-            </EuiButton>
-          </>
-        ) : (
-          <EuiButton onClick={onCloseCaseAndSyncAlerts} fill disabled={!selectedClosingReason}>
-            {i18n.CLOSE_CASE_MODAL_CONFIRM}
-          </EuiButton>
-        )}
+      <EuiModalFooter
+        css={css`
+          justify-content: space-between;
+        `}
+      >
+        <EuiButtonEmpty onClick={onClose}>{i18n.CLOSE_CASE_MODAL_CLOSE_BUTTON}</EuiButtonEmpty>
+        <EuiButton onClick={onSubmit} fill>
+          {i18n.CLOSE_CASE_MODAL_CONFIRM}
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   )
@@ -140,17 +130,17 @@ export const useCloseCaseModal = ({
     () =>
       initialCloseReasonOptions.map((closeReasonOption) => ({
         ...closeReasonOption,
-        checked: undefined,
+        checked: closeReasonOption.key == null ? ('on' as const) : undefined,
       })),
     [initialCloseReasonOptions]
   );
   const [isCloseCaseModalVisible, setIsCloseCaseModalVisible] = useState(false);
-  const [closeCaseModalStep, setCloseCaseModalStep] = useState<CloseCaseModalStep>('sync_decision');
   const [closeReasonOptions, setCloseReasonOptions] = useState<
     Array<EuiSelectableOption<ClosingReasonOption>>
   >(() => createCloseReasonOptions());
-  const [selectedClosingReason, setSelectedClosingReason] =
-    useState<EuiSelectableOption<ClosingReasonOption>>();
+  const [selectedClosingReason, setSelectedClosingReason] = useState<
+    EuiSelectableOption<ClosingReasonOption> | undefined
+  >(() => createCloseReasonOptions().find((option) => option.key == null));
   const onCloseReasonOptionsChange = useCallback(
     (
       options: Array<EuiSelectableOption<ClosingReasonOption>>,
@@ -167,19 +157,10 @@ export const useCloseCaseModal = ({
     setIsCloseCaseModalVisible(false);
   }, []);
 
-  const onCloseCaseOnly = useCallback(() => {
-    closeCloseCaseModal();
-    onCloseCase();
-  }, [closeCloseCaseModal, onCloseCase]);
-
-  const onCloseCaseAndSyncAlerts = useCallback(() => {
+  const onSubmit = useCallback(() => {
     closeCloseCaseModal();
     onCloseCase(selectedClosingReason?.key);
   }, [closeCloseCaseModal, onCloseCase, selectedClosingReason?.key]);
-
-  const onGoToCloseReasonSelection = useCallback(() => {
-    setCloseCaseModalStep('reason_selection');
-  }, []);
 
   const openCloseCaseModal = useCallback(() => {
     // Should automatically close without reason when case sync to alerts is disabled
@@ -187,9 +168,9 @@ export const useCloseCaseModal = ({
       onCloseCase();
       return;
     }
-    setCloseReasonOptions(createCloseReasonOptions());
-    setSelectedClosingReason(undefined);
-    setCloseCaseModalStep('sync_decision');
+    const nextCloseReasonOptions = createCloseReasonOptions();
+    setCloseReasonOptions(nextCloseReasonOptions);
+    setSelectedClosingReason(nextCloseReasonOptions.find((option) => option.key == null));
     setIsCloseCaseModalVisible(true);
   }, [canSyncCloseReasonToAlerts, createCloseReasonOptions, onCloseCase]);
 
@@ -197,13 +178,9 @@ export const useCloseCaseModal = ({
     openCloseCaseModal,
     closeCaseModal: isCloseCaseModalVisible ? (
       <CloseCaseModalComponent
-        isSyncDecisionStep={closeCaseModalStep === 'sync_decision'}
         closeReasonOptions={closeReasonOptions}
-        selectedClosingReason={selectedClosingReason}
         onClose={closeCloseCaseModal}
-        onCloseCaseOnly={onCloseCaseOnly}
-        onGoToCloseReasonSelection={onGoToCloseReasonSelection}
-        onCloseCaseAndSyncAlerts={onCloseCaseAndSyncAlerts}
+        onSubmit={onSubmit}
         onCloseReasonOptionsChange={onCloseReasonOptionsChange}
       />
     ) : null,

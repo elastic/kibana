@@ -86,7 +86,7 @@ describe('StatusActionButton', () => {
         .simulate('click');
       wrapper
         .find('button')
-        .filterWhere((node) => node.text() === i18n.CLOSE_CASE_MODAL_DO_NOT_SYNC_CLOSE_REASON)
+        .filterWhere((node) => node.text() === i18n.CLOSE_CASE_MODAL_CONFIRM)
         .simulate('click');
       expect(onStatusChanged).toHaveBeenCalledWith('closed');
     });

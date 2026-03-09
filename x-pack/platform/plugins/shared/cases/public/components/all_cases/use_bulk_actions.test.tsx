@@ -86,7 +86,7 @@ describe('useBulkActions', () => {
       });
     });
 
-    it('shows the sync step and reason step when closing from bulk actions', async () => {
+    it('shows the reason selector when closing from bulk actions', async () => {
       const { result } = renderHook(
         () =>
           useBulkActions({
@@ -131,17 +131,9 @@ describe('useBulkActions', () => {
         </>
       );
 
-      expect(await screen.findByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).toBeInTheDocument();
-      await userEvent.click(screen.getByText(i18n.CLOSE_CASE_MODAL_SYNC_CLOSE_REASON));
-
-      modals = result.current.modals;
-      rerender(
-        <>
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-          {modals}
-        </>
-      );
-
+      expect(
+        await screen.findByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+      ).toBeInTheDocument();
       expect(screen.getByText('Close without reason')).toBeInTheDocument();
     });
 
@@ -184,7 +176,9 @@ describe('useBulkActions', () => {
         pointerEventsCheck: 0,
       });
 
-      expect(screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+      ).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(updateCasesSpy).toHaveBeenCalledWith(

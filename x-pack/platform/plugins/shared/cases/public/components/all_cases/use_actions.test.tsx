@@ -170,7 +170,6 @@ describe('useActions', () => {
       expect(screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_SYNC_CLOSE_REASON));
     await user.click(screen.getByText('Duplicate'));
     await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_CONFIRM));
 
@@ -214,7 +213,9 @@ describe('useActions', () => {
     await waitForEuiContextMenuPanelTransition();
 
     await user.click(screen.getByTestId('cases-bulk-action-status-closed'));
-    expect(screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })
+    ).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalledWith(
@@ -255,7 +256,6 @@ describe('useActions', () => {
       expect(screen.getByRole('dialog', { name: i18n.CLOSE_CASE_MODAL_TITLE })).toBeInTheDocument();
     });
 
-    await user.click(screen.getByText(i18n.CLOSE_CASE_MODAL_SYNC_CLOSE_REASON));
     await waitFor(() => {
       expect(screen.getByText('Close without reason')).toBeInTheDocument();
     });
