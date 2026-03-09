@@ -85,6 +85,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     }, [setIsPopoverOpen]);
 
     const getOpenedTabItemContents = useCallback((item: TabItem): React.ReactNode => {
+      // title set to undefined to disable default tooltip
       return <EuiTextTruncate truncation="middle" text={item.label} title={undefined} />;
     }, []);
 
@@ -170,6 +171,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         const includeTimeLine = options?.includeTimeLine ?? Boolean(formattedTime);
         return (
           <>
+            {/* title set to undefined to disable default tooltip */}
             <EuiTextTruncate truncation="middle" text={item.label} title={undefined} />
             {includeTimeLine && formattedTime ? (
               <EuiText size="xs" color="subdued" className="eui-displayBlock">
@@ -264,6 +266,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         rootItems.push({
           name: (
             <>
+              {/* title set to undefined to disable default tooltip */}
               <EuiTextTruncate
                 truncation="middle"
                 text={i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosedGroupLabel', {
