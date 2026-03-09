@@ -16,7 +16,10 @@ import type {
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../common/constants';
 import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
@@ -225,6 +228,7 @@ The tool stores the result as an attachment (creating new or updating existing).
           }
 
           const created = await attachments.add({
+            id: SECURITY_RULE_ATTACHMENT_ID,
             type: SecurityAgentBuilderAttachments.rule,
             data: attachmentData,
             description: attachmentDescription,

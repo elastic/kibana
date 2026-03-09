@@ -23,6 +23,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import {
   THREAT_HUNTING_AGENT_ID,
   SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
 } from '../../../../../common/constants';
 
 interface CreateRuleContextMenuProps {
@@ -64,7 +65,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     closePopover();
 
     const emptyRuleAttachment: AttachmentInput = {
-      id: 'ai-rule-creation',
+      id: SECURITY_RULE_ATTACHMENT_ID,
       type: SecurityAgentBuilderAttachments.rule,
       data: {
         text: JSON.stringify({}),
