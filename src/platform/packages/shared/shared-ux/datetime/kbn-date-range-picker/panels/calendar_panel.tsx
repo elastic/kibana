@@ -9,7 +9,15 @@
 
 import React, { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { EuiButton, EuiCheckbox, EuiFlexGroup, EuiToolTip, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { TimeRangeBounds } from '../types';
 import { Calendar } from '../calendar';
@@ -34,58 +42,53 @@ import {
 
 /** Calendar-based date selection panel. */
 export function CalendarPanel() {
+  const { euiTheme } = useEuiTheme();
   const { applyRange, onPresetSave, setText, text, timeRange } = useDateRangePickerContext();
   const saveAsPresetCheckboxId = useGeneratedHtmlId({ prefix: 'saveAsPreset' });
 
-  const [range, setRange] = useState<DateRange | undefined>(() =>
-    timeRange.startDate && timeRange.endDate
-      ? { from: timeRange.startDate, to: timeRange.endDate }
-      : undefined
-  );
-
+  const [pendingFrom, setPendingFrom] = useState<Date | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [saveAsPreset, setSaveAsPreset] = useState(false);
 
-  const calendarChangeRef = useRef(false);
-  const initialStateRef = useRef({
+  const originalTextRef = useRef(text);
+  const timeSourceRef = useRef({
     startDate: timeRange.startDate,
     endDate: timeRange.endDate,
-    text,
-    mountText:
-      timeRange.startDate && timeRange.endDate
-        ? formatDateRange(timeRange.startDate, timeRange.endDate)
-        : null,
   });
+
+  // Derived range: pending single-click selection takes priority, otherwise derive from text
+  const range: DateRange | undefined = useMemo(() => {
+    if (pendingFrom) return { from: pendingFrom, to: undefined };
+    if (timeRange.startDate && timeRange.endDate)
+      return { from: timeRange.startDate, to: timeRange.endDate };
+
+    return undefined;
+  }, [pendingFrom, timeRange.startDate, timeRange.endDate]);
 
   // On mount: convert to absolute format so user sees resolved dates
   useEffect(() => {
-    if (initialStateRef.current.mountText) {
-      setText(initialStateRef.current.mountText);
+    if (timeSourceRef.current.startDate && timeSourceRef.current.endDate) {
+      setText(formatDateRange(timeSourceRef.current.startDate, timeSourceRef.current.endDate));
     }
   }, [setText]);
 
-  // Sync calendar when input text changes (e.g. user edits the input directly)
-  useEffect(() => {
-    if (calendarChangeRef.current) {
-      calendarChangeRef.current = false;
-      return;
-    }
-
-    if (timeRange.startDate && timeRange.endDate) {
-      setRange({ from: timeRange.startDate, to: timeRange.endDate });
-      setHasChanges(true);
-    }
+  const hasTimeRangeChanged = useMemo(() => {
+    if (!timeRange.startDate || !timeRange.endDate) return false;
+    return (
+      timeRange.startDate.getTime() !== timeSourceRef.current.startDate?.getTime() ||
+      timeRange.endDate.getTime() !== timeSourceRef.current.endDate?.getTime()
+    );
   }, [timeRange.startDate, timeRange.endDate]);
 
   const restoreOriginalText = useCallback(() => {
-    setText(initialStateRef.current.text);
+    setText(originalTextRef.current);
   }, [setText]);
 
   const getStartDate = useCallback(
     (date: Date) =>
       combineDateAndTime(
         date,
-        initialStateRef.current.startDate,
+        timeSourceRef.current.startDate,
         DEFAULT_START_HOUR,
         DEFAULT_START_MINUTE
       ),
@@ -94,12 +97,7 @@ export function CalendarPanel() {
 
   const getEndDate = useCallback(
     (date: Date) =>
-      combineDateAndTime(
-        date,
-        initialStateRef.current.endDate,
-        DEFAULT_END_HOUR,
-        DEFAULT_END_MINUTE
-      ),
+      combineDateAndTime(date, timeSourceRef.current.endDate, DEFAULT_END_HOUR, DEFAULT_END_MINUTE),
     []
   );
 
@@ -133,6 +131,8 @@ export function CalendarPanel() {
     return {
       start: toLocalPreciseString(start),
       end: toLocalPreciseString(end),
+      startDate: start,
+      endDate: end,
       inputText: formatDateRange(start, end),
     };
   }, [range, getOrderedDates]);
@@ -140,29 +140,36 @@ export function CalendarPanel() {
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
       setHasChanges(true);
-      calendarChangeRef.current = true;
 
-      // Reset to single date when clicking after complete selection
-      if (range?.from && range?.to) {
+      // Complete range visible — user is starting a new selection
+      if (!pendingFrom && range?.from && range?.to) {
         const fromChanged = newRange?.from?.getTime() !== range.from.getTime();
         const clickedDate = fromChanged ? newRange?.from : newRange?.to;
 
-        setRange({ from: clickedDate, to: undefined });
+        setPendingFrom(clickedDate ?? null);
         if (clickedDate) setText(formatRangeText(clickedDate));
         return;
       }
 
-      setRange(newRange);
-
-      if (newRange?.from) {
+      // Second click — completing the range
+      if (pendingFrom && newRange?.from && newRange?.to) {
+        setPendingFrom(null);
         setText(formatRangeText(newRange.from, newRange.to));
+        return;
+      }
+
+      // First click with no existing selection
+      if (newRange?.from) {
+        setPendingFrom(newRange.from);
+        setText(formatRangeText(newRange.from));
       }
     },
-    [range, setText, formatRangeText]
+    [pendingFrom, range, setText, formatRangeText]
   );
 
   const isRangeComplete = Boolean(range?.from && range?.to);
-  const isApplyDisabled = !hasChanges || !isRangeComplete || !absoluteRange;
+  const isApplyDisabled =
+    !(hasChanges || hasTimeRangeChanged) || !isRangeComplete || !absoluteRange;
 
   const onApply = useCallback(() => {
     if (!absoluteRange) return;
@@ -181,8 +188,8 @@ export function CalendarPanel() {
           value: absoluteRange.inputText,
           start: absoluteRange.start,
           end: absoluteRange.end,
-          startDate: new Date(absoluteRange.start),
-          endDate: new Date(absoluteRange.end),
+          startDate: absoluteRange.startDate,
+          endDate: absoluteRange.endDate,
           type: [DATE_TYPE_ABSOLUTE, DATE_TYPE_ABSOLUTE],
           isNaturalLanguage: false,
           isInvalid: false,

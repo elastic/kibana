@@ -13,8 +13,7 @@ import {
   getIndexFromDate,
   getScrollDirectionIcon,
 } from './calendar.utils';
-
-const TODAY_INDEX = 100000;
+import { TODAY_INDEX } from './calendar.constants';
 
 describe('Calendar utility functions', () => {
   describe('getScrollDirection', () => {

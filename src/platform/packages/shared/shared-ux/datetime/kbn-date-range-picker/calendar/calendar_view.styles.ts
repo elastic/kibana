@@ -35,7 +35,7 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       display: flex;
       font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
       font-weight: ${euiTheme.font.weight.bold};
-      height: 36px;
+      height: calc(${euiTheme.size.xl} + ${euiTheme.size.xs});
       justify-content: center;
       padding-bottom: ${euiTheme.size.s};
       padding-top: ${euiTheme.size.m};
@@ -52,12 +52,13 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       color: ${euiTheme.colors.textSubdued};
       height: ${euiTheme.size.l};
       font-size: ${euiTheme.font.scale.xxs * euiTheme.base}px;
+      font-weight: ${euiTheme.font.weight.semiBold};
       padding: ${euiTheme.size.xs};
       vertical-align: middle;
     }
 
     .rdp-weeks tr:first-child td {
-      padding-top: ${euiTheme.size.xs};
+      padding-top: ${euiTheme.size.s};
     }
 
     .rdp-day, .rdp-range_start, .rdp-range_end {
@@ -79,11 +80,14 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       &::after {
         content: '';
         position: absolute;
-        top: 4px;
-        right: 4px;
+        top: ${euiTheme.size.xs};
+        right: ${euiTheme.size.xs};
+        /* There's no such token in EUI so we use a hardcoded value */
         width: 6px;
+        /* There's no such token in EUI so we use a hardcoded value */
         height: 6px;
         background-color: ${euiTheme.colors.backgroundFilledPrimary};
+        /* There's no such token in EUI so we use a hardcoded value */
         border-radius: 3px;
       }
     }

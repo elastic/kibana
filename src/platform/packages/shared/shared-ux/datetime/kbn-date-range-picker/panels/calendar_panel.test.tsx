@@ -14,6 +14,7 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import { CalendarPanel } from './calendar_panel';
 import { DATE_TYPE_ABSOLUTE, DATE_TYPE_NOW, DATE_TYPE_RELATIVE } from '../constants';
 import { formatDateRange, toLocalPreciseString } from '../utils';
+import { textToTimeRange } from '../parse';
 
 const mockUseDateRangePickerContext = jest.fn();
 
@@ -91,7 +92,16 @@ const clickDay = (day: number) =>
 describe('CalendarPanel', () => {
   const applyRange = jest.fn();
   const onPresetSave = jest.fn();
-  const setText = jest.fn();
+  const setText = jest.fn((newText: string) => {
+    const parsed = textToTimeRange(newText);
+    const current = mockUseDateRangePickerContext();
+
+    mockUseDateRangePickerContext.mockReturnValue({
+      ...current,
+      text: newText,
+      timeRange: { ...current.timeRange, startDate: parsed.startDate, endDate: parsed.endDate },
+    });
+  });
 
   /** Context with computed dates. */
   const makeContext = (
@@ -275,7 +285,7 @@ describe('CalendarPanel', () => {
       expect(screen.getByRole('button', { name: 'Apply' })).not.toBeDisabled();
     });
 
-    it('calls applyRange with UTC ISO bounds and local display text', () => {
+    it('calls applyRange with local precise bounds and display text', () => {
       mockUseDateRangePickerContext.mockReturnValue(makeContextNoDates());
       renderWithEuiTheme(<CalendarPanel />);
 
@@ -285,8 +295,8 @@ describe('CalendarPanel', () => {
 
       expect(applyRange).toHaveBeenCalledWith(
         {
-          start: new Date(2026, 1, 10, 0, 0).toISOString(),
-          end: new Date(2026, 1, 15, 23, 30).toISOString(),
+          start: feb2026Local(10, 0, 0),
+          end: feb2026Local(15, 23, 30),
         },
         formatDateRange(feb2026(10, 0, 0), feb2026(15, 23, 30))
       );
