@@ -168,7 +168,9 @@ export function App({
 
   const isFromLegacyEditorEmbeddable = isLegacyEditorEmbeddable(initialContext);
   const legacyEditorAppName =
-    initialContext && 'originatingApp' in initialContext
+    initialContext && 'legacyEditorOriginatingApp' in initialContext
+      ? initialContext.legacyEditorOriginatingApp
+      : initialContext && 'originatingApp' in initialContext
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
