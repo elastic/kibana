@@ -24,13 +24,11 @@ export const createNavigationTree = ({
   overviewAvailable = true,
   isCasesAvailable = true,
   showAiAssistant = true,
-  showAlertingV2 = false,
 }: {
   streamsAvailable?: boolean;
   overviewAvailable?: boolean;
   isCasesAvailable?: boolean;
   showAiAssistant?: boolean;
-  showAlertingV2?: boolean;
 }): NavigationTreeDefinition => {
   return {
     body: [
@@ -68,8 +66,6 @@ export const createNavigationTree = ({
       {
         link: 'observability-overview:alerts',
         icon: 'warning',
-        getIsActive: ({ pathNameSerialized, prepend }) =>
-          pathNameSerialized.startsWith(prepend('/app/observability/alerts')),
       },
       ...filterForFeatureAvailability(
         {
@@ -91,7 +87,7 @@ export const createNavigationTree = ({
           defaultMessage: 'SLOs',
         }),
         link: 'slo',
-        icon: 'chartGauge',
+        icon: 'visGauge',
       },
       ...filterForFeatureAvailability(
         {
@@ -116,24 +112,12 @@ export const createNavigationTree = ({
                 title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
                   defaultMessage: 'Service inventory',
                 }),
-                getIsActive: ({ pathNameSerialized }) => {
-                  const regex = /app\/apm\/.*service.*/;
-
-                  return regex.test(pathNameSerialized);
-                },
               },
               {
                 link: 'apm:service-map',
                 title: i18n.translate('xpack.serverlessObservability.nav.apm.serviceMap', {
                   defaultMessage: 'Service map',
                 }),
-                sideNavStatus: 'hidden',
-              },
-              {
-                link: 'apm:service-groups-list',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
-                },
                 sideNavStatus: 'hidden',
               },
               { link: 'apm:traces' },
@@ -300,15 +284,6 @@ export const createNavigationTree = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
-                  link: 'management:anomaly_detection',
-                  title: i18n.translate(
-                    'xpack.serverlessObservability.nav.ml.anomaly_detection.manage_jobs',
-                    {
-                      defaultMessage: 'Manage jobs',
-                    }
-                  ),
-                },
-                {
                   link: 'ml:anomalyExplorer',
                 },
                 {
@@ -408,20 +383,13 @@ export const createNavigationTree = ({
     ],
     footer: [
       {
-        title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-          defaultMessage: 'Add data',
-        }),
-        link: 'observabilityOnboarding',
-        icon: 'plusCircle',
-      },
-      {
         id: 'ingestHub',
         title: i18n.translate('xpack.serverlessObservability.nav.ingestHub', {
           defaultMessage: 'Ingest Hub',
         }),
         link: 'observabilityOnboarding:ingest-hub',
         renderAs: 'panelOpener',
-        icon: 'logstashInput',
+        icon: 'plusInCircle',
         children: [
           {
             id: 'ingestHub_main',
@@ -563,25 +531,6 @@ export const createNavigationTree = ({
               },
             ],
           },
-          ...filterForFeatureAvailability(
-            {
-              id: 'v2_alerting_preview',
-              title: i18n.translate(
-                'xpack.serverlessObservability.nav.projectSettings.v2AlertingPreview',
-                {
-                  defaultMessage: 'V2 Alerting Preview',
-                }
-              ),
-              renderAs: 'panelOpener' as const,
-              breadcrumbStatus: 'hidden',
-              children: [
-                { link: 'management:rules', breadcrumbStatus: 'hidden' },
-                { link: 'management:episodes', breadcrumbStatus: 'hidden' },
-                { link: 'management:action_policies', breadcrumbStatus: 'hidden' },
-              ],
-            },
-            showAlertingV2
-          ),
           {
             id: 'alerts_and_insights',
             title: i18n.translate(
@@ -593,21 +542,10 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts' },
-              { link: 'rules' },
+              { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
-          },
-          {
-            id: 'project_performance',
-            title: i18n.translate(
-              'xpack.serverlessObservability.nav.projectSettings.projectPerformance',
-              {
-                defaultMessage: 'Project performance',
-              }
-            ),
-            breadcrumbStatus: 'hidden',
-            children: [{ link: 'management:queryActivity', badgeType: 'new' }],
           },
           ...filterForFeatureAvailability(
             {
@@ -630,30 +568,12 @@ export const createNavigationTree = ({
             overviewAvailable
           ),
           {
-            id: 'model_management',
-            title: i18n.translate(
-              'xpack.serverlessObservability.nav.projectSettings.modelManagement',
-              {
-                defaultMessage: 'Model Management',
-              }
-            ),
-            children: [
-              { link: 'management:elastic_inference_service' },
-              { link: 'management:inference_endpoints' },
-              { link: 'management:model_settings' },
-            ],
-          },
-          {
             title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
               defaultMessage: 'AI',
             }),
             children: [
               {
                 link: 'management:genAiSettings' as const,
-                breadcrumbStatus: 'hidden' as const,
-              },
-              {
-                link: 'management:evals' as const,
                 breadcrumbStatus: 'hidden' as const,
               },
               ...(showAiAssistant

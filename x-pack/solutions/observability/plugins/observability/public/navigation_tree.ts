@@ -14,7 +14,6 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
 import type { ObservabilityPublicPluginsStart } from './plugin';
-
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
   {
@@ -45,14 +44,10 @@ function createNavTree({
   streamsAvailable,
   showAiAssistant,
   isCloudEnabled,
-  showAlertingV2,
-  ingestHubAvailable,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
   isCloudEnabled?: boolean;
-  showAlertingV2?: boolean;
-  ingestHubAvailable?: boolean;
 }) {
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -324,15 +319,6 @@ function createNavTree({
             breadcrumbStatus: 'hidden',
             children: [
               {
-                link: 'management:anomaly_detection',
-                title: i18n.translate(
-                  'xpack.observability.obltNav.ml.anomaly_detection.manage_jobs',
-                  {
-                    defaultMessage: 'Manage jobs',
-                  }
-                ),
-              },
-              {
                 link: 'ml:anomalyExplorer',
               },
               {
@@ -418,29 +404,6 @@ function createNavTree({
       },
     ],
     footer: [
-      ingestHubAvailable
-        ? {
-            link: 'ingestHub' as const,
-            title: i18n.translate('xpack.observability.obltNav.ingestHub', {
-              defaultMessage: 'Ingest Hub',
-            }),
-            icon: 'launch',
-            children: [
-              {
-                link: 'ingestHub' as const,
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.getStarted', {
-                  defaultMessage: 'Get started',
-                }),
-              },
-            ],
-          }
-        : {
-            title: i18n.translate('xpack.observability.obltNav.addData', {
-              defaultMessage: 'Add data',
-            }),
-            link: 'observabilityOnboarding' as const,
-            icon: 'plusInCircle',
-          },
       {
         id: 'ingestHub',
         title: i18n.translate('xpack.observability.obltNav.ingestHub', {
@@ -448,7 +411,7 @@ function createNavTree({
         }),
         link: 'observabilityOnboarding:ingest-hub',
         renderAs: 'panelOpener',
-        icon: 'logstashInput',
+        icon: 'plusInCircle',
         children: [
           {
             id: 'ingestHub_main',
@@ -610,24 +573,9 @@ function createNavTree({
                       link: 'cloud_connect' as const,
                     },
                   ]),
+              { link: 'monitoring' },
             ],
           },
-          ...(showAlertingV2
-            ? [
-                {
-                  id: 'v2_alerting_preview',
-                  title: i18n.translate('xpack.observability.obltNav.v2AlertingPreview', {
-                    defaultMessage: 'V2 Alerting Preview',
-                  }),
-                  renderAs: 'panelOpener' as const,
-                  children: [
-                    { link: 'management:rules' as const },
-                    { link: 'management:episodes' as const },
-                    { link: 'management:action_policies' as const },
-                  ],
-                },
-              ]
-            : []),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
@@ -636,7 +584,7 @@ function createNavTree({
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'rules',
+                link: 'management:triggersActions',
               },
               {
                 link: 'management:triggersActionsConnectors',
@@ -649,19 +597,6 @@ function createNavTree({
               },
               {
                 link: 'management:maintenanceWindows',
-              },
-            ],
-          },
-          {
-            id: 'cluster_performance',
-            title: i18n.translate('xpack.observability.obltNav.clusterPerformance', {
-              defaultMessage: 'Cluster performance',
-            }),
-            children: [
-              { link: 'monitoring' },
-              {
-                link: 'management:queryActivity',
-                badgeType: 'new',
               },
             ],
           },
@@ -679,24 +614,12 @@ function createNavTree({
             ],
           },
           {
-            id: 'management_model_management',
-            title: i18n.translate('xpack.observability.obltNav.modelManagement', {
-              defaultMessage: 'Model Management',
-            }),
-            children: [
-              { link: 'management:elastic_inference_service' },
-              { link: 'management:inference_endpoints' },
-              { link: 'management:model_settings' },
-            ],
-          },
-          {
             id: 'management_ai',
             title: i18n.translate('xpack.observability.obltNav.ai', {
               defaultMessage: 'AI',
             }),
             children: [
               { link: 'management:genAiSettings' },
-              { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -781,19 +704,18 @@ export const createDefinition = (
   id: 'oblt',
   title,
   icon: 'logoObservability',
+  homePage: 'observabilityOnboarding',
   navigationTree$: combineLatest([
     pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
-    pluginsStart.ingestHub?.navigationAvailable$ || of(false),
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable]) =>
+    map(([{ status }, chatExperience]) =>
       createNavTree({
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
         isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
-        ingestHubAvailable,
       })
     )
   ),
+  dataTestSubj: 'observabilitySideNav',
 });
