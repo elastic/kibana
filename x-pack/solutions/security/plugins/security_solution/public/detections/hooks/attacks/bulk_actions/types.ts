@@ -8,7 +8,9 @@
 import type { BulkActionsConfig, ContentPanelConfig } from '@kbn/response-ops-alerts-table/types';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+
 import type { AlertWorkflowStatus } from '../../../../common/types';
+import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry';
 
 /**
  * Base props shared by all apply attack hooks.
@@ -23,6 +25,8 @@ export interface BaseApplyAttackProps {
   setIsLoading?: (loading: boolean) => void;
   /** Optional callback when operation succeeds */
   onSuccess?: () => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -40,6 +44,8 @@ export interface BaseAttackContextMenuItemsProps {
   refresh?: () => void;
   /** Optional callback to set loading state */
   setIsLoading?: (loading: boolean) => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
