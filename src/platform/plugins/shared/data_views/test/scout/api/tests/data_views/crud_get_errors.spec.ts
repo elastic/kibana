@@ -31,7 +31,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(response).toHaveStatusCode(404);
+      expect(response).toHaveStatusCode(403);
     });
 
     apiTest('returns error when ID is too long', async ({ apiClient }) => {

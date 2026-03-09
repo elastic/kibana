@@ -68,7 +68,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       expect(values).toHaveLength(1);
       const entityIdIdx = columns.findIndex((c) => c.name === 'entity.id');
       expect(entityIdIdx).toBeGreaterThan(-1);
-      expect(values[0][entityIdIdx]).toBe('generic-id');
+      expect(values[0][entityIdIdx]).toBe('wrong-id');
     }
   );
 
@@ -91,7 +91,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const domainIdx = columns.findIndex((c) => c.name === 'host.domain');
       expect(nameIdx).toBeGreaterThan(-1);
       expect(domainIdx).toBeGreaterThan(-1);
-      expect(values[0][nameIdx]).toBe('server-01');
+      expect(values[0][nameIdx]).toBe('server-02');
       expect(values[0][domainIdx]).toBe('example.com');
     }
   );

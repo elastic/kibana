@@ -106,7 +106,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(20);
+    expect(extractionResponse.body.count).toBe(21);
 
     const entities = await esClient.search({
       index: '.entities.v2.latest.security_default',

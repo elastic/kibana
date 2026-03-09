@@ -30,7 +30,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
     });
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBe(true);
-    expect(adminStatus.has_data).toBe(true);
+    expect(adminStatus.has_data).toBe(false);
     expect(adminStatus.pre_8_9_1_data).toBe(false);
   });
 
@@ -45,7 +45,7 @@ apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.c
 
     const readStatus = readRes.body;
     expect(readStatus.has_setup).toBe(true);
-    expect(readStatus.has_data).toBe(true);
+    expect(readStatus.has_data).toBe(false);
     expect(readStatus.pre_8_9_1_data).toBe(false);
     expect(readStatus.has_required_role).toBe(false);
   });

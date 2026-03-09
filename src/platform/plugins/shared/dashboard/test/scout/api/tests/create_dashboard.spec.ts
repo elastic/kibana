@@ -46,7 +46,7 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(200);
+    expect(response).toHaveStatusCode(400);
     expect(response.body.spaces).toStrictEqual(['default']);
     expect(response.body.data).toStrictEqual({
       title,
