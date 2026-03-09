@@ -1,0 +1,42 @@
+# Ralph Progress Log
+Started: Sun Mar  9 2026
+---
+
+## Codebase Patterns
+- Bootstrap required: Run `yarn kbn bootstrap` after switching branches or when TS project map is missing
+- Typecheck single project: `yarn test:type_check --project path/to/tsconfig.json`
+- Jest tests: `yarn test:jest [TestPathPattern]` — auto-discovers config from test path
+- Jest integration tests: `yarn test:jest_integration [TestPathPattern]` — auto-discovers jest.integration.config.js
+- File casing: new files must be snake_case
+- Saved objects packages live under `src/core/packages/saved-objects/`
+- `api-server` = public types/interfaces, `api-server-internal` = implementation, `api-server-mocks` = mocks
+- TWO repository mock files must stay in sync: `api-server-mocks/src/repository.mock.ts` and `api-server-internal/src/mocks/repository.mock.ts`
+- THREE encryption extension mock files must stay in sync: `api-server-mocks`, `api-server-internal/mocks`, and `encrypted_saved_objects/server/crypto/`
+- RepositoryEsClient only wraps top-level ES methods (search, get, bulk, etc.) — does NOT expose esql.query(). Use raw ElasticsearchClient via this.options.client
+- `getNamespacesBoolFilter` and filter-merging patterns are in the search.ts implementation and can be reused
+- performSearch in search.ts is the closest pattern to follow for performEsql
+- Unit tests must go through SavedObjectsRepository class (not call performEsql directly) due to Jest module resolution
+- EncryptionHelper captures encryptionExtension at construction time via createRepositoryHelpers — for runtime code that needs the live extension reference, use apiExecutionContext.extensions.encryptionExtension directly (not helpers.encryption)
+- encryptionExtension.decryptOrStripResponseAttributes is the core method for decrypt-or-strip — it reconstructs AAD from SavedObject fields (type, id, namespace, attributesToIncludeInAAD)
+- ES|QL _source values are objects but FieldValue type doesn't include them — use `as unknown as estypes.FieldValue` for assignment
+- In saved object raw docs, attributes are stored under `source[type]` (e.g., `source['index-pattern']`)
+---
+
+## 2026-03-09 - US-005, US-006, US-007
+- Implemented _source decryption path in performEsql: when both _source and _id columns are present, each row's _source document is decrypted via encryptionExtension.decryptOrStripResponseAttributes
+- Standalone encrypted scalar columns are always nulled (existing behavior preserved)
+- Used encryptionExtension directly rather than EncryptionHelper because EncryptionHelper captures the extension at construction time
+- Added 4 new unit tests for _source decryption: success, failure/strip fallback, missing _id, missing _source
+- Updated tutorial docs to document the hybrid encryption behavior
+- Updated SavedObjectsEsqlOptions JSDoc to mention _source decryption
+- Files changed:
+  - src/core/packages/saved-objects/api-server-internal/src/lib/apis/esql.ts
+  - src/core/packages/saved-objects/api-server-internal/src/lib/apis/esql.test.ts
+  - src/core/packages/saved-objects/api-server/src/apis/esql.ts
+  - dev_docs/tutorials/saved_objects_esql.mdx
+  - tasks/prd.json, tasks/progress.txt
+- **Learnings for future iterations:**
+  - EncryptionHelper stores encryptionExtension at construction time — it won't see extensions added to the extensions object after repository creation. Use the extension directly from apiExecutionContext.extensions for runtime code.
+  - collectAttributesForAAD silently omits missing AAD attributes (uses Object.hasOwn), so partial documents cause AAD mismatch → decryption failure → strip fallback. This is by design.
+  - The find method with `fields` has the same limitation — it attempts decryption and falls back to stripping. No extra fields are fetched for AAD.
+---

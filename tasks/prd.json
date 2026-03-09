@@ -1,0 +1,186 @@
+{
+  "project": "Kibana",
+  "branchName": "ralph/esql-search-saved-objects",
+  "description": "Add an esql method to the Saved Objects client and repository, following the same pattern as the existing search method. The esql method avoids the translation/indirection layer of the find method to give consumers access to the full power of ES|QL's processing commands.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Define SavedObjectsEsqlOptions types and add esql to ISavedObjectsRepository",
+      "description": "As a Kibana core developer, I want to define the ES|QL types and add an esql method to the saved objects repository interface so that plugins can execute ES|QL queries against saved objects with security enforced.",
+      "acceptanceCriteria": [
+        "New type file at api-server/src/apis/esql.ts defining SavedObjectsEsqlOptions and SavedObjectsEsqlResponse",
+        "SavedObjectsEsqlOptions extends Omit<estypes.EsqlQueryRequest, 'format' | 'columnar' | 'delimiter' | 'query'>, adding: type (string | string[]), namespaces (string[]), pipeline (string), metadata (optional string[])",
+        "SavedObjectsEsqlResponse is a type alias for estypes.EsqlQueryResponse (aliased from EsqlEsqlResult in ES client types)",
+        "ISavedObjectsRepository interface (in api-server/src/saved_objects_repository.ts) has a new esql method with signature: esql(options: SavedObjectsEsqlOptions): Promise<SavedObjectsEsqlResponse>",
+        "Types are exported from api-server/src/apis/index.ts barrel and api-server/index.ts",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "Already implemented on branch. Types defined, exported, and interface updated."
+    },
+    {
+      "id": "US-002",
+      "title": "Add esql to SavedObjectsClientContract, mocks, and repository stub",
+      "description": "As a Kibana plugin developer, I want the esql method available on the saved objects client so that I can use it from route handlers via ctx.core.savedObjects.client.esql().",
+      "acceptanceCriteria": [
+        "SavedObjectsClientContract interface (in api-server/src/saved_objects_client.ts) has the esql method with JSDoc warning about security risks (matching search method's remarks)",
+        "SavedObjectsClient implementation (in api-server-internal/src/saved_objects_client.ts) delegates to the repository's esql method",
+        "Repository mock (api-server-mocks/src/repository.mock.ts) includes esql as a jest mock",
+        "Internal repository mock (api-server-internal/src/mocks/repository.mock.ts) includes esql as a jest mock — there are TWO repository mock files that must stay in sync",
+        "Client mock (api-server-mocks/src/saved_objects_client.mock.ts) includes esql as a jest mock",
+        "SavedObjectsRepository class gets a stub esql method (throws 'not implemented') to satisfy the interface — the real implementation is wired in US-004",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": true,
+      "notes": "Already implemented on branch. Client, mocks, and repository all have esql method."
+    },
+    {
+      "id": "US-003",
+      "title": "Implement performEsql in the repository internals",
+      "description": "As a Kibana core developer, I want the internal implementation of the esql method to execute ES|QL queries via the Elasticsearch client while injecting space and type security filters and auto-generating the FROM clause.",
+      "acceptanceCriteria": [
+        "New performEsql function in api-server-internal/src/lib/apis/esql.ts, following the pattern of performSearch in search.ts",
+        "Accepts a PerformEsqlParams object with options: SavedObjectsEsqlOptions and rawClient: ElasticsearchClient",
+        "Validates options.namespaces is not empty (throws BadRequestError if empty)",
+        "Validates options.type contains at least one allowed type (returns empty response { columns: [], values: [] } if none match allowedTypes)",
+        "Resolves indices from types via commonHelper.getIndicesForTypes(types) and constructs the FROM <indices> clause (with optional METADATA fields)",
+        "Constructs the full ES|QL query by concatenating the FROM clause with the consumer's pipeline",
+        "Validates that pipeline does not start with a source command (FROM, ROW, SHOW, METRICS) — throws BadRequestError if it does",
+        "Uses spacesExtension.getSearchableNamespaces() to resolve authorized namespaces; returns empty response on 403 Boom errors",
+        "Uses securityExtension.authorizeFind() to check RBAC, supporting partially_authorized via typeToNamespacesMap",
+        "Constructs the namespaces bool filter via getNamespacesBoolFilter() (imported from ../search)",
+        "Injects the filter into EsqlQueryRequest.filter — merging with any user-provided filter using { bool: { must: [namespacesBoolFilter, userFilter] } }",
+        "Calls rawClient.esql.query() with the constructed query and filter",
+        "Returns the raw EsqlQueryResponse",
+        "Exported from apis/index.ts barrel file",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": true,
+      "notes": "Already implemented on branch. performEsql handles security, RBAC, namespaces, FROM clause generation, and filter merging."
+    },
+    {
+      "id": "US-004",
+      "title": "Wire esql into the repository implementation",
+      "description": "As a Kibana core developer, I want the repository class to delegate esql calls to the performEsql function with the correct execution context.",
+      "acceptanceCriteria": [
+        "SavedObjectsRepository.esql() method (in api-server-internal/src/lib/repository.ts) replaces the stub with a call to performEsql({ options, rawClient: this.options.client }, this.apiExecutionContext)",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": true,
+      "notes": "Already implemented on branch. Repository delegates to performEsql with rawClient."
+    },
+    {
+      "id": "US-005",
+      "title": "Handle encrypted attributes in ES|QL results",
+      "description": "As a Kibana core developer, I want encrypted saved object attributes handled correctly in ES|QL query results — decrypted when _source is available (matching the find/search behavior), and stripped/nulled for standalone scalar columns where AAD cannot be reconstructed.",
+      "acceptanceCriteria": [
+        "Add getEncryptedAttributes(type: string): ReadonlySet<string> | undefined to ISavedObjectsEncryptionExtension interface (in server/src/extensions/encryption.ts)",
+        "Implement getEncryptedAttributes on SavedObjectsEncryptionExtension class (in encrypted_saved_objects plugin) — delegates to EncryptedSavedObjectsService",
+        "Implement getEncryptedAttributes on EncryptedSavedObjectsService — returns the ReadonlySet from the type's definition stored in the private Map",
+        "Update all three encryption extension mocks: api-server-mocks, api-server-internal/mocks, and ESO plugin service mocks",
+        "When _source column is present in the response: for each row, extract the _source object and _id (from metadata), reconstruct a saved object descriptor, and run through encryptionHelper.optionallyDecryptAndRedactSingleResult — the same decryption path used by find and search. Replace the _source value in the row with the decrypted/redacted result.",
+        "Always null standalone encrypted scalar columns: regardless of whether _source decryption succeeds, any standalone encrypted attribute columns (e.g. dashboard.secretKey) must have their values replaced with null",
+        "Add stripEncryptedColumns function to performEsql that nulls encrypted column values (for the scalar column path)",
+        "ES|QL columns for SO attributes use the pattern <type>.<attribute_name> — match against this pattern to identify encrypted columns",
+        "Replace values in encrypted columns with null (preserving column structure so row indices remain stable)",
+        "If no encryption extension exists or all requested types are non-encryptable, skip post-processing entirely (fast path)",
+        "Works correctly for mixed-type queries where only some types have encrypted attributes",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": true,
+      "notes": "Implemented _source decryption path: when _source and _id columns are present, each row's _source is decrypted via encryptionExtension.decryptOrStripResponseAttributes (same path as find/search). Standalone encrypted scalar columns are always nulled. Used encryptionExtension directly (not EncryptionHelper) because EncryptionHelper captures the extension at construction time, before extensions are set in tests."
+    },
+    {
+      "id": "US-006",
+      "title": "Write unit tests for performEsql",
+      "description": "As a Kibana core developer, I want comprehensive unit tests so that I can verify the FROM clause generation, security filtering, authorization, encryption handling, and error handling of the esql method.",
+      "acceptanceCriteria": [
+        "Test file at api-server-internal/src/lib/apis/esql.test.ts",
+        "Tests that the FROM clause is auto-generated from type via getIndicesForTypes()",
+        "Tests that metadata fields are appended to the FROM clause (e.g. FROM .kibana METADATA _id)",
+        "Tests that pipeline is appended after the FROM clause",
+        "Tests that a pipeline starting with a source command (FROM, ROW, SHOW, METRICS) throws BadRequestError",
+        "Tests that namespaces filter is injected into EsqlQueryRequest.filter",
+        "Tests that user-provided filter is merged (not replaced) with the security filter",
+        "Tests that empty namespaces throws BadRequestError",
+        "Tests that unauthorized types return empty response",
+        "Tests that partially_authorized correctly restricts types to authorized namespaces",
+        "Tests that hidden types are filtered from allowed types",
+        "Tests that encrypted attribute columns have their values replaced with null",
+        "Tests that non-encrypted columns are returned unmodified",
+        "Tests that when _source column is present, encrypted attributes in _source are decrypted (matching find/search behavior)",
+        "Tests that when _source column is present but decryption fails, encrypted attributes in _source are stripped (fallback)",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": true,
+      "notes": "Added 4 tests for _source decryption: decrypt success, decrypt failure (strip fallback), missing _id column, missing _source column. Total: 22 tests passing."
+    },
+    {
+      "id": "US-007",
+      "title": "Write tutorial documentation",
+      "description": "As a Kibana plugin developer, I want a tutorial doc so that I can understand how to use the esql method, including the pipeline concept, security model, and the esql tagged template composer for avoiding injection attacks.",
+      "acceptanceCriteria": [
+        "New tutorial at dev_docs/tutorials/saved_objects_esql.mdx (following saved_objects_search.mdx pattern)",
+        "Explains the relationship between find, search, and esql methods",
+        "Explains the pipeline concept: consumers write only the ES|QL processing pipeline (everything after FROM), the system handles index resolution from type and security filtering",
+        "Shows a basic usage example in a route handler (using savedObjectsClient.esql() with pipeline)",
+        "Shows how to use metadata for METADATA _id, _source on the FROM clause",
+        "Explains how space and type security filtering is injected via the filter parameter",
+        "Documents the esql tagged template from @kbn/esql-language as the recommended way to build pipelines with user input — specifically the named param syntax ${{ name: value }}",
+        "Shows how to extract pipeline and params from the composer: use .print() for the pipeline string and .getParams() for the named params",
+        "Documents the type gap between the composer's .toRequest() and ES client types",
+        "Documents that encrypted fields in _source are decrypted (same as search), while standalone encrypted scalar columns are always nulled",
+        "Links to the Elasticsearch ES|QL documentation",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": true,
+      "notes": "Updated tutorial to document _source decryption behavior: encrypted attributes in _source are decrypted (same as search), standalone scalar columns are always nulled."
+    },
+    {
+      "id": "US-008",
+      "title": "Add example plugin route",
+      "description": "As a Kibana plugin developer, I want a working example so that I can see the esql method used in a real route handler with the pipeline API.",
+      "acceptanceCriteria": [
+        "New route file examples/saved_objects/server/esql_example_routes.ts (following search_example_routes.ts pattern)",
+        "Route registered in examples/saved_objects/server/plugin.ts",
+        "Demonstrates the esql method with type, namespaces, and pipeline — no FROM clause or WHERE type == in the pipeline",
+        "Shows a simple pipeline example (e.g. | KEEP dashboard.title | SORT dashboard.title | LIMIT 100)",
+        "Shows usage of @kbn/esql-language esql tagged template with named param syntax for safe pipeline construction",
+        "Shows usage of metadata option for METADATA fields",
+        "Includes error handling with isResponseError from @kbn/es-errors",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": true,
+      "notes": "Already implemented on branch."
+    },
+    {
+      "id": "US-009",
+      "title": "End-to-end integration tests for the esql method",
+      "description": "As a Kibana core developer, I want integration tests that exercise the esql method against a real Elasticsearch instance so that I can verify the full flow works end-to-end.",
+      "acceptanceCriteria": [
+        "New integration test file at src/core/server/integration_tests/saved_objects/service/lib/esql.test.ts (following the pattern of search.test.ts)",
+        "Test setup: boot a real ES + Kibana root using createTestServers and createRootWithCorePlugins, register a test-type with namespaceType: 'multiple' and mappings for name (text) and email (keyword)",
+        "Seed data: bulk-create test documents across default namespace and a second namespace (e.g. namespaceA)",
+        "Test: basic ES|QL query returns expected columns and values for the default namespace",
+        "Test: namespace scoping — querying namespaceA returns only documents from that namespace",
+        "Test: pipeline commands work (e.g. | WHERE, | SORT, | LIMIT, | STATS COUNT(*))",
+        "Test: pipeline starting with a source command (FROM, ROW) is rejected with BadRequestError",
+        "Test: metadata option (e.g. metadata: ['_id']) includes metadata fields in the response",
+        "Test: user-provided filter is merged with namespace filter (results are filtered by both)",
+        "All tests pass against a real Elasticsearch instance",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": true,
+      "notes": "Already implemented on branch."
+    }
+  ]
+}

@@ -26,8 +26,9 @@ import type { estypes } from '@elastic/elasticsearch';
  *
  * - Use the `esql` tagged template from `@kbn/esql-language` with named param syntax
  *   (`${{ name: value }}`) to prevent injection attacks.
- * - Encrypted saved object attributes are stripped (replaced with `null`) in the response
- *   because AAD cannot be reliably reconstructed from tabular data.
+ * - Standalone encrypted scalar columns are always replaced with `null`.
+ *   When `_source` is present (via `metadata: ['_id', '_source']`), encrypted attributes
+ *   within `_source` are decrypted using the same path as `find` and `search`.
  *
  * @public
  */

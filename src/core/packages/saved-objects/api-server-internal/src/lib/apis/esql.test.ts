@@ -321,4 +321,121 @@ describe('esql', () => {
       ]);
     });
   });
+
+  describe('_source decryption', () => {
+    let encryptionExtension: jest.Mocked<ISavedObjectsEncryptionExtension>;
+
+    beforeEach(() => {
+      encryptionExtension = savedObjectsExtensionsMock.createEncryptionExtension();
+      extensions.encryptionExtension = encryptionExtension;
+    });
+
+    it('should decrypt encrypted attributes in _source when _source and _id columns are present', async () => {
+      const responseWithSource = {
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: '_source' },
+        ],
+        values: [
+          [
+            'doc-1',
+            {
+              type: 'index-pattern',
+              namespaces: ['default'],
+              'index-pattern': { title: 'my-pattern', secret: 'encrypted-blob' },
+            },
+          ],
+        ],
+      };
+
+      encryptionExtension.isEncryptableType.mockImplementation((type) => type === 'index-pattern');
+      encryptionExtension.getEncryptedAttributes.mockReturnValue(new Set(['secret']));
+      encryptionExtension.decryptOrStripResponseAttributes.mockImplementation(async (object) => ({
+        ...(object as any),
+        attributes: {
+          ...(object.attributes as Record<string, unknown>),
+          secret: 'decrypted-value',
+        },
+      }));
+      client.esql.query.mockResolvedValue(responseWithSource as any);
+
+      const result = await repository.esql(options);
+
+      expect(encryptionExtension.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
+      const source = result.values[0][1] as unknown as Record<string, unknown>;
+      const attrs = source['index-pattern'] as Record<string, unknown>;
+      expect(attrs.secret).toBe('decrypted-value');
+      expect(attrs.title).toBe('my-pattern');
+    });
+
+    it('should strip encrypted attributes in _source when decryption fails', async () => {
+      const responseWithSource = {
+        columns: [
+          { name: '_id', type: 'keyword' },
+          { name: '_source', type: '_source' },
+        ],
+        values: [
+          [
+            'doc-1',
+            {
+              type: 'index-pattern',
+              namespaces: ['default'],
+              'index-pattern': { title: 'my-pattern', secret: 'encrypted-blob' },
+            },
+          ],
+        ],
+      };
+
+      encryptionExtension.isEncryptableType.mockImplementation((type) => type === 'index-pattern');
+      encryptionExtension.getEncryptedAttributes.mockReturnValue(new Set(['secret']));
+      // Simulate decryption failure: the extension strips the encrypted attribute
+      encryptionExtension.decryptOrStripResponseAttributes.mockImplementation(async (object) => {
+        const { secret: _stripped, ...remaining } = object.attributes as Record<string, unknown>;
+        return {
+          ...object,
+          attributes: remaining,
+          error: { statusCode: 500, error: 'Decryption error', message: 'AAD mismatch' },
+        };
+      });
+      client.esql.query.mockResolvedValue(responseWithSource as any);
+
+      const result = await repository.esql(options);
+
+      const source = result.values[0][1] as unknown as Record<string, unknown>;
+      const attrs = source['index-pattern'] as Record<string, unknown>;
+      expect(attrs.secret).toBeUndefined();
+      expect(attrs.title).toBe('my-pattern');
+    });
+
+    it('should not attempt _source decryption when _id column is missing', async () => {
+      const responseWithSourceOnly = {
+        columns: [{ name: '_source', type: '_source' }],
+        values: [
+          [
+            {
+              type: 'index-pattern',
+              'index-pattern': { title: 'my-pattern', secret: 'encrypted-blob' },
+            },
+          ],
+        ],
+      };
+
+      encryptionExtension.isEncryptableType.mockImplementation((type) => type === 'index-pattern');
+      encryptionExtension.getEncryptedAttributes.mockReturnValue(new Set(['secret']));
+      client.esql.query.mockResolvedValue(responseWithSourceOnly as any);
+
+      await repository.esql(options);
+
+      expect(encryptionExtension.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
+    });
+
+    it('should not attempt _source decryption when _source column is missing', async () => {
+      encryptionExtension.isEncryptableType.mockReturnValue(false);
+      client.esql.query.mockResolvedValue(MOCK_ESQL_RESPONSE as any);
+
+      await repository.esql(options);
+
+      expect(encryptionExtension.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
+    });
+  });
 });

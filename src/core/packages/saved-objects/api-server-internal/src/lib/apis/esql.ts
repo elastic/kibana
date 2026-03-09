@@ -11,6 +11,7 @@ import { castArray } from 'lodash';
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import type { ISavedObjectsEncryptionExtension } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
@@ -119,7 +120,79 @@ export async function performEsql(
   });
 
   const { encryptionExtension } = extensions;
-  return stripEncryptedColumns(result, types, encryptionExtension);
+  const withDecryptedSource = await decryptSourceColumn(result, types, encryptionExtension);
+  return stripEncryptedColumns(withDecryptedSource, types, encryptionExtension);
+}
+
+/**
+ * When both `_source` and `_id` columns are present in the ES|QL response,
+ * attempts to decrypt encrypted attributes within each row's `_source` document.
+ * This mirrors the decryption path used by `find` and `search` — the full document
+ * in `_source` contains all attributes needed for AAD reconstruction.
+ *
+ * If decryption fails for a row (e.g., AAD mismatch), the encryption extension
+ * strips encrypted attributes from that row's `_source` (same fallback as `find`).
+ */
+async function decryptSourceColumn(
+  response: SavedObjectsEsqlResponse,
+  types: string[],
+  encryptionExtension?: ISavedObjectsEncryptionExtension
+): Promise<SavedObjectsEsqlResponse> {
+  if (!encryptionExtension) {
+    return response;
+  }
+
+  const sourceColIdx = response.columns.findIndex((col) => col.name === '_source');
+  const idColIdx = response.columns.findIndex((col) => col.name === '_id');
+
+  if (sourceColIdx === -1 || idColIdx === -1 || response.values.length === 0) {
+    return response;
+  }
+
+  const decryptedValues = await Promise.all(
+    response.values.map(async (row) => {
+      const source = row[sourceColIdx] as Record<string, unknown> | null;
+      const rawId = row[idColIdx] as string | null;
+
+      if (!source || typeof source !== 'object' || !rawId) {
+        return row;
+      }
+
+      const docType = source.type as string | undefined;
+      if (!docType || !encryptionExtension.isEncryptableType(docType)) {
+        return row;
+      }
+
+      // Extract attributes from the raw document (stored under the type key)
+      const attributes = source[docType] as Record<string, unknown> | undefined;
+      if (!attributes) {
+        return row;
+      }
+
+      // Reconstruct a SavedObject for the encryption extension
+      const savedObject: SavedObject = {
+        id: rawId,
+        type: docType,
+        attributes,
+        references: (source.references as SavedObject['references']) ?? [],
+        namespaces: source.namespaces as string[] | undefined,
+      };
+
+      const decrypted = await encryptionExtension.decryptOrStripResponseAttributes(savedObject);
+
+      // Replace the _source value with the decrypted document.
+      // ES|QL _source values are objects but the FieldValue type doesn't include them.
+      const newSource = {
+        ...source,
+        [docType]: decrypted.attributes,
+      } as unknown as estypes.FieldValue;
+      const newRow = [...row];
+      newRow[sourceColIdx] = newSource;
+      return newRow;
+    })
+  );
+
+  return { ...response, values: decryptedValues };
 }
 
 /**

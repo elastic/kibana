@@ -153,9 +153,14 @@ If you provide a `filter` in the options, it is merged with the security filter 
 
 ## Encrypted attributes
 
-Saved object types that use the Encrypted Saved Objects (ESO) plugin have their encrypted attribute values **stripped** (replaced with `null`) in ES|QL results. This is because ES|QL returns tabular data, and the AAD (Additional Authenticated Data) required for decryption cannot be reliably reconstructed from flat column/value pairs.
+Encrypted saved object attributes are handled differently depending on whether `_source` is present in the response:
 
-For example, if a `connector` type has an encrypted `secrets` attribute, the ES|QL response will contain `null` for the `connector.secrets` column.
+- **With `_source` (via `metadata: ['_id', '_source']`):** The full document in `_source` contains all attributes needed for AAD (Additional Authenticated Data) reconstruction. Encrypted attributes are **decrypted** in `_source` using the same path as `find` and `search`. If decryption fails (e.g., key rotation), encrypted attributes are stripped from `_source` instead.
+- **Standalone scalar columns (e.g., `connector.secrets`):** Always replaced with `null`, regardless of `_source` decryption. These columns contain raw ciphertext that cannot be used outside the document context.
+
+For example, if a `connector` type has an encrypted `secrets` attribute:
+- `connector.secrets` column → always `null`
+- `_source` column → contains the full document with `secrets` decrypted (or stripped on failure)
 
 ## Response structure
 
