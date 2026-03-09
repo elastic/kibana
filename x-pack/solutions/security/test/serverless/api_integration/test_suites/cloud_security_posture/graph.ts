@@ -35,6 +35,16 @@ export default function ({ getService }: FtrProviderContext) {
     // see details: https://github.com/elastic/kibana/issues/208903
     this.tags(['failsOnMKI']);
     before(async () => {
+      // Create a no-op fleet final pipeline to prevent errors when loading
+      // the logs_gcp_audit archive, whose index template references this pipeline
+      await es.ingest.putPipeline({
+        id: '.fleet_final_pipeline-1',
+        body: {
+          description: 'No-op pipeline for testing',
+          processors: [],
+        },
+      });
+
       await esArchiver.load(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/security_alerts',
         { docsOnly: true }
@@ -59,6 +69,9 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
       );
+      await es.ingest.deletePipeline({
+        id: '.fleet_final_pipeline-1',
+      });
     });
 
     describe('Authorization', () => {
