@@ -17,6 +17,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
@@ -36,6 +37,7 @@ jest.mock('./saved_search_grid', () => ({
 const createStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
   columnsMeta: new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined),
+  esqlDataView: new BehaviorSubject<DataView | undefined>(undefined),
   grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
   rowHeight: new BehaviorSubject<number | undefined>(undefined),
   headerRowHeight: new BehaviorSubject<number | undefined>(undefined),

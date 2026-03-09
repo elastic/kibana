@@ -304,6 +304,15 @@ function DiscoverDocumentsComponent({
         : undefined,
     [documentState.esqlQueryColumns]
   );
+
+  // Use enriched ES|QL DataView with fields from query columns when available.
+  // This allows the grid and doc viewer to use dataView.fields directly
+  // instead of relying on columnsMeta for field information.
+  const gridDataView = useMemo(
+    () => documentState.esqlDataView ?? dataView,
+    [documentState.esqlDataView, dataView]
+  );
+
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const extensionActions = useMemo(
@@ -370,7 +379,7 @@ function DiscoverDocumentsComponent({
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <DiscoverGridFlyout
-        dataView={dataView}
+        dataView={gridDataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
@@ -392,7 +401,7 @@ function DiscoverDocumentsComponent({
       />
     ),
     [
-      dataView,
+      gridDataView,
       persistedDiscoverSession?.id,
       query,
       initialDocViewerTabId,
@@ -557,7 +566,7 @@ function DiscoverDocumentsComponent({
             columns={currentColumns}
             columnsMeta={columnsMeta}
             expandedDoc={expandedDoc}
-            dataView={dataView}
+            dataView={gridDataView}
             loadingState={
               isDataLoading
                 ? DataLoadingState.loading

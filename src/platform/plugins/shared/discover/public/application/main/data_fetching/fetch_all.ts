@@ -37,6 +37,7 @@ import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
+import { createEsqlDataViewWithColumns } from '../state_management/utils/create_esql_data_view_with_columns';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -136,7 +137,7 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
+      .then(async ({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
         fetchAllRequestOnlyTracker.reportEvent(
           {
             queryRangeSeconds,
@@ -187,10 +188,25 @@ export function fetchAll(
          */
         const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
 
+        // Create enriched DataView with ES|QL column fields if available
+        let esqlDataView;
+        if (esqlQueryColumns) {
+          const [shortDotsEnable, metaFields] = await Promise.all([
+            services.dataViews.getShortDotsEnable(),
+            services.dataViews.getMetaFields(),
+          ]);
+          esqlDataView = createEsqlDataViewWithColumns(dataView, esqlQueryColumns, {
+            fieldFormats: services.fieldFormats,
+            shortDotsEnable,
+            metaFields,
+          });
+        }
+
         dataSubjects.documents$.next({
           fetchStatus,
           result: records,
           esqlQueryColumns,
+          esqlDataView,
           esqlHeaderWarning,
           interceptedWarnings,
           query,

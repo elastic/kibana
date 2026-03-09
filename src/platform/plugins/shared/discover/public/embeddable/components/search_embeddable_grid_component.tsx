@@ -80,6 +80,7 @@ export function SearchEmbeddableGridComponent({
     rows,
     totalHitCount,
     columnsMeta,
+    esqlDataView,
     grid,
     panelTitle,
     panelDescription,
@@ -97,6 +98,7 @@ export function SearchEmbeddableGridComponent({
     stateManager.rows,
     stateManager.totalHitCount,
     stateManager.columnsMeta,
+    stateManager.esqlDataView,
     stateManager.grid,
     api.title$,
     api.description$,
@@ -111,6 +113,9 @@ export function SearchEmbeddableGridComponent({
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
+
+  // Use enriched ES|QL DataView with fields from query columns when available
+  const gridDataView = useMemo(() => esqlDataView ?? dataView, [esqlDataView, dataView]);
 
   const sort = useMemo(
     () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
@@ -228,7 +233,7 @@ export function SearchEmbeddableGridComponent({
       {...onStateEditedProps}
       onUpdateSampleSize={isEsql ? undefined : onStateEditedProps.onUpdateSampleSize}
       columns={columns}
-      dataView={dataView}
+      dataView={gridDataView}
       interceptedWarnings={interceptedWarnings}
       onFilter={onAddFilter}
       rows={rows}

@@ -26,6 +26,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
@@ -72,6 +73,7 @@ export interface DataMainMsg extends DataMsg {
 export interface DataDocumentsMsg extends DataMsg {
   result?: DataTableRecord[];
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
+  esqlDataView?: DataView; // enriched DataView clone with fields from ES|QL columns
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
 }

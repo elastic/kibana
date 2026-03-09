@@ -8,6 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
@@ -51,6 +52,7 @@ export type SearchEmbeddablePublicState = Pick<
 > & {
   rows: DataTableRecord[];
   columnsMeta: DataTableColumnsMeta | undefined;
+  esqlDataView: DataView | undefined;
   totalHitCount: number | undefined;
   inspectorAdapters: Record<string, unknown>;
 };
@@ -63,7 +65,7 @@ export type SearchEmbeddableStateManager = {
 
 export type SearchEmbeddableSerializedAttributes = Omit<
   SearchEmbeddablePublicState,
-  'rows' | 'columnsMeta' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
+  'rows' | 'columnsMeta' | 'esqlDataView' | 'totalHitCount' | 'searchSource' | 'inspectorAdapters'
 > &
   Pick<SerializableSavedSearch, 'serializedSearchSource'>;
 

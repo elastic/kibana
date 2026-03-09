@@ -38,6 +38,7 @@ import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warni
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { createEsqlDataViewWithColumns } from '../application/main/state_management/utils/create_esql_data_view_with_columns';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { getAppTarget } from './initialize_edit_api';
@@ -222,10 +223,26 @@ export function initializeFetch({
               esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
               projectRouting: fetchContext.projectRouting,
             });
+
+            // Create enriched DataView with ES|QL column fields if available
+            let esqlDataView;
+            if (result.esqlQueryColumns) {
+              const [shortDotsEnable, metaFields] = await Promise.all([
+                discoverServices.dataViews.getShortDotsEnable(),
+                discoverServices.dataViews.getMetaFields(),
+              ]);
+              esqlDataView = createEsqlDataViewWithColumns(dataView, result.esqlQueryColumns, {
+                fieldFormats: discoverServices.fieldFormats,
+                shortDotsEnable,
+                metaFields,
+              });
+            }
+
             return {
               columnsMeta: result.esqlQueryColumns
                 ? getTextBasedColumnsMeta(result.esqlQueryColumns)
                 : undefined,
+              esqlDataView,
               rows: result.records,
               hitCount: result.records.length,
               fetchContext,
@@ -292,6 +309,9 @@ export function initializeFetch({
       api.fetchContext$.next(next.fetchContext);
       if (Object.hasOwn(next, 'columnsMeta')) {
         stateManager.columnsMeta.next(next.columnsMeta);
+      }
+      if (Object.hasOwn(next, 'esqlDataView')) {
+        stateManager.esqlDataView.next(next.esqlDataView);
       }
     });
 

@@ -60,6 +60,7 @@ export const getMockedSearchApi = ({
       rows: new BehaviorSubject<DataTableRecord[]>([]),
       totalHitCount: new BehaviorSubject<number | undefined>(0),
       columnsMeta: new BehaviorSubject<Record<string, DatatableColumnMeta> | undefined>(undefined),
+      esqlDataView: new BehaviorSubject<DataView | undefined>(undefined),
       inspectorAdapters: new BehaviorSubject<Adapters>({}),
     },
     setters: {

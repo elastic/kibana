@@ -10,6 +10,7 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -23,6 +24,7 @@ export enum FetchStatus {
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   esqlQueryColumns?: DatatableColumn[];
+  esqlDataView?: DataView;
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
 }
