@@ -49,7 +49,6 @@ export function ServiceGroupTemplate({
     },
     [serviceGroupId]
   );
-
   const serviceGroupName = data?.serviceGroup.groupName;
   const loadingServiceGroupName = !!serviceGroupId && !serviceGroupName;
   const isAllServices = !serviceGroupId;
