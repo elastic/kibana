@@ -848,7 +848,7 @@ export const IngestHubPage: React.FC = () => {
   const renderRecommendedContent = () => {
     return (
       <>
-        <EuiTitle size="s">
+        <EuiTitle size="xs">
           <h2>Recommended</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
@@ -977,13 +977,13 @@ export const IngestHubPage: React.FC = () => {
           <EuiFlexItem
             grow={false}
             style={{
-              width: 280,
-              minWidth: 280,
-              maxWidth: 280,
+              width: 190,
+              minWidth: 190,
+              maxWidth: 190,
               position: 'sticky',
-              top: 0,
+              top: 32,
               alignSelf: 'flex-start',
-              maxHeight: 'calc(100vh - 200px)',
+              maxHeight: 'calc(100vh - 232px)',
               overflowY: 'auto',
               overflowX: 'hidden',
             }}
@@ -1160,9 +1160,13 @@ export const IngestHubPage: React.FC = () => {
                 <div style={{ height: 56 }} />
               </>
             )}
-            <EuiTitle size="s">
-              <h2>All integrations</h2>
+            <EuiTitle size="xs">
+              <h2>All catalogue</h2>
             </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiText size="s" color="subdued">
+              <p>Complete catalogue of integrations, input packages, assets, and connectors.</p>
+            </EuiText>
             <EuiSpacer size="l" />
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               {sorted.map((tile: TaggedTile) => (
@@ -1186,7 +1190,7 @@ export const IngestHubPage: React.FC = () => {
 
   const renderGetStartedView = () => (
     <>
-      <div css={paddedContent}>
+      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
         {renderSectionPageHeader(
           rocketImg,
           'Welcome to Elastic Observability',
@@ -1319,7 +1323,7 @@ export const IngestHubPage: React.FC = () => {
                     <div
                       style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(5, 1fr)',
+                        gridTemplateColumns: `repeat(${SAAS_TILES.length}, 1fr)`,
                         gap: 12,
                         alignItems: 'center',
                       }}
@@ -1328,7 +1332,7 @@ export const IngestHubPage: React.FC = () => {
                         <IntegrationCard
                           key={tile.id}
                           name={tile.name}
-                          description=""
+                          description={tile.description}
                           logoDomain={tile.logoDomain}
                           logoUrl={tile.logoUrl}
                           centerAlign
@@ -1574,7 +1578,7 @@ export const IngestHubPage: React.FC = () => {
 
   const renderApiEndpointView = () => (
     <>
-      <div css={paddedContent}>
+      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
         {renderSectionPageHeader(
           apiEndpointHeaderImg,
           'API Endpoint',
@@ -1626,7 +1630,7 @@ export const IngestHubPage: React.FC = () => {
     placeholder: string
   ) => (
     <>
-      <div css={paddedContent}>{renderSectionPageHeader(imageSrc, heading, subtitle)}</div>
+      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>{renderSectionPageHeader(imageSrc, heading, subtitle)}</div>
       <EuiHorizontalRule margin="none" css={dividerStyle} />
       <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
         <div style={{ height: 40 }} />
@@ -1637,7 +1641,7 @@ export const IngestHubPage: React.FC = () => {
 
   const renderPlatformMigrationView = () => (
     <>
-      <div css={paddedContent}>
+      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
         {renderSectionPageHeader(
           platformMigrationHeaderImg,
           'Platform Migration',

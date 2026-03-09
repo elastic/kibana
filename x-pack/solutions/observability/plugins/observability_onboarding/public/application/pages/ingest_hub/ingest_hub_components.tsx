@@ -122,24 +122,23 @@ export const IntegrationCard: React.FC<{
           }
         `}
       >
-        {description ? (
-          <EuiText
-            size="s"
-            color="subdued"
-            style={{ marginTop: 4, marginBottom: 0 }}
-            css={css`
-              p {
-                margin-bottom: 0;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
-              }
-            `}
-          >
-            {description}
-          </EuiText>
-        ) : null}
+        <EuiText
+          size="s"
+          color="subdued"
+          style={{ marginTop: 4, marginBottom: 0 }}
+          css={css`
+            min-height: 2.8em;
+            p {
+              margin-bottom: 0;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+          `}
+        >
+          {description || '\u00A0'}
+        </EuiText>
       </EuiCard>
     </div>
   );
@@ -188,96 +187,82 @@ export const CompactIntegrationCard: React.FC<{
 }> = ({ name, description, badge, logoUrl, onClick }) => {
   const { euiTheme } = useEuiTheme();
   const logoSrc = logoUrl ?? '';
+  const titleContent = badge ? (
+    <span css={css`display: flex; align-items: center; gap: 8px;`}>
+      {name}
+      <EuiBadge
+        color="default"
+        css={css`
+          font-size: 10px;
+          line-height: 1;
+          padding: 0 4px;
+          height: 18px;
+          .euiBadge__content { padding: 0; }
+          .euiBadge__text { padding: 0; }
+        `}
+      >
+        {badge}
+      </EuiBadge>
+    </span>
+  ) : (
+    name
+  );
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <EuiCard
+      title={titleContent}
+      titleElement="h4"
+      titleSize="xs"
+      description=""
+      icon={<CompactLogoIcon src={logoSrc} alt={`${name} logo`} />}
+      layout="horizontal"
+      hasBorder
+      paddingSize="none"
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onClick?.();
-      }}
       css={css`
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 12px;
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-        border: 1px solid ${euiTheme.colors.borderBaseSubdued};
         border-radius: 6px;
+        padding: 12px;
+        height: 100%;
         cursor: pointer;
-        transition: box-shadow 150ms ease-in, border-color 150ms ease-in;
-        &:hover,
-        &:focus {
-          box-shadow: ${euiTheme.shadows.s};
-          border-color: ${euiTheme.colors.borderBasePlain};
+        .euiCard__top {
+          min-width: 0;
+          flex-shrink: 0;
+          margin-block-end: 0 !important;
+          margin-inline-end: 12px !important;
+        }
+        .euiCard__content {
+          min-width: 0;
+        }
+        .euiCard__content,
+        .euiCard__children {
+          margin-bottom: 0;
+          padding-bottom: 0;
+        }
+        .euiCard__title {
+          font-family: ${euiTheme.font.family};
+          font-weight: ${euiTheme.font.weight.bold};
+          color: ${euiTheme.colors.text};
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .euiCard__description {
+          display: none;
         }
       `}
     >
-      <CompactLogoIcon src={logoSrc} alt={`${name} logo`} />
-      <div
+      <EuiText
+        size="xs"
+        color="subdued"
         css={css`
-          min-width: 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          min-height: 2.4em;
         `}
       >
-        <div
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-          `}
-        >
-          <EuiTitle
-            size="xs"
-            css={css`
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              min-width: 0;
-            `}
-          >
-            <h4>{name}</h4>
-          </EuiTitle>
-          {badge && (
-            <EuiBadge
-              color="default"
-              css={css`
-                font-size: 10px;
-                line-height: 1;
-                padding: 0 4px;
-                height: 18px;
-                .euiBadge__content {
-                  padding: 0;
-                }
-                .euiBadge__text {
-                  padding: 0;
-                }
-              `}
-            >
-              {badge}
-            </EuiBadge>
-          )}
-        </div>
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={css`
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            min-height: 2.4em;
-          `}
-        >
-          {description || '\u00A0'}
-        </EuiText>
-      </div>
-    </div>
+        {description || '\u00A0'}
+      </EuiText>
+    </EuiCard>
   );
 };
