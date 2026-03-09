@@ -31,17 +31,17 @@ export const InputPanel = ({
   const { currentTextObject, customParsedRequestsProvider } = useEditorReadContext();
 
   useEffect(() => {
-    const debouncedSetFechingAutocompleteEntities = debounce(
+    const debouncedSetFetchingAutocompleteEntities = debounce(
       setFetchingAutocompleteEntities,
       DEBOUNCE_DELAY
     );
     const subscription = getAutocompleteInfo().isLoading$.subscribe(
-      debouncedSetFechingAutocompleteEntities
+      debouncedSetFetchingAutocompleteEntities
     );
 
     return () => {
       subscription.unsubscribe();
-      debouncedSetFechingAutocompleteEntities.cancel();
+      debouncedSetFetchingAutocompleteEntities.cancel();
     };
   }, [setFetchingAutocompleteEntities]);
 
