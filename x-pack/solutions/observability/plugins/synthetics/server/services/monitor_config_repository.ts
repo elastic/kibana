@@ -131,7 +131,7 @@ export class MonitorConfigRepository {
       id,
       ...(id && { overwrite: true }),
       ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
-      ...(references && { references }),
+      references,
     };
 
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
@@ -168,7 +168,7 @@ export class MonitorConfigRepository {
             revision: 1,
           }),
           ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
-          ...(references && { references }),
+          references,
         };
       });
     const result = await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(
@@ -195,7 +195,7 @@ export class MonitorConfigRepository {
       return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
         id,
         ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
-        ...(references && { references }),
+        references,
       });
     }
   }
@@ -262,7 +262,7 @@ export class MonitorConfigRepository {
         type: syntheticsMonitorSavedObjectType,
         attributes,
         ...(!isEmpty(attributes.spaces) && { initialNamespaces: attributes.spaces }),
-        ...(references && { references }),
+        references,
       }));
       const bulkCreateResult = await this.soClient.bulkCreate<MonitorFields>(bulkCreateObjects);
       recreateResults = bulkCreateResult.saved_objects;

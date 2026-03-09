@@ -70,7 +70,7 @@ test.describe('PrivateLocationsSettings', { tag: tags.stateful.classic }, () => 
 
     await test.step('verify Fleet integration', async () => {
       await pageObjects.syntheticsApp.navigateToFleetIntegrationPolicies();
-      await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}-default"`);
+      await page.click(`text="test-monitor-${NEW_LOCATION_LABEL}"`);
       // there is "ghost" element with the same locator, so we need to specify the first one
       // eslint-disable-next-line playwright/no-nth-methods
       await expect(page.testSubj.locator('syntheticsManagedPolicyCallout').first()).toBeVisible();
