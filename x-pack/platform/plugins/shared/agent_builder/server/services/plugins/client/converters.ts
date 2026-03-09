@@ -96,7 +96,8 @@ export const parsedArchiveToCreateRequest = ({
       keywords: manifest.keywords,
     },
     source_url: sourceUrl,
-    skill_ids: [],
+    // TODO: must change when we properly add skills support
+    skill_ids: parsedArchive.skills.map((skill) => skill.meta.name ?? ''),
     unmanaged_assets: unmanagedAssets,
   };
 };

@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
-import { createBadRequestError } from '@kbn/agent-builder-common';
+import { createBadRequestError, ParsedPluginArchive } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
@@ -81,7 +81,7 @@ class PluginsServiceImpl implements PluginsService {
     request: KibanaRequest;
     source: InstallPluginSource;
   }): Promise<PersistedPluginDefinition> {
-    let parsedArchive;
+    let parsedArchive: ParsedPluginArchive;
     let sourceUrl: string | undefined;
 
     if (source.type === 'url') {
