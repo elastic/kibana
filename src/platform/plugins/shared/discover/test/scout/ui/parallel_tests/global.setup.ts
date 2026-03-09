@@ -40,33 +40,36 @@ globalSetupHook(
         : '[setup:metrics] metrics test index already exists, skipping'
     );
 
-    // Traces Experience setup
-    if (!config.isCloud) {
-      await apiServices.fleet.internal.setup();
-      log.debug('[setup:traces] Fleet infrastructure setup completed');
-      await apiServices.fleet.agent.setup();
-      log.debug('[setup:traces] Fleet agents setup completed');
+    // Traces Experience setup (not supported in serverless security - no Fleet/APM privileges)
+    const hasFleetSupport = !(config.serverless && config.projectType === 'security');
+    if (hasFleetSupport) {
+      if (!config.isCloud) {
+        await apiServices.fleet.internal.setup();
+        log.debug('[setup:traces] Fleet infrastructure setup completed');
+        await apiServices.fleet.agent.setup();
+        log.debug('[setup:traces] Fleet agents setup completed');
+      }
+
+      const timeRange = {
+        from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
+        to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
+      };
+
+      const { apmData, correlationIds } = richTrace(timeRange);
+
+      await apmSynthtraceEsClient.index(apmData);
+      log.debug('[setup:traces] Rich APM trace data indexed');
+
+      const logData = traceCorrelatedLogs({
+        ...timeRange,
+        traceId: correlationIds.richTraceId,
+        transactionId: correlationIds.transactionId,
+        dbSpanId: correlationIds.dbSpanId,
+        processOrderSpanId: correlationIds.processOrderSpanId,
+      });
+
+      await logsSynthtraceEsClient.index(logData);
+      log.debug('[setup:traces] Correlated log data indexed');
     }
-
-    const timeRange = {
-      from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
-      to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
-    };
-
-    const { apmData, correlationIds } = richTrace(timeRange);
-
-    await apmSynthtraceEsClient.index(apmData);
-    log.debug('[setup:traces] Rich APM trace data indexed');
-
-    const logData = traceCorrelatedLogs({
-      ...timeRange,
-      traceId: correlationIds.richTraceId,
-      transactionId: correlationIds.transactionId,
-      dbSpanId: correlationIds.dbSpanId,
-      processOrderSpanId: correlationIds.processOrderSpanId,
-    });
-
-    await logsSynthtraceEsClient.index(logData);
-    log.debug('[setup:traces] Correlated log data indexed');
   }
 );
