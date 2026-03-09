@@ -219,6 +219,7 @@ describe('stripUnmappedKeys', () => {
               "uid": "panel1",
             },
             Object {
+              "collapsed": false,
               "grid": Object {
                 "y": 0,
               },
