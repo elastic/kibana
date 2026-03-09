@@ -90,18 +90,6 @@ export class FeedbackPlugin implements Plugin {
       }
     };
 
-    const checkTelemetryOptIn = async (): Promise<boolean> => {
-      try {
-        const telemetryConfig = await core.http.get<{ optIn: boolean | null }>(
-          '/internal/telemetry/config',
-          { version: '2' }
-        );
-        return telemetryConfig.optIn === true;
-      } catch {
-        return false;
-      }
-    };
-
     core.chrome.navControls.registerRight({
       order: 1001,
       content: (
@@ -112,7 +100,7 @@ export class FeedbackPlugin implements Plugin {
             getCurrentUserEmail={getCurrentUserEmail}
             sendFeedback={sendFeedback}
             showToast={showToast}
-            checkTelemetryOptIn={checkTelemetryOptIn}
+            isTelemetryOptedIn={telemetry.telemetryService.getIsOptedIn() === true}
           />
         </Suspense>
       ),

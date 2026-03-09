@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, lazy, Suspense } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, EuiModal } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ interface Props {
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;
-  checkTelemetryOptIn: () => Promise<boolean>;
+  isTelemetryOptedIn: boolean;
 }
 
 export const FeedbackTriggerButton = ({
@@ -33,27 +33,9 @@ export const FeedbackTriggerButton = ({
   getCurrentUserEmail,
   sendFeedback,
   showToast,
-  checkTelemetryOptIn,
+  isTelemetryOptedIn,
 }: Props) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isOptedIn, setIsOptedIn] = useState<boolean | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        setIsLoading(true);
-        const optedIn = await checkTelemetryOptIn();
-        setIsOptedIn(optedIn);
-      } catch {
-        setIsOptedIn(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkStatus();
-  }, [checkTelemetryOptIn]);
 
   const handleShowFeedbackContainer = () => {
     setIsModalOpen(true);
@@ -71,7 +53,7 @@ export const FeedbackTriggerButton = ({
     <>
       <EuiToolTip
         content={
-          !isOptedIn
+          !isTelemetryOptedIn
             ? i18n.translate('feedback.triggerButton.tooltip.disabled', {
                 defaultMessage: 'Enable usage collection to submit feedback',
               })
@@ -84,8 +66,7 @@ export const FeedbackTriggerButton = ({
           data-test-subj="feedbackTriggerButton"
           aria-haspopup="dialog"
           onClick={handleShowFeedbackContainer}
-          isLoading={isLoading}
-          disabled={!isOptedIn}
+          disabled={!isTelemetryOptedIn}
         >
           <EuiIcon
             type="comment"
