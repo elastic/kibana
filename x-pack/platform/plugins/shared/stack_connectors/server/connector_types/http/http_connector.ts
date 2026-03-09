@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/pipeable';
 import { getOrElse, map } from 'fp-ts/Option';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { ProxySettings } from '@kbn/actions-utils';
+import { getProxySettings } from '@kbn/actions-utils';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
@@ -230,27 +230,13 @@ export async function executor(
   // Merge headers: params headers take precedence over config headers
   const finalHeaders = { ...configHeaders, ...(paramsHeaders || {}) };
 
-  // Build connector-level proxy settings if configured
-  let proxySettings: ProxySettings | undefined;
-  if (config.proxyUrl) {
-    const parsedUrl = new URL(config.proxyUrl);
-    if (
-      config.hasProxyAuth &&
-      execOptions.secrets.proxyUsername &&
-      execOptions.secrets.proxyPassword
-    ) {
-      parsedUrl.username = execOptions.secrets.proxyUsername;
-      parsedUrl.password = execOptions.secrets.proxyPassword;
-    }
-    proxySettings = {
-      proxyUrl: parsedUrl.toString(),
-      proxyBypassHosts: undefined,
-      proxyOnlyHosts: undefined,
-      proxySSLSettings: {
-        verificationMode: config.proxyVerificationMode ?? 'full',
-      },
-    };
-  }
+  const proxySettings = getProxySettings({
+    url: config.proxyUrl,
+    hasAuth: config.hasProxyAuth,
+    username: execOptions.secrets.proxyUsername ?? undefined,
+    password: execOptions.secrets.proxyPassword ?? undefined,
+    verificationMode: config.proxyVerificationMode,
+  });
 
   // Handle fetcher options
   let sslOverrides = baseSslOverrides;
