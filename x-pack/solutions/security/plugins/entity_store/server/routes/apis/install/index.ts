@@ -7,12 +7,12 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
+import { getMissingPrivileges } from '../utils/get_missing_privileges';
 
 export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
@@ -35,7 +35,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager } = entityStoreCtx;
         const { entityTypes, logExtraction, historySnapshot } = req.body;
         logger.debug('Install api called');
 
@@ -64,23 +64,4 @@ export function registerInstall(router: EntityStorePluginRouter) {
         return res.created({ body: { ok: true } });
       })
     );
-}
-
-function getMissingPrivileges({ privileges: { kibana, elasticsearch } }: CheckPrivilegesResponse) {
-  const unauthorized = (p: { authorized: boolean }) => !p.authorized;
-  const toPrivilege = (p: { privilege: string }) => p.privilege;
-
-  return {
-    missing_kibana_privileges: kibana.filter(unauthorized).map(toPrivilege),
-    missing_elasticsearch_privileges: {
-      cluster: elasticsearch.cluster.filter(unauthorized).map(toPrivilege),
-      index: Object.entries(elasticsearch.index).reduce<
-        Array<{ index: string; privileges: string[] }>
-      >((acc, [index, p]) => {
-        const missing = p.filter(unauthorized).map(toPrivilege);
-        if (missing.length) acc.push({ index, privileges: missing });
-        return acc;
-      }, []),
-    },
-  };
 }
