@@ -12,18 +12,22 @@ import {
   createSkillEntries,
   isSkillFileEntry,
 } from './utils';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
+type MountableSkill = InternalSkillDefinition & { basePath: string };
+
 describe('skills utils', () => {
-  const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
+  const createMockSkill = (overrides: Partial<MountableSkill> = {}): MountableSkill => ({
     id: 'test-skill-1',
     name: 'test-skill',
     basePath: 'skills/platform',
     description: 'A test skill',
     content: 'This is the skill body content.',
+    readonly: true,
+    getRegistryTools: () => [],
     ...overrides,
   });
 

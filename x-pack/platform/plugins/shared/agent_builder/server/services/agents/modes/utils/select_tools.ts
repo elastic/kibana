@@ -105,10 +105,10 @@ export const selectTools = async ({
     request,
   });
 
+  const allSkills = await skills.list();
   const dynamicInlineTools = (
     await Promise.all(
-      skills
-        .list()
+      allSkills
         .filter((skill) => skill.getInlineTools !== undefined)
         .map((skill) => skill.getInlineTools!())
     )
@@ -164,6 +164,7 @@ const builtinToolToExecutable = ({
     configuration: {},
     readonly: true,
     getSchema: () => tool.schema,
+    summarizeToolReturn: tool.summarizeToolReturn,
     execute: async (params) => {
       return runner.runInternalTool({
         ...params,

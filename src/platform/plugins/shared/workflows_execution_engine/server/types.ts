@@ -18,6 +18,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -46,6 +47,7 @@ export interface WorkflowsExecutionEnginePluginStart {
 export interface WorkflowsExecutionEnginePluginSetupDeps {
   taskManager: TaskManagerSetupContract;
   cloud: CloudSetup;
+  usageApi?: UsageApiSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }
 

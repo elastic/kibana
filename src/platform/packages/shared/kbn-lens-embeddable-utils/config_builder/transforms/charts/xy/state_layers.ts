@@ -90,7 +90,7 @@ function buildDataLayer(layer: DataLayerType, i: number): XYDataLayerConfig {
       ? { collapseFn: layer.breakdown_by.collapse_by }
       : {}),
     ...(layer.breakdown_by && 'color' in layer.breakdown_by
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.breakdown_by.color) }
+      ? { ...fromColorMappingAPIToLensState(layer.breakdown_by.color) }
       : {}),
   };
 }
@@ -172,6 +172,7 @@ function buildReferenceLineLayer(
 ): XYReferenceLineLayerConfig {
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => ({
     icon: threshold.icon,
+    iconPosition: threshold.decoration_position,
     lineWidth: threshold.stroke_width,
     lineStyle: threshold.stroke_dash,
     textVisibility: threshold.text ? threshold.text === 'label' : undefined,

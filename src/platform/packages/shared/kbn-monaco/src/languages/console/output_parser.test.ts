@@ -8,22 +8,12 @@
  */
 
 import { createOutputParser } from './output_parser';
-import type { ConsoleOutputParserResult } from './types';
 
 const parser = createOutputParser();
 describe('console output parser', () => {
-  it('returns errors if input is not correct', () => {
-    const input = 'x';
-    const parserResult = parser(input) as ConsoleOutputParserResult;
-
-    expect(parserResult.responses.length).toBe(1);
-    // the parser should generate an invalid input error
-    expect(parserResult.errors).toContainEqual({ text: 'Invalid input', offset: 1 });
-  });
-
   it('returns parsed responses if the input is correct', () => {
     const input = `# 1: GET /my-index/_doc/0 \n { "_index": "my-index" }`;
-    const { responses, errors } = parser(input) as ConsoleOutputParserResult;
+    const { responses, errors } = parser(input)!;
     expect(responses.length).toBe(1);
     expect(errors.length).toBe(0);
     const { data } = responses[0];
@@ -32,9 +22,149 @@ describe('console output parser', () => {
     expect(data).toEqual(expected);
   });
 
-  it('parses several responses', () => {
-    const input = `# 1: GET /my-index/_doc/0 \n { "_index": "my-index" } \n # 2: GET /my-index/_doc/1 \n { "_index": "my-index" }`;
-    const { responses } = parser(input) as ConsoleOutputParserResult;
-    expect(responses.length).toBe(2);
+  it('returns both invalid-input and syntax-error annotations for non-object input', () => {
+    const input = 'x';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [
+        { text: 'Invalid input', offset: 1 },
+        { text: 'Syntax error', offset: 1 },
+      ],
+      responses: [{ startOffset: 0 }],
+    });
+  });
+
+  it('parses exponent numbers inside objects', () => {
+    const input = '{ "n": 1e2 }';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 0,
+          data: [{ n: 100 }],
+          endOffset: 12,
+        },
+      ],
+    });
+  });
+
+  it('parses unicode escapes inside strings', () => {
+    const input = '{ "s": "\\u0041" }';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 0,
+          data: [{ s: 'A' }],
+          endOffset: 17,
+        },
+      ],
+    });
+  });
+
+  it('parses triple-quoted strings', () => {
+    const input = '{ "s": """foo""" }';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 0,
+          data: [{ s: 'foo' }],
+          endOffset: 18,
+        },
+      ],
+    });
+  });
+
+  it('parses array responses', () => {
+    const input = '[{ "a": 1 }]';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 0,
+          data: [{ a: 1 }],
+          endOffset: 12,
+        },
+      ],
+    });
+  });
+
+  it('accepts null array elements', () => {
+    const input = '[null]';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 0,
+          data: [null],
+          endOffset: 6,
+        },
+      ],
+    });
+  });
+
+  it('emits array-element error for non-object array elements', () => {
+    const input = '[1]';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [{ text: 'Array elements must be objects', offset: 4 }],
+      responses: [{ startOffset: 0 }],
+    });
+  });
+
+  it('skips multiline comments before the response', () => {
+    const input = '/* c */\n{ "a": 1 }';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 8,
+          data: [{ a: 1 }],
+          endOffset: 18,
+        },
+      ],
+    });
+  });
+
+  it('parses responses separated by # headers', () => {
+    const input = '# 1: GET /a\n{ "a": 1 }\n# 2: GET /b\n{ "b": 2 }';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 12,
+          data: [{ a: 1 }],
+          endOffset: 22,
+        },
+        {
+          startOffset: 35,
+          data: [{ b: 2 }],
+          endOffset: 45,
+        },
+      ],
+    });
+  });
+
+  it('parses multi-doc object responses as a single response with multiple data items', () => {
+    const input = '{"a":1}\n{"b":2}';
+    const parserResult = parser(input)!;
+    expect(parserResult).toEqual({
+      errors: [],
+      responses: [
+        {
+          startOffset: 0,
+          data: [{ a: 1 }, { b: 2 }],
+          endOffset: 15,
+        },
+      ],
+    });
   });
 });

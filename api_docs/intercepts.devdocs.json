@@ -58,9 +58,9 @@
         "label": "InterceptWithoutRunId",
         "description": [],
         "signature": [
-          "{ id: string; steps: [StartingInterceptStep, ...",
+          "{ id: string; onProgress?: ((evt: InterceptProgressEvent) => void) | undefined; steps: [StartingInterceptStep, ...",
           "InterceptSteps",
-          "[], CompletionInterceptStep]; onProgress?: ((evt: InterceptProgressEvent) => void) | undefined; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
+          "[], CompletionInterceptStep]; onFinish: (evt: InterceptCompletionEvent) => void; onDismiss?: ((evt: InterceptDismissalEvent) => void) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/intercept_dialog_api.ts",
         "lineNumber": 69,

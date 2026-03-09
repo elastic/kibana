@@ -5,68 +5,159 @@
  * 2.0.
  */
 
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
-import { validateSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { ToolRegistry } from '@kbn/agent-builder-server';
+import {
+  createBadRequestError,
+  createSkillNotFoundError,
+  validateSkillId,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+} from '@kbn/agent-builder-common';
+import type { SkillProvider, ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
+import { isReadonlySkillProvider } from './skill_provider';
 
 export interface SkillRegistry {
-  register(skill: SkillDefinition): Promise<void>;
-  unregister(skillId: string): Promise<boolean>;
-  has(skillId: string): boolean;
-  get(skillId: string): SkillDefinition | undefined;
-  list(): SkillDefinition[];
+  has(skillId: string): Promise<boolean>;
+  get(skillId: string): Promise<InternalSkillDefinition>;
+  list(): Promise<InternalSkillDefinition[]>;
+  create(params: PersistedSkillCreateRequest): Promise<InternalSkillDefinition>;
+  update(skillId: string, update: PersistedSkillUpdateRequest): Promise<InternalSkillDefinition>;
+  /** Deletes a skill. Throws if the skill does not exist or is read-only. */
+  delete(skillId: string): Promise<void>;
 }
 
-export const createSkillRegistry = (): SkillRegistry => {
-  return new SkillRegistryImpl();
+export interface CreateSkillRegistryParams {
+  builtinProvider: ReadonlySkillProvider;
+  persistedProvider: WritableSkillProvider;
+  toolRegistry: ToolRegistry;
+}
+
+export const createSkillRegistry = (params: CreateSkillRegistryParams): SkillRegistry => {
+  return new SkillRegistryImpl(params);
 };
 
 class SkillRegistryImpl implements SkillRegistry {
-  private skills: Map<string, SkillDefinition> = new Map();
-  private skillFullPaths: Set<string> = new Set();
+  private static readonly MAX_TOOL_IDS_PER_SKILL = 5;
 
-  async register(skill: SkillDefinition) {
-    await validateSkillDefinition(skill);
+  private readonly builtinProvider: ReadonlySkillProvider;
+  private readonly persistedProvider: WritableSkillProvider;
+  private readonly toolRegistry: ToolRegistry;
 
-    if (this.skills.has(skill.id)) {
-      throw new Error(`Skill type with id ${skill.id} already registered`);
+  constructor({ builtinProvider, persistedProvider, toolRegistry }: CreateSkillRegistryParams) {
+    this.builtinProvider = builtinProvider;
+    this.persistedProvider = persistedProvider;
+    this.toolRegistry = toolRegistry;
+  }
+
+  private get orderedProviders(): SkillProvider[] {
+    return [this.builtinProvider, this.persistedProvider];
+  }
+
+  async has(skillId: string): Promise<boolean> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(skillId)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async get(skillId: string): Promise<InternalSkillDefinition> {
+    for (const provider of this.orderedProviders) {
+      const skill = await provider.get(skillId);
+      if (skill) {
+        return skill;
+      }
+    }
+    throw createSkillNotFoundError({ skillId });
+  }
+
+  async list(): Promise<InternalSkillDefinition[]> {
+    const allSkills: InternalSkillDefinition[] = [];
+    for (const provider of this.orderedProviders) {
+      const skills = await provider.list();
+      allSkills.push(...skills);
+    }
+    return allSkills;
+  }
+
+  async create(createRequest: PersistedSkillCreateRequest): Promise<InternalSkillDefinition> {
+    const { id: skillId } = createRequest;
+
+    const validationError = validateSkillId(skillId);
+    if (validationError) {
+      throw createBadRequestError(`Invalid skill id: "${skillId}": ${validationError}`);
     }
 
-    const fullPath = getSkillEntryPath({
-      skill,
-    });
+    if (await this.has(skillId)) {
+      throw createBadRequestError(`Skill with id '${skillId}' already exists`);
+    }
 
-    if (this.skillFullPaths.has(fullPath)) {
-      throw new Error(
-        `Skill with path ${skill.basePath} and name ${skill.name} already registered`
+    await this.validateToolIds(createRequest.tool_ids);
+
+    return this.persistedProvider.create(createRequest);
+  }
+
+  async update(
+    skillId: string,
+    update: PersistedSkillUpdateRequest
+  ): Promise<InternalSkillDefinition> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(skillId)) {
+        if (isReadonlySkillProvider(provider)) {
+          throw createBadRequestError(`Skill '${skillId}' is read-only and can't be updated`);
+        }
+
+        if (update.tool_ids) {
+          await this.validateToolIds(update.tool_ids);
+        }
+
+        return provider.update(skillId, update);
+      }
+    }
+    throw createSkillNotFoundError({ skillId });
+  }
+
+  async delete(skillId: string): Promise<void> {
+    for (const provider of this.orderedProviders) {
+      if (await provider.has(skillId)) {
+        if (isReadonlySkillProvider(provider)) {
+          throw createBadRequestError(`Skill '${skillId}' is read-only and can't be deleted`);
+        }
+        await provider.delete(skillId);
+        return;
+      }
+    }
+    throw createSkillNotFoundError({ skillId });
+  }
+
+  /**
+   * Validates that all tool IDs exist in the tool registry
+   * and enforces a maximum of 5 tools per skill.
+   */
+  private async validateToolIds(toolIds: string[]): Promise<void> {
+    if (!toolIds || toolIds.length === 0) {
+      return;
+    }
+
+    if (toolIds.length > SkillRegistryImpl.MAX_TOOL_IDS_PER_SKILL) {
+      throw createBadRequestError(
+        `A skill can reference at most ${SkillRegistryImpl.MAX_TOOL_IDS_PER_SKILL} tools, but ${toolIds.length} were provided.`
       );
     }
-    this.skillFullPaths.add(fullPath);
 
-    this.skills.set(skill.id, skill);
-  }
-
-  async unregister(skillId: string): Promise<boolean> {
-    const skill = this.skills.get(skillId);
-    if (!skill) {
-      return false;
+    const invalidIds: string[] = [];
+    for (const toolId of toolIds) {
+      if (!(await this.toolRegistry.has(toolId))) {
+        invalidIds.push(toolId);
+      }
     }
 
-    const fullPath = getSkillEntryPath({ skill });
-    this.skillFullPaths.delete(fullPath);
-    this.skills.delete(skillId);
-    return true;
-  }
-
-  has(skillId: string): boolean {
-    return this.skills.has(skillId);
-  }
-
-  get(skillId: string) {
-    return this.skills.get(skillId);
-  }
-
-  list() {
-    return [...this.skills.values()];
+    if (invalidIds.length > 0) {
+      throw createBadRequestError(
+        `Invalid tool IDs: ${invalidIds.join(', ')}. These tools do not exist in the tool registry.`
+      );
+    }
   }
 }

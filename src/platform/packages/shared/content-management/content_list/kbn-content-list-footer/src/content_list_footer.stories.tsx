@@ -84,7 +84,7 @@ interface StoryArgs {
 }
 
 const meta: Meta<StoryArgs> = {
-  title: 'Content Management/Content List/Footer',
+  title: 'Content List/Components/Footer',
   parameters: { layout: 'padded' },
   argTypes: {
     totalItems: {

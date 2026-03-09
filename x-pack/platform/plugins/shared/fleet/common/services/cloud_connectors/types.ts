@@ -66,7 +66,7 @@ export interface NormalizedAwsCredentials {
 export interface NormalizedAzureCredentials {
   tenantId?: string | { id: string; isSecretRef: boolean };
   clientId?: string | { id: string; isSecretRef: boolean };
-  azureCredentialsCloudConnectorId?: string;
+  azure_credentials_cloud_connector_id?: string;
 }
 
 /**

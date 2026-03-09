@@ -9,25 +9,51 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import type { MessageEditorInstance } from './use_message_editor';
+import { TriggerId } from './inline_actions';
+
+// TODO: Remove once the inline actions feature is no longer behind the experimental feature flag
+jest.mock('../../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      settings: {
+        client: {
+          get: () => true,
+        },
+      },
+    },
+  }),
+}));
+
+jest.mock('./inline_actions/cursor_rect', () => ({
+  getRectAtOffset: () => ({
+    left: 100,
+    top: 200,
+    bottom: 220,
+    right: 100,
+    width: 0,
+    height: 20,
+    x: 100,
+    y: 200,
+    toJSON: () => ({}),
+  }),
+}));
 
 const mockOnSubmit = jest.fn();
 
 const createMockMessageEditor = (): MessageEditorInstance => {
-  const mockRef = { current: document.createElement('div') };
+  const mockRef = { current: null } as React.RefObject<HTMLDivElement>;
   return {
     _internal: {
-      ref: jest.fn((node) => {
-        if (node) {
-          mockRef.current = node;
-        }
-      }) as any,
+      ref: mockRef,
       onChange: jest.fn(),
+      triggerMatch: { isActive: false, activeTrigger: null },
     },
     clear: jest.fn(),
     focus: jest.fn(),
     getContent: jest.fn(() => ''),
     setContent: jest.fn(),
     isEmpty: false,
+    dismissTrigger: jest.fn(),
   };
 };
 
@@ -152,5 +178,81 @@ describe('MessageEditor', () => {
       shiftKey: false,
     });
     expect(mockOnSubmit).toHaveBeenCalled();
+  });
+
+  it('calls dismissTrigger when Escape is pressed', () => {
+    const messageEditor = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    fireEvent.keyDown(editor, { key: 'Escape' });
+
+    expect(messageEditor.dismissTrigger).toHaveBeenCalled();
+    expect(mockOnSubmit).not.toHaveBeenCalled();
+  });
+
+  it('renders container wrapper around editor', () => {
+    const messageEditor = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const container = screen.getByTestId('messageEditor-container');
+    const editor = screen.getByTestId('messageEditor');
+    expect(container).toContainElement(editor);
+  });
+
+  it('has aria-haspopup="dialog" on the editor', () => {
+    const messageEditor = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    expect(screen.getByTestId('messageEditor')).toHaveAttribute('aria-haspopup', 'dialog');
+  });
+
+  it('renders popover content when trigger is active', () => {
+    const messageEditor = createMockMessageEditor();
+
+    const { rerender } = render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    messageEditor._internal.triggerMatch = {
+      isActive: true,
+      activeTrigger: {
+        trigger: { id: TriggerId.Attachment, sequence: '@' },
+        triggerStartOffset: 0,
+        query: 'test',
+      },
+    };
+
+    rerender(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    expect(screen.getByTestId('inlineActionPopover-content')).toBeInTheDocument();
   });
 });

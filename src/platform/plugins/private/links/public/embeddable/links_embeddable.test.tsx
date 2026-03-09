@@ -160,6 +160,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: false,
+        hide_border: false,
         savedObjectId: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
@@ -173,6 +174,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: false,
+        hide_border: false,
         links: getLinks(),
         layout: 'vertical',
       });
@@ -205,6 +207,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: true,
+        hide_border: true,
         links: getLinks(),
         layout: 'horizontal',
       });
@@ -227,6 +230,7 @@ describe('getLinksEmbeddableFactory', () => {
         title: 'my links',
         description: 'just a few links',
         hide_title: true,
+        hide_border: true,
         savedObjectId: '333',
       });
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 
 /**
@@ -276,3 +276,11 @@ export const estimateTokens = (data: unknown): number => {
   const str = JSON.stringify(data);
   return Math.ceil(str.length / 4);
 };
+
+/**
+ * Response from the update origin API endpoint.
+ */
+export interface UpdateOriginResponse {
+  success: boolean;
+  attachment: VersionedAttachment;
+}

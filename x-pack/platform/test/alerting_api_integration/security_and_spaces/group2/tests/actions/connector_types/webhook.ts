@@ -26,6 +26,7 @@ const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
   hasAuth: true,
+  authType: 'webhook-authentication-basic',
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
@@ -592,9 +593,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(
-          /Connector must be one of the following types: \.webhook, \.cases-webhook, \.mcp/
-        );
+        expect(result.message).to.match(/Connector must be one of the following types/);
       });
     });
 

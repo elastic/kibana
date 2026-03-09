@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { isEqual, xorWith } from 'lodash';
+import { isEqual, keyBy, xorWith } from 'lodash';
 import pMap from 'p-map';
+import type { Logger } from '@kbn/core/server';
+import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
+import type { ScriptsLibraryClientInterface } from '../../scripts_library';
 import type { BulkError } from '../../../../lib/detection_engine/routes/utils';
 import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import type { RuleAlertType } from '../../../../lib/detection_engine/rule_schema';
@@ -20,6 +23,7 @@ import type {
   RuleResponseEndpointAction,
   RuleResponseOsqueryAction,
   RuleToImport,
+  RunscriptParams,
 } from '../../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { stringify } from '../../../utils/stringify';
@@ -101,8 +105,11 @@ export const validateRuleResponseActions = async <
     () => `Response actions needing validation: ${stringify(responseActionsToValidate)}`
   );
 
+  const isRunscriptAutomatedResponseActionEnabled =
+    endpointService.experimentalFeatures.responseActionsEndpointAutomatedRunScript;
+
   for (const actionData of responseActionsToValidate) {
-    if (isEndpointResponseAction(actionData)) {
+    if (isEndpointResponseAction(actionData) && actionData.params.command) {
       validateEndpointResponseActionAuthz(endpointAuthz, actionData.params.command);
 
       // Individual response action payload validations
@@ -110,6 +117,21 @@ export const validateRuleResponseActions = async <
         case 'kill-process':
         case 'suspend-process':
           validateEndpointKillSuspendProcessResponseAction(actionData.params);
+          break;
+
+        case 'runscript':
+          if (!isRunscriptAutomatedResponseActionEnabled) {
+            throw new CustomHttpRequestError(
+              `Endpoint runscript automated response action is not enabled`,
+              400
+            );
+          }
+
+          await validateEndpointRunscriptResponseAction(
+            endpointService.getScriptsLibraryClient(spaceId, 'elastic'),
+            logger,
+            actionData.params
+          );
           break;
       }
     } else {
@@ -245,5 +267,73 @@ const validateEndpointKillSuspendProcessResponseAction = ({ config, command }: P
       `Invalid [${command}] response action configuration: 'field' is required when 'overwrite' is 'false'`,
       400
     );
+  }
+};
+
+/** @private */
+const validateEndpointRunscriptResponseAction = async (
+  scriptsClient: ScriptsLibraryClientInterface,
+  logger: Logger,
+  { config }: RunscriptParams
+): Promise<void> => {
+  if (!config) {
+    throw new CustomHttpRequestError(
+      `Invalid [runscript] response action configuration: 'config' is required`,
+      400
+    );
+  }
+
+  const scriptIds = Object.values(config).reduce((acc, osConfig) => {
+    if (osConfig.scriptId && !acc.includes(osConfig.scriptId)) {
+      acc.push(osConfig.scriptId);
+    }
+
+    return acc;
+  }, [] as string[]);
+
+  if (scriptIds.length === 0) {
+    throw new CustomHttpRequestError(
+      `Invalid [runscript] response action configuration: no scripts specified`,
+      400
+    );
+  }
+
+  const scripts = await scriptsClient.list({
+    kuery: `id:(${scriptIds.map((id) => `"${id}"`).join(' OR ')})`,
+  });
+
+  logger.debug(
+    () => `Found ${scripts.total} scripts for runscript response action:\n ${stringify(scripts)}`
+  );
+
+  const scriptById = keyBy(scripts.data, 'id');
+
+  for (const [osType, osRunscriptConfig] of Object.entries(config)) {
+    if (osRunscriptConfig.scriptId) {
+      const script = scriptById[osRunscriptConfig.scriptId];
+
+      if (!script) {
+        throw new CustomHttpRequestError(
+          `Invalid [${osType}] [runscript] response action configuration: script [${osRunscriptConfig.scriptId}] not found`,
+          400
+        );
+      }
+
+      if (!script.platform.includes(osType as SupportedHostOsType)) {
+        throw new CustomHttpRequestError(
+          `Invalid [${osType}] [runscript] response action configuration: script [${script.id}, ${script.name}] is not compatible with host OS '${osType}']`
+        );
+      }
+
+      if (
+        script.requiresInput &&
+        (!osRunscriptConfig.scriptInput || osRunscriptConfig.scriptInput.trim() === '')
+      ) {
+        throw new CustomHttpRequestError(
+          `Invalid [${osType}] [runscript] response action configuration: script [${script.id}, ${script.name}] requires input but no input was provided`,
+          400
+        );
+      }
+    }
   }
 };

@@ -90,10 +90,14 @@ export class DataViewsPublicPlugin
       hasData: this.hasData.start(core, this.callResolveCluster),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http, async () => {
-        const currentUser = await core.security.authc.getCurrentUser();
-        return currentUser?.profile_uid;
-      }),
+      apiClient: new DataViewsApiClient(
+        http,
+        async () => {
+          const currentUser = await core.security.authc.getCurrentUser();
+          return currentUser?.profile_uid;
+        },
+        () => cps?.cpsManager?.getProjectRouting()
+      ),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {
@@ -110,8 +114,7 @@ export class DataViewsPublicPlugin
         getIndices({
           ...props,
           http: core.http,
-          projectRouting:
-            'projectRouting' in props ? props.projectRouting : cps?.cpsManager?.getProjectRouting(),
+          projectRouting: cps?.cpsManager?.getProjectRouting(props.projectRouting),
         }),
       getRollupsEnabled: () => this.rollupsEnabled,
       scriptedFieldsEnabled: config.scriptedFieldsEnabled === false ? false : true, // accounting for null value

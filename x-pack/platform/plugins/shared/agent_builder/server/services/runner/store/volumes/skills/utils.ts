@@ -8,10 +8,23 @@
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils/tools/utils/token_count';
-import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillFileEntry, SkillReferencedContentFileEntry } from './types';
 
-export const getSkillEntryPath = ({ skill }: { skill: SkillDefinition }): string => {
+/**
+ * Skill with a guaranteed basePath, used for VFS mounting.
+ */
+type MountableSkill = InternalSkillDefinition & { basePath: string };
+
+/**
+ * Get the VFS entry path for a skill.
+ * Accepts either a SkillDefinition or InternalSkillDefinition with basePath.
+ */
+export const getSkillEntryPath = ({
+  skill,
+}: {
+  skill: Pick<MountableSkill, 'basePath' | 'name'>;
+}): string => {
   return `${skill.basePath}/${skill.name}/SKILL.md`;
 };
 
@@ -19,13 +32,17 @@ export const getSkillReferencedContentEntryPath = ({
   skill,
   referencedContent,
 }: {
-  skill: SkillDefinition;
-  referencedContent: NonNullable<SkillDefinition['referencedContent']>[number];
+  skill: Pick<MountableSkill, 'basePath' | 'name'>;
+  referencedContent: { relativePath: string; name: string };
 }): string => {
   return `${skill.basePath}/${skill.name}/${referencedContent.relativePath}/${referencedContent.name}.md`;
 };
 
-export const getSkillPlainText = ({ skill }: { skill: SkillDefinition }): string => {
+export const getSkillPlainText = ({
+  skill,
+}: {
+  skill: Pick<InternalSkillDefinition, 'name' | 'description' | 'content'>;
+}): string => {
   return `---
 name: ${skill.name}
 description: ${skill.description}
@@ -34,8 +51,12 @@ description: ${skill.description}
 ${skill.content}`;
 };
 
+/**
+ * Creates VFS file entries for a skill that has a basePath.
+ * Only skills with basePath should be passed to this function (builtin skills).
+ */
 export const createSkillEntries = (
-  skill: SkillDefinition
+  skill: MountableSkill
 ): (SkillFileEntry | SkillReferencedContentFileEntry)[] => {
   const stringifiedContent = getSkillPlainText({ skill });
 

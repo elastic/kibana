@@ -37,19 +37,19 @@ export function kqlToInfluencerQuery(
  * target the nested `influencers` path.
  */
 function rewriteDslToInfluencerQuery(dsl: QueryDslQueryContainer): QueryDslQueryContainer {
-  if (dsl.bool) {
+  if (dsl?.bool) {
     const rewritten: QueryDslQueryContainer = { bool: {} };
-    if (dsl.bool.filter) {
+    if (dsl?.bool.filter) {
       rewritten.bool!.filter = toArray(dsl.bool.filter).map(rewriteDslToInfluencerQuery);
     }
-    if (dsl.bool.must) {
+    if (dsl?.bool.must) {
       rewritten.bool!.must = toArray(dsl.bool.must).map(rewriteDslToInfluencerQuery);
     }
-    if (dsl.bool.should) {
+    if (dsl?.bool.should) {
       rewritten.bool!.should = toArray(dsl.bool.should).map(rewriteDslToInfluencerQuery);
       rewritten.bool!.minimum_should_match = dsl.bool.minimum_should_match;
     }
-    if (dsl.bool.must_not) {
+    if (dsl?.bool.must_not) {
       rewritten.bool!.must_not = toArray(dsl.bool.must_not).map(rewriteDslToInfluencerQuery);
     }
     return rewritten;
@@ -87,25 +87,25 @@ function rewriteDslToInfluencerQuery(dsl: QueryDslQueryContainer): QueryDslQuery
 function extractFieldAndValue(
   dsl: QueryDslQueryContainer
 ): { field: string; value?: string; isWildcard?: boolean } | undefined {
-  if (dsl.match) {
+  if (dsl?.match) {
     const [field] = Object.keys(dsl.match);
     const clause = (dsl.match as Record<string, unknown>)[field];
     return { field, value: String(typeof clause === 'object' ? (clause as any).query : clause) };
   }
-  if (dsl.match_phrase) {
+  if (dsl?.match_phrase) {
     const [field] = Object.keys(dsl.match_phrase);
     const clause = (dsl.match_phrase as Record<string, unknown>)[field];
     return { field, value: String(typeof clause === 'object' ? (clause as any).query : clause) };
   }
-  if (dsl.term) {
+  if (dsl?.term) {
     const [field] = Object.keys(dsl.term);
     const clause = (dsl.term as Record<string, unknown>)[field];
     return { field, value: String(typeof clause === 'object' ? (clause as any).value : clause) };
   }
-  if (dsl.exists) {
+  if (dsl?.exists) {
     return { field: dsl.exists.field as string };
   }
-  if (dsl.wildcard) {
+  if (dsl?.wildcard) {
     const [field] = Object.keys(dsl.wildcard);
     const clause = (dsl.wildcard as Record<string, unknown>)[field];
     return {
@@ -114,7 +114,7 @@ function extractFieldAndValue(
       isWildcard: true,
     };
   }
-  if (dsl.query_string) {
+  if (dsl?.query_string) {
     const qs = dsl.query_string;
     const field = Array.isArray(qs.fields) ? qs.fields[0] : undefined;
     if (field && qs.query) {

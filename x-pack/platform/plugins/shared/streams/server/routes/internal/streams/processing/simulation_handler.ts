@@ -35,13 +35,16 @@ import type {
   DetectedField,
   ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
-import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { validateStreamlang } from '@kbn/streamlang';
-import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import {
+  getInheritedFieldsFromAncestors,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
+import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
@@ -121,9 +124,12 @@ export const simulateProcessing = async ({
     .map(([name]) => name);
 
   // Validate the Streamlang DSL before attempting simulation
+  const rootStream = getRoot(params.path.name);
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
   const validationResult = validateStreamlang(params.body.processing, {
     reservedFields,
-    streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
+    streamType: isWiredStream ? 'wired' : 'classic',
+    skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
   });
 
   if (!validationResult.isValid) {
@@ -230,7 +236,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: processorConfig.tag,
+                processor_id: processorConfig?.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -584,16 +590,17 @@ const computePipelineSimulationResult = (
 };
 
 const initProcessorMetricsMap = (
-  processors: IngestProcessorContainer[]
+  processors: NonNullable<IngestProcessorContainer>[]
 ): Record<string, ProcessorMetrics> => {
   // Gather unique IDs because the manual ingest pipeline proccessor (for example) will share the same
   // ID across it's nested processors.
   const ids = new Set<string>();
 
   for (const processor of processors) {
-    const type = Object.keys(processor)[0] as keyof IngestProcessorContainer;
-    const config = processor[type] as Record<string, unknown>;
-    const tag = config.tag;
+    const type = Object.keys(processor)[0] as keyof NonNullable<IngestProcessorContainer>;
+    const config = processor[type];
+
+    const tag = config?.tag;
 
     if (typeof tag === 'string') {
       ids.add(tag);

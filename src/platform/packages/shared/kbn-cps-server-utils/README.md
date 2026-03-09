@@ -6,7 +6,7 @@ Server-side Cross-Project Search (CPS) utilities.
 
 Returns the Named Project Routing Expression (NPRE) for a given space, using the convention `kibana_space_${spaceId}_default`.
 
-Accepts either a `spaceId` string or a `KibanaRequest` (from which the space is derived via the request URL path, without a dependency on the `spaces` plugin).
+Accepts either a `spaceId` string or a `KibanaRequest` (from which the space is derived via the request URL path, without a dependency on the `spaces` plugin). A `FakeRequest` is not accepted — it does not carry a URL, so the space cannot be derived from it. Passing one will throw at runtime.
 
 ```ts
 import { getSpaceNPRE } from '@kbn/cps-server-utils';

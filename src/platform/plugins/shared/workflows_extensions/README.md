@@ -42,6 +42,8 @@ This separation ensures that:
 - UI definition is available directly to client-side code without HTTP requests
 - Type safety is maintained between server and client registries via step type IDs
 
+**Async registration (public only):** The public step registry accepts either a definition or a **loader function** `() => Promise<PublicStepDefinition>`. Using a loader (e.g. `() => import('./my_step').then(m => m.myStepDefinition)`) allows step modules—and heavy dependencies like zod—to be loaded asynchronously, keeping them out of your plugin’s main bundle. The registry resolves loaders in the background; the workflows app awaits `workflowsExtensions.isReady()` before rendering so definitions are ready when needed.
+
 ## Architecture
 
 ```
@@ -80,9 +82,9 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
  * Step type ID for your custom step.
- * Must follow namespaced format: 'pluginName.stepName'
+ * Must follow namespaced format: '<namespace>.<action>' (kebab-case namespace, camelCase action)
  */
-export const MyStepTypeId = 'myPlugin.myCustomStep';
+export const MyStepTypeId = 'my-namespace.myCustomStep';
 
 /**
  * Input schema for the step.
@@ -475,7 +477,7 @@ interface SelectionDetails {
 }
 
 interface SelectionContext {
-  /** The step type ID (e.g., "oneChat.runAgent") */
+  /** The step type ID (e.g., "ai.runAgent", "one-chat.invoke") */
   stepType: string;
   /** The property scope ("config" or "input") */
   scope: 'config' | 'input';
@@ -528,10 +530,11 @@ export class MyPlugin implements Plugin {
 
 **Public-side** (`public/plugin.ts`):
 
+Register the public step definition using either a **direct definition** or an **async loader**. Prefer the loader form so the step module (and its dependencies, e.g. zod) are not pulled into your plugin’s main bundle:
+
 ```typescript
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
-import { myStepDefinition } from './workflows/step_types/my_step';
 
 export interface MyPluginPublicSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -539,11 +542,19 @@ export interface MyPluginPublicSetupDeps {
 
 export class MyPlugin implements Plugin {
   public setup(_core: CoreSetup, plugins: MyPluginPublicSetupDeps) {
-    // Register public-side step definitions
-    plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
+    // Recommended: register via async loader to keep step module + zod out of main bundle
+    plugins.workflowsExtensions.registerStepDefinition(() =>
+      import('./workflows/step_types/my_step').then((m) => m.myStepDefinition)
+    );
+
+    // Alternatively: sync registration (pulls step module into main bundle)
+    // import { myStepDefinition } from './workflows/step_types/my_step';
+    // plugins.workflowsExtensions.registerStepDefinition(myStepDefinition);
   }
 }
 ```
+
+Loaders are resolved in the background after setup. The workflows app waits for `workflowsExtensions.isReady()` before rendering, so step definitions are available when the UI runs.
 
 ### Step 5: Get Approval
 
@@ -569,27 +580,56 @@ function MyComponent() {
   const allSteps = workflowsExtensions.getAllStepDefinitions();
 
   // Get definition for a specific step
-  const stepDefinition = workflowsExtensions.getStepDefinition('myPlugin.myCustomStep');
+  const stepDefinition = workflowsExtensions.getStepDefinition('my-namespace.myCustomStep');
   if (stepDefinition) {
     console.log(stepDefinition.label); // "My Custom Step"
     console.log(stepDefinition.icon); // React component
   }
 
   // Check if a step is registered
-  if (workflowsExtensions.hasStepDefinition('myPlugin.myCustomStep')) {
+  if (workflowsExtensions.hasStepDefinition('my-namespace.myCustomStep')) {
     // Step is available
   }
 }
 ```
 
+**Waiting for async step definitions:** If your app mounts before step definitions are needed, you can await `workflowsExtensions.isReady()` before rendering. That ensures all step definitions registered via async loaders have resolved. The workflows app does this in its mount so the step registry is ready when the UI runs.
+
 ## Step Type Requirements
+
+### Workflow YAML Naming Conventions
+
+The following naming conventions apply to workflow YAML. They ensure consistency where the workflows team owns the schema, while allowing inherited formats from external contracts (OpenAPI, connectors, platform-owned APIs).
+
+| Area | Convention | Notes |
+|------|-------------|-------|
+| **Workflow Config keys** (root + step config outside `with`) | **kebab-case** for multi-word keys | Keys we own: `on-failure`, `connector-id`, `agent-id`, `timeout`, etc. |
+| **Step Input** (`with:` params) | **kebab-case** or **snake_case** recommended | Inherited formats from OpenAPI/connectors/platform contracts are allowed. |
+| **Step Type** (`type:` value) | `<namespace>.<action>` | **kebab-case** for namespace, **camelCase** for action. Inherited forms allowed. |
+
+**Examples:**
+
+```yaml
+# Config keys (we own) — kebab-case
+- name: send_notification
+  type: my-namespace.sendNotification    # namespace: kebab-case, action: camelCase
+  connector-id: slack         # kebab-case
+  on-failure: continue
+  with:
+    channel-id: '#alerts'             # kebab-case or snake_case for our params
+    message: Hello
+```
+
+**Inherited formats:** When step inputs come from external schemas (e.g., OpenAPI-generated params, connector specs), use the format defined by that contract. The conventions above apply to workflow-owned keys and to custom step params we define.
 
 ### Step Type IDs
 
 Step type IDs must follow a namespaced format to avoid conflicts:
 
-- ✅ Good: `"myPlugin.myStep"`, `"custom.feature.step"`
-- ❌ Bad: `"myStep"`, `"step"` (too generic)
+- Format: `<namespace>.<action>` — use **kebab-case** for the namespace, **camelCase** for the action
+- ✅ Good: `"my-namespace.sendNotification"`, `"custom-feature.processData"`
+- ⚠️ Allowed: Inherited forms from OpenAPI/connectors/platform-owned contracts
+- ❌ Bad: `"myStep"`, `"step"` (too generic, no namespace)
 
 ### Config vs Inputs: Mental Model
 
@@ -598,7 +638,7 @@ When designing a step, you need to decide which parameters should be **config** 
 **Config (step-level properties):**
 Use config to **control step behavior** - how/when/who the step executes:
 
-- Execution context (e.g., `connector-id: 'slack-webhook'`, `agent-id: 'agent-123'`)
+- Execution context (e.g., `connector-id: 'slack'`, `agent-id: 'agent-123'`)
 - Execution mode (e.g., `mode: 'batch'`, `strategy: 'parallel'`)
 
 **Built-in step-level config examples:**
@@ -621,8 +661,8 @@ Use inputs for **what/where to process** - the step's payload:
 ```yaml
 # Config properties (step-level) - Control step behavior
 - name: send_notification
-  type: myPlugin.sendNotification
-  connector-id: slack-webhook # Config: which connector to use (controls behavior)
+  type: my-namespace.sendNotification
+  connector-id: slack # Config: which connector to use (controls behavior)
   mode: async # Config: execution mode (controls behavior)
   timeout: 10s # Config: time limit (controls behavior)
   # Inputs (with section) - What/Where to process
@@ -632,7 +672,7 @@ Use inputs for **what/where to process** - the step's payload:
     priority: high # Input: WHAT - processing parameter
 
 - name: process_data
-  type: myPlugin.processData
+  type: my-namespace.processData
   if: steps.previous.output.data.length > 10 # Config: by which condition to run this step (control behavior)
   agent-id: data-processor-1 # Config: which agent to use (controls behavior)
   strategy: parallel # Config: processing strategy (controls behavior)
@@ -821,7 +861,36 @@ The `context` parameter provides access to runtime services and step information
 - **`context.logger`**: Scoped logger (`debug`, `info`, `warn`, `error`)
 - **`context.abortSignal`**: AbortSignal for cancellation support
 - **`context.stepId`**: Current step instance identifier
-- **`context.stepType`**: Step type identifier (e.g., `'myPlugin.myCustomStep'`)
+- **`context.stepType`**: Step type identifier (e.g., `'my-namespace.myCustomStep'`)
+
+### Cancellation Cleanup (`onCancel`)
+
+Steps can provide an optional `onCancel` handler for explicit cancellation cleanup. This is useful for steps that hold external resources (e.g., spawned child operations, long-running connections) that need teardown when the workflow is cancelled.
+
+`onCancel` is called **after** the step's `abortSignal` fires and `run()` completes — it is never invoked in parallel with `run()`. Steps that complete normally (without cancellation) skip `onCancel` entirely.
+
+```typescript
+const myStepDefinition = createServerStepDefinition({
+  ...myStepCommonDefinition,
+  handler: async (context) => {
+    // Main step logic — observe context.abortSignal for cooperative cancellation
+    const result = await doWork(context.abortSignal);
+    return { output: { result } };
+  },
+  onCancel: async (context) => {
+    // Cleanup logic — called only when the workflow is cancelled
+    context.logger.info('Cancelling spawned operations');
+    await cancelSpawnedOperations(context);
+  },
+});
+```
+
+**Key points:**
+
+- `onCancel` receives the same `StepHandlerContext` as `handler`, so it has access to `input`, `config`, and all runtime services
+- Implementations must be **idempotent** — `onCancel` may be called more than once in edge cases
+- Errors thrown in `onCancel` are logged but do **not** disrupt the cancellation flow
+- Steps without `onCancel` are unaffected — no changes required for existing step implementations
 
 ### Public-Side Definition Requirements
 
@@ -889,7 +958,7 @@ When registering a new step, you must:
    ```typescript
    export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
      {
-       id: 'myPlugin.myCustomStep',
+       id: 'my-namespace.myCustomStep',
        handlerHash: 'abc123...', // SHA256 hash from test output
      },
    ];

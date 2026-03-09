@@ -16,6 +16,7 @@ import {
   USER_AGENT_HEADER,
   configureClient,
   AgentManager,
+  getRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema, ElasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
 
@@ -64,6 +65,7 @@ describe('ES Client - custom user-agent', () => {
       logger,
       kibanaVersion,
       agentFactoryProvider,
+      onRequest: getRequestHandlerFactory(false)({ projectRouting: 'origin-only' }),
     });
 
     let userAgentHeader: string | undefined;

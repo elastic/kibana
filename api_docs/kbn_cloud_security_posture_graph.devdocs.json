@@ -1029,7 +1029,7 @@
             "section": "def-public.EdgeViewModel",
             "text": "EdgeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ type?: \"solid\" | \"dashed\" | undefined; } & { source: string; id: string; color: \"primary\" | \"warning\" | \"subdued\" | \"danger\"; target: string; }>"
+          " extends Record<string, unknown>,Readonly<{ type?: \"dashed\" | \"solid\" | undefined; } & { source: string; id: string; color: \"warning\" | \"subdued\" | \"primary\" | \"danger\"; target: string; }>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "lineNumber": 85,
@@ -1054,7 +1054,7 @@
             "section": "def-public.EntityNodeViewModel",
             "text": "EntityNodeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ count?: number | undefined; label?: string | undefined; icon?: string | undefined; tag?: string | undefined; ips?: string[] | undefined; countryCodes?: string[] | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; host?: Readonly<{ ip?: string | undefined; } & {}> | undefined; sub_type?: string | undefined; availableInEntityStore?: boolean | undefined; ecsParentField?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\" | \"entity\"; }>[] | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"primary\" | \"warning\" | \"danger\"; }>,BaseNodeDataViewModel"
+          " extends Record<string, unknown>,Readonly<{ count?: number | undefined; label?: string | undefined; icon?: string | undefined; tag?: string | undefined; ips?: string[] | undefined; countryCodes?: string[] | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; host?: Readonly<{ ip?: string | undefined; } & {}> | undefined; sub_type?: string | undefined; availableInEntityStore?: boolean | undefined; ecsParentField?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\" | \"entity\"; }>[] | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "lineNumber": 44,
@@ -1487,7 +1487,7 @@
             "section": "def-public.LabelNodeViewModel",
             "text": "LabelNodeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{ count?: number | undefined; label?: string | undefined; icon?: string | undefined; ips?: string[] | undefined; countryCodes?: string[] | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; host?: Readonly<{ ip?: string | undefined; } & {}> | undefined; sub_type?: string | undefined; availableInEntityStore?: boolean | undefined; ecsParentField?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\" | \"entity\"; }>[] | undefined; parentId?: string | undefined; uniqueEventsCount?: number | undefined; uniqueAlertsCount?: number | undefined; } & { id: string; shape: \"label\"; color: \"primary\" | \"warning\" | \"danger\"; }>,BaseNodeDataViewModel"
+          " extends Record<string, unknown>,Readonly<{ count?: number | undefined; label?: string | undefined; icon?: string | undefined; ips?: string[] | undefined; countryCodes?: string[] | undefined; documentsData?: Readonly<{ index?: string | undefined; alert?: Readonly<{ ruleName?: string | undefined; } & {}> | undefined; event?: Readonly<{} & { id: string; }> | undefined; entity?: Readonly<{ type?: string | undefined; name?: string | undefined; host?: Readonly<{ ip?: string | undefined; } & {}> | undefined; sub_type?: string | undefined; availableInEntityStore?: boolean | undefined; ecsParentField?: string | undefined; } & {}> | undefined; } & { id: string; type: \"alert\" | \"event\" | \"entity\"; }>[] | undefined; parentId?: string | undefined; uniqueEventsCount?: number | undefined; uniqueAlertsCount?: number | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "lineNumber": 61,

@@ -17,6 +17,7 @@ import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
+  SystemConnectorsMap,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 
@@ -126,6 +127,12 @@ function convertDynamicConnectorsToContractsInternal(
   Object.values(connectorTypes).forEach((connectorType) => {
     try {
       const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
+
+      // If the connector has a system connector associated, it can be executed without a connector-id
+      const hasConnectorId = SystemConnectorsMap.has(connectorType.actionTypeId)
+        ? 'optional'
+        : 'required';
+
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
@@ -140,7 +147,7 @@ function convertDynamicConnectorsToContractsInternal(
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
-            hasConnectorId: 'required',
+            hasConnectorId,
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,
             instances: connectorType.instances,
@@ -157,7 +164,7 @@ function convertDynamicConnectorsToContractsInternal(
           type: connectorTypeName,
           summary: connectorType.displayName,
           paramsSchema,
-          hasConnectorId: 'required',
+          hasConnectorId,
           outputSchema,
           description: `${connectorType.displayName} connector`,
           instances: connectorType.instances,
@@ -171,7 +178,6 @@ function convertDynamicConnectorsToContractsInternal(
         type: connectorType.actionTypeId,
         summary: connectorType.displayName,
         paramsSchema: z.any(),
-        hasConnectorId: 'required',
         outputSchema: z.any(),
         description: `${connectorType.displayName || connectorType.actionTypeId} connector`,
         instances: connectorType.instances,

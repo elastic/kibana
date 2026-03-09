@@ -1899,13 +1899,42 @@
         "children": [
           {
             "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"serverless\" | \"cloud\" | \"self-managed\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.profiling_enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "profiling_enabled",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.ProfilingStatus.has_setup",
             "type": "boolean",
             "tags": [],
             "label": "has_setup",
             "description": [],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
-            "lineNumber": 11,
+            "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1918,7 +1947,7 @@
             "label": "has_data",
             "description": [],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
-            "lineNumber": 12,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1931,7 +1960,7 @@
             "label": "pre_8_9_1_data",
             "description": [],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
-            "lineNumber": 13,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1947,7 +1976,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
-            "lineNumber": 14,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1963,7 +1992,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
-            "lineNumber": 15,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -1931,14 +1931,6 @@
             "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/embeddable.ts"
           },
           {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
-            "plugin": "uiActionsEnhanced",
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/action_factory.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/test_utils/index.ts"
           },
