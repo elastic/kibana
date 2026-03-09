@@ -124,7 +124,6 @@ dependsOn:
   - '@kbn/observability-synthetics-test-data'
   - '@kbn/charts-plugin'
   - '@kbn/react-query'
-  - '@kbn/content-management-utils'
   - '@kbn/scout-oblt'
 tags:
   - plugin
