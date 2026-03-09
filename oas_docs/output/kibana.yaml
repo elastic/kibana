@@ -41985,6 +41985,12 @@ paths:
           schema:
             default: false
             type: boolean
+        - in: query
+          name: skipDependencyCheck
+          required: false
+          schema:
+            default: false
+            type: boolean
       requestBody:
         content:
           application/json:
