@@ -181,9 +181,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
   | EVAL entity.namespace = CASE((MV_FIRST(event.module) == \\"okta\\" OR MV_FIRST(event.module) == \\"entityanalytics_okta\\"), \\"okta\\", (MV_FIRST(event.module) == \\"azure\\" OR MV_FIRST(event.module) == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (MV_FIRST(event.module) == \\"o365\\" OR MV_FIRST(event.module) == \\"o365_metrics\\"), \\"microsoft_365\\", (MV_FIRST(event.module) == \\"entityanalytics_ad\\"), \\"active_directory\\", MV_FIRST(event.module))| EVAL entity.id = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 ((entity.namespace == \\"active_directory\\") AND (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\")), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace),
-(client.user.email IS NOT NULL AND client.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(client.user.email, \\"@\\", entity.namespace),
-(source.user.email IS NOT NULL AND source.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(source.user.email, \\"@\\", entity.namespace), NULL))
+(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL))
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
@@ -193,8 +191,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
  event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
  event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
- client.user.email = MV_DEDUPE(TOP(TO_STRING(client.user.email), 10)) WHERE client.user.email IS NOT NULL,
- source.user.email = MV_DEDUPE(TOP(TO_STRING(source.user.email), 10)) WHERE source.user.email IS NOT NULL,
  entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
  user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
@@ -257,8 +253,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
  event.kind,
  event.category,
  event.type,
- client.user.email,
- source.user.email,
  entity.namespace,
  user.domain,
  user.email,
@@ -1676,9 +1670,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 ((entity.namespace == \\"active_directory\\") AND (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\")), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
-(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace),
-(client.user.email IS NOT NULL AND client.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(client.user.email, \\"@\\", entity.namespace),
-(source.user.email IS NOT NULL AND source.user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(source.user.email, \\"@\\", entity.namespace), NULL)
+(user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL)
   | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
@@ -1688,8 +1680,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  recent.event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
  recent.event.type = MV_DEDUPE(TOP(TO_STRING(event.type), 10)) WHERE event.type IS NOT NULL,
- recent.client.user.email = MV_DEDUPE(TOP(TO_STRING(client.user.email), 10)) WHERE client.user.email IS NOT NULL,
- recent.source.user.email = MV_DEDUPE(TOP(TO_STRING(source.user.email), 10)) WHERE source.user.email IS NOT NULL,
  recent.entity.namespace = LAST(TO_STRING(entity.namespace), @timestamp) WHERE entity.namespace IS NOT NULL,
  recent.user.domain = MV_DEDUPE(TOP(TO_STRING(user.domain), 10)) WHERE user.domain IS NOT NULL,
  recent.user.email = MV_DEDUPE(TOP(TO_STRING(user.email), 10)) WHERE user.email IS NOT NULL,
@@ -1753,8 +1743,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 9),
  event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 9),
  event.type = MV_SLICE(MV_UNION(recent.event.type, event.type), 0, 9),
- client.user.email = MV_SLICE(MV_UNION(recent.client.user.email, client.user.email), 0, 9),
- source.user.email = MV_SLICE(MV_UNION(recent.source.user.email, source.user.email), 0, 9),
  entity.namespace = COALESCE(recent.entity.namespace, entity.namespace),
  user.domain = MV_SLICE(MV_UNION(recent.user.domain, user.domain), 0, 9),
  user.email = MV_SLICE(MV_UNION(recent.user.email, user.email), 0, 9),
@@ -1819,8 +1807,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  event.kind,
  event.category,
  event.type,
- client.user.email,
- source.user.email,
  entity.namespace,
  user.domain,
  user.email,

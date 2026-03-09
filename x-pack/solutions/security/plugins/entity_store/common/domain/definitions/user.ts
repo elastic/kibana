@@ -44,12 +44,9 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         field('entity.namespace')
       ),
       compose(field('user.name'), sep('@'), field('entity.namespace')),
-      compose(field('client.user.email'), sep('@'), field('entity.namespace')),
-      compose(field('source.user.email'), sep('@'), field('entity.namespace')),
     ],
     /**
-     * UEBA user documents filter: (at least one user identity present) AND
-     * ( (A) event.kind == "asset" OR (B) event.category contains "iam", event.type in ("user","creation","deletion","group"), and event.kind != "enrichment" ).
+     * UEBA user documents filter
      */
     documentsFilter: {
       and: [
@@ -92,9 +89,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'event.kind' }),
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),
-
-    collect({ source: 'client.user.email' }),
-    collect({ source: 'source.user.email' }),
 
     newestValue({ source: 'entity.namespace' }),
 
