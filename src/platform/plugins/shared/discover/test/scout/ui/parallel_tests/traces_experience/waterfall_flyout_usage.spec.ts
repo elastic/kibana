@@ -35,8 +35,8 @@ const openTraceTimeline = async (pageObjects: {
   );
   await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
   const { flyout } = pageObjects.tracesExperience;
-  await flyout.traceWaterfallFullScreenButton.click();
-  await expect(flyout.traceTimelineFlyout).toBeVisible();
+  await flyout.traceSummary.fullScreenButton.click();
+  await expect(flyout.waterfallFlyout.container).toBeVisible();
 };
 
 spaceTest.describe(
@@ -68,40 +68,44 @@ spaceTest.describe(
         await spaceTest.step(
           'Transaction child flyout - click on the transaction row',
           async () => {
-            await flyout.getWaterfallItem(RICH_TRACE.TRANSACTION_NAME).content.click();
+            await flyout.waterfallFlyout
+              .getWaterfallItem(RICH_TRACE.TRANSACTION_NAME)
+              .content.click();
           }
         );
 
         await spaceTest.step(
           'Transaction child flyout - verify About section with transaction name and no trace summary',
           async () => {
-            await expect(flyout.childFlyout.aboutSection).toContainText(
+            await expect(flyout.waterfallFlyout.childDocFlyout.aboutSection).toContainText(
               RICH_TRACE.TRANSACTION_NAME
             );
-            await expect(flyout.childFlyout.traceSummarySection).toBeHidden();
+            await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
 
         await spaceTest.step('Transaction child flyout - close', async () => {
-          await flyout.childFlyout.close();
+          await flyout.waterfallFlyout.childDocFlyout.close();
         });
 
         // ── Span ────────────────────────────────────────────────────────
 
         await spaceTest.step('Span child flyout - click on the DB span row', async () => {
-          await flyout.getWaterfallItem(RICH_TRACE.DB_SPAN_NAME).content.click();
+          await flyout.waterfallFlyout.getWaterfallItem(RICH_TRACE.DB_SPAN_NAME).content.click();
         });
 
         await spaceTest.step(
           'Span child flyout - verify About section with span name and no trace summary',
           async () => {
-            await expect(flyout.childFlyout.aboutSection).toContainText(RICH_TRACE.DB_SPAN_NAME);
-            await expect(flyout.childFlyout.traceSummarySection).toBeHidden();
+            await expect(flyout.waterfallFlyout.childDocFlyout.aboutSection).toContainText(
+              RICH_TRACE.DB_SPAN_NAME
+            );
+            await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
 
         await spaceTest.step('Span child flyout - close', async () => {
-          await flyout.childFlyout.close();
+          await flyout.waterfallFlyout.childDocFlyout.close();
         });
 
         // ── "View error" (single error on DB span) ──────────────────────
@@ -109,7 +113,7 @@ spaceTest.describe(
         await spaceTest.step(
           'Log child flyout - click "View error" badge on the DB span',
           async () => {
-            const { errorBadge } = flyout.getWaterfallItem(RICH_TRACE.DB_SPAN_NAME);
+            const { errorBadge } = flyout.waterfallFlyout.getWaterfallItem(RICH_TRACE.DB_SPAN_NAME);
             await errorBadge.click();
           }
         );
@@ -117,15 +121,15 @@ spaceTest.describe(
         await spaceTest.step(
           'Log child flyout - verify error message and no trace summary',
           async () => {
-            await expect(flyout.childFlyout.logMessage).toContainText(
+            await expect(flyout.waterfallFlyout.childDocFlyout.logMessage).toContainText(
               RICH_TRACE.ERRORS.DB_SPAN_TIMEOUT
             );
-            await expect(flyout.childFlyout.traceSummarySection).toBeHidden();
+            await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
 
         await spaceTest.step('Log child flyout - close', async () => {
-          await flyout.childFlyout.close();
+          await flyout.waterfallFlyout.childDocFlyout.close();
         });
 
         // ── "View errors" (multiple errors on transaction) ──────────────
@@ -133,7 +137,9 @@ spaceTest.describe(
         await spaceTest.step(
           'Transaction child flyout (View errors) - click "View 2 errors" badge',
           async () => {
-            const { errorBadge } = flyout.getWaterfallItem(RICH_TRACE.TRANSACTION_NAME);
+            const { errorBadge } = flyout.waterfallFlyout.getWaterfallItem(
+              RICH_TRACE.TRANSACTION_NAME
+            );
             await errorBadge.click();
           }
         );
@@ -141,21 +147,21 @@ spaceTest.describe(
         await spaceTest.step(
           'Transaction child flyout (View errors) - verify About section, both errors, and no trace summary',
           async () => {
-            await expect(flyout.childFlyout.aboutSection).toContainText(
+            await expect(flyout.waterfallFlyout.childDocFlyout.aboutSection).toContainText(
               RICH_TRACE.TRANSACTION_NAME
             );
-            await expect(flyout.childFlyout.errors.section).toContainText(
+            await expect(flyout.waterfallFlyout.childDocFlyout.errors.section).toContainText(
               RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR
             );
-            await expect(flyout.childFlyout.errors.section).toContainText(
+            await expect(flyout.waterfallFlyout.childDocFlyout.errors.section).toContainText(
               RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR
             );
-            await expect(flyout.childFlyout.traceSummarySection).toBeHidden();
+            await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
 
         await spaceTest.step('Transaction child flyout (View errors) - close', async () => {
-          await flyout.childFlyout.close();
+          await flyout.waterfallFlyout.childDocFlyout.close();
         });
 
         // ── Internal span ─────────────────────────────────────────────────
@@ -163,17 +169,19 @@ spaceTest.describe(
         await spaceTest.step(
           'Internal span child flyout - click on the internal span row',
           async () => {
-            await flyout.getWaterfallItem(RICH_TRACE.INTERNAL_SPAN_NAME).content.click();
+            await flyout.waterfallFlyout
+              .getWaterfallItem(RICH_TRACE.INTERNAL_SPAN_NAME)
+              .content.click();
           }
         );
 
         await spaceTest.step(
           'Internal span child flyout - verify About section with span name and no trace summary',
           async () => {
-            await expect(flyout.childFlyout.aboutSection).toContainText(
+            await expect(flyout.waterfallFlyout.childDocFlyout.aboutSection).toContainText(
               RICH_TRACE.INTERNAL_SPAN_NAME
             );
-            await expect(flyout.childFlyout.traceSummarySection).toBeHidden();
+            await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
       }
@@ -192,14 +200,16 @@ spaceTest.describe(
         await spaceTest.step(
           'Internal span child flyout - click on the internal span row',
           async () => {
-            await flyout.getWaterfallItem(RICH_TRACE.INTERNAL_SPAN_NAME).content.click();
+            await flyout.waterfallFlyout
+              .getWaterfallItem(RICH_TRACE.INTERNAL_SPAN_NAME)
+              .content.click();
           }
         );
 
         await spaceTest.step(
           'Internal span child flyout - errors Open in Discover shows the span error',
           async () => {
-            await flyout.childFlyout.errors.openInDiscoverButton.click();
+            await flyout.waterfallFlyout.childDocFlyout.errors.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(RICH_TRACE.ERRORS.PROCESS_ORDER_FAILURE);
           }
@@ -215,7 +225,7 @@ spaceTest.describe(
         await spaceTest.step(
           'Internal span child flyout - logs Open in Discover shows the correlated logs',
           async () => {
-            await flyout.childFlyout.logs.openInDiscoverButton.click();
+            await flyout.waterfallFlyout.childDocFlyout.logs.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(RICH_TRACE.LOGS.PROCESS_ORDER_VALIDATING);
             await expect(docTable).toContainText(RICH_TRACE.LOGS.PROCESS_ORDER_INVENTORY);
@@ -233,7 +243,7 @@ spaceTest.describe(
         await spaceTest.step(
           'Internal span child flyout - span links Open in Discover shows the linked span',
           async () => {
-            await flyout.childFlyout.spanLinks.openInDiscoverButton.click();
+            await flyout.waterfallFlyout.childDocFlyout.spanLinks.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
           }

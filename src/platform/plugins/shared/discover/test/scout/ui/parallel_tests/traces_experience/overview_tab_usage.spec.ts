@@ -66,7 +66,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click service name link and verify APM service page', async () => {
-          await flyout.serviceNameLink.click();
+          await flyout.about.serviceNameLink.click();
           const serviceHeader = page.testSubj.locator('apmMainTemplateHeaderServiceName');
           await expect(serviceHeader).toHaveText(RICH_TRACE.SERVICE_NAME);
           await expect(page.testSubj.locator('overviewTab')).toHaveAttribute(
@@ -90,7 +90,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click transaction name link and verify APM page', async () => {
-          await flyout.transactionNameLink.click();
+          await flyout.about.transactionNameLink.click();
           const serviceHeader = page.testSubj.locator('apmMainTemplateHeaderServiceName');
           await expect(serviceHeader).toHaveText(RICH_TRACE.SERVICE_NAME);
           await expect(page.testSubj.locator('transactionsTab')).toHaveAttribute(
@@ -111,7 +111,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click dependency name link and verify APM page', async () => {
-          await flyout.dependencyNameLink.click();
+          await flyout.about.dependencyNameLink.click();
           await page.waitForURL(/\/dependencies\/overview/);
           await expect(page.getByRole('tab', { name: 'Overview' })).toHaveAttribute(
             'aria-selected',
@@ -133,8 +133,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify chart renders without error', async () => {
-          await expect(flyout.similarSpansDurationDistributionChart).toBeVisible();
-          await expect(flyout.similarSpansDurationDistributionChart).not.toContainText(
+          await expect(flyout.similarSpans.durationDistributionChart).toBeVisible();
+          await expect(flyout.similarSpans.durationDistributionChart).not.toContainText(
             'An error happened when trying to fetch data'
           );
         });
@@ -142,7 +142,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click Open in Discover and verify new tab returns similar spans',
           async () => {
-            await flyout.similarSpansOpenInDiscoverButton.click();
+            await flyout.similarSpans.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(RICH_TRACE.SERVICE_NAME);
             await expect(docTable).toContainText(RICH_TRACE.INTERNAL_SPAN_NAME);
@@ -165,27 +165,27 @@ spaceTest.describe(
         await spaceTest.step(
           'click waterfall preview to open expanded timeline flyout',
           async () => {
-            await flyout.traceWaterfallClickArea.click();
-            await expect(flyout.traceTimelineFlyout).toBeVisible();
-            await flyout.traceTimelineFlyoutBackButton.click();
-            await expect(flyout.traceTimelineFlyout).toBeHidden();
+            await flyout.traceSummary.waterfallClickArea.click();
+            await expect(flyout.waterfallFlyout.container).toBeVisible();
+            await flyout.waterfallFlyout.backButton.click();
+            await expect(flyout.waterfallFlyout.container).toBeHidden();
           }
         );
 
         await spaceTest.step(
           'click expand timeline button to open expanded timeline flyout',
           async () => {
-            await flyout.traceWaterfallFullScreenButton.click();
-            await expect(flyout.traceTimelineFlyout).toBeVisible();
-            await flyout.traceTimelineFlyoutBackButton.click();
-            await expect(flyout.traceTimelineFlyout).toBeHidden();
+            await flyout.traceSummary.fullScreenButton.click();
+            await expect(flyout.waterfallFlyout.container).toBeVisible();
+            await flyout.waterfallFlyout.backButton.click();
+            await expect(flyout.waterfallFlyout.container).toBeHidden();
           }
         );
 
         await spaceTest.step(
           'click Open in Discover and verify new tab returns trace items',
           async () => {
-            await flyout.traceSummaryOpenInDiscoverButton.click();
+            await flyout.traceSummary.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(RICH_TRACE.TRANSACTION_NAME);
             await expect(docTable).toContainText(RICH_TRACE.SERVICE_NAME);
@@ -231,7 +231,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click Open in Discover and verify new tab returns all transaction errors',
           async () => {
-            await flyout.errorsOpenInDiscoverButton.click();
+            await flyout.errors.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR);
             await expect(docTable).toContainText(RICH_TRACE.ERRORS.TRANSACTION_VALIDATION_ERROR);
@@ -258,17 +258,17 @@ spaceTest.describe(
         );
 
         await spaceTest.step('verify all 3 correlated logs are displayed', async () => {
-          await expect(flyout.logsSection).toContainText(RICH_TRACE.LOGS.TRANSACTION_DB_ERROR);
-          await expect(flyout.logsSection).toContainText(
+          await expect(flyout.logs.section).toContainText(RICH_TRACE.LOGS.TRANSACTION_DB_ERROR);
+          await expect(flyout.logs.section).toContainText(
             RICH_TRACE.LOGS.TRANSACTION_VALIDATION_ERROR
           );
-          await expect(flyout.logsSection).toContainText(RICH_TRACE.LOGS.TRANSACTION_INFO);
+          await expect(flyout.logs.section).toContainText(RICH_TRACE.LOGS.TRANSACTION_INFO);
         });
 
         await spaceTest.step(
           'click Open in Discover and verify new tab returns correlated logs',
           async () => {
-            await flyout.logsOpenInDiscoverButton.click();
+            await flyout.logs.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(RICH_TRACE.LOGS.TRANSACTION_DB_ERROR);
             await expect(docTable).toContainText(RICH_TRACE.LOGS.TRANSACTION_VALIDATION_ERROR);
@@ -292,7 +292,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click span name link and verify new tab returns the linked span',
           async () => {
-            const spanNameLink = flyout.spanLinksSection
+            const spanNameLink = flyout.spanLinks.section
               .locator('a')
               .filter({ hasText: PRODUCER_TRACE.KAFKA_SPAN_NAME });
             await spanNameLink.click();
@@ -309,7 +309,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click service name link and verify new tab returns service documents',
           async () => {
-            const serviceNameLink = flyout.spanLinksSection
+            const serviceNameLink = flyout.spanLinks.section
               .locator('a')
               .filter({ hasText: PRODUCER_TRACE.SERVICE_NAME });
             await serviceNameLink.click();
@@ -325,7 +325,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click trace ID link and verify new tab returns trace documents',
           async () => {
-            const traceIdLink = flyout.spanLinksSection.locator(
+            const traceIdLink = flyout.spanLinks.section.locator(
               '[data-test-subj^="outgoing-traceIdLink-"]'
             );
             await traceIdLink.click();
@@ -341,7 +341,7 @@ spaceTest.describe(
         await spaceTest.step(
           'click Open in Discover and verify new tab returns span link targets',
           async () => {
-            await flyout.spanLinksOpenInDiscoverButton.click();
+            await flyout.spanLinks.openInDiscoverButton.click();
             const docTable = page.testSubj.locator('discoverDocTable');
             await expect(docTable).toContainText(PRODUCER_TRACE.KAFKA_SPAN_NAME);
           }

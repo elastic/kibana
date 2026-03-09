@@ -12,133 +12,162 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 export interface TracesFlyout {
   readonly overviewTab: Locator;
 
-  readonly aboutSection: Locator;
-  readonly serviceNameLink: Locator;
-  readonly transactionNameLink: Locator;
-  readonly dependencyNameLink: Locator;
-
-  readonly similarSpansSection: Locator;
-  readonly similarSpansDurationDistributionChart: Locator;
-  readonly similarSpansOpenInDiscoverButton: Locator;
-
-  readonly traceSummarySection: Locator;
-  readonly traceWaterfallClickArea: Locator;
-  readonly traceWaterfallFullScreenButton: Locator;
-  readonly traceTimelineFlyout: Locator;
-  readonly traceTimelineFlyoutBackButton: Locator;
-  readonly traceSummaryOpenInDiscoverButton: Locator;
-
-  readonly errorsSection: Locator;
-  readonly errorsOpenInDiscoverButton: Locator;
-
-  readonly logsSection: Locator;
-  readonly logsOpenInDiscoverButton: Locator;
-
-  readonly spanLinksSection: Locator;
-  readonly spanLinksOpenInDiscoverButton: Locator;
-
-  getWaterfallItem(name: string): {
-    readonly content: Locator;
-    readonly errorBadge: Locator;
+  readonly about: {
+    readonly section: Locator;
+    readonly serviceNameLink: Locator;
+    readonly transactionNameLink: Locator;
+    readonly dependencyNameLink: Locator;
   };
-  readonly childFlyout: {
-    readonly aboutSection: Locator;
-    readonly logMessage: Locator;
-    readonly traceSummarySection: Locator;
-    readonly errors: {
-      readonly section: Locator;
-      readonly openInDiscoverButton: Locator;
+
+  readonly similarSpans: {
+    readonly section: Locator;
+    readonly durationDistributionChart: Locator;
+    readonly openInDiscoverButton: Locator;
+  };
+
+  readonly traceSummary: {
+    readonly section: Locator;
+    readonly waterfallClickArea: Locator;
+    readonly fullScreenButton: Locator;
+    readonly openInDiscoverButton: Locator;
+  };
+
+  readonly errors: {
+    readonly section: Locator;
+    readonly openInDiscoverButton: Locator;
+  };
+
+  readonly logs: {
+    readonly section: Locator;
+    readonly openInDiscoverButton: Locator;
+  };
+
+  readonly spanLinks: {
+    readonly section: Locator;
+    readonly openInDiscoverButton: Locator;
+  };
+
+  readonly waterfallFlyout: {
+    readonly container: Locator;
+    readonly backButton: Locator;
+    getWaterfallItem(name: string): {
+      readonly content: Locator;
+      readonly errorBadge: Locator;
     };
-    readonly logs: {
-      readonly openInDiscoverButton: Locator;
+    readonly childDocFlyout: {
+      readonly aboutSection: Locator;
+      readonly logMessage: Locator;
+      readonly traceSummarySection: Locator;
+      readonly errors: {
+        readonly section: Locator;
+        readonly openInDiscoverButton: Locator;
+      };
+      readonly logs: {
+        readonly openInDiscoverButton: Locator;
+      };
+      readonly spanLinks: {
+        readonly openInDiscoverButton: Locator;
+      };
+      close(): Promise<void>;
     };
-    readonly spanLinks: {
-      readonly openInDiscoverButton: Locator;
-    };
-    close(): Promise<void>;
   };
 }
 
 export function createTracesFlyout(page: ScoutPage): TracesFlyout {
+  const timelineFlyout = page.getByRole('dialog', { name: 'Trace timeline' });
+
   return {
     overviewTab: page.testSubj.locator('docViewerTab-doc_view_obs_traces_overview'),
 
-    aboutSection: page.testSubj.locator('UnifiedDocViewerTableGrid'),
-    serviceNameLink: page.testSubj.locator('unifiedDocViewerObservabilityTracesServiceNameLink'),
-    transactionNameLink: page.testSubj.locator(
-      'unifiedDocViewerObservabilityTracesTransactionNameLink'
-    ),
-    dependencyNameLink: page.testSubj.locator('unifiedDocViewSpanOverviewDependencyNameLink'),
-
-    similarSpansSection: page.testSubj.locator('docViewerSimilarSpansSection'),
-    similarSpansDurationDistributionChart: page.testSubj.locator(
-      'docViewerSimilarSpansDurationDistributionChart'
-    ),
-    similarSpansOpenInDiscoverButton: page.testSubj.locator(
-      'docViewerSimilarSpansOpenInDiscoverButton'
-    ),
-
-    traceSummarySection: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
-    traceWaterfallClickArea: page.testSubj.locator(
-      'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
-    ),
-    traceWaterfallFullScreenButton: page.testSubj.locator(
-      'unifiedDocViewerObservabilityTracesTraceFullScreenButton'
-    ),
-    traceTimelineFlyout: page.getByRole('dialog', { name: 'Trace timeline' }),
-    traceTimelineFlyoutBackButton: page
-      .getByRole('dialog', { name: 'Trace timeline' })
-      .locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
-    traceSummaryOpenInDiscoverButton: page.testSubj.locator(
-      'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
-    ),
-
-    errorsSection: page.testSubj.locator('unifiedDocViewerErrorsAccordion'),
-    errorsOpenInDiscoverButton: page.testSubj.locator('docViewerErrorsOpenInDiscoverButton'),
-
-    logsSection: page.testSubj.locator('unifiedDocViewerLogsSection'),
-    logsOpenInDiscoverButton: page.testSubj.locator('unifiedDocViewerLogsOpenInDiscoverButton'),
-
-    spanLinksSection: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
-    spanLinksOpenInDiscoverButton: page.testSubj.locator('docViewerSpanLinksOpenInDiscoverButton'),
-
-    getWaterfallItem(name: string) {
-      const row = page
-        .getByRole('dialog', { name: 'Trace timeline' })
-        .locator('[data-test-subj="traceItemRowWrapper"]')
-        .filter({ hasText: name });
-      return {
-        content: row.locator('[data-test-subj="traceItemRowContent"]'),
-        errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
-      };
+    about: {
+      section: page.testSubj.locator('UnifiedDocViewerTableGrid'),
+      serviceNameLink: page.testSubj.locator('unifiedDocViewerObservabilityTracesServiceNameLink'),
+      transactionNameLink: page.testSubj.locator(
+        'unifiedDocViewerObservabilityTracesTransactionNameLink'
+      ),
+      dependencyNameLink: page.testSubj.locator('unifiedDocViewSpanOverviewDependencyNameLink'),
     },
-    childFlyout: (() => {
-      const container = page.locator('[id^="documentDetailFlyout"]');
+
+    similarSpans: {
+      section: page.testSubj.locator('docViewerSimilarSpansSection'),
+      durationDistributionChart: page.testSubj.locator(
+        'docViewerSimilarSpansDurationDistributionChart'
+      ),
+      openInDiscoverButton: page.testSubj.locator('docViewerSimilarSpansOpenInDiscoverButton'),
+    },
+
+    traceSummary: {
+      section: page.testSubj.locator('unifiedDocViewerTraceSummarySection'),
+      waterfallClickArea: page.testSubj.locator(
+        'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
+      ),
+      fullScreenButton: page.testSubj.locator(
+        'unifiedDocViewerObservabilityTracesTraceFullScreenButton'
+      ),
+      openInDiscoverButton: page.testSubj.locator(
+        'unifiedDocViewerObservabilityTracesOpenInDiscoverButton'
+      ),
+    },
+
+    errors: {
+      section: page.testSubj.locator('unifiedDocViewerErrorsAccordion'),
+      openInDiscoverButton: page.testSubj.locator('docViewerErrorsOpenInDiscoverButton'),
+    },
+
+    logs: {
+      section: page.testSubj.locator('unifiedDocViewerLogsSection'),
+      openInDiscoverButton: page.testSubj.locator('unifiedDocViewerLogsOpenInDiscoverButton'),
+    },
+
+    spanLinks: {
+      section: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
+      openInDiscoverButton: page.testSubj.locator('docViewerSpanLinksOpenInDiscoverButton'),
+    },
+
+    waterfallFlyout: (() => {
+      const childDocContainer = page.locator('[id^="documentDetailFlyout"]');
       return {
-        aboutSection: container.locator('[data-test-subj="UnifiedDocViewerTableGrid"]'),
-        logMessage: container.locator('[data-test-subj="unifiedDocViewLogsOverviewMessage"]'),
-        traceSummarySection: container.locator(
-          '[data-test-subj="unifiedDocViewerTraceSummarySection"]'
-        ),
-        errors: {
-          section: container.locator('[data-test-subj="unifiedDocViewerErrorsAccordion"]'),
-          openInDiscoverButton: container.locator(
-            '[data-test-subj="docViewerErrorsOpenInDiscoverButton"]'
-          ),
+        container: timelineFlyout,
+        backButton: timelineFlyout.locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
+        getWaterfallItem(name: string) {
+          const row = timelineFlyout
+            .locator('[data-test-subj="traceItemRowWrapper"]')
+            .filter({ hasText: name });
+          return {
+            content: row.locator('[data-test-subj="traceItemRowContent"]'),
+            errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
+          };
         },
-        logs: {
-          openInDiscoverButton: container.locator(
-            '[data-test-subj="unifiedDocViewerLogsOpenInDiscoverButton"]'
+        childDocFlyout: {
+          aboutSection: childDocContainer.locator('[data-test-subj="UnifiedDocViewerTableGrid"]'),
+          logMessage: childDocContainer.locator(
+            '[data-test-subj="unifiedDocViewLogsOverviewMessage"]'
           ),
-        },
-        spanLinks: {
-          openInDiscoverButton: container.locator(
-            '[data-test-subj="docViewerSpanLinksOpenInDiscoverButton"]'
+          traceSummarySection: childDocContainer.locator(
+            '[data-test-subj="unifiedDocViewerTraceSummarySection"]'
           ),
-        },
-        async close() {
-          await page.keyboard.press('Escape');
-          await container.waitFor({ state: 'detached' });
+          errors: {
+            section: childDocContainer.locator(
+              '[data-test-subj="unifiedDocViewerErrorsAccordion"]'
+            ),
+            openInDiscoverButton: childDocContainer.locator(
+              '[data-test-subj="docViewerErrorsOpenInDiscoverButton"]'
+            ),
+          },
+          logs: {
+            openInDiscoverButton: childDocContainer.locator(
+              '[data-test-subj="unifiedDocViewerLogsOpenInDiscoverButton"]'
+            ),
+          },
+          spanLinks: {
+            openInDiscoverButton: childDocContainer.locator(
+              '[data-test-subj="docViewerSpanLinksOpenInDiscoverButton"]'
+            ),
+          },
+          async close() {
+            await page.keyboard.press('Escape');
+            await childDocContainer.waitFor({ state: 'detached' });
+          },
         },
       };
     })(),
