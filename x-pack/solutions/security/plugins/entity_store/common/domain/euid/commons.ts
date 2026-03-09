@@ -6,11 +6,7 @@
  */
 
 import { get } from 'lodash';
-import type {
-  EuidAttribute,
-  EuidConditional,
-  EuidFieldInstruction,
-} from '../definitions/entity_schema';
+import type { EuidAttribute } from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
@@ -61,32 +57,16 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   return String(fieldInObject);
 }
 
-export function conditionalMatchesDoc(doc: any, conditional: EuidConditional): boolean {
-  return getFieldValue(doc, conditional.field) === conditional.eq;
-}
-
-export function instructionMatchesDoc(doc: any, instruction: EuidFieldInstruction): boolean {
-  if (!instruction.conditional) return true;
-  return conditionalMatchesDoc(doc, instruction.conditional);
-}
-
 export function getCompositionFields(composition: EuidAttribute[]): string[] {
   return composition.filter(isEuidField).map((attr) => attr.field);
 }
 
 export function getFieldsToBeFilteredOn(
   doc: any,
-  euidFields: EuidFieldInstruction[]
+  euidFields: EuidAttribute[][]
 ): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
-    const instruction = euidFields[i];
-
-    // if the special conditional does not match, skip the instruction
-    if (!instructionMatchesDoc(doc, instruction)) {
-      continue;
-    }
-
-    const composition = instruction.composition;
+    const composition = euidFields[i];
     const fieldAttrs = composition.filter(isEuidField);
     const composedFieldValues = fieldAttrs.reduce(
       (acc, attr) => ({
@@ -104,12 +84,12 @@ export function getFieldsToBeFilteredOn(
 }
 
 export function getFieldsToBeFilteredOut(
-  euidFields: EuidFieldInstruction[],
+  euidFields: EuidAttribute[][],
   fieldsToBeFilteredOn: { values: FieldValue; rankingPosition: number }
 ): string[] {
   const euidFieldsBeforeRanking = euidFields.slice(0, fieldsToBeFilteredOn.rankingPosition);
-  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap((instruction) =>
-    getCompositionFields(instruction.composition)
+  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap((composition) =>
+    getCompositionFields(composition)
   );
 
   const toFilterOut: string[] = [];

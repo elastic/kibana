@@ -34,18 +34,7 @@ const euidFieldSchema = z.object({
 });
 
 const euidSeparatorSchema = z.object({
-  separator: z.string(),
-});
-
-/** Minimal conditional for an euid instruction: doc must have field === eq (after field evaluations). */
-const euidConditionalSchema = z.object({
-  field: z.string(),
-  eq: z.string(),
-});
-
-const euidFieldInstructionSchema = z.object({
-  conditional: euidConditionalSchema.optional(),
-  composition: z.array(z.union([euidFieldSchema, euidSeparatorSchema])),
+  sep: z.string(),
 });
 
 // Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value).
@@ -68,7 +57,7 @@ const calculatedIdentityFieldLogicSchema = z.object({
   // The ids that are generated using the esqlEvaluation will also be prepended
   // with the type (e.g. `host:`). The fields found on the default id won't be prepended.
   // ALL THE FIELDS MUST BE OF MAPPING TYPE 'keyword'
-  euidFields: z.array(euidFieldInstructionSchema),
+  euidFields: z.array(z.array(z.union([euidFieldSchema, euidSeparatorSchema]))),
 
   // Optional pre-evaluated fields (e.g. entity.namespace from event.module). Applied before
   // euid generation and translated to ESQL, Painless, and in-memory.
@@ -120,8 +109,6 @@ export type ManagedEntityDefinition = EntityDefinition & { type: EntityType }; /
 export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
-export type EuidConditional = z.infer<typeof euidConditionalSchema>;
-export type EuidFieldInstruction = z.infer<typeof euidFieldInstructionSchema>;
 export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
 

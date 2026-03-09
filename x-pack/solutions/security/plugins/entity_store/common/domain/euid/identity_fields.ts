@@ -47,8 +47,8 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
   );
   const identitySourceFields = Array.from(
     new Set(
-      euidFields.flatMap((instr) =>
-        instr.composition.filter(isEuidField).map((attr) => {
+      euidFields.flatMap((composition) =>
+        composition.filter(isEuidField).map((attr) => {
           const field = attr.field;
           // if the field is a fieldEvaluation destination, return the source field
           return evaluationDestinationToSource.get(field) ?? field;

@@ -11,8 +11,7 @@ import {
   isNotEmptyCondition,
 } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { compose, composeIf, field, sep } from './euid_instructions';
-import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue } from './field_retention_operations';
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
   type: 'user',
@@ -33,17 +32,16 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       },
     ],
     euidFields: [
-      compose(field('user.email'), sep('@'), field('entity.namespace')),
-      compose(field('user.id'), sep('@'), field('entity.namespace')),
-      composeIf(
-        { field: 'entity.namespace', eq: 'active_directory' },
-        field('user.name'),
-        sep('@'),
-        field('user.domain'),
-        sep('@'),
-        field('entity.namespace')
-      ),
-      compose(field('user.name'), sep('@'), field('entity.namespace')),
+      [{ field: 'user.email' }, { sep: '@' }, { field: 'entity.namespace' }],
+      [{ field: 'user.id' }, { sep: '@' }, { field: 'entity.namespace' }],
+      [
+        { field: 'user.name' },
+        { sep: '@' },
+        { field: 'user.domain' },
+        { sep: '@' },
+        { field: 'entity.namespace' },
+      ],
+      [{ field: 'user.name' }, { sep: '@' }, { field: 'entity.namespace' }],
     ],
     /**
      * UEBA user documents filter
@@ -83,7 +81,6 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   fields: [
     newestValue({ destination: 'entity.name', source: 'user.name' }),
-    oldestValue({ source: 'user.entity.id' }),
 
     collect({ source: 'event.module' }),
     collect({ source: 'event.kind' }),

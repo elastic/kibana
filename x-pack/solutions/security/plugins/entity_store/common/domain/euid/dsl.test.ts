@@ -172,7 +172,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns filter for Active Directory conditional: user.name and user.domain only (entity.namespace excluded)', () => {
+    it('returns filter for user.name and user.domain only (entity.namespace excluded from filter)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
         event: { module: 'entityanalytics_ad' },

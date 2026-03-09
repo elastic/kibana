@@ -209,31 +209,20 @@ export function getEuidEsqlEvaluation(
     throw new Error('No euid fields found, invalid euid logic definition');
   }
 
-  // If only one instruction with single field, no CASE logic is needed (unless conditional)
+  // If only one instruction with single field, no CASE logic is needed
   if (identityField.euidFields.length === 1) {
-    const instruction = identityField.euidFields[0];
-    const comp = instruction.composition;
+    const comp = identityField.euidFields[0];
     const firstAttr = comp[0];
     if (isEuidSeparator(firstAttr)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     if (comp.length === 1 && isEuidField(firstAttr)) {
-      if (instruction.conditional) {
-        const condEsql = `(${instruction.conditional.field} == "${escapeEsqlString(
-          instruction.conditional.eq
-        )}")`;
-        const caseExpr = `CASE((${condEsql}) AND (${esqlIsNotNullOrEmpty(firstAttr.field)}), ${
-          firstAttr.field
-        }, NULL)`;
-        return appendTypeIdIfNeeded(entityType, caseExpr, mustPrependTypeId);
-      }
       return appendTypeIdIfNeeded(entityType, firstAttr.field, mustPrependTypeId);
     }
     // single instruction but composed: fall through to multi-branch CASE
   }
 
-  const euidLogic = identityField.euidFields.map((instruction) => {
-    const composedField = instruction.composition;
+  const euidLogic = identityField.euidFields.map((composedField) => {
     if (composedField.length === 1 && isEuidSeparator(composedField[0])) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
@@ -247,23 +236,17 @@ export function getEuidEsqlEvaluation(
       throw new Error('The first field of a composed field cannot be a separator');
     }
 
-    const caseBooleanOp = instruction.conditional
-      ? `(${instruction.conditional.field} == "${escapeEsqlString(
-          instruction.conditional.eq
-        )}") AND (${compositionConditions})`
-      : compositionConditions;
-
     if (composedField.length === 1) {
-      return `(${caseBooleanOp}), ${(composedField[0] as { field: string }).field}`;
+      return `(${compositionConditions}), ${(composedField[0] as { field: string }).field}`;
     }
 
     const evaluations = composedField
-      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.separator)}"`))
+      .map((attr) => (isEuidField(attr) ? attr.field : `"${escapeEsqlString(attr.sep)}"`))
       .join(', ');
 
     const concatLogic = `CONCAT(${evaluations})`;
 
-    return `(${caseBooleanOp}), ${concatLogic}`;
+    return `(${compositionConditions}), ${concatLogic}`;
   });
 
   const idLogic = `CASE(${euidLogic.join(',\n')}, NULL)`;

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EntityType,
-  EuidAttribute,
-  EuidConditional,
-  FieldEvaluation,
-} from '../definitions/entity_schema';
+import type { EntityType, EuidAttribute, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isEuidField, isEuidSeparator } from './commons';
@@ -95,33 +90,24 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
 
   // If there is only one euid field, we can simplify the logic.
   if (identityField.euidFields.length === 1) {
-    const instruction = identityField.euidFields[0];
-    const comp = instruction.composition;
+    const comp = identityField.euidFields[0];
     const first = comp[0];
     if (isEuidSeparator(first)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     const field = first.field;
-    const condPart = instruction.conditional
-      ? conditionalToPainlessExpression(instruction.conditional, fieldValueExpr) + ' && '
-      : '';
-    const condition = condPart + fieldCondition(field);
+    const condition = fieldCondition(field);
     const valueExpr = fieldValueExpr(field);
     return `${preamble}if (${condition}) { return ${prefixExpr}${valueExpr}; } return null;`;
   }
 
-  const clauses = identityField.euidFields.map((instruction) => {
-    const composedField = instruction.composition;
+  const clauses = identityField.euidFields.map((composedField) => {
     const compositionCond = composedField
       .filter(isEuidField)
       .map((a) => fieldCondition(a.field))
       .join(' && ');
-    const condPart = instruction.conditional
-      ? conditionalToPainlessExpression(instruction.conditional, fieldValueExpr) + ' && '
-      : '';
-    const condition = condPart + compositionCond;
     const valueExpr = buildPainlessValueExprWithEvaluated(composedField, fieldValueExpr);
-    return `if (${condition}) { return ${prefixExpr}${valueExpr}; }`;
+    return `if (${compositionCond}) { return ${prefixExpr}${valueExpr}; }`;
   });
 
   return preamble + clauses.join(' ') + ' return null;';
@@ -143,7 +129,7 @@ function buildPainlessValueExprWithEvaluated(
     if (isEuidField(attr)) {
       return fieldValueExpr(attr.field);
     }
-    return `"${escapePainlessString(attr.separator)}"`;
+    return `"${escapePainlessString(attr.sep)}"`;
   });
   return parts.join(' + ');
 }
@@ -158,16 +144,6 @@ function escapePainlessString(s: string): string {
 
 function destinationToVarName(destination: string): string {
   return destination.replace(/\./g, '_');
-}
-
-/** Painless boolean expression for the minimal conditional (field == eq). */
-function conditionalToPainlessExpression(
-  conditional: EuidConditional,
-  // Function to get the value of a field.
-  fieldValueExpr: (field: string) => string
-): string {
-  const val = fieldValueExpr(conditional.field);
-  return `${val} == "${escapePainlessString(conditional.eq)}"`;
 }
 
 function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {

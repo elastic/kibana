@@ -128,7 +128,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
     });
 
-    it('returns filter for Active Directory conditional: user.name, user.domain, entity.namespace when namespace is active_directory', () => {
+    it('returns filter for user.name and user.domain when name and domain present', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { name: 'jane', domain: 'corp.com' },
         event: { module: 'entityanalytics_ad' },

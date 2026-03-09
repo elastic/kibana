@@ -180,13 +180,12 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
       AND (((NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (\`event.kind\` == \\"asset\\" OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\") AND \`event.kind\` != \\"enrichment\\")) AND ((MV_FIRST(event.module) IS NOT NULL AND MV_FIRST(event.module) != \\"\\")))
   | EVAL entity.namespace = CASE((MV_FIRST(event.module) == \\"okta\\" OR MV_FIRST(event.module) == \\"entityanalytics_okta\\"), \\"okta\\", (MV_FIRST(event.module) == \\"azure\\" OR MV_FIRST(event.module) == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (MV_FIRST(event.module) == \\"o365\\" OR MV_FIRST(event.module) == \\"o365_metrics\\"), \\"microsoft_365\\", (MV_FIRST(event.module) == \\"entityanalytics_ad\\"), \\"active_directory\\", MV_FIRST(event.module))| EVAL entity.id = CONCAT(\\"user:\\", CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-((entity.namespace == \\"active_directory\\") AND (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\")), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
+(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL))
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
       entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
- user.entity.id = FIRST(TO_STRING(user.entity.id), @timestamp) WHERE user.entity.id IS NOT NULL,
  event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
  event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
@@ -248,7 +247,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
             OR (entity.EngineMetadata.FirstSeenLogInPage == TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\") 
                 AND entity.id > \\"cursor-id\\")
     | KEEP entity.name,
- user.entity.id,
  event.module,
  event.kind,
  event.category,
@@ -1669,13 +1667,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | EVAL entity.namespace = CASE((MV_FIRST(event.module) == \\"okta\\" OR MV_FIRST(event.module) == \\"entityanalytics_okta\\"), \\"okta\\", (MV_FIRST(event.module) == \\"azure\\" OR MV_FIRST(event.module) == \\"entityanalytics_entra_id\\"), \\"entra_id\\", (MV_FIRST(event.module) == \\"o365\\" OR MV_FIRST(event.module) == \\"o365_metrics\\"), \\"microsoft_365\\", (MV_FIRST(event.module) == \\"entityanalytics_ad\\"), \\"active_directory\\", MV_FIRST(event.module))
   | EVAL recent.entity.EngineMetadata.UntypedId = CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.email, \\"@\\", entity.namespace),
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
-((entity.namespace == \\"active_directory\\") AND (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\")), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
+(user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL)
   | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),
     recent.entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
- recent.user.entity.id = FIRST(TO_STRING(user.entity.id), @timestamp) WHERE user.entity.id IS NOT NULL,
  recent.event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
  recent.event.kind = MV_DEDUPE(TOP(TO_STRING(event.kind), 10)) WHERE event.kind IS NOT NULL,
  recent.event.category = MV_DEDUPE(TOP(TO_STRING(event.category), 10)) WHERE event.category IS NOT NULL,
@@ -1738,7 +1735,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
- user.entity.id = COALESCE(user.entity.id, recent.user.entity.id),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 9),
  event.kind = MV_SLICE(MV_UNION(recent.event.kind, event.kind), 0, 9),
  event.category = MV_SLICE(MV_UNION(recent.event.category, event.category), 0, 9),
@@ -1802,7 +1798,6 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
     recent.entity.id AS entity.id,
     recent.entity.EngineMetadata.UntypedId AS entity.EngineMetadata.UntypedId
   | KEEP entity.name,
- user.entity.id,
  event.module,
  event.kind,
  event.category,

@@ -134,7 +134,7 @@ describe('getEuidFromObject', () => {
       expect(getEuidFromObject('user', obj)).toBe('user:dev@example.com@okta');
     });
 
-    it('uses user.name@user.domain@entity.namespace when entity.namespace is active_directory (conditional instruction)', () => {
+    it('uses user.name@user.domain when name and domain present', () => {
       expect(
         getEuidFromObject('user', {
           user: { name: 'jane', domain: 'corp.com' },
@@ -143,13 +143,13 @@ describe('getEuidFromObject', () => {
       ).toBe('user:jane@corp.com@active_directory');
     });
 
-    it('uses user.name@entity.namespace when name and domain present but namespace is not active_directory', () => {
+    it('uses user.name@user.domain when name and domain present (namespace does not affect which instruction matches)', () => {
       expect(
         getEuidFromObject('user', {
           user: { name: 'jane', domain: 'corp.com' },
           event: { module: 'okta' },
         })
-      ).toBe('user:jane@okta');
+      ).toBe('user:jane@corp.com@okta');
     });
   });
 

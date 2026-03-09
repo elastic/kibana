@@ -39,7 +39,7 @@ const createDefinition = (type: EntityType, fields: EntityField[]): ManagedEntit
   type,
   fields,
   identityField: {
-    euidFields: [{ composition: [{ field: 'entity.id' }] }],
+    euidFields: [[{ field: 'entity.id' }]],
     documentsFilter: isNotEmptyCondition('entity.id'),
   },
   indexPatterns: ['logs-*'],

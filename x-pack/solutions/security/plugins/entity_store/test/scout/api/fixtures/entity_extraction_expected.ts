@@ -377,15 +377,15 @@ export const expectedUserEntities = [
   },
   {
     _index: '.entities.v2.latest.security_default',
-    _id: 'a178fa6ee7dee7e62f94b3835ca637ff',
+    _id: '725d5a8408a77ccc3592e8580e7faf2a',
     _source: {
       '@timestamp': '2026-01-20T12:05:06.000Z',
       user: { domain: 'corp', name: 'charlie.wilson' },
       entity: {
         name: 'charlie.wilson',
         type: 'Identity',
-        id: 'user:charlie.wilson@aws',
-        EngineMetadata: { Type: 'user', UntypedId: 'charlie.wilson@aws' },
+        id: 'user:charlie.wilson@corp@aws',
+        EngineMetadata: { Type: 'user', UntypedId: 'charlie.wilson@corp@aws' },
       },
     },
   },

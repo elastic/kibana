@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { EntityType, EuidFieldInstruction } from '../definitions/entity_schema';
+import type { EntityType, EuidAttribute } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { getDocument, getFieldValue, instructionMatchesDoc, isEuidField } from './commons';
+import { getDocument, getFieldValue, isEuidField } from './commons';
 import { applyFieldEvaluations } from './field_evaluations';
 
 /**
@@ -65,15 +65,13 @@ export function getEuidFromObject(entityType: EntityType, doc: any) {
   return `${entityType}:${rawId}`;
 }
 
-function getComposedFieldValues(doc: any, euidFields: EuidFieldInstruction[]): string[] {
-  for (const instruction of euidFields) {
-    if (!instructionMatchesDoc(doc, instruction)) continue;
-    const composition = instruction.composition;
+function getComposedFieldValues(doc: any, euidFields: EuidAttribute[][]): string[] {
+  for (const composition of euidFields) {
     const composedFieldValues = composition.map((attr) => {
       if (isEuidField(attr)) {
         return getFieldValue(doc, attr.field);
       }
-      return attr.separator;
+      return attr.sep;
     });
 
     if (composedFieldValues.every((value) => value !== undefined)) {
