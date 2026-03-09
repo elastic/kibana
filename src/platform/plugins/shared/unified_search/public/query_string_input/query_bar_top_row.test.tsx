@@ -10,7 +10,7 @@
 import { mockPersistedLogFactory } from '@kbn/kql/public/components/query_string_input/query_string_input.test.mocks';
 
 jest.mock('@kbn/esql/public/kibana_services', () => ({
-  getKibanaServices: jest.fn(() => ({})),
+  useKibanaServices: jest.fn(() => ({})),
   untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
 }));
 

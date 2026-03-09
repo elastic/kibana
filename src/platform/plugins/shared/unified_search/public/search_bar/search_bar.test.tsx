@@ -8,7 +8,7 @@
  */
 
 jest.mock('@kbn/esql/public/kibana_services', () => ({
-  getKibanaServices: jest.fn(() => ({})),
+  useKibanaServices: jest.fn(() => ({})),
   untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
 }));
 
