@@ -65,7 +65,8 @@ const matchesFixture = (fixture: unknown, actual: unknown): boolean => {
   }
   if (Array.isArray(fixture) && Array.isArray(actual)) {
     return (
-      fixture.length === actual.length && fixture.every((item, i) => matchesFixture(item, actual[i]))
+      fixture.length === actual.length &&
+      fixture.every((item, i) => matchesFixture(item, actual[i]))
     );
   }
   if (
