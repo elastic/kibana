@@ -126,6 +126,7 @@ export default function indexTest({ getService }: FtrProviderContext) {
           refresh: true,
           executionTimeField: 'test',
         },
+        auth_mode: 'shared',
       });
     });
 

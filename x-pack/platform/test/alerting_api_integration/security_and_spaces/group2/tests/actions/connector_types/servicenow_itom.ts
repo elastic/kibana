@@ -206,6 +206,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             userIdentifierValue: mockServiceNowOAuth.config.userIdentifierValue,
           },
           is_connector_type_deprecated: false,
+          auth_mode: 'shared',
         });
       });
 
