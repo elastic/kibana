@@ -7,6 +7,7 @@
 
 import type { RetrieverContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
@@ -52,6 +53,7 @@ export interface SearchIndicesAppPluginStartDependencies {
   sampleDataIngest?: SampleDataIngestPluginStart;
   indexManagement: IndexManagementPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
+  cloudConnect?: CloudConnectedPluginStart;
 }
 
 export interface SearchIndicesServicesContextDeps {
