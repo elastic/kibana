@@ -8,9 +8,8 @@
  */
 
 import type { Condition, StreamlangDSL } from '@kbn/streamlang';
-import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
-import { ClassicStream } from '@kbn/streams-schema/src/models/ingest/classic';
+import type { IngestStream, IngestUpsertRequest } from '@kbn/streams-schema';
+import { WiredStream, ClassicStream } from '@kbn/streams-schema';
 import type { RoutingStatus } from '@kbn/streams-schema';
 import { omit } from 'lodash';
 import type { KbnClient, ScoutLogger } from '../../../../../../common';

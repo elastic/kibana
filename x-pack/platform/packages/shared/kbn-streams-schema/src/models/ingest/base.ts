@@ -5,13 +5,16 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import type { ModelValidation } from '../validation/model_validation';
-import { modelValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import type { IngestStreamLifecycle } from './lifecycle';
 import { ingestStreamLifecycleSchema } from './lifecycle';
-import { BaseStream } from '../base';
+import {
+  baseStreamDefinitionSchema,
+  baseStreamGetResponseSchema,
+  baseStreamUpsertRequestSchema,
+} from '../base';
+import type { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
 import type { FailureStore } from './failure_store';
@@ -94,32 +97,16 @@ export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertReques
   })
 );
 
-type OmitIngestBaseStreamUpsertProps<
-  T extends {
-    ingest: Omit<IngestBase, 'processing'> & {
-      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
-    };
-  }
-> = Omit<T, 'ingest'> & {
-  ingest: Omit<IngestBase, 'processing'> & {
-    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
-  };
-};
-
-interface IngestBaseStreamDefaults {
-  Definition: z.output<IIngestBaseStreamSchema['Definition']>;
-  Source: z.output<IIngestBaseStreamSchema['Definition']>;
-  GetResponse: {
-    stream: z.output<IIngestBaseStreamSchema['Definition']>;
-  } & z.output<IIngestBaseStreamSchema['GetResponse']>;
-  UpsertRequest: {
-    stream: OmitIngestBaseStreamUpsertProps<{} & z.output<IIngestBaseStreamSchema['Definition']>>;
-  };
-}
-
-/* eslint-disable @typescript-eslint/no-namespace */
 export type IngestStreamIndexMode = 'standard' | 'time_series' | 'logsdb' | 'lookup';
 
+const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
+  'standard',
+  'time_series',
+  'logsdb',
+  'lookup',
+]);
+
+/* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {
   export interface Definition extends BaseStream.Definition {
     ingest: IngestBase;
@@ -148,28 +135,30 @@ export namespace IngestBaseStream {
   }
 }
 
-const ingestStreamIndexModeSchema: z.Schema<IngestStreamIndexMode> = z.enum([
-  'standard',
-  'time_series',
-  'logsdb',
-  'lookup',
-]);
-
-const IngestBaseStreamSchema = {
-  Source: z.object({}),
-  Definition: z.object({
-    ingest: IngestBase.right,
-  }),
-  GetResponse: z.object({
-    privileges: ingestStreamPrivilegesSchema,
-    index_mode: z.optional(ingestStreamIndexModeSchema),
-  }),
-  UpsertRequest: z.object({}),
+type OmitIngestBaseStreamUpsertProps<
+  T extends {
+    ingest: Omit<IngestBase, 'processing'> & {
+      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<IngestBase, 'processing'> & {
+    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
+  };
 };
-type IIngestBaseStreamSchema = typeof IngestBaseStreamSchema;
 
-export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
-  modelValidation<BaseStream.Model, IIngestBaseStreamSchema, IngestBaseStreamDefaults>(
-    BaseStream,
-    IngestBaseStreamSchema
-  );
+export const ingestBaseStreamDefinitionSchema = baseStreamDefinitionSchema.extend({
+  ingest: IngestBase.right,
+});
+
+export const ingestBaseStreamGetResponseSchema = baseStreamGetResponseSchema.extend({
+  stream: ingestBaseStreamDefinitionSchema,
+  privileges: ingestStreamPrivilegesSchema,
+  index_mode: z.optional(ingestStreamIndexModeSchema),
+});
+
+export const ingestBaseStreamUpsertRequestSchema = baseStreamUpsertRequestSchema.extend({
+  stream: baseStreamDefinitionSchema
+    .omit({ name: true, updated_at: true })
+    .extend({ ingest: IngestBaseUpsertRequest.right }),
+});
