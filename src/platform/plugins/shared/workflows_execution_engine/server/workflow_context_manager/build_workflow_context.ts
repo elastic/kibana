@@ -11,8 +11,8 @@ import type { CoreStart } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowContext } from '@kbn/workflows';
 import {
   applyInputDefaults,
-  normalizeInputsToJsonSchema,
-} from '@kbn/workflows/spec/lib/input_conversion';
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { ContextDependencies } from './types';
 import { buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
 
@@ -28,7 +28,7 @@ export function buildWorkflowContext(
     workflowExecution.workflowId,
     workflowExecution.id
   );
-  const normalizedInputsSchema = normalizeInputsToJsonSchema(
+  const normalizedInputsSchema = normalizeFieldsToJsonSchema(
     workflowExecution.workflowDefinition.inputs
   );
 

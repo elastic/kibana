@@ -8,7 +8,7 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
-import { resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
+import { resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
 import { z } from '@kbn/zod/v4';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
@@ -114,10 +114,10 @@ export function convertJsonSchemaToZodWithRefs(
 }
 
 /**
- * Builds a Zod validator for workflow inputs from a normalized JSON Schema (object with properties, required, etc.).
- * Handles required/optional, defaults, and $ref resolution. Use after normalizeInputsToJsonSchema when validating input payloads.
+ * Builds a Zod validator for workflow fields (inputs or outputs) from a normalized JSON Schema (object with properties, required, etc.).
+ * Handles required/optional, defaults, and $ref resolution. Use after normalizeFieldsToJsonSchema when validating field payloads.
  */
-export function buildInputsZodValidator(
+export function buildFieldsZodValidator(
   schema: RootSchemaType | null | undefined
 ): z.ZodType<Record<string, unknown>> {
   if (!schema?.properties || typeof schema.properties !== 'object') {

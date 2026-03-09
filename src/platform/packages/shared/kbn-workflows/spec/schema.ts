@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
+import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { timezoneNames } from './schema/triggers/timezone_names';
 
@@ -678,7 +678,7 @@ const WorkflowSchemaBase = z.object({
       z.array(WorkflowInputSchema),
     ])
     .optional(),
-  outputs: z.array(WorkflowOutputSchema).optional(),
+  outputs: z.union([JsonModelSchema, z.array(WorkflowOutputSchema)]).optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
@@ -696,17 +696,31 @@ export const WorkflowSchema = WorkflowSchemaBase.extend({
     ) {
       normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
     } else if (Array.isArray(data.inputs)) {
-      normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+      normalizedInputs = convertLegacyFieldsToJsonSchema(data.inputs);
     }
   }
 
-  // Return the data with normalized inputs, preserving all other fields as-is
+  let normalizedOutputs: z.infer<typeof JsonModelSchema> | undefined;
+  if (data.outputs) {
+    if (
+      'properties' in data.outputs &&
+      typeof data.outputs === 'object' &&
+      !Array.isArray(data.outputs)
+    ) {
+      normalizedOutputs = data.outputs as z.infer<typeof JsonModelSchema>;
+    } else if (Array.isArray(data.outputs)) {
+      normalizedOutputs = convertLegacyFieldsToJsonSchema(data.outputs);
+    }
+  }
+
+  // Return the data with normalized inputs and outputs, preserving all other fields as-is
   // This preserves the optionality of fields since we're not explicitly listing them all
-  // Exclude inputs from spread to ensure it's always the normalized JSON Schema format (or undefined)
-  const { inputs: _, ...rest } = data;
+  // Exclude inputs and outputs from spread to ensure they're always the normalized JSON Schema format (or undefined)
+  const { inputs: _, outputs: __, ...rest } = data;
   return {
     ...rest,
     ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+    ...(normalizedOutputs !== undefined && { outputs: normalizedOutputs }),
   };
 });
 
@@ -747,7 +761,20 @@ const WorkflowSchemaForAutocompleteBase = z
       ])
       .optional()
       .catch(undefined),
-    outputs: z.array(WorkflowOutputSchema).optional().catch(undefined),
+    outputs: z
+      .union([
+        JsonModelSchema,
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
+      .optional()
+      .catch(undefined),
     consts: WorkflowConstsSchema.optional(),
     steps: z
       .array(

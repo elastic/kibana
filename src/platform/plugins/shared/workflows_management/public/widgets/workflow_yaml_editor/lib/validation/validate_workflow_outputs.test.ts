@@ -8,9 +8,68 @@
  */
 
 import type { WorkflowOutput } from '@kbn/workflows';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { validateWorkflowOutputs } from './validate_workflow_outputs';
 
 describe('validateWorkflowOutputs', () => {
+  describe('JSON Schema format outputs', () => {
+    it('should detect missing required field and wrong type', () => {
+      const jsonSchemaOutputs: JsonModelSchemaType = {
+        required: ['b'],
+        properties: {
+          a: { type: 'string', default: 'aaaa' },
+          b: { type: 'number' },
+        },
+      };
+
+      const result = validateWorkflowOutputs({ a: {} }, jsonSchemaOutputs);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.length).toBeGreaterThanOrEqual(1);
+      // Should catch wrong type for 'a' (object instead of string) and/or missing required 'b'
+      const errorNames = result.errors.map((e) => e.outputName);
+      expect(errorNames).toContain('b');
+    });
+
+    it('should detect wrong type for field with default', () => {
+      const jsonSchemaOutputs: JsonModelSchemaType = {
+        properties: {
+          a: { type: 'string', default: 'aaaa' },
+        },
+      };
+
+      const result = validateWorkflowOutputs({ a: {} }, jsonSchemaOutputs);
+      expect(result.isValid).toBe(false);
+      expect(result.errors[0].outputName).toBe('a');
+    });
+
+    it('should detect missing required field when not provided', () => {
+      const jsonSchemaOutputs: JsonModelSchemaType = {
+        required: ['b'],
+        properties: {
+          a: { type: 'string' },
+          b: { type: 'number' },
+        },
+      };
+
+      const result = validateWorkflowOutputs({ a: 'hello' }, jsonSchemaOutputs);
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some((e) => e.outputName === 'b')).toBe(true);
+    });
+
+    it('should pass when all required fields are provided with correct types', () => {
+      const jsonSchemaOutputs: JsonModelSchemaType = {
+        required: ['b'],
+        properties: {
+          a: { type: 'string' },
+          b: { type: 'number' },
+        },
+      };
+
+      const result = validateWorkflowOutputs({ a: 'hello', b: 42 }, jsonSchemaOutputs);
+      expect(result.isValid).toBe(true);
+    });
+  });
+
   describe('when target workflow has no outputs', () => {
     it('should return valid for any outputs or no outputs', () => {
       expect(validateWorkflowOutputs({}, undefined).isValid).toBe(true);

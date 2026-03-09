@@ -74,7 +74,6 @@ export function useMonacoMarkersChangedInterceptor({
       const errors: YamlValidationResult[] = [];
       for (const marker of markers) {
         if (!isYamlValidationMarkerOwner(owner)) {
-          // console.log('skipping marker for unknown owner', owner);
           // eslint-disable-next-line no-continue
           continue;
         }
@@ -98,9 +97,7 @@ export function useMonacoMarkersChangedInterceptor({
       };
       setValidationErrors(errorsUpdater);
     },
-    // the yamlDocumentRef is not needed here because it's a ref object and not a dependency
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [workflowYamlSchema]
+    []
   );
 
   return {

@@ -9,7 +9,11 @@
 
 import type { ToStringOptions } from 'yaml';
 import { stringify } from 'yaml';
-import type { BuiltInStepType, WorkflowOutput } from '@kbn/workflows';
+import type { BuiltInStepType } from '@kbn/workflows';
+import {
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 
 interface GenerateBuiltInStepSnippetOptions {
   full?: boolean;
@@ -28,7 +32,7 @@ interface GenerateBuiltInStepSnippetOptions {
 export function generateBuiltInStepSnippet(
   stepType: BuiltInStepType,
   { full, withStepsSection }: GenerateBuiltInStepSnippetOptions = {},
-  workflowOutputs?: WorkflowOutput[]
+  workflowOutputs?: NormalizableFieldSchema
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -89,11 +93,16 @@ export function generateBuiltInStepSnippet(
       break;
     case 'workflow.output': {
       const withBlock: Record<string, string> = {};
-      if (workflowOutputs && workflowOutputs.length > 0) {
-        workflowOutputs.forEach((output) => {
-          const placeholder = output.type === 'string' ? '"${1:value}"' : '${1:value}';
-          withBlock[output.name] = placeholder;
-        });
+      const normalized = normalizeFieldsToJsonSchema(workflowOutputs);
+      if (normalized?.properties && Object.keys(normalized.properties).length > 0) {
+        for (const [name, propSchema] of Object.entries(normalized.properties)) {
+          const type =
+            propSchema && typeof propSchema === 'object' && 'type' in propSchema
+              ? (propSchema as { type?: string }).type
+              : undefined;
+          const placeholder = type === 'string' ? '"${1:value}"' : '${1:value}';
+          withBlock[name] = placeholder;
+        }
       } else {
         withBlock.output_name = '${1:value}';
       }

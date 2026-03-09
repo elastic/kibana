@@ -10,7 +10,10 @@
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
 import type { Document, Node, YAMLMap, YAMLSeq } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import type { WorkflowOutput } from '@kbn/workflows';
+import {
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { validateWorkflowFields } from '../../../widgets/workflow_yaml_editor/lib/validation/validate_workflow_fields';
 import type { YamlValidationResult } from '../model/types';
@@ -19,6 +22,8 @@ interface WorkflowOutputStepItem {
   id: string;
   yamlNode: Node;
   withNode: Node | null;
+  /** Key node of the 'with' pair (for underlining only the "with:" line when required field is missing) */
+  withKeyNode: Node | null;
   withValues: Record<string, unknown>;
   model: monaco.editor.ITextModel;
 }
@@ -57,8 +62,12 @@ function collectWorkflowOutputStepFromNode(
   let withNode: Node | null = null;
   const withValues: Record<string, unknown> = {};
 
+  let withKeyNode: Node | null = null;
   if (withPair && isPair(withPair)) {
     withNode = withPair.value as Node;
+    if (isScalar(withPair.key)) {
+      withKeyNode = withPair.key;
+    }
 
     if (isMap(withPair.value)) {
       withPair.value.items.forEach((item) => {
@@ -89,6 +98,7 @@ function collectWorkflowOutputStepFromNode(
     id: stepId,
     yamlNode: stepNode,
     withNode,
+    withKeyNode,
     withValues,
     model,
   });
@@ -141,24 +151,48 @@ function collectWorkflowOutputSteps(
 }
 
 /**
+ * Reads the outputs section from the raw YAML document as a plain object.
+ * Used when workflowDefinition.outputs is missing (e.g. schema parse stripped it).
+ */
+function getOutputsFromYamlDocument(yamlDocument: Document): NormalizableFieldSchema | undefined {
+  const outputsNode = yamlDocument.get('outputs', true);
+  if (outputsNode == null) return undefined;
+  const plain =
+    typeof (outputsNode as Node).toJSON === 'function'
+      ? (outputsNode as Node).toJSON()
+      : outputsNode;
+  if (
+    plain &&
+    typeof plain === 'object' &&
+    !Array.isArray(plain) &&
+    'properties' in plain &&
+    typeof (plain as Record<string, unknown>).properties === 'object'
+  ) {
+    return plain as NormalizableFieldSchema;
+  }
+  return undefined;
+}
+
+/**
  * Validates workflow.output steps against the workflow's declared outputs
  */
 export function validateWorkflowOutputsInYaml(
   yamlDocument: Document,
   model: monaco.editor.ITextModel,
-  workflowOutputs: WorkflowOutput[] | undefined
+  workflowOutputs: NormalizableFieldSchema | undefined
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
-  if (!workflowOutputs || workflowOutputs.length === 0) {
-    // No outputs declared, no validation needed
+  const outputsSchema = workflowOutputs ?? getOutputsFromYamlDocument(yamlDocument);
+  const normalized = normalizeFieldsToJsonSchema(outputsSchema);
+  if (!normalized?.properties || Object.keys(normalized.properties).length === 0) {
     return results;
   }
 
   const outputSteps = collectWorkflowOutputSteps(yamlDocument, model);
 
   for (const outputStep of outputSteps) {
-    const validation = validateWorkflowFields(outputStep.withValues, workflowOutputs, 'output');
+    const validation = validateWorkflowFields(outputStep.withValues, outputsSchema, 'output');
 
     if (!validation.isValid) {
       for (const error of validation.errors) {
@@ -166,16 +200,14 @@ export function validateWorkflowOutputsInYaml(
           ? findFieldNodeInWith(outputStep.withNode, error.fieldName)
           : outputStep.withNode;
 
-        const range = errorNode
-          ? getMonacoRangeFromYamlNode(model, errorNode)
-          : outputStep.yamlNode.range
-          ? {
-              startLineNumber: model.getPositionAt(outputStep.yamlNode.range[0]).lineNumber,
-              startColumn: model.getPositionAt(outputStep.yamlNode.range[0]).column,
-              endLineNumber: model.getPositionAt(outputStep.yamlNode.range[2]).lineNumber,
-              endColumn: model.getPositionAt(outputStep.yamlNode.range[2]).column,
-            }
-          : null;
+        let range: ReturnType<typeof getMonacoRangeFromYamlNode> = null;
+        if (errorNode) {
+          range = getMonacoRangeFromYamlNode(model, errorNode);
+        } else if (error.fieldName && outputStep.withKeyNode?.range) {
+          range = getMonacoRangeFromYamlNode(model, outputStep.withKeyNode);
+        } else if (outputStep.yamlNode.range) {
+          range = getMonacoRangeFromYamlNode(model, outputStep.yamlNode);
+        }
 
         if (range) {
           // Prefix field name to the error message for clarity

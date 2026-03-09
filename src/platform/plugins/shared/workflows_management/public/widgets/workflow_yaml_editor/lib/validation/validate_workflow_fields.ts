@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyWorkflowInput, WorkflowOutput } from '@kbn/workflows';
-import { buildZodSchemaFromFields } from '@kbn/workflows';
-
-// Union type for fields that can be inputs or outputs
-type WorkflowField = LegacyWorkflowInput | WorkflowOutput;
+import {
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
+import { z } from '@kbn/zod/v4';
+import { buildFieldsZodValidator } from '../../../../../common/lib/json_schema_to_zod';
 
 // Generic interface for validation errors
 export interface WorkflowFieldValidationError {
@@ -21,10 +22,14 @@ export interface WorkflowFieldValidationError {
 
 /**
  * Creates a Zod validator for workflow fields (inputs or outputs).
- * Uses shared buildZodSchemaFromFields from @kbn/workflows.
+ * Supports both legacy array format and JSON Schema format.
  */
-export function makeWorkflowFieldsValidator(fields: WorkflowField[]) {
-  return buildZodSchemaFromFields(fields, { optionalIfNotRequired: true });
+export function makeWorkflowFieldsValidator(fields: NormalizableFieldSchema) {
+  const normalized = normalizeFieldsToJsonSchema(fields);
+  if (normalized?.properties && Object.keys(normalized.properties).length > 0) {
+    return buildFieldsZodValidator(normalized);
+  }
+  return z.object({}) as z.ZodObject<Record<string, z.ZodType>>;
 }
 
 /**
@@ -35,28 +40,29 @@ export function makeWorkflowFieldsValidator(fields: WorkflowField[]) {
  */
 export function validateWorkflowFields(
   values: Record<string, unknown> | undefined,
-  targetFields: WorkflowField[] | undefined,
+  targetFields: NormalizableFieldSchema | undefined,
   fieldKind: 'input' | 'output'
 ): { isValid: boolean; errors: WorkflowFieldValidationError[] } {
   const fieldKindPlural = fieldKind === 'input' ? 'inputs' : 'outputs';
 
-  if (!targetFields || targetFields.length === 0) {
-    // No fields required, so any values (or none) are valid
+  if (!targetFields) {
+    return { isValid: true, errors: [] };
+  }
+
+  const normalized = normalizeFieldsToJsonSchema(targetFields);
+  if (!normalized?.properties || Object.keys(normalized.properties).length === 0) {
     return { isValid: true, errors: [] };
   }
 
   if (!values) {
-    // Check if any fields are required
-    const requiredFields = targetFields.filter((field) => field.required);
+    const requiredFields = normalized.required || [];
     if (requiredFields.length > 0) {
       return {
         isValid: false,
         errors: [
           {
             fieldName: '',
-            message: `Missing required ${fieldKindPlural}: ${requiredFields
-              .map((f) => f.name)
-              .join(', ')}`,
+            message: `Missing required ${fieldKindPlural}: ${requiredFields.join(', ')}`,
           },
         ],
       };
@@ -75,19 +81,19 @@ export function validateWorkflowFields(
       // Remove "Invalid input: " prefix if present (Zod's default prefix)
       message = message.replace(/^Invalid input:\s*/, '');
 
-      const fieldDef = targetFields.find((f) => f.name === fieldName);
+      const fieldSchema = normalized.properties?.[fieldName];
+      const isRequired = normalized.required?.includes(fieldName) ?? false;
+      const fieldType =
+        fieldSchema && typeof fieldSchema === 'object' && 'type' in fieldSchema
+          ? (fieldSchema as { type?: string }).type
+          : undefined;
 
-      if (
-        issue.code === 'invalid_type' &&
-        message.includes('received undefined') &&
-        fieldDef?.required
-      ) {
+      if (issue.code === 'invalid_type' && message.includes('received undefined') && isRequired) {
         message = 'this field is required';
       } else if (issue.code === 'invalid_union') {
-        if (fieldDef?.type === 'array' && values) {
+        if (fieldType === 'array' && values) {
           const receivedValue = values[fieldName];
           if (receivedValue !== undefined) {
-            // Determine the actual type of the received value
             const receivedType =
               receivedValue === null
                 ? 'null'

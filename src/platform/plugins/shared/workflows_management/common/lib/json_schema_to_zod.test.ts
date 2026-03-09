@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import {
-  buildInputsZodValidator,
+  buildFieldsZodValidator,
   convertJsonSchemaToZod,
   convertJsonSchemaToZodWithRefs,
 } from './json_schema_to_zod';
@@ -384,11 +384,11 @@ describe('convertJsonSchemaToZodWithRefs', () => {
   });
 });
 
-describe('buildInputsZodValidator', () => {
+describe('buildFieldsZodValidator', () => {
   it('should return empty object schema when schema has no properties', () => {
-    const validator = buildInputsZodValidator(null);
+    const validator = buildFieldsZodValidator(null);
     expect(validator.parse({})).toEqual({});
-    const validator2 = buildInputsZodValidator({});
+    const validator2 = buildFieldsZodValidator({});
     expect(validator2.parse({})).toEqual({});
   });
 
@@ -400,8 +400,8 @@ describe('buildInputsZodValidator', () => {
         age: { type: 'number' },
       },
       required: ['name'],
-    } as Parameters<typeof buildInputsZodValidator>[0];
-    const validator = buildInputsZodValidator(schema);
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
     expect(validator.parse({ name: 'Alice' })).toEqual({ name: 'Alice' });
     expect(validator.parse({ name: 'Bob', age: 30 })).toEqual({ name: 'Bob', age: 30 });
     expect(validator.safeParse({ age: 30 }).success).toBe(false);
@@ -414,8 +414,8 @@ describe('buildInputsZodValidator', () => {
         name: { type: 'string', default: 'unknown' },
         count: { type: 'number', default: 0 },
       },
-    } as Parameters<typeof buildInputsZodValidator>[0];
-    const validator = buildInputsZodValidator(schema);
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
     const result = validator.parse({}) as { name: string; count: number };
     expect(result.name).toBe('unknown');
     expect(result.count).toBe(0);
@@ -427,8 +427,8 @@ describe('buildInputsZodValidator', () => {
       properties: {
         enabled: { type: 'boolean' },
       },
-    } as Parameters<typeof buildInputsZodValidator>[0];
-    const validator = buildInputsZodValidator(schema);
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
     expect(validator.safeParse({ enabled: 'yes' }).success).toBe(false);
     expect(validator.safeParse({ enabled: true }).success).toBe(true);
   });

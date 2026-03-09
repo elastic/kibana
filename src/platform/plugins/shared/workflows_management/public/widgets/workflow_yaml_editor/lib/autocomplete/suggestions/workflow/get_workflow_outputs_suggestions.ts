@@ -10,7 +10,7 @@
 import { isMap, isPair, isScalar, isSeq } from 'yaml';
 import type { Document, YAMLSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { WorkflowOutput } from '@kbn/workflows';
+import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 /**
@@ -20,20 +20,23 @@ import type { AutocompleteContext } from '../../context/autocomplete.types';
 const MAX_STEP_DISTANCE = 100;
 
 function createOutputSuggestion(
-  output: WorkflowOutput,
+  name: string,
+  schema: { type?: string; description?: string; enum?: string[] },
+  isRequired: boolean,
   range: monaco.IRange
 ): monaco.languages.CompletionItem {
-  const outputValuePlaceholder = output.type === 'string' ? '"${1:value}"' : '${1:value}';
+  const type = schema.type || 'string';
+  const outputValuePlaceholder = type === 'string' ? '"${1:value}"' : '${1:value}';
 
   return {
-    label: output.name,
+    label: name,
     kind: monaco.languages.CompletionItemKind.Property,
-    insertText: `${output.name}: ${outputValuePlaceholder}`,
+    insertText: `${name}: ${outputValuePlaceholder}`,
     insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     range,
-    documentation: output.description || `${output.type} output`,
-    detail: `${output.type}${output.required ? ' (required)' : ' (optional)'}`,
-    preselect: output.required,
+    documentation: schema.description || `${type} output`,
+    detail: `${type}${isRequired ? ' (required)' : ' (optional)'}`,
+    preselect: isRequired,
   };
 }
 
@@ -208,8 +211,10 @@ export async function getWorkflowOutputsSuggestions(
     return [];
   }
 
-  const declaredOutputs = workflowDefinition?.outputs;
-  if (!declaredOutputs || declaredOutputs.length === 0) {
+  const rawOutputs = workflowDefinition?.outputs;
+  const normalizedOutputs = normalizeFieldsToJsonSchema(rawOutputs);
+
+  if (!normalizedOutputs?.properties || Object.keys(normalizedOutputs.properties).length === 0) {
     return [];
   }
 
@@ -246,9 +251,17 @@ export async function getWorkflowOutputsSuggestions(
 
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  for (const output of declaredOutputs) {
-    if (!existingKeys.has(output.name)) {
-      suggestions.push(createOutputSuggestion(output, range));
+  for (const [name, propSchema] of Object.entries(normalizedOutputs.properties)) {
+    if (!existingKeys.has(name) && propSchema && typeof propSchema === 'object') {
+      const isRequired = normalizedOutputs.required?.includes(name) ?? false;
+      suggestions.push(
+        createOutputSuggestion(
+          name,
+          propSchema as { type?: string; description?: string; enum?: string[] },
+          isRequired,
+          range
+        )
+      );
     }
   }
 

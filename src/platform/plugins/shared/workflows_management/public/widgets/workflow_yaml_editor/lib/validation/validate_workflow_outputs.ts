@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowOutput } from '@kbn/workflows';
+import type { NormalizableFieldSchema } from '@kbn/workflows/spec/lib/field_conversion';
 import { makeWorkflowFieldsValidator, validateWorkflowFields } from './validate_workflow_fields';
 
 /**
  * Creates a Zod validator for workflow outputs
  * Delegates to shared field validator
  */
-export function makeWorkflowOutputsValidator(outputs: WorkflowOutput[]) {
+export function makeWorkflowOutputsValidator(outputs: NormalizableFieldSchema) {
   return makeWorkflowFieldsValidator(outputs);
 }
 
@@ -29,7 +29,7 @@ export interface WorkflowOutputValidationError {
  */
 export function validateWorkflowOutputs(
   outputs: Record<string, unknown> | undefined,
-  targetWorkflowOutputs: WorkflowOutput[] | undefined
+  targetWorkflowOutputs: NormalizableFieldSchema | undefined
 ): { isValid: boolean; errors: WorkflowOutputValidationError[] } {
   const result = validateWorkflowFields(outputs, targetWorkflowOutputs, 'output');
 

@@ -8,17 +8,19 @@
  */
 
 import type { Document } from 'yaml';
-import type { WorkflowOutput, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import {
   AlertEventPropsSchema,
   BaseEventSchema,
-  buildZodSchemaFromFields,
   DynamicWorkflowContextSchema,
   isTriggerType,
 } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import {
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import { z } from '@kbn/zod/v4';
-import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
+import { buildFieldsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { inferZodType } from '../../../../common/lib/zod';
 import { triggerSchemas } from '../../../trigger_schemas';
 
@@ -63,13 +65,12 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
   return eventSchema.optional();
 }
 
-function buildOutputsSchema(
-  outputs: WorkflowOutput[] | undefined
-): z.ZodObject<Record<string, z.ZodType>> {
-  if (!outputs?.length) {
+function buildOutputsSchema(outputs?: NormalizableFieldSchema): z.ZodType<Record<string, unknown>> {
+  const normalized = normalizeFieldsToJsonSchema(outputs);
+  if (!normalized?.properties || Object.keys(normalized.properties).length === 0) {
     return z.object({});
   }
-  return buildZodSchemaFromFields(outputs, { optionalIfNotRequired: false });
+  return buildFieldsZodValidator(normalized);
 }
 
 export function getWorkflowContextSchema(
@@ -89,11 +90,23 @@ export function getWorkflowContextSchema(
     }
   }
 
+  // If outputs is undefined, try to extract it from the YAML document
+  let outputs = definition.outputs;
+  if (outputs === undefined && yamlDocument) {
+    try {
+      const yamlJson = yamlDocument.toJSON();
+      if (yamlJson && typeof yamlJson === 'object' && 'outputs' in yamlJson) {
+        outputs = (yamlJson as Record<string, unknown>).outputs as typeof outputs;
+      }
+    } catch (e) {
+      // Ignore errors when extracting from YAML
+    }
+  }
+
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
   // This handles both array (legacy) and object (new) formats
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs as any);
-  const inputsSchema = buildInputsZodValidator(normalizedInputs);
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputs as NormalizableFieldSchema);
+  const inputsSchema = buildFieldsZodValidator(normalizedInputs);
 
   const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
@@ -101,10 +114,10 @@ export function getWorkflowContextSchema(
   // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
   // The merge() method requires both schemas to have the same base structure.
   // Cast to typeof DynamicWorkflowContextSchema because inputsSchema is ZodType<Record<string, unknown>>
-  // (from buildInputsZodValidator) while the base schema expects ZodObject; runtime shape is compatible.
+  // (from buildFieldsZodValidator) while the base schema expects ZodObject; runtime shape is compatible.
   return DynamicWorkflowContextSchema.extend({
     inputs: inputsSchema,
-    output: buildOutputsSchema(definition.outputs as WorkflowOutput[] | undefined),
+    output: buildOutputsSchema(outputs),
     // transform an object of consts to an object
     // with the const name as the key and inferred type as the value
     consts: z.object({

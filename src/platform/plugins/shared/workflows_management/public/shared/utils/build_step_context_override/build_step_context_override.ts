@@ -19,8 +19,8 @@ import {
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import {
   applyInputDefaults,
-  normalizeInputsToJsonSchema,
-} from '@kbn/workflows/spec/lib/input_conversion';
+  normalizeFieldsToJsonSchema,
+} from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { z } from '@kbn/zod/v4';
 
@@ -85,7 +85,7 @@ function buildInputsFromDefinition(
   }
 
   // Normalize inputs to JSON Schema format (handles both legacy array and JSON Schema formats)
-  const normalizedInputs = normalizeInputsToJsonSchema(inputsDefinition);
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputsDefinition);
 
   if (!normalizedInputs) {
     return undefined;

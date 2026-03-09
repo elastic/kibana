@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowOutput, WorkflowOutputStep } from '@kbn/workflows';
-import { buildZodSchemaFromFields, ExecutionStatus } from '@kbn/workflows';
+import type { JSONSchema7 } from 'json-schema';
+import type { WorkflowOutputStep } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowOutputGraphNode } from '@kbn/workflows/graph';
+import {
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+  resolveRef,
+} from '@kbn/workflows/spec/lib/field_conversion';
+import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
@@ -111,15 +119,30 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     try {
       // Get the workflow definition to check for declared outputs
       const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
-      const declaredOutputs = workflowExecution.workflowDefinition?.outputs as
-        | WorkflowOutput[]
-        | undefined;
+      const declaredOutputs = workflowExecution.workflowDefinition?.outputs;
 
-      // Validate outputs against declared schema if it exists
-      if (declaredOutputs && declaredOutputs.length > 0) {
-        const validator = buildZodSchemaFromFields(declaredOutputs, {
-          optionalIfNotRequired: true,
-        });
+      const normalizedOutputs = normalizeFieldsToJsonSchema(
+        declaredOutputs as NormalizableFieldSchema
+      );
+
+      if (normalizedOutputs?.properties && Object.keys(normalizedOutputs.properties).length > 0) {
+        const shape: Record<string, z.ZodType> = {};
+        for (const [propName, propSchema] of Object.entries(normalizedOutputs.properties)) {
+          if (propSchema && typeof propSchema === 'object') {
+            const jsonSchema = propSchema as JSONSchema7;
+            const resolvedSchema = jsonSchema.$ref
+              ? resolveRef(jsonSchema.$ref, normalizedOutputs) || jsonSchema
+              : jsonSchema;
+            let zodSchema: z.ZodType =
+              fromJSONSchema(resolvedSchema as Record<string, unknown>) ?? z.any();
+            const isRequired = normalizedOutputs.required?.includes(propName) ?? false;
+            if (!isRequired) {
+              zodSchema = zodSchema.optional();
+            }
+            shape[propName] = zodSchema;
+          }
+        }
+        const validator = z.object(shape);
         const validationResult = validator.safeParse(outputValues);
 
         if (!validationResult.success) {
