@@ -48,6 +48,7 @@ const SKILL_SELECTION_SCHEMA = schema.arrayOf(
           meta: { description: 'Skill ID to be available to the agent.' },
         }),
         {
+          maxSize: 100,
           meta: { description: 'Array of skill IDs. Use "*" to select all built-in skills.' },
         }
       ),
@@ -55,7 +56,8 @@ const SKILL_SELECTION_SCHEMA = schema.arrayOf(
     {
       meta: { description: 'Skill selection configuration for the agent.' },
     }
-  )
+  ),
+  { maxSize: 100 }
 );
 
 const VISIBILITY_DISABLED_MESSAGE =
