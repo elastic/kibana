@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCard,
   EuiCopy,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -26,6 +27,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiPageTemplate,
   EuiPopover,
   EuiSelectable,
@@ -1523,52 +1525,67 @@ export const IngestHubPage: React.FC = () => {
         </div>
 
         <div style={{ height: 80 }} />
-      </div>
-      <div style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
-        <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="observabilityOnboardingRenderGetStartedViewManageYourDeploymentButton"
-              size="s"
-              iconType="managementApp"
-              href="#"
-              target="_blank"
-            >
-              Manage your deployment
-            </EuiButtonEmpty>
+
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="observabilityOnboardingGetStartedDemoEnvironmentCard"
+              icon={<EuiIcon type="desktop" size="l" color="primary" />}
+              title="Demo environment"
+              description="Explore our live demo environment"
+              hasBorder
+              footer={
+                <EuiLink href="https://demo.elastic.co" target="_blank" external>
+                  Explore demo
+                </EuiLink>
+              }
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="observabilityOnboardingRenderGetStartedViewBrowseDocsButton"
-              size="s"
-              iconType="documentation"
-              href="https://www.elastic.co/docs/solutions/observability"
-              target="_blank"
-            >
-              Browse docs
-            </EuiButtonEmpty>
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="observabilityOnboardingGetStartedExploreForumCard"
+              icon={<EuiIcon type="discuss" size="l" color="primary" />}
+              title="Explore forum"
+              description="Exchange thoughts about Elastic"
+              hasBorder
+              footer={
+                <EuiLink href="https://discuss.elastic.co" target="_blank" external>
+                  Discuss forum
+                </EuiLink>
+              }
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="observabilityOnboardingRenderGetStartedViewJoinTheSlackButton"
-              size="s"
-              iconType="users"
-              href="https://ela.st/slack"
-              target="_blank"
-            >
-              Join the Slack
-            </EuiButtonEmpty>
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="observabilityOnboardingGetStartedBrowseDocumentationCard"
+              icon={<EuiIcon type="documentation" size="l" color="primary" />}
+              title="Browse documentation"
+              description="In-depth guides on all Elastic features"
+              hasBorder
+              footer={
+                <EuiLink
+                  href="https://www.elastic.co/docs/solutions/observability"
+                  target="_blank"
+                  external
+                >
+                  Learn more
+                </EuiLink>
+              }
+            />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="observabilityOnboardingRenderGetStartedViewOptIntoUserResearchButton"
-              size="s"
-              iconType="userAvatar"
-              href="#"
-              target="_blank"
-            >
-              Opt into user research
-            </EuiButtonEmpty>
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="observabilityOnboardingGetStartedSupportHubCard"
+              icon={<EuiIcon type="help" size="l" color="primary" />}
+              title="Support Hub"
+              description="Get help by opening a case or checking our articles"
+              hasBorder
+              footer={
+                <EuiLink href="https://support.elastic.co" target="_blank" external>
+                  Open Support Hub
+                </EuiLink>
+              }
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <div style={{ height: 40 }} />
