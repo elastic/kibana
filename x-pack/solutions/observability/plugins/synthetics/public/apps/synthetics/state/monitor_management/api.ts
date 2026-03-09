@@ -72,6 +72,17 @@ export const fetchProjectAPIKey = async (
   });
 };
 
+export const resetMonitorAPI = async ({
+  id,
+  force = false,
+}: {
+  id: string;
+  force?: boolean;
+}): Promise<{ id: string; reset: boolean } | ServiceLocationErrorsResponse> => {
+  const url = SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_RESET.replace('{monitorId}', id);
+  return await apiService.post(url, undefined, { force });
+};
+
 export const deletePackagePolicy = async (
   packagePolicyId: string
 ): Promise<{
