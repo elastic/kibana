@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Document } from 'yaml';
 import { validateLiquidTemplate as validateLiquidTemplateCommon } from '../../../../common/lib/validate_liquid_template';
 import type { YamlValidationResult } from '../model/types';
 
-export function validateLiquidTemplate(yamlString: string): YamlValidationResult[] {
-  const errors = validateLiquidTemplateCommon(yamlString);
+export function validateLiquidTemplate(
+  yamlString: string,
+  yamlDocument: Document
+): YamlValidationResult[] {
+  const errors = validateLiquidTemplateCommon(yamlString, yamlDocument);
 
   return errors.map((error) => ({
     id: `liquid-template-${error.startLine}-${error.startColumn}-${error.endLine}-${error.endColumn}`,
