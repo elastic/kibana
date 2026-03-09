@@ -12,10 +12,10 @@ import {
   SIGNIFICANT_EVENT_TYPE_RESOURCE_HEALTH,
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from '@kbn/streams-ai/src/significant_events/types';
-import type { Evaluator } from '@kbn/evals/src/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { selectEvaluators } from '@kbn/evals/src/evaluators/filter';
-import type { EvaluationCriterion } from '@kbn/evals/src/evaluators/criteria';
+import { selectEvaluators } from '@kbn/evals';
+import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
 import { createScenarioCriteriaLlmEvaluator } from './scenario_criteria_llm_evaluator';
 
 const ALLOWED_CATEGORIES = [
@@ -26,14 +26,39 @@ const ALLOWED_CATEGORIES = [
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 ];
 
+interface QueryGenerationEvaluationExample {
+  input: { sample_logs: string[] } & Record<string, unknown>;
+  output: Record<string, unknown>;
+  metadata: Record<string, unknown> | null;
+}
+
+interface Query {
+  esql: string;
+  title: string;
+  category: SignificantEventType;
+  severity_score: number;
+  evidence?: string[];
+}
+
+interface QueryGenerationTaskOutput {
+  queries: Query[];
+  traceId?: string | null;
+}
+
+type QueryGenerationOutput = Query[] | QueryGenerationTaskOutput;
+
+const getQueriesFromOutput = (output: QueryGenerationOutput): Query[] => {
+  return Array.isArray(output) ? output : output.queries;
+};
+
 const createQueryGenerationCodeEvaluator = (
   esClient: ElasticsearchClient,
   logger?: Logger
-): Evaluator => ({
+): Evaluator<QueryGenerationEvaluationExample, QueryGenerationOutput> => ({
   name: 'query_generation_code_evaluator',
   kind: 'CODE' as const,
   evaluate: async ({ output, input }) => {
-    const queries = Array.isArray(output) ? output : [output];
+    const queries = getQueriesFromOutput(output ?? []);
 
     if (queries.length === 0 || !queries[0] || !queries[0].esql) {
       return {
@@ -59,7 +84,7 @@ const createQueryGenerationCodeEvaluator = (
 
     for (const query of queries) {
       const { esql, category, severity_score, evidence } = query;
-      const { sample_logs } = input;
+      const { sample_logs: sampleLogs } = input;
 
       let isSyntaxValid = false;
       let isExecutionHit = false;
@@ -91,7 +116,7 @@ const createQueryGenerationCodeEvaluator = (
         missingEvidence: [],
       };
       if (evidence && evidence.length > 0) {
-        const allLogs = (sample_logs as string[]).join('\n');
+        const allLogs = sampleLogs.join('\n');
         const missing = evidence.filter((ev: string) => !allLogs.includes(ev));
         if (missing.length > 0) {
           evidenceValidation.allEvidenceFound = false;
@@ -142,9 +167,11 @@ export const createQueryGenerationEvaluators = (
   const { criteriaFn, criteria } = scenarioCriteria;
   return [
     ...base,
-    createScenarioCriteriaLlmEvaluator({
-      criteriaFn,
+    createScenarioCriteriaLlmEvaluator<QueryGenerationEvaluationExample, QueryGenerationOutput>({
+      criteriaFn: (c) =>
+        criteriaFn(c) as Evaluator<QueryGenerationEvaluationExample, QueryGenerationOutput>,
       criteria,
+      transformOutput: (output) => getQueriesFromOutput(output),
     }),
   ];
 };

@@ -252,7 +252,7 @@ export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFi
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }
