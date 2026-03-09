@@ -8,9 +8,29 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 
 export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
 export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
+
+export const METRICS_EXPERIENCE_VIEWER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      {
+        names: [METRICS_TEST_INDEX_NAME, METRICS_TEST_INDEX_PATTERN],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: [
+    {
+      base: ['read'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
 
 export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
   'metricsExperienceFlyoutOverviewTabDimensionItem';
@@ -29,4 +49,5 @@ export const KBN_ARCHIVE =
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
   ...tags.serverless.observability.complete,
+  ...tags.serverless.security.complete,
 ];

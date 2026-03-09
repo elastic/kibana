@@ -15,7 +15,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
+import {
+  spaceTest,
+  testData,
+  DEFAULT_TIME_RANGE,
+  loginAsMetricsViewer,
+} from '../../fixtures/metrics_experience';
 
 spaceTest.describe(
   'Metrics in Discover - Grid',
@@ -29,8 +34,8 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(DEFAULT_TIME_RANGE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginAsViewer();
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, config }) => {
+      await loginAsMetricsViewer(browserAuth, config);
       await pageObjects.discover.goto();
     });
 

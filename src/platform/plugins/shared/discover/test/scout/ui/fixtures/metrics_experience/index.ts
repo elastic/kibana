@@ -11,9 +11,12 @@ import type {
   PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  BrowserAuthFixture,
+  ScoutTestConfig,
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { MetricsExperiencePage } from './page_objects';
+import { METRICS_EXPERIENCE_VIEWER_ROLE } from './constants';
 
 export interface MetricsExperienceTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
@@ -43,6 +46,16 @@ export const spaceTest = spaceBaseTest.extend<
     await use(extendedPageObjects);
   },
 });
+
+export const loginAsMetricsViewer = async (
+  browserAuth: BrowserAuthFixture,
+  config: ScoutTestConfig
+) => {
+  if (config.serverless && config.projectType === 'security') {
+    return browserAuth.loginWithCustomRole(METRICS_EXPERIENCE_VIEWER_ROLE);
+  }
+  return browserAuth.loginAsViewer();
+};
 
 export * as testData from './constants';
 export * from './generators';
