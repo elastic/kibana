@@ -204,11 +204,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await filterBar.hasFilter('extension', 'jpg')).to.be(true);
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('unsaved');
         expect(await unifiedTabs.getTabLabels()).to.eql(['saved', 'unsaved']);
-        expect(await unifiedTabs.getRecentlyClosedTabTitles()).to.eql([
-          'Untitled',
-          'saved',
-          'unsaved',
-        ]);
+        expect(await unifiedTabs.getRecentlyClosedRootTitles()).to.eql(['Untitled', '2 tabs']);
+        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).to.eql(['saved', 'unsaved']);
         expect(await discover.getSavedSearchTitle()).to.be('kql');
         expect(await dataViews.isAdHoc()).to.be(true);
       });
@@ -230,12 +227,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await queryBar.getQueryString()).to.be('');
         expect(await unifiedTabs.getSelectedTabLabel()).to.be('saved');
         expect(await unifiedTabs.getTabLabels()).to.eql(['saved']);
-        expect(await unifiedTabs.getRecentlyClosedTabTitles()).to.eql([
+        expect(await unifiedTabs.getRecentlyClosedRootTitles()).to.eql([
           'unsaved (modified)',
           'Untitled',
-          'saved',
-          'unsaved',
+          '2 tabs',
         ]);
+        expect(await unifiedTabs.getRecentlyClosedGroupTabTitles(0)).to.eql(['saved', 'unsaved']);
         expect(await discover.getSavedSearchTitle()).to.be('kql');
         expect(await dataViews.isAdHoc()).to.be(false);
       });
