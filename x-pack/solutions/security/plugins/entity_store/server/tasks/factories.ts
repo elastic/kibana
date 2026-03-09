@@ -10,11 +10,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { CcsLogsExtractionClient } from '../domain/logs_extraction';
-import { CRUDClient } from '../domain/crud_client';
-import {
-  EngineDescriptorClient,
-  EntityStoreGlobalStateClient,
-} from '../domain/definitions/saved_objects';
+import { CRUDClient } from '../domain/crud';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
