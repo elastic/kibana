@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveLinkInfo } from './resolve_links';
+import { resolveLinkInfo, resolveLinks } from './resolve_links';
 import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
 
@@ -67,5 +67,24 @@ describe('resolveLinkInfo', () => {
       description: 'Dashboard not found',
       error: new Error('Dashboard not found'),
     });
+  });
+});
+
+describe('resolveLinks', () => {
+  it('generates uuids for links wihtout ids', async () => {
+    const links: Link[] = [
+      {
+        type: DASHBOARD_LINK_TYPE,
+        destination: '404',
+      },
+      {
+        id: '2',
+        type: DASHBOARD_LINK_TYPE,
+        destination: '404',
+      },
+    ];
+    const resolvedLinks = await resolveLinks(links);
+    expect(resolvedLinks[0].id).toBeDefined();
+    expect(resolvedLinks[1].id).toEqual('2');
   });
 });
