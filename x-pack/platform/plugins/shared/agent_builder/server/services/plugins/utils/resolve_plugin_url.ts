@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createBadRequestError } from '@kbn/agent-builder-common';
 import { isGithubUrl, parseGithubUrl, getGithubArchiveUrl } from './parse_github_url';
 
 /**
@@ -46,15 +47,15 @@ export const resolvePluginUrl = (
 ): ResolvedPluginUrl => {
   const { githubBaseUrl } = options;
 
-  if (isGithubUrl(url, githubBaseUrl)) {
-    return resolveGithubUrl(url, githubBaseUrl);
-  }
-
   if (looksLikeZipUrl(url)) {
     return { type: 'zip', downloadUrl: url };
   }
 
-  throw new Error(
+  if (isGithubUrl(url, githubBaseUrl)) {
+    return resolveGithubUrl(url, githubBaseUrl);
+  }
+
+  throw createBadRequestError(
     `Unsupported plugin URL: "${url}". Provide a GitHub repository URL or a direct link to a .zip file.`
   );
 };

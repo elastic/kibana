@@ -43,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     let pluginsServer: PluginsTestServer;
     let serverUrl: string;
+    let zipBuffer: Buffer;
     const createdPluginIds: string[] = [];
 
     before(async () => {
@@ -50,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
       pluginsServer = new PluginsTestServer({ port, assetsDir: ASSETS_DIR, log });
       await pluginsServer.start();
       serverUrl = pluginsServer.getUrl();
+      zipBuffer = await createZipBuffer();
     });
 
     after(async () => {
@@ -67,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       pluginsServer.stop();
     });
 
-    const installFromUrl = async (url: string, pluginName?: string) => {
+    const installFromUrl = (url: string, pluginName?: string) => {
       const body: Record<string, string> = { url };
       if (pluginName) {
         body.plugin_name = pluginName;
@@ -79,8 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(body);
     };
 
-    const installFromUpload = async (pluginName?: string) => {
-      const zipBuffer = await createZipBuffer();
+    const installFromUpload = (pluginName?: string) => {
       let req = supertest
         .post('/internal/agent_builder/plugins/upload')
         .set('kbn-xsrf', 'kibana')
@@ -91,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
       return req;
     };
 
-    const deletePlugin = async (pluginId: string) => {
+    const deletePlugin = (pluginId: string) => {
       return supertest
         .delete(`/api/agent_builder/plugins/${pluginId}`)
         .set('kbn-xsrf', 'kibana')

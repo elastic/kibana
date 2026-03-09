@@ -11,7 +11,7 @@ import { createStatefulTestConfig } from '../../api_integration_deployment_agnos
 import { agentBuilderApiServices } from '../../agent_builder/services/api';
 
 export default async (context: FtrConfigProviderContext) => {
-  const pluginsServerPort = await getPort({ port: getPort.makeRange(9300, 9399) });
+  const pluginsServerPort = await getPort({ port: getPort.makeRange(18300, 18399) });
   process.env.PLUGINS_TEST_SERVER_PORT = String(pluginsServerPort);
 
   const configProvider = createStatefulTestConfig({
