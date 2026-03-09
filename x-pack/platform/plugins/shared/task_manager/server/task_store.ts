@@ -310,23 +310,31 @@ export class TaskStore {
   }
 
   private async bulkGetDecryptedTaskApiKeys(
-    ids: string[]
+    taskIds: string[]
   ): Promise<Map<string, string | undefined>> {
-    if (!this.canEncryptSo() || !ids.length) {
+    if (!this.canEncryptSo() || !taskIds.length) {
       return new Map<string, string | undefined>();
     }
 
-    const result = await this.getApiKeys(ids);
+    const result = await this.getApiKeys(taskIds);
 
     // the search doesn't wait for refresh, so may miss a newly created key
-    const idsOfMissingKeys = ids.filter((id) => result.get(id) === undefined);
+    const idsOfMissingKeys = taskIds.filter((id) => result.get(id) === undefined);
 
     if (idsOfMissingKeys.length === 0) return result;
 
     // do a refresh, and get the remaining keys
     this.logger.warn('Refreshing index to get recently created API keys for tasks');
-    await this.esClient.indices.refresh({ index: this.index });
 
+    // refresh; if that fails, return what we currently have
+    try {
+      await this.esClient.indices.refresh({ index: this.index });
+    } catch (e) {
+      this.logger.error(`Error refreshing index ${this.index}: ${e.message}`);
+      return result;
+    }
+
+    // get the missing keys, a log an error if they continue to be missing
     const missingResult = await this.getApiKeys(idsOfMissingKeys);
 
     for (const id of idsOfMissingKeys) {
@@ -341,9 +349,9 @@ export class TaskStore {
     return result;
   }
 
-  private async getApiKeys(ids: string[]) {
+  private async getApiKeys(taskIds: string[]) {
     const kueryNode = nodeBuilder.or(
-      ids.map((id) => {
+      taskIds.map((id) => {
         return nodeBuilder.is(`${TASK_SO_NAME}.id`, `${TASK_SO_NAME}:${id}`);
       })
     );
