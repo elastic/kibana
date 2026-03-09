@@ -45,7 +45,7 @@ export const InputPanel = ({
     };
   }, [setFetchingAutocompleteEntities]);
 
-  if (!currentTextObject) return null;
+  if (!currentTextObject) return <></>;
 
   return (
     <>
