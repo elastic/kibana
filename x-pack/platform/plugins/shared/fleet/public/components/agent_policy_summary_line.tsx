@@ -70,7 +70,7 @@ export const AgentPolicySummaryLine = memo<{
     }
 
     const warnings: Array<{ label: string; description: string }> = [];
-    if (!isOutdated) {
+    if (isOutdated) {
       warnings.push({
         label: i18n.translate('xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning', {
           defaultMessage: 'Outdated policy',

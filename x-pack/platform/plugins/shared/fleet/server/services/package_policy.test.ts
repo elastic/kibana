@@ -75,6 +75,7 @@ import {
   _validateRestrictedFieldsNotModifiedOrThrow,
   _normalizePackagePolicyKuery,
   _getAssetForTemplatePath,
+  getCompiledVersionsForAgentPolicy,
 } from './package_policy';
 import { appContextService } from '.';
 
@@ -669,6 +670,47 @@ describe('Package policy service', () => {
         expect.objectContaining({
           hasAgentVersionConditions: true,
         })
+      );
+    });
+
+    it('should store package_agent_version_condition on saved object when package manifest has agent version condition', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const soClient = createSavedObjectClientMock();
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'test-package-policy',
+        attributes: {},
+        references: [],
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      });
+
+      mockAgentPolicyGet();
+
+      await packagePolicyService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Test Package Policy',
+          namespace: 'test',
+          enabled: true,
+          policy_id: 'test',
+          policy_ids: ['test'],
+          inputs: [],
+          package: {
+            name: 'apache',
+            title: 'Apache',
+            version: '1.3.2',
+          },
+        },
+        { id: 'test-package-policy', skipUniqueNameVerification: true }
+      );
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          package_agent_version_condition: '>=9.3.0',
+        }),
+        expect.anything()
       );
     });
 
@@ -9368,5 +9410,70 @@ describe('_getAssetForTemplatePath()', () => {
     };
     const asset = _getAssetForTemplatePath(pkgInfo, assetsMap, datasetPath, templatePath);
     expect(asset).toEqual(expectedFallbackAsset);
+  });
+});
+
+describe('getCompiledVersionsForAgentPolicy', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
+
+  it('should return an empty array when no package policies have inputs_for_versions', async () => {
+    const soClient = createSavedObjectClientMock();
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: {} as any,
+        },
+      ],
+      total: 1,
+      page: 1,
+      per_page: 1,
+    });
+
+    const versions = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-id');
+    expect(versions).toEqual([]);
+  });
+
+  it('should collect unique versions from inputs_for_versions across all package policies', async () => {
+    const soClient = createSavedObjectClientMock();
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'pp-1',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: {
+            inputs_for_versions: { '8.0.0': [], '9.0.0': [] },
+          } as any,
+        },
+        {
+          id: 'pp-2',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          score: 1,
+          attributes: {
+            inputs_for_versions: { '8.0.0': [], '10.0.0': [] },
+          } as any,
+        },
+      ],
+      total: 2,
+      page: 1,
+      per_page: 2,
+    });
+
+    const versions = await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-id');
+    expect(versions).toEqual(expect.arrayContaining(['8.0.0', '9.0.0', '10.0.0']));
+    expect(versions).toHaveLength(3);
   });
 });
