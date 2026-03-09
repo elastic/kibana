@@ -21,6 +21,7 @@ import {
   DEFAULT_ITEMS_PER_PAGE,
   WORKFLOWS_SCOPE,
   TOOLS_SCOPE,
+  BULK_DELETE_API_ROUTE,
 } from '../../common/constants';
 import * as helpers from './data_sources_helpers';
 
@@ -1001,6 +1002,141 @@ describe('registerRoutes', () => {
         },
       });
       expect(mockDeleteDataSourceAndRelatedResources).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('POST /api/data_sources/_bulk_delete', () => {
+    let routeHandler: any;
+
+    const createBulkMockDataSource = (id: string) => ({
+      id,
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: `Data Source ${id}`,
+        type: 'notion',
+        config: {},
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z',
+        workflowIds: [`workflow-${id}`],
+        toolIds: [`tool-${id}`],
+        kscIds: [`ksc-${id}`],
+      },
+      references: [],
+    });
+
+    beforeEach(() => {
+      registerRoutes(dependencies);
+
+      const postCall = (mockRouter.post as jest.Mock).mock.calls.find(
+        (call) => call[0].path === BULK_DELETE_API_ROUTE
+      );
+      expect(postCall).toBeDefined();
+      routeHandler = postCall![1];
+    });
+
+    it('should return results for all successfully deleted data sources', async () => {
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [createBulkMockDataSource('ds-1'), createBulkMockDataSource('ds-2')],
+      });
+      mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
+        success: true,
+        fullyDeleted: true,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { ids: ['ds-1', 'ds-2'] },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockDeleteDataSourceAndRelatedResources).toHaveBeenCalledTimes(2);
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          results: [
+            { id: 'ds-1', success: true, fullyDeleted: true },
+            { id: 'ds-2', success: true, fullyDeleted: true },
+          ],
+        },
+      });
+    });
+
+    it('should handle mixed results with partial deletions', async () => {
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [createBulkMockDataSource('ds-1'), createBulkMockDataSource('ds-2')],
+      });
+      mockDeleteDataSourceAndRelatedResources
+        .mockResolvedValueOnce({ success: true, fullyDeleted: true })
+        .mockResolvedValueOnce({
+          success: true,
+          fullyDeleted: false,
+          remaining: { kscIds: [], toolIds: ['tool-ds-2'], workflowIds: [] },
+        });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { ids: ['ds-1', 'ds-2'] },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          results: [
+            { id: 'ds-1', success: true, fullyDeleted: true },
+            {
+              id: 'ds-2',
+              success: true,
+              fullyDeleted: false,
+              remaining: { kscIds: [], toolIds: ['tool-ds-2'], workflowIds: [] },
+            },
+          ],
+        },
+      });
+    });
+
+    it('should log errors and return failure results when some deletions fail', async () => {
+      mockSavedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          createBulkMockDataSource('ds-1'),
+          {
+            id: 'ds-2',
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 404, message: 'Data source not found', error: 'Not Found' },
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+
+      mockDeleteDataSourceAndRelatedResources.mockResolvedValue({
+        success: true,
+        fullyDeleted: true,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: { ids: ['ds-1', 'ds-2'] },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(), mockRequest, mockResponse);
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Failed to delete data source ds-2: Data source not found'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: {
+          results: [
+            { id: 'ds-1', success: true, fullyDeleted: true },
+            {
+              id: 'ds-2',
+              success: false,
+              fullyDeleted: false,
+              error: 'Data source not found',
+            },
+          ],
+        },
+      });
     });
   });
 });

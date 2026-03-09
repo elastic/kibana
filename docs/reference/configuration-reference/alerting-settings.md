@@ -94,7 +94,7 @@ If a setting is applicable to {{ech}} environments, its name is followed by this
     Default: `false`
 
 `xpack.actions.customHostSettings[n].smtp.requireTLS` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg 'Supported on {{ech}}')
-: A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
+:   A boolean value indicating that TLS must be used for this connection. The options `smtp.ignoreTLS` and `smtp.requireTLS` can not both be set to true.
 
     Data type: `bool`
     Default: `false`

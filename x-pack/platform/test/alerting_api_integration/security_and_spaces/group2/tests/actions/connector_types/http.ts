@@ -28,6 +28,32 @@ const defaultValues: Record<string, any> = {
   hasAuth: true,
 };
 
+function expectBasicHttpConnectorShape({
+  action,
+  expectedUrl,
+  expectedHeaders = null,
+}: {
+  action: Record<string, any>;
+  expectedUrl: string;
+  expectedHeaders?: Record<string, string> | null;
+}) {
+  expect(action.is_preconfigured).to.be(false);
+  expect(action.is_system_action).to.be(false);
+  expect(action.is_deprecated).to.be(false);
+  expect(action.name).to.be('A generic Http action');
+  expect(action.connector_type_id).to.be('.http');
+  expect(action.is_missing_secrets).to.be(false);
+  expect(action.is_connector_type_deprecated).to.be(false);
+
+  expect(action.config.url).to.be(expectedUrl);
+  expect(action.config.headers).to.eql(expectedHeaders);
+  expect(action.config.hasAuth).to.be(true);
+
+  if (action.config.authType != null) {
+    expect(action.config.authType).to.be(AuthType.Basic);
+  }
+}
+
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
   return {
     ...url,
@@ -125,19 +151,10 @@ export default function httpTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-        },
-        is_connector_type_deprecated: false,
+      expectBasicHttpConnectorShape({
+        action: createdAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: defaultValues.headers,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -146,19 +163,10 @@ export default function httpTest({ getService }: FtrProviderContext) {
         .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-        },
-        is_connector_type_deprecated: false,
+      expectBasicHttpConnectorShape({
+        action: fetchedAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: defaultValues.headers,
       });
     });
 
@@ -182,22 +190,12 @@ export default function httpTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(createdAction).to.eql({
-        id: createdAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-          headers: {
-            someHeader: '123',
-          },
+      expectBasicHttpConnectorShape({
+        action: createdAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: {
+          someHeader: '123',
         },
-        is_connector_type_deprecated: false,
       });
 
       await supertest
@@ -222,22 +220,12 @@ export default function httpTest({ getService }: FtrProviderContext) {
         .get(`/api/actions/connector/${createdAction.id}`)
         .expect(200);
 
-      expect(fetchedAction).to.eql({
-        id: fetchedAction.id,
-        is_preconfigured: false,
-        is_system_action: false,
-        is_deprecated: false,
-        name: 'A generic Http action',
-        connector_type_id: '.http',
-        is_missing_secrets: false,
-        config: {
-          ...defaultValues,
-          url: httpSimulatorURL,
-          headers: {
-            someOtherHeader: '456',
-          },
+      expectBasicHttpConnectorShape({
+        action: fetchedAction,
+        expectedUrl: httpSimulatorURL,
+        expectedHeaders: {
+          someOtherHeader: '456',
         },
-        is_connector_type_deprecated: false,
       });
     });
 
@@ -349,6 +337,55 @@ export default function httpTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/error calling http, retry later/);
       expect(result.service_message).to.eql('[500] Internal Server Error');
+    });
+
+    it('should not abort when the request completes normally', async () => {
+      await fetch(`${httpSimulatorURL}?reset_aborted_count`);
+
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_200', method: 'POST' } })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(0);
+    });
+
+    it('should abort the http request when the execution is cancelled', async () => {
+      await fetch(`${httpSimulatorURL}?reset_aborted_count`);
+
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const startTime = Date.now();
+
+      const executeReq = supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_30000', method: 'POST' } });
+
+      setTimeout(() => executeReq.abort(), 1000);
+
+      try {
+        await executeReq;
+      } catch (err) {
+        // Expected: connection reset due to client abort
+      }
+
+      const elapsed = Date.now() - startTime;
+      expect(elapsed).to.be.lessThan(5000);
+
+      // wait for the proxy server to close the connection
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(1);
     });
 
     it('sends both config and secret headers in the http request', async () => {
