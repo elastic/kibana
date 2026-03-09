@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { groupBy, keyBy, mapValues } from 'lodash';
+import { minimatch } from 'minimatch';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { timeRangeFilter, kqlFilter as toKqlFilter } from '../../utils/dsl_filters';
 import { parseDatemath } from '../../utils/time';
@@ -212,15 +213,6 @@ async function getTextFieldSampleValues(
   );
 }
 
-/** Converts a wildcard pattern to a regex */
-export function wildcardToRegex(pattern: string): RegExp {
-  const escaped = pattern
-    .replace(/\\/g, '\\\\')
-    .replace(/[.+?^${}()|[\]]/g, '\\$&')
-    .replace(/\*/g, '.*');
-  return new RegExp(`^${escaped}$`);
-}
-
 /** Determines the category for a field type */
 export function getFieldCategory(
   fieldType: string
@@ -250,14 +242,12 @@ export function resolveInputToConcreteFields(
   allFieldNames: string[],
   fieldNameToTypeMap: Record<string, string | undefined>
 ): ResolvedField[] {
-  const isWildcard = input.includes('*');
-  const matchingFields = isWildcard
-    ? allFieldNames.filter((f) => wildcardToRegex(input).test(f) && fieldNameToTypeMap[f])
-    : fieldNameToTypeMap[input]
-    ? [input]
-    : [];
+  const matchingFields = allFieldNames.filter(
+    (f) => minimatch(f, input, { dot: true }) && fieldNameToTypeMap[f]
+  );
 
   if (matchingFields.length === 0) {
+    const isWildcard = input.includes('*');
     return [
       {
         input,
