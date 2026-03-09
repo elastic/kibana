@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { StateGraph, Annotation, messagesStateReducer, START, END } from '@langchain/langgraph';
+import {
+  StateGraph,
+  Annotation,
+  messagesStateReducer,
+  START,
+  END,
+  Command,
+} from '@langchain/langgraph';
 import { type Tool, tool as toTool } from '@langchain/core/tools';
 import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
@@ -30,10 +37,11 @@ import { truncateJsonResponse } from './truncate_response';
  * Node names in the state graph
  */
 const NODE_NAMES = {
+  ROUTE_ENTRY: 'route_entry',
   GENERATE_TOOLS: 'generate_tools',
   AGENT: 'agent',
+  ASK_FOR_CONFIRMATION: 'ask_for_confirmation',
   EXECUTE_TOOL: 'execute_tool',
-  CHECK_CONFIRMATION: 'check_confirmation',
 } as const;
 
 /**
@@ -131,14 +139,13 @@ const createExecutableTools = (tools: Tool[], esClient: IScopedClusterClient): a
  * Parses and truncates tool response
  */
 const parseToolResponse = (
-  toolMessage: BaseMessage,
-  toolName?: string
+  toolMessage: BaseMessage
 ): { name: string; response: unknown; console_command?: string } => {
   const parsedContent = JSON.parse(toolMessage.content as string);
   const truncatedContent = truncateJsonResponse(parsedContent.response);
 
   return {
-    name: toolName || toolMessage.name || 'unknown',
+    name: toolMessage.name || 'unknown',
     response: truncatedContent,
     console_command: parsedContent.console_command,
   };
@@ -148,7 +155,7 @@ const parseToolResponse = (
  * Creates a LangGraph-based state machine for Elasticsearch query generation and execution
  *
  * Graph Flow:
- * 1. checkState: Determines if execution is resuming or starting fresh
+ * 1. routeEntry: Routes execution based on whether the invocation is fresh or resumed
  * 2. generateTools: Retrieves OpenAPI specs and generates LangChain tools
  * 3. terminateIfInvalidTools: Validates that tools were generated successfully
  * 4. agent: Calls the LLM to generate tool calls based on natural language query
@@ -183,48 +190,44 @@ export const createElasticsearchToolGraph = async ({
   const model = await modelProvider.getDefaultModel();
 
   /**
-   * Determines if execution is resuming or starting fresh
+   * Routes execution to the appropriate node based on whether
+   * the invocation is fresh (-> generateTools) or resumed after
+   * a user confirmation prompt (-> executeTool or end).
    */
-  const checkState = async (state: StateType) => {
+  const routeEntry = async (state: StateType) => {
     // retrieve the tool's execution state - present only if the execution was resumed
     const resumedState = stateManager.getState<StateManagerType>();
-    return !resumedState ? NODE_NAMES.GENERATE_TOOLS : NODE_NAMES.CHECK_CONFIRMATION;
-  };
 
-  /**
-   * Validates user confirmation and reconstructs tools
-   */
-  const checkConfirmation = async (state: StateType) => {
-    const resumedState = stateManager.getState<StateManagerType>();
+    if (!resumedState) {
+      return new Command({
+        goto: NODE_NAMES.GENERATE_TOOLS,
+      });
+    }
+
     const { status: confirmStatus } = prompts.checkConfirmationStatus(
       CONFIRMATION_IDS.EXECUTE_ACTION
     );
     if (confirmStatus === ConfirmationStatus.rejected) {
-      return {
-        result: createErrorResult(`User denied usage of the action`),
-      };
+      return new Command({
+        update: {
+          result: createErrorResult(`User denied usage of the action`),
+        },
+        goto: END,
+      });
     }
+
     const openApiToolSet = new OpenAPIToolSet({
       operations: (resumedState as StateManagerType).openapiSpecs as OperationObject[],
     });
-    return {
-      ...resumedState,
-      openApiToolSet,
-      tools: openApiToolSet.getTools(),
-    };
-  };
 
-  /**
-   * Routes execution based on user confirmation status
-   */
-  const decideContinue = async (state: StateType) => {
-    const { status: confirmStatus } = prompts.checkConfirmationStatus(
-      CONFIRMATION_IDS.EXECUTE_ACTION
-    );
-    if (confirmStatus === ConfirmationStatus.rejected) {
-      return '__end__';
-    }
-    return NODE_NAMES.EXECUTE_TOOL;
+    return new Command({
+      update: {
+        ...resumedState,
+        openApiToolSet,
+        tools: openApiToolSet.getTools(),
+      },
+      goto: NODE_NAMES.EXECUTE_TOOL,
+    });
   };
 
   /**
@@ -275,20 +278,28 @@ export const createElasticsearchToolGraph = async ({
   };
 
   const terminateIfInvalidTools = async (state: StateType) => {
-    return state.toolsValid ? NODE_NAMES.AGENT : '__end__';
+    return state.toolsValid ? NODE_NAMES.AGENT : END;
   };
 
   const askForConfirmation = async (state: StateType) => {
-    if (state.prompt) {
-      stateManager.setState({
-        openapiSpecs: state.openapiSpecs,
-        nlQuery: state.nlQuery,
-        toolsValid: state.toolsValid,
-        messages: state.messages,
-      });
-      return '__end__';
-    }
-    return NODE_NAMES.EXECUTE_TOOL;
+    stateManager.setState({
+      openapiSpecs: state.openapiSpecs,
+      nlQuery: state.nlQuery,
+      toolsValid: state.toolsValid,
+      messages: state.messages,
+    });
+
+    const aiMessage = state.messages[state.messages.length - 1] as AIMessageChunk;
+    const commands = aiMessage.tool_calls!.map((t) =>
+      state.openApiToolSet.getApiCallConsoleCommand(t.name, t.args)
+    );
+    const confirmationMessage = buildConfirmationMessage(commands);
+
+    const confirmation = await prompts.askForConfirmation({
+      id: CONFIRMATION_IDS.EXECUTE_ACTION,
+      message: confirmationMessage,
+    });
+    return { prompt: confirmation };
   };
 
   const callElasticsearchAgent = async (state: StateType) => {
@@ -300,23 +311,20 @@ export const createElasticsearchToolGraph = async ({
       getElasticsearchPrompt({ nlQuery: state.nlQuery, tools: state.tools })
     );
     if (isDangerousOperation(response, state.openApiToolSet)) {
-      const commands = response.tool_calls!.map((t) =>
-        state.openApiToolSet.getApiCallConsoleCommand(t.name, t.args)
-      );
-      const confirmationMessage = buildConfirmationMessage(commands);
-      const confirmation = await prompts.askForConfirmation({
-        id: CONFIRMATION_IDS.EXECUTE_ACTION,
-        message: confirmationMessage,
+      return new Command({
+        update: {
+          messages: [response],
+        },
+        goto: NODE_NAMES.ASK_FOR_CONFIRMATION,
       });
-      return {
-        prompt: confirmation,
-        messages: [response],
-      };
     }
 
-    return {
-      messages: [response],
-    };
+    return new Command({
+      update: {
+        messages: [response],
+      },
+      goto: NODE_NAMES.EXECUTE_TOOL,
+    });
   };
 
   const executeTool = async (state: StateType) => {
@@ -343,27 +351,22 @@ export const createElasticsearchToolGraph = async ({
 
   const graph = new StateGraph(StateAnnotation)
     // nodes
+    .addNode(NODE_NAMES.ROUTE_ENTRY, routeEntry, {
+      ends: [NODE_NAMES.GENERATE_TOOLS, NODE_NAMES.EXECUTE_TOOL, END],
+    })
     .addNode(NODE_NAMES.GENERATE_TOOLS, generateTools)
-    .addNode(NODE_NAMES.AGENT, callElasticsearchAgent)
+    .addNode(NODE_NAMES.AGENT, callElasticsearchAgent, {
+      ends: [NODE_NAMES.ASK_FOR_CONFIRMATION, NODE_NAMES.EXECUTE_TOOL],
+    })
+    .addNode(NODE_NAMES.ASK_FOR_CONFIRMATION, askForConfirmation)
     .addNode(NODE_NAMES.EXECUTE_TOOL, executeTool)
-    .addNode(NODE_NAMES.CHECK_CONFIRMATION, checkConfirmation)
     // edges
-    .addConditionalEdges(START, checkState, {
-      [NODE_NAMES.GENERATE_TOOLS]: NODE_NAMES.GENERATE_TOOLS,
-      [NODE_NAMES.CHECK_CONFIRMATION]: NODE_NAMES.CHECK_CONFIRMATION,
-    })
-    .addConditionalEdges(NODE_NAMES.CHECK_CONFIRMATION, decideContinue, {
-      [END]: END,
-      [NODE_NAMES.EXECUTE_TOOL]: NODE_NAMES.EXECUTE_TOOL,
-    })
+    .addEdge(START, NODE_NAMES.ROUTE_ENTRY)
     .addConditionalEdges(NODE_NAMES.GENERATE_TOOLS, terminateIfInvalidTools, {
       [NODE_NAMES.AGENT]: NODE_NAMES.AGENT,
       [END]: END,
     })
-    .addConditionalEdges(NODE_NAMES.AGENT, askForConfirmation, {
-      [NODE_NAMES.EXECUTE_TOOL]: NODE_NAMES.EXECUTE_TOOL,
-      [END]: END,
-    })
+    .addEdge(NODE_NAMES.ASK_FOR_CONFIRMATION, END)
     .addEdge(NODE_NAMES.EXECUTE_TOOL, END)
     .compile();
 
