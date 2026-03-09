@@ -83,7 +83,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       focusedPanelId !== undefined &&
       focusedPanelId !== id &&
       !arePanelsRelated(id, focusedPanelId);
-    const showBorder = useMargins && !hidePanelBorders; // to do - check if useMargins is necessary here or if we can just rely on hidePanelBorders
+    const showBorder = useMargins && !hidePanelBorders; // we do not show panel borders when margins are disabled
     const classes = classNames('dshDashboardGrid__item', {
       'dshDashboardGrid__item--expanded': expandPanel,
       'dshDashboardGrid__item--hidden': hidePanel,
@@ -117,9 +117,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     const dashboardContainerTopOffset = dashboardContainerRef?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
-    const styles = useMemoCss(
-      showBorder ? dashboardGridItemStyles : dashboardGridItemStylesWithHighlight
-    );
+    const styles = useMemoCss(dashboardGridItemStyles);
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
@@ -237,37 +235,11 @@ const dashboardGridItemStyles = {
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
         },
-        // Call out focused panels with a simple border moved here because are not a part of highlight styles
+        // Call out focused panels with a simple border
         '&.dshDashboardGrid__item--focused .embPanel': {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
       },
-      printViewportVisStyles(context),
-    ]),
-  focusPanelBlur: css({
-    pointerEvents: 'none',
-    opacity: '0.25',
-  }),
-};
-
-const dashboardGridItemStylesWithHighlight = {
-  item: (context: UseEuiTheme) =>
-    css([
-      {
-        height: '100%',
-        // Remove padding in fullscreen mode
-        '.kbnAppWrapper--hiddenChrome &.dshDashboardGrid__item--expanded': {
-          padding: 0,
-        },
-        '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
-          padding: 0,
-        },
-        // Call out focused panels with a simple border moved here because are not a part of highlight styles
-        '&.dshDashboardGrid__item--focused .embPanel': {
-          outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
-        },
-      },
-      getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
   focusPanelBlur: css({
