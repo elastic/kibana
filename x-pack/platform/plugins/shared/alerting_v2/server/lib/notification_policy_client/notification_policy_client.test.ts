@@ -613,34 +613,34 @@ describe('NotificationPolicyClient', () => {
   });
 
   describe('enableNotificationPolicy', () => {
-    it('enables a policy and clears snoozedUntil', async () => {
-      const existingAttributes: NotificationPolicySavedObjectAttributes = {
-        name: 'snoozed-policy',
-        description: 'snoozed-policy description',
-        enabled: true,
-        destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        snoozedUntil: '2025-02-01T00:00:00.000Z',
-        auth: {
-          apiKey: 'some-key',
-          owner: 'test-user',
-          createdByUser: false,
-        },
-        createdBy: 'elastic_profile_uid',
-        createdAt: '2024-12-01T00:00:00.000Z',
-        updatedBy: 'elastic_profile_uid',
-        updatedAt: '2024-12-01T00:00:00.000Z',
-      };
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-enable',
-        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: existingAttributes,
-        references: [],
-        version: 'WzEsMV0=',
-      });
+    const updatedAttributes: NotificationPolicySavedObjectAttributes = {
+      name: 'snoozed-policy',
+      description: 'snoozed-policy description',
+      enabled: true,
+      destinations: [{ type: 'workflow', id: 'test-workflow' }],
+      auth: {
+        apiKey: 'some-key',
+        owner: 'test-user',
+        createdByUser: false,
+      },
+      createdBy: 'elastic_profile_uid',
+      createdAt: '2024-12-01T00:00:00.000Z',
+      updatedBy: 'elastic_profile_uid',
+      updatedAt: '2025-01-01T00:00:00.000Z',
+    };
+
+    it('does a partial update then fetches the full policy', async () => {
       mockSavedObjectsClient.update.mockResolvedValueOnce({
         id: 'policy-id-enable',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-enable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: updatedAttributes,
         references: [],
         version: 'WzIsMV0=',
       });
@@ -650,19 +650,26 @@ describe('NotificationPolicyClient', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-enable',
-        expect.objectContaining({
+        {
           enabled: true,
           snoozedUntil: undefined,
+          updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
-        }),
-        { version: 'WzEsMV0=' }
+        },
+        undefined
       );
 
       expect(res.id).toBe('policy-id-enable');
       expect(res.auth).not.toHaveProperty('apiKey');
     });
 
-    it('throws 404 when policy is not found', async () => {
+    it('throws 404 when policy is not found on follow-up get', async () => {
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-enable-404',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+      });
       mockSavedObjectsClient.get.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createGenericNotFoundError(
           NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
@@ -679,13 +686,12 @@ describe('NotificationPolicyClient', () => {
   });
 
   describe('disableNotificationPolicy', () => {
-    it('disables a policy and clears snoozedUntil', async () => {
-      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+    it('does a partial update with enabled=false', async () => {
+      const updatedAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'active-policy',
         description: 'active-policy description',
-        enabled: true,
+        enabled: false,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        snoozedUntil: '2025-02-01T00:00:00.000Z',
         auth: {
           apiKey: 'some-key',
           owner: 'test-user',
@@ -694,19 +700,19 @@ describe('NotificationPolicyClient', () => {
         createdBy: 'elastic_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
-        updatedAt: '2024-12-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-disable',
-        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: existingAttributes,
-        references: [],
-        version: 'WzEsMV0=',
-      });
       mockSavedObjectsClient.update.mockResolvedValueOnce({
         id: 'policy-id-disable',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-disable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: updatedAttributes,
         references: [],
         version: 'WzIsMV0=',
       });
@@ -716,12 +722,13 @@ describe('NotificationPolicyClient', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-disable',
-        expect.objectContaining({
+        {
           enabled: false,
           snoozedUntil: undefined,
+          updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
-        }),
-        { version: 'WzEsMV0=' }
+        },
+        undefined
       );
 
       expect(res.id).toBe('policy-id-disable');
@@ -730,12 +737,13 @@ describe('NotificationPolicyClient', () => {
   });
 
   describe('snoozeNotificationPolicy', () => {
-    it('snoozes a policy until a specific datetime', async () => {
-      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+    it('does a partial update with snoozedUntil', async () => {
+      const updatedAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'active-policy',
         description: 'active-policy description',
         enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        snoozedUntil: '2025-06-01T12:00:00.000Z',
         auth: {
           apiKey: 'some-key',
           owner: 'test-user',
@@ -744,19 +752,19 @@ describe('NotificationPolicyClient', () => {
         createdBy: 'elastic_profile_uid',
         createdAt: '2024-12-01T00:00:00.000Z',
         updatedBy: 'elastic_profile_uid',
-        updatedAt: '2024-12-01T00:00:00.000Z',
+        updatedAt: '2025-01-01T00:00:00.000Z',
       };
-      mockSavedObjectsClient.get.mockResolvedValueOnce({
-        id: 'policy-id-snooze',
-        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
-        attributes: existingAttributes,
-        references: [],
-        version: 'WzEsMV0=',
-      });
       mockSavedObjectsClient.update.mockResolvedValueOnce({
         id: 'policy-id-snooze',
         type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-snooze',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: updatedAttributes,
         references: [],
         version: 'WzIsMV0=',
       });
@@ -769,11 +777,12 @@ describe('NotificationPolicyClient', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
         'policy-id-snooze',
-        expect.objectContaining({
+        {
           snoozedUntil: '2025-06-01T12:00:00.000Z',
+          updatedBy: 'elastic_profile_uid',
           updatedAt: '2025-01-01T00:00:00.000Z',
-        }),
-        { version: 'WzEsMV0=' }
+        },
+        undefined
       );
 
       expect(res.id).toBe('policy-id-snooze');

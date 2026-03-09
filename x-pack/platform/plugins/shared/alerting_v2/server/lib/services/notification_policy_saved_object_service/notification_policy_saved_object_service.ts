@@ -48,8 +48,8 @@ export interface NotificationPolicySavedObjectServiceContract {
   ): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   update(params: {
     id: string;
-    attrs: NotificationPolicySavedObjectAttributes;
-    version: string;
+    attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    version?: string;
   }): Promise<{ id: string; version?: string }>;
   bulkUpdate(params: {
     objects: Array<{
@@ -128,14 +128,14 @@ export class NotificationPolicySavedObjectService
     version,
   }: {
     id: string;
-    attrs: NotificationPolicySavedObjectAttributes;
-    version: string;
+    attrs: Partial<NotificationPolicySavedObjectAttributes>;
+    version?: string;
   }): Promise<{ id: string; version?: string }> {
     const result = await this.client.update<NotificationPolicySavedObjectAttributes>(
       NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
       id,
       attrs,
-      { version }
+      version ? { version } : undefined
     );
 
     return { id: result.id, version: result.version };

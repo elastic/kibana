@@ -286,39 +286,12 @@ export class NotificationPolicyClient {
     const userProfileUid = await this.getUserProfileUid();
     const now = new Date().toISOString();
 
-    const doc = await this.notificationPolicySavedObjectService.get(id);
+    await this.notificationPolicySavedObjectService.update({
+      id,
+      attrs: { ...stateUpdate, updatedBy: userProfileUid, updatedAt: now },
+    });
 
-    const nextAttrs: NotificationPolicySavedObjectAttributes = {
-      ...doc.attributes,
-      ...stateUpdate,
-      updatedBy: userProfileUid,
-      updatedAt: now,
-    };
-
-    try {
-      const updated = await this.notificationPolicySavedObjectService.update({
-        id,
-        attrs: nextAttrs,
-        version: doc.version!,
-      });
-
-      return {
-        id,
-        version: updated.version,
-        ...omit(nextAttrs, ['auth']),
-        auth: toAuthResponse(nextAttrs.auth),
-      };
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Notification policy with id "${id}" not found`);
-      }
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(
-          `Notification policy with id "${id}" has already been updated by another user`
-        );
-      }
-      throw e;
-    }
+    return this.getNotificationPolicy({ id });
   }
 
   private async getUserProfileUid(): Promise<string | null> {
