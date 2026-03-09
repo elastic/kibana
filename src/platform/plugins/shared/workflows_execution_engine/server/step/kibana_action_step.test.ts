@@ -708,7 +708,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
 
   describe('response size limit enforcement (Layer 1)', () => {
     it('should abort fetch mid-stream when body exceeds max-step-size', async () => {
-      // Create a response with a body larger than 100 bytes
       const largeBody = JSON.stringify({ data: 'x'.repeat(500) });
       const cancelFn = jest.fn();
       mockedFetch.mockResolvedValue({
@@ -754,35 +753,6 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(cancelFn).toHaveBeenCalled();
     });
 
-    it('should handle 204 No Content (null body) without crashing', async () => {
-      mockedFetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-        body: null,
-      } as any);
-
-      const step: KibanaActionStep = {
-        name: 'no_content_step',
-        type: 'kibana.request',
-        spaceId: 'default',
-        with: {
-          request: { method: 'DELETE', path: '/api/some-resource/123' },
-        },
-      };
-
-      const kibanaStep = new KibanaActionStepImpl(
-        step,
-        mockStepExecutionRuntime,
-        mockWorkflowRuntime,
-        mockWorkflowLogger
-      );
-
-      const result = await (kibanaStep as any)._run(step.with);
-
-      expect(result.error).toBeUndefined();
-      expect(result.output).toBeNull();
-    });
-
     it('should truncate large error response bodies', async () => {
       const largeErrorBody = 'E'.repeat(2 * 1024 * 1024); // 2MB error
       mockedFetch.mockResolvedValue({
@@ -823,9 +793,118 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       const result = await (kibanaStep as any)._run(step.with);
 
       expect(result.error).toBeDefined();
-      // Error message should be truncated, not the full 2MB
       expect(result.error.message.length).toBeLessThan(1.5 * 1024 * 1024);
       expect(result.error.message).toContain('... [truncated]');
+    });
+  });
+
+  describe('empty response body handling (204 No Content)', () => {
+    it('should succeed with empty output when response is 204 No Content', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'delete_rule',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: { method: 'DELETE', path: '/api/alerting/rule/some-rule-id' },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({});
+    });
+
+    it('should include _debug info for empty responses when debug is true', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'delete_rule',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: {
+            method: 'DELETE',
+            path: '/api/alerting/rule/some-rule-id',
+          },
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output._debug).toBeDefined();
+      expect(result.output._debug.method).toBe('DELETE');
+    });
+
+    it('should still parse JSON normally when response body is non-empty', async () => {
+      const jsonBody = JSON.stringify({ id: 'case-1', title: 'Test' });
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        body: {
+          getReader: () => {
+            let consumed = false;
+            return {
+              read: async () => {
+                if (consumed) return { done: true, value: undefined };
+                consumed = true;
+                return { done: false, value: new TextEncoder().encode(jsonBody) };
+              },
+              releaseLock: () => {},
+              cancel: jest.fn(),
+            };
+          },
+        },
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'create_case',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          request: {
+            method: 'POST',
+            path: '/api/cases',
+            body: { title: 'Test' },
+          },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({ id: 'case-1', title: 'Test' });
     });
   });
 });

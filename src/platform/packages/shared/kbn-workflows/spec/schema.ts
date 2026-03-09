@@ -140,8 +140,8 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
-/** Schema for the `with` block of custom triggers (KQL condition to filter when the workflow runs). */
-const CustomTriggerWithSchema = z
+/** Schema for the `on` block of custom triggers (KQL condition to filter when the workflow runs). */
+const CustomTriggerOnSchema = z
   .object({
     condition: z.string().optional(),
   })
@@ -150,7 +150,7 @@ const CustomTriggerWithSchema = z
 /**
  * Returns a trigger schema that includes built-in types plus optional registered trigger ids.
  * Used by the YAML editor so custom trigger types (e.g. example.custom_trigger) pass validation.
- * Custom triggers allow a `with.condition` clause for KQL filtering.
+ * Custom triggers allow an `on.condition` clause for KQL filtering.
  */
 export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
   if (customTriggerIds.length === 0) {
@@ -159,7 +159,7 @@ export function getTriggerSchema(customTriggerIds: string[] = []): z.ZodType {
   const customSchemas = customTriggerIds.map((id) =>
     z.object({
       type: z.literal(id),
-      with: CustomTriggerWithSchema,
+      on: CustomTriggerOnSchema,
     })
   );
   return z.discriminatedUnion('type', [
@@ -772,10 +772,19 @@ export const AlertEventPropsSchema = z.object({
 });
 
 /**
- * Base event properties that are always present regardless of trigger type.
+ * Base fields present on every trigger event (injected by the platform).
+ * Custom trigger event schemas are merged on top of this for workflow context and autocomplete.
+ * Timestamp is only present for event-driven (custom) triggers; see EventTimestampSchema.
  */
 export const BaseEventSchema = z.object({
-  spaceId: z.string(),
+  spaceId: z.string().describe('The space where the event was emitted.'),
+});
+
+/**
+ * Timestamp injected by the platform for event-driven (custom) trigger events only.
+ */
+export const EventTimestampSchema = z.object({
+  timestamp: z.string().describe('Time when the event was received (ISO 8601).'),
 });
 
 /**
