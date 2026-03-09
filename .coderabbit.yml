@@ -1,8 +1,14 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 reviews:
+  inheritance: true
+  review_status: false
+  poem: false
   auto_review:
     labels:
       - reviewer:coderabbit
       - Team:Search
       - Team:Operations
       - Team:QA
+      - Team:SigEvents
+      - Team:Kibana Management
+      - Team:obs-onboarding
