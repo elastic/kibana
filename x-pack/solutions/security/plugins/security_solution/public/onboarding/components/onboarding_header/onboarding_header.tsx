@@ -12,8 +12,7 @@ import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
 import { OnboardingHeaderTopicSelector } from './onboarding_header_topic_selector';
 import { useOnboardingHeaderStyles } from './onboarding_header.styles';
-import rocketImage from './images/header_rocket.png';
-import rocketDarkImage from './images/header_rocket_dark.png';
+import { CloudRocketIllustration } from './cloud_rocket_illustration';
 import { TeammatesCard } from './cards/teammates_card';
 import { VideoCard } from './cards/video_card';
 import { DemoCard } from './cards/demo_card';
@@ -45,8 +44,7 @@ export const OnboardingHeader = React.memo(() => {
     <>
       <EuiFlexGroup justifyContent="center" alignItems="center" className={styles}>
         <EuiFlexItem grow={false}>
-          <EuiImage
-            src={isDarkMode ? rocketDarkImage : rocketImage}
+          <CloudRocketIllustration
             size={128}
             alt={filteredHeaderConfig.subTitle}
           />

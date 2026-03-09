@@ -10,17 +10,18 @@ import useObservable from 'react-use/lib/useObservable';
 import { OnboardingHeaderCardId } from '../../constants';
 import { useOnboardingService } from '../../../hooks/use_onboarding_service';
 import { LinkCard } from '../common/link_card';
-import teammatesImage from './images/teammates_card.png';
-import darkTeammatesImage from './images/teammates_card_dark.png';
+import { HighFiveIllustration } from './high_five_illustration';
 import * as i18n from './translations';
 
-export const TeammatesCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
+export const TeammatesCard = React.memo<{ isDarkMode: boolean }>(() => {
   const { usersUrl$ } = useOnboardingService();
   const usersUrl = useObservable(usersUrl$, undefined);
   return (
     <LinkCard
       id={OnboardingHeaderCardId.teammates}
-      icon={isDarkMode ? darkTeammatesImage : teammatesImage}
+      icon={
+        <HighFiveIllustration size={64} alt={i18n.ONBOARDING_HEADER_TEAMMATES_TITLE} />
+      }
       title={i18n.ONBOARDING_HEADER_TEAMMATES_TITLE}
       description={i18n.ONBOARDING_HEADER_TEAMMATES_DESCRIPTION}
       href={usersUrl}

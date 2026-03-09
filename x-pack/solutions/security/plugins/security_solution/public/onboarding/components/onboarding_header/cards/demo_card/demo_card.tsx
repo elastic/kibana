@@ -7,16 +7,20 @@
 
 import React from 'react';
 import { LinkCard } from '../common/link_card';
-import demoImage from './images/demo_card.png';
-import darkDemoImage from './images/demo_card_dark.png';
+import { ObservabilityGraphsIllustration } from './observability_graphs_illustration';
 import * as i18n from './translations';
 import { OnboardingHeaderCardId } from '../../constants';
 
-export const DemoCard = React.memo<{ isDarkMode: boolean }>(({ isDarkMode }) => {
+export const DemoCard = React.memo<{ isDarkMode: boolean }>(() => {
   return (
     <LinkCard
       id={OnboardingHeaderCardId.demo}
-      icon={isDarkMode ? darkDemoImage : demoImage}
+      icon={
+        <ObservabilityGraphsIllustration
+          size={64}
+          alt={i18n.ONBOARDING_HEADER_DEMO_TITLE}
+        />
+      }
       title={i18n.ONBOARDING_HEADER_DEMO_TITLE}
       description={i18n.ONBOARDING_HEADER_DEMO_DESCRIPTION}
       href="https://demo.elastic.co/app/security/get_started"
