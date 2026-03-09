@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/refs/heads/main/schema.json
 steps:
   - trigger: elastic/kibana-vm-images
     build:
@@ -6,13 +7,13 @@ steps:
           IMAGES_CONFIG: kibana/base_image.yml
   - trigger: elastic/kibana-vm-images
     build:
-      mata_data:
+      meta_data:
         env:
           IMAGES_CONFIG: kibana/packages_layer.yml
           BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml"
   - trigger: elastic/kibana-vm-images
     build:
-      mata_data:
+      meta_data:
         env:
           IMAGES_CONFIG: kibana/image_cache.tpl.yml
           BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml"
