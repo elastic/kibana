@@ -73,6 +73,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/cloud",
     "@kbn/search-index-documents",
+    "@kbn/cloud-connect-plugin",
   ],
   "exclude": ["target/**/*"]
 }

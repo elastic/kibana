@@ -17,6 +17,7 @@ import {
   fromStaticColorAPIToLensState,
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
+  LEGACY_PALETTE_PREFIX,
 } from './coloring';
 
 import * as percentageMocks from './percentage.mocks';
@@ -473,6 +474,20 @@ describe('Color util transforms', () => {
       expect(fromColorMappingLensStateToAPI(undefined)).toBeUndefined();
     });
 
+    it('should convert legacy color palette', () => {
+      const originalColorPalette: PaletteOutput = {
+        type: 'palette',
+        name: 'kibana_palette',
+      };
+
+      const result = fromColorMappingLensStateToAPI(undefined, originalColorPalette);
+      expect(result).toEqual({
+        palette: `${LEGACY_PALETTE_PREFIX}kibana_palette`,
+        mode: 'categorical',
+        mapping: [],
+      });
+    });
+
     it('should convert categorical color mapping with empty assignments', () => {
       const originalColorMapping: ColorMapping.Config = {
         paletteId: 'kibana_palette',
@@ -548,8 +563,23 @@ describe('Color util transforms', () => {
   });
 
   describe('fromColorMappingAPIToLensState', () => {
-    it('should convert legacy color mapping', () => {
+    it('should convert undefined color mapping', () => {
       expect(fromColorMappingAPIToLensState(undefined)).toBeUndefined();
+    });
+
+    it('should convert legacy color mapping', () => {
+      expect(
+        fromColorMappingAPIToLensState({
+          palette: `${LEGACY_PALETTE_PREFIX}kibana_palette`,
+          mode: 'categorical',
+          mapping: [],
+        })
+      ).toEqual({
+        palette: {
+          type: 'palette',
+          name: 'kibana_palette',
+        },
+      });
     });
 
     it('should convert empty mapping correctly', () => {
@@ -560,12 +590,14 @@ describe('Color util transforms', () => {
           mapping: [],
         })
       ).toEqual({
-        colorMode: { type: 'categorical' },
-        paletteId: 'kibana_palette',
-        assignments: [],
-        specialAssignments: [
-          { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
-        ],
+        colorMapping: {
+          colorMode: { type: 'categorical' },
+          paletteId: 'kibana_palette',
+          assignments: [],
+          specialAssignments: [
+            { color: { type: 'loop' }, rules: [{ type: 'other' }], touched: false },
+          ],
+        },
       });
     });
   });
@@ -705,7 +737,11 @@ describe('Color util transforms', () => {
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
-      const backToAPI = fromColorMappingLensStateToAPI(lensState);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
 
       expect(backToAPI).toEqual(originalColorMapping);
     });
@@ -727,7 +763,11 @@ describe('Color util transforms', () => {
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
-      const backToAPI = fromColorMappingLensStateToAPI(lensState);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
 
       expect(backToAPI).toEqual(originalColorMapping);
     });
@@ -752,7 +792,11 @@ describe('Color util transforms', () => {
       };
 
       const lensState = fromColorMappingAPIToLensState(originalColorMapping);
-      const backToAPI = fromColorMappingLensStateToAPI(lensState);
+      expect(lensState).toBeDefined();
+      expect('colorMapping' in lensState!).toBe(true);
+      const backToAPI = fromColorMappingLensStateToAPI(
+        (lensState as { colorMapping: ColorMapping.Config }).colorMapping
+      );
 
       expect(backToAPI).toEqual(originalColorMapping);
     });
