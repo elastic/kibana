@@ -131,8 +131,8 @@ export function CalendarPanel() {
     const { start, end } = getOrderedDates(range.from, range.to);
 
     return {
-      start: start.toISOString(),
-      end: end.toISOString(),
+      start: toLocalPreciseString(start),
+      end: toLocalPreciseString(end),
       inputText: formatDateRange(start, end),
     };
   }, [range, getOrderedDates]);
