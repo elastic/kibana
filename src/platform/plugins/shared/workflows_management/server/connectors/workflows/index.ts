@@ -214,19 +214,18 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
           },
         };
       } catch (error) {
+        const fallbackStates = params?.subActionParams?.alertStates;
         return {
           subAction: 'run' as const,
           subActionParams: {
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
             summaryMode: params?.subActionParams?.summaryMode ?? true,
-            alertStates: params?.subActionParams?.alertStates
-              ? {
-                  new: params.subActionParams.alertStates.new !== false,
-                  ongoing: params.subActionParams.alertStates.ongoing === true,
-                  recovered: params.subActionParams.alertStates.recovered === true,
-                }
-              : undefined,
+            alertStates: {
+              new: fallbackStates?.new !== false,
+              ongoing: fallbackStates?.ongoing === true,
+              recovered: fallbackStates?.recovered === true,
+            },
           },
         };
       }
