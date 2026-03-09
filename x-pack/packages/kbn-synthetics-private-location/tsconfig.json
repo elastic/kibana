@@ -18,5 +18,6 @@
   "kbn_references": [
     "@kbn/tooling-log",
     "@kbn/dev-utils",
+    "@kbn/repo-info",
   ]
 }

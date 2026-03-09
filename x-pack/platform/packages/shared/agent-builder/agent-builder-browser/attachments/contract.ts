@@ -11,6 +11,7 @@ import type {
   UnknownAttachment,
   AttachmentVersion,
   UpdateOriginResponse,
+  ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
@@ -26,6 +27,8 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   attachment: TAttachment;
   /** Whether the attachment is being rendered in a sidebar context */
   isSidebar: boolean;
+  /** Data from the screen context attachment, if present in the conversation */
+  screenContext?: ScreenContextAttachmentData;
 }
 
 /**

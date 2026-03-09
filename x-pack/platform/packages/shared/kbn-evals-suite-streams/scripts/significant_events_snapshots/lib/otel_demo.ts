@@ -11,11 +11,38 @@ import execa from 'execa';
 import Path from 'path';
 import { POD_READY_TIMEOUT_S, POD_READY_POLL_INTERVAL_MS, OTEL_DEMO_NAMESPACE } from './constants';
 
-const otelDemoScript = Path.join(REPO_ROOT, 'scripts', 'otel_demo.js');
+const MINIKUBE_CPUS = 4;
+const MINIKUBE_MEMORY = '8g';
 
 interface OtelDemoHandle {
   child: execa.ExecaChildProcess;
   deployedPromise: Promise<void>;
+}
+
+const otelDemoScript = Path.join(REPO_ROOT, 'scripts', 'otel_demo.js');
+
+export async function ensureMinikube(log: ToolingLog): Promise<void> {
+  try {
+    const { stdout } = await execa('minikube', ['status', '--format', '{{.Host}}']);
+    if (stdout.trim() === 'Running') {
+      log.info('minikube is already running');
+      return;
+    }
+  } catch (err: unknown) {
+    const code = (err as { code?: string })?.code;
+    if (code === 'ENOENT') {
+      throw new Error('minikube is not installed. Please install minikube');
+    }
+    // `minikube status` exits non-zero when the cluster is stopped or doesn't exist
+  }
+
+  log.info(
+    `Starting minikube (--cpus=${MINIKUBE_CPUS} --memory=${MINIKUBE_MEMORY}) — this may take a minute...`
+  );
+  await execa('minikube', ['start', `--cpus=${MINIKUBE_CPUS}`, `--memory=${MINIKUBE_MEMORY}`], {
+    stdio: 'inherit',
+  });
+  log.info('minikube started');
 }
 
 export function deployOtelDemo(log: ToolingLog): OtelDemoHandle {
