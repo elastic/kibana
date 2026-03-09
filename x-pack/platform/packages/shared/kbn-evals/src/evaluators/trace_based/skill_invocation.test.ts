@@ -48,14 +48,19 @@ describe('createSkillInvocationEvaluator', () => {
     });
 
     (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
-      columns: [{ name: 'skill_invoked', type: 'long' }],
-      values: [[1]],
+      columns: [
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[1, 1]],
     });
 
     await evaluateWith(evaluator, VALID_TRACE_ID);
 
     const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
     expect(calledQuery).toContain(`trace.id == "${VALID_TRACE_ID}"`);
+    expect(calledQuery).toContain('total_tool_spans = COUNT(*)');
+    expect(calledQuery).toContain('COUNT(');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
   });
@@ -68,8 +73,11 @@ describe('createSkillInvocationEvaluator', () => {
     });
 
     (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
-      columns: [{ name: 'skill_invoked', type: 'long' }],
-      values: [[1]],
+      columns: [
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[2, 1]],
     });
 
     const result = await evaluateWith(evaluator, VALID_TRACE_ID);
@@ -85,8 +93,11 @@ describe('createSkillInvocationEvaluator', () => {
     });
 
     (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
-      columns: [{ name: 'skill_invoked', type: 'long' }],
-      values: [[0]],
+      columns: [
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[2, 0]],
     });
 
     const result = await evaluateWith(evaluator, VALID_TRACE_ID);
@@ -102,13 +113,47 @@ describe('createSkillInvocationEvaluator', () => {
     });
 
     (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
-      columns: [{ name: 'skill_invoked', type: 'long' }],
-      values: [[3]],
+      columns: [
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[4, 3]],
     });
 
     const result = await evaluateWith(evaluator, VALID_TRACE_ID);
 
     expect(result.score).toBe(1);
+  });
+
+  it('should retry until tool spans are visible in the trace data', async () => {
+    const evaluator = createSkillInvocationEvaluator({
+      traceEsClient: mockEsClient,
+      log: mockLog,
+      skillName: 'data-exploration',
+    });
+
+    (mockEsClient.esql.query as jest.Mock)
+      .mockResolvedValueOnce({
+        columns: [
+          { name: 'total_tool_spans', type: 'long' },
+          { name: 'skill_invoked', type: 'long' },
+        ],
+        values: [[0, 0]],
+      })
+      .mockResolvedValueOnce({
+        columns: [
+          { name: 'total_tool_spans', type: 'long' },
+          { name: 'skill_invoked', type: 'long' },
+        ],
+        values: [[3, 1]],
+      });
+
+    const promise = evaluateWith(evaluator, VALID_TRACE_ID);
+    await jest.advanceTimersByTimeAsync(60_000);
+    const result = await promise;
+
+    expect(result.score).toBe(1);
+    expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
   });
 
   it('should include the skill name in the evaluator name', () => {
@@ -147,8 +192,11 @@ describe('createSkillInvocationEvaluator', () => {
     });
 
     (mockEsClient.esql.query as jest.Mock).mockResolvedValue({
-      columns: [{ name: 'skill_invoked', type: 'long' }],
-      values: [[0]],
+      columns: [
+        { name: 'total_tool_spans', type: 'long' },
+        { name: 'skill_invoked', type: 'long' },
+      ],
+      values: [[1, 0]],
     });
 
     const result = await evaluateWith(evaluator, VALID_TRACE_ID);
