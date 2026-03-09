@@ -89,7 +89,7 @@ export interface UserActivityUserInputMetadata {
   indices?: string[];
   /** Time range selected by the user. */
   time?: UserActivityUserInputTimeRange;
-  /** KQL/ES|QL query introduced by the user in the Global Query Bar. */
+  /** KQL/ES|QL query entered by the user in the global search field. */
   global_query?: string;
   /** Array of non-indexed objects describing filters configured by the user. */
   filters?: UserActivityUserInputFilter[];
