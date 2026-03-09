@@ -12,7 +12,8 @@ import userEvent from '@testing-library/user-event';
 import type { RenderOptions } from '@testing-library/react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { LegendValue } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
+import { LegendLayout } from '@kbn/chart-expressions-common';
 
 describe('Legend Settings', () => {
   let defaultProps: LegendSettingsProps;
@@ -153,5 +154,49 @@ describe('Legend Settings', () => {
       [LegendValue.Average, LegendValue.CurrentAndLastValue],
       false
     );
+  });
+
+  it('should show Layout setting for top/bottom outside legends and call onLayoutChange', async () => {
+    const onLayoutChange = jest.fn();
+    await renderLegendSettingsPopover({
+      position: Position.Bottom,
+      location: 'outside',
+      layout: LegendLayout.List,
+      onLayoutChange,
+    });
+
+    expect(screen.getByTestId('lens-legend-layout-btn')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Table' }));
+    expect(onLayoutChange).toHaveBeenCalledWith(LegendLayout.Table);
+  });
+
+  it('should show no layout selection when layout is undefined', async () => {
+    const onLayoutChange = jest.fn();
+    await renderLegendSettingsPopover({
+      position: Position.Bottom,
+      location: 'outside',
+      layout: undefined,
+      onLayoutChange,
+    });
+
+    const listButton = screen.getByRole('button', { name: 'List' });
+    const tableButton = screen.getByRole('button', { name: 'Table' });
+    expect(listButton).not.toHaveAttribute('aria-pressed', 'true');
+    expect(tableButton).not.toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(listButton);
+    expect(onLayoutChange).toHaveBeenCalledWith(LegendLayout.List);
+  });
+
+  it('should show pixel truncation input when list layout is selected', async () => {
+    await renderLegendSettingsPopover({
+      position: Position.Bottom,
+      location: 'outside',
+      layout: LegendLayout.List,
+      onLayoutChange: jest.fn(),
+    });
+
+    expect(screen.getByRole('spinbutton', { name: 'Pixel limit' })).toBeInTheDocument();
+    expect(screen.queryByRole('spinbutton', { name: 'Line limit' })).toBeNull();
   });
 });
