@@ -21,10 +21,7 @@ export interface ChromeStyleState {
 export const createChromeStyleState = (): ChromeStyleState => {
   const chromeStyle = createState<ChromeStyle>('classic');
 
-  const chromeStyle$ = chromeStyle.$.pipe(
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
+  const chromeStyle$ = chromeStyle.$.pipe(distinctUntilChanged(), shareReplay(1));
 
   const setChromeStyle = (style: ChromeStyle) => {
     if (style === chromeStyle.get()) return;

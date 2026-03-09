@@ -21,9 +21,10 @@ export function useHasAppMenu(): boolean {
   const chrome = useChromeService();
   const hasAppMenu$ = useMemo(
     () =>
-      combineLatest([chrome.componentDeps.application.currentActionMenu$, chrome.getAppMenu$()]).pipe(
-        map(([menu, appMenu]) => !!menu || !!appMenu)
-      ),
+      combineLatest([
+        chrome.componentDeps.application.currentActionMenu$,
+        chrome.getAppMenu$(),
+      ]).pipe(map(([menu, appMenu]) => !!menu || !!appMenu)),
     [chrome]
   );
   return useObservable(hasAppMenu$, false);

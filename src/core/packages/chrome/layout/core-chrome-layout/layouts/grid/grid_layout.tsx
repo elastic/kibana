@@ -25,7 +25,11 @@ import {
   AppMenuBar,
   Sidebar,
 } from '@kbn/core-chrome-browser-components';
-import { useChromeStyle, useIsChromeVisible, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
+import {
+  useChromeStyle,
+  useIsChromeVisible,
+  useSidebarWidth,
+} from '@kbn/core-chrome-browser-hooks';
 import {
   useGlobalFooter,
   useHasAppMenu,
