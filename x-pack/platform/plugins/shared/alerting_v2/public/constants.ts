@@ -14,6 +14,9 @@ export const INTERNAL_ALERTING_V2_NOTIFICATION_POLICY_API_PATH =
   '/internal/alerting/v2/notification_policies' as const;
 
 export const paths = {
+  ruleCreate: `${ALERTING_V2_BASE_PATH}/create`,
+  ruleEdit: (id: string) => `${ALERTING_V2_BASE_PATH}/edit/${encodeURIComponent(id)}`,
+  ruleList: ALERTING_V2_BASE_PATH,
   notificationPolicyCreate: `${ALERTING_V2_NOTIFICATION_POLICIES_PATH}/create`,
   notificationPolicyEdit: (id: string) =>
     `${ALERTING_V2_NOTIFICATION_POLICIES_PATH}/edit/${encodeURIComponent(id)}`,

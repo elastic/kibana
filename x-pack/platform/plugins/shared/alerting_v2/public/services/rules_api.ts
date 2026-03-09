@@ -46,4 +46,8 @@ export class RulesApi {
       body: JSON.stringify(payload),
     });
   }
+
+  public async deleteRule(id: string) {
+    await this.http.delete(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
+  }
 }

@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+export const ruleKeys = {
+  all: ['rule'] as const,
+  lists: () => [...ruleKeys.all, 'list'] as const,
+  list: (filters: { page: number; perPage: number }) => [...ruleKeys.lists(), filters] as const,
+  detail: (id: string) => [...ruleKeys.all, 'detail', id] as const,
+  create: () => [...ruleKeys.all, 'create'] as const,
+  update: () => [...ruleKeys.all, 'update'] as const,
+  delete: () => [...ruleKeys.all, 'delete'] as const,
+};
+
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   create: () => [...notificationPolicyKeys.all, 'create'] as const,
