@@ -37,6 +37,18 @@ describe('getDefaultAlertFieldRules', () => {
     );
   });
 
+  it('returns anonymized=true with entity class for host.hostname', () => {
+    const hostHostnameRule = rules.find((r) => r.field === 'host.hostname');
+
+    expect(hostHostnameRule).toEqual(
+      expect.objectContaining({
+        allowed: true,
+        anonymized: true,
+        entityClass: 'HOST_NAME',
+      })
+    );
+  });
+
   it('returns anonymized=true with entity class for user.name', () => {
     const userNameRule = rules.find((r) => r.field === 'user.name');
 
