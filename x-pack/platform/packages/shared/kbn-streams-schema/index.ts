@@ -232,3 +232,5 @@ export {
 } from './src/insights';
 export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
+export { streamsOasDefinitions } from './src/oas_definitions';
+export type { StreamsOasDefinitions } from './src/oas_definitions';
