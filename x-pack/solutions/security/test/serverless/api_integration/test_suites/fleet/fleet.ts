@@ -228,7 +228,8 @@ export default function (ctx: FtrProviderContext) {
         });
       });
 
-      it('it works', async () => {
+      // unskip when https://github.com/elastic/kibana-team/issues/3020 is fixed
+      it.skip('it works', async () => {
         const { body, status } = await supertestWithoutAuth
           .get('/api/fleet/data_streams')
           .set(svlCommonApi.getInternalRequestHeader())
