@@ -213,6 +213,62 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should restore all tabs from a recently closed tab group', async () => {
+      const firstTabQuery = 'from logstash-* | limit 51';
+      const secondTabQuery = 'from logstash-* | limit 52';
+
+      await unifiedTabs.editTabLabel(0, firstTabLabel);
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+      await esql.setEsqlEditorQuery(firstTabQuery);
+      await esql.submitEsqlEditorQuery();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('51');
+
+      await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
+      await unifiedTabs.editTabLabel(1, secondTabLabel);
+      await esql.setEsqlEditorQuery(secondTabQuery);
+      await esql.submitEsqlEditorQuery();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCount()).to.be('52');
+
+      await discover.loadSavedSearch('A Saved Search');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([untitledTabLabel]);
+        const recentlyClosedRootTitles = await unifiedTabs.getRecentlyClosedRootTitles();
+        expect(recentlyClosedRootTitles).to.eql(['2 tabs']);
+
+        const groupTabTitles = await unifiedTabs.getRecentlyClosedGroupTabTitles(0);
+        expect(groupTabTitles).to.eql([firstTabLabel, secondTabLabel]);
+      });
+
+      await unifiedTabs.restoreAllRecentlyClosedTabsFromGroup(0);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await unifiedTabs.getTabLabels()).to.eql([
+          untitledTabLabel,
+          firstTabLabel,
+          secondTabLabel,
+        ]);
+
+        // First restored tab is selected after restore-all.
+        expect(await monacoEditor.getCodeEditorValue()).to.be(firstTabQuery);
+        expect(await discover.getHitCount()).to.be('51');
+      });
+
+      await unifiedTabs.selectTab(2);
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await monacoEditor.getCodeEditorValue()).to.be(secondTabQuery);
+        expect(await discover.getHitCount()).to.be('52');
+      });
+    });
+
     it('should handle recently closed tabs correctly after saving a new discover session', async () => {
       const testTabLabel = 'My test tab';
 
