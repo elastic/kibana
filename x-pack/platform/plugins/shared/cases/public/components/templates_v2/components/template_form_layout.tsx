@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -78,6 +78,11 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+  const [savedValue, setSavedValue] = useState(initialValue);
+
+  useEffect(() => {
+    setSavedValue(initialValue);
+  }, [initialValue]);
 
   const {
     value: yamlValue,
@@ -92,7 +97,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     templateId
   );
 
-  const hasChanges = yamlValue !== initialValue;
+  const hasChanges = yamlValue !== savedValue;
 
   const handleResetClick = useCallback(() => {
     setIsResetModalVisible(true);
@@ -113,6 +118,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
       async (data) => {
         try {
           await onCreate(data);
+          setSavedValue(data.definition);
         } catch (e) {
           setSubmitError(e?.message ?? 'Failed to save template');
         }
