@@ -10,7 +10,7 @@
     "@emotion/react": "^11.0.0",
     "classnames": "2.5.1",
     "react": "^17",
-    "react-markdown": "^6.0.3",
+    "react-markdown": "^10.1.0",
     "react-dom": "~18.2.0",
     "lodash": "^4.17.23",
     "moment": "^2.30.1",
