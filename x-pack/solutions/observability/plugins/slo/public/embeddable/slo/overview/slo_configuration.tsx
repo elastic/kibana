@@ -73,7 +73,7 @@ function SingleSloConfiguration({ onCreate, onCancel }: SingleConfigurationProps
 
     onCreate({
       slo_id: selectedSloDefinition.id,
-      slo_instance_id: hasGroupBy ? selectedInstanceId ?? ALL_VALUE : undefined,
+      slo_instance_id: hasGroupBy ? selectedInstanceId ?? ALL_VALUE : ALL_VALUE,
       remote_name: remoteName,
       overview_mode: 'single',
     });

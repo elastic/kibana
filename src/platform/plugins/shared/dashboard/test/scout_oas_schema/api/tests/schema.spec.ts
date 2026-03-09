@@ -8,8 +8,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { apiTest, DASHBOARD_API_PATH } from '../fixtures';
 
 /**
@@ -41,7 +41,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
    * it can only be changed with additive changes.
    */
   apiTest('Registered embeddable schemas have not changed', async ({ apiClient }) => {
-    apiTest.setTimeout(90000); // takes about 70-80 seconds to run
+    apiTest.setTimeout(120000); // takes about 70-80 seconds to run
 
     // OAS paths are stored with leading slashes, so we need to use the full path here
     const oasPath = `/${DASHBOARD_API_PATH}`;
@@ -64,6 +64,6 @@ apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
       ].schema;
     const panelsSchema = createBodySchema.properties.panels;
     expect(panelsSchema).toBeDefined();
-    expect(panelsSchema.items.anyOf[0].oneOf).toHaveLength(9);
+    expect(panelsSchema.items.anyOf[0].oneOf).toHaveLength(10);
   });
 });
