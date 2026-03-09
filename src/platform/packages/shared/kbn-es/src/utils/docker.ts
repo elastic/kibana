@@ -1092,7 +1092,7 @@ export const LINKED_CLUSTER_NAME_SUFFIX = '-linked';
 export const LINKED_CLUSTER_PORT_OFFSET = 10;
 
 /**
- * Starts a linked ES Serverless cluster for Cross Project Search (CSP).
+ * Starts a linked ES Serverless cluster for Cross Project Search (CPS).
  * Must be called AFTER the origin cluster and UIAM are fully ready.
  * Reuses the same Docker network, ES image, and UIAM service -- does NOT start new UIAM containers.
  */
