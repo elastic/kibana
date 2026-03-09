@@ -98,6 +98,7 @@ function createWiredDefinition({
     queries: [],
     privileges,
     inherited_fields: {},
+    data_stream_exists: true,
     effective_lifecycle: { dsl: { data_retention: '1d' }, from: 'ancestor' },
     effective_settings: {},
     stream: {
