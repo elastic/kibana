@@ -21,10 +21,6 @@ export interface RelatedAlertsByAncestryProps {
    * Values of the kibana.alert.rule.parameters.index field
    */
   indices: string[];
-  /**
-   * Maintain backwards compatibility // TODO remove when possible
-   */
-  scopeId: string;
 }
 
 /**
@@ -33,12 +29,10 @@ export interface RelatedAlertsByAncestryProps {
 export const RelatedAlertsByAncestry: React.VFC<RelatedAlertsByAncestryProps> = ({
   documentId,
   indices,
-  scopeId,
 }) => {
   const { loading, error, dataCount } = useFetchRelatedAlertsByAncestry({
     documentId,
     indices,
-    scopeId,
   });
 
   const text = useMemo(

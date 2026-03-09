@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 
 import { GrokdebuggerRequest } from '../../../models/grokdebugger_request';
@@ -14,11 +15,11 @@ import { handleEsError } from '../../../shared_imports';
 
 import type { KibanaFramework } from '../../../lib/kibana_framework';
 
-const requestBodySchema = schema.object({
+export const requestBodySchema = schema.object({
   pattern: schema.string(),
   rawEvent: schema.string(),
-  // We don't know these key / values up front as they depend on user input
-  customPatterns: schema.object({}, { unknowns: 'allow' }),
+  // Dynamic pattern-name keys with string definitions, e.g. { POSTFIX_QUEUEID: '[0-9A-F]{10,11}' }
+  customPatterns: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
 });
 
 export function registerGrokSimulateRoute(framework: KibanaFramework) {
@@ -47,8 +48,11 @@ export function registerGrokSimulateRoute(framework: KibanaFramework) {
         return response.ok({
           body: grokdebuggerResponse,
         });
-      } catch (error) {
-        return handleEsError({ error, response });
+      } catch (error: unknown) {
+        if (error instanceof errors.ElasticsearchClientError) {
+          return handleEsError({ error, response });
+        }
+        throw error;
       }
     }
   );

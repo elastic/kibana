@@ -1,0 +1,37 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateOriginExample:
+          description: "Example request for linking an attachment to a saved visualization"
+          value:
+            origin:
+              saved_object_id: "abc123"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          updateOriginResponseExample:
+            description: "Example response returning the attachment with updated origin"
+            value:
+              success: true
+              attachment:
+                id: att-123
+                type: visualization
+                current_version: 1
+                versions:
+                  - version: 1
+                    data:
+                      query: "Show monthly sales"
+                      visualization: {}
+                      chart_type: "bar"
+                      esql: "FROM sales | STATS count=COUNT(*) BY month"
+                    created_at: "2025-01-06T10:00:00.000Z"
+                    content_hash: "sha256-xyz"
+                    estimated_tokens: 50
+                description: "Sales chart"
+                active: true
+                origin:
+                  saved_object_id: "abc123"

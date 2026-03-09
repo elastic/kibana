@@ -41,17 +41,30 @@ export const getFileSystemInstructions = async ({
 
   Please refer to each tool's description and schema for more information on how to use it.
 
+  Note: Results from filestore tools called before the last user message will be excluded from the conversation.
+  When needing to access the same data again, you should call the filestore tool again with the same parameters.
+
   ### Types of files
 
   The filestore is used to store different types of files. Each of them represents a different concept in the system.
 
-  #### ${FileEntryType.toolResult}
+  #### Tool results
+
+  File type: "${FileEntryType.toolResult}"
 
   Those are the results from all prior tool calls you performed during the current conversation, exposed
   so that you can access them later when required.
 
   - They are all stored under the "/tool_calls" folder
   - They follow this path convention: "/tool_calls/{tool_id}/{tool_call_id}/{tool_result_id}.json"
+
+  #### Skills
+
+  File type: "${FileEntryType.skill}"
+
+  Skills contained detailed instructions for a specific task.
+
+  - They are all stored under the "/skills" folder
 
   ### Filesystem representation
 

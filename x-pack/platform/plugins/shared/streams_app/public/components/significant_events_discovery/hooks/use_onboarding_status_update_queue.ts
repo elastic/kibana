@@ -24,9 +24,9 @@ export function useOnboardingStatusUpdateQueue(
   const isProcessing = useRef(false);
 
   const aiFeatures = useAIFeatures();
-  const { getOnboardingTaskStatus } = useOnboardingApi(
-    aiFeatures?.genAiConnectors.selectedConnector
-  );
+  const { getOnboardingTaskStatus } = useOnboardingApi({
+    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
+  });
 
   const updateStatuses = useCallback(async (): Promise<void> => {
     await pMap(

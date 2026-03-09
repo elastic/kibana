@@ -25,7 +25,7 @@ And updates:
 
 ## Implement the Connector Spec
 
-Fill in the generated spec stub with actions, handlers, auth config, and tests.
+Fill in the generated spec stub with actions, handlers, auth config, and tests. Additionally, create a `types.ts` file alongside the spec for input schemas and types (see "Input Schemas & Types" below).
 
 ### Auth Type Selection
 
@@ -34,6 +34,52 @@ Fill in the generated spec stub with actions, handlers, auth config, and tests.
 - `'oauth_client_credentials'` — for services that use OAuth 2.0 Client Credentials flow (e.g., Microsoft/Azure services like SharePoint). **Note:** requires multi-field credential input (clientId, clientSecret, tenantId).
 
 **IMPORTANT:** Check which auth types the `buildSecretsFromConnectorSpec` function in `x-pack/platform/plugins/shared/data_sources/server/utils/create_stack_connector.ts` supports before choosing. Currently it only handles `bearer` and `api_key_header` for non-MCP connectors.
+
+### Input Schemas & Types
+
+Define zod schemas and inferred types in a separate `types.ts` file alongside the connector spec. This keeps schemas as the single source of truth for both runtime validation and TypeScript types.
+
+**Path**: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/types.ts`
+
+```typescript
+import { z } from '@kbn/zod/v4';
+
+export const SearchInputSchema = z.object({
+  query: z.string().describe('Search query string'),
+  limit: z.number().optional().describe('Maximum results (default: 20)'),
+});
+export type SearchInput = z.infer<typeof SearchInputSchema>;
+
+export const GetRecordInputSchema = z.object({
+  id: z.string().describe('The record ID'),
+});
+export type GetRecordInput = z.infer<typeof GetRecordInputSchema>;
+```
+
+Then in the connector spec, import and use both the schema (for `input:`) and the type (for the handler signature):
+
+```typescript
+import { SearchInputSchema, GetRecordInputSchema } from './types';
+import type { SearchInput, GetRecordInput } from './types';
+
+export const MyConnector: ConnectorSpec = {
+  actions: {
+    search: {
+      input: SearchInputSchema,
+      handler: async (ctx, input: SearchInput) => { ... },
+    },
+    getRecord: {
+      input: GetRecordInputSchema,
+      handler: async (ctx, input: GetRecordInput) => { ... },
+    },
+  },
+};
+```
+
+This pattern (used by the ServiceNow and Slack connectors):
+- Eliminates drift between schemas and types — `z.infer` derives the type from the schema
+- Keeps the main connector file focused on handler logic
+- Gives handlers full autocomplete without inline `as` casts
 
 ### SubActions
 

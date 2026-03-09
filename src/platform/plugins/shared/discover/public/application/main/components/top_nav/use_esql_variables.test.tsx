@@ -15,7 +15,7 @@ import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
-import type { ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { internalStateActions } from '../../state_management/redux';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
@@ -26,12 +26,14 @@ class MockControlGroupRendererApi {
   inputSubject: BehaviorSubject<{
     initialChildControlState: ControlPanelsState<OptionsListESQLControlState>;
   } | null>;
+  esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
   addNewPanel: jest.Mock;
 
   constructor() {
     this.inputSubject = new BehaviorSubject<{
       initialChildControlState: ControlPanelsState<OptionsListESQLControlState>;
     } | null>(null);
+    this.esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
     this.addNewPanel = jest.fn();
   }
 
@@ -48,6 +50,11 @@ class MockControlGroupRendererApi {
     initialChildControlState: ControlPanelsState<OptionsListESQLControlState>;
   }) {
     this.inputSubject.next(input);
+  }
+
+  // Method to simulate variable changes from the control manager
+  simulateVariables(variables: ESQLControlVariable[]) {
+    this.esqlVariables$.next(variables);
   }
 
   updateInput = jest.fn().mockImplementation(() => {
@@ -148,32 +155,28 @@ describe('useESQLVariables', () => {
       const { toolkit, stateContainer } = await renderUseESQLVariables({
         isEsqlMode: true,
       });
-      const dispatchSpy = jest.spyOn(toolkit.internalState, 'dispatch');
       const fetchSpy = jest.spyOn(stateContainer.dataState, 'fetch');
+      const tabId = toolkit.getCurrentTab().id;
 
       // Simulate initial input from controlGroupAPI
       act(() => {
         mockControlGroupAPI.simulateInput({ initialChildControlState: mockControlState });
       });
 
-      // Assert dispatches happened
       await waitFor(() => {
-        expect(dispatchSpy).toHaveBeenCalledTimes(4);
-        const dispatchCalls = dispatchSpy.mock.calls;
-        dispatchCalls.forEach((call) => {
-          const action = call[0] as { type: string; payload?: unknown };
-          if (action.type === 'internalState/setAttributes') {
-            expect(
-              (action.payload as { attributes: { controlGroupState: unknown } }).attributes
-                .controlGroupState
-            ).toEqual(mockControlState);
-          }
-          if (action.type === 'internalState/setEsqlVariables') {
-            expect((action.payload as { esqlVariables: unknown }).esqlVariables).toEqual(
-              mockNewVariables
-            );
-          }
-        });
+        const tabState = toolkit.internalState.getState().tabs.byId[tabId];
+        expect(tabState.attributes.controlGroupState).toEqual(mockControlState);
+      });
+
+      // Simulate variables published by the control manager
+      act(() => {
+        mockControlGroupAPI.simulateVariables(mockNewVariables);
+      });
+
+      // Assert variables were updated in internal state
+      await waitFor(() => {
+        const tabState = toolkit.internalState.getState().tabs.byId[tabId];
+        expect(tabState.esqlVariables).toEqual(mockNewVariables);
       });
 
       await waitFor(() => {
@@ -291,96 +294,6 @@ describe('useESQLVariables', () => {
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledTimes(1);
       expect(mockOnTextLangQueryChange).not.toHaveBeenCalled();
     });
-
-    it('should handle numeric type coercion for ESQL variable values', async () => {
-      const { toolkit } = await setup();
-      const dispatchSpy = jest.spyOn(toolkit.internalState, 'dispatch');
-
-      await renderUseESQLVariables({
-        toolkit,
-        isEsqlMode: true,
-      });
-
-      // Test case 1: String that can be converted to a number
-      const mockControlWithNumericString = {
-        panel1: {
-          type: 'esqlControl',
-          variable_type: 'values' as ESQLVariableType,
-          variable_name: 'numericVar',
-          selected_options: ['123'], // String that can be converted to number
-          title: 'Numeric Panel',
-          available_options: ['123', '456'],
-          esql_query: '',
-          control_type: 'STATIC_VALUES' as EsqlControlType,
-          order: 0,
-        },
-      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
-
-      act(() => {
-        mockControlGroupAPI.simulateInput({
-          initialChildControlState: mockControlWithNumericString,
-        });
-      });
-
-      await waitFor(() => {
-        const setEsqlVariablesCall = dispatchSpy.mock.calls.find(
-          (call) => (call[0] as { type: string }).type === 'internalState/setEsqlVariables'
-        );
-        expect(setEsqlVariablesCall).toBeTruthy();
-        expect(
-          (setEsqlVariablesCall![0] as unknown as { payload: { esqlVariables: unknown } }).payload
-            .esqlVariables
-        ).toEqual([
-          {
-            key: 'numericVar',
-            type: 'values',
-            value: 123, // Should be converted to number
-          },
-        ]);
-      });
-
-      jest.clearAllMocks();
-
-      // Test case 2: String that cannot be converted to a number
-      const mockControlWithTextString = {
-        panel2: {
-          type: 'esqlControl',
-          variable_type: 'values' as ESQLVariableType,
-          variable_name: 'textVar',
-          selected_options: ['hello'], // String that cannot be converted to number
-          title: 'Text Panel',
-          available_options: ['hello', 'world'],
-          esql_query: '',
-          control_type: 'STATIC_VALUES' as EsqlControlType,
-          order: 0,
-        },
-      } as unknown as ControlPanelsState<OptionsListESQLControlState>;
-
-      act(() => {
-        mockControlGroupAPI.simulateInput({
-          initialChildControlState: mockControlWithTextString,
-        });
-      });
-
-      await waitFor(() => {
-        const setEsqlVariablesCall = dispatchSpy.mock.calls.find(
-          (call) => (call[0] as { type: string }).type === 'internalState/setEsqlVariables'
-        );
-        expect(setEsqlVariablesCall).toBeTruthy();
-        expect(
-          (setEsqlVariablesCall![0] as unknown as { payload: { esqlVariables: unknown } }).payload
-            .esqlVariables
-        ).toEqual([
-          {
-            key: 'textVar',
-            type: 'values',
-            value: 'hello', // Should remain as string
-          },
-        ]);
-      });
-
-      jest.clearAllMocks();
-    });
   });
 
   describe('getActivePanels', () => {
@@ -397,7 +310,7 @@ describe('useESQLVariables', () => {
       expect(activePanels).toEqual(mockControlState);
     });
 
-    it('should return undefined if both currentTab.controlGroupState and savedSearchState.controlGroupJson are empty/invalid', async () => {
+    it('should return undefined if currentTab.controlGroupState is empty/invalid', async () => {
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
       });

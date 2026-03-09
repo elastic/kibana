@@ -40,7 +40,7 @@
       "path": "esbuild",
       "lifecycle": "postinstall",
       "required": true,
-      "reason": "Configures esbuild. Used by @elastic/synthetics"
+      "reason": "Downloads platform-specific esbuild binary. Transitive dependency of Storybook via esbuild-register"
     },
     {
       "path": "geckodriver",
@@ -86,6 +86,12 @@
     },
     {
       "path": "protobufjs",
+      "lifecycle": "postinstall",
+      "required": false,
+      "reason": "Prints version scheme warning - not needed"
+    },
+    {
+      "path": "@opentelemetry/otlp-transformer/node_modules/protobufjs",
       "lifecycle": "postinstall",
       "required": false,
       "reason": "Prints version scheme warning - not needed"
