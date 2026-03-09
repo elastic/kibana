@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction } from '../../../../../types';
+import type { ESQLFunction } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
 import { SignatureAnalyzer } from './signature_analyzer';
 import type { Signature } from '../../../types';
+import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
@@ -144,4 +145,17 @@ export async function getKqlSuggestionsIfApplicable(
   } catch (error) {
     return null;
   }
+}
+
+/** Normalizes preferred expression type option into an array form for downstream checks. */
+export function normalizePreferredExpressionTypes(
+  preferredExpressionType?: PreferredExpressionType | PreferredExpressionType[]
+): PreferredExpressionType[] {
+  if (!preferredExpressionType) {
+    return [];
+  }
+
+  return Array.isArray(preferredExpressionType)
+    ? preferredExpressionType
+    : [preferredExpressionType];
 }

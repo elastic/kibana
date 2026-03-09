@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/shared-ux-router'
+  - '@kbn/expandable-flyout'
 tags:
   - plugin
   - prod

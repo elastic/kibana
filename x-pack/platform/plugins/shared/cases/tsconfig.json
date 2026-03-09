@@ -8,8 +8,7 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "../../../../../typings/**/*",
-    "docs/openapi/**/*.gen.ts"
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -101,7 +100,9 @@
     "@kbn/zod",
     "@kbn/securitysolution-es-utils",
     "@kbn/response-ops-retry-service",
-    "@kbn/openapi-generator"
+    "@kbn/openapi-generator",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows"
   ],
   "exclude": ["target/**/*"]
 }

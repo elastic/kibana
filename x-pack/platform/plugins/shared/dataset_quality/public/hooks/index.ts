@@ -8,6 +8,7 @@
 export * from './use_dataset_quality_table';
 export * from './use_quality_issues_docs_chart';
 export * from './use_redirect_link';
+export * from './use_esql_redirect_link';
 export * from './use_summary_panel';
 export * from './use_create_dataview';
 export * from './use_redirect_link_telemetry';

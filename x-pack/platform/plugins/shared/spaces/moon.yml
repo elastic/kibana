@@ -71,6 +71,10 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/react-query'
   - '@kbn/scout'
+  - '@kbn/es-query'
+  - '@kbn/cps'
+  - '@kbn/cps-common'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

@@ -118,19 +118,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^x-pack\/solutions\/observability\/plugins/,
-        /^package.json/,
-        /^yarn.lock/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites') ||
-      ALL_UI_TEST_SUITES
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
-    }
-
     const aiInfraPaths = [
       /^x-pack\/platform\/packages\/shared\/ai-infra/,
       /^x-pack\/platform\/plugins\/shared\/ai_infra/,
@@ -543,36 +530,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^packages\/kbn-babel-preset/,
-        /^packages\/kbn-repo-file-maps/,
-        /^src\/platform\/packages\/private\/kbn-babel-transform/,
-        /^src\/platform\/packages\/private\/kbn-import-resolver/,
-        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
-        /^src\/platform\/packages\/private\/kbn-repo-packages/,
-        /^src\/platform\/packages\/shared\/kbn-babel-register/,
-        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-repo-info/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-jest')
-    ) {
+    if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-es/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-services/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-ui-services/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-ftr')
-    ) {
+    if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
 

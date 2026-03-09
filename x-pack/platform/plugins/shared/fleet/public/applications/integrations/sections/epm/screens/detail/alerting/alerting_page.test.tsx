@@ -11,6 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
+import { InstallStatus } from '../../../../../types';
 
 const mockUseAuthz = jest.fn();
 const mockExperimentalFeaturesGet = jest.fn();
@@ -47,7 +48,13 @@ jest.mock('../../../../../hooks', () => ({
   useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
 }));
 
+import { useGetPackageInstallStatus } from '../../../../../hooks';
+
 import { AlertingPage } from './alerting_page';
+
+const mockUseGetPackageInstallStatus = useGetPackageInstallStatus as jest.MockedFunction<
+  typeof useGetPackageInstallStatus
+>;
 
 describe('AlertingPage', () => {
   const basePackageInfo = {
@@ -88,6 +95,11 @@ describe('AlertingPage', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockUseGetPackageInstallStatus.mockReturnValue(() => ({
+      status: InstallStatus.installed,
+      version: '1.0.0',
+    }));
 
     mockUseAlertingAssets.mockReturnValue({
       alertingAssets: [
@@ -404,5 +416,16 @@ describe('AlertingPage', () => {
 
     const fleetRuleElements = screen.getAllByText('[System] Fleet rule');
     expect(fleetRuleElements).toHaveLength(1);
+  });
+
+  it('should not redirect to overview when package type is input', async () => {
+    const inputPackageInfo = { ...basePackageInfo, type: 'input' as const };
+    renderComponent(inputPackageInfo);
+
+    await waitFor(() => {
+      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('fleetAlertingReinstallButton')).toBeInTheDocument();
   });
 });
