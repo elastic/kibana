@@ -6,14 +6,13 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { Tool } from '@langchain/core/tools';
 
 export const getElasticsearchPrompt = ({
   nlQuery,
   tools,
 }: {
   nlQuery: string;
-  tools: Tool[];
+  tools: Array<{ name: string; description: string }>;
 }): BaseMessageLike[] => {
   const systemPrompt = `You are an expert Elasticsearch tool caller. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it.
 You **must** call **one** of the available tools. Do not answer the user directly or ask clarifying questions.

@@ -25,6 +25,13 @@ type ToolHandler = (
   esClient: IScopedClusterClient
 ) => Promise<{ response?: any; console_command: string; error?: string }>;
 
+export interface Tool {
+  name: string;
+  description: string;
+  schema: ToolSchema;
+  handler: ToolHandler;
+}
+
 class RestApiTool {
   private readonly operation: OperationObject;
   private readonly name: string;
@@ -163,7 +170,7 @@ class RestApiTool {
   getHandler(): ToolHandler {
     return this.handler;
   }
-  getTool() {
+  getTool(): Tool {
     return {
       handler: this.handler,
       name: this.name,
@@ -189,7 +196,7 @@ export class OpenAPIToolSet {
     return tools;
   }
 
-  getTools() {
+  getTools(): Tool[] {
     return this.tools.map((tool) => tool.getTool());
   }
 

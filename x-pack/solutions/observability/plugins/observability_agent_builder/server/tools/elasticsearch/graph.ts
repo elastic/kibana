@@ -13,7 +13,7 @@ import {
   END,
   Command,
 } from '@langchain/langgraph';
-import { type Tool, tool as toTool } from '@langchain/core/tools';
+import { tool as toTool } from '@langchain/core/tools';
 import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -31,11 +31,9 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { getElasticsearchPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
-import { OpenAPIToolSet, type OperationObject } from '../../utils/openapi_tool_set';
+import { OpenAPIToolSet, type OperationObject, type Tool } from '../../utils/openapi_tool_set';
 import { truncateJsonResponse } from './truncate_response';
-/**
- * Node names in the state graph
- */
+
 const NODE_NAMES = {
   ROUTE_ENTRY: 'route_entry',
   GENERATE_TOOLS: 'generate_tools',
@@ -44,9 +42,6 @@ const NODE_NAMES = {
   EXECUTE_TOOL: 'execute_tool',
 } as const;
 
-/**
- * Confirmation IDs for user prompts
- */
 const CONFIRMATION_IDS = {
   EXECUTE_ACTION: 'execute_action',
 } as const;
@@ -60,7 +55,6 @@ const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   // inner
-  toolsValid: Annotation<boolean>(),
   openapiSpecs: Annotation<unknown[]>(),
   tools: Annotation<Tool[]>(),
   messages: Annotation<BaseMessage[]>({
@@ -75,11 +69,8 @@ const StateAnnotation = Annotation.Root({
 });
 
 export type StateType = typeof StateAnnotation.State;
-type StateManagerType = Pick<StateType, 'nlQuery' | 'toolsValid' | 'openapiSpecs' | 'messages'>;
+type StateManagerType = Pick<StateType, 'nlQuery' | 'openapiSpecs' | 'messages'>;
 
-/**
- * Encapsulates graph context and dependencies
- */
 interface GraphContext {
   core: ObservabilityAgentBuilderCoreSetup;
   modelProvider: ModelProvider;
@@ -90,9 +81,6 @@ interface GraphContext {
   stateManager: ToolStateManager;
 }
 
-/**
- * Detects if an API response requires user confirmation before execution
- */
 const isDangerousOperation = (
   response: AIMessageChunk,
   openApiToolSet: OpenAPIToolSet
@@ -109,35 +97,30 @@ const isDangerousOperation = (
 };
 
 /**
- * Formats confirmation message with API commands
+ * Converts an OpenAPI-based Tool into a LangChain-compatible DynamicStructuredTool,
+ * binding the Elasticsearch client to the tool's handler.
  */
-const buildConfirmationMessage = (commands: string[]): string => {
-  return `Are you sure you want to call these Elasticsearch APIs?\n\n${commands.join('\n')}`;
+const toLangchainTool = (tool: Tool, esClient: IScopedClusterClient) => {
+  return toTool(async (args) => tool.handler(args, esClient), {
+    name: tool.name,
+    description: tool.description,
+    schema: tool.schema,
+  });
 };
 
 /**
- * Creates wrapper tools compatible with LangGraph ToolNode
+ * Checks if a tool can be successfully converted to a LangChain tool.
+ * Attempts conversion via toLangchainTool; returns false if it throws.
  */
-const createExecutableTools = (tools: Tool[], esClient: IScopedClusterClient): any[] => {
-  return tools.map((tool) =>
-    toTool(
-      async (args) =>
-        (tool as Tool & { handler: (args: any, esClient: IScopedClusterClient) => void }).handler(
-          args,
-          esClient
-        ),
-      {
-        name: tool.name,
-        description: tool.description,
-        schema: tool.schema,
-      }
-    )
-  );
+const isValidLangchainTool = (tool: Tool, esClient: IScopedClusterClient): boolean => {
+  try {
+    toLangchainTool(tool, esClient);
+    return true;
+  } catch {
+    return false;
+  }
 };
 
-/**
- * Parses and truncates tool response
- */
 const parseToolResponse = (
   toolMessage: BaseMessage
 ): { name: string; response: unknown; console_command?: string } => {
@@ -179,9 +162,6 @@ export const createElasticsearchToolGraph = async ({
   // TODO make this configurable, we need a platform level setting for the embedding model
   const inferenceId = defaultInferenceEndpoints.ELSER;
 
-  /**
-   * Resolves LLM Tasks plugin from core services
-   */
   const getLlmTasks = async () => {
     const [, plugins] = await core.getStartServices();
     return plugins.llmTasks;
@@ -189,11 +169,6 @@ export const createElasticsearchToolGraph = async ({
 
   const model = await modelProvider.getDefaultModel();
 
-  /**
-   * Routes execution to the appropriate node based on whether
-   * the invocation is fresh (-> generateTools) or resumed after
-   * a user confirmation prompt (-> executeTool or end).
-   */
   const routeEntry = async (state: StateType) => {
     // retrieve the tool's execution state - present only if the execution was resumed
     const resumedState = stateManager.getState<StateManagerType>();
@@ -230,9 +205,6 @@ export const createElasticsearchToolGraph = async ({
     });
   };
 
-  /**
-   * Generates LangChain tools from retrieved OpenAPI specifications
-   */
   const generateTools = async (state: StateType) => {
     events?.reportProgress(progressMessages.generatingTools());
     const llmTasks = await getLlmTasks();
@@ -261,31 +233,22 @@ export const createElasticsearchToolGraph = async ({
 
     const tools = openApiToolSet.getTools();
 
-    // TODO: validate tools
-    if (tools.length > 0) {
-      return {
-        toolsValid: true,
-        openapiSpecs,
-        openApiToolSet,
-        tools,
-      };
-    } else {
-      return {
-        toolsValid: false,
-        error: `Could not dynamically generate tools`,
-      };
-    }
+    return {
+      openapiSpecs,
+      openApiToolSet,
+      tools,
+    };
   };
 
   const terminateIfInvalidTools = async (state: StateType) => {
-    return state.toolsValid ? NODE_NAMES.LLM_SELECT_TOOLS : END;
+    const validTools = state.tools.filter((tool) => isValidLangchainTool(tool, esClient));
+    return validTools.length > 0 ? NODE_NAMES.LLM_SELECT_TOOLS : END;
   };
 
   const askForConfirmation = async (state: StateType) => {
     stateManager.setState({
       openapiSpecs: state.openapiSpecs,
       nlQuery: state.nlQuery,
-      toolsValid: state.toolsValid,
       messages: state.messages,
     });
 
@@ -293,7 +256,9 @@ export const createElasticsearchToolGraph = async ({
     const commands = aiMessage.tool_calls!.map((t) =>
       state.openApiToolSet.getApiCallConsoleCommand(t.name, t.args)
     );
-    const confirmationMessage = buildConfirmationMessage(commands);
+    const confirmationMessage = `Are you sure you want to call these Elasticsearch APIs?\n\n${commands.join(
+      '\n'
+    )}`;
 
     const confirmation = await prompts.askForConfirmation({
       id: CONFIRMATION_IDS.EXECUTE_ACTION,
@@ -304,11 +269,12 @@ export const createElasticsearchToolGraph = async ({
 
   const llmSelectTools = async (state: StateType) => {
     events?.reportProgress(progressMessages.callingElasticsearchAgent());
-    const searchModel = model.chatModel.bindTools(state.tools).withConfig({
+    const tools = state.tools.map((tool) => toLangchainTool(tool, esClient));
+    const searchModel = model.chatModel.bindTools(tools).withConfig({
       tags: ['observability-elasticsearch-tool'],
     });
     const response = await searchModel.invoke(
-      getElasticsearchPrompt({ nlQuery: state.nlQuery, tools: state.tools })
+      getElasticsearchPrompt({ nlQuery: state.nlQuery, tools })
     );
     if (isDangerousOperation(response, state.openApiToolSet)) {
       return new Command({
@@ -329,7 +295,7 @@ export const createElasticsearchToolGraph = async ({
 
   const executeTool = async (state: StateType) => {
     events?.reportProgress(progressMessages.performingElasticsearchTool());
-    const tools = createExecutableTools(state.tools, esClient);
+    const tools = state.tools.map((tool) => toLangchainTool(tool, esClient));
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
     const toolNodeResult = await toolNode.invoke(state.messages);
 
