@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest as base } from '@kbn/scout';
-import { WorkflowsApiService } from './workflows_api_service';
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
+import { spaceTest as spaceBaseTest } from '@kbn/scout';
+import { WorkflowsApiService } from '../../common/apis/workflows';
 
-interface WorkflowsWorkerFixtures {
-  getWorkflowsApi: (roleApiCredentials: RoleApiCredentials) => Promise<WorkflowsApiService>;
+export interface WorkflowsApiServicesFixture extends ApiServicesFixture {
+  workflowsApi: WorkflowsApiService;
 }
 
-export const apiTest = base.extend<{}, WorkflowsWorkerFixtures>({
-  getWorkflowsApi: [
-    async ({ apiClient }, use) => {
-      await use(async (roleApiCredentials) => {
-        return new WorkflowsApiService(apiClient, roleApiCredentials);
-      });
+export const spaceTest = spaceBaseTest.extend<WorkflowsApiServicesFixture>({
+  apiServices: [
+    async (
+      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      use: (extendedApiServices: WorkflowsApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as WorkflowsApiServicesFixture;
+      extendedApiServices.workflowsApi = new WorkflowsApiService(kbnClient);
+      await use(extendedApiServices);
     },
     { scope: 'worker' },
   ],
