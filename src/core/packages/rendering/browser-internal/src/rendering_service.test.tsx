@@ -50,6 +50,21 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
   AppMenuBar: () => <div>App menu!</div>,
   Sidebar: () => <div>Sidebar!</div>,
 }));
+
+const mockChromeVisible$ = new BehaviorSubject(false);
+jest.mock('@kbn/core-chrome-browser-hooks', () => {
+  const { useObservable } = require('@kbn/use-observable');
+  return {
+    useChromeStyle: () => 'classic',
+    useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
+    useSidebarWidth: () => 0,
+  };
+});
+jest.mock('@kbn/core-chrome-browser-hooks/internal', () => ({
+  useGlobalFooter: () => null,
+  useHasAppMenu: () => false,
+  useHasHeaderBanner: () => false,
+}));
 jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
   return {
@@ -112,6 +127,7 @@ describe('RenderingService', () => {
     });
     mockRoots.length = 0;
     mockLegacyRender.mockClear();
+    mockChromeVisible$.next(false);
   });
 
   describe('renderCore', () => {
@@ -155,8 +171,7 @@ describe('RenderingService', () => {
     });
 
     it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', async () => {
-      const isVisible$ = new BehaviorSubject(true);
-      chrome.getIsVisible$.mockReturnValue(isVisible$);
+      mockChromeVisible$.next(true);
       const service = startService();
       await act(async () => {
         service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
@@ -165,10 +180,10 @@ describe('RenderingService', () => {
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
 
-      act(() => isVisible$.next(false));
+      act(() => mockChromeVisible$.next(false));
       expect(appWrapper.className).toEqual('kbnAppWrapper kbnAppWrapper--hiddenChrome');
 
-      act(() => isVisible$.next(true));
+      act(() => mockChromeVisible$.next(true));
       expect(appWrapper.className).toEqual('kbnAppWrapper');
     });
 
