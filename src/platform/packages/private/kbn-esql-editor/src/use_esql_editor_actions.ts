@@ -20,9 +20,7 @@ interface UseEsqlEditorActionsParams {
   onVisorClosed?: () => void;
   starredQueriesService: EsqlStarredQueriesService | null;
   trimmedQuery: string;
-  hasUserDismissedVisorAutoOpen: boolean;
   isVisorOpenRef: React.MutableRefObject<boolean>;
-  setHasUserDismissedVisorAutoOpen: (value: boolean) => void;
   setIsHistoryOpen: (value: boolean) => void;
   setIsCurrentQueryStarred: (value: boolean) => void;
   setIsVisorOpen: (value: boolean) => void;
@@ -37,9 +35,7 @@ export function useEsqlEditorActions({
   onVisorClosed,
   starredQueriesService,
   trimmedQuery,
-  hasUserDismissedVisorAutoOpen,
   isVisorOpenRef,
-  setHasUserDismissedVisorAutoOpen,
   setIsHistoryOpen,
   setIsCurrentQueryStarred,
   setIsVisorOpen,
@@ -54,18 +50,11 @@ export function useEsqlEditorActions({
 } {
   const onToggleVisor = useCallback(() => {
     const isClosingVisor = isVisorOpenRef.current;
-    setHasUserDismissedVisorAutoOpen(!hasUserDismissedVisorAutoOpen);
     setIsVisorOpen(!isVisorOpenRef.current);
     if (isClosingVisor) {
       onVisorClosed?.();
     }
-  }, [
-    hasUserDismissedVisorAutoOpen,
-    isVisorOpenRef,
-    onVisorClosed,
-    setHasUserDismissedVisorAutoOpen,
-    setIsVisorOpen,
-  ]);
+  }, [isVisorOpenRef, onVisorClosed, setIsVisorOpen]);
 
   const onClickQueryHistory = useCallback(
     (isOpen: boolean) => {
