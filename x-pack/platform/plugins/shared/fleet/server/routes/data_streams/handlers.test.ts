@@ -11,7 +11,97 @@ import type { KibanaRequest } from '@kbn/core/server';
 
 import type { FleetRequestHandlerContext } from '../..';
 
-import { getDeprecatedILMCheckHandler } from './handlers';
+jest.mock('../../services/data_streams');
+jest.mock('../../services/epm/packages/get');
+jest.mock('../../services');
+jest.mock('./get_data_streams_query_metadata');
+
+import { dataStreamService } from '../../services/data_streams';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { appContextService } from '../../services';
+
+import { getDeprecatedILMCheckHandler, getListHandler } from './handlers';
+import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
+
+describe('getListHandler', () => {
+  let context: FleetRequestHandlerContext;
+  let response: ReturnType<typeof httpServerMock.createResponseFactory>;
+  let request: jest.Mocked<KibanaRequest>;
+  let mockEsClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+
+  const createDataStreamInfo = (name: string) => ({
+    name,
+    timestamp_field: { name: '@timestamp' },
+    indices: [{ index_name: `${name}-000001`, index_uuid: 'uuid' }],
+    generation: 1,
+    _meta: { managed_by: 'fleet' },
+    status: 'open',
+    template: 'logs',
+    hidden: false,
+  });
+
+  beforeEach(() => {
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    response = httpServerMock.createResponseFactory();
+    request = httpServerMock.createKibanaRequest() as jest.Mocked<KibanaRequest>;
+
+    jest.mocked(appContextService.getConfig).mockReturnValue({
+      internal: { useMeteringApi: true },
+    } as any);
+
+    jest
+      .mocked(dataStreamService.getAllFleetDataStreams)
+      .mockResolvedValue([
+        createDataStreamInfo('logs-nginx.access-default'),
+        createDataStreamInfo('.ds-logs-system-default'),
+      ] as any);
+
+    jest.mocked(dataStreamService.getAllFleetMeteringStats).mockResolvedValue([
+      { name: 'logs-nginx.access-default', num_docs: 1, size_in_bytes: 100 },
+      { name: '.ds-logs-system-default', num_docs: 1, size_in_bytes: 100 },
+    ]);
+
+    jest.mocked(getPackageSavedObjects).mockResolvedValue({
+      saved_objects: [],
+    } as any);
+
+    jest.mocked(getDataStreamsQueryMetadata).mockResolvedValue({
+      maxIngested: Date.now(),
+      namespace: 'default',
+      dataset: 'nginx.access',
+      type: 'logs',
+      serviceNames: [],
+      environments: [],
+    });
+
+    context = {
+      core: {
+        elasticsearch: {
+          client: {
+            asCurrentUser: mockEsClient,
+            asSecondaryAuthUser: mockEsClient,
+          },
+        },
+        savedObjects: {
+          client: {
+            bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          },
+        },
+      },
+    } as unknown as FleetRequestHandlerContext;
+  });
+
+  it('filters out data streams that start with "."', async () => {
+    await getListHandler(context, request, response);
+
+    expect(response.ok).toHaveBeenCalled();
+    const [call] = jest.mocked(response.ok).mock.calls;
+    const body = call[0]?.body as { data_streams: Array<{ index: string }> };
+    expect(body.data_streams).toHaveLength(1);
+    expect(body.data_streams[0].index).toBe('logs-nginx.access-default');
+    expect(body.data_streams.every((ds) => !ds.index.startsWith('.'))).toBe(true);
+  });
+});
 
 describe('getDeprecatedILMCheckHandler', () => {
   let context: FleetRequestHandlerContext;
