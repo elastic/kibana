@@ -123,7 +123,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non standard metadata specific to the kibana usage log, with some standardized optional fields (in the following rows) for normalization purposes. |
+| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log, with some standardized optional fields (in the following rows) for normalization purposes. |
 | `metadata.user_input.indices` | (Optional) Which indices are affected by the user action. |
 | `metadata.user_input.time.start` | (Optional) ISO timestamp of the start of the selected timerange in the date picker. |
 | `metadata.user_input.time.end` | (Optional) ISO timestamp of the end of the selected timerange in the date picker. |
