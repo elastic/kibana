@@ -409,6 +409,18 @@ export async function deleteApmDataStreams(client: Client): Promise<void> {
   }
 }
 
+export async function deleteAllDatasetStreams(client: Client): Promise<void> {
+  for (const pattern of [
+    'logs-rcaeval.*',
+    'metrics-rcaeval.*',
+    'logs-openrca.*',
+    'metrics-openrca.*',
+  ]) {
+    await deleteDataStream(client, pattern);
+  }
+  await deleteApmDataStreams(client);
+}
+
 export function generateHexId(length: number): string {
   const bytes = new Uint8Array(length / 2);
   crypto.getRandomValues(bytes);

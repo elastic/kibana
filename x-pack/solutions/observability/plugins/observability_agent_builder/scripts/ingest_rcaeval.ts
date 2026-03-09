@@ -65,7 +65,7 @@ import {
   printVerifyCommands,
   checkOtlpEndpoint,
   exportTracesViaOtlp,
-  deleteApmDataStreams,
+  deleteAllDatasetStreams,
   INFRA_METRIC_MAPPINGS,
 } from './ingest_utils';
 
@@ -552,10 +552,8 @@ async function main() {
 
   if (opts.clean) {
     const client = await createEsClient(opts.esUrl);
-    await deleteDataStream(client, LOG_INDEX_NAME);
-    await deleteDataStream(client, METRIC_INDEX_NAME);
-    await deleteApmDataStreams(client);
-    console.log('Cleaned: deleted RCAEval data streams and APM data');
+    await deleteAllDatasetStreams(client);
+    console.log('Cleaned: deleted all dataset and APM data streams');
     if (!opts.caseName) return;
   }
 

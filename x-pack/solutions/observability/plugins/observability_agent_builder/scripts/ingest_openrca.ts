@@ -68,7 +68,7 @@ import {
   printVerifyCommands,
   checkOtlpEndpoint,
   exportTracesViaOtlp,
-  deleteApmDataStreams,
+  deleteAllDatasetStreams,
   generateHexId,
   toHexId,
   INFRA_METRIC_MAPPINGS,
@@ -440,9 +440,9 @@ async function streamTraceSpansFromFile(
           return;
         }
 
-        const ts = parseInt(data.timestamp, 10);
-        if (!isNaN(ts) && ts > 1e12) {
-          data.timestamp = String(Math.round(ts / 1000));
+        const raw = parseInt(data.timestamp, 10);
+        if (!isNaN(raw)) {
+          data.timestamp = String(toSeconds(raw, 'milliseconds'));
         }
 
         buffer.push(data);
@@ -788,12 +788,21 @@ async function streamAndIndexMetricFile(
 // Timestamp scanning
 // ---------------------------------------------------------------------------
 
+type TimestampUnit = 'seconds' | 'milliseconds';
+
+function toSeconds(raw: number, unit: TimestampUnit): number {
+  return unit === 'milliseconds' ? Math.round(raw / 1000) : raw;
+}
+
 interface TimestampRange {
   minSec: number;
   maxSec: number;
 }
 
-async function scanTimestampRange(files: string[]): Promise<TimestampRange> {
+async function scanTimestampRange(
+  files: string[],
+  timestampUnit: TimestampUnit
+): Promise<TimestampRange> {
   let minSec = Infinity;
   let maxSec = -Infinity;
 
@@ -803,9 +812,9 @@ async function scanTimestampRange(files: string[]): Promise<TimestampRange> {
         header: true,
         skipEmptyLines: true,
         step: ({ data }: { data: Record<string, string> }) => {
-          let ts = parseInt(data.timestamp, 10);
-          if (!isNaN(ts)) {
-            if (ts > 1e12) ts = Math.round(ts / 1000);
+          const raw = parseInt(data.timestamp, 10);
+          if (!isNaN(raw)) {
+            const ts = toSeconds(raw, timestampUnit);
             if (ts < minSec) minSec = ts;
             if (ts > maxSec) maxSec = ts;
           }
@@ -974,12 +983,8 @@ async function main() {
 
   if (opts.clean) {
     const client = await createEsClient(opts.esUrl);
-    for (const config of Object.values(SYSTEMS)) {
-      await deleteDataStream(client, config.logIndexName);
-      await deleteDataStream(client, config.metricIndexName);
-    }
-    await deleteApmDataStreams(client);
-    console.log('Cleaned: deleted all OpenRCA data streams and APM data');
+    await deleteAllDatasetStreams(client);
+    console.log('Cleaned: deleted all dataset and APM data streams');
     if (!opts.hasExplicitCase) return;
   }
 
@@ -1058,13 +1063,24 @@ async function main() {
       `  Found: ${logFiles.length} log, ${traceFiles.length} trace, ${metricFiles.length} metric CSV files`
     );
 
-    // Scan timestamps -- prefer log files, fall back to trace/metric files
+    // Scan timestamps -- prefer log files, fall back to trace/metric files.
+    // Traces use millisecond timestamps; logs and metrics use seconds.
     let range: TimestampRange | null = null;
     if (logFiles.length > 0 || traceFiles.length > 0 || metricFiles.length > 0) {
       console.log('  Scanning timestamps...');
-      const filesToScan =
-        logFiles.length > 0 ? logFiles : traceFiles.length > 0 ? traceFiles : metricFiles;
-      range = await scanTimestampRange(filesToScan);
+      let filesToScan: string[];
+      let timestampUnit: TimestampUnit;
+      if (logFiles.length > 0) {
+        filesToScan = logFiles;
+        timestampUnit = 'seconds';
+      } else if (traceFiles.length > 0) {
+        filesToScan = traceFiles;
+        timestampUnit = 'milliseconds';
+      } else {
+        filesToScan = metricFiles;
+        timestampUnit = 'seconds';
+      }
+      range = await scanTimestampRange(filesToScan, timestampUnit);
     }
 
     if (!range || range.minSec === Infinity) {
