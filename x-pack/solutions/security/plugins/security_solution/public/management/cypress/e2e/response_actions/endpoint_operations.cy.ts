@@ -10,22 +10,23 @@ import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import {
   openResponseConsoleFromEndpointList,
+  performCommandInputChecks,
+  submitCommand,
   waitForEndpointListPageToBeLoaded,
 } from '../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
+import { checkEndpointListForOnlyUnIsolatedHosts } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 
-describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  beforeEach(() => {
-    login();
-  });
-
-  describe('From endpoint list', () => {
+describe(
+  'Response console - endpoint list and document signing',
+  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -37,7 +38,6 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
           policy = indexedPolicy.integrationPolicies[0];
 
           return enableAllPolicyProtections(policy.id).then(() => {
-            // Create and enroll a new Endpoint host
             return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
@@ -60,10 +60,36 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
       }
     });
 
-    it('should open responder', () => {
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      openResponseConsoleFromEndpointList();
-      ensureOnResponder();
+    beforeEach(() => {
+      login();
     });
-  });
-});
+
+    describe('From endpoint list', () => {
+      it('should open responder', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        openResponseConsoleFromEndpointList();
+        ensureOnResponder();
+      });
+    });
+
+    describe('Document signing:', () => {
+      it('should fail if data tampered', () => {
+        waitForEndpointListPageToBeLoaded(createdHost.hostname);
+        checkEndpointListForOnlyUnIsolatedHosts();
+        openResponseConsoleFromEndpointList();
+        performCommandInputChecks('isolate');
+
+        cy.task('stopEndpointHost', createdHost.hostname);
+        cy.task('getLatestActionDoc').then((previousActionDoc) => {
+          submitCommand();
+          cy.task('tamperActionDoc', previousActionDoc);
+        });
+        cy.task('startEndpointHost', createdHost.hostname);
+
+        const actionValidationErrorMsg =
+          'Fleet action response error: Failed to validate action signature; check Endpoint logs for details';
+        cy.contains(actionValidationErrorMsg, { timeout: 180000 }).should('exist');
+      });
+    });
+  }
+);

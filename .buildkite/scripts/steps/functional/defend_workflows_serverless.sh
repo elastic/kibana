@@ -6,6 +6,7 @@ source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-defend-workflows-serverless-cypress
 export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
+export CYPRESS_SHARE_STACKS=true
 
 source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 

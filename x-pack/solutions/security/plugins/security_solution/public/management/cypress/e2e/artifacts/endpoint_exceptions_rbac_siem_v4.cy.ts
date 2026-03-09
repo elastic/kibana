@@ -9,7 +9,7 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Endpoint Exceptions RBAC',
+  'Endpoint Exceptions RBAC (siemV4)',
   {
     env: {
       ftrConfig: {
@@ -22,6 +22,7 @@ describe(
     },
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
-
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'))
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('endpointExceptions'), {
+    siemVersionFilter: (versions) => versions.filter((v) => v === 'siemV4'),
+  })
 );

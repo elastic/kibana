@@ -42,7 +42,7 @@ export const getCypressBaseConfig = (
       screenshotsFolder:
         '../../../target/kibana-security-solution/public/management/cypress/screenshots',
       trashAssetsBeforeRuns: false,
-      video: true,
+      video: Boolean(process.env.CYPRESS_RETRY_RUN),
       videoCompression: 15,
       videosFolder: '../../../target/kibana-security-solution/public/management/cypress/videos',
       viewportHeight: 1200,

@@ -9,8 +9,9 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Blocklist RBAC',
+  'Blocklist RBAC (siemV4)',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('blocklists'))
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('blocklists'), {
+    siemVersionFilter: (versions) => versions.filter((v) => v === 'siemV4'),
+  })
 );

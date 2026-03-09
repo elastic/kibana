@@ -9,8 +9,9 @@ import { getArtifactsListTestDataForArtifact } from '../../fixtures/artifacts_pa
 import { getArtifactMockedDataTests } from '../../support/artifacts_rbac_runner';
 
 describe(
-  'Trusted apps RBAC',
+  'Host Isolation Exceptions RBAC (siemV2)',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
-
-  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('trustedApps'))
+  getArtifactMockedDataTests(getArtifactsListTestDataForArtifact('hostIsolationExceptions'), {
+    siemVersionFilter: (versions) => versions.filter((v) => v === 'siemV2'),
+  })
 );
