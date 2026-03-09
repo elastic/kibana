@@ -34,13 +34,17 @@ export interface FilterByAssigneesPopoverProps {
    * Callback to handle changing of the assignees selection
    */
   onSelectionChange?: (users: AssigneesIdsSelection[]) => void;
+  /**
+   * Renders a shorter button that matches compressed form controls.
+   */
+  compressed?: boolean;
 }
 
 /**
  * The popover to filter alerts by assigned users
  */
 export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
-  ({ selectedUserIds, onSelectionChange }) => {
+  ({ selectedUserIds, onSelectionChange, compressed = false }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
@@ -82,7 +86,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
     );
 
     return (
-      <EuiFilterGroup>
+      <EuiFilterGroup compressed={compressed}>
         <EuiPopover
           panelPaddingSize="none"
           initialFocus={`[id="${searchInputId}"]`}

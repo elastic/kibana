@@ -138,33 +138,37 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <HeaderPage title={PAGE_TITLE}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <FilterByAssigneesPopover
-                  selectedUserIds={assignees}
-                  onSelectionChange={onAssigneesSelectionChange}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ConnectorFilter
-                  aiConnectors={aiConnectors}
-                  connectorNames={aiConnectorNames}
-                  selectedConnectorNames={selectedConnectorNames}
-                  setSelectedConnectorNames={setSelectedConnectorNames}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
                 <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
-          <FiltersSection
-            dataView={dataView}
-            pageFilters={pageFilters}
-            setStatusFilter={setStatusFilter}
-            setPageFilters={setPageFilters}
-            setPageFilterHandler={setPageFilterHandler}
-          />
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem>
+              <FilterByAssigneesPopover
+                selectedUserIds={assignees}
+                onSelectionChange={onAssigneesSelectionChange}
+                compressed={true}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ConnectorFilter
+                aiConnectors={aiConnectors}
+                connectorNames={aiConnectorNames}
+                selectedConnectorNames={selectedConnectorNames}
+                setSelectedConnectorNames={setSelectedConnectorNames}
+                compressed={true}
+              />
+            </EuiFlexItem>
+            <FiltersSection
+              dataView={dataView}
+              pageFilters={pageFilters}
+              setStatusFilter={setStatusFilter}
+              setPageFilters={setPageFilters}
+              setPageFilterHandler={setPageFilterHandler}
+            />
+          </EuiFlexGroup>
           <EuiSpacer size="l" />
         </Display>
 
