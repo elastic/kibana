@@ -145,9 +145,7 @@ describe('EntityMaintainersClient', () => {
       entityMaintainersRegistry.hasId.mockReturnValue(false);
       const runSoonMock = jest.fn().mockResolvedValue({ id: 'id:default', forced: false });
       const client = createClient({ taskManager: { runSoon: runSoonMock } });
-      const request = createMockRequest();
-
-      await client.runNow('unknown-id', request);
+      await client.runNow('unknown-id');
 
       expect(entityMaintainersRegistry.hasId).toHaveBeenCalledWith('unknown-id');
       expect(runSoonMock).not.toHaveBeenCalled();
@@ -157,9 +155,8 @@ describe('EntityMaintainersClient', () => {
       entityMaintainersRegistry.hasId.mockReturnValue(true);
       const runSoonMock = jest.fn().mockResolvedValue({ id: 'id:default', forced: false });
       const client = createClient({ taskManager: { runSoon: runSoonMock } });
-      const request = createMockRequest();
 
-      await client.runNow('maintainer-a', request);
+      await client.runNow('maintainer-a');
 
       expect(getTaskId).toHaveBeenCalledWith('maintainer-a', 'default');
       expect(runSoonMock).toHaveBeenCalledWith('maintainer-a:default');
@@ -170,9 +167,8 @@ describe('EntityMaintainersClient', () => {
       const client = createClient({
         taskManager: { runSoon: jest.fn().mockRejectedValue(new Error('runSoon failed')) },
       });
-      const request = createMockRequest();
 
-      await expect(client.runNow('maintainer-a', request)).rejects.toThrow('runSoon failed');
+      await expect(client.runNow('maintainer-a')).rejects.toThrow('runSoon failed');
     });
   });
 

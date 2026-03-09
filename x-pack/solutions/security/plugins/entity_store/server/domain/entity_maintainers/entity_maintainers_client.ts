@@ -116,12 +116,12 @@ export class EntityMaintainersClient {
     }
   }
 
-  public async runNow(id: string, _request?: KibanaRequest): Promise<void> {
-    if (!entityMaintainersRegistry.hasId(id)) {
-      return;
-    }
-    this.logger.debug(`Run maintainer now invoked for id: ${id}`);
+  public async runNow(id: string): Promise<void> {
     try {
+      if (!entityMaintainersRegistry.hasId(id)) {
+        this.logger.debug(`Maintainer not found, skipping run now: ${id}`);
+        return;
+      }
       const taskId = getTaskId(id, this.namespace);
       await this.taskManager.runSoon(taskId);
     } catch (error) {

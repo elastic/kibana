@@ -39,7 +39,7 @@ export function registerRunMaintainer(router: EntityStorePluginRouter) {
 
         logger.debug(`Run maintainer API invoked for id: ${id}`);
 
-        await entityMaintainersClient.runNow(id, req);
+        await entityMaintainersClient.runNow(id);
 
         return res.ok({ body: { ok: true } });
       })
