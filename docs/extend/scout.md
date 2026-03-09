@@ -84,9 +84,9 @@ It’s easier to iterate and maintain, and it can enable smarter test selection 
 
 Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 
-#### Q: What happens to my FTR tests? [scout-faq-ftr-tests]
+#### Q: What happens to FTR tests? [scout-faq-ftr-tests]
 
-FTR tests keep running for now, you can start migrating them to Scout.
+Existing FTR tests continue to run, and teams can migrate them to Scout incrementally over time.
 
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
