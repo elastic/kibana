@@ -60,10 +60,6 @@ import { ChangelogModal } from './changelog_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
 import { RollbackButton } from './rollback_button';
-import {
-  PendingUpgradeReviewCallout,
-  DeclinedUpgradeReviewCallout,
-} from './review_upgrade_callout';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -151,15 +147,6 @@ export const SettingsPage: React.FC<Props> = memo(
     const updatePackageMutation = useUpdatePackageMutation();
 
     const { notifications } = useStartServices();
-
-    const rawReview =
-      'installationInfo' in packageInfo
-        ? packageInfo.installationInfo?.pending_upgrade_review
-        : undefined;
-    const pendingUpgradeReview =
-      rawReview && (!rawReview.action || rawReview.action === 'pending') ? rawReview : undefined;
-    const declinedUpgradeReview =
-      rawReview && rawReview.action === 'declined' ? rawReview : undefined;
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -318,22 +305,6 @@ export const SettingsPage: React.FC<Props> = memo(
                       />
                       <EuiSpacer size="l" />
                     </>
-                  )}
-
-                  {pendingUpgradeReview && !!keepPoliciesUpToDateSwitchValue && (
-                    <PendingUpgradeReviewCallout
-                      pkgName={name}
-                      pkgTitle={title}
-                      pendingUpgradeReview={pendingUpgradeReview}
-                    />
-                  )}
-
-                  {declinedUpgradeReview && !!keepPoliciesUpToDateSwitchValue && (
-                    <DeclinedUpgradeReviewCallout
-                      pkgName={name}
-                      pkgTitle={title}
-                      pendingUpgradeReview={declinedUpgradeReview}
-                    />
                   )}
 
                   {(updateAvailable || isUpgradingPackagePolicies) && (

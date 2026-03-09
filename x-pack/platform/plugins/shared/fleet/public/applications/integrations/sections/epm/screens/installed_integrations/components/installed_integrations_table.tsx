@@ -278,32 +278,9 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                         type="warning"
                         color="warning"
                         content={i18n.translate(
-                          'xpack.fleet.installedIntegrations.upgradePausedTooltip',
+                          'xpack.fleet.installedIntegrations.upgradeAvailableTooltip',
                           {
-                            defaultMessage: 'Auto-upgrade to version {version} has been paused.',
-                            values: {
-                              version:
-                                item.installationInfo?.pending_upgrade_review?.target_version,
-                            },
-                          }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                );
-              }
-              if (showDeclinedReview) {
-                return (
-                  <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
-                    {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="warning"
-                        color="warning"
-                        content={i18n.translate(
-                          'xpack.fleet.installedIntegrations.upgradeDeclinedTooltip',
-                          {
-                            defaultMessage: 'Auto-upgrade to version {version} has been declined.',
+                            defaultMessage: 'Auto-upgrade to version {version} is available.',
                             values: {
                               version:
                                 item.installationInfo?.pending_upgrade_review?.target_version,

@@ -42,6 +42,12 @@ jest.mock('../hooks', () => {
   };
 });
 jest.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
+jest.mock(
+  '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status',
+  () => ({
+    scheduleAutoOpenModal: jest.fn(),
+  })
+);
 
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies
@@ -284,6 +290,66 @@ describe('PackagePolicyActionsMenu', () => {
     await waitFor(() => {
       const copyButton = utils.getByTestId('PackagePolicyActionsCopyItem');
       expect(copyButton).not.toBeDisabled();
+    });
+  });
+
+  it('Should show "Review policy upgrade" when hasUpgrade, keepPoliciesUpToDate, and review is declined', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      hasUpgrade: true,
+      keepPoliciesUpToDate: true,
+      pendingUpgradeReview: {
+        target_version: '2.0.0',
+        reason: 'deprecated',
+        created_at: '2026-01-01T00:00:00.000Z',
+        action: 'declined',
+      },
+      package: { name: 'test-pkg', version: '1.0.0', title: 'Test Package' },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      expect(utils.getByTestId('PackagePolicyActionsDeclinedUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
+    });
+  });
+
+  it('Should show standard upgrade button when hasUpgrade but review is not declined', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      hasUpgrade: true,
+      keepPoliciesUpToDate: true,
+      pendingUpgradeReview: {
+        target_version: '2.0.0',
+        reason: 'deprecated',
+        created_at: '2026-01-01T00:00:00.000Z',
+        action: 'pending',
+      },
+      package: { name: 'test-pkg', version: '1.0.0', title: 'Test Package' },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      expect(utils.getByTestId('PackagePolicyActionsUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsDeclinedUpgradeItem')).toBeNull();
+    });
+  });
+
+  it('Should show standard upgrade button when hasUpgrade but keepPoliciesUpToDate is false', async () => {
+    const agentPolicies = createMockAgentPolicies();
+    const packagePolicy = createMockPackagePolicy({
+      hasUpgrade: true,
+      keepPoliciesUpToDate: false,
+      pendingUpgradeReview: {
+        target_version: '2.0.0',
+        reason: 'deprecated',
+        created_at: '2026-01-01T00:00:00.000Z',
+        action: 'declined',
+      },
+      package: { name: 'test-pkg', version: '1.0.0', title: 'Test Package' },
+    });
+    const { utils } = renderMenu({ agentPolicies, packagePolicy });
+    await waitFor(() => {
+      expect(utils.getByTestId('PackagePolicyActionsUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsDeclinedUpgradeItem')).toBeNull();
     });
   });
 });

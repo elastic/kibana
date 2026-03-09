@@ -13,10 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../../../../../../types';
 import { useLink, useAuthz } from '../../../../../../hooks';
-import {
-  PendingUpgradeReviewStatus,
-  DeclinedUpgradeStatus,
-} from '../../../installed_integrations/components/pending_upgrade_review_status';
+import { PendingUpgradeReviewStatus } from '../../../installed_integrations/components/pending_upgrade_review_status';
 
 export const PackagePolicyUpgradeCell: React.FC<{
   packagePolicy: InMemoryPackagePolicy;
@@ -37,17 +34,6 @@ export const PackagePolicyUpgradeCell: React.FC<{
       return (
         <EuiFlexItem grow={false}>
           <PendingUpgradeReviewStatus
-            pkgName={packagePolicy.package?.name ?? ''}
-            pkgTitle={packagePolicy.package?.title ?? ''}
-            pendingUpgradeReview={review}
-          />
-        </EuiFlexItem>
-      );
-    }
-    if (review && review.action === 'declined') {
-      return (
-        <EuiFlexItem grow={false}>
-          <DeclinedUpgradeStatus
             pkgName={packagePolicy.package?.name ?? ''}
             pkgTitle={packagePolicy.package?.title ?? ''}
             pendingUpgradeReview={review}

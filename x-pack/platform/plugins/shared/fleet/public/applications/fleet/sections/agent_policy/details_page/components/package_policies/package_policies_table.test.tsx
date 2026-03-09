@@ -76,6 +76,7 @@ describe('PackagePoliciesTable', () => {
       isPackagePolicyUpgradable: jest.fn().mockReturnValue(hasUpgrade),
       getPackagePolicyUpgradeReview: jest.fn().mockReturnValue(pendingUpgradeReview),
       getKeepPoliciesUpToDate: jest.fn().mockReturnValue(keepPoliciesUpToDate),
+      getUpgradeVersion: jest.fn().mockReturnValue('2.0.0'),
       isLoadingPackages: false,
     });
 
@@ -112,23 +113,6 @@ describe('PackagePoliciesTable', () => {
     await act(async () => {});
 
     expect(result.getByText('Review upgrade')).toBeInTheDocument();
-    expect(result.queryByText('Upgrade')).not.toBeInTheDocument();
-  });
-
-  it('renders resume upgrade when hasUpgrade is true, keepPoliciesUpToDate is true, and review action is declined', async () => {
-    const result = renderTable({
-      hasUpgrade: true,
-      keepPoliciesUpToDate: true,
-      pendingUpgradeReview: {
-        target_version: '2.0.0',
-        reason: 'deprecated',
-        created_at: '2025-01-01T00:00:00Z',
-        action: 'declined',
-      },
-    });
-    await act(async () => {});
-
-    expect(result.getByText('Resume upgrade')).toBeInTheDocument();
     expect(result.queryByText('Upgrade')).not.toBeInTheDocument();
   });
 

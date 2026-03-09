@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { Installation } from '../../common/types';
 
-import { useStartServices } from '../applications/fleet/hooks';
+import { useStartServices } from './use_core';
 
 import { useReviewUpgradeMutation } from './use_request/epm';
 
@@ -63,7 +63,7 @@ export const useUpgradeReviewActions = ({
               title: i18n.translate(
                 'xpack.fleet.upgradeReviewActions.upgradeReviewDismissedTitle',
                 {
-                  defaultMessage: 'Auto-upgrade paused for {title} {version}',
+                  defaultMessage: 'Auto-upgrade declined for {title} {version}',
                   values: { title: pkgTitle, version: targetVersion },
                 }
               ),
@@ -78,25 +78,9 @@ export const useUpgradeReviewActions = ({
 
   const handleReEnable = useCallback(
     (onSuccess?: () => void) => {
-      reviewUpgradeMutation.mutate(
-        { pkgName, action: 'pending', targetVersion },
-        {
-          onSuccess: () => {
-            notifications.toasts.addSuccess({
-              title: i18n.translate(
-                'xpack.fleet.upgradeReviewActions.upgradeReviewReEnabledTitle',
-                {
-                  defaultMessage: 'Upgrade review resumed for {title} {version}',
-                  values: { title: pkgTitle, version: targetVersion },
-                }
-              ),
-            });
-            onSuccess?.();
-          },
-        }
-      );
+      reviewUpgradeMutation.mutate({ pkgName, action: 'pending', targetVersion }, {});
     },
-    [reviewUpgradeMutation, pkgName, pkgTitle, targetVersion, notifications.toasts]
+    [reviewUpgradeMutation, pkgName, targetVersion]
   );
 
   return {

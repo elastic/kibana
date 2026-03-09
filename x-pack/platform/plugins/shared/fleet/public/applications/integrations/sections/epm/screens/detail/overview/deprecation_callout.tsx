@@ -77,27 +77,27 @@ export const DeprecationCallout: React.FC<{
   );
 };
 
-export const DeprecatedFeaturesList: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
-  interface DeprecatedFeature {
-    type: 'input' | 'variable' | 'data stream' | 'policy template';
-    name: string;
-    description: string;
-  }
+interface DeprecatedFeature {
+  type: 'input' | 'variable' | 'data stream' | 'policy template';
+  name: string;
+  description: string;
+}
 
+const deprecatedVars = (
+  vars: Array<{ deprecated?: { description: string }; title?: string; name: string }>
+): DeprecatedFeature[] =>
+  vars
+    .filter((v): v is typeof v & { deprecated: { description: string } } => !!v.deprecated)
+    .map(
+      (v): DeprecatedFeature => ({
+        type: 'variable',
+        name: v.title || v.name,
+        description: v.deprecated.description,
+      })
+    );
+
+const getDeprecatedFeatures = (packageInfo: PackageInfo): DeprecatedFeature[] => {
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
-
-  const deprecatedVars = (
-    vars: Array<{ deprecated?: { description: string }; title?: string; name: string }>
-  ) =>
-    vars
-      .filter((v): v is typeof v & { deprecated: { description: string } } => !!v.deprecated)
-      .map(
-        (v): DeprecatedFeature => ({
-          type: 'variable',
-          name: v.title || v.name,
-          description: v.deprecated.description,
-        })
-      );
 
   const deprecatedPolicyTemplateFeatures = hasIntegrations
     ? []
@@ -144,12 +144,19 @@ export const DeprecatedFeaturesList: React.FC<{ packageInfo: PackageInfo }> = ({
 
   const deprecatedPackageVars = deprecatedVars(packageInfo.vars || []);
 
-  const deprecatedFeatures = [
+  return [
     ...deprecatedPolicyTemplateFeatures,
     ...deprecatedInputFeatures,
     ...deprecatedStreamFeatures,
     ...deprecatedPackageVars,
   ];
+};
+
+const hasDeprecatedFeatures = (packageInfo: PackageInfo): boolean =>
+  getDeprecatedFeatures(packageInfo).length > 0;
+
+export const DeprecatedFeaturesList: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
+  const deprecatedFeatures = getDeprecatedFeatures(packageInfo);
 
   if (deprecatedFeatures.length === 0) {
     return null;
@@ -184,6 +191,10 @@ export const DeprecatedFeaturesList: React.FC<{ packageInfo: PackageInfo }> = ({
 export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
   packageInfo,
 }) => {
+  if (!hasDeprecatedFeatures(packageInfo)) {
+    return null;
+  }
+
   return (
     <>
       <EuiCallOut

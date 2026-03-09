@@ -19,7 +19,6 @@ import {
   EuiModalFooter,
   EuiText,
   useGeneratedHtmlId,
-  EuiToolTip,
   EuiPanel,
   EuiSpacer,
   EuiSkeletonText,
@@ -33,6 +32,10 @@ import type { UpgradeReviewProps } from '../../../../../../../hooks';
 import { DeprecatedFeaturesList } from '../../detail/overview/deprecation_callout';
 
 const autoOpenModalForPackages = new Set<string>();
+
+export const scheduleAutoOpenModal = (pkgName: string) => {
+  autoOpenModalForPackages.add(pkgName);
+};
 
 export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewProps> = React.memo(
   ({ pkgName, pendingUpgradeReview, pkgTitle }) => {
@@ -145,48 +148,6 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
           </EuiModal>
         )}
       </>
-    );
-  }
-);
-
-export const DeclinedUpgradeStatus: React.FunctionComponent<UpgradeReviewProps> = React.memo(
-  ({ pkgName, pkgTitle, pendingUpgradeReview }) => {
-    const targetVersion = pendingUpgradeReview.target_version;
-
-    const { handleReEnable, isLoading } = useUpgradeReviewActions({
-      pkgName,
-      pkgTitle,
-      targetVersion,
-    });
-
-    const onReEnable = useCallback(() => {
-      autoOpenModalForPackages.add(pkgName);
-      handleReEnable();
-    }, [pkgName, handleReEnable]);
-
-    return (
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            position="top"
-            content={i18n.translate(
-              'xpack.fleet.epmInstalledIntegrations.statusUpgradePausedTooltip',
-              {
-                defaultMessage:
-                  'Auto-upgrade to version {version} has been paused. Click to review the changes.',
-                values: { version: pendingUpgradeReview.target_version },
-              }
-            )}
-          >
-            <EuiButton color="primary" onClick={onReEnable} size="s" isLoading={isLoading}>
-              <FormattedMessage
-                id="xpack.fleet.epmInstalledIntegrations.reEnableUpgradeButton"
-                defaultMessage="Resume upgrade"
-              />
-            </EuiButton>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     );
   }
 );
