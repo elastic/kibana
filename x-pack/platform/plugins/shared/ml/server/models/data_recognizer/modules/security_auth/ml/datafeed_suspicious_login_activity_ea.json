@@ -1,5 +1,5 @@
 {
-  "job_id": "auth_rare_user_euid",
+  "job_id": "suspicious_login_activity_ea",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -10,11 +10,6 @@
         {
           "term": {
             "event.category": "authentication"
-          }
-        },
-        {
-          "term": {
-            "event.outcome": "success"
           }
         }
       ],
@@ -33,18 +28,6 @@
             "winlogbeat"
           ]
         }
-      }
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
-    },
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
       }
     }
   }

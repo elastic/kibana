@@ -15,10 +15,10 @@
     ],
     "influencers": [
       "source.ip",
-      "user.entity.id_computed",
       "user.name",
-      "host.entity.id_computed",
-      "host.name"
+      "user.id",
+      "host.name",
+      "host.id"
     ]
   },
   "allow_lazy_open": true,

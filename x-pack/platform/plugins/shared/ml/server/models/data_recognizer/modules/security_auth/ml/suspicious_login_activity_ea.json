@@ -10,15 +10,15 @@
       {
         "detector_description": "Detects high number of authentication attempts for a host.",
         "function": "high_non_zero_count",
-        "partition_field_name": "host.entity.id_computed",
+        "partition_field_name": "host.name",
         "detector_index": 0
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
       "host.name",
-      "user.entity.id_computed",
+      "host.id",
       "user.name",
+      "user.id",
       "source.ip"
     ],
     "model_prune_window": "30d"
