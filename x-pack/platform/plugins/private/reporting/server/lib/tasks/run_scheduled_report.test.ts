@@ -659,11 +659,7 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    const taskPromise = taskRunner.run();
-    setImmediate(() => {
-      mockReporting.pluginStop();
-    });
-    await taskPromise.catch(() => {});
+    await taskRunner.run().catch(() => {});
 
     expect(reportStore.setReportFailed).toHaveBeenCalledWith(
       expect.objectContaining({
