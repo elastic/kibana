@@ -24,7 +24,7 @@ export class AgentConfigurationsPage {
     await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   async getCreateConfigurationButton() {
