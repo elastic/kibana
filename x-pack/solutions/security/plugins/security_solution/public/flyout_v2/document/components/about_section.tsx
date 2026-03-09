@@ -68,11 +68,11 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
           <EuiFlexItem grow={false}>
             <AlertReason hit={hit} onShowFullReason={undefined} />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <AlertStatus hit={hit} />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <MitreAttack hit={hit} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <AlertStatus hit={hit} />
           </EuiFlexItem>
         </>
       ) : null}

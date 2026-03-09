@@ -116,7 +116,7 @@ export const AboutSection = memo(() => {
         />
         <AlertReason hit={hit} onShowFullReason={openAlertReasonPreview} />
         <MitreAttack hit={hit} />
-        <AlertStatus />
+        <AlertStatus hit={hit} />
       </>
     ) : (
       <>
