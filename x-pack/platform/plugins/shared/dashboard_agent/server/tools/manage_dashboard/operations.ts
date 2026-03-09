@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { getRemovedPanels, upsertMarkdownPanel, type VisualizationFailure } from './utils';
 
@@ -21,12 +22,19 @@ export const upsertMarkdownOperationSchema = z.object({
   markdownContent: z.string().describe('Markdown content for the dashboard summary panel.'),
 });
 
+const attachmentWithGridSchema = z.object({
+  attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
+  grid: panelGridSchema.describe(
+    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
+  ),
+});
+
 export const addPanelsFromAttachmentsOperationSchema = z.object({
   operation: z.literal('add_panels_from_attachments'),
-  attachmentIds: z
-    .array(z.string())
+  items: z
+    .array(attachmentWithGridSchema)
     .min(1)
-    .describe('Attachment ids to resolve into dashboard panels.'),
+    .describe('Visualization attachments to add, each with its dashboard grid layout.'),
 });
 
 export const removePanelsOperationSchema = z.object({
@@ -104,15 +112,21 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_panels_from_attachments': {
-        const attachmentPanels = await resolvePanelsFromAttachments(operation.attachmentIds);
-        if (attachmentPanels.panels.length > 0) {
-          nextDashboardData = {
-            ...nextDashboardData,
-            panels: [...nextDashboardData.panels, ...attachmentPanels.panels],
-          };
-          onPanelsAdded(attachmentPanels.panels);
+        for (const item of operation.items) {
+          const result = await resolvePanelsFromAttachments([item.attachmentId]);
+          const panelsWithGrid: AttachmentPanel[] = result.panels.map((panel) => ({
+            ...panel,
+            grid: item.grid,
+          }));
+          if (panelsWithGrid.length > 0) {
+            nextDashboardData = {
+              ...nextDashboardData,
+              panels: [...nextDashboardData.panels, ...panelsWithGrid],
+            };
+            onPanelsAdded(panelsWithGrid);
+          }
+          failures.push(...result.failures);
         }
-        failures.push(...attachmentPanels.failures);
         break;
       }
 
