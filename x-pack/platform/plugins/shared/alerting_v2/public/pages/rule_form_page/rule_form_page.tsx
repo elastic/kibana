@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiCallOut, EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
@@ -13,9 +13,11 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
+import { useQueryClient } from '@kbn/react-query';
 import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { ruleKeys } from '../../hooks/query_key_factory';
 import { paths } from '../../constants';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
@@ -87,6 +89,7 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
   const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
+  const queryClient = useQueryClient();
 
   const ruleFormServices = useMemo(
     () => ({
@@ -99,9 +102,14 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
     [http, data, dataViews, notifications, application]
   );
 
-  const onSuccess = () => {
+  const onSuccess = useCallback(() => {
+    // Invalidate cached rule data so the next edit fetches fresh data
+    queryClient.invalidateQueries(ruleKeys.lists());
+    if (ruleId) {
+      queryClient.invalidateQueries(ruleKeys.detail(ruleId));
+    }
     navigateToUrl(basePath.prepend(paths.ruleList));
-  };
+  }, [queryClient, ruleId, navigateToUrl, basePath]);
 
   const onCancel = () => {
     navigateToUrl(basePath.prepend(paths.ruleList));
