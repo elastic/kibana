@@ -9,15 +9,17 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type {
-  EntityMaintainerStatus,
-  EntityMaintainerTaskMethod,
-  RegisterEntityMaintainerConfig,
+import {
+  EntityMaintainerTaskStatus,
+  type EntityMaintainerStatus,
+  type EntityMaintainerTaskMethod,
+  type RegisterEntityMaintainerConfig,
 } from './types';
 import { TasksConfig } from '../config';
 import { EntityStoreTaskType } from '../constants';
 import type { EntityStoreCoreSetup } from '../../types';
 import { entityMaintainersRegistry } from './entity_maintainers_registry';
+import { CRUDClient } from '../../domain/crud';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
@@ -48,7 +50,7 @@ export async function scheduleEntityMaintainerTask({
       id: getTaskId(id, namespace),
       taskType: getTaskType(id),
       schedule: { interval },
-      state: { namespace },
+      state: { namespace, taskStatus: EntityMaintainerTaskStatus.STARTED },
       params: {},
     },
     { request }
@@ -96,6 +98,13 @@ export function registerEntityMaintainerTask({
                 };
               }
 
+              if (currentStatus.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
+                logger.debug(`Entity maintainer task is stopped, skipping run`);
+                return {
+                  state: currentStatus,
+                };
+              }
+
               const maintainerStatus: EntityMaintainerStatus = {
                 metadata: {
                   runs: currentStatus?.metadata?.runs || 0,
@@ -104,7 +113,15 @@ export function registerEntityMaintainerTask({
                   namespace: currentStatus?.namespace || currentStatus?.metadata?.namespace,
                 },
                 state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
+                taskStatus: currentStatus?.taskStatus ?? EntityMaintainerTaskStatus.STARTED,
               };
+
+              const esClient = start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+              const crudClient = new CRUDClient({
+                logger,
+                esClient,
+                namespace: maintainerStatus.metadata.namespace,
+              });
 
               return await runEntityMaintainerTask({
                 currentStatus: maintainerStatus,
@@ -113,7 +130,8 @@ export function registerEntityMaintainerTask({
                 setup,
                 run,
                 abortController,
-                esClient: start.elasticsearch.client.asScoped(fakeRequest).asCurrentUser,
+                esClient,
+                crudClient,
               });
             },
           }),
@@ -133,6 +151,7 @@ async function runEntityMaintainerTask({
   run,
   abortController,
   esClient,
+  crudClient,
 }: {
   currentStatus: EntityMaintainerStatus;
   fakeRequest: KibanaRequest;
@@ -141,6 +160,7 @@ async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
 }): Promise<{ state: EntityMaintainerStatus }> {
   try {
     const isFirstRun = currentStatus.metadata.runs === 0;
@@ -152,6 +172,7 @@ async function runEntityMaintainerTask({
         logger,
         fakeRequest,
         esClient,
+        crudClient,
       });
     }
     logger.debug(`Executing run`);
@@ -161,6 +182,7 @@ async function runEntityMaintainerTask({
       logger,
       fakeRequest,
       esClient,
+      crudClient,
     });
     currentStatus.metadata.lastSuccessTimestamp = new Date().toISOString();
   } catch (err) {
@@ -175,7 +197,67 @@ async function runEntityMaintainerTask({
   };
 }
 
+async function updateTaskStatus({
+  taskManager,
+  taskId,
+  taskStatus,
+  request,
+}: {
+  taskManager: TaskManagerStartContract;
+  taskId: string;
+  taskStatus: EntityMaintainerTaskStatus;
+  request: KibanaRequest;
+}): Promise<void> {
+  await taskManager.bulkUpdateState([taskId], (state) => ({ ...state, taskStatus }), { request });
+}
+
 export async function stopEntityMaintainer({
+  taskManager,
+  id,
+  namespace,
+  logger,
+  request,
+}: {
+  taskManager: TaskManagerStartContract;
+  id: string;
+  namespace: string;
+  logger: Logger;
+  request: KibanaRequest;
+}): Promise<void> {
+  const taskId = getTaskId(id, namespace);
+  await updateTaskStatus({
+    taskManager,
+    taskId,
+    taskStatus: EntityMaintainerTaskStatus.STOPPED,
+    request,
+  });
+  logger.debug(`Stopped entity maintainer task: ${taskId}`);
+}
+
+export async function startEntityMaintainer({
+  taskManager,
+  id,
+  namespace,
+  logger,
+  request,
+}: {
+  taskManager: TaskManagerStartContract;
+  id: string;
+  namespace: string;
+  logger: Logger;
+  request: KibanaRequest;
+}): Promise<void> {
+  const taskId = getTaskId(id, namespace);
+  await updateTaskStatus({
+    taskManager,
+    taskId,
+    taskStatus: EntityMaintainerTaskStatus.STARTED,
+    request,
+  });
+  logger.debug(`Start entity maintainer task: ${taskId}`);
+}
+
+export async function removeEntityMaintainer({
   taskManager,
   id,
   namespace,
@@ -188,5 +270,5 @@ export async function stopEntityMaintainer({
 }): Promise<void> {
   const taskId = getTaskId(id, namespace);
   await taskManager.removeIfExists(taskId);
-  logger.debug(`removed entity maintainer task: ${taskId}`);
+  logger.debug(`Removed entity maintainer task: ${taskId}`);
 }
