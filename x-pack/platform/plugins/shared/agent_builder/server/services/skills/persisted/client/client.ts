@@ -15,7 +15,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { SkillStorage } from './storage';
-import { createStorage } from './storage';
+import { createStorage, skillIndexName } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
 import type { SkillDocument, SkillPersistedDefinition } from './types';
 
@@ -50,26 +50,30 @@ export const createClient = ({
   esClient: ElasticsearchClient;
 }): SkillClient => {
   const storage = createStorage({ logger, esClient });
-  return new SkillClientImpl({ space, storage, logger });
+  return new SkillClientImpl({ space, storage, logger, esClient });
 };
 
 class SkillClientImpl implements SkillClient {
   private readonly space: string;
   private readonly storage: SkillStorage;
   private readonly logger: Logger;
+  private readonly esClient: ElasticsearchClient;
 
   constructor({
     space,
     storage,
     logger,
+    esClient,
   }: {
     space: string;
     storage: SkillStorage;
     logger: Logger;
+    esClient: ElasticsearchClient;
   }) {
     this.space = space;
     this.storage = storage;
     this.logger = logger;
+    this.esClient = esClient;
   }
 
   async get(id: string): Promise<SkillPersistedDefinition> {
@@ -174,7 +178,8 @@ class SkillClientImpl implements SkillClient {
   }
 
   async deleteByPluginId(pluginId: string): Promise<void> {
-    await this.storage.getClient().deleteByQuery({
+    await this.esClient.deleteByQuery({
+      index: `${skillIndexName}*`,
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space), { term: { plugin_id: pluginId } }],
