@@ -12,24 +12,6 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ---
 
-## App wrapper — `getRenderAppWrapper`
-
-**Changes:** Wraps the entire Discover app (React providers, banners).
-
-**Use when:** You need profile-specific context, theme, or messaging.
-
-**Returns:** `FunctionComponent<PropsWithChildren<{}>>`
-
-**Screenshot:**
-![App wrapper example](./docs/extension_points/get_render_app_wrapper.png)
-
-**Implementation examples:**
-- [Security root profile](profile_providers/security/security_root_profile/profile.tsx)
-- [Observability root profile](profile_providers/observability/observability_root_profile/profile.tsx)
-- [Example root profile](profile_providers/example/example_root_profile/profile.tsx)
-
----
-
 ## Default app state — `getDefaultAppState`
 
 **Changes:** Initial columns, row height, breakdown field, chart visibility.
@@ -184,11 +166,11 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 ### Doc viewer — `getDocViewer`
 
-**Changes:** Flyout title and tabs (add/modify).
+**Changes:** Flyout title, custom header, and tabs (add/modify).
 
-**Use when:** Add "Related events", "Stack trace", "Analysis".
+**Use when:** Add "Related events", "Stack trace", "Analysis", or custom header section.
 
-**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry }`
+**Returns:** `{ title?, docViewsRegistry(prev) => DocViewsRegistry, renderHeader?(props) => ReactElement }`
 
 **Screenshot:**
 ![Doc viewer example](./docs/extension_points/get_doc_viewer.png)
@@ -198,6 +180,7 @@ A concise, non-technical map of the Discover Profile extension points (what they
 - [Traces document profile](profile_providers/observability/traces_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability document profile](profile_providers/observability/observability_document_profile/document_profile/accessors/doc_viewer.tsx)
 - [Observability root profile](profile_providers/observability/observability_root_profile/accessors/get_doc_viewer.tsx)
+- [Example data source profile with custom header](profile_providers/example/example_data_source_profile/profile.tsx)
 
 ---
 

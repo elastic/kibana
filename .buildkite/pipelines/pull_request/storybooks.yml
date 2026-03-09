@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
-    cancel_on_build_failing: true
     label: 'Build Storybooks'
     agents:
       machineType: n2-standard-8

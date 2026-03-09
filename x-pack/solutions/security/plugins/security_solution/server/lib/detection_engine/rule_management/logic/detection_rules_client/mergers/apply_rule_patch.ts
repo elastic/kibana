@@ -6,7 +6,7 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { addEcsToRequiredFields } from '../../../../../../../common/detection_engine/rule_management/utils';
 import type {
   EqlRule,

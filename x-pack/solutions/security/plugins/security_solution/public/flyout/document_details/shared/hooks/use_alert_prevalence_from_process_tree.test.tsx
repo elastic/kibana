@@ -71,11 +71,15 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     hookResult = renderHook(() =>
       useAlertPrevalenceFromProcessTree({
         documentId: 'documentId',
-        isActiveTimeline: true,
         indices: [],
       })
     );
 
+    expect(useQuery).toHaveBeenCalledWith(
+      ['getAlertPrevalenceFromProcessTree', null, 'index'],
+      expect.any(Function),
+      expect.any(Object)
+    );
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.alertIds).toEqual(undefined);
@@ -98,7 +102,6 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     hookResult = renderHook(() =>
       useAlertPrevalenceFromProcessTree({
         documentId: 'documentId',
-        isActiveTimeline: true,
         indices: [],
       })
     );
@@ -128,7 +131,6 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     hookResult = renderHook(() =>
       useAlertPrevalenceFromProcessTree({
         documentId: 'documentId',
-        isActiveTimeline: true,
         indices: [],
       })
     );
@@ -154,7 +156,6 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     hookResult = renderHook(() =>
       useAlertPrevalenceFromProcessTree({
         documentId: 'documentId',
-        isActiveTimeline: true,
         indices: [],
       })
     );

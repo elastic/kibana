@@ -83,7 +83,8 @@
       "automaticImport",
       "serverless",
       "agentBuilder",
-      "llmTasks"
+      "llmTasks",
+      "cps"
     ],
     "requiredBundles": [
       "esUiShared",
