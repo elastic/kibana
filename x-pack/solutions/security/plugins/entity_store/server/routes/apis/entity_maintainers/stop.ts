@@ -16,7 +16,7 @@ import { maintainerIdParamsSchema } from './utils/validator';
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP}/{id}`,
+      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP}`,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -39,7 +39,7 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
 
         logger.debug(`Stop maintainer API invoked for id: ${id}`);
 
-        await entityMaintainersClient.stop(id);
+        await entityMaintainersClient.stop(id, req);
 
         return res.ok({ body: { ok: true } });
       })

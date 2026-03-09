@@ -1691,6 +1691,8 @@
           "AlertingKibanaPrivilege",
           " | undefined; manual_run?: ",
           "AlertingKibanaPrivilege",
+          " | undefined; manage_rule_settings?: ",
+          "AlertingKibanaPrivilege",
           " | undefined; } | undefined; alert?: { all?: ",
           "AlertingKibanaPrivilege",
           " | undefined; read?: ",

@@ -13,9 +13,10 @@ import type {
   TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
+import { getActiveDatasourceIdFromDoc } from '../../utils';
 
 export function getStateManagementForInlineEditing(
-  activeDatasourceId: 'formBased' | 'textBased',
+  initialDatasourceId: 'formBased' | 'textBased',
   getAttributes: () => TypedLensSerializedState['attributes'],
   updateAttributes: (
     newAttributes: TypedLensSerializedState['attributes'],
@@ -31,6 +32,7 @@ export function getStateManagementForInlineEditing(
     visualizationType?: string
   ) => {
     const viz = getAttributes();
+    const activeDatasourceId = getActiveDatasourceIdFromDoc(viz) ?? initialDatasourceId;
     const datasourceStates: DatasourceStates = {
       [activeDatasourceId]: {
         isLoading: false,
