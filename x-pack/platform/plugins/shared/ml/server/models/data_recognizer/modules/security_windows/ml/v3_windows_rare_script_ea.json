@@ -1,23 +1,25 @@
 {
+  "description": "Security: Windows - Looks for rare powershell scripts that may indicate execution of malware, or persistence mechanisms.",
   "groups": [
-    "security",
-    "windows"
+    "windows",
+    "powershell",
+    "security"
   ],
-  "description": "Security: Windows - Looks for rare and unusual Windows service names which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare service names.",
+        "detector_description": "Detects rare powershell scripts via hash.",
         "function": "rare",
-        "by_field_name": "winlog.event_data.ServiceName",
+        "by_field_name": "powershell.file.script_block_hash",
         "detector_index": 0
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
       "host.name",
-      "winlog.event_data.ServiceName"
+      "host.id",
+      "user.name",
+      "event.module"
     ]
   },
   "allow_lazy_open": true,
@@ -29,7 +31,7 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Unusual Windows Service",
+    "security_app_display_name": "Rare Powershell Script",
     "managed": true,
     "job_revision": 4
   }

@@ -15,11 +15,11 @@
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
       "host.name",
+      "host.id",
       "process.name",
-      "user.entity.id_computed",
-      "user.name"
+      "user.name",
+      "event.module"
     ]
   },
   "allow_lazy_open": true,

@@ -43,123 +43,123 @@
   },
   "jobs": [
     {
-      "id": "v3_windows_anomalous_service_euid",
-      "file": "v3_windows_anomalous_service_euid.json"
+      "id": "v3_windows_anomalous_service_ea",
+      "file": "v3_windows_anomalous_service_ea.json"
     },
     {
-      "id": "v3_windows_rare_user_runas_event_euid",
-      "file": "v3_windows_rare_user_runas_event_euid.json"
+      "id": "v3_windows_rare_user_runas_event_ea",
+      "file": "v3_windows_rare_user_runas_event_ea.json"
     },
     {
-      "id": "v3_windows_rare_user_type10_remote_login_euid",
-      "file": "v3_windows_rare_user_type10_remote_login_euid.json"
+      "id": "v3_windows_rare_user_type10_remote_login_ea",
+      "file": "v3_windows_rare_user_type10_remote_login_ea.json"
     },
     {
-      "id": "v3_rare_process_by_host_windows_euid",
-      "file": "v3_rare_process_by_host_windows_euid.json"
+      "id": "v3_rare_process_by_host_windows_ea",
+      "file": "v3_rare_process_by_host_windows_ea.json"
     },
     {
-      "id": "v3_windows_anomalous_network_activity_euid",
-      "file": "v3_windows_anomalous_network_activity_euid.json"
+      "id": "v3_windows_anomalous_network_activity_ea",
+      "file": "v3_windows_anomalous_network_activity_ea.json"
     },
     {
-      "id": "v3_windows_anomalous_path_activity_euid",
-      "file": "v3_windows_anomalous_path_activity_euid.json"
+      "id": "v3_windows_anomalous_path_activity_ea",
+      "file": "v3_windows_anomalous_path_activity_ea.json"
     },
     {
-      "id": "v3_windows_anomalous_process_all_hosts_euid",
-      "file": "v3_windows_anomalous_process_all_hosts_euid.json"
+      "id": "v3_windows_anomalous_process_all_hosts_ea",
+      "file": "v3_windows_anomalous_process_all_hosts_ea.json"
     },
     {
-      "id": "v3_windows_anomalous_process_creation_euid",
-      "file": "v3_windows_anomalous_process_creation_euid.json"
+      "id": "v3_windows_anomalous_process_creation_ea",
+      "file": "v3_windows_anomalous_process_creation_ea.json"
     },
     {
-      "id": "v3_windows_anomalous_user_name_euid",
-      "file": "v3_windows_anomalous_user_name_euid.json"
+      "id": "v3_windows_anomalous_user_name_ea",
+      "file": "v3_windows_anomalous_user_name_ea.json"
     },
     {
-      "id": "v3_windows_rare_metadata_process_euid",
-      "file": "v3_windows_rare_metadata_process_euid.json"
+      "id": "v3_windows_rare_metadata_process_ea",
+      "file": "v3_windows_rare_metadata_process_ea.json"
     },
     {
-      "id": "v3_windows_rare_metadata_user_euid",
-      "file": "v3_windows_rare_metadata_user_euid.json"
+      "id": "v3_windows_rare_metadata_user_ea",
+      "file": "v3_windows_rare_metadata_user_ea.json"
     },
     {
-      "id": "v3_windows_anomalous_script_euid",
-      "file": "v3_windows_anomalous_script_euid.json"
+      "id": "v3_windows_anomalous_script_ea",
+      "file": "v3_windows_anomalous_script_ea.json"
     },
     {
-      "id": "v3_windows_rare_script_euid",
-      "file": "v3_windows_rare_script_euid.json"
+      "id": "v3_windows_rare_script_ea",
+      "file": "v3_windows_rare_script_ea.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-v3_windows_anomalous_service_euid",
-      "file": "datafeed_v3_windows_anomalous_service_euid.json",
-      "job_id": "v3_windows_anomalous_service_euid"
+      "id": "datafeed-v3_windows_anomalous_service_ea",
+      "file": "datafeed_v3_windows_anomalous_service_ea.json",
+      "job_id": "v3_windows_anomalous_service_ea"
     },
     {
-      "id": "datafeed-v3_windows_rare_user_runas_event_euid",
-      "file": "datafeed_v3_windows_rare_user_runas_event_euid.json",
-      "job_id": "v3_windows_rare_user_runas_event_euid"
+      "id": "datafeed-v3_windows_rare_user_runas_event_ea",
+      "file": "datafeed_v3_windows_rare_user_runas_event_ea.json",
+      "job_id": "v3_windows_rare_user_runas_event_ea"
     },
     {
-      "id": "datafeed-v3_windows_rare_user_type10_remote_login_euid",
-      "file": "datafeed_v3_windows_rare_user_type10_remote_login_euid.json",
-      "job_id": "v3_windows_rare_user_type10_remote_login_euid"
+      "id": "datafeed-v3_windows_rare_user_type10_remote_login_ea",
+      "file": "datafeed_v3_windows_rare_user_type10_remote_login_ea.json",
+      "job_id": "v3_windows_rare_user_type10_remote_login_ea"
     },
     {
-      "id": "datafeed-v3_rare_process_by_host_windows_euid",
-      "file": "datafeed_v3_rare_process_by_host_windows_euid.json",
-      "job_id": "v3_rare_process_by_host_windows_euid"
+      "id": "datafeed-v3_rare_process_by_host_windows_ea",
+      "file": "datafeed_v3_rare_process_by_host_windows_ea.json",
+      "job_id": "v3_rare_process_by_host_windows_ea"
     },
     {
-      "id": "datafeed-v3_windows_anomalous_network_activity_euid",
-      "file": "datafeed_v3_windows_anomalous_network_activity_euid.json",
-      "job_id": "v3_windows_anomalous_network_activity_euid"
+      "id": "datafeed-v3_windows_anomalous_network_activity_ea",
+      "file": "datafeed_v3_windows_anomalous_network_activity_ea.json",
+      "job_id": "v3_windows_anomalous_network_activity_ea"
     },
     {
-      "id": "datafeed-v3_windows_anomalous_path_activity_euid",
-      "file": "datafeed_v3_windows_anomalous_path_activity_euid.json",
-      "job_id": "v3_windows_anomalous_path_activity_euid"
+      "id": "datafeed-v3_windows_anomalous_path_activity_ea",
+      "file": "datafeed_v3_windows_anomalous_path_activity_ea.json",
+      "job_id": "v3_windows_anomalous_path_activity_ea"
     },
     {
-      "id": "datafeed-v3_windows_anomalous_process_all_hosts_euid",
-      "file": "datafeed_v3_windows_anomalous_process_all_hosts_euid.json",
-      "job_id": "v3_windows_anomalous_process_all_hosts_euid"
+      "id": "datafeed-v3_windows_anomalous_process_all_hosts_ea",
+      "file": "datafeed_v3_windows_anomalous_process_all_hosts_ea.json",
+      "job_id": "v3_windows_anomalous_process_all_hosts_ea"
     },
     {
-      "id": "datafeed-v3_windows_anomalous_process_creation_euid",
-      "file": "datafeed_v3_windows_anomalous_process_creation_euid.json",
-      "job_id": "v3_windows_anomalous_process_creation_euid"
+      "id": "datafeed-v3_windows_anomalous_process_creation_ea",
+      "file": "datafeed_v3_windows_anomalous_process_creation_ea.json",
+      "job_id": "v3_windows_anomalous_process_creation_ea"
     },
     {
-      "id": "datafeed-v3_windows_anomalous_user_name_euid",
-      "file": "datafeed_v3_windows_anomalous_user_name_euid.json",
-      "job_id": "v3_windows_anomalous_user_name_euid"
+      "id": "datafeed-v3_windows_anomalous_user_name_ea",
+      "file": "datafeed_v3_windows_anomalous_user_name_ea.json",
+      "job_id": "v3_windows_anomalous_user_name_ea"
     },
     {
-      "id": "datafeed-v3_windows_rare_metadata_process_euid",
-      "file": "datafeed_v3_windows_rare_metadata_process_euid.json",
-      "job_id": "v3_windows_rare_metadata_process_euid"
+      "id": "datafeed-v3_windows_rare_metadata_process_ea",
+      "file": "datafeed_v3_windows_rare_metadata_process_ea.json",
+      "job_id": "v3_windows_rare_metadata_process_ea"
     },
     {
-      "id": "datafeed-v3_windows_rare_metadata_user_euid",
-      "file": "datafeed_v3_windows_rare_metadata_user_euid.json",
-      "job_id": "v3_windows_rare_metadata_user_euid"
+      "id": "datafeed-v3_windows_rare_metadata_user_ea",
+      "file": "datafeed_v3_windows_rare_metadata_user_ea.json",
+      "job_id": "v3_windows_rare_metadata_user_ea"
     },
     {
-      "id": "datafeed-v3_windows_anomalous_script_euid",
-      "file": "datafeed_v3_windows_anomalous_script_euid.json",
-      "job_id": "v3_windows_anomalous_script_euid"
+      "id": "datafeed-v3_windows_anomalous_script_ea",
+      "file": "datafeed_v3_windows_anomalous_script_ea.json",
+      "job_id": "v3_windows_anomalous_script_ea"
     },
     {
-      "id": "datafeed-v3_windows_rare_script_euid",
-      "file": "datafeed_v3_windows_rare_script_euid.json",
-      "job_id": "v3_windows_rare_script_euid"
+      "id": "datafeed-v3_windows_rare_script_ea",
+      "file": "datafeed_v3_windows_rare_script_ea.json",
+      "job_id": "v3_windows_rare_script_ea"
     }
   ],
   "tags": [

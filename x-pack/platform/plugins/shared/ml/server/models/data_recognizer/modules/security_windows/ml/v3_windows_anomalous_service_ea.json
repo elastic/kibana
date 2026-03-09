@@ -1,25 +1,23 @@
 {
-  "description": "Security: Windows - Looks for activity in unusual paths that may indicate execution of malware or persistence mechanisms. Windows payloads often execute from user profile paths.",
   "groups": [
     "security",
     "windows"
   ],
+  "description": "Security: Windows - Looks for rare and unusual Windows service names which may indicate execution of unauthorized services, malware, or persistence mechanisms.",
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare working directories.",
+        "detector_description": "Detects rare service names.",
         "function": "rare",
-        "by_field_name": "process.working_directory",
+        "by_field_name": "winlog.event_data.ServiceName",
         "detector_index": 0
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
       "host.name",
-      "process.name",
-      "user.entity.id_computed",
-      "user.name"
+      "host.id",
+      "winlog.event_data.ServiceName"
     ]
   },
   "allow_lazy_open": true,
@@ -31,7 +29,7 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Unusual Windows Path Activity",
+    "security_app_display_name": "Unusual Windows Service",
     "managed": true,
     "job_revision": 4
   }

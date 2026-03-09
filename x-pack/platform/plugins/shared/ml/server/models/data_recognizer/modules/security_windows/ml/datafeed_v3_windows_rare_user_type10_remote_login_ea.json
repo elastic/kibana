@@ -1,5 +1,5 @@
 {
-  "job_id": "v3_windows_anomalous_process_all_hosts_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -9,12 +9,7 @@
       "filter": [
         {
           "term": {
-            "event.category": "process"
-          }
-        },
-        {
-          "term": {
-            "event.type": "start"
+            "winlog.event_data.LogonType": "10"
           }
         }
       ],
@@ -24,16 +19,16 @@
             "should": [
               {
                 "match": {
-                  "host.os.family": {
-                    "query": "windows",
+                  "event.type": {
+                    "query": "authentication_success",
                     "operator": "OR"
                   }
                 }
               },
               {
                 "match": {
-                  "host.os.type": {
-                    "query": "windows",
+                  "event.action": {
+                    "query": "logged-in",
                     "operator": "OR"
                   }
                 }
@@ -57,18 +52,6 @@
             "winlogbeat"
           ]
         }
-      }
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
-    },
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
       }
     }
   }

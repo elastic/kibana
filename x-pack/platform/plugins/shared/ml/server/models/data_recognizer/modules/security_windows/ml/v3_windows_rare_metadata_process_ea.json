@@ -1,5 +1,5 @@
 {
-  "description": "Security: Windows - Looks for unusual process relationships which may indicate execution of malware or persistence mechanisms.",
+  "description": "Security: Windows - Looks for anomalous access to the metadata service by an unusual process. The metadata service may be targeted in order to harvest credentials or user data scripts containing secrets.",
   "groups": [
     "security",
     "windows"
@@ -8,31 +8,30 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare processes per parent process.",
+        "detector_description": "Detects rare process names.",
         "function": "rare",
         "by_field_name": "process.name",
-        "partition_field_name": "process.parent.name",
         "detector_index": 0
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
-      "host.name",
       "process.name",
-      "user.entity.id_computed",
-      "user.name"
+      "host.name",
+      "host.id",
+      "user.name",
+      "event.module"
     ]
   },
   "allow_lazy_open": true,
   "analysis_limits": {
-    "model_memory_limit": "256mb"
+    "model_memory_limit": "32mb"
   },
   "data_description": {
     "time_field": "@timestamp"
   },
   "custom_settings": {
     "created_by": "ml-module-security-windows-v3",
-    "security_app_display_name": "Anomalous Windows Process Creation",
+    "security_app_display_name": "Unusual Windows Process Calling the Metadata Service",
     "managed": true,
     "job_revision": 4
   }
