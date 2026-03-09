@@ -72,6 +72,22 @@ export const chatCompleteBaseSchema = schema.object({
           aggregateBy: schema.maybe(schema.string()),
         })
       ),
+      anonymization: schema.maybe(
+        schema.object({
+          profileId: schema.maybe(schema.string()),
+          replacementsId: schema.maybe(schema.string()),
+          target: schema.maybe(
+            schema.object({
+              targetType: schema.oneOf([
+                schema.literal('data_view'),
+                schema.literal('index_pattern'),
+                schema.literal('index'),
+              ]),
+              targetId: schema.string(),
+            })
+          ),
+        })
+      ),
       attributes: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     })
   ),

@@ -6,3 +6,5 @@
  */
 
 export { dataExplorationSkill } from './data_exploration_skill';
+export { visualizationCreationSkill } from './visualization_creation_skill';
+export { registerSkills } from './register_skills';
