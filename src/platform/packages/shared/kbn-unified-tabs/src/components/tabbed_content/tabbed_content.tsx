@@ -224,15 +224,21 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           return { ...omit(item, 'closedAt'), id: newItem.id, restoredFromId: item.id };
         });
 
+        if (restoredItems.length === 0) {
+          return prevState;
+        }
+
         const nextSelectedItem = restoredItems[0] ?? prevState.selectedItem;
         if (nextSelectedItem) {
           tabsBarApi.current?.moveFocusToNextSelectedItem(nextSelectedItem);
         }
 
-        onEBTEvent({
-          [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
-          [TabsEventDataKeys.TAB_ID]: itemsToRestore[0].id,
-          [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+        restoredItems.forEach((restoredItem) => {
+          onEBTEvent({
+            [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName.tabSelectRecentlyClosed,
+            [TabsEventDataKeys.TAB_ID]: restoredItem.restoredFromId ?? restoredItem.id,
+            [TabsEventDataKeys.TOTAL_TABS_OPEN]: prevState.items.length,
+          });
         });
 
         return {
