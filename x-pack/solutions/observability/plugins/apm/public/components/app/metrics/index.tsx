@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,8 +18,13 @@ import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboard } from './static_dashboard/helper';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
+import { CodeBasedMetricsDashboard } from './metrics_dashboard';
+import { getOtelOtherJavaPanels } from './metrics_dashboard/panels/jvm_panels';
 
 export function Metrics() {
+  const location = useLocation();
+  const useCodeBasedDashboard = new URLSearchParams(location.search).get('metricsView') === 'code';
+
   const { agentName, runtimeName, serverlessType, telemetrySdkName, telemetrySdkLanguage } =
     useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
@@ -26,8 +32,15 @@ export function Metrics() {
 
   const hasDashboardFile = hasDashboard({ agentName, telemetrySdkName, telemetrySdkLanguage });
 
+  const indexPattern = apmIndices?.metric ?? dataView?.getIndexPattern() ?? '';
+  const codeBasedPanels = useMemo(() => getOtelOtherJavaPanels(indexPattern), [indexPattern]);
+
   if (isAWSLambda) {
     return <ServerlessMetrics />;
+  }
+
+  if (useCodeBasedDashboard && dataView) {
+    return <CodeBasedMetricsDashboard panels={codeBasedPanels} dataView={dataView} />;
   }
 
   if (!hasDashboardFile && !isElasticAgentName(agentName ?? '')) {
