@@ -284,21 +284,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // as `index`
           agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
-          const validationResult = await runExecutionValidation({
-            params,
-            inputIndex,
-            ruleName: rule.name,
-            scopedClusterClient: services.scopedClusterClient,
-            runtimeMappings,
-            primaryTimestamp,
-            secondaryTimestamp,
-            ruleExecutionLogger,
-            isServerless: isServerless ?? false,
-          });
+          const { skipExecution, warnings, frozenIndicesQueriedCount } =
+            await runExecutionValidation({
+              params,
+              inputIndex,
+              ruleName: rule.name,
+              scopedClusterClient: services.scopedClusterClient,
+              runtimeMappings,
+              primaryTimestamp,
+              secondaryTimestamp,
+              ruleExecutionLogger,
+              isServerless: isServerless ?? false,
+            });
 
-          const skipExecution = validationResult.skipExecution ?? false;
-          const frozenIndicesQueriedCount = validationResult.frozenIndicesQueriedCount ?? 0;
-          wrapperWarnings.push(...validationResult.warnings);
+          wrapperWarnings.push(...warnings);
 
           const {
             tuples,
