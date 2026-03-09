@@ -294,5 +294,4 @@ describe('ESQLEditor', () => {
       expect(screen.getByText('Client warning example')).toBeInTheDocument();
     });
   });
-
 });
