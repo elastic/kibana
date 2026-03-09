@@ -424,6 +424,7 @@ export const getTopNavConfig = (
                 ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                legacyEditorOriginatingApp: VisualizeConstants.APP_ID,
                 originatingApp,
                 title: visInstance?.panelTitle || vis.title,
                 visTypeTitle: vis.type.title,

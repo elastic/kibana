@@ -632,6 +632,7 @@ export type VisualizeEditorContext<T extends LensConfiguration = LensConfigurati
   savedObjectId?: string;
   embeddableId?: string;
   vizEditorOriginatingAppUrl?: string;
+  legacyEditorOriginatingApp?: string;
   originatingApp?: string;
   isVisualizeAction: boolean;
   searchQuery?: Query;

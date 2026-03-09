@@ -80,9 +80,10 @@ export const VisualizationTableList = ({
     closeNewVisModal.current = visualizations.showNewVisModal({
       originatingApp: currentApp,
       originatingPath: window.location.hash,
+      breadcrumbTitle,
       outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
     });
-  }, [visualizations, core.application]);
+  }, [visualizations, core.application, breadcrumbTitle]);
 
   useEffect(() => {
     return () => {
