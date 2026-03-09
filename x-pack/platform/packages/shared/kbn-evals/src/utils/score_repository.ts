@@ -61,7 +61,6 @@ export interface EvaluationScoreDocument {
     repetition_index: number;
     output?: unknown | null;
     model: Model;
-    output: unknown;
   };
 
   evaluator: {

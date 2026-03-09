@@ -503,6 +503,7 @@ export function createEvaluateDataset({
       {
         dataset,
         task: async ({ input, output: expected }) => {
+          if (!input) throw new Error('Missing input for task');
           totalExamples++;
           const SEP = '═'.repeat(60);
           log.info(`[Task] Prompt: "${input.prompt}"`);
