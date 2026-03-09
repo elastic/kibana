@@ -803,8 +803,9 @@ async function scanTimestampRange(files: string[]): Promise<TimestampRange> {
         header: true,
         skipEmptyLines: true,
         step: ({ data }: { data: Record<string, string> }) => {
-          const ts = parseInt(data.timestamp, 10);
+          let ts = parseInt(data.timestamp, 10);
           if (!isNaN(ts)) {
+            if (ts > 1e12) ts = Math.round(ts / 1000);
             if (ts < minSec) minSec = ts;
             if (ts > maxSec) maxSec = ts;
           }
