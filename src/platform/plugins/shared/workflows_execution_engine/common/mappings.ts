@@ -13,6 +13,7 @@ export const PLUGIN_NAME = 'Workflows Execution Engine';
 
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_CONCURRENCY_SEMAPHORE_INDEX = '.workflows-concurrency-semaphore';
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
@@ -58,6 +59,21 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       type: 'keyword',
     },
     concurrencyGroupKey: {
+      type: 'keyword',
+    },
+  },
+};
+
+export const WORKFLOWS_CONCURRENCY_SEMAPHORE_INDEX_MAPPINGS: MappingTypeMapping = {
+  dynamic: false,
+  properties: {
+    concurrencyGroupKey: {
+      type: 'keyword',
+    },
+    spaceId: {
+      type: 'keyword',
+    },
+    activeSlots: {
       type: 'keyword',
     },
   },

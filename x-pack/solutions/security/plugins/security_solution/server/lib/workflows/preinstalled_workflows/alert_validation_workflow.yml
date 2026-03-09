@@ -44,7 +44,7 @@ triggers:
 settings:
   concurrency: 
     strategy: queue
-    max: 10
+    max: 7
     maxQueueSize: 10000
     key: "alert.validation"
 
@@ -640,6 +640,8 @@ steps:
                 Use available tools to gather required context such as details about related alerts or other events.
 
                 Missing context lowers confidence but must not change classification.
+
+                Don't use any tools. Just reason about the alert and the context.
                 </epistemic_framework>
 
                 <reasoning_process>
@@ -745,8 +747,8 @@ steps:
             create-conversation: true
             on-failure:
               retry:
-                max-attempts: 3
-                delay: "10s"
+                max-attempts: 10
+                delay: "30s"
             with:
               message: "{{ steps.build_agent_message.output.message }}"
               attachments:

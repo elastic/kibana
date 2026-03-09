@@ -34,6 +34,7 @@ import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { ConcurrencySemaphoreRepository } from './repositories/concurrency_semaphore_repository';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
@@ -71,6 +72,7 @@ export class WorkflowsExecutionEnginePlugin
   private readonly logger: Logger;
   private readonly config: WorkflowsExecutionEngineConfig;
   private concurrencyManager!: ConcurrencyManager;
+  private concurrencySemaphoreRepository!: ConcurrencySemaphoreRepository;
   private workflowTaskManager!: WorkflowTaskManager;
   private workflowExecutionRepository!: WorkflowExecutionRepository;
   private setupDependencies?: SetupDependencies;
@@ -184,7 +186,7 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                 });
               } finally {
-                await this.promoteNextQueuedIfNeeded(workflowRunId, spaceId, fakeRequest).catch(
+                await this.releaseSlotAndPromote(workflowRunId, spaceId, fakeRequest).catch(
                   (err) =>
                     this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
                 );
@@ -268,7 +270,7 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                 });
               } finally {
-                await this.promoteNextQueuedIfNeeded(workflowRunId, spaceId, fakeRequest).catch(
+                await this.releaseSlotAndPromote(workflowRunId, spaceId, fakeRequest).catch(
                   (err) =>
                     this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
                 );
@@ -481,7 +483,7 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                 });
               } finally {
-                await this.promoteNextQueuedIfNeeded(
+                await this.releaseSlotAndPromote(
                   workflowExecution.id as string,
                   workflowExecution.spaceId as string,
                   fakeRequest
@@ -517,14 +519,16 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const concurrencySemaphoreRepository = new ConcurrencySemaphoreRepository(esClient);
     this.workflowTaskManager = workflowTaskManager;
     this.workflowExecutionRepository = workflowExecutionRepository;
+    this.concurrencySemaphoreRepository = concurrencySemaphoreRepository;
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
-      workflowExecutionRepository
+      workflowExecutionRepository,
+      concurrencySemaphoreRepository
     );
 
     const dependencies: ContextDependencies = {
@@ -663,7 +667,7 @@ export class WorkflowsExecutionEnginePlugin
             meteringService: this.meteringService,
           });
         } finally {
-          await this.promoteNextQueuedIfNeeded(
+          await this.releaseSlotAndPromote(
             workflowExecution.id as string,
             workflowExecution.spaceId || 'default',
             request
@@ -816,8 +820,8 @@ export class WorkflowsExecutionEnginePlugin
       // QUEUED and PENDING executions may have no TM task — cancel directly.
       // QUEUED never had a task; PENDING may be a zombie (promotion succeeded but
       // task scheduling failed). Either way, the task hasn't started running, so
-      // a direct status transition is safe. Then promote the next queued execution
-      // to fill the freed slot.
+      // a direct status transition is safe. Then release the semaphore slot (if held)
+      // and promote the next queued execution to fill the freed slot.
       if (
         workflowExecution.status === ExecutionStatus.QUEUED ||
         workflowExecution.status === ExecutionStatus.PENDING
@@ -834,8 +838,22 @@ export class WorkflowsExecutionEnginePlugin
           },
           { refresh: 'wait_for' }
         );
+        // PENDING executions hold a semaphore slot; QUEUED do not
+        if (
+          workflowExecution.status === ExecutionStatus.PENDING &&
+          workflowExecution.concurrencyGroupKey &&
+          workflowExecution.workflowDefinition?.settings?.concurrency?.strategy === 'queue'
+        ) {
+          await concurrencySemaphoreRepository
+            .releaseSlot(workflowExecution.concurrencyGroupKey, spaceId, workflowExecutionId)
+            .catch((err) =>
+              this.logger.error(
+                `Failed to release semaphore slot for cancelled PENDING execution ${workflowExecutionId}: ${err}`
+              )
+            );
+        }
         if (request) {
-          await this.promoteNextQueuedIfNeeded(workflowExecutionId, spaceId, request).catch((err) =>
+          await this.releaseSlotAndPromote(workflowExecutionId, spaceId, request).catch((err) =>
             this.logger.error(`Promotion failed after cancelling ${workflowExecutionId}: ${err}`)
           );
         }
@@ -974,31 +992,60 @@ export class WorkflowsExecutionEnginePlugin
 
       return canProceed;
     } catch (error) {
-      // Best-effort concurrency enforcement: log error but allow execution to proceed
-      // This prevents a single cancellation failure from blocking new executions
       const errorMessage = error instanceof Error ? error.message : String(error);
+      const strategy =
+        workflowExecution.workflowDefinition?.settings?.concurrency?.strategy;
+
+      if (strategy === 'queue' && workflowExecution.id) {
+        // Queue strategy must not bypass the limit on error — queue the execution
+        // so it can be promoted later when a slot frees up.
+        this.logger.warn(
+          `Concurrency enforcement error for queue-strategy execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}): ${errorMessage}. Queueing execution instead of bypassing limit.`
+        );
+        await this.workflowExecutionRepository?.updateWorkflowExecution({
+          id: workflowExecution.id,
+          status: ExecutionStatus.QUEUED,
+        });
+        return false;
+      }
+
+      // For drop/cancel-in-progress strategies, best-effort: allow execution to
+      // proceed so a transient ES error doesn't block new work entirely.
       this.logger.debug(
         `Failed to enforce concurrency limits for workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}): ${errorMessage}. Execution will proceed without concurrency enforcement.`
       );
       if (error instanceof Error) {
         this.logger.debug(`Concurrency enforcement error stack: ${error.stack}`);
       }
-      return true; // On error, allow execution to proceed
+      return true;
     }
   }
 
   /**
-   * After an execution completes (success or failure), checks whether there are queued
-   * executions for the same concurrency group that can now be promoted and scheduled.
+   * Releases the semaphore slot held by a completed/failed execution and promotes
+   * queued executions to fill freed slots. Replaces the old search-based
+   * promoteNextQueuedIfNeeded with semaphore-based slot management.
    *
-   * Early-returns for non-queue workflows so there's zero overhead for drop/cancel-in-progress.
+   * Flow:
+   * 1. Release the completed execution's semaphore slot (atomic, no search needed)
+   * 2. Fetch QUEUED executions ordered FIFO
+   * 3. For each, atomically acquire a semaphore slot
+   * 4. If acquired, promote QUEUED → PENDING and schedule a TM task
+   * 5. If scheduling fails, release the slot and revert to QUEUED
+   *
+   * Early-returns for non-queue workflows so there's zero overhead for
+   * drop/cancel-in-progress strategies.
    */
-  private async promoteNextQueuedIfNeeded(
+  private async releaseSlotAndPromote(
     workflowRunId: string,
     spaceId: string,
     fakeRequest: KibanaRequest
   ): Promise<void> {
-    if (!this.workflowExecutionRepository || !this.workflowTaskManager) {
+    if (
+      !this.workflowExecutionRepository ||
+      !this.workflowTaskManager ||
+      !this.concurrencySemaphoreRepository
+    ) {
       return;
     }
 
@@ -1012,33 +1059,35 @@ export class WorkflowsExecutionEnginePlugin
       return;
     }
 
+    const groupKey = execution.concurrencyGroupKey;
     const max = concurrency.max ?? 1;
 
-    // Conditionally exclude the triggering execution from the active count:
-    // - Terminal (COMPLETED/FAILED/…): exclude it, because the ES search index may not yet
-    //   reflect the status update (near-real-time lag) and would still count it as active.
-    // - Non-terminal (WAITING for resume, etc.): do NOT exclude — it still occupies a slot.
-    const excludeId = TerminalExecutionStatuses.includes(execution.status)
-      ? workflowRunId
-      : undefined;
-    const activeIds = await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
-      execution.concurrencyGroupKey,
-      spaceId,
-      excludeId
-    );
-    const availableSlots = max - activeIds.length;
-
-    if (availableSlots <= 0) {
-      return;
+    // Step 1: Release the completing execution's semaphore slot
+    if (TerminalExecutionStatuses.includes(execution.status)) {
+      await this.concurrencySemaphoreRepository.releaseSlot(groupKey, spaceId, workflowRunId);
     }
 
+    // Step 2: Fetch candidates from the queue (grab a few more than max to allow for
+    // concurrent promoters on other nodes — extras will simply fail to acquire a slot)
     const queued = await this.workflowExecutionRepository.getQueuedExecutionsByConcurrencyGroup(
-      execution.concurrencyGroupKey,
+      groupKey,
       spaceId,
-      availableSlots
+      max
     );
 
+    // Step 3–5: For each queued execution, try to acquire a slot and promote
     for (const exec of queued) {
+      const acquired = await this.concurrencySemaphoreRepository.tryAcquireSlot(
+        groupKey,
+        spaceId,
+        exec.id,
+        max
+      );
+
+      if (!acquired) {
+        break; // All slots occupied — remaining queued items can't proceed
+      }
+
       const result = await this.workflowExecutionRepository.promoteQueuedExecution(exec.id);
       if (result === 'updated') {
         try {
@@ -1052,6 +1101,14 @@ export class WorkflowsExecutionEnginePlugin
           this.logger.error(
             `Failed to schedule promoted execution ${exec.id}, reverting to QUEUED: ${err}`
           );
+          // Release the slot we just acquired and revert status
+          await this.concurrencySemaphoreRepository
+            .releaseSlot(groupKey, spaceId, exec.id)
+            .catch((releaseErr) =>
+              this.logger.error(
+                `Failed to release semaphore slot for reverted execution ${exec.id}: ${releaseErr}`
+              )
+            );
           await this.workflowExecutionRepository
             .updateWorkflowExecution(
               { id: exec.id, status: ExecutionStatus.QUEUED },
@@ -1061,6 +1118,21 @@ export class WorkflowsExecutionEnginePlugin
               this.logger.error(`Failed to revert execution ${exec.id} to QUEUED: ${revertErr}`)
             );
         }
+      } else {
+        // Execution was no longer QUEUED — either promoted by another concurrent
+        // promoter (PENDING/RUNNING) or cancelled/completed.
+        // Only release the semaphore slot if the execution is terminal. If it's
+        // still active, the slot is legitimately held by the other promoter and
+        // releasing it would create a phantom free slot, allowing over-promotion.
+        const current = await this.workflowExecutionRepository.getWorkflowExecutionById(
+          exec.id,
+          spaceId
+        );
+        if (!current || TerminalExecutionStatuses.includes(current.status)) {
+          await this.concurrencySemaphoreRepository
+            .releaseSlot(groupKey, spaceId, exec.id)
+            .catch(() => {});
+        }
       }
     }
   }
@@ -1069,6 +1141,9 @@ export class WorkflowsExecutionEnginePlugin
    * Recovers orphaned QUEUED executions after a Kibana restart.
    * Also detects stuck PENDING executions from queue-strategy workflows and
    * reverts them to QUEUED so they can be re-promoted with fresh TM tasks.
+   *
+   * Additionally reconciles the concurrency semaphore documents to remove stale
+   * slots left by executions that terminated without releasing (e.g. Kibana crash).
    *
    * QUEUED docs have no TM task, so if Kibana restarts while executions are queued
    * and the group has no running executions, the queue would be permanently stuck.
@@ -1097,9 +1172,16 @@ export class WorkflowsExecutionEnginePlugin
       10000
     );
 
+    // Track concurrency groups that need semaphore reconciliation
+    const groupsToReconcile = new Set<string>();
+
     for (const hit of stuckPending) {
       const doc = hit._source;
       if (doc?.id && doc.workflowDefinition?.settings?.concurrency?.strategy === 'queue') {
+        if (doc.concurrencyGroupKey) {
+          groupsToReconcile.add(`${doc.spaceId}:${doc.concurrencyGroupKey}`);
+        }
+
         if (doc.cancelRequested) {
           this.logger.info(
             `Completing cancellation of stuck PENDING execution ${doc.id} (cancel was requested)`
@@ -1132,10 +1214,31 @@ export class WorkflowsExecutionEnginePlugin
       }
     }
 
+    // Reconcile semaphore documents for affected concurrency groups.
+    // After reverting stuck PENDING executions, the semaphore's activeSlots may contain
+    // stale IDs from executions that are no longer running. Query the actual active
+    // executions and overwrite the semaphore to match reality.
+    if (this.concurrencySemaphoreRepository) {
+      for (const groupCompositeKey of groupsToReconcile) {
+        const [groupSpaceId, ...keyParts] = groupCompositeKey.split(':');
+        const groupKey = keyParts.join(':');
+        const actualActive =
+          await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+            groupKey,
+            groupSpaceId
+          );
+        await this.concurrencySemaphoreRepository
+          .reconcileSlots(groupKey, groupSpaceId, actualActive)
+          .catch((err) =>
+            this.logger.warn(`Failed to reconcile semaphore for group ${groupKey}: ${err}`)
+          );
+      }
+    }
+
     // Note: we intentionally do NOT promote QUEUED → PENDING here because
     // scheduling a TM task requires the user's request/API-key context, which
     // is unavailable during a server restart. Queued executions will be promoted
-    // when the next workflow execution completes (via promoteNextQueuedIfNeeded)
+    // when the next workflow execution completes (via releaseSlotAndPromote)
     // or when a user cancels a stuck execution.
     const hasQueued = await this.workflowExecutionRepository.searchWorkflowExecutions(
       { bool: { filter: [{ term: { status: ExecutionStatus.QUEUED } }] } },
@@ -1143,7 +1246,8 @@ export class WorkflowsExecutionEnginePlugin
     );
     if (hasQueued.length > 0 || stuckPending.length > 0) {
       this.logger.info(
-        `Queue recovery: cleaned up ${stuckPending.length} stuck PENDING executions. ` +
+        `Queue recovery: cleaned up ${stuckPending.length} stuck PENDING executions, ` +
+          `reconciled ${groupsToReconcile.size} semaphore group(s). ` +
           `QUEUED executions remain and will drain on the next trigger.`
       );
     }
