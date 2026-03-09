@@ -172,6 +172,10 @@ export const useToggleEntityAnalytics = ({
         await Promise.all(disablePromises);
         addSuccess(i18n.ENTITY_ANALYTICS_TURNED_OFF, TOAST_OPTIONS);
       } else {
+        if (!isEntityStoreFeatureFlagDisabled) {
+          await enableEntityStore();
+        }
+
         if (riskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED || !riskEngineStatus) {
           if (!selectedSettingsMatchSavedSettings) {
             await onSaveSettings();
@@ -179,10 +183,6 @@ export const useToggleEntityAnalytics = ({
           await initRiskEngineMutation.mutateAsync(undefined);
         } else if (riskEngineStatus === RiskEngineStatusEnum.DISABLED) {
           await enableRiskEngineMutation.mutateAsync(undefined);
-        }
-
-        if (!isEntityStoreFeatureFlagDisabled) {
-          await enableEntityStore();
         }
 
         addSuccess(i18n.ENTITY_ANALYTICS_TURNED_ON, TOAST_OPTIONS);

@@ -131,16 +131,21 @@ describe('useToggleEntityAnalytics', () => {
   });
 
   describe('toggle ON from not_installed', () => {
-    it('inits risk engine then enables entity store', async () => {
+    it('enables entity store before initing risk engine', async () => {
       const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
 
       await act(async () => {
         await result.current.toggle();
       });
 
-      expect(mockInitRiskEngine).toHaveBeenCalledTimes(1);
       expect(mockInstallEntityStore).toHaveBeenCalledTimes(1);
       expect(mockStartEntityStore).toHaveBeenCalledTimes(1);
+      expect(mockInitRiskEngine).toHaveBeenCalledTimes(1);
+
+      const entityStoreCallOrder = mockInstallEntityStore.mock.invocationCallOrder[0];
+      const riskEngineCallOrder = mockInitRiskEngine.mock.invocationCallOrder[0];
+      expect(entityStoreCallOrder).toBeLessThan(riskEngineCallOrder);
+
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
@@ -172,17 +177,21 @@ describe('useToggleEntityAnalytics', () => {
       };
     });
 
-    it('enables risk engine and starts stopped entity store', async () => {
+    it('starts stopped entity store before enabling risk engine', async () => {
       const { result } = renderHook(() => useToggleEntityAnalytics(defaultOptions));
 
       await act(async () => {
         await result.current.toggle();
       });
 
+      expect(mockStartEntityStore).toHaveBeenCalledTimes(1);
       expect(mockEnableRiskEngine).toHaveBeenCalledTimes(1);
       expect(mockInitRiskEngine).not.toHaveBeenCalled();
-      expect(mockStartEntityStore).toHaveBeenCalledTimes(1);
       expect(mockInstallEntityStore).not.toHaveBeenCalled();
+
+      const entityStoreCallOrder = mockStartEntityStore.mock.invocationCallOrder[0];
+      const riskEngineCallOrder = mockEnableRiskEngine.mock.invocationCallOrder[0];
+      expect(entityStoreCallOrder).toBeLessThan(riskEngineCallOrder);
     });
   });
 
