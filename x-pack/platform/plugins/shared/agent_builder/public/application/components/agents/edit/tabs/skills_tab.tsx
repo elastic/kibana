@@ -8,27 +8,33 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
-  EuiBasicTable,
+  EuiBadge,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
+  EuiProgress,
   EuiSearchBar,
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { PublicSkillDefinition, SkillSelection } from '@kbn/agent-builder-common';
 import { hasSkillSelectionWildcard, getExplicitSkillIds } from '@kbn/agent-builder-common';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AgentFormData } from '../agent_form';
 import { labels } from '../../../../utils/i18n';
-import {
-  createSkillIdColumn,
-  createSkillDescriptionColumn,
-  createSkillTypeColumn,
-} from '../../../skills/skills_columns';
+import { useNavigation } from '../../../../hooks/use_navigation';
+import { appPaths } from '../../../../utils/app_paths';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
@@ -43,6 +49,9 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   isLoading,
   isFormDisabled,
 }) => {
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -56,6 +65,8 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             selectedSkills={field.value ?? [{ skill_ids: ['*'] }]}
             onSkillsChange={field.onChange}
             disabled={isFormDisabled}
+            showActiveOnly={showActiveOnly || isFormDisabled}
+            onShowActiveOnlyChange={showActiveOnlyChangeHandler}
           />
         )}
       />
@@ -69,6 +80,8 @@ interface SkillsSelectionProps {
   selectedSkills: SkillSelection[];
   onSkillsChange: (skills: SkillSelection[]) => void;
   disabled?: boolean;
+  showActiveOnly: boolean;
+  onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
 }
 
 const SkillsSelection: React.FC<SkillsSelectionProps> = ({
@@ -77,13 +90,12 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   selectedSkills,
   onSkillsChange,
   disabled = false,
+  showActiveOnly,
+  onShowActiveOnlyChange,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
-  const [sortField, setSortField] = useState<keyof PublicSkillDefinition>('id');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageIndex, setPageIndex] = useState(0);
-  const pageSize = 20;
+  const [pageSize, setPageSize] = useState(10);
 
   const isAllBuiltinSelected = hasSkillSelectionWildcard(selectedSkills);
   const explicitSelectedIds = useMemo(
@@ -108,24 +120,18 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       result = skills.filter((skill) => isSkillActive(skill));
     }
 
-    if (searchQuery) {
-      result = EuiSearchBar.Query.execute(EuiSearchBar.Query.parse(searchQuery), result, {
-        defaultFields: ['id', 'name', 'description'],
-      });
+    return result;
+  }, [skills, showActiveOnly, isSkillActive]);
+
+  const filteredSkills = useMemo(() => {
+    if (!searchQuery) {
+      return displaySkills;
     }
 
-    return result;
-  }, [skills, showActiveOnly, searchQuery, isSkillActive]);
-
-  const sortedAndPaginatedSkills = useMemo(() => {
-    const sorted = [...displaySkills].sort((a, b) => {
-      const aVal = String(a[sortField] ?? '');
-      const bVal = String(b[sortField] ?? '');
-      const cmp = aVal.localeCompare(bVal);
-      return sortDirection === 'asc' ? cmp : -cmp;
+    return EuiSearchBar.Query.execute(EuiSearchBar.Query.parse(searchQuery), displaySkills, {
+      defaultFields: ['id', 'name', 'description'],
     });
-    return sorted.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
-  }, [displaySkills, sortField, sortDirection, pageIndex, pageSize]);
+  }, [searchQuery, displaySkills]);
 
   const activeSkillsCount = useMemo(() => {
     return skills.filter((skill) => isSkillActive(skill)).length;
@@ -159,92 +165,105 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
     [isAllBuiltinSelected, explicitSelectedIds, selectedSkills, skills, onSkillsChange]
   );
 
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+    setPageIndex(0);
+  }, []);
+
+  const handleTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<PublicSkillDefinition>) => {
+      if (page) {
+        setPageIndex(page.index);
+        if (page.size !== pageSize) {
+          setPageSize(page.size);
+          setPageIndex(0);
+        }
+      }
+    },
+    [pageSize]
+  );
+
   if (skillsLoading) {
     return <EuiLoadingSpinner size="l" />;
   }
 
   const columns = [
-    createSkillIdColumn(),
-    createSkillDescriptionColumn(),
-    createSkillTypeColumn(),
-    {
-      width: '80px',
-      name: i18n.translate('xpack.agentBuilder.agents.form.skills.activeColumn', {
-        defaultMessage: 'Active',
-      }),
-      render: (skill: PublicSkillDefinition) => (
-        <EuiSwitch
-          label=""
-          showLabel={false}
-          checked={isSkillActive(skill)}
-          onChange={() => handleToggleSkill(skill.id)}
-          disabled={disabled}
-          compressed
-          data-test-subj={`agentFormSkillToggle-${skill.id}`}
-        />
-      ),
-    },
+    createCheckboxColumn(isSkillActive, handleToggleSkill, disabled),
+    createSkillDetailsColumn(),
+    createTypeColumn(),
   ];
 
   return (
     <div>
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.agentBuilder.agents.form.skills.activeCount', {
-          defaultMessage: '{count} of {total} {total, plural, one {skill} other {skills}} active',
-          values: { count: activeSkillsCount, total: skills.length },
-        })}
-      </EuiText>
+      <ActiveSkillsStatus activeSkillsCount={activeSkillsCount} totalSkills={skills.length} />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="center">
+      <EuiFlexGroup alignItems="center" gutterSize="m">
         <EuiFlexItem>
           <EuiSearchBar
             box={{
               incremental: true,
               placeholder: labels.skills.searchSkillsPlaceholder,
             }}
-            onChange={({ queryText }) => setSearchQuery(queryText ?? '')}
+            onChange={({ queryText, error }) => {
+              if (!error) {
+                handleSearchChange(queryText);
+              }
+            }}
+            query={searchQuery}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('xpack.agentBuilder.agents.form.skills.showActiveOnly', {
-              defaultMessage: 'Active only',
-            })}
-            checked={showActiveOnly}
-            onChange={(e) => setShowActiveOnly(e.target.checked)}
-            compressed
-          />
-        </EuiFlexItem>
+        {onShowActiveOnlyChange && (
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('xpack.agentBuilder.skills.showActiveOnly', {
+                defaultMessage: 'Show active only',
+              })}
+              checked={showActiveOnly}
+              onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
+              disabled={disabled}
+              compressed
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      <EuiBasicTable
-        items={sortedAndPaginatedSkills}
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.agentBuilder.skills.skillsSelectionSummary"
+            defaultMessage="Showing {start}-{end} of {total} {skills}"
+            values={{
+              start: <strong>{Math.min(pageIndex * pageSize + 1, filteredSkills.length)}</strong>,
+              end: (
+                <strong>{Math.min((pageIndex + 1) * pageSize, filteredSkills.length)}</strong>
+              ),
+              total: filteredSkills.length,
+              skills: <strong>{labels.skills.title}</strong>,
+            }}
+          />
+        </EuiText>
+      </EuiFlexGroup>
+
+      <EuiInMemoryTable
         columns={columns}
+        items={filteredSkills}
         itemId="id"
         pagination={{
           pageIndex,
           pageSize,
-          totalItemCount: displaySkills.length,
-          showPerPageOptions: false,
+          pageSizeOptions: [10, 25, 50, 100],
+          showPerPageOptions: true,
         }}
+        onTableChange={handleTableChange}
         sorting={{
           sort: {
-            field: sortField,
-            direction: sortDirection,
+            field: 'id',
+            direction: 'asc',
           },
-        }}
-        onChange={({ sort, page }: CriteriaWithPagination<PublicSkillDefinition>) => {
-          if (sort) {
-            setSortField(sort.field);
-            setSortDirection(sort.direction);
-          }
-          if (page) {
-            setPageIndex(page.index);
-          }
         }}
         noItemsMessage={
           skills.length > 0 ? labels.skills.noSkillsMatchMessage : labels.skills.noSkillsMessage
@@ -253,3 +272,122 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
     </div>
   );
 };
+
+const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: number }> = ({
+  activeSkillsCount,
+  totalSkills,
+}) => {
+  const { createAgentBuilderUrl } = useNavigation();
+  const isZeroSkills = activeSkillsCount === 0;
+  const statusColor = isZeroSkills ? 'warning' : 'success';
+  const iconType = isZeroSkills ? 'alert' : 'checkCircleFill';
+
+  return (
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="l">
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="m" color={statusColor}>
+                    <strong>
+                      {i18n.translate('xpack.agentBuilder.activeSkillsStatus.title', {
+                        defaultMessage:
+                          'This agent has {count} active {count, plural, one {skill} other {skills}}',
+                        values: { count: activeSkillsCount },
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.agentBuilder.activeSkillsStatus.description"
+                  defaultMessage="{skillsLink} provide specialized knowledge and instructions that guide agents on specific tasks."
+                  values={{
+                    skillsLink: (
+                      <EuiLink href={createAgentBuilderUrl(appPaths.skills.list)}>
+                        {labels.skills.title}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={1}>
+          <EuiProgress
+            value={activeSkillsCount}
+            max={totalSkills}
+            color={statusColor}
+            size="m"
+            label={i18n.translate('xpack.agentBuilder.activeSkillsStatus.progressLabel', {
+              defaultMessage: 'Active skills',
+            })}
+            valueText={`${activeSkillsCount}/${totalSkills}`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
+
+const SkillDetailsColumn: React.FC<{ skill: PublicSkillDefinition }> = ({ skill }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiText
+        size="s"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {skill.id}
+      </EuiText>
+      <EuiText size="s" color="subdued">
+        {skill.description}
+      </EuiText>
+    </EuiFlexGroup>
+  );
+};
+
+const createCheckboxColumn = (
+  isSkillActive: (skill: PublicSkillDefinition) => boolean,
+  onToggle: (skillId: string) => void,
+  disabled: boolean
+) => ({
+  width: '40px',
+  render: (skill: PublicSkillDefinition) => (
+    <EuiCheckbox
+      id={`skill-${skill.id}`}
+      checked={isSkillActive(skill)}
+      onChange={() => onToggle(skill.id)}
+      disabled={disabled}
+    />
+  ),
+});
+
+const createSkillDetailsColumn = () => ({
+  name: labels.skills.skillIdLabel,
+  sortable: (item: PublicSkillDefinition) => item.id,
+  width: '60%',
+  render: (item: PublicSkillDefinition) => <SkillDetailsColumn skill={item} />,
+});
+
+const createTypeColumn = () => ({
+  field: 'readonly',
+  name: labels.skills.typeLabel,
+  render: (readonly: boolean) => (
+    <EuiBadge color={readonly ? 'hollow' : 'primary'}>
+      {readonly ? labels.skills.builtinLabel : labels.skills.customLabel}
+    </EuiBadge>
+  ),
+});

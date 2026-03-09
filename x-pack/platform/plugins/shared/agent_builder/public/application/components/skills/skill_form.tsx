@@ -233,7 +233,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     fill
                     iconType="save"
                     onClick={handleSubmit(onSubmit)}
-                    disabled={hasErrors || isSubmitting}
+                    disabled={hasErrors || isSubmitting || (!isCreateMode && !isDirty)}
                     isLoading={isSubmitting}
                     data-test-subj="agentBuilderSkillFormSaveButton"
                   >
