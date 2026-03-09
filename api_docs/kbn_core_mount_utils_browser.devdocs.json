@@ -118,14 +118,6 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts"
-          },
-          {
-            "plugin": "@kbn/core",
             "path": "src/core/packages/chrome/browser/src/nav_controls.ts"
           },
           {
