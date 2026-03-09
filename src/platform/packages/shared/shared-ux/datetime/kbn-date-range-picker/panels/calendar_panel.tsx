@@ -46,6 +46,7 @@ export function CalendarPanel() {
   const [hasChanges, setHasChanges] = useState(false);
   const [saveAsPreset, setSaveAsPreset] = useState(false);
 
+  const calendarChangeRef = useRef(false);
   const initialStateRef = useRef({
     startDate: timeRange.startDate,
     endDate: timeRange.endDate,
@@ -62,6 +63,19 @@ export function CalendarPanel() {
       setText(initialStateRef.current.mountText);
     }
   }, [setText]);
+
+  // Sync calendar when input text changes (e.g. user edits the input directly)
+  useEffect(() => {
+    if (calendarChangeRef.current) {
+      calendarChangeRef.current = false;
+      return;
+    }
+
+    if (timeRange.startDate && timeRange.endDate) {
+      setRange({ from: timeRange.startDate, to: timeRange.endDate });
+      setHasChanges(true);
+    }
+  }, [timeRange.startDate, timeRange.endDate]);
 
   const restoreOriginalText = useCallback(() => {
     setText(initialStateRef.current.text);
@@ -126,6 +140,7 @@ export function CalendarPanel() {
   const handleRangeChange = useCallback(
     (newRange: DateRange | undefined) => {
       setHasChanges(true);
+      calendarChangeRef.current = true;
 
       // Reset to single date when clicking after complete selection
       if (range?.from && range?.to) {
