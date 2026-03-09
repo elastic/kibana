@@ -157,6 +157,7 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      isTestRun: Boolean(this.workflowExecution.isTestRun),
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
     this.stepDocumentsChanges.set(step.id as string, newStep);

@@ -84,6 +84,9 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     status: {
       type: 'keyword',
     },
+    isTestRun: {
+      type: 'boolean',
+    },
     startedAt: {
       type: 'date',
     },

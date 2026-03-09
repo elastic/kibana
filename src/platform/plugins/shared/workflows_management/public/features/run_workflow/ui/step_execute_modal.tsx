@@ -9,12 +9,10 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  euiFontSize,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -27,7 +25,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
@@ -75,7 +72,6 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     initialTab,
     stepId,
   }) => {
-    const styles = useMemoCss(componentStyles);
     useWorkflowsMonacoTheme();
     const { euiTheme } = useEuiTheme();
     const initialInputs = useMemo(
@@ -266,11 +262,3 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
   }
 );
 StepExecuteModal.displayName = 'StepExecuteModal';
-
-const componentStyles = {
-  description: (euiThemeContext: UseEuiTheme) =>
-    css({
-      ...euiFontSize(euiThemeContext, 's'),
-      fontWeight: 'normal',
-    }),
-};

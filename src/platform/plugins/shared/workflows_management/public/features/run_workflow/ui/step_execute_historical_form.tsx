@@ -95,21 +95,46 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         acc[stepExecution.workflowRunId] = (acc[stepExecution.workflowRunId] ?? 0) + 1;
         return acc;
       }, {} as Record<string, number>);
+      const stepRunIdsLoopIndex: Record<string, number> = {};
 
       return results.map((stepExecution, index): EuiComboBoxOptionOption<string> => {
         const runNumber = total - index;
         const formattedDateTime =
           getFormattedDateTime(new Date(stepExecution.startedAt)) ?? stepExecution.startedAt;
         const statusIcon = getExecutionStatusIcon(euiTheme, stepExecution.status);
+
         const isLoopExecution = workflowRunIdsStepCount[stepExecution.workflowRunId] > 1;
+        const append: React.ReactNode[] = [];
+        if (isLoopExecution) {
+          const loopIndex = stepRunIdsLoopIndex[stepExecution.workflowRunId] ?? 0;
+          stepRunIdsLoopIndex[stepExecution.workflowRunId] = loopIndex + 1;
+          append.push(
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="refresh"
+                aria-hidden={true}
+                content={translations.loopExecution(loopIndex)}
+              />
+            </EuiFlexItem>
+          );
+        }
+        if (stepExecution.isTestRun) {
+          append.push(
+            <EuiFlexItem grow={false}>
+              <EuiIconTip type="flask" aria-hidden={true} content={translations.testRun} />
+            </EuiFlexItem>
+          );
+        }
         return {
           key: stepExecution.id,
           value: stepExecution.id,
           label: translations.getRunLabel(stepId ?? '', runNumber, formattedDateTime),
           prepend: <EuiFlexItem grow={false}>{statusIcon}</EuiFlexItem>,
-          ...(isLoopExecution && {
+          ...(append.length > 0 && {
             append: (
-              <EuiIconTip type="refresh" aria-hidden={true} content={translations.loopExecution} />
+              <EuiFlexGroup direction="row" gutterSize="xs">
+                {append}
+              </EuiFlexGroup>
             ),
           }),
           css: css`
@@ -294,8 +319,13 @@ const translations = {
       defaultMessage: 'Run #{runNumber} (Step: "{stepId}") - {dateTime}',
       values: { stepId, runNumber, dateTime },
     }),
-  loopExecution: i18n.translate('workflows.testStepModal.loopExecution', {
-    defaultMessage: 'Multiple step executions found in the same workflow run (loop/retry)',
+  loopExecution: (loopIndex: number) =>
+    i18n.translate('workflows.testStepModal.loopExecution', {
+      defaultMessage: 'Loop index: {loopIndex}',
+      values: { loopIndex },
+    }),
+  testRun: i18n.translate('workflows.testStepModal.testRun', {
+    defaultMessage: 'Test Run',
   }),
   invalidJson: i18n.translate('workflows.testStepModal.invalidJson', {
     defaultMessage: 'Invalid JSON',
