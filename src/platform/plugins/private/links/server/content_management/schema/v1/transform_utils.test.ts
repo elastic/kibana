@@ -9,8 +9,7 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { savedObjectToItem, itemToAttributes } from './transform_utils';
-import type { StoredLink, StoredLinksState } from './types';
-import type { LinksState } from './types';
+import type { StoredLink, StoredLinksState, LinksState } from './types';
 import { EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 
 jest.mock('uuid', () => ({
