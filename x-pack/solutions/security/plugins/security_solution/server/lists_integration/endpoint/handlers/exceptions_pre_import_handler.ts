@@ -117,11 +117,16 @@ export const getExceptionsPreImportHandler = (
       await endpointExceptionValidator.validatePreImport(data);
     }
 
+    // --- Below are operations to prepare the imported data ---
+    addImportedCommentToItems(data);
+
     if (!overwrite) {
       return { data, overwrite };
     }
 
-    // --- From this point, we're starting to perform operations on SOs. All validations must be above ---
+    // --- From this point, we're starting to perform operations on SOs in order to prepare OVERWRITING EXISTING LIST. ---
+    //  All validations must be above
+
     await deleteExistingItemsForOverwrite({
       data,
       exceptionListClient,
@@ -273,5 +278,20 @@ const deleteExistingItemsForOverwrite = async ({
     );
   } else {
     logger.info('No exception list items found to delete on import with overwrite.');
+  }
+};
+
+const addImportedCommentToItems = (data: PromiseFromStreams): void => {
+  for (const item of data.items) {
+    if (!(item instanceof Error)) {
+      item.comments = [
+        ...(item.comments ?? []),
+        {
+          comment: `Imported artifact.\nOriginally created by "${
+            item.created_by ?? 'unknown'
+          }" at "${item.created_at ?? 'unknown'}".`,
+        },
+      ];
+    }
   }
 };

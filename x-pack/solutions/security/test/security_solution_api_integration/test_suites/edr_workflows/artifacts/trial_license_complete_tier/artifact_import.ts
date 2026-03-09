@@ -497,9 +497,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   ]);
 
                   // changes indicated in a comment
-                  expect(items[0].comments.length).toEqual(1);
-                  expect(items[0].comments[0].comment).toEqual(
-                    `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n- "i-do-not-exist"\n- "me-neither"`
+                  expect(items[0].comments).toContainEqual(
+                    expect.objectContaining({
+                      comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n- "i-do-not-exist"\n- "me-neither"`,
+                    })
                   );
 
                   const username = `${artifact.listId}_allWithGlobal`;
@@ -871,7 +872,79 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               });
             });
 
-            it('should add a comment to imported artifacts with relevant data', async () => {});
+            it('should add a comment to imported artifacts with relevant data', async () => {
+              await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                .post(`${EXCEPTION_LIST_URL}/_import`)
+                .query({ new_list: true })
+                .set('kbn-xsrf', 'true')
+                .on('error', createSupertestErrorLogger(log))
+                .attach(
+                  'file',
+                  buildImportBuffer(artifact.listId, [
+                    {
+                      item_id: 'imported-artifact-without-existing-comment',
+                      tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      created_by: 'original-creator-1',
+                      created_at: 'random-date-1',
+                    },
+                    {
+                      item_id: 'imported-artifact-with-existing-comment',
+                      tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      created_by: 'original-creator-2',
+                      created_at: 'random-date-2',
+                      comments: [
+                        {
+                          comment: 'I am a comment!',
+                          created_at: '2026-02-26T09:46:53.602Z',
+                          created_by: 'some_user',
+                          id: '9414e275-3c14-4814-9a6c-e789589bc9b1',
+                        },
+                      ],
+                    },
+                  ]),
+                  'import_data.ndjson'
+                )
+                .expect(200)
+                .expect({
+                  errors: [],
+                  success: true,
+                  success_count: 3,
+                  success_exception_lists: true,
+                  success_count_exception_lists: 1,
+                  success_exception_list_items: true,
+                  success_count_exception_list_items: 2,
+                } as ImportExceptionsResponseSchema);
+
+              const items = await fetchArtifacts(CURRENT_SPACE_ID);
+              expect(
+                items.map(({ item_id, comments }) => ({
+                  item_id,
+                  comments,
+                }))
+              ).toEqual([
+                {
+                  item_id: 'imported-artifact-without-existing-comment',
+                  comments: [
+                    {
+                      comment: `Imported artifact.\nOriginally created by "original-creator-1" at "random-date-1".`,
+                      created_at: expect.any(String),
+                      created_by: `${artifact.listId}_allWithGlobal`,
+                      id: expect.any(String),
+                    },
+                  ],
+                },
+                {
+                  item_id: 'imported-artifact-with-existing-comment',
+                  comments: [
+                    expect.objectContaining({ comment: 'I am a comment!' }),
+                    expect.objectContaining({
+                      comment: `Imported artifact.\nOriginally created by "original-creator-2" at "random-date-2".`,
+                    }),
+                  ],
+                },
+              ]);
+            });
+
             it('should add a tag to imported artifacts', async () => {});
 
             describe('compatibility with artifacts exported before space awareness - when artifacts have no ownerSpaceId', () => {
