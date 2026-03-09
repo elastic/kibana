@@ -2106,8 +2106,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/serverless/functional/services/ @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/config* @elastic/appex-qa
 /x-pack/platform/test/serverless/functional/ftr_provider_context.d.ts @elastic/appex-qa
-/**/scout/.meta/** @kibanamachine @elastic/appex-qa
-/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # Core
 /src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json @elastic/kibana-core @elastic/kibana-data-discovery
@@ -3211,6 +3209,10 @@ src/platform/test/moon.yml @elastic/kibana-operations
 x-pack/platform/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
+
+# Appex QA to own auto-generated scout metadata
+/**/scout/.meta/** @kibanamachine @elastic/appex-qa
+/**/scout_*/.meta/** @kibanamachine @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
