@@ -31,6 +31,23 @@ describe('StoreActionsStep', () => {
     jest.clearAllMocks();
   });
 
+  it('halts when there are no episodes at all', async () => {
+    const mockService = createMockStorageService();
+    const step = new StoreActionsStep(mockService);
+
+    const state = createDispatcherPipelineState({
+      dispatchable: [],
+      suppressed: [],
+      throttled: [],
+      dispatch: [],
+    });
+
+    const result = await step.execute(state);
+
+    expect(result).toEqual({ type: 'halt', reason: 'no_actions' });
+    expect(mockService.bulkIndexDocs).not.toHaveBeenCalled();
+  });
+
   it('halts when suppressed, throttled, and dispatch are all empty', async () => {
     const mockService = createMockStorageService();
     const step = new StoreActionsStep(mockService);
