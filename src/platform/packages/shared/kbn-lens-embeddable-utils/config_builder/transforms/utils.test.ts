@@ -268,7 +268,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
-                "index": "test",
+                "index": "test-no_time_field",
                 "query": Object {
                   "esql": "from test | limit 10",
                 },
@@ -279,6 +279,7 @@ describe('buildDatasourceStates', () => {
         },
         "usedDataviews": Object {
           "layer_0": Object {
+            "dataSourceType": "esql",
             "index": "test",
             "timeFieldName": undefined,
             "type": "adHocDataView",
