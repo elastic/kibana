@@ -66,7 +66,7 @@ describe('UserActivityService', () => {
       service.trackUserAction({
         message: 'Custom message for action',
         event: { action: TEST_ACTION, type: 'change' },
-        object: { id: 'obj-1', name: 'Test Object', type: 'dashboard', tags: ['tag1'] },
+        object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
       });
 
       expect(loggingSystemMock.collect(core.logger).info).toEqual([
@@ -75,7 +75,7 @@ describe('UserActivityService', () => {
           {
             message: 'Custom message for action',
             event: { action: TEST_ACTION, type: 'change' },
-            object: { id: 'obj-1', name: 'Test Object', type: 'dashboard', tags: ['tag1'] },
+            object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
           },
         ],
       ]);
@@ -91,7 +91,7 @@ describe('UserActivityService', () => {
           end: '2026-01-01T00:00:00.250Z',
           duration: 250000000,
         },
-        object: { id: 'obj-meta', name: 'Object', type: 'dashboard', tags: [] },
+        object: { id: 'obj-meta', name: 'Object', type: 'rule', tags: [] },
         metadata: {
           user_input: {
             indices: ['logs-*'],
@@ -118,13 +118,15 @@ describe('UserActivityService', () => {
       });
 
       service.trackUserAction({
-        event: { action: TEST_ACTION, type: 'change' },
-        object: { id: 'obj-2', name: 'My Dashboard', type: 'dashboard', tags: [] },
+        event: { action: TEST_ACTION, type: 'creation' },
+        object: { id: 'obj-2', name: 'My rule', type: 'rule', tags: [] },
       });
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
-      expect(logCalls[0][0]).toBe('User test_user performed test_action on My Dashboard (obj-2)');
+      expect(logCalls[0][0]).toBe(
+        'User test_user performed create_alerting_rule on My rule (obj-2)'
+      );
     });
 
     it('includes injected context in logs', () => {
