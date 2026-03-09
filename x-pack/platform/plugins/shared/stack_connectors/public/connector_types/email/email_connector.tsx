@@ -279,6 +279,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                 config={{ defaultValue: true }}
                 componentProps={{
                   euiFieldProps: {
+                    'data-test-subj': 'emailHasAuthSwitch',
                     label: i18n.HAS_AUTH_LABEL,
                     disabled: readOnly,
                     readOnly,

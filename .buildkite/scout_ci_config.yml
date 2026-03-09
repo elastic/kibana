@@ -15,6 +15,7 @@ plugins:
     - streams_app
     - transform
     - dashboard
+    - uptime
     - ux
 
   disabled:
