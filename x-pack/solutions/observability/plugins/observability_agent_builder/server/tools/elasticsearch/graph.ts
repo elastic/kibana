@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StateGraph, Annotation, messagesStateReducer } from '@langchain/langgraph';
+import { StateGraph, Annotation, messagesStateReducer, START, END } from '@langchain/langgraph';
 import { type Tool, tool as toTool } from '@langchain/core/tools';
 import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
@@ -24,113 +24,142 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import { getElasticsearchPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
-import { OpenAPIToolSet } from '../../utils/openapi_tool_set';
+import { OpenAPIToolSet, type OperationObject } from '../../utils/openapi_tool_set';
+import { truncateJsonResponse } from './truncate_response';
+/**
+ * Node names in the state graph
+ */
+const NODE_NAMES = {
+  GENERATE_TOOLS: 'generate_tools',
+  AGENT: 'agent',
+  EXECUTE_TOOL: 'execute_tool',
+  CHECK_CONFIRMATION: 'check_confirmation',
+} as const;
 
 /**
- * Truncates a JSON response to fit within a size budget (in characters).
- * Keeps the first N items of arrays and fields of objects until size limit is reached.
- * Adds _truncation_info markers to indicate what was removed.
+ * Confirmation IDs for user prompts
  */
-const truncateJsonResponse = (obj: unknown, maxSize: number = 6000): unknown => {
-  const processValue = (
-    value: unknown,
-    remainingBudget: number
-  ): { value: unknown; size: number } => {
-    // Primitives: return as-is
-    if (value === null || typeof value !== 'object') {
-      const str = JSON.stringify(value);
-      return { value, size: str.length };
-    }
+const CONFIRMATION_IDS = {
+  EXECUTE_ACTION: 'execute_action',
+} as const;
 
-    // Arrays: keep first N items, add truncation info if needed
-    if (Array.isArray(value)) {
-      const result: unknown[] = [];
-      let size = 0;
-
-      for (let i = 0; i < value.length; i++) {
-        if (size > remainingBudget * 0.75) {
-          // Size limit approaching, add truncation marker and stop
-          if (i < value.length) {
-            result.push({
-              _truncation_info: {
-                type: 'array',
-                shown: result.length,
-                total: value.length,
-                remaining: value.length - result.length,
-              },
-            });
-          }
-          break;
-        }
-
-        const { value: processedItem, size: itemSize } = processValue(
-          value[i],
-          remainingBudget - size
-        );
-        result.push(processedItem);
-        size += itemSize;
-      }
-
-      return { value: result, size };
-    }
-
-    // Objects: keep fields until size limit is reached
-    const result: Record<string, unknown> = {};
-    const entries = Object.entries(value as Record<string, unknown>);
-    let size = 0;
-    let fieldsProcessed = 0;
-
-    for (const [key, val] of entries) {
-      if (size > remainingBudget) {
-        // Size limit approaching, add truncation marker and stop
-        const remainingFields = entries.length - fieldsProcessed;
-        if (remainingFields > 0) {
-          result._truncation_info = {
-            type: 'object',
-            fields_shown: fieldsProcessed,
-            fields_total: entries.length,
-            fields_remaining: remainingFields,
-          };
-        }
-        break;
-      }
-
-      const { value: processedVal, size: valSize } = processValue(val, remainingBudget - size);
-      result[key] = processedVal;
-      size += key.length + valSize;
-      fieldsProcessed++;
-    }
-
-    return { value: result, size };
-  };
-
-  const { value } = processValue(obj, maxSize);
-  return value;
-};
+/**
+ * HTTP methods that are considered dangerous operations
+ */
+const DANGEROUS_HTTP_METHODS = new Set(['post', 'put', 'delete']);
 
 const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   // inner
   toolsValid: Annotation<boolean>(),
+  openapiSpecs: Annotation<unknown[]>(),
   tools: Annotation<Tool[]>(),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
-  state: Annotation<unknown>(),
   openApiToolSet: Annotation<OpenAPIToolSet>(),
   // outputs
   error: Annotation<string>(),
-  results: Annotation<{ content: unknown }[]>({
-    reducer: (a, b) => [...a, ...b],
-    default: () => [],
-  }),
+  result: Annotation<{ content: unknown }>(),
   prompt: Annotation<ToolHandlerPromptReturn>(),
 });
 
 export type StateType = typeof StateAnnotation.State;
+type StateManagerType = Pick<StateType, 'nlQuery' | 'toolsValid' | 'openapiSpecs' | 'messages'>;
 
+/**
+ * Encapsulates graph context and dependencies
+ */
+interface GraphContext {
+  core: ObservabilityAgentBuilderCoreSetup;
+  modelProvider: ModelProvider;
+  esClient: IScopedClusterClient;
+  events: ToolEventEmitter;
+  request: KibanaRequest;
+  prompts: ToolPromptManager;
+  stateManager: ToolStateManager;
+}
+
+/**
+ * Detects if an API response requires user confirmation before execution
+ */
+const isDangerousOperation = (
+  response: AIMessageChunk,
+  openApiToolSet: OpenAPIToolSet
+): boolean => {
+  if (!response.tool_calls || response.tool_calls.length === 0) {
+    return false;
+  }
+
+  const methods = response.tool_calls
+    .map((t) => openApiToolSet.getToolOperation(t.name)?.method.toLowerCase())
+    .filter(Boolean) as string[];
+
+  return methods.some((method) => DANGEROUS_HTTP_METHODS.has(method));
+};
+
+/**
+ * Formats confirmation message with API commands
+ */
+const buildConfirmationMessage = (commands: string[]): string => {
+  return `Are you sure you want to call these Elasticsearch APIs?\n\n${commands.join('\n')}`;
+};
+
+/**
+ * Creates wrapper tools compatible with LangGraph ToolNode
+ */
+const createExecutableTools = (tools: Tool[], esClient: IScopedClusterClient): any[] => {
+  return tools.map((tool) =>
+    toTool(
+      async (args) =>
+        (tool as Tool & { handler: (args: any, esClient: IScopedClusterClient) => void }).handler(
+          args,
+          esClient
+        ),
+      {
+        name: tool.name,
+        description: tool.description,
+        schema: tool.schema,
+      }
+    )
+  );
+};
+
+/**
+ * Parses and truncates tool response
+ */
+const parseToolResponse = (
+  toolMessage: BaseMessage,
+  toolName?: string
+): { name: string; response: unknown; console_command?: string } => {
+  const parsedContent = JSON.parse(toolMessage.content as string);
+  const truncatedContent = truncateJsonResponse(parsedContent.response);
+
+  return {
+    name: toolName || toolMessage.name || 'unknown',
+    response: truncatedContent,
+    console_command: parsedContent.console_command,
+  };
+};
+
+/**
+ * Creates a LangGraph-based state machine for Elasticsearch query generation and execution
+ *
+ * Graph Flow:
+ * 1. checkState: Determines if execution is resuming or starting fresh
+ * 2. generateTools: Retrieves OpenAPI specs and generates LangChain tools
+ * 3. terminateIfInvalidTools: Validates that tools were generated successfully
+ * 4. agent: Calls the LLM to generate tool calls based on natural language query
+ * 5. askForConfirmation: Checks if confirmation was provided (for dangerous operations)
+ * 6. executeTool: Runs the selected tool against Elasticsearch
+ *
+ * Dangerous operations (POST, PUT, DELETE) require user confirmation before execution.
+ * State can be persisted and resumed across multiple invocations.
+ * @param context - Encapsulated dependencies including core services, model provider, etc.
+ * @returns Compiled LangGraph StateGraph ready for execution
+ */
 export const createElasticsearchToolGraph = async ({
   core,
   modelProvider,
@@ -139,52 +168,68 @@ export const createElasticsearchToolGraph = async ({
   request,
   prompts,
   stateManager,
-}: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  modelProvider: ModelProvider;
-  esClient: IScopedClusterClient;
-  events: ToolEventEmitter;
-  request: KibanaRequest;
-  prompts: ToolPromptManager;
-  stateManager: ToolStateManager;
-}) => {
+}: GraphContext) => {
   // TODO make this configurable, we need a platform level setting for the embedding model
   const inferenceId = defaultInferenceEndpoints.ELSER;
 
-  const checkState = async (state: StateType) => {
-    // retrieve the tool's execution state - present only if the execution was resumed
-    const resumedState = stateManager.getState<StateType>();
-    return !resumedState ? 'generate_tools' : 'check_confirmation';
-  };
-
-  const checkConfirmation = async (state: StateType) => {
-    const resumedState = stateManager.getState<StateType>();
-    const { status: confirmStatus } = prompts.checkConfirmationStatus('execute_action');
-    if (confirmStatus === ConfirmationStatus.rejected) {
-      return {
-        results: [createErrorResult(`User denied usage of the action`)],
-      };
-    }
-    return {
-      ...resumedState,
-    };
-  };
-
-  const decideContinue = async (state: StateType) => {
-    const { status: confirmStatus } = prompts.checkConfirmationStatus('execute_action');
-    if (confirmStatus === ConfirmationStatus.rejected) {
-      return '__end__';
-    }
-    return 'execute_tool';
-  };
-
-  // Create a closure that will resolve llmTasks when the handler is called
+  /**
+   * Resolves LLM Tasks plugin from core services
+   */
   const getLlmTasks = async () => {
     const [, plugins] = await core.getStartServices();
     return plugins.llmTasks;
   };
+
   const model = await modelProvider.getDefaultModel();
 
+  /**
+   * Determines if execution is resuming or starting fresh
+   */
+  const checkState = async (state: StateType) => {
+    // retrieve the tool's execution state - present only if the execution was resumed
+    const resumedState = stateManager.getState<StateManagerType>();
+    return !resumedState ? NODE_NAMES.GENERATE_TOOLS : NODE_NAMES.CHECK_CONFIRMATION;
+  };
+
+  /**
+   * Validates user confirmation and reconstructs tools
+   */
+  const checkConfirmation = async (state: StateType) => {
+    const resumedState = stateManager.getState<StateManagerType>();
+    const { status: confirmStatus } = prompts.checkConfirmationStatus(
+      CONFIRMATION_IDS.EXECUTE_ACTION
+    );
+    if (confirmStatus === ConfirmationStatus.rejected) {
+      return {
+        result: createErrorResult(`User denied usage of the action`),
+      };
+    }
+    const openApiToolSet = new OpenAPIToolSet({
+      operations: (resumedState as StateManagerType).openapiSpecs as OperationObject[],
+    });
+    return {
+      ...resumedState,
+      openApiToolSet,
+      tools: openApiToolSet.getTools(),
+    };
+  };
+
+  /**
+   * Routes execution based on user confirmation status
+   */
+  const decideContinue = async (state: StateType) => {
+    const { status: confirmStatus } = prompts.checkConfirmationStatus(
+      CONFIRMATION_IDS.EXECUTE_ACTION
+    );
+    if (confirmStatus === ConfirmationStatus.rejected) {
+      return '__end__';
+    }
+    return NODE_NAMES.EXECUTE_TOOL;
+  };
+
+  /**
+   * Generates LangChain tools from retrieved OpenAPI specifications
+   */
   const generateTools = async (state: StateType) => {
     events?.reportProgress(progressMessages.generatingTools());
     const llmTasks = await getLlmTasks();
@@ -217,14 +262,9 @@ export const createElasticsearchToolGraph = async ({
     if (tools.length > 0) {
       return {
         toolsValid: true,
+        openapiSpecs,
         openApiToolSet,
-        tools: tools.map((tool) =>
-          toTool(async (args) => tool.handler(args, esClient), {
-            name: tool.name,
-            description: tool.description,
-            schema: tool.schema,
-          })
-        ),
+        tools,
       };
     } else {
       return {
@@ -235,33 +275,20 @@ export const createElasticsearchToolGraph = async ({
   };
 
   const terminateIfInvalidTools = async (state: StateType) => {
-    return state.toolsValid ? 'agent' : '__end__';
+    return state.toolsValid ? NODE_NAMES.AGENT : '__end__';
   };
 
   const askForConfirmation = async (state: StateType) => {
     if (state.prompt) {
-      stateManager.setState({ state });
+      stateManager.setState({
+        openapiSpecs: state.openapiSpecs,
+        nlQuery: state.nlQuery,
+        toolsValid: state.toolsValid,
+        messages: state.messages,
+      });
       return '__end__';
     }
-    return 'execute_tool';
-  };
-
-  const buildConfirmationMessage = (commands: string[]): string => {
-    return `Are you sure you want to call these Elasticsearch APIs?\n\n${commands.join('\n')}`;
-  };
-
-  const isDangerousOperation = (
-    response: AIMessageChunk,
-    openApiToolSet: OpenAPIToolSet
-  ): boolean => {
-    if (response.tool_calls && response.tool_calls.length > 0) {
-      const operations = response.tool_calls.map((t) => openApiToolSet.getToolOperation(t.name));
-      const methods = operations.map((op) => op?.method.toLowerCase());
-      if (methods.includes('post') || methods.includes('put') || methods.includes('delete')) {
-        return true;
-      }
-    }
-    return false;
+    return NODE_NAMES.EXECUTE_TOOL;
   };
 
   const callElasticsearchAgent = async (state: StateType) => {
@@ -272,13 +299,13 @@ export const createElasticsearchToolGraph = async ({
     const response = await searchModel.invoke(
       getElasticsearchPrompt({ nlQuery: state.nlQuery, tools: state.tools })
     );
-    if (response.tool_calls && isDangerousOperation(response, state.openApiToolSet)) {
-      const commands = response.tool_calls.map((t) =>
+    if (isDangerousOperation(response, state.openApiToolSet)) {
+      const commands = response.tool_calls!.map((t) =>
         state.openApiToolSet.getApiCallConsoleCommand(t.name, t.args)
       );
       const confirmationMessage = buildConfirmationMessage(commands);
       const confirmation = await prompts.askForConfirmation({
-        id: 'execute_action',
+        id: CONFIRMATION_IDS.EXECUTE_ACTION,
         message: confirmationMessage,
       });
       return {
@@ -292,64 +319,52 @@ export const createElasticsearchToolGraph = async ({
     };
   };
 
-  const decideContinueOrEnd = async (state: StateType) => {
-    // only one call for now
-    return '__end__';
-  };
-
   const executeTool = async (state: StateType) => {
     events?.reportProgress(progressMessages.performingElasticsearchTool());
-    const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(state.tools);
+    const tools = createExecutableTools(state.tools, esClient);
+    const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
     const toolNodeResult = await toolNode.invoke(state.messages);
+
     if (!toolNodeResult || !toolNodeResult.length) {
       return {
-        results: [
-          {
-            content: state.messages[0].content,
-          },
-        ],
+        result: {
+          content: state.messages[0].content,
+        },
       };
     }
+
     const toolMessage = toolNodeResult[toolNodeResult.length - 1];
-    const parsedContent = JSON.parse(toolMessage.content as string);
-    const truncatedContent = truncateJsonResponse(parsedContent.response, 6000);
+    const toolResponse = parseToolResponse(toolMessage);
+
     return {
-      results: [
-        {
-          name: toolMessage.name!,
-          response: truncatedContent,
-          console_command: parsedContent.console_command,
-        },
-      ],
+      result: toolResponse,
     };
   };
 
   const graph = new StateGraph(StateAnnotation)
     // nodes
-    .addNode('generate_tools', generateTools)
-    .addNode('agent', callElasticsearchAgent)
-    .addNode('execute_tool', executeTool)
-    .addNode('check_confirmation', checkConfirmation)
+    .addNode(NODE_NAMES.GENERATE_TOOLS, generateTools)
+    .addNode(NODE_NAMES.AGENT, callElasticsearchAgent)
+    .addNode(NODE_NAMES.EXECUTE_TOOL, executeTool)
+    .addNode(NODE_NAMES.CHECK_CONFIRMATION, checkConfirmation)
     // edges
-    .addConditionalEdges('__start__', checkState, {
-      generate_tools: 'generate_tools',
-      check_confirmation: 'check_confirmation',
+    .addConditionalEdges(START, checkState, {
+      [NODE_NAMES.GENERATE_TOOLS]: NODE_NAMES.GENERATE_TOOLS,
+      [NODE_NAMES.CHECK_CONFIRMATION]: NODE_NAMES.CHECK_CONFIRMATION,
     })
-    .addConditionalEdges('check_confirmation', decideContinue, {
-      __end__: '__end__',
-      execute_tool: 'execute_tool',
+    .addConditionalEdges(NODE_NAMES.CHECK_CONFIRMATION, decideContinue, {
+      [END]: END,
+      [NODE_NAMES.EXECUTE_TOOL]: NODE_NAMES.EXECUTE_TOOL,
     })
-    .addConditionalEdges('generate_tools', terminateIfInvalidTools, {
-      agent: 'agent',
-      __end__: '__end__',
+    .addConditionalEdges(NODE_NAMES.GENERATE_TOOLS, terminateIfInvalidTools, {
+      [NODE_NAMES.AGENT]: NODE_NAMES.AGENT,
+      [END]: END,
     })
-    .addConditionalEdges('agent', askForConfirmation, {
-      execute_tool: 'execute_tool',
-      __end__: '__end__',
+    .addConditionalEdges(NODE_NAMES.AGENT, askForConfirmation, {
+      [NODE_NAMES.EXECUTE_TOOL]: NODE_NAMES.EXECUTE_TOOL,
+      [END]: END,
     })
-    .addConditionalEdges('execute_tool', decideContinueOrEnd, {
-      __end__: '__end__',
-    })
+    .addEdge(NODE_NAMES.EXECUTE_TOOL, END)
     .compile();
 
   return graph;

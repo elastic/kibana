@@ -69,7 +69,7 @@ export function createElasticsearchTool({
           results: [
             {
               type: ToolResultType.other,
-              data: response.results[0],
+              data: response.result,
             },
           ],
         };
