@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-solution-fixtures-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-cases'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-solution-fixtures-plugin'
+  title: '@kbn/security-solution-fixtures-plugin'
   description: Moon project for @kbn/security-solution-fixtures-plugin
   channel: ''
   owner: '@elastic/kibana-cases'
-  metadata:
-    sourceRoot: x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+  sourceRoot: x-pack/platform/test/cases_api_integration/common/plugins/security_solution
 dependsOn:
   - '@kbn/core'
   - '@kbn/files-plugin'
