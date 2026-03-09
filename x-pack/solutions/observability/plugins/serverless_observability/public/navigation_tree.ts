@@ -383,13 +383,20 @@ export const createNavigationTree = ({
     ],
     footer: [
       {
+        title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
+          defaultMessage: 'Add data',
+        }),
+        link: 'observabilityOnboarding',
+        icon: 'plusInCircle',
+      },
+      {
         id: 'ingestHub',
         title: i18n.translate('xpack.serverlessObservability.nav.ingestHub', {
           defaultMessage: 'Ingest Hub',
         }),
         link: 'observabilityOnboarding:ingest-hub',
         renderAs: 'panelOpener',
-        icon: 'plusInCircle',
+        icon: 'logstashInput',
         children: [
           {
             id: 'ingestHub_main',
