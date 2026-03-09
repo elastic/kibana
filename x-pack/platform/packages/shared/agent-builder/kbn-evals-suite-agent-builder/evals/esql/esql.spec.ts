@@ -57,7 +57,7 @@ function createEvaluateEsqlDataset({
     const executeToolTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
       const response = await chatClient.executeTool({
         toolId: platformCoreTools.generateEsql,
-        toolParams: { query: input.question },
+        toolParams: { query: input!.question },
       });
 
       const esql = (response.results as ToolResult[])
