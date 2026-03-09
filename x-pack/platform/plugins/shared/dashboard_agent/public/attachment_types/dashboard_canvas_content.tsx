@@ -25,7 +25,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { normalizePanels } from './panel_grid_layout';
+import { normalizeDashboardWidgets } from './panel_grid_layout';
 
 interface DashboardCanvasInitialInput {
   timeRange: {
@@ -43,7 +43,10 @@ const createDashboardRendererInitialInput = (
 ): DashboardCanvasInitialInput => ({
   timeRange: { from: 'now-24h', to: 'now' },
   viewMode: 'view',
-  panels: normalizePanels(data.panels ?? []) as DashboardState['panels'],
+  panels: normalizeDashboardWidgets({
+    panels: data.panels ?? [],
+    sections: data.sections,
+  }),
   title: data.title,
   description: data.description,
 });
