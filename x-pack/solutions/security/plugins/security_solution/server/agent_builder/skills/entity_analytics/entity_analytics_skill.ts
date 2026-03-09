@@ -41,6 +41,11 @@ Use this skill when:
 - A user wants to understand whether any entities have had a significant change in risk score
 - You want to look up the asset criticality level for an entity
 
+## Related Skills
+
+After using this skill, you may want to use:
+- '~/skills/security/ml/find-security-ml-jobs' to determine if an entity is exhibiting any unusual or anomalous behavior or acting in the environment in a suspicous way.
+
 ## Entity Analysis Process
 
 ### 1. Find the risky entities
