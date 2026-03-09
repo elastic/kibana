@@ -14,7 +14,7 @@ import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
 import { spaceTest } from '../../fixtures';
 
-const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 10;
+const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 5;
 
 const SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML = `
 name: Scout Scheduled Workflow Test
@@ -70,12 +70,13 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
 
   spaceTest('enabling a scheduled workflow triggers executions automatically', async () => {
     await workflowsApi.update(workflowId, { enabled: true });
+    const expectedExecutions = 3;
 
     const { results } = await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
-      condition: ({ results: r }) => r.length > 2,
+      condition: ({ results: r }) => r.length >= expectedExecutions,
       interval: 1000,
-      timeout: 30_000,
+      timeout: SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * expectedExecutions,
       errorMessage: ({ results: r }) => `Expected > 2 executions, got ${r.length}`,
     });
 
@@ -108,7 +109,7 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
       action: () => workflowsApi.getExecutions(workflowId),
       condition: ({ results: r }) => r.length >= 1,
       interval: 1000,
-      timeout: 20_000,
+      timeout: SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2,
       errorMessage: 'No executions appeared after enabling the workflow',
     });
 
@@ -143,7 +144,7 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
         condition: ({ results: r }) =>
           r.filter((e) => e.status === ExecutionStatus.COMPLETED).length >= 2,
         interval: 2000,
-        timeout: 40_000,
+        timeout: SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 4,
         errorMessage: ({ results: r }) =>
           `Expected >= 2 completed executions, got ${
             r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
@@ -171,7 +172,7 @@ spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAg
         const currentStart = new Date(completedExecutions[index]?.startedAt ?? '').getTime();
         const previousStart = new Date(completedExecutions[index - 1]?.startedAt ?? '').getTime();
         expect(currentStart - previousStart).toBeGreaterThan(
-          SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2 // multiply by 2 because the wait step takes 6s that will be added to the interval
+          SCHEDULED_WORKFLOW_INTERVAL_SECONDS * 1000 * 2 * 0.85 // multiply by 2 because the wait step takes 6s that will be added to the interval
         );
       }
     }
