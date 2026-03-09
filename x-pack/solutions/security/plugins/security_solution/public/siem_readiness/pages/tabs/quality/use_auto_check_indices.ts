@@ -13,8 +13,6 @@ import { EcsVersion } from '@elastic/ecs';
 import {
   checkIndex,
   type PartitionedFieldMetadata,
-  type UnallowedValueCount,
-  type AllowedValue,
   type IncompatibleFieldMappingItem,
   type IncompatibleFieldValueItem,
   type SameFamilyFieldItem,
@@ -34,6 +32,7 @@ const formatStorageResult = ({
   isCheckAll,
   partitionedFieldMetadata,
   sizeInBytes,
+  docsCount,
 }: {
   batchId: string;
   indexName: string;
@@ -41,6 +40,7 @@ const formatStorageResult = ({
   isCheckAll: boolean;
   partitionedFieldMetadata: PartitionedFieldMetadata;
   sizeInBytes: number;
+  docsCount: number;
 }): StorageResult => {
   const incompatibleFieldMappingItems: IncompatibleFieldMappingItem[] = [];
   const incompatibleFieldValueItems: IncompatibleFieldValueItem[] = [];
@@ -59,8 +59,8 @@ const formatStorageResult = ({
     if (field.indexInvalidValues.length > 0) {
       incompatibleFieldValueItems.push({
         fieldName: field.indexFieldName,
-        expectedValues: field.allowed_values?.map((x: AllowedValue) => x.name) ?? [],
-        actualValues: field.indexInvalidValues.map((v: UnallowedValueCount) => ({
+        expectedValues: field.allowed_values?.map((x) => x.name) ?? [],
+        actualValues: field.indexInvalidValues.map((v) => ({
           name: v.fieldName,
           count: v.count,
         })),
@@ -84,7 +84,7 @@ const formatStorageResult = ({
     indexPattern: pattern,
     isCheckAll,
     checkedAt: Date.now(),
-    docsCount: 0,
+    docsCount,
     totalFieldCount: partitionedFieldMetadata.all.length,
     ecsFieldCount: partitionedFieldMetadata.ecsCompliant.length,
     customFieldCount: partitionedFieldMetadata.custom.length,
@@ -128,6 +128,7 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
     setIsComplete(false);
     setProgress({ checked: 0, total: 0 });
     setCurrentIndexName('');
+    hasStarted.current = false;
   }, []);
 
   const cancelChecks = useCallback(() => {
@@ -189,16 +190,21 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
           indexName,
           isCheckAll: true,
           isLastCheck,
-          onCheckCompleted: ({ partitionedFieldMetadata, pattern, error }) => {
+          onCheckCompleted: ({ partitionedFieldMetadata, pattern, error, stats }) => {
             // Save results to backend only if check was successful
             if (partitionedFieldMetadata && !error) {
+              // Extract actual size and docs count from stats if available
+              const sizeInBytes = stats?.total ?? 0;
+              const docsCount = stats?.docsCount ?? 0;
+
               const storageResult = formatStorageResult({
                 batchId,
                 indexName,
                 pattern,
                 isCheckAll: true,
                 partitionedFieldMetadata,
-                sizeInBytes: 0,
+                sizeInBytes,
+                docsCount,
               });
 
               // Create and track the save promise using async/await
@@ -233,9 +239,11 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
           setProgress({ checked, total: uniqueIndexNames.length });
         }
       } catch (error) {
-        // Continue checking remaining indices even if one fails
-        checked++;
-        setProgress({ checked, total: uniqueIndexNames.length });
+        // Continue checking remaining indices even if one fails, but only if not aborted
+        if (!abortController.current.signal.aborted) {
+          checked++;
+          setProgress({ checked, total: uniqueIndexNames.length });
+        }
       }
     }
 
@@ -247,14 +255,13 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    // Refresh results after all checks and saves complete
+    // Only update state and refresh results if not aborted
     if (!abortController.current.signal.aborted) {
       refreshIndexResults();
+      setIsChecking(false);
+      setIsComplete(true);
+      // Keep progress and currentIndexName visible for complete state
     }
-
-    setIsChecking(false);
-    setIsComplete(true);
-    // Keep progress and currentIndexName visible for complete state
   }, [indexNames, formatBytes, http, refreshIndexResults]);
 
   // Auto-start checks when enabled (only once)
