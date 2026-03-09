@@ -20,6 +20,7 @@ import type {
 import type { WorkflowsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 import { WorkflowsApiService } from '../../common/apis/workflows';
+import { ScoutSpaceParallelFixture } from '@kbn/scout/src/playwright/fixtures/scope/worker';
 
 export interface WorkflowsApiServicesFixture extends ApiServicesFixture {
   workflows: WorkflowsApiService;
@@ -59,11 +60,19 @@ export const spaceTest = spaceBaseTest.extend<WorkflowsTestFixtures, WorkflowsWo
   },
   apiServices: [
     async (
-      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
+      {
+        apiServices,
+        kbnClient,
+        scoutSpace,
+      }: {
+        apiServices: ApiServicesFixture;
+        kbnClient: KbnClient;
+        scoutSpace: ScoutSpaceParallelFixture;
+      },
       use: (extendedApiServices: WorkflowsApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as WorkflowsApiServicesFixture;
-      extendedApiServices.workflows = new WorkflowsApiService(kbnClient);
+      extendedApiServices.workflows = new WorkflowsApiService(scoutSpace.id, kbnClient);
       await use(extendedApiServices);
     },
     { scope: 'worker' },
