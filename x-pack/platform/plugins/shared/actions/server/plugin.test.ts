@@ -65,9 +65,13 @@ function getConfig(overrides = {}) {
     usage: {
       url: 'ca.path',
     },
-    oAuthRateLimit: {
-      authorize: { lookbackWindow: '1h', limit: 100 },
-      callback: { lookbackWindow: '1h', limit: 100 },
+    auth: {
+      oauth_authorization_code: {
+        rate_limits: {
+          authorize: { lookbackWindow: '1h', limit: 100 },
+          callback: { lookbackWindow: '1h', limit: 100 },
+        },
+      },
     },
     ...overrides,
   };
@@ -119,9 +123,13 @@ describe('Actions Plugin', () => {
         usage: {
           url: 'ca.path',
         },
-        oAuthRateLimit: {
-          authorize: { lookbackWindow: '1h', limit: 100 },
-          callback: { lookbackWindow: '1h', limit: 100 },
+        auth: {
+          oauth_authorization_code: {
+            rate_limits: {
+              authorize: { lookbackWindow: '1h', limit: 100 },
+              callback: { lookbackWindow: '1h', limit: 100 },
+            },
+          },
         },
       });
       plugin = new ActionsPlugin(context);
@@ -527,9 +535,13 @@ describe('Actions Plugin', () => {
         usage: {
           url: 'ca.path',
         },
-        oAuthRateLimit: {
-          authorize: { lookbackWindow: '1h', limit: 100 },
-          callback: { lookbackWindow: '1h', limit: 100 },
+        auth: {
+          oauth_authorization_code: {
+            rate_limits: {
+              authorize: { lookbackWindow: '1h', limit: 100 },
+              callback: { lookbackWindow: '1h', limit: 100 },
+            },
+          },
         },
       });
       plugin = new ActionsPlugin(context);
