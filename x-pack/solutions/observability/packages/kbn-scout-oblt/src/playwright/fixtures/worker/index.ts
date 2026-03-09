@@ -7,7 +7,5 @@
 
 export { profilingSetupFixture } from './profiling';
 export type { ProfilingSetupFixture } from './profiling';
-export type * from './slos_overview.journey';
-export type * from './annotation_list.journey';
 export { sloDataFixture } from './slo_data';
 export type { SloDataFixture } from './slo_data';
