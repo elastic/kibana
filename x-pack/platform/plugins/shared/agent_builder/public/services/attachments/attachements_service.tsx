@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type { HttpSetup } from '@kbn/core-http-browser';
+import type {
+  UnknownAttachment,
+  UpdateOriginResponse,
+} from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import { publicApiPath } from '../../../common/constants';
 
 /**
- * Internal service for managing attachment UI definitions.
- * This service maintains a registry of UI definitions for different attachment types.
+ * Internal service for managing attachment UI definitions and API operations.
+ * This service maintains a registry of UI definitions for different attachment types
+ * and provides methods for attachment API operations.
  */
 export class AttachmentsService {
   private readonly registry: Map<string, AttachmentUIDefinition> = new Map();
+  private readonly http: HttpSetup;
+
+  constructor({ http }: { http: HttpSetup }) {
+    this.http = http;
+  }
 
   /**
    * Registers a UI definition for a specific attachment type.
@@ -52,5 +63,26 @@ export class AttachmentsService {
    */
   hasAttachmentType(attachmentType: string): boolean {
     return this.registry.has(attachmentType);
+  }
+
+  /**
+   * Updates the origin reference for an attachment.
+   * Use this after saving a by-value attachment to link it to its persistent store.
+   *
+   * @param conversationId - The conversation containing the attachment
+   * @param attachmentId - The ID of the attachment to update
+   * @param origin - The origin reference object (shape depends on attachment type)
+   */
+  async updateOrigin(
+    conversationId: string,
+    attachmentId: string,
+    origin: unknown
+  ): Promise<UpdateOriginResponse> {
+    return await this.http.put<UpdateOriginResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
+      {
+        body: JSON.stringify({ origin }),
+      }
+    );
   }
 }

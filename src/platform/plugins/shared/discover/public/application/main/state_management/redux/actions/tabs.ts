@@ -206,7 +206,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         tab.appState = {
           ...(isOfAggregateQueryType(currentQuery)
-            ? { query: { esql: getInitialESQLQuery(currentDataView, true) } }
+            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
             : {}),
           dataSource: createDataSource({
             dataView: currentDataView,

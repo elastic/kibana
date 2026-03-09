@@ -17,11 +17,12 @@ const rootPath = '#/';
 function getRootBreadcrumbs({
   breadcrumb,
   embeddable,
+  isEmbeddedEditor,
 }: {
   breadcrumb?: string;
   embeddable: EmbeddableEditorService;
+  isEmbeddedEditor?: boolean;
 }): ChromeBreadcrumb[] {
-  const isEmbeddedEditor = embeddable.isEmbeddedEditor();
   const href = isEmbeddedEditor ? undefined : breadcrumb || rootPath;
 
   return [
@@ -54,6 +55,7 @@ export function setBreadcrumbs({
   services: DiscoverServices;
 }) {
   const embeddable = services.embeddableEditor;
+  const isEmbeddedEditor = embeddable.isEmbeddedEditor();
   const byValueTitle = embeddable.getByValueInput()?.label;
 
   const breadcrumbTitle = byValueTitle || titleBreadcrumbText;
@@ -62,12 +64,13 @@ export function setBreadcrumbs({
     const rootBreadcrumbs = getRootBreadcrumbs({
       breadcrumb: rootBreadcrumbPath,
       embeddable,
+      isEmbeddedEditor,
     });
 
     services.chrome.setBreadcrumbs([
       ...rootBreadcrumbs,
       {
-        text: embeddable.isEmbeddedEditor()
+        text: isEmbeddedEditor
           ? i18n.translate('discover.dashboardsEditorBreadcrumbEditingTitle', {
               defaultMessage: 'Editing {title}',
               values: { title: breadcrumbTitle },
@@ -76,7 +79,7 @@ export function setBreadcrumbs({
       },
     ]);
   } else {
-    const discoverBreadcrumbsTitle = embeddable.isEmbeddedEditor()
+    const discoverBreadcrumbsTitle = isEmbeddedEditor
       ? i18n.translate('discover.dashboardsEditorBreadcrumbTitle', {
           defaultMessage: 'Dashboards',
         })

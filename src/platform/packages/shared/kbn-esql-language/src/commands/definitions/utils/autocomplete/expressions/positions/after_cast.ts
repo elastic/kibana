@@ -8,9 +8,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ESQLInlineCast } from '@elastic/esql/types';
+import { Walker, within } from '@elastic/esql';
 import type { SupportedDataType } from '../../../../..';
-import type { ESQLInlineCast } from '../../../../../../types';
-import { Walker, within } from '../../../../../../ast';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ExpressionContext } from '../types';

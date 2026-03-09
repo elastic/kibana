@@ -14,7 +14,7 @@ import { EuiBetaBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import {
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
   SUPPRESSED_ALERTS_SECTION_TECHNICAL_PREVIEW_TEST_ID,

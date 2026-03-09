@@ -11,12 +11,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getWorkflowExecution } from './get_workflow_execution';
 
-jest.mock('./search_step_executions', () => ({
-  searchStepExecutions: jest.fn().mockResolvedValue([]),
-}));
-
-const { searchStepExecutions } = jest.requireMock('./search_step_executions');
-
 describe('getWorkflowExecution', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
@@ -142,10 +136,10 @@ describe('getWorkflowExecution', () => {
       mockEsClient.get.mockResolvedValue({
         _source: { ...baseExecutionDoc, stepExecutionIds: undefined },
       } as any);
-      searchStepExecutions.mockResolvedValue([]);
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
     });
 
-    it('should pass sourceExcludes to searchStepExecutions when includeInput/includeOutput are false', async () => {
+    it('should pass _source excludes to search when includeInput/includeOutput are false', async () => {
       await getWorkflowExecution({
         ...baseParams,
         esClient: mockEsClient,
@@ -154,14 +148,14 @@ describe('getWorkflowExecution', () => {
         includeOutput: false,
       });
 
-      expect(searchStepExecutions).toHaveBeenCalledWith(
+      expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          sourceExcludes: ['input', 'output'],
+          _source: { excludes: ['input', 'output'] },
         })
       );
     });
 
-    it('should pass empty sourceExcludes when both flags are true', async () => {
+    it('should not pass _source excludes when both flags are true', async () => {
       await getWorkflowExecution({
         ...baseParams,
         esClient: mockEsClient,
@@ -170,9 +164,9 @@ describe('getWorkflowExecution', () => {
         includeOutput: true,
       });
 
-      expect(searchStepExecutions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sourceExcludes: [],
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          _source: expect.anything(),
         })
       );
     });

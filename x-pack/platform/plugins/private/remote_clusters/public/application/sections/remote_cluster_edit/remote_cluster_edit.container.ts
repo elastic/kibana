@@ -7,6 +7,7 @@
 
 import { connect } from 'react-redux';
 import type { Cluster, ClusterPayload } from '../../../../common/lib';
+import type { RequestError } from '../../../types';
 import { RemoteClusterEdit as RemoteClusterEditView } from './remote_cluster_edit';
 
 import {
@@ -15,6 +16,7 @@ import {
   isEditingCluster,
   getEditClusterError,
 } from '../../store/selectors';
+import type { AppDispatch, RemoteClustersState } from '../../store/types';
 
 import {
   editCluster,
@@ -24,7 +26,7 @@ import {
   openDetailPanel,
 } from '../../store/actions';
 
-const mapStateToProps = (state: any) => {
+const mapStateToProps = (state: RemoteClustersState) => {
   return {
     isLoading: isLoading(state),
     cluster: getEditedCluster(state),
@@ -33,7 +35,7 @@ const mapStateToProps = (state: any) => {
   };
 };
 
-const mapDispatchToProps = (dispatch: (action: any) => void) => {
+const mapDispatchToProps = (dispatch: AppDispatch) => {
   return {
     startEditingCluster: (clusterName: string) => {
       dispatch(startEditingCluster({ clusterName }));
@@ -55,12 +57,12 @@ const mapDispatchToProps = (dispatch: (action: any) => void) => {
 
 interface Props {
   isLoading: boolean;
-  cluster: Cluster;
+  cluster: Cluster | undefined;
   startEditingCluster: (clusterName: string) => void;
   stopEditingCluster: () => void;
   editCluster: (cluster: ClusterPayload) => void;
   isEditingCluster: boolean;
-  getEditClusterError?: object;
+  getEditClusterError?: RequestError;
   clearEditClusterErrors: () => void;
   openDetailPanel: (clusterName: string) => void;
 }

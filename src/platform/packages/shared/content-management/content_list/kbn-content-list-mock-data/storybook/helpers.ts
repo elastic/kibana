@@ -15,6 +15,27 @@ import { MOCK_VISUALIZATIONS, type VisualizationMockItem } from './visualization
 import { MOCK_USER_PROFILES } from './user_profiles';
 import { mockFavoritesClient } from './services';
 
+/** Shape compatible with `ActiveFilters` from `@kbn/content-list-provider`. Defined locally to avoid circular dependency. */
+interface MockFindItemsFilters {
+  search?: string;
+  tag?: { include?: string[]; exclude?: string[] };
+  favoritesOnly?: boolean;
+  users?: string[];
+}
+
+/**
+ * Extracts tag IDs from a `UserContentCommonSchema` item's `references` array.
+ *
+ * Mock items store tags as `{ type: 'tag', id: 'tag-id' }` references. This
+ * helper converts them into a flat `string[]` suitable for `ContentListItem.tags`.
+ */
+export const extractTagIds = (
+  references: UserContentCommonSchema['references']
+): string[] | undefined => {
+  const tagIds = references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id);
+  return tagIds && tagIds.length > 0 ? tagIds : undefined;
+};
+
 /**
  * Generic mock item type
  */
@@ -51,7 +72,7 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     page,
   }: {
     searchQuery?: string;
-    filters: { tags?: { include?: string[]; exclude?: string[] }; favoritesOnly?: boolean };
+    filters: MockFindItemsFilters;
     sort: { field: string; direction: 'asc' | 'desc' };
     page: { index: number; size: number };
   }) => {
@@ -73,7 +94,8 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     }
 
     // Apply tag include filters
-    const includeTags = filters.tags?.include;
+    const tagFilter = filters.tag;
+    const includeTags = tagFilter?.include;
     if (includeTags && includeTags.length > 0) {
       items = items.filter((item) =>
         includeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
@@ -81,15 +103,15 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     }
 
     // Apply tag exclude filters
-    const excludeTags = filters.tags?.exclude;
+    const excludeTags = tagFilter?.exclude;
     if (excludeTags && excludeTags.length > 0) {
       items = items.filter(
         (item) => !excludeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
       );
     }
 
-    // Apply favorites filter
-    if (filters.favoritesOnly) {
+    // Apply favorites filter (mock extension, not in ActiveFilters)
+    if ((filters as { favoritesOnly?: boolean }).favoritesOnly) {
       const favorites = await mockFavoritesClient.getFavorites();
       items = items.filter((item) => favorites.favoriteIds.includes(item.id));
     }
@@ -122,7 +144,19 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Apply pagination
+    // Compute per-tag item counts from the full (pre-paginated) result set.
+    // Key by id (or name) to match TagFilterRenderer lookup.
+    const tagCounts: Record<string, number> = {};
+    items.forEach((item) => {
+      item.references?.forEach((ref) => {
+        if (ref.type === 'tag') {
+          const key = ref.id ?? ref.name;
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      });
+    });
+
+    // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
     const end = start + page.size;
@@ -131,6 +165,7 @@ export function createMockFindItems<T extends UserContentCommonSchema>(
     return {
       items: paginatedItems,
       total,
+      counts: { tag: tagCounts },
     };
   };
 }
@@ -389,11 +424,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     page,
   }: {
     searchQuery?: string;
-    filters: {
-      tags?: { include?: string[]; exclude?: string[] };
-      users?: string[];
-      favoritesOnly?: boolean;
-    };
+    filters: MockFindItemsFilters;
     sort: { field: string; direction: 'asc' | 'desc' };
     page: { index: number; size: number };
   }) => {
@@ -416,7 +447,8 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     }
 
     // Apply tag include filters
-    const includeTags = filters.tags?.include;
+    const tagFilter = filters.tag;
+    const includeTags = tagFilter?.include;
     if (includeTags && includeTags.length > 0) {
       items = items.filter((item) =>
         includeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
@@ -424,7 +456,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     }
 
     // Apply tag exclude filters
-    const excludeTags = filters.tags?.exclude;
+    const excludeTags = tagFilter?.exclude;
     if (excludeTags && excludeTags.length > 0) {
       items = items.filter(
         (item) => !excludeTags.some((tag) => item.references?.some((ref) => ref.id === tag))
@@ -432,8 +464,9 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     }
 
     // Apply user filters (createdBy) - supports both email and uid filter values
-    if (filters.users && filters.users.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, filters.users!));
+    const usersFilter = (filters as { users?: string[] }).users;
+    if (usersFilter && usersFilter.length > 0) {
+      items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
     }
 
     // Apply favorites filter
@@ -465,7 +498,19 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
       return sort.direction === 'asc' ? comparison : -comparison;
     });
 
-    // Apply pagination
+    // Compute per-tag item counts from the full (pre-paginated) result set.
+    // Key by id (or name) to match TagFilterRenderer lookup.
+    const tagCounts: Record<string, number> = {};
+    items.forEach((item) => {
+      item.references?.forEach((ref) => {
+        if (ref.type === 'tag') {
+          const key = ref.id ?? ref.name;
+          tagCounts[key] = (tagCounts[key] || 0) + 1;
+        }
+      });
+    });
+
+    // Apply pagination.
     const total = items.length;
     const start = page.index * page.size;
     const end = start + page.size;
@@ -474,6 +519,7 @@ export const createSimpleMockFindItems = (delay: number = 0) => {
     return {
       items: paginatedItems,
       total,
+      counts: { tag: tagCounts },
     };
   };
 };

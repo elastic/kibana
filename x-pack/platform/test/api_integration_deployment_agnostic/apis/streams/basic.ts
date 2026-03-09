@@ -11,6 +11,7 @@ import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
 import { get, omit } from 'lodash';
+import type { JsonObject } from '@kbn/utility-types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import {
@@ -473,8 +474,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(result._index).to.match(new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`));
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:00.000Z');
         expect(result._source).to.have.property('message', 'test message');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', rootStream);
+        // With subobjects: false, stream.name is a flat dotted key
+        expect((result._source as JsonObject)['stream.name']).to.eql(rootStream);
       });
 
       it('Index an ECS doc with nested fields', async () => {
@@ -492,8 +493,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, rootStream, doc);
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:00.000Z');
         expect(result._source).to.have.property('message', 'test message');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', rootStream);
+        expect((result._source as JsonObject)['stream.name']).to.eql(rootStream);
       });
 
       it(`Fork ${rootStream} to ${rootStream}.apache`, async () => {
@@ -541,8 +541,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await indexAndAssertTargetStream(esClient, `${rootStream}.apache`, doc);
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:10.000Z');
         expect(result._source).to.have.property('message', 'Apache access log');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property('name', `${rootStream}.apache`);
+        expect((result._source as JsonObject)['stream.name']).to.eql(`${rootStream}.apache`);
       });
 
       it(`Fork ${rootStream}.apache to ${rootStream}.apache.error`, async () => {
@@ -574,11 +573,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(result._source).to.have.property('@timestamp', '2024-01-01T00:00:20.000Z');
         expect(result._source).to.have.property('message', 'Apache error log');
-        expect(result._source).to.have.property('stream');
-        expect((result._source as any).stream).to.have.property(
-          'name',
-          `${rootStream}.apache.error`
-        );
+        expect((result._source as JsonObject)['stream.name']).to.eql(`${rootStream}.apache.error`);
       });
 
       it(`Does not index to ${rootStream}.apache.error if routing is disabled`, async () => {
@@ -912,11 +907,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       }
 
+      const isEcs = streams[0].startsWith('logs.ecs');
       const mappingsResponse = await esClient.indices.getMapping({ index: streams });
       for (const { mappings } of Object.values(mappingsResponse)) {
         for (const [field, fieldConfig] of Object.entries(expectedFields)) {
-          const fieldPath = field.split('.').join('.properties.');
-          expect(get(mappings.properties, fieldPath)).to.eql(omit(fieldConfig, ['from']));
+          if (isEcs) {
+            // With subobjects: false, dotted field names are literal keys in mappings
+            expect(get(mappings.properties, [field])).to.eql(omit(fieldConfig, ['from']));
+          } else {
+            const fieldPath = field.split('.').join('.properties.');
+            expect(get(mappings.properties, fieldPath)).to.eql(omit(fieldConfig, ['from']));
+          }
         }
       }
     }

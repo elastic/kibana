@@ -1,0 +1,44 @@
+version: '1'
+name: 'sources.servicenow.search'
+description: 'Search ServiceNow records using full-text search. Searches across a specified table (e.g., incident, kb_knowledge, sc_req_item, change_request) and returns matching records with high-level metadata.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table
+    type: string
+    required: true
+    description: 'The ServiceNow table to search. Common values: incident (IT incidents), kb_knowledge (knowledge articles), sc_req_item (service catalog requests), change_request (change management), problem (problem records), sc_task (service catalog tasks), cmdb_ci (configuration items). Custom tables are also supported.'
+  - name: query
+    type: string
+    required: true
+    description: 'Full-text search query string'
+  - name: encoded_query
+    type: string
+    required: false
+    description: 'Optional ServiceNow encoded query to combine with the full-text search for additional filtering (e.g., active=true^priority=1). Uses ^ to AND conditions, ^OR for OR.'
+  - name: fields
+    type: string
+    required: false
+    description: 'Comma-separated list of fields to return (e.g., sys_id,number,short_description,state,priority,assigned_to,sys_created_on)'
+  - name: limit
+    type: number
+    required: false
+    default: 20
+    description: 'Maximum number of results to return'
+  - name: offset
+    type: number
+    required: false
+    description: 'Offset for pagination'
+steps:
+  - name: search-records
+    type: servicenow_search.search
+    connector-id: <%= servicenow_search-stack-connector-id %>
+    with:
+      table: "${{ inputs.table }}"
+      query: "${{ inputs.query }}"
+      encodedQuery: "${{ inputs.encoded_query }}"
+      fields: "${{ inputs.fields }}"
+      limit: ${{ inputs.limit }}
+      offset: ${{ inputs.offset }}
