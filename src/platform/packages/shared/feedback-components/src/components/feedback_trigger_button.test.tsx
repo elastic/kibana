@@ -29,7 +29,7 @@ const createMockProps = ({
   getCurrentUserEmail: jest.fn().mockResolvedValue('capybara@elastic.co'),
   sendFeedback: jest.fn().mockResolvedValue(undefined),
   showToast: jest.fn(),
-  isTelemetryOptedIn: isTelemetryGlobalSettingEnabled,
+  getIsTelemetryOptedIn: () => isTelemetryGlobalSettingEnabled,
 });
 
 describe('FeedbackButton', () => {

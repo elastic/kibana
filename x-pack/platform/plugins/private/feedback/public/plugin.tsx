@@ -100,7 +100,7 @@ export class FeedbackPlugin implements Plugin {
             getCurrentUserEmail={getCurrentUserEmail}
             sendFeedback={sendFeedback}
             showToast={showToast}
-            isTelemetryOptedIn={telemetry.telemetryService.getIsOptedIn() === true}
+            getIsTelemetryOptedIn={() => telemetry.telemetryService.getIsOptedIn() === true}
           />
         </Suspense>
       ),

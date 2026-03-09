@@ -24,7 +24,7 @@ interface Props {
   getCurrentUserEmail: () => Promise<string | undefined>;
   sendFeedback: (data: FeedbackFormData) => Promise<void>;
   showToast: (title: string, type: 'success' | 'error') => void;
-  isTelemetryOptedIn: boolean;
+  getIsTelemetryOptedIn: () => boolean;
 }
 
 export const FeedbackTriggerButton = ({
@@ -33,8 +33,9 @@ export const FeedbackTriggerButton = ({
   getCurrentUserEmail,
   sendFeedback,
   showToast,
-  isTelemetryOptedIn,
+  getIsTelemetryOptedIn,
 }: Props) => {
+  const isOptedIn = getIsTelemetryOptedIn();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleShowFeedbackContainer = () => {
@@ -53,7 +54,7 @@ export const FeedbackTriggerButton = ({
     <>
       <EuiToolTip
         content={
-          !isTelemetryOptedIn
+          !isOptedIn
             ? i18n.translate('feedback.triggerButton.tooltip.disabled', {
                 defaultMessage: 'Enable usage collection to submit feedback',
               })
@@ -66,7 +67,7 @@ export const FeedbackTriggerButton = ({
           data-test-subj="feedbackTriggerButton"
           aria-haspopup="dialog"
           onClick={handleShowFeedbackContainer}
-          disabled={!isTelemetryOptedIn}
+          disabled={!isOptedIn}
         >
           <EuiIcon
             type="comment"
