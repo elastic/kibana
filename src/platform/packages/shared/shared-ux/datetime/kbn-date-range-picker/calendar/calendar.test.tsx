@@ -141,7 +141,7 @@ describe('Calendar', () => {
 
         expect(mockScrollToIndex).toHaveBeenCalledWith(
           expect.objectContaining({
-            behavior: 'smooth',
+            behavior: 'auto',
             align: 'center',
           })
         );

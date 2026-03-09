@@ -85,7 +85,7 @@ export function Calendar({ range, onRangeChange, weekStartsOn }: CalendarProps) 
   const scrollToToday = useCallback(() => {
     virtuosoRef.current?.scrollToIndex({
       index: TODAY_INDEX - firstItemIndex,
-      behavior: 'smooth',
+      behavior: 'auto',
       align: 'center',
     });
   }, [firstItemIndex]);
