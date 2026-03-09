@@ -317,7 +317,7 @@ export interface OtlpResourceSpans {
   spans: OtlpSpan[];
 }
 
-const OTLP_BATCH_SIZE = 1000;
+const OTLP_BATCH_SIZE = 5000;
 
 export async function checkOtlpEndpoint(endpoint: string): Promise<boolean> {
   try {
@@ -334,6 +334,8 @@ export async function checkOtlpEndpoint(endpoint: string): Promise<boolean> {
 
 export type DatasetId = 'openrca' | 'rcaeval-re3';
 
+const OTLP_CONCURRENCY = 3;
+
 export async function exportTracesViaOtlp(
   resourceSpansList: OtlpResourceSpans[],
   otlpEndpoint: string,
@@ -341,8 +343,11 @@ export async function exportTracesViaOtlp(
 ): Promise<number> {
   const tag = options?.label ? `[${options.label}] ` : '';
   let totalExported = 0;
+  const limit = pLimit(OTLP_CONCURRENCY);
 
   for (const { serviceName, spans } of resourceSpansList) {
+    const tasks: Promise<void>[] = [];
+
     for (let offset = 0; offset < spans.length; offset += OTLP_BATCH_SIZE) {
       const batch = spans.slice(offset, offset + OTLP_BATCH_SIZE);
 
@@ -372,51 +377,35 @@ export async function exportTracesViaOtlp(
         ],
       };
 
-      const res = await fetch(`${otlpEndpoint}/v1/traces`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      tasks.push(
+        limit(async () => {
+          const res = await fetch(`${otlpEndpoint}/v1/traces`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
 
-      if (!res.ok) {
-        const body = await res.text().catch(() => '');
-        throw new Error(`OTLP export failed (${res.status}): ${body}`);
-      }
+          if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            throw new Error(`OTLP export failed (${res.status}): ${body}`);
+          }
 
-      totalExported += batch.length;
-      process.stdout.write(`  ${tag}Exported ${totalExported} spans for ${serviceName}\r`);
+          totalExported += batch.length;
+          process.stdout.write(`  ${tag}Exported ${totalExported} spans for ${serviceName}\r`);
+        })
+      );
     }
+
+    await Promise.all(tasks);
   }
 
   if (totalExported > 0) console.log();
   return totalExported;
 }
 
-export async function deleteApmDataByDataset(client: Client, datasetId: DatasetId): Promise<void> {
-  const apmPatterns = ['traces-apm*', 'metrics-apm*'];
-  for (const pattern of apmPatterns) {
-    try {
-      const result = await client.deleteByQuery({
-        index: pattern,
-        query: {
-          bool: {
-            should: [
-              { term: { 'labels.ingest_dataset': datasetId } },
-              { term: { 'resource.attributes.ingest.dataset': datasetId } },
-            ],
-            minimum_should_match: 1,
-          },
-        },
-        conflicts: 'proceed',
-        refresh: true,
-      });
-      const deleted = result.deleted ?? 0;
-      if (deleted > 0) {
-        console.log(`Deleted ${deleted} APM documents from ${pattern} (dataset=${datasetId})`);
-      }
-    } catch {
-      // Index pattern may not exist
-    }
+export async function deleteApmDataStreams(client: Client): Promise<void> {
+  for (const pattern of ['traces-apm*', 'metrics-apm*', 'traces-*.otel-*', 'metrics-*.otel-*']) {
+    await deleteDataStream(client, pattern);
   }
 }
 

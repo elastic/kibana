@@ -13,10 +13,20 @@ Scripts for downloading and ingesting observability datasets (logs, traces, metr
 30 code-level failure cases from the Online Boutique microservice system. Source: [RCAEval RE3-OB](https://github.com/phamquiluan/RCAEval) ([paper](https://arxiv.org/html/2412.17015v5)).
 
 ```bash
-npx tsx scripts/ingest_rcaeval.ts                                # list available cases
-npx tsx scripts/ingest_rcaeval.ts --case adservice_f4/1          # ingest a single case
-npx tsx scripts/ingest_rcaeval.ts --clean --case adservice_f4/1  # clean then ingest
-npx tsx scripts/ingest_rcaeval.ts --clean                        # delete ingested data
+ # list available cases
+npx tsx scripts/ingest_rcaeval.ts
+
+# ingest a single case
+npx tsx scripts/ingest_rcaeval.ts --case adservice_f4/1
+
+# limit trace rows for faster ingestion
+npx tsx scripts/ingest_rcaeval.ts --case adservice_f4/1 --max-trace-rows 50000
+
+# clean then ingest
+npx tsx scripts/ingest_rcaeval.ts --clean --case adservice_f4/1
+
+# delete ingested data
+npx tsx scripts/ingest_rcaeval.ts --clean
 ```
 
 ### Data Streams
@@ -31,28 +41,38 @@ npx tsx scripts/ingest_rcaeval.ts --clean                        # delete ingest
 
 Fault types: f1 (incorrect parameter values), f2 (missing parameters), f3 (missing function call), f4 (incorrect return values), f5 (missing exception handlers). The `/1`, `/2`, `/3` suffixes are repetitions of the same fault-service pair.
 
-| Case pattern                   | Root Cause Service | Fault | Expected Root Cause                                                                                                                   |
-| ------------------------------ | ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `cartservice_f1/{1,2,3}`      | `cartservice`      | f1    | Incorrect parameter values — `System.OverflowException` in `RedisCartStore.AddItemAsync` (overflow from extremely large item count)   |
-| `currencyservice_f1/{1,2,3}`  | `currencyservice`  | f1    | Incorrect parameter values causing currency conversion errors                                                                         |
-| `emailservice_f1/{1,2,3}`     | `emailservice`     | f1    | Incorrect parameter values causing email processing failures                                                                          |
-| `emailservice_f2/{1,2,3}`     | `emailservice`     | f2    | Missing parameters in function calls causing runtime errors                                                                           |
-| `adservice_f3/{1,2,3}`        | `adservice`        | f3    | Missing function call causing incomplete ad serving and downstream errors                                                             |
-| `emailservice_f3/{1,2,3}`     | `emailservice`     | f3    | Missing function call causing incomplete email processing                                                                             |
-| `adservice_f4/{1,2,3}`        | `adservice`        | f4    | Incorrect return values causing downstream errors in `frontend`                                                                       |
-| `emailservice_f4/{1,2,3}`     | `emailservice`     | f4    | Incorrect return values causing downstream failures                                                                                   |
-| `adservice_f5/{1,2,3}`        | `adservice`        | f5    | Missing exception handler causing unhandled crashes, errors propagating to callers                                                    |
-| `emailservice_f5/{1,2,3}`     | `emailservice`     | f5    | Missing exception handler causing unhandled crashes, errors propagating to callers                                                    |
+| Case pattern                 | Root Cause Service | Fault | Expected Root Cause                                                                                                                 |
+| ---------------------------- | ------------------ | ----- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `cartservice_f1/{1,2,3}`     | `cartservice`      | f1    | Incorrect parameter values — `System.OverflowException` in `RedisCartStore.AddItemAsync` (overflow from extremely large item count) |
+| `currencyservice_f1/{1,2,3}` | `currencyservice`  | f1    | Incorrect parameter values causing currency conversion errors                                                                       |
+| `emailservice_f1/{1,2,3}`    | `emailservice`     | f1    | Incorrect parameter values causing email processing failures                                                                        |
+| `emailservice_f2/{1,2,3}`    | `emailservice`     | f2    | Missing parameters in function calls causing runtime errors                                                                         |
+| `adservice_f3/{1,2,3}`       | `adservice`        | f3    | Missing function call causing incomplete ad serving and downstream errors                                                           |
+| `emailservice_f3/{1,2,3}`    | `emailservice`     | f3    | Missing function call causing incomplete email processing                                                                           |
+| `adservice_f4/{1,2,3}`       | `adservice`        | f4    | Incorrect return values causing downstream errors in `frontend`                                                                     |
+| `emailservice_f4/{1,2,3}`    | `emailservice`     | f4    | Incorrect return values causing downstream failures                                                                                 |
+| `adservice_f5/{1,2,3}`       | `adservice`        | f5    | Missing exception handler causing unhandled crashes, errors propagating to callers                                                  |
+| `emailservice_f5/{1,2,3}`    | `emailservice`     | f5    | Missing exception handler causing unhandled crashes, errors propagating to callers                                                  |
 
 ## OpenRCA
 
 Real telemetry from microservice failure scenarios across Bank and Market systems. Source: [OpenRCA](https://github.com/microsoft/OpenRCA). Full ground truth is in `datasets/openrca/Bank/query.csv` and `Market/cloudbed-*/query.csv`.
 
 ```bash
-npx tsx scripts/ingest_openrca.ts                                  # list available cases
-npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04           # ingest a single case
-npx tsx scripts/ingest_openrca.ts --clean --case bank/2021_03_04   # clean then ingest
-npx tsx scripts/ingest_openrca.ts --clean                          # delete ingested data
+# list available cases
+npx tsx scripts/ingest_openrca.ts
+
+# ingest a single case
+npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04
+
+# limit trace rows for faster ingestion (bank has 12M+ trace rows)
+npx tsx scripts/ingest_openrca.ts --case bank/2021_03_04 --max-trace-rows 200000
+
+# clean then ingest
+npx tsx scripts/ingest_openrca.ts --clean --case bank/2021_03_04
+
+# delete ingested data
+npx tsx scripts/ingest_openrca.ts --clean
 ```
 
 ### Data Streams
@@ -67,7 +87,7 @@ npx tsx scripts/ingest_openrca.ts --clean                          # delete inge
 
 | Case                | Faults | Key Root Causes (representative, not exhaustive)                                                                                |
 | ------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| `bank/2021_03_04`   | ~11    | `Mysql02` (high memory), `Redis02` (high memory, high CPU), `Tomcat02` (network latency), `MG01`/`MG02` (JVM OOM, high CPU)    |
+| `bank/2021_03_04`   | ~11    | `Mysql02` (high memory), `Redis02` (high memory, high CPU), `Tomcat02` (network latency), `MG01`/`MG02` (JVM OOM, high CPU)     |
 | `bank/2021_03_06`   | ~11    | `Tomcat01` (high memory, network latency), `Tomcat03`/`Tomcat04` (network latency, high CPU), `apache02` (packet loss)          |
 | `bank/2021_03_07`   | ~14    | `MG02` (packet loss), `Tomcat01` (packet loss, disk I/O, high CPU), `Tomcat02` (network latency, JVM OOM), `apache02` (latency) |
 | `bank/2021_03_09`   | ~19    | `apache01` (packet loss, latency, disk I/O), `Tomcat01`/`Tomcat02` (latency, packet loss), `MG02` (packet loss, latency)        |

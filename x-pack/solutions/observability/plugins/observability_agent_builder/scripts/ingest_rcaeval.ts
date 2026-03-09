@@ -38,6 +38,7 @@
  *   --otlp-endpoint <url>     OTLP endpoint for traces (default: http://localhost:4318)
  *   --skip-traces             Skip trace ingestion (no EDOT Collector required)
  *   --skip-metrics            Skip metric ingestion
+ *   --max-trace-rows <N>      Limit trace rows per file via uniform sampling (default: 200000)
  */
 
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
@@ -64,7 +65,7 @@ import {
   printVerifyCommands,
   checkOtlpEndpoint,
   exportTracesViaOtlp,
-  deleteApmDataByDataset,
+  deleteApmDataStreams,
   INFRA_METRIC_MAPPINGS,
 } from './ingest_utils';
 
@@ -79,6 +80,7 @@ const METRIC_INDEX_NAME = 'metrics-rcaeval.re3-default';
 const METRIC_TEMPLATE_NAME = 'rcaeval-re3-metrics';
 const DATASET_ID: DatasetId = 'rcaeval-re3';
 const DEFAULT_OTLP_ENDPOINT = 'http://localhost:4318';
+const DEFAULT_MAX_TRACE_ROWS = 200_000;
 
 const PLUGIN_ROOT = resolve(__dirname, '..');
 const DATASETS_DIR = join(PLUGIN_ROOT, 'datasets');
@@ -91,18 +93,22 @@ interface RcaEvalArgs extends BaseArgs {
   case?: string;
   source?: string;
   'otlp-endpoint'?: string;
+  'max-trace-rows'?: string;
 }
 
 function getOpts() {
-  const raw = parseArgs<RcaEvalArgs>(['case', 'source', 'otlp-endpoint'], {
+  const raw = parseArgs<RcaEvalArgs>(['case', 'source', 'otlp-endpoint', 'max-trace-rows'], {
     'otlp-endpoint': DEFAULT_OTLP_ENDPOINT,
   });
+  const rawMaxRows = raw['max-trace-rows'];
+  const maxTraceRows = rawMaxRows ? parseInt(rawMaxRows, 10) : DEFAULT_MAX_TRACE_ROWS;
   return {
     esUrl: raw.esUrl,
     window: raw.window,
     caseName: raw.case,
     source: raw.source,
     otlpEndpoint: raw['otlp-endpoint'] ?? DEFAULT_OTLP_ENDPOINT,
+    maxTraceRows: !isNaN(maxTraceRows) && maxTraceRows > 0 ? maxTraceRows : undefined,
     clean: process.argv.includes('--clean'),
     skipTraces: process.argv.includes('--skip-traces'),
     skipMetrics: process.argv.includes('--skip-metrics'),
@@ -229,13 +235,25 @@ function buildDocuments(caseInfo: CaseInfo, windowMs: number): Record<string, un
 // Trace building (traces.csv → OTLP spans)
 // ---------------------------------------------------------------------------
 
-function buildTraceSpans(caseInfo: CaseInfo, windowMs: number): OtlpResourceSpans[] {
+function buildTraceSpans(
+  caseInfo: CaseInfo,
+  windowMs: number,
+  maxTraceRows?: number
+): OtlpResourceSpans[] {
   const tracesFile = join(caseInfo.path, 'traces.csv');
   if (!existsSync(tracesFile)) return [];
 
   const csvText = readFileSync(tracesFile, 'utf-8');
-  const rows = parseCsv(csvText);
+  let rows = parseCsv(csvText);
   if (rows.length === 0) return [];
+
+  if (maxTraceRows && rows.length > maxTraceRows) {
+    const interval = Math.ceil(rows.length / maxTraceRows);
+    console.log(
+      `  Sampling every ${interval}th trace row (${maxTraceRows.toLocaleString()} of ${rows.length.toLocaleString()})`
+    );
+    rows = rows.filter((_, i) => i % interval === 0);
+  }
 
   const startTimeField = rows[0].startTime !== undefined ? 'startTime' : 'startTimeMillis';
   const isMicros = startTimeField === 'startTime';
@@ -350,7 +368,7 @@ function buildMetricDocuments(caseInfo: CaseInfo, windowMs: number): Record<stri
   for (const name of csvCandidates) {
     const csvFile = join(caseInfo.path, name);
     if (existsSync(csvFile)) {
-      return buildMetricsFromDataCsv(csvFile, caseInfo, windowMs);
+      return buildMetricsFromDataCsv(csvFile, windowMs);
     }
   }
 
@@ -419,11 +437,7 @@ function buildMetricDocuments(caseInfo: CaseInfo, windowMs: number): Record<stri
   return docs;
 }
 
-function buildMetricsFromDataCsv(
-  csvFile: string,
-  caseInfo: CaseInfo,
-  windowMs: number
-): Record<string, unknown>[] {
+function buildMetricsFromDataCsv(csvFile: string, windowMs: number): Record<string, unknown>[] {
   const csvText = readFileSync(csvFile, 'utf-8');
   const rows = parseCsv(csvText);
   if (rows.length === 0) return [];
@@ -540,7 +554,7 @@ async function main() {
     const client = await createEsClient(opts.esUrl);
     await deleteDataStream(client, LOG_INDEX_NAME);
     await deleteDataStream(client, METRIC_INDEX_NAME);
-    await deleteApmDataByDataset(client, DATASET_ID);
+    await deleteApmDataStreams(client);
     console.log('Cleaned: deleted RCAEval data streams and APM data');
     if (!opts.caseName) return;
   }
@@ -567,6 +581,8 @@ async function main() {
   console.log(`Signals:  logs${ingestTraces ? ', traces' : ''}${ingestMetrics ? ', metrics' : ''}`);
   console.log(`Case:     ${opts.caseName}`);
   if (ingestTraces) console.log(`OTLP:     ${opts.otlpEndpoint}`);
+  if (opts.maxTraceRows)
+    console.log(`Max rows: ${opts.maxTraceRows.toLocaleString()} trace rows per file`);
   console.log();
 
   // Verify EDOT Collector is reachable before starting
@@ -648,7 +664,7 @@ async function main() {
 
     // --- Traces ---
     if (ingestTraces) {
-      const traceSpans = buildTraceSpans(caseInfo, windowMs);
+      const traceSpans = buildTraceSpans(caseInfo, windowMs, opts.maxTraceRows);
       const spanCount = traceSpans.reduce((sum, rs) => sum + rs.spans.length, 0);
       if (spanCount > 0) {
         console.log(`  Traces: ${spanCount} spans across ${traceSpans.length} services`);

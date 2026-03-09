@@ -40,10 +40,11 @@
  *   --otlp-endpoint <url>     OTLP endpoint for traces (default: http://localhost:4318)
  *   --skip-traces             Skip trace ingestion (no EDOT Collector required)
  *   --skip-metrics            Skip metric ingestion
+ *   --max-trace-rows <N>      Limit trace rows per file via uniform sampling (default: 200000)
  */
 
 import { createReadStream, existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, resolve as resolvePath } from 'node:path';
 import globby from 'globby';
 import Papa from 'papaparse';
 import type { Client } from '@elastic/elasticsearch';
@@ -67,7 +68,7 @@ import {
   printVerifyCommands,
   checkOtlpEndpoint,
   exportTracesViaOtlp,
-  deleteApmDataByDataset,
+  deleteApmDataStreams,
   generateHexId,
   toHexId,
   INFRA_METRIC_MAPPINGS,
@@ -83,9 +84,10 @@ const GDRIVE_FILE_IDS: Record<string, string> = {
 };
 
 const DEFAULT_OTLP_ENDPOINT = 'http://localhost:4318';
+const DEFAULT_MAX_TRACE_ROWS = 200_000;
 const DATASET_ID: DatasetId = 'openrca';
 
-const PLUGIN_ROOT = resolve(__dirname, '..');
+const PLUGIN_ROOT = resolvePath(__dirname, '..');
 const DATASETS_DIR = join(PLUGIN_ROOT, 'datasets');
 const OPENRCA_DIR = join(DATASETS_DIR, 'openrca');
 
@@ -99,13 +101,17 @@ interface OpenRcaArgs extends BaseArgs {
   case?: string;
   source?: string;
   'otlp-endpoint'?: string;
+  'max-trace-rows'?: string;
 }
 
 function getOpts() {
-  const raw = parseArgs<OpenRcaArgs>(['systems', 'date', 'case', 'source', 'otlp-endpoint'], {
-    systems: 'bank,market',
-    'otlp-endpoint': DEFAULT_OTLP_ENDPOINT,
-  });
+  const raw = parseArgs<OpenRcaArgs>(
+    ['systems', 'date', 'case', 'source', 'otlp-endpoint', 'max-trace-rows'],
+    {
+      systems: 'bank,market',
+      'otlp-endpoint': DEFAULT_OTLP_ENDPOINT,
+    }
+  );
 
   let systems = (raw.systems ?? 'bank,market').split(',').map((s) => s.trim().toLowerCase());
   let date = raw.date;
@@ -123,6 +129,9 @@ function getOpts() {
 
   const hasExplicitCase = Boolean(raw.case || raw.date);
 
+  const rawMaxRows = raw['max-trace-rows'];
+  const maxTraceRows = rawMaxRows ? parseInt(rawMaxRows, 10) : DEFAULT_MAX_TRACE_ROWS;
+
   return {
     esUrl: raw.esUrl,
     window: raw.window,
@@ -131,6 +140,7 @@ function getOpts() {
     hasExplicitCase,
     source: raw.source,
     otlpEndpoint: raw['otlp-endpoint'] ?? DEFAULT_OTLP_ENDPOINT,
+    maxTraceRows: !isNaN(maxTraceRows) && maxTraceRows > 0 ? maxTraceRows : undefined,
     clean: process.argv.includes('--clean'),
     skipLogs: process.argv.includes('--skip-logs'),
     skipTraces: process.argv.includes('--skip-traces'),
@@ -286,7 +296,7 @@ function discoverTraceFiles(dataDir: string, config: SystemConfig, dateFilter?: 
 // We synthesize proper trace/span IDs from these edges.
 // ---------------------------------------------------------------------------
 
-const TRACE_FLUSH_SIZE = 1000;
+const TRACE_FLUSH_SIZE = 5000;
 
 function detectTraceFormat(file: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -317,20 +327,42 @@ function detectTraceFormat(file: string): Promise<boolean> {
   });
 }
 
-function buildSpanIdToServiceMap(file: string): Promise<Map<string, string>> {
+interface PreScanResult {
+  spanIdToService: Map<string, string>;
+  totalRows: number;
+}
+
+function preScanDistributedTraceFile(file: string): Promise<PreScanResult> {
   const map = new Map<string, string>();
+  let totalRows = 0;
   return new Promise((resolve, reject) => {
     Papa.parse(createReadStream(file, 'utf-8'), {
       header: true,
       skipEmptyLines: true,
       step: ({ data }: { data: Record<string, string> }) => {
+        totalRows++;
         const rawSpanId = data.spanID || data.spanId || data.span_id || '';
         const serviceName = data.serviceName || data.service_name || data.cmdb_id || '';
         if (rawSpanId && serviceName) {
           map.set(rawSpanId, serviceName);
         }
       },
-      complete: () => resolve(map),
+      complete: () => resolve({ spanIdToService: map, totalRows }),
+      error: (err: Error) => reject(err),
+    });
+  });
+}
+
+function countCsvRows(file: string): Promise<number> {
+  let count = 0;
+  return new Promise((resolve, reject) => {
+    Papa.parse(createReadStream(file, 'utf-8'), {
+      header: true,
+      skipEmptyLines: true,
+      step: () => {
+        count++;
+      },
+      complete: () => resolve(count),
       error: (err: Error) => reject(err),
     });
   });
@@ -343,7 +375,8 @@ async function streamTraceSpansFromFile(
   now: number,
   systemKey: string,
   otlpEndpoint: string,
-  label: string
+  label: string,
+  maxTraceRows?: number
 ): Promise<number> {
   let totalExported = 0;
   let buffer: Record<string, string>[] = [];
@@ -351,11 +384,30 @@ async function streamTraceSpansFromFile(
   const isDistributed = await detectTraceFormat(file);
 
   let spanIdToService: Map<string, string> | undefined;
+  let totalRows: number | undefined;
+  let sampleInterval = 1;
+
   if (isDistributed) {
     console.log(`  [${label}] Pre-scanning for span→service mapping...`);
-    spanIdToService = await buildSpanIdToServiceMap(file);
-    console.log(`  [${label}] Found ${spanIdToService.size.toLocaleString()} spans across services`);
+    const preScan = await preScanDistributedTraceFile(file);
+    spanIdToService = preScan.spanIdToService;
+    totalRows = preScan.totalRows;
+    console.log(
+      `  [${label}] Found ${spanIdToService.size.toLocaleString()} spans across services (${totalRows.toLocaleString()} rows)`
+    );
+  } else if (maxTraceRows) {
+    totalRows = await countCsvRows(file);
+    console.log(`  [${label}] Total rows: ${totalRows.toLocaleString()}`);
   }
+
+  if (maxTraceRows && totalRows && totalRows > maxTraceRows) {
+    sampleInterval = Math.ceil(totalRows / maxTraceRows);
+    console.log(
+      `  [${label}] Sampling every ${sampleInterval}th row (${maxTraceRows.toLocaleString()} of ${totalRows.toLocaleString()})`
+    );
+  }
+
+  let rowIndex = 0;
 
   async function flushBuffer(): Promise<number> {
     if (buffer.length === 0) return 0;
@@ -382,6 +434,12 @@ async function streamTraceSpansFromFile(
       header: true,
       skipEmptyLines: true,
       step: ({ data }: { data: Record<string, string> }, parser: Papa.Parser) => {
+        const currentRow = rowIndex++;
+
+        if (sampleInterval > 1 && currentRow % sampleInterval !== 0) {
+          return;
+        }
+
         const ts = parseInt(data.timestamp, 10);
         if (!isNaN(ts) && ts > 1e12) {
           data.timestamp = String(Math.round(ts / 1000));
@@ -453,7 +511,12 @@ function buildDistributedTraces(
     const rawTraceId = row.traceID || row.traceId || row.trace_id || '';
     const rawSpanId = row.spanID || row.spanId || row.span_id || '';
     const rawParentId =
-      row.parentSpanID || row.parentSpanId || row.parent_span_id || row.parent_span || row.parent_id || '';
+      row.parentSpanID ||
+      row.parentSpanId ||
+      row.parent_span_id ||
+      row.parent_span ||
+      row.parent_id ||
+      '';
     const traceId = toHexId(rawTraceId, 32);
     const spanId = toHexId(rawSpanId, 16);
     const serviceName = row.serviceName || row.service_name || row.cmdb_id || 'unknown';
@@ -482,9 +545,7 @@ function buildDistributedTraces(
       kind,
       startTimeUnixNano: startNano.toString(),
       endTimeUnixNano: endNano.toString(),
-      attributes: [
-        { key: 'span.name', value: { stringValue: operationName } },
-      ],
+      attributes: [{ key: 'span.name', value: { stringValue: operationName } }],
       status: { code: 1 },
     };
     pushSpan(serviceName, span);
@@ -609,7 +670,6 @@ function buildGraphTraces(
 // ---------------------------------------------------------------------------
 
 function buildMetricDoc(
-  row: Record<string, string>,
   kpiName: string,
   cmdbId: string,
   val: number,
@@ -694,7 +754,7 @@ async function streamAndIndexMetricFile(
           const val = parseFloat(data.value);
           if (isNaN(val)) return;
           const kpiName = (data.kpi_name || data.metric_name || '').toLowerCase();
-          buffer.push(buildMetricDoc(data, kpiName, data.cmdb_id, val, remappedMs, systemKey));
+          buffer.push(buildMetricDoc(kpiName, data.cmdb_id, val, remappedMs, systemKey));
         } else {
           for (const col of metricCols) {
             const val = parseFloat(data[col]);
@@ -702,7 +762,7 @@ async function streamAndIndexMetricFile(
             const dotIdx = col.indexOf('.');
             const cmdbId = dotIdx > 0 ? col.slice(0, dotIdx) : col;
             const metricName = dotIdx > 0 ? col.slice(dotIdx + 1).toLowerCase() : 'value';
-            buffer.push(buildMetricDoc(data, metricName, cmdbId, val, remappedMs, systemKey));
+            buffer.push(buildMetricDoc(metricName, cmdbId, val, remappedMs, systemKey));
           }
         }
 
@@ -917,7 +977,7 @@ async function main() {
       await deleteDataStream(client, config.logIndexName);
       await deleteDataStream(client, config.metricIndexName);
     }
-    await deleteApmDataByDataset(client, DATASET_ID);
+    await deleteApmDataStreams(client);
     console.log('Cleaned: deleted all OpenRCA data streams and APM data');
     if (!opts.hasExplicitCase) return;
   }
@@ -931,10 +991,16 @@ async function main() {
   console.log('=================================');
   console.log(`ES URL:   ${maskPassword(opts.esUrl)}`);
   console.log(`Window:   ${opts.window} (${windowMs}ms)`);
-  console.log(`Signals:  ${ingestLogs ? 'logs' : ''}${ingestTraces ? ', traces' : ''}${ingestMetrics ? ', metrics' : ''}`);
+  console.log(
+    `Signals:  ${ingestLogs ? 'logs' : ''}${ingestTraces ? ', traces' : ''}${
+      ingestMetrics ? ', metrics' : ''
+    }`
+  );
   console.log(`Systems:  ${opts.systems.join(', ')}`);
   if (opts.date) console.log(`Date:     ${opts.date}`);
   if (ingestTraces) console.log(`OTLP:     ${opts.otlpEndpoint}`);
+  if (opts.maxTraceRows)
+    console.log(`Max rows: ${opts.maxTraceRows.toLocaleString()} trace rows per file`);
   console.log();
 
   const dataDir = await ensureDataset(opts.source);
@@ -1079,7 +1145,8 @@ async function main() {
           now,
           systemKey,
           opts.otlpEndpoint,
-          label
+          label,
+          opts.maxTraceRows
         );
         totalTraceSpans += exported;
         if (exported > 0) {
