@@ -884,7 +884,15 @@
         "signature": [
           "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
           "HttpSetup",
-          ", queryString: string, activeSolutionId: \"security\" | \"es\" | \"workplaceai\" | \"oblt\") => Promise<{ recommendedQueries: ",
+          ", queryString: string, activeSolutionId: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLRegistrySolutionId",
+            "text": "ESQLRegistrySolutionId"
+          },
+          ") => Promise<{ recommendedQueries: ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
@@ -903,7 +911,7 @@
           "[]; }>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
-        "lineNumber": 39,
+        "lineNumber": 38,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
