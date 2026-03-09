@@ -18,7 +18,7 @@ import * as i18n from './translations';
 
 const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
-async function sha256Hash(message: string): Promise<string> {
+export async function sha256Hash(message: string): Promise<string> {
   const textEncoder = new TextEncoder();
   const data = textEncoder.encode(message);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -41,7 +41,7 @@ async function hmacSha256(key: BufferSource, message: string): Promise<ArrayBuff
   return await crypto.subtle.sign('HMAC', cryptoKey, messageData);
 }
 
-async function calculateSignature(
+export async function calculateAWSA4Signature(
   secretAccessKey: string,
   dateStamp: string,
   region: string,
@@ -145,7 +145,7 @@ async function signRequest(
   const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
   const stringToSign = [algorithm, amzDate, credentialScope, canonicalRequestHash].join('\n');
 
-  const signature = await calculateSignature(
+  const signature = await calculateAWSA4Signature(
     secretAccessKey,
     dateStamp,
     region,

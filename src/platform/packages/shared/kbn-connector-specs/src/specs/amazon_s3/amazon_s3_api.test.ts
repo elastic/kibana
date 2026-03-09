@@ -25,6 +25,7 @@ describe('amazon_s3_api exports', () => {
   const mockContext = {
     client: mockClient,
     config: { region: 'us-east-1' },
+    secrets: { accessKeyId: 'test-access-key-id', secretAccessKey: 'test-secret-access-key' },
     log: { debug: jest.fn() },
   } as unknown as ActionContext;
 
@@ -160,9 +161,17 @@ describe('amazon_s3_api exports', () => {
   });
 
   // TODO --- 
-  test.todo('generateAmazonS3BucketObjectPresignedUrl - implement test');
+  it('should generate a Amazon S3 bucket object presigned url', async () => {
+    const nodeCrypto = await import('crypto');
+    Object.defineProperty(global, 'crypto', {
+      value: nodeCrypto,
+      writable: true,
+    });
+    const result = await generateAmazonS3BucketObjectPresignedUrl(mockContext, 'test-bucket-name', 'test-object-key', 300, 'us-east-1');
+    expect(result).toMatch(/^https:\/\/s3\.amazonaws\.com\/test-object-key\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.+&X-Amz-Date=.+&X-Amz-Expires=300&X-Amz-Signature=.+&X-Amz-SignedHeaders=.+$/);
+  });
 
-  it("should downloadAmazonS3BucketObject smaller file", async () => {
+  it("should downloadAmazonS3BucketObject file", async () => {
     mockClient.get.mockResolvedValueOnce({ headers: responseDownloadBucketObjectHeaders, data: responseDownloadBucketObjectData });
     const result = await downloadAmazonS3BucketObject(mockContext, 'test-bucket-name', 'test-object-key', 'us-east-1');
     expect(result).toEqual({
@@ -177,7 +186,7 @@ describe('amazon_s3_api exports', () => {
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });
-  
+
   const responseListBucketsNoBuckets = "<ListAllMyBucketsResult></ListAllMyBucketsResult>";
 
   const responseListBucketsSingleBucket = `
@@ -271,24 +280,6 @@ describe('amazon_s3_api exports', () => {
     "server": "AmazonS3",
     "x-amz-storage-class": "STANDARD",
   };
-
-  const responseGetBucketObjectMetadataLargeFile = {
-    "accept-ranges": "bytes",
-    "content-length": "327680",
-    "content-type": "application/octet-stream",
-    "last-modified": "ISO_Timestamp",
-    "ETag": "test-etag",
-    "cache-control": "no-cache",
-    "content-disposition": "attachment; filename=\"test-file-name\"",
-    "content-encoding": "gzip",
-    "content-language": "en",
-    "content-range": "bytes 0-327679/327680",
-    "expires": "Wed, 21 Oct 2025 07:28:00 GMT",
-    "server": "AmazonS3",
-    "x-amz-storage-class": "STANDARD",
-  };
-  
-  const responseGeneratePresignedUrl = "";
 
   const responseDownloadBucketObjectHeaders = {
     "content-length": "12345",

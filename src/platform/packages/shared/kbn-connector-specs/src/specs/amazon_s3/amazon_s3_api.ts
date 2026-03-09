@@ -8,6 +8,7 @@
  */
 
 import { ActionContext } from "../../connector_spec";
+import { calculateAWSA4Signature, sha256Hash } from "../../auth_types/aws_credentials";
 import { Parser } from 'xml2js';
 
 type AmazonS3Bucket = {
@@ -67,6 +68,8 @@ type AmazonS3Object = {
     contentUrl?: string,
     message?: string,
 }
+
+const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 function createQueryQueryString(params: Record<string, string | undefined>): string {
     const queryParams: Record<string, string> = {};
@@ -273,40 +276,47 @@ export async function getAmazonS3BucketObjectMetadata(ctx: ActionContext, bucket
 }
 
 export async function generateAmazonS3BucketObjectPresignedUrl(ctx: ActionContext, bucketName: string, objectKey: string, expiresInSeconds: number = 300, bucketRegion?: string) : Promise<string> {
-    // const accessKeyId = (ctx.config as { accessKeyId: string }).accessKeyId;
     const region = bucketRegion || (ctx.config as { region: string }).region;
     const awsS3Host = `${bucketName}.s3.${region}.amazonaws.com`;
-    const objectUrl = `https://${awsS3Host}/${objectKey}`;
 
-    // TODO -- generating a presigned URL is non-trivial as it requires signing the request with AWS SigV4.
-    // for now, just return the objectURL
-    return objectUrl;
-
-    /*
     const amzDateTime = (new Date()).toISOString().replace(/[:-]|\.\d{3}/g, '');
     const amzDateOnly = amzDateTime.substring(0, 8);
-    const credentialValue = `${accessKeyId}/${amzDateOnly}/${region}/s3/aws4_request`;
 
-    try {
-        const response = await ctx.client.get(objectUrl, { maxBodyLength: 0});
-        
-        const signature = "test";
+    const accessKey = (ctx.secrets as {accessKeyId: string, secretAccessKey: string}).accessKeyId;
+    const secretKey = (ctx.secrets as {accessKeyId: string, secretAccessKey: string}).secretAccessKey;
+    const credentialValue = `${accessKey}/${amzDateOnly}/${region}/s3/aws4_request`;
 
-        const queryString = createQueryQueryString({
-            'X-Amz-Algorithm': 'AWS4-HMAC-SHA256',
-            'X-Amz-Credential': credentialValue,
-            'X-Amz-Date': amzDateTime,
-            'X-Amz-Expires': expiresInSeconds.toString(),
-            'X-Amz-SignedHeaders': 'host',
-            'X-Amz-Signature': signature,
-        });
-
-        return `https://s3.amazonaws.com/${objectKey}?${queryString}`;
-    } catch (error: unknown) {
-        throwS3Error(error);
-        throw error;
+    // our headers we need to set
+    const headersList: Record<string, string> = {
+        'host': awsS3Host,
+        'X-Amz-Date': amzDateOnly,
+        'x-amz-content-sha256': EMPTY_BODY_SHA256,
     }
-    */
+    const canonicalHeaders = Object.keys(headersList).sort().map(key => `${key.toLowerCase()}:${headersList[key]}`).join('\n');
+    const signedHeadersString = Object.keys(headersList).map(key => key.toLowerCase()).sort().join(';');
+
+    // our query string values that are needed
+    let queryStringValues: Record<string, string> = {
+        'X-Amz-Algorithm': 'AWS4-HMAC-SHA256',
+        'X-Amz-Credential': credentialValue,
+        'X-Amz-Date': amzDateTime,
+        'X-Amz-Expires': expiresInSeconds.toString(),
+        'X-Amz-SignedHeaders': signedHeadersString,
+    };
+    const queryString = createQueryQueryString(queryStringValues);
+
+    // and create the actual request
+    const canonicalUri = objectKey;
+    const canonicalRequest = `GET\n${canonicalUri}\n${queryString}\n${canonicalHeaders}\n${signedHeadersString}\n${EMPTY_BODY_SHA256}`;
+
+    // assemble the string to sign
+    const stringToSign = `AWS4-HMAC-SHA256\n${amzDateTime}\n${credentialValue}\n${await sha256Hash(canonicalRequest)}`;
+
+    // and add in the signature
+    const signature = await calculateAWSA4Signature(secretKey, amzDateOnly, region, 's3', stringToSign);
+    queryStringValues['X-Amz-Signature'] = signature;
+
+    return `https://s3.amazonaws.com/${canonicalUri}?${createQueryQueryString(queryStringValues)}`;
 }
 
 

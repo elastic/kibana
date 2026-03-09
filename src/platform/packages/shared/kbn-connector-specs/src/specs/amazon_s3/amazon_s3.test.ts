@@ -230,5 +230,97 @@ describe('AmazonS3', () => {
     expect(mockListAmazonS3BucketObjects).toHaveBeenCalledTimes(2);
   });
 
-  // TODO -- additional tests
+  it('Should downloadFile with a small file and return its contents', async () => {
+    mockGetAmazonS3BucketObjectMetadata.mockResolvedValue({
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+      lastModified: 'ISO_Timestamp',
+      storageClass: 'STANDARD',
+      acceptRanges: 'bytes',
+      cacheControl: 'none',
+      contentDisposition: 'none',
+      contentEncoding: 'none',
+      contentLanguage: 'none',
+      contentLength: 1234,
+      contentRange: 'none',
+      contentType: 'text/plain',
+      eTag: 'testetag',
+      expires: 'none',
+      region: 'us-east-1',
+      server: 'host',
+    });
+
+    mockDownloadAmazonS3BucketObject.mockResolvedValue({
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+      contentType: 'text/plain',
+      contentLength: 1234,
+      lastModified: 'ISO_Timestamp',
+      etag: 'testetag',
+      content: 'test file content',
+      encoding: 'base64',
+    });
+
+    const result = await AmazonS3.actions.downloadFile.handler(mockContext, {
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+    });
+
+    expect(mockGetAmazonS3BucketObjectMetadata).toHaveBeenCalledTimes(1);
+    expect(mockGenerateAmazonS3BucketObjectPresignedUrl).toHaveBeenCalledTimes(0);
+    expect(mockDownloadAmazonS3BucketObject).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+      contentType: 'text/plain',
+      contentLength: 1234,
+      lastModified: 'ISO_Timestamp',
+      etag: 'testetag',
+      content: 'test file content',
+      encoding: 'base64',
+    });
+  });
+
+  it('Should downloadFile with a large file and return a download URL with message', async () => {
+    mockGetAmazonS3BucketObjectMetadata.mockResolvedValue({
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+      lastModified: 'ISO_Timestamp',
+      storageClass: 'STANDARD',
+      acceptRanges: 'bytes',
+      cacheControl: 'none',
+      contentDisposition: 'none',
+      contentEncoding: 'none',
+      contentLanguage: 'none',
+      contentLength: 987654,
+      contentRange: 'none',
+      contentType: 'text/plain',
+      eTag: 'testetag',
+      expires: 'none',
+      region: 'us-east-1',
+      server: 'host',
+    });
+
+    mockGenerateAmazonS3BucketObjectPresignedUrl.mockResolvedValue('https://presigned-url');
+
+    const result = await AmazonS3.actions.downloadFile.handler(mockContext, {
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+    });
+
+    expect(mockGetAmazonS3BucketObjectMetadata).toHaveBeenCalledTimes(1);
+    expect(mockGenerateAmazonS3BucketObjectPresignedUrl).toHaveBeenCalledTimes(1);
+    expect(mockDownloadAmazonS3BucketObject).toHaveBeenCalledTimes(0);
+
+    expect(result).toEqual({
+      bucket: 'test-bucket-name',
+      key: 'test-object-key',
+      contentType: 'text/plain',
+      contentLength: 987654,
+      lastModified: 'ISO_Timestamp',
+      etag: 'testetag',
+      contentUrl: 'https://presigned-url',
+      message: `File size (987654 bytes) exceeds maximum downloadable size (131072 bytes). Access the file using the provided link.`,
+    });
+  });
 });
