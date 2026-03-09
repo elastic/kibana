@@ -127,10 +127,19 @@ export const validateRuleResponseActions = async <
             );
           }
 
-          // We only validate the runscript response action if it is in the rule update payload -
-          // there is no need to validate a script (aside form Authz above) if it is being removed
-          // from the rule via the update
+          // validate runscript response action if it is defined in the rule update payload,
+          // OR:
+          // if the script IDs are being used in the rule update payload.
+          //
+          // Why:
+          // there is no need to validate a script (aside from Authz above) if it is being removed
+          // from the rule via the update. This will ensure that users can remove the use of a
+          // script if that script is ever updated in a way that would cause it to fail validation -
+          // example: the script is updated to require input arguments. User should not be forced to
+          // first update the rule to ensure the existing entry is valid if all they want to do is
+          // remove the use of the script from the rule.
           if (
+            ruleResponseActions?.includes(actionData as ResponseAction) ||
             isScriptIdReferencedInRunscriptResponseActions(
               ruleResponseActions ?? [],
               getScriptIdsFromRunscriptConfig(actionData.params.config)
