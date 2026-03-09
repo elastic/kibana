@@ -96,34 +96,34 @@ export const runExecutionValidation = async (
     }
   }
 
-  if (!skipExecution) {
-    try {
-      const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
-        scopedClusterClient.asCurrentUser.fieldCaps(
-          {
-            index: inputIndex,
-            fields: secondaryTimestamp
-              ? [primaryTimestamp, secondaryTimestamp]
-              : [primaryTimestamp],
-            include_unmapped: true,
-            runtime_mappings: runtimeMappings,
-            ignore_unavailable: true,
-          },
-          { meta: true }
-        )
-      );
+  if (skipExecution) {
+    return { skipExecution, warnings, frozenIndicesQueriedCount };
+  }
 
-      const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
-        timestampField: primaryTimestamp,
-        timestampFieldCapsResponse: fieldCapsResponse,
-        ruleExecutionLogger,
-      });
-      if (missingTimestampWarning) {
-        warnings.push(missingTimestampWarning);
-      }
-    } catch (exc) {
-      warnings.push(`Timestamp fields check failed to execute ${exc}`);
+  try {
+    const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
+      scopedClusterClient.asCurrentUser.fieldCaps(
+        {
+          index: inputIndex,
+          fields: secondaryTimestamp ? [primaryTimestamp, secondaryTimestamp] : [primaryTimestamp],
+          include_unmapped: true,
+          runtime_mappings: runtimeMappings,
+          ignore_unavailable: true,
+        },
+        { meta: true }
+      )
+    );
+
+    const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
+      timestampField: primaryTimestamp,
+      timestampFieldCapsResponse: fieldCapsResponse,
+      ruleExecutionLogger,
+    });
+    if (missingTimestampWarning) {
+      warnings.push(missingTimestampWarning);
     }
+  } catch (exc) {
+    warnings.push(`Timestamp fields check failed to execute ${exc}`);
   }
 
   if (!isServerless) {
