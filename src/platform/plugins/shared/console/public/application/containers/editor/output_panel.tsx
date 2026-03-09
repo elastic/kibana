@@ -20,7 +20,6 @@ export const OutputPanel = ({ loading }: { loading: boolean }) => {
     lastResult: { data: requestData, error: requestError },
   } = useRequestReadContext();
 
-  // this should likely be simplified and moved to the hook
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
   const isLoading = loading || requestInFlight;
 

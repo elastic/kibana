@@ -91,6 +91,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
     []
   );
 
+  // Always keep the localstorage value in sync with the value in the editor
   // to avoid losing the text object when the user navigates away from the shell
   useEffect(() => {
     debouncedUpdateLocalStorageValue(inputEditorValue);
@@ -98,7 +99,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   if (!currentTextObject) return null;
 
-  // these could go into a hook
   const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
   const isLoading = loading || requestInFlight;
 
