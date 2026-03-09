@@ -126,7 +126,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log, with some standardized optional fields (in the following rows) for normalization purposes. |
 | `metadata.user_input.indices` | (Optional) Which indices are affected by the user action. |
 | `metadata.user_input.time.start` | (Optional) ISO timestamp of the start of the selected time range in the date picker. |
-| `metadata.user_input.time.end` | (Optional) ISO timestamp of the end of the selected timerange in the date picker. |
+| `metadata.user_input.time.end` | (Optional) ISO timestamp of the end of the selected time range in the date picker. |
 | `metadata.user_input.global_query` | (Optional) KQL/ES\|QL query introduced by the user in the Global Query Bar. |
 | `metadata.user_input.filters` | (Optional) Array of non-indexed objects describing the filters configured by the user. |
 
