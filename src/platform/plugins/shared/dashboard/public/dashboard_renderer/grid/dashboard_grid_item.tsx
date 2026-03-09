@@ -239,6 +239,7 @@ const dashboardGridItemStyles = {
           outline: `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
       },
+      getHighlightStyles(context),
       printViewportVisStyles(context),
     ]),
   focusPanelBlur: css({
