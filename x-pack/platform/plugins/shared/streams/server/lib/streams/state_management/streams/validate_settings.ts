@@ -71,11 +71,7 @@ export async function validateSettingsWithDryRun({
     dry_run: true,
   })) as DataStreamSettingsResponse;
 
-  if (!response.data_streams || response.data_streams.length === 0) {
-    throw new Error(`Failed to validate stream settings for "${streamName}"`);
-  }
-
-  const error = response.data_streams.find(({ error: err }) => Boolean(err))?.error;
+  const error = response.data_streams?.find(({ error: err }) => Boolean(err))?.error;
   if (error) {
     throw new Error(`Invalid stream settings: ${error}`);
   }

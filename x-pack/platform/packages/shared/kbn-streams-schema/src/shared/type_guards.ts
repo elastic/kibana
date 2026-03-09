@@ -7,6 +7,13 @@
 
 import type { z } from '@kbn/zod/v4';
 
+/**
+ * Type guard to check if a value is a non-null object (record).
+ * Useful for safely accessing properties on unknown values.
+ */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
 export function createIsNarrowSchema<
   TBaseSchema extends z.ZodType,
   TNarrowSchema extends z.ZodType
