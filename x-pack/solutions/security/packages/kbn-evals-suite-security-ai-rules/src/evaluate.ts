@@ -116,23 +116,37 @@ export const evaluate = base.extend<
     },
   ],
   reportDisplayOptions: [
-    async (_deps, use) => {
-      const options: ReportDisplayOptions = {
-        evaluatorDisplayOptions: new Map([
-          ['Query Syntax Validity', { statsToInclude: ['mean'] }],
-          ['Field Coverage', { statsToInclude: ['mean'] }],
-          ['Rule Type & Language', { statsToInclude: ['mean'] }],
-          ['MITRE Accuracy', { statsToInclude: ['mean', 'median'] }],
-          ['Severity Validity', { statsToInclude: ['mean'] }],
-          ['Risk Score Validity', { statsToInclude: ['mean'] }],
-          ['Interval Format', { statsToInclude: ['mean'] }],
-          ['Lookback Gap', { statsToInclude: ['mean'] }],
-          ['Severity Match', { statsToInclude: ['mean'] }],
-          ['Risk Score Match', { statsToInclude: ['mean', 'median'] }],
-          ['ES|QL Functional Equivalence', { statsToInclude: ['mean'] }],
-          ['Rejection', { statsToInclude: ['mean'] }],
-        ]),
+    async ({ evaluators }, use) => {
+      const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+        evaluators.traceBasedEvaluators;
+
+      const evaluatorDisplayOptions: ReportDisplayOptions['evaluatorDisplayOptions'] = new Map([
+        [inputTokens.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median'] }],
+        [outputTokens.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median'] }],
+        [cachedTokens.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median'] }],
+        [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median'] }],
+        [latency.name, { unitSuffix: 's', statsToInclude: ['mean', 'median'] }],
+        ['Query Syntax Validity', { statsToInclude: ['mean'] }],
+        ['Field Coverage', { statsToInclude: ['mean'] }],
+        ['Rule Type & Language', { statsToInclude: ['mean'] }],
+        ['MITRE Accuracy', { statsToInclude: ['mean', 'median'] }],
+        ['Severity Validity', { statsToInclude: ['mean'] }],
+        ['Risk Score Validity', { statsToInclude: ['mean'] }],
+        ['Interval Format', { statsToInclude: ['mean'] }],
+        ['Lookback Gap', { statsToInclude: ['mean'] }],
+        ['Severity Match', { statsToInclude: ['mean'] }],
+        ['Risk Score Match', { statsToInclude: ['mean', 'median'] }],
+        ['ES|QL Functional Equivalence', { statsToInclude: ['mean'] }],
+        ['Rejection', { statsToInclude: ['mean'] }],
+      ]);
+
+      await use({
+        evaluatorDisplayOptions,
         evaluatorDisplayGroups: [
+          {
+            evaluatorNames: [inputTokens.name, outputTokens.name, cachedTokens.name],
+            combinedColumnName: 'Tokens',
+          },
           {
             evaluatorNames: [
               'Query Syntax Validity',
@@ -149,8 +163,7 @@ export const evaluate = base.extend<
             combinedColumnName: 'Reference Match',
           },
         ],
-      };
-      await use(options);
+      });
     },
     { scope: 'worker' },
   ],
