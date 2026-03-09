@@ -116,8 +116,7 @@ export const evaluate = base.extend<
     },
   ],
   reportDisplayOptions: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
+    async (_deps, use) => {
       const options: ReportDisplayOptions = {
         evaluatorDisplayOptions: new Map([
           ['Query Syntax Validity', { statsToInclude: ['mean'] }],
