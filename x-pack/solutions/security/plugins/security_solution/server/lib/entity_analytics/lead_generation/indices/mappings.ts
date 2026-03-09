@@ -16,7 +16,7 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
     byline: { type: 'text' },
     description: { type: 'text' },
     entities: {
-      type: 'nested',
+      type: 'object',
       properties: {
         type: { type: 'keyword' },
         name: { type: 'keyword' },
@@ -29,7 +29,7 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
     staleness: { type: 'keyword' },
     status: { type: 'keyword' },
     observations: {
-      type: 'nested',
+      type: 'object',
       properties: {
         entity_id: { type: 'keyword' },
         module_id: { type: 'keyword' },

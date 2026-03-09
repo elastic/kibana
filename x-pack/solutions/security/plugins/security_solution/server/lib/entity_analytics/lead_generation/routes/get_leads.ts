@@ -12,7 +12,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   GET_LEADS_URL,
   getLeadsIndexName,
-} from '../../../../../common/entity_analytics/entity_lead_generation/constants';
+} from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';

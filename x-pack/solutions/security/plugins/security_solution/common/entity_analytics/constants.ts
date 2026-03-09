@@ -12,7 +12,7 @@ export * from './migrations/constants';
 export * from './privileged_user_monitoring/constants';
 export * from './watchlists/constants';
 export * from './entity_store/constants';
-export * from './entity_lead_generation/constants';
+export * from './lead_generation/constants';
 
 export const API_VERSIONS = {
   public: {

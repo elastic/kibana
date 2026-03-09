@@ -22,7 +22,7 @@ import {
   GENERATE_LEADS_URL,
   getLeadsIndexName,
   type LeadGenerationMode,
-} from '../../../../../common/entity_analytics/entity_lead_generation/constants';
+} from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
