@@ -24,8 +24,6 @@ export const calendarStyles = ({ euiTheme }: UseEuiTheme) => {
 
   const todayButton = css`
     background: ${euiTheme.colors.backgroundBasePlain};
-    /* TODO: there is no such border radius token in EUI, even scoped to badges */
-    border-radius: ${euiTheme.size.base};
     bottom: ${euiTheme.size.s};
     box-shadow: ${euiTheme.shadows.m.down};
     left: 50%;
