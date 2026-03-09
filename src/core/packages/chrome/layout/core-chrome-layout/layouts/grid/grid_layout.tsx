@@ -25,13 +25,12 @@ import {
   AppMenuBar,
   Sidebar,
 } from '@kbn/core-chrome-browser-components';
+import { useChromeStyle, useIsChromeVisible, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
 import {
-  useChromeStyle,
+  useGlobalFooter,
+  useHasAppMenu,
   useHasHeaderBanner,
-  useIsChromeVisible,
-  useSidebarWidth,
-} from '@kbn/core-chrome-browser-hooks';
-import { useGlobalFooter, useHasAppMenu } from '@kbn/core-chrome-browser-hooks/internal';
+} from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type {
   LayoutService,

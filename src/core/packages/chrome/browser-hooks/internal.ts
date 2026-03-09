@@ -9,3 +9,4 @@
 
 export { useGlobalFooter } from './use_global_footer';
 export { useHasAppMenu } from './use_has_app_menu';
+export { useHasHeaderBanner } from './use_has_header_banner';

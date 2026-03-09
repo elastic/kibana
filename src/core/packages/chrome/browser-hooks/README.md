@@ -16,7 +16,6 @@ For use by plugins and any code outside core Chrome internals:
 
 - `useChromeStyle()` — returns the current `ChromeStyle` (`'classic'` or `'project'`). Defaults to `'classic'` until explicitly changed.
 - `useActiveSolutionNavId()` — returns the active solution nav ID, or `null` when no solution nav is active.
-- `useHasHeaderBanner()` — returns `true` when a header banner is currently registered via `chrome.setHeaderBanner()`.
 - `useIsChromeVisible()` — returns `true` when the chrome UI (header and navigation) is currently visible.
 - `useSidebarWidth()` — returns the effective sidebar pixel width (`0` when the sidebar is closed).
 
@@ -26,6 +25,7 @@ For use by core Chrome components only (e.g. layout, grid). Not part of the publ
 
 - `useGlobalFooter()` — returns the current global footer `ReactNode` (used by the developer toolbar).
 - `useHasAppMenu()` — returns `true` when either a legacy action menu or a new `AppMenuConfig` is active. Uses internal `componentDeps`.
+- `useHasHeaderBanner()` — returns `true` when a header banner is currently registered via `chrome.setHeaderBanner()`.
 
 ## Notes
 
