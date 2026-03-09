@@ -22,6 +22,10 @@ import {
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_duration_start_mark';
+import {
+  getWasHiddenDuringLoad,
+  stopDashboardVisibilityTracking,
+} from './dashboard_visibility_tracking';
 
 type DashboardLoadType = 'sessionFirstLoad' | 'dashboardFirstLoad' | 'dashboardSubsequentLoad';
 
@@ -33,42 +37,6 @@ export interface PerformanceState {
 }
 
 let isFirstDashboardLoadOfSession = true;
-let wasHiddenDuringLoad = false;
-let visibilityCleanup: (() => void) | null = null;
-
-/**
- * Dashboards can be backgrounded while loading (e.g. switching browser tabs), which pauses requestAnimationFrame calls and, hence,
- * the dashboard-loaded event. This can artificially inflate the load time metrics for both the dashboard as a whole and the visualizations.
- *
- * To account for this, we track if the dashboard was backgrounded at any point during loading and include that in our
- * telemetry. We also want to avoid tracking visibility changes across multiple dashboard loads, so we set up a new listener
- * on each load and clean it up when it's no longer needed.
- */
-export const startDashboardVisibilityTracking = (): void => {
-  // Clean up any existing listener and reset flag
-  stopDashboardVisibilityTracking();
-  wasHiddenDuringLoad = false;
-
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'hidden') {
-      wasHiddenDuringLoad = true;
-    }
-  };
-
-  // If tab is already hidden when tracking starts, set flag
-  if (document.visibilityState === 'hidden') {
-    wasHiddenDuringLoad = true;
-  }
-
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-  visibilityCleanup = () =>
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-};
-
-export const stopDashboardVisibilityTracking = (): void => {
-  visibilityCleanup?.();
-  visibilityCleanup = null;
-};
 
 const loadTypesMapping: { [key in DashboardLoadType]: number } = {
   sessionFirstLoad: 0, // on first time the SO is loaded
@@ -196,7 +164,7 @@ function reportPerformanceMetrics({
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
     key5: 'was_hidden_during_load',
-    value5: wasHiddenDuringLoad ? 1 : 0,
+    value5: getWasHiddenDuringLoad() ? 1 : 0,
     key8: 'mean_panel_prerender',
     value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',

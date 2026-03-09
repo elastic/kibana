@@ -35,7 +35,7 @@ import {
   createDashboardListingFilterUrl,
 } from '../utils/urls';
 import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
-import { startDashboardVisibilityTracking } from '../dashboard_api/performance/query_performance_tracking';
+import { startDashboardVisibilityTracking } from '../dashboard_api/performance/dashboard_visibility_tracking';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
