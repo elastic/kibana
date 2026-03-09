@@ -249,6 +249,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     uniqueValue,
     multiValueFieldsToFlatten,
     sort,
+    unitsCountFilter,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);
