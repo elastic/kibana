@@ -13,7 +13,7 @@ import {
   type EvaluationDataset,
   type Example,
 } from '@kbn/evals';
-import { AiInsightClient, type AiInsightResponse } from '../src/clients/ai_insight_client';
+import { AiInsightClient, type AiInsightResponse } from '../../src/clients/ai_insight_client';
 
 export interface AiInsightExample<TPayload> extends Example {
   input: { requestPayload: TPayload; question: string };
