@@ -39,7 +39,6 @@ export async function waitForCondition<T>(params: WaitForConditionParams<T>): Pr
     result = await action();
 
     if (await condition(result)) {
-      console.info('Condition met after', Date.now() - startTime, 'ms');
       return { success: true, result };
     }
 
