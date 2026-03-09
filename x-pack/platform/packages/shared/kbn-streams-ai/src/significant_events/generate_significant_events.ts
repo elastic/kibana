@@ -6,6 +6,7 @@
  */
 
 import type { Feature, Streams } from '@kbn/streams-schema';
+import { ensureMetadata, getSourcesForStream, replaceFromSources } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -76,6 +77,7 @@ export async function generateSignificantEvents({
   const toolUsage = createDefaultSignificantEventsToolUsage();
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
+  const targetSources = getSourcesForStream(stream);
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -139,14 +141,15 @@ export async function generateSignificantEvents({
           const queryValidationResults = await Promise.all(
             queries.map(async (query) => {
               try {
-                // The query search validates syntax and field mapping in Elasticsearch.
+                const rewritten = ensureMetadata(replaceFromSources(query.esql, targetSources));
+
                 await esClient.esql.query({
-                  query: `${query.esql}\n| LIMIT 0`,
+                  query: `${rewritten}\n| LIMIT 0`,
                   format: 'json',
                 });
 
                 return {
-                  query,
+                  query: { ...query, esql: rewritten },
                   valid: true,
                   status: 'Added',
                   error: undefined,
