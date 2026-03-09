@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-24T05:09:57.770Z",
-  "sha1": "b37fbc020d0e0eb51980c3e0795cdc289673c709",
+  "sha1": "909c9ca89da58d6aac9deb75b2108ba2c744cab7",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -946,6 +945,70 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
         "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-e7b2804e4de31d3",
+      "title": "Transaction details Redirects to transaction list when transactionName is missing in URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-025e43f8799c8ae",
+      "title": "Transaction details Renders the page with expected content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-32f26083c909a43",
+      "title": "Transaction details Trace samples navigation persists across page reloads",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "0ea21a81fd9bb15-a7c84b743868348",
+      "title": "Transaction details Trace samples waterfall should not become stuck on loading state after page reload with empty data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/transaction_details.spec.ts",
+        "line": 93,
         "column": 9
       }
     },
