@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Saved query management - Feature controls', function () {
+  describe('Saved query management - Feature controls - group2', function () {
     loadTestFile(require.resolve('./security'));
   });
 }
