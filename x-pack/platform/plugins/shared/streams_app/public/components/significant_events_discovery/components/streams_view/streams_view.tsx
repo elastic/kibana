@@ -86,9 +86,9 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   >({});
   const router = useStreamsAppRouter();
   const aiFeatures = useAIFeatures();
-  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi(
-    aiFeatures?.genAiConnectors.selectedConnector
-  );
+  const { scheduleOnboardingTask, cancelOnboardingTask } = useOnboardingApi({
+    connectorId: aiFeatures?.genAiConnectors.selectedConnector,
+  });
   const { scheduleInsightsDiscoveryTask, getInsightsDiscoveryTaskStatus } = useInsightsDiscoveryApi(
     aiFeatures?.genAiConnectors.selectedConnector
   );

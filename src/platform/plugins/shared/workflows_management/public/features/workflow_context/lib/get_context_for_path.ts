@@ -13,6 +13,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
+import { getContextSchemaWithTemplateLocals } from './extend_context_with_template_locals';
 import { getForeachStateSchema } from './get_foreach_state_schema';
 import { getNearestStepPath } from './get_nearest_step_path';
 import { getStepsCollectionSchema } from './get_steps_collection_schema';
@@ -34,7 +35,8 @@ export function getContextSchemaForPath(
   definition: WorkflowDefinitionForContext,
   workflowGraph: WorkflowGraph,
   path: Array<string | number>,
-  yamlDocument?: Document | null
+  yamlDocument?: Document | null,
+  offset?: number
 ): typeof DynamicStepContextSchema {
   // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
   // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
@@ -45,11 +47,11 @@ export function getContextSchemaForPath(
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {
-    return schema;
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
   }
   const nearestStep = _.get(definition, nearestStepPath);
   if (!nearestStep) {
-    return schema;
+    return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
   }
 
   const stepsCollectionSchema = getStepsCollectionSchema(schema, workflowGraph, nearestStep.name);
@@ -71,6 +73,17 @@ export function getContextSchemaForPath(
     schema = schema.extend({ [enrichment.key]: enrichment.value });
   }
 
+  return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
+}
+
+function maybeExtendWithTemplateLocals(
+  schema: typeof DynamicStepContextSchema,
+  yamlDocument?: Document | null,
+  offset?: number
+): typeof DynamicStepContextSchema {
+  if (yamlDocument != null && offset !== undefined) {
+    return getContextSchemaWithTemplateLocals(yamlDocument, offset, schema);
+  }
   return schema;
 }
 

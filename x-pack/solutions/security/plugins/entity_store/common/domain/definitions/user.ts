@@ -48,38 +48,15 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     collect({ source: 'user.hash' }),
     collect({ source: 'user.id' }),
     collect({ source: 'user.roles' }),
+    collect({ source: 'user.group.domain' }),
+    collect({ source: 'user.group.id' }),
+    collect({ source: 'user.group.name' }),
     ...getCommonFieldDescriptions('user'),
     ...getEntityFieldsDescriptions('user'),
 
-    // Used to populate the identity field
+    /* Used to populate the identity field */
     collect({ source: 'host.entity.id' }),
     collect({ source: 'host.id' }),
     collect({ source: 'host.name' }),
-
-    collect({
-      source: `user.entity.relationships.accesses_frequently`,
-      destination: 'entity.relationships.accesses_frequently',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `user.entity.relationships.owns`,
-      destination: 'entity.relationships.owns',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-
-    collect({
-      source: `user.entity.relationships.supervises`,
-      destination: 'entity.relationships.supervises',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `user.entity.relationships.supervised_by`,
-      destination: 'entity.relationships.supervised_by',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

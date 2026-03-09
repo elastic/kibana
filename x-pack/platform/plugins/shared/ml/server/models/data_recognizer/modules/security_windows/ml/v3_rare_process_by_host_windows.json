@@ -5,7 +5,7 @@
     "windows"
   ],
   "analysis_config": {
-    "bucket_span": "15m",
+    "bucket_span": "2h",
     "detectors": [
       {
         "detector_description": "Detects rare processes per host.",

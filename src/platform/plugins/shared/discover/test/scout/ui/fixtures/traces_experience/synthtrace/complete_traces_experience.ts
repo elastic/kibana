@@ -17,7 +17,7 @@
  *    - DB span with `span.destination.service.resource` (dependency link)
  *      → 1 APM error + 1 correlated error log
  *    - Internal span with span links
- *      → 3 correlated info logs (non-error)
+ *      → 1 APM error + 3 correlated info logs
  *
  * 2. Minimal trace ("GET /health") — transaction + DB span only
  *    - No errors, no logs, no span links
@@ -39,8 +39,8 @@ import type {
 import { apm, log, timerange } from '@kbn/synthtrace-client';
 import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE } from '../constants';
 
-const FRONTEND_SERVICE = 'synth-traces-frontend';
-const BACKEND_SERVICE = 'synth-traces-backend';
+const FRONTEND_SERVICE = RICH_TRACE.SERVICE_NAME;
+const BACKEND_SERVICE = PRODUCER_TRACE.SERVICE_NAME;
 const ENVIRONMENT = 'production';
 
 interface TraceCorrelationIds {
@@ -78,7 +78,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
           .children(
             backend
               .span({
-                spanName: 'Publish to kafka/orders',
+                spanName: PRODUCER_TRACE.KAFKA_SPAN_NAME,
                 spanType: 'messaging',
                 spanSubtype: 'kafka',
               })
@@ -176,7 +176,7 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
     return error.timestamp(timestamp).serialize()[0];
   };
 
-  // 2 errors on transaction, 1 error on DB span
+  // 2 errors on transaction, 1 error on DB span, 1 error on process-order span
   const errorEvents: ApmFields[] = [
     createError(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR, 'DatabaseError', transactionId, from + 100),
     createError(
@@ -190,6 +190,12 @@ export function richTrace({ from, to }: { from: number; to: number }): RichTrace
       'QueryTimeoutError',
       correlationIds.dbSpanId,
       from + 310
+    ),
+    createError(
+      RICH_TRACE.ERRORS.PROCESS_ORDER_FAILURE,
+      'InventoryError',
+      correlationIds.processOrderSpanId,
+      from + 320
     ),
   ];
 

@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -172,11 +171,4 @@ export const AssetManager: FC<Props> = (props) => {
       </EuiModalFooter>
     </EuiModal>
   );
-};
-
-AssetManager.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
-  assets: PropTypes.arrayOf(PropTypes.object).isRequired,
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
 };

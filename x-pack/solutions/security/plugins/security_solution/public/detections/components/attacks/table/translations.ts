@@ -83,3 +83,17 @@ export const LEAST_ALERTS = i18n.translate(
     defaultMessage: 'Least alerts',
   }
 );
+
+export const VIEW_OPTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.tableSection.viewOptionsAriaLabel',
+  {
+    defaultMessage: 'View options',
+  }
+);
+
+export const SHOW_ATTACKS_ONLY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.attacks.tableSection.showAttacksOnlyLabel',
+  {
+    defaultMessage: 'Show attacks only',
+  }
+);

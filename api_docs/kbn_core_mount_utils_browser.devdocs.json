@@ -67,7 +67,9 @@
         "parentPluginId": "@kbn/core-mount-utils-browser",
         "id": "def-public.MountPoint",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "deprecated"
+        ],
         "label": "MountPoint",
         "description": [
           "\nA function that should mount DOM content inside the provided container element\nand return a handler to unmount it.\n"
@@ -77,10 +79,376 @@
           "UnmountCallback"
         ],
         "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
-        "lineNumber": 10,
+        "lineNumber": 12,
         "columnNumber": 1,
-        "deprecated": false,
+        "deprecated": true,
         "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser/src/mount_point.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser/index.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser/src/app_mount.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser/src/app_mount.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser/src/nav_controls.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser/src/types.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser/src/types.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser/src/types.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/banners.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/banners.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/banners.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/banners.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/banners.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/flyout.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/flyout.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/flyout.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/modal.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/modal.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/modal.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/modal.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser/src/modal.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/types.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/types.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/ui/app_container.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/ui/app_container.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/ui/app_router.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/ui/app_router.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/application_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/application_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/application_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-internal/src/application_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/mount-utils/browser-internal/src/mount.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser-internal/src/toasts/deduplicate_toasts.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser-internal/src/toasts/deduplicate_toasts.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/banners/banners_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/banners/banners_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/banners/banners_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/flyout/flyout_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/flyout/flyout_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/modal/modal_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/modal/modal_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/overlays/browser-internal/src/modal/modal_service.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-components/src/context.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-components/src/context.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-components/src/shared/header_action_menu.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-components/src/shared/header_action_menu.tsx"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-internal/src/side_effects/handle_body_classes.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/chrome/browser-internal/src/side_effects/handle_body_classes.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/public/index.ts"
+          },
+          {
+            "plugin": "kibanaReact",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx"
+          },
+          {
+            "plugin": "kibanaReact",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx"
+          },
+          {
+            "plugin": "navigation",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx"
+          },
+          {
+            "plugin": "navigation",
+            "path": "src/platform/plugins/shared/navigation/public/top_nav_menu/top_nav_menu.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/security_checkup/components/insecure_cluster_alert.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/platform/plugins/shared/security/public/security_checkup/components/insecure_cluster_alert.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/internal_dashboard_top_nav.tsx"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/platform/plugins/shared/dashboard/public/dashboard_top_nav/internal_dashboard_top_nav.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/platform/plugins/private/monitoring/public/application/index.tsx"
+          },
+          {
+            "plugin": "monitoring",
+            "path": "x-pack/platform/plugins/private/monitoring/public/application/index.tsx"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_add_to_case.ts"
+          },
+          {
+            "plugin": "exploratoryView",
+            "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/hooks/use_add_to_case.ts"
+          },
+          {
+            "plugin": "@kbn/react-kibana-mount",
+            "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx"
+          },
+          {
+            "plugin": "@kbn/react-kibana-mount",
+            "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx"
+          },
+          {
+            "plugin": "@kbn/react-kibana-mount",
+            "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx"
+          },
+          {
+            "plugin": "@kbn/react-kibana-mount",
+            "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx"
+          },
+          {
+            "plugin": "@kbn/content-management-content-editor",
+            "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx"
+          },
+          {
+            "plugin": "@kbn/content-management-content-editor",
+            "path": "src/platform/packages/shared/content-management/content_editor/src/services.tsx"
+          },
+          {
+            "plugin": "@kbn/content-management-table-list-view-table",
+            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx"
+          },
+          {
+            "plugin": "@kbn/content-management-table-list-view-table",
+            "path": "src/platform/packages/shared/content-management/table_list_view_table/src/services.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
+          },
+          {
+            "plugin": "@kbn/elastic-assistant-shared-state",
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts"
+          },
+          {
+            "plugin": "@kbn/elastic-assistant-shared-state",
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
+          },
+          {
+            "plugin": "@kbn/elastic-assistant-shared-state",
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.test.ts"
+          },
+          {
+            "plugin": "@kbn/elastic-assistant-shared-state",
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.test.ts"
+          },
+          {
+            "plugin": "@kbn/elastic-assistant-shared-state",
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state/src/shared_state/comments_service.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.test.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/notifications/browser-internal/src/toasts/toasts_api.test.ts"
+          }
+        ],
         "returnComment": [
           "a {@link UnmountCallback } that unmount the element on call."
         ],
@@ -98,7 +466,7 @@
               "T"
             ],
             "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
-            "lineNumber": 19,
+            "lineNumber": 22,
             "columnNumber": 64,
             "deprecated": false,
             "trackAdoption": false
@@ -119,7 +487,7 @@
           "() => void"
         ],
         "path": "src/core/packages/mount-utils/browser/src/mount_point.ts",
-        "lineNumber": 21,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

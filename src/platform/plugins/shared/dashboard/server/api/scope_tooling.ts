@@ -86,30 +86,3 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     warnings,
   };
 }
-
-export function throwOnUnmappedKeys(dashboardState: DashboardState) {
-  function throwOnUnmappedPanelKeys(panel: DashboardPanel | DashboardPinnedPanel) {
-    const transforms = embeddableService?.getTransforms(panel.type);
-    const panelSchema = transforms?.schema;
-
-    if (!panelSchema) {
-      throw new Error(
-        `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
-      );
-    }
-
-    if ((panel.config as { enhancements?: unknown }).enhancements) {
-      throw new Error(
-        'enhancements panel config key is not supported by dashboard REST endpoints.'
-      );
-    }
-  }
-
-  [...(dashboardState.panels ?? []), ...(dashboardState.pinned_panels ?? [])].forEach((panel) => {
-    if (isDashboardSection(panel)) {
-      panel.panels.forEach(throwOnUnmappedPanelKeys);
-    } else {
-      throwOnUnmappedPanelKeys(panel);
-    }
-  });
-}

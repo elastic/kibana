@@ -11,7 +11,7 @@ export const lensDeleteRequestParamsSchema = schema.object(
   {
     id: schema.string({
       meta: {
-        description: 'The saved object id of a Lens visualization.',
+        description: 'The saved object id of a visualization.',
       },
     }),
   },

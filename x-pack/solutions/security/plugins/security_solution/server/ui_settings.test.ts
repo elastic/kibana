@@ -44,6 +44,7 @@ describe('initUiSettings', () => {
         name: 'Enable alerts and attacks alignment',
         value: false,
         type: 'boolean',
+        technicalPreview: true,
       })
     );
   });
