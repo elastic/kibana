@@ -230,9 +230,18 @@ describe(
             (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
           );
 
-          expect(item?.inputs[0].config?.osquery.value.packs[packName].queries).to.deep.equal(
-            queries
+          const packKey = `default-${packName}`;
+          const actualQueries = item?.inputs[0].config?.osquery.value.packs[packKey].queries;
+          const sanitizedQueries = Object.fromEntries(
+            Object.entries(actualQueries as Record<string, Record<string, unknown>>).map(
+              ([key, value]) => {
+                const { schedule_id, start_date, space_id, name, ...rest } = value;
+
+                return [key, rest];
+              }
+            )
           );
+          expect(sanitizedQueries).to.deep.equal(queries);
         });
       });
     });
