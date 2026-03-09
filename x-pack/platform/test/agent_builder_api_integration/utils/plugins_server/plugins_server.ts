@@ -97,7 +97,7 @@ export class PluginsTestServer {
 
     archive.pipe(res);
     archive.directory(pluginDir, false);
-    archive.finalize();
+    void archive.finalize();
   }
 
   /**
@@ -116,6 +116,6 @@ export class PluginsTestServer {
 
     archive.pipe(res);
     archive.directory(pluginDir, rootPrefix);
-    archive.finalize();
+    void archive.finalize();
   }
 }

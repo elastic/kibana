@@ -30,7 +30,7 @@ const createZipBuffer = async (): Promise<Buffer> => {
     archive.on('error', reject);
 
     archive.directory(path.join(ASSETS_DIR, PLUGIN_NAME), false);
-    archive.finalize();
+    void archive.finalize();
   });
 };
 
