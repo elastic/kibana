@@ -53,7 +53,7 @@ jest.mock('@kbn/core-chrome-browser-components', () => ({
 
 const mockChromeVisible$ = new BehaviorSubject(false);
 jest.mock('@kbn/core-chrome-browser-hooks', () => {
-  const { useObservable } = require('@kbn/use-observable');
+  const { useObservable } = jest.requireActual('@kbn/use-observable');
   return {
     useChromeStyle: () => 'classic',
     useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
