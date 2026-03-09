@@ -6,18 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   CaseTitle,
 } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
 export const SetTitleStepTypeId = 'cases.setTitle';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
+export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   title: CaseTitle.min(1, 'title is required'),
 });
 
@@ -36,6 +36,22 @@ export const setTitleStepCommonDefinition: CommonStepDefinition<
   SetTitleStepOutputSchema
 > = {
   id: SetTitleStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.SET_TITLE_STEP_LABEL,
+  description: i18n.SET_TITLE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.SET_TITLE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set case title
+\`\`\`yaml
+- name: set_case_title
+  type: ${SetTitleStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    title: "Updated incident title"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

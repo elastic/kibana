@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
+import * as i18n from '../translations';
 
 export const FindSimilarCasesStepTypeId = 'cases.findSimilarCases';
 
@@ -47,6 +49,23 @@ export const findSimilarCasesStepCommonDefinition: CommonStepDefinition<
   FindSimilarCasesStepOutputSchema
 > = {
   id: FindSimilarCasesStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.FIND_SIMILAR_CASES_STEP_LABEL,
+  description: i18n.FIND_SIMILAR_CASES_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.FIND_SIMILAR_CASES_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Find similar cases
+\`\`\`yaml
+- name: find_similar_cases
+  type: ${FindSimilarCasesStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    page: 1
+    perPage: 20
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };

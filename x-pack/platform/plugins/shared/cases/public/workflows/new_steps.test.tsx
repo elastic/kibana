@@ -17,7 +17,7 @@ import { setDescriptionStepDefinition } from './set_description';
 import { setTitleStepDefinition } from './set_title';
 import { addObservablesStepDefinition } from './add_observables';
 import { addTagStepDefinition } from './add_tag';
-import { addCategoryStepDefinition } from './add_category';
+import { setCategoryStepDefinition } from './set_category';
 
 describe('new cases public step definitions', () => {
   const steps = [
@@ -33,7 +33,7 @@ describe('new cases public step definitions', () => {
     setTitleStepDefinition,
     addObservablesStepDefinition,
     addTagStepDefinition,
-    addCategoryStepDefinition,
+    setCategoryStepDefinition,
   ];
 
   it.each(steps)('returns expected metadata for %s', (definition) => {

@@ -26,7 +26,7 @@ import { setDescriptionStepCommonDefinition } from './set_description';
 import { setTitleStepCommonDefinition } from './set_title';
 import { addObservablesStepCommonDefinition } from './add_observables';
 import { addTagStepCommonDefinition } from './add_tag';
-import { addCategoryStepCommonDefinition } from './add_category';
+import { setCategoryStepCommonDefinition } from './set_category';
 
 export { GetCaseStepTypeId, getCaseStepCommonDefinition } from './get_case';
 export { CreateCaseStepTypeId, createCaseStepCommonDefinition } from './create_case';
@@ -54,7 +54,7 @@ export { SetDescriptionStepTypeId, setDescriptionStepCommonDefinition } from './
 export { SetTitleStepTypeId, setTitleStepCommonDefinition } from './set_title';
 export { AddObservablesStepTypeId, addObservablesStepCommonDefinition } from './add_observables';
 export { AddTagStepTypeId, addTagStepCommonDefinition } from './add_tag';
-export { AddCategoryStepTypeId, addCategoryStepCommonDefinition } from './add_category';
+export { SetCategoryStepTypeId, setCategoryStepCommonDefinition } from './set_category';
 
 export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.freeze([
   getCaseStepCommonDefinition,
@@ -77,7 +77,7 @@ export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.fr
   setTitleStepCommonDefinition,
   addObservablesStepCommonDefinition,
   addTagStepCommonDefinition,
-  addCategoryStepCommonDefinition,
+  setCategoryStepCommonDefinition,
 ]);
 
 export const registerCasesWorkflowStep = (

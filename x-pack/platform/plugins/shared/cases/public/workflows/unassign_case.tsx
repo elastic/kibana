@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  unassignCaseStepCommonDefinition,
-  UnassignCaseStepTypeId,
-} from '../../common/workflows/steps/unassign_case';
-import * as i18n from '../../common/workflows/translations';
+import { unassignCaseStepCommonDefinition } from '../../common/workflows/steps/unassign_case';
 
 export const unassignCaseStepDefinition = createPublicStepDefinition({
   ...unassignCaseStepCommonDefinition,
@@ -21,20 +16,4 @@ export const unassignCaseStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.UNASSIGN_CASE_STEP_LABEL,
-  description: i18n.UNASSIGN_CASE_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Set assignees after unassignment
-\`\`\`yaml
-- name: unassign_case_users
-  type: ${UnassignCaseStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    assignees: []
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

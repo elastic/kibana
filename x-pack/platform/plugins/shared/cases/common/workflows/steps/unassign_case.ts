@@ -6,18 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   Assignees,
   CaseResponseProperties as CaseResponsePropertiesSchema,
 } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
 export const UnassignCaseStepTypeId = 'cases.unassignCase';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
+export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   assignees: Assignees,
 });
 
@@ -36,6 +36,22 @@ export const unassignCaseStepCommonDefinition: CommonStepDefinition<
   UnassignCaseStepOutputSchema
 > = {
   id: UnassignCaseStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.UNASSIGN_CASE_STEP_LABEL,
+  description: i18n.UNASSIGN_CASE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.UNASSIGN_CASE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set assignees after unassignment
+\`\`\`yaml
+- name: unassign_case_users
+  type: ${UnassignCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    assignees: []
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

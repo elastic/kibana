@@ -7,6 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 
+export const CasesStepCaseIdVersionSchema = z.object({
+  case_id: z.string().min(1, 'case_id is required'),
+  version: z.string().min(1).optional(),
+});
+
 export const CasesStepBaseConfigSchema = z
   .object({
     'push-case': z.boolean().optional().default(false),

@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  setSeverityStepCommonDefinition,
-  SetSeverityStepTypeId,
-} from '../../common/workflows/steps/set_severity';
-import * as i18n from '../../common/workflows/translations';
+import { setSeverityStepCommonDefinition } from '../../common/workflows/steps/set_severity';
 
 export const setSeverityStepDefinition = createPublicStepDefinition({
   ...setSeverityStepCommonDefinition,
@@ -21,20 +16,4 @@ export const setSeverityStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.SET_SEVERITY_STEP_LABEL,
-  description: i18n.SET_SEVERITY_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.SET_SEVERITY_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Set case severity
-\`\`\`yaml
-- name: set_case_severity
-  type: ${SetSeverityStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    severity: "high"
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

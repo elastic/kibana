@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { setDescriptionStepCommonDefinition } from '../../common/workflows/steps/set_description';
+import { setCategoryStepCommonDefinition } from '../../common/workflows/steps/set_category';
 
-export const setDescriptionStepDefinition = createPublicStepDefinition({
-  ...setDescriptionStepCommonDefinition,
+export const setCategoryStepDefinition = createPublicStepDefinition({
+  ...setCategoryStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/plus_circle').then(({ icon }) => ({
       default: icon,
     }))
   ),

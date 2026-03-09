@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  closeCaseStepCommonDefinition,
-  CloseCaseStepTypeId,
-} from '../../common/workflows/steps/close_case';
-import * as i18n from '../../common/workflows/translations';
+import { closeCaseStepCommonDefinition } from '../../common/workflows/steps/close_case';
 
 export const closeCaseStepDefinition = createPublicStepDefinition({
   ...closeCaseStepCommonDefinition,
@@ -21,19 +16,4 @@ export const closeCaseStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.CLOSE_CASE_STEP_LABEL,
-  description: i18n.CLOSE_CASE_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.CLOSE_CASE_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Close a case
-\`\`\`yaml
-- name: close_case
-  type: ${CloseCaseStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

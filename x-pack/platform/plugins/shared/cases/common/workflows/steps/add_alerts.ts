@@ -6,11 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   Rule,
 } from '../../bundled-types.gen';
+import * as i18n from '../translations';
 import { CasesStepBaseConfigSchema } from './shared';
 
 export const AddAlertsStepTypeId = 'cases.addAlerts';
@@ -41,6 +43,27 @@ export const addAlertsStepCommonDefinition: CommonStepDefinition<
   AddAlertsStepOutputSchema
 > = {
   id: AddAlertsStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.ADD_ALERTS_STEP_LABEL,
+  description: i18n.ADD_ALERTS_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_ALERTS_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Add alerts to case
+\`\`\`yaml
+- name: add_alerts
+  type: ${AddAlertsStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    alerts:
+      - alertId: "alert-1"
+        index: ".alerts-security.alerts-default"
+        rule:
+          id: "rule-1"
+          name: "Suspicious process"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

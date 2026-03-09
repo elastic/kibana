@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  addAlertsStepCommonDefinition,
-  AddAlertsStepTypeId,
-} from '../../common/workflows/steps/add_alerts';
-import * as i18n from '../../common/workflows/translations';
+import { addAlertsStepCommonDefinition } from '../../common/workflows/steps/add_alerts';
 
 export const addAlertsStepDefinition = createPublicStepDefinition({
   ...addAlertsStepCommonDefinition,
@@ -21,25 +16,4 @@ export const addAlertsStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.ADD_ALERTS_STEP_LABEL,
-  description: i18n.ADD_ALERTS_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.ADD_ALERTS_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Add alerts to case
-\`\`\`yaml
-- name: add_alerts
-  type: ${AddAlertsStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    alerts:
-      - alertId: "alert-1"
-        index: ".alerts-security.alerts-default"
-        rule:
-          id: "rule-1"
-          name: "Suspicious process"
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

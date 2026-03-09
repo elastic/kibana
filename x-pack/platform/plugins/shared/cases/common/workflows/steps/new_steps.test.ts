@@ -8,8 +8,8 @@
 import {
   AddAlertsStepTypeId,
   addAlertsStepCommonDefinition,
-  AddCategoryStepTypeId,
-  addCategoryStepCommonDefinition,
+  SetCategoryStepTypeId,
+  setCategoryStepCommonDefinition,
   AddEventsStepTypeId,
   addEventsStepCommonDefinition,
   AddObservablesStepTypeId,
@@ -32,7 +32,7 @@ import {
   setStatusStepCommonDefinition,
   SetTitleStepTypeId,
   setTitleStepCommonDefinition,
-} from './index';
+} from '.';
 import {
   addAlertsInputFixture,
   addCategoryInputFixture,
@@ -65,16 +65,22 @@ describe('new cases common step definitions', () => {
     expect(setTitleStepCommonDefinition.id).toBe(SetTitleStepTypeId);
     expect(addObservablesStepCommonDefinition.id).toBe(AddObservablesStepTypeId);
     expect(addTagStepCommonDefinition.id).toBe(AddTagStepTypeId);
-    expect(addCategoryStepCommonDefinition.id).toBe(AddCategoryStepTypeId);
+    expect(setCategoryStepCommonDefinition.id).toBe(SetCategoryStepTypeId);
   });
 
   it('accepts valid input payloads', () => {
-    expect(setSeverityStepCommonDefinition.inputSchema.safeParse(setSeverityInputFixture).success).toBe(
+    expect(
+      setSeverityStepCommonDefinition.inputSchema.safeParse(setSeverityInputFixture).success
+    ).toBe(true);
+    expect(setStatusStepCommonDefinition.inputSchema.safeParse(setStatusInputFixture).success).toBe(
       true
     );
-    expect(setStatusStepCommonDefinition.inputSchema.safeParse(setStatusInputFixture).success).toBe(true);
-    expect(closeCaseStepCommonDefinition.inputSchema.safeParse(closeCaseInputFixture).success).toBe(true);
-    expect(assignCaseStepCommonDefinition.inputSchema.safeParse(assignCaseInputFixture).success).toBe(true);
+    expect(closeCaseStepCommonDefinition.inputSchema.safeParse(closeCaseInputFixture).success).toBe(
+      true
+    );
+    expect(
+      assignCaseStepCommonDefinition.inputSchema.safeParse(assignCaseInputFixture).success
+    ).toBe(true);
     expect(
       unassignCaseStepCommonDefinition.inputSchema.safeParse(unassignCaseInputFixture).success
     ).toBe(true);
@@ -85,7 +91,8 @@ describe('new cases common step definitions', () => {
       true
     );
     expect(
-      findSimilarCasesStepCommonDefinition.inputSchema.safeParse(findSimilarCasesInputFixture).success
+      findSimilarCasesStepCommonDefinition.inputSchema.safeParse(findSimilarCasesInputFixture)
+        .success
     ).toBe(true);
     expect(
       setDescriptionStepCommonDefinition.inputSchema.safeParse(setDescriptionInputFixture).success
@@ -97,27 +104,63 @@ describe('new cases common step definitions', () => {
       addObservablesStepCommonDefinition.inputSchema.safeParse(addObservablesInputFixture).success
     ).toBe(true);
     expect(addTagStepCommonDefinition.inputSchema.safeParse(addTagInputFixture).success).toBe(true);
-    expect(addCategoryStepCommonDefinition.inputSchema.safeParse(addCategoryInputFixture).success).toBe(
-      true
-    );
+    expect(
+      setCategoryStepCommonDefinition.inputSchema.safeParse(addCategoryInputFixture).success
+    ).toBe(true);
   });
 
   it('accepts valid output payloads', () => {
-    expect(setSeverityStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(setStatusStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(closeCaseStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(assignCaseStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(unassignCaseStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(addAlertsStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(addEventsStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(setDescriptionStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(setTitleStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(addObservablesStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(addTagStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
-    expect(addCategoryStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success).toBe(true);
+    expect(
+      setSeverityStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      setStatusStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      closeCaseStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      assignCaseStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      unassignCaseStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      addAlertsStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      addEventsStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      setDescriptionStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      setTitleStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      addObservablesStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
+    expect(
+      addTagStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture }).success
+    ).toBe(true);
+    expect(
+      setCategoryStepCommonDefinition.outputSchema.safeParse({ case: createCaseResponseFixture })
+        .success
+    ).toBe(true);
 
-    const similarOutput =
-      findSimilarCasesStepCommonDefinition.outputSchema.safeParse(findSimilarCasesOutputFixture);
+    const similarOutput = findSimilarCasesStepCommonDefinition.outputSchema.safeParse(
+      findSimilarCasesOutputFixture
+    );
 
     expect(similarOutput.success).toBe(true);
   });

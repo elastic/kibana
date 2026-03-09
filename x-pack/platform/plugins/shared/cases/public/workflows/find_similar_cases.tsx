@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  findSimilarCasesStepCommonDefinition,
-  FindSimilarCasesStepTypeId,
-} from '../../common/workflows/steps/find_similar_cases';
-import * as i18n from '../../common/workflows/translations';
+import { findSimilarCasesStepCommonDefinition } from '../../common/workflows/steps/find_similar_cases';
 
 export const findSimilarCasesStepDefinition = createPublicStepDefinition({
   ...findSimilarCasesStepCommonDefinition,
@@ -21,21 +16,4 @@ export const findSimilarCasesStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.FIND_SIMILAR_CASES_STEP_LABEL,
-  description: i18n.FIND_SIMILAR_CASES_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.FIND_SIMILAR_CASES_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Find similar cases
-\`\`\`yaml
-- name: find_similar_cases
-  type: ${FindSimilarCasesStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    page: 1
-    perPage: 20
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

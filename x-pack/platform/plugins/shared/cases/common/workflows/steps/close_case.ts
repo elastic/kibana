@@ -6,16 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
 export const CloseCaseStepTypeId = 'cases.closeCase';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
-});
+export const InputSchema = CasesStepCaseIdVersionSchema;
 
 export const OutputSchema = z.object({
   case: CaseResponsePropertiesSchema,
@@ -32,6 +31,21 @@ export const closeCaseStepCommonDefinition: CommonStepDefinition<
   CloseCaseStepOutputSchema
 > = {
   id: CloseCaseStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.CLOSE_CASE_STEP_LABEL,
+  description: i18n.CLOSE_CASE_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.CLOSE_CASE_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Close a case
+\`\`\`yaml
+- name: close_case
+  type: ${CloseCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

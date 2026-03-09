@@ -6,18 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   CaseSeverity,
 } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
 export const SetSeverityStepTypeId = 'cases.setSeverity';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
+export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   severity: CaseSeverity,
 });
 
@@ -36,6 +36,22 @@ export const setSeverityStepCommonDefinition: CommonStepDefinition<
   SetSeverityStepOutputSchema
 > = {
   id: SetSeverityStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.SET_SEVERITY_STEP_LABEL,
+  description: i18n.SET_SEVERITY_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.SET_SEVERITY_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set case severity
+\`\`\`yaml
+- name: set_case_severity
+  type: ${SetSeverityStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    severity: "high"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  setStatusStepCommonDefinition,
-  SetStatusStepTypeId,
-} from '../../common/workflows/steps/set_status';
-import * as i18n from '../../common/workflows/translations';
+import { setStatusStepCommonDefinition } from '../../common/workflows/steps/set_status';
 
 export const setStatusStepDefinition = createPublicStepDefinition({
   ...setStatusStepCommonDefinition,
@@ -21,20 +16,4 @@ export const setStatusStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.SET_STATUS_STEP_LABEL,
-  description: i18n.SET_STATUS_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.SET_STATUS_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Set case status
-\`\`\`yaml
-- name: set_case_status
-  type: ${SetStatusStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    status: "in-progress"
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

@@ -6,13 +6,8 @@
  */
 
 import React from 'react';
-import { StepCategory } from '@kbn/workflows';
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  setTitleStepCommonDefinition,
-  SetTitleStepTypeId,
-} from '../../common/workflows/steps/set_title';
-import * as i18n from '../../common/workflows/translations';
+import { setTitleStepCommonDefinition } from '../../common/workflows/steps/set_title';
 
 export const setTitleStepDefinition = createPublicStepDefinition({
   ...setTitleStepCommonDefinition,
@@ -21,20 +16,4 @@ export const setTitleStepDefinition = createPublicStepDefinition({
       default: icon,
     }))
   ),
-  label: i18n.SET_TITLE_STEP_LABEL,
-  description: i18n.SET_TITLE_STEP_DESCRIPTION,
-  documentation: {
-    details: i18n.SET_TITLE_STEP_DOCUMENTATION_DETAILS,
-    examples: [
-      `## Set case title
-\`\`\`yaml
-- name: set_case_title
-  type: ${SetTitleStepTypeId}
-  with:
-    case_id: "abc-123-def-456"
-    title: "Updated incident title"
-\`\`\``,
-    ],
-  },
-  category: StepCategory.Kibana,
 });

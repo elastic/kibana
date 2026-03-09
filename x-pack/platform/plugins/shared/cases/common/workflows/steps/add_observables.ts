@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
+import * as i18n from '../translations';
 import { CasesStepBaseConfigSchema } from './shared';
 
 export const AddObservablesStepTypeId = 'cases.addObservables';
@@ -38,6 +40,25 @@ export const addObservablesStepCommonDefinition: CommonStepDefinition<
   AddObservablesStepOutputSchema
 > = {
   id: AddObservablesStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.ADD_OBSERVABLES_STEP_LABEL,
+  description: i18n.ADD_OBSERVABLES_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_OBSERVABLES_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Add observables to case
+\`\`\`yaml
+- name: add_observables
+  type: ${AddObservablesStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    observables:
+      - typeKey: "ip"
+        value: "10.0.0.8"
+        description: "Source IP"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

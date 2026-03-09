@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties as CaseResponsePropertiesSchema } from '../../bundled-types.gen';
+import * as i18n from '../translations';
 import { CasesStepBaseConfigSchema } from './shared';
 
 export const AddEventsStepTypeId = 'cases.addEvents';
@@ -37,6 +39,24 @@ export const addEventsStepCommonDefinition: CommonStepDefinition<
   AddEventsStepOutputSchema
 > = {
   id: AddEventsStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.ADD_EVENTS_STEP_LABEL,
+  description: i18n.ADD_EVENTS_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_EVENTS_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Add events to case
+\`\`\`yaml
+- name: add_events
+  type: ${AddEventsStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    events:
+      - eventId: "event-1"
+        index: ".ds-logs-*"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

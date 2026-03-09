@@ -12,7 +12,7 @@ import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   UpdateCaseRequest as UpdateCaseRequestSchema,
 } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 import * as i18n from '../translations';
 
 export const UpdateCasesStepTypeId = 'cases.updateCases';
@@ -22,9 +22,7 @@ const UpdateFieldsSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
   version: true,
 });
 
-const CaseUpdateSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
+const CaseUpdateSchema = CasesStepCaseIdVersionSchema.extend({
   updates: UpdateFieldsSchema.refine((updates) => Object.keys(updates).length > 0, {
     message: 'updates must include at least one field',
   }),

@@ -7,13 +7,13 @@
 
 import { createCaseResponseFixture } from '../../../common/fixtures/create_case';
 import type { CasesClient } from '../../client';
-import { addCategoryStepDefinition } from './add_category';
+import { setCategoryStepDefinition } from './set_category';
 import { createStepHandlerContext } from './test_utils';
 
 const createContext = (input: unknown) =>
-  createStepHandlerContext({ input, stepType: 'cases.addCategory' });
+  createStepHandlerContext({ input, stepType: 'cases.setCategory' });
 
-describe('addCategoryStepDefinition', () => {
+describe('setCategoryStepDefinition', () => {
   it('updates case category', async () => {
     const category = 'Malware';
     const get = jest.fn();
@@ -21,13 +21,13 @@ describe('addCategoryStepDefinition', () => {
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);
-    const definition = addCategoryStepDefinition(getCasesClient);
+    const definition = setCategoryStepDefinition(getCasesClient);
 
     const result = await definition.handler(
       createContext({ case_id: 'case-1', version: 'provided-version', category })
     );
 
-    expect(definition.id).toBe('cases.addCategory');
+    expect(definition.id).toBe('cases.setCategory');
     expect(get).not.toHaveBeenCalled();
     expect(bulkUpdate).toHaveBeenCalledWith({
       cases: [

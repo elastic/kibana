@@ -6,18 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   CaseTags,
 } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
 export const AddTagStepTypeId = 'cases.addTag';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
+export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   tags: CaseTags,
 });
 
@@ -36,6 +36,22 @@ export const addTagStepCommonDefinition: CommonStepDefinition<
   AddTagStepOutputSchema
 > = {
   id: AddTagStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.ADD_TAG_STEP_LABEL,
+  description: i18n.ADD_TAG_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.ADD_TAG_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set case tags
+\`\`\`yaml
+- name: set_case_tags
+  type: ${AddTagStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    tags: ["investigation", "high-priority"]
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

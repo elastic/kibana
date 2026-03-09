@@ -6,18 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
   CaseResponseProperties as CaseResponsePropertiesSchema,
   CaseStatus,
 } from '../../bundled-types.gen';
-import { CasesStepBaseConfigSchema } from './shared';
+import * as i18n from '../translations';
+import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
 export const SetStatusStepTypeId = 'cases.setStatus';
 
-export const InputSchema = z.object({
-  case_id: z.string().min(1, 'case_id is required'),
-  version: z.string().min(1).optional(),
+export const InputSchema = CasesStepCaseIdVersionSchema.extend({
   status: CaseStatus,
 });
 
@@ -36,6 +36,22 @@ export const setStatusStepCommonDefinition: CommonStepDefinition<
   SetStatusStepOutputSchema
 > = {
   id: SetStatusStepTypeId,
+  category: StepCategory.Kibana,
+  label: i18n.SET_STATUS_STEP_LABEL,
+  description: i18n.SET_STATUS_STEP_DESCRIPTION,
+  documentation: {
+    details: i18n.SET_STATUS_STEP_DOCUMENTATION_DETAILS,
+    examples: [
+      `## Set case status
+\`\`\`yaml
+- name: set_case_status
+  type: ${SetStatusStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    status: "in-progress"
+\`\`\``,
+    ],
+  },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
   configSchema: CasesStepBaseConfigSchema,

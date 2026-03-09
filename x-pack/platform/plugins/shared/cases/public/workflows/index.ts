@@ -92,7 +92,7 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./add_category').then((m) => m.addCategoryStepDefinition)
+    import('./set_category').then((m) => m.setCategoryStepDefinition)
   );
 
   // Leaving this in for now. We need to get support for reflective value lookup first.

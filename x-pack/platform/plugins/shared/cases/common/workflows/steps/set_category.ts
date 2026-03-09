@@ -9,46 +9,46 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import {
-  CaseDescription,
+  CaseCategory,
   CaseResponseProperties as CaseResponsePropertiesSchema,
 } from '../../bundled-types.gen';
 import * as i18n from '../translations';
 import { CasesStepBaseConfigSchema, CasesStepCaseIdVersionSchema } from './shared';
 
-export const SetDescriptionStepTypeId = 'cases.setDescription';
+export const SetCategoryStepTypeId = 'cases.setCategory';
 
 export const InputSchema = CasesStepCaseIdVersionSchema.extend({
-  description: CaseDescription.min(1, 'description is required'),
+  category: CaseCategory.min(1, 'category is required'),
 });
 
 export const OutputSchema = z.object({
   case: CaseResponsePropertiesSchema,
 });
 
-export type SetDescriptionStepInputSchema = typeof InputSchema;
-export type SetDescriptionStepOutputSchema = typeof OutputSchema;
+export type SetCategoryStepInputSchema = typeof InputSchema;
+export type SetCategoryStepOutputSchema = typeof OutputSchema;
 
-export type SetDescriptionStepInput = z.infer<typeof InputSchema>;
-export type SetDescriptionStepOutput = z.infer<typeof OutputSchema>;
+export type SetCategoryStepInput = z.infer<typeof InputSchema>;
+export type SetCategoryStepOutput = z.infer<typeof OutputSchema>;
 
-export const setDescriptionStepCommonDefinition: CommonStepDefinition<
-  SetDescriptionStepInputSchema,
-  SetDescriptionStepOutputSchema
+export const setCategoryStepCommonDefinition: CommonStepDefinition<
+  SetCategoryStepInputSchema,
+  SetCategoryStepOutputSchema
 > = {
-  id: SetDescriptionStepTypeId,
+  id: SetCategoryStepTypeId,
   category: StepCategory.Kibana,
-  label: i18n.SET_DESCRIPTION_STEP_LABEL,
-  description: i18n.SET_DESCRIPTION_STEP_DESCRIPTION,
+  label: i18n.ADD_CATEGORY_STEP_LABEL,
+  description: i18n.ADD_CATEGORY_STEP_DESCRIPTION,
   documentation: {
-    details: i18n.SET_DESCRIPTION_STEP_DOCUMENTATION_DETAILS,
+    details: i18n.ADD_CATEGORY_STEP_DOCUMENTATION_DETAILS,
     examples: [
-      `## Set case description
+      `## Set case category
 \`\`\`yaml
-- name: set_case_description
-  type: ${SetDescriptionStepTypeId}
+- name: set_case_category
+  type: ${SetCategoryStepTypeId}
   with:
     case_id: "abc-123-def-456"
-    description: "Updated timeline and investigation findings."
+    category: "Malware"
 \`\`\``,
     ],
   },

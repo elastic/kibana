@@ -29,7 +29,7 @@ import { setDescriptionStepDefinition } from './steps/set_description';
 import { setTitleStepDefinition } from './steps/set_title';
 import { addObservablesStepDefinition } from './steps/add_observables';
 import { addTagStepDefinition } from './steps/add_tag';
-import { addCategoryStepDefinition } from './steps/add_category';
+import { setCategoryStepDefinition } from './steps/set_category';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
@@ -60,5 +60,5 @@ export function registerCaseWorkflowSteps(
   workflowsExtensions.registerStepDefinition(setTitleStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addObservablesStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(addTagStepDefinition(getCasesClient));
-  workflowsExtensions.registerStepDefinition(addCategoryStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(setCategoryStepDefinition(getCasesClient));
 }
