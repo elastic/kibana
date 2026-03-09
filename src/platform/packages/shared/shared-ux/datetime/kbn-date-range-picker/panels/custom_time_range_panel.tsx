@@ -35,6 +35,8 @@ import {
   useGeneratedHtmlId,
   copyToClipboard,
   EuiToolTip,
+  EuiCallOut,
+  useEuiFontSize,
 } from '@elastic/eui';
 
 import {
@@ -91,7 +93,11 @@ function deriveInitialState(
   dateType: DateType
 ): DatePartState {
   if (dateType === DATE_TYPE_NOW) {
-    return { tab: DATE_TYPE_NOW, relative: DEFAULT_RELATIVE, absoluteText: '' };
+    return {
+      tab: DATE_TYPE_NOW,
+      relative: DEFAULT_RELATIVE,
+      absoluteText: moment().format(DEFAULT_DATE_FORMAT),
+    };
   }
 
   if (dateType === DATE_TYPE_RELATIVE) {
@@ -132,11 +138,13 @@ interface DatePartPickerProps {
   label: string;
   state: DatePartState;
   onChange: (next: DatePartState) => void;
+  error?: string;
 }
 
 /** Picker for one side of the range: tab group (Relative / Absolute / Now) plus conditional controls. */
-const DatePartPicker = ({ label, state, onChange }: DatePartPickerProps) => {
+const DatePartPicker = ({ label, state, onChange, error }: DatePartPickerProps) => {
   const tabGroupId = useGeneratedHtmlId({ prefix: 'datePartTab' });
+  const fonts = useEuiFontSize('xs');
 
   const tabOptions = useMemo(
     () => [
@@ -235,6 +243,23 @@ const DatePartPicker = ({ label, state, onChange }: DatePartPickerProps) => {
                 refresh.
               </p>
             </EuiText>
+          )}
+
+          {error && (
+            <EuiCallOut
+              announceOnMount
+              title={error}
+              color="danger"
+              iconType="warning"
+              size="s"
+              css={css`
+                /* there's no size=xs for EuiCallOut :( */
+                .euiCallOutHeader__title {
+                  font-size: ${fonts.fontSize};
+                  line-height: ${fonts.lineHeight};
+                }
+              `}
+            />
           )}
         </EuiFlexGroup>
       </EuiFormFieldset>
