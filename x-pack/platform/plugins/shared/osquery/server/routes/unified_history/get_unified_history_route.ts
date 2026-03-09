@@ -190,6 +190,8 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
               })
             : undefined;
 
+          const emptyScheduledResult = { aggregations: {} as ScheduledAggregations };
+
           const [actionsResult, scheduledResult] = await Promise.all([
             actionsQuery
               ? esClient.search(
@@ -201,14 +203,26 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 )
               : Promise.resolve({ hits: { hits: [] } }),
             scheduledQuery
-              ? esClient.search(
-                  {
-                    index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
-                    ...scheduledQuery,
-                  },
-                  { ignore: [404] }
-                )
-              : Promise.resolve({ aggregations: {} as ScheduledAggregations }),
+              ? esClient
+                  .search(
+                    {
+                      index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+                      ...scheduledQuery,
+                    },
+                    { ignore: [404] }
+                  )
+                  .catch((err) => {
+                    // Graceful degradation: if the osquery integration has not been
+                    // upgraded yet, `planned_schedule_time` may be mapped as `keyword`
+                    // instead of `date`, which makes the `max` aggregation fail.
+                    // Return empty scheduled results until the integration is updated.`````
+                    logger.warn(
+                      `Scheduled query aggregation failed (likely outdated integration mappings): ${err.message}`
+                    );
+
+                    return emptyScheduledResult;
+                  })
+              : Promise.resolve(emptyScheduledResult),
           ]);
 
           const liveHits = (actionsResult.hits?.hits ?? []) as LiveActionHit[];
