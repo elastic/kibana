@@ -35,7 +35,7 @@ import { buildFieldsBrowserCommandArgs } from '../../../language/autocomplete/au
 import { createFieldsBrowserSuggestion } from '../../registry/complete_items';
 import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
-import { getMatchingSignatures } from './expressions';
+import { getMatchingSignatures, getMaxMinNumberOfParams } from './signature_analysis';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -335,17 +335,8 @@ export function checkFunctionInvocationComplete(
 
   const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
 
-  const argLengthCheck = fnDefinition.signatures.some((def) => {
-    if (def.minParams && cleanedArgs.length >= def.minParams) {
-      return true;
-    }
-
-    if (cleanedArgs.length === def.params.length) {
-      return true;
-    }
-
-    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
-  });
+  const { min, max } = getMaxMinNumberOfParams(fnDefinition.signatures);
+  const argLengthCheck = cleanedArgs.length >= min && cleanedArgs.length <= max;
 
   if (!argLengthCheck) {
     return { complete: false, reason: 'tooFewArgs' };

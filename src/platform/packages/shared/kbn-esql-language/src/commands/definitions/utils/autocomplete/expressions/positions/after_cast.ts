@@ -16,7 +16,7 @@ import { getFunctionDefinition } from '../../../functions';
 import type { ExpressionContext } from '../types';
 import { getExpressionType } from '../../..';
 import { inlineCastsMapping } from '../../../../generated/inline_casts_mapping';
-import { getMatchingSignatures } from '../../../expressions';
+import { getMatchingSignatures } from '../../../signature_analysis';
 
 /**
  * Suggests completions after the cast (::) keyword.

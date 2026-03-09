@@ -15,11 +15,18 @@ import type { ExpressionContext } from '../types';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../registry/complete_items';
 import { getExpressionType } from '../../../expressions';
-import { SignatureAnalyzer } from '../signature_analyzer';
 import { getLogicalContinuationSuggestions } from '../operators/utils';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { logicalOperators } from '../../../../all_operators';
+import {
+  hasArbitraryExpressionSignature,
+  toSignatureState,
+  isAmbiguousPosition,
+  canAcceptMoreArgs,
+  hasVariadicSignature,
+  isTypeAcceptedAtPosition,
+} from '../../../signature_analysis';
 
 /**
  * Handler for autocomplete suggestions after complete expressions.
@@ -55,14 +62,14 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return suggestions;
     }
 
-    const analyzer = SignatureAnalyzer.from(functionParameterContext);
+    const state = toSignatureState(functionParameterContext);
 
     // For repeating signatures (CASE): boolean at position 2,4,6... is a condition → suggest comma
-    if (analyzer?.isAmbiguousPosition) {
+    if (isAmbiguousPosition(state)) {
       return [...suggestions, commaCompleteItem];
     }
 
-    if (analyzer?.hasMoreParams) {
+    if (canAcceptMoreArgs(state)) {
       return [...suggestions, commaCompleteItem];
     }
 
@@ -75,14 +82,14 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     context?.columns,
     context?.unmappedFieldsStrategy
   );
-  const signatureAnalysis = functionParameterContext
-    ? SignatureAnalyzer.from(functionParameterContext)
+  const signatureState = functionParameterContext
+    ? toSignatureState(functionParameterContext)
     : null;
 
   const enrichedCtx = {
     ...ctx,
     expressionType,
-    signatureAnalysis,
+    signatureAnalysis: signatureState,
   };
 
   if (!isParameterType(expressionType) && !functionParameterContext) {
@@ -126,9 +133,14 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     return timeUnitItems;
   }
 
-  // Use SignatureAnalyzer for parameter state analysis if available
-  const paramState = signatureAnalysis
-    ? signatureAnalysis.getParameterState(expressionType, isLiteral(expressionRoot))
+  const expressionIsLiteral = isLiteral(expressionRoot);
+  const paramState = signatureState
+    ? {
+        typeMatches: isTypeAcceptedAtPosition(signatureState, expressionType, expressionIsLiteral),
+        isLiteral: expressionIsLiteral,
+        hasMoreParams: canAcceptMoreArgs(signatureState),
+        isVariadic: hasVariadicSignature(signatureState.signatures),
+      }
     : {
         typeMatches: false,
         isLiteral: false,
@@ -182,8 +194,10 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       isLiteral: paramState.isLiteral,
       hasMoreParams: paramState.hasMoreParams,
       isVariadic: paramState.isVariadic,
-      isAmbiguousPosition: signatureAnalysis?.isAmbiguousPosition,
-      functionSignatures: signatureAnalysis?.getValidSignatures(),
+      isAmbiguousPosition: signatureState ? isAmbiguousPosition(signatureState) : undefined,
+      isExpressionHeavy: hasArbitraryExpressionSignature(
+        functionParameterContext.functionDefinition?.signatures ?? []
+      ),
       expressionType,
       isCursorFollowedByComma: options.isCursorFollowedByComma,
     });

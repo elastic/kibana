@@ -10,10 +10,10 @@
 import type { ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import { within } from '@elastic/esql';
 import { suggestForExpression } from '../suggestion_engine';
-import type { ExpressionContext, FunctionParameterContext } from '../types';
+import type { ExpressionContext } from '../types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import { SignatureAnalyzer } from '../signature_analyzer';
+import { resolveSignatureContext } from '../signature_analyzer';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;
@@ -39,13 +39,12 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
     return [];
   }
 
-  const analyzer = SignatureAnalyzer.fromNode(functionExpression, context, functionDefinition);
+  const paramContext = resolveSignatureContext(functionExpression, context, functionDefinition);
 
-  if (!analyzer) {
+  if (!paramContext) {
     return [];
   }
 
-  const paramContext = buildInFunctionParameterContext(analyzer, functionDefinition);
   const targetExpression = determineTargetExpression(functionExpression, innerText);
 
   const existing = options.parentFunctionNames ?? [];
@@ -69,21 +68,6 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
   });
 
   return suggestions;
-}
-
-function buildInFunctionParameterContext(
-  analyzer: SignatureAnalyzer,
-  functionDefinition: ReturnType<typeof getFunctionDefinition>
-): FunctionParameterContext {
-  return {
-    paramDefinitions: analyzer.getCompatibleParamDefs(),
-    hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-    functionDefinition,
-    firstArgumentType: analyzer.getFirstArgumentType(),
-    firstValueType: analyzer.getFirstValueType(),
-    currentParameterIndex: analyzer.getCurrentParameterIndex(),
-    validSignatures: analyzer.getValidSignatures(),
-  };
 }
 
 /** Determines which expression to use as target for recursive suggestion */

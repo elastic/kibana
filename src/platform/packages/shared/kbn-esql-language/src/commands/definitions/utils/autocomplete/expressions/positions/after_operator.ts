@@ -8,14 +8,19 @@
  */
 
 import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
-import { isLiteral } from '@elastic/esql';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { listCompleteItem } from '../../../../../registry/complete_items';
 import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
-import { SignatureAnalyzer } from '../signature_analyzer';
-import { getExpressionType, getMatchingSignatures } from '../../../expressions';
-import { getFunctionDefinition } from '../../../functions';
+import { getExpressionType } from '../../../expressions';
+import {
+  hasArbitraryExpressionSignature,
+  toSignatureState,
+  doesParamAcceptType,
+  canAcceptMoreArgs,
+  hasVariadicSignature,
+} from '../../../signature_analysis';
+import { checkFunctionInvocationComplete, getFunctionDefinition } from '../../../functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
@@ -48,62 +53,13 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
   const getExprType = (expression: ESQLAstItem) =>
     getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
 
-  const { complete, reason } = isOperatorComplete(rightmostOperator, getExprType);
+  const { complete, reason } = checkFunctionInvocationComplete(rightmostOperator, getExprType);
 
   if (complete) {
     return handleCompleteOperator(ctx, rightmostOperator, getExprType);
   }
 
   return handleIncompleteOperator(ctx, rightmostOperator, getExprType, reason);
-}
-
-/** Checks if an operator invocation is complete and correctly typed */
-function isOperatorComplete(
-  func: ESQLFunction,
-  getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
-): {
-  complete: boolean;
-  reason?: 'tooFewArgs' | 'wrongTypes';
-} {
-  const fnDefinition = getFunctionDefinition(func.name);
-
-  if (!fnDefinition) {
-    return { complete: false };
-  }
-
-  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExprType);
-
-  const argLengthCheck = fnDefinition.signatures.some(({ minParams, params }) => {
-    if (minParams && cleanedArgs.length >= minParams) {
-      return true;
-    }
-
-    if (cleanedArgs.length === params.length) {
-      return true;
-    }
-
-    return cleanedArgs.length >= params.filter(({ optional }) => !optional).length;
-  });
-
-  if (!argLengthCheck) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  const givenTypes = func.args.map((arg) => getExprType(arg));
-  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
-
-  const hasCorrectTypes = !!getMatchingSignatures(
-    fnDefinition.signatures,
-    givenTypes,
-    literalMask,
-    true
-  ).length;
-
-  if (!hasCorrectTypes) {
-    return { complete: false, reason: 'wrongTypes' };
-  }
-
-  return { complete: true };
 }
 
 /** Returns supported right-side types for binary operators matching the left-side type */
@@ -162,22 +118,21 @@ function handleCompleteOperator(
 
   // Add comma using decision engine for all operators in function context
   if (options.functionParameterContext) {
-    const analyzer = SignatureAnalyzer.from(options.functionParameterContext);
+    const state = toSignatureState(options.functionParameterContext);
+    const typeMatches = doesParamAcceptType(state, operatorReturnType, false);
 
-    if (analyzer) {
-      const typeMatches = analyzer.typeMatches(operatorReturnType, false);
-
-      builder.addCommaIfNeeded({
-        position: 'after_complete',
-        typeMatches,
-        isLiteral: false,
-        hasMoreParams: analyzer.hasMoreParams,
-        isVariadic: analyzer.isVariadic,
-        hasMoreMandatoryArgs: analyzer.getHasMoreMandatoryArgs(),
-        functionSignatures: analyzer.getValidSignatures(),
-        isCursorFollowedByComma: false,
-      });
-    }
+    builder.addCommaIfNeeded({
+      position: 'after_complete',
+      typeMatches,
+      isLiteral: false,
+      hasMoreParams: canAcceptMoreArgs(state),
+      isVariadic: hasVariadicSignature(state.signatures),
+      hasMoreMandatoryArgs: state.hasMoreMandatoryArgs,
+      isExpressionHeavy: hasArbitraryExpressionSignature(
+        options.functionParameterContext.functionDefinition?.signatures ?? []
+      ),
+      isCursorFollowedByComma: false,
+    });
   }
 
   const suggestions = builder.build();

@@ -11,10 +11,19 @@ import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { isEqual, uniq, uniqWith } from 'lodash';
 import { matchesSpecialFunction, normalizePreferredExpressionTypes } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
+import {
+  hasArbitraryExpressionSignature,
+  toSignatureState,
+  hasVariadicSignature,
+  hasRepeatingSignature,
+  getAcceptedParamTypes,
+  isAtRepeatingValuePosition,
+  isAmbiguousPosition,
+  pairKeywordAndTextTypes,
+} from '../../../signature_analysis';
+import type { SignatureState } from '../../../signature_analysis';
 import type { ExpressionContext } from '../types';
-import { ensureKeywordAndText } from '../../functions';
 import { SuggestionBuilder } from '../suggestion_builder';
-import { SignatureAnalyzer } from '../signature_analyzer';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
 import type {
@@ -57,20 +66,20 @@ async function handleFunctionParameterContext(
   ctx: ExpressionContext
 ): Promise<ISuggestionItem[]> {
   const { paramDefinitions } = functionParamContext;
-  const analyzer = SignatureAnalyzer.from(functionParamContext);
 
-  // Early validation
-  if (!analyzer) {
+  if (!functionParamContext.functionDefinition) {
     return [];
   }
 
+  const state = toSignatureState(functionParamContext);
+
   // Empty paramDefinitions = no valid signature for this position → return []
-  // Example: FUNC(double, double, /) with only 1-2 param signatures → suggest nothing
-  //
-  // Exception (continue suggesting) for:
-  // - variadic functions (CONCAT, COALESCE): minParams defined, accepts unlimited params
-  // - repeating signatures (CASE): accepts unlimited condition/value pairs
-  if (paramDefinitions.length === 0 && !analyzer.isVariadic && !analyzer.hasRepeatingSignature) {
+  // Exception for variadic and repeating signature functions
+  if (
+    paramDefinitions.length === 0 &&
+    !hasVariadicSignature(state.signatures) &&
+    !hasRepeatingSignature(state.signatures)
+  ) {
     return [];
   }
 
@@ -82,7 +91,7 @@ async function handleFunctionParameterContext(
   }
 
   // Build composite suggestions (literals + fields + functions)
-  return buildCompositeSuggestions(functionParamContext, ctx, analyzer);
+  return buildCompositeSuggestions(functionParamContext, ctx, state);
 }
 
 /** Try suggestions that are exclusive (if present, return only these) */
@@ -117,7 +126,7 @@ function tryExclusiveSuggestions(
 async function buildCompositeSuggestions(
   functionParamContext: FunctionParamContext,
   ctx: ExpressionContext,
-  analyzer: SignatureAnalyzer
+  state: SignatureState
 ): Promise<ISuggestionItem[]> {
   const { functionDefinition } = functionParamContext;
   const { options } = ctx;
@@ -126,7 +135,7 @@ async function buildCompositeSuggestions(
   const config = getParamSuggestionConfig(
     functionParamContext,
     options.isCursorFollowedByComma ?? false,
-    analyzer
+    state
   );
 
   const suggestions: ISuggestionItem[] = [];
@@ -335,10 +344,10 @@ function getConstantOnlyParams(paramDefinitions: FunctionParameter[]): FunctionP
 function getParamSuggestionConfig(
   functionParamContext: FunctionParamContext,
   isCursorFollowedByComma: boolean,
-  analyzer: SignatureAnalyzer
+  state: SignatureState
 ) {
   const { functionDefinition } = functionParamContext;
-  const acceptedTypes = analyzer.getAcceptedTypes() as FunctionParameterType[];
+  const acceptedTypes = getAcceptedParamTypes(state) as FunctionParameterType[];
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
 
@@ -347,7 +356,7 @@ function getParamSuggestionConfig(
     hasMoreMandatoryArgs,
     functionType: functionDefinition!.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition!.signatures,
+    isExpressionHeavy: hasArbitraryExpressionSignature(functionDefinition!.signatures),
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
@@ -355,8 +364,8 @@ function getParamSuggestionConfig(
   return {
     acceptedTypes,
     shouldAddComma,
-    isRepeatingValuePosition: analyzer.isRepeatingValuePosition,
-    isAmbiguousPosition: analyzer.isAmbiguousPosition,
+    isRepeatingValuePosition: isAtRepeatingValuePosition(state),
+    isAmbiguousPosition: isAmbiguousPosition(state),
   };
 }
 
@@ -378,7 +387,7 @@ function buildEnumValueSuggestions(
     hasMoreMandatoryArgs,
     functionType: functionDefinition.type,
     isCursorFollowedByComma,
-    functionSignatures: functionDefinition.signatures,
+    isExpressionHeavy: hasArbitraryExpressionSignature(functionDefinition.signatures),
   };
 
   const shouldAddComma = shouldSuggestComma(commaContext);
@@ -419,7 +428,7 @@ function buildConstantOnlyLiteralSuggestions(
     return [];
   }
 
-  const types = ensureKeywordAndText(constantOnlyParams.map(({ type }) => type));
+  const types = pairKeywordAndTextTypes(constantOnlyParams.map(({ type }) => type));
 
   const builder = new SuggestionBuilder(ctx);
 
