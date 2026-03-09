@@ -18,7 +18,6 @@
       "source.ip",
       "host.name",
       "user.name",
-      "user.id",
       "host.id",
       "event.module"
     ]

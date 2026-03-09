@@ -17,7 +17,6 @@
       "source.ip",
       "winlog.event_data.LogonType",
       "user.name",
-      "user.id",
       "host.name",
       "host.id",
       "event.module"

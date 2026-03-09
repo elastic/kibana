@@ -16,7 +16,6 @@
     "influencers": [
       "source.ip",
       "user.name",
-      "user.id",
       "host.name",
       "host.id",
       "event.module"
