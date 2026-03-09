@@ -12,28 +12,21 @@ import type { StreamEnrichmentContextType } from './types';
 describe('stream_enrichment_state_machine/utils', () => {
   describe('getUpsertFields()', () => {
     it('returns typeless doc-only overrides (no type: unmapped) and removes mapping overrides', () => {
-      const existingOverrides: FieldDefinition = {
-        foo: { type: 'keyword' },
-        keep: { type: 'date' },
-      };
+      const wiredDefinition = createWiredDefinition({
+        fields: {
+          foo: { type: 'keyword' },
+          keep: { type: 'date' },
+        },
+      });
 
       const context = {
-        definition: {
-          stream: {
-            name: 'classic-stream',
-            ingest: {
-              classic: {
-                field_overrides: existingOverrides,
-              },
-            },
-          },
-        } as unknown as Streams.ClassicStream.GetResponse,
+        definition: wiredDefinition,
         simulatorRef: {
           getSnapshot: () => ({
             context: {
               detectedSchemaFields: [
-                { name: 'foo', parent: 'classic-stream', status: 'unmapped' },
-                { name: 'keep', parent: 'classic-stream', status: 'mapped', type: 'date' },
+                { name: 'foo', parent: 'wired-stream', status: 'unmapped' },
+                { name: 'keep', parent: 'wired-stream', status: 'mapped', type: 'date' },
               ],
               docOnlyOverrides: {
                 foo: { description: 'Foo description' },

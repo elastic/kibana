@@ -233,6 +233,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
             <EuiFlexItem grow={2}>
               {isEditing ? (
                 <EuiTextArea
+                  aria-label={FIELD_SUMMARIES.fieldDescription.label}
                   data-test-subj="streamsAppFieldSummaryDescriptionTextArea"
                   value={field.description ?? ''}
                   onChange={(e) => onChange({ description: e.target.value || undefined })}

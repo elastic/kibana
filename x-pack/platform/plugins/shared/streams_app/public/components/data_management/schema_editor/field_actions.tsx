@@ -136,6 +136,9 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
                 name: field.name,
                 parent: field.parent,
                 status: 'unmapped',
+                ...(Streams.WiredStream.Definition.is(stream) && field.description
+                  ? { description: field.description }
+                  : {}),
               } as SchemaField);
             },
           });
