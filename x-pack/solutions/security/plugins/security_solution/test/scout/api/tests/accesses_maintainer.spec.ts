@@ -8,6 +8,7 @@
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { INTEGRATION_CONFIGS } from '../../../../server/lib/entity_analytics/entity_store/maintainers/accesses/integrations';
+import { MAINTAINER_ID } from '../../../../server/lib/entity_analytics/entity_store/maintainers/accesses/constants';
 import {
   COMMON_HEADERS,
   ENTITY_STORE_ROUTES,
@@ -39,6 +40,45 @@ function getField(source: Record<string, unknown>, path: string): unknown {
     current = (current as Record<string, unknown>)[part];
   }
   return current;
+}
+
+interface MaintainerEntry {
+  id: string;
+  runs: number;
+  customState: Record<string, unknown> | null;
+  lastSuccessTimestamp: string | null;
+  lastErrorTimestamp: string | null;
+}
+
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 120_000;
+
+async function waitForMaintainerRun(
+  apiClient: {
+    get: (url: string, options?: Record<string, unknown>) => Promise<{ body: unknown }>;
+  },
+  headers: Record<string, string>,
+  maintainerId: string,
+  minRuns: number
+): Promise<MaintainerEntry> {
+  const start = Date.now();
+
+  while (Date.now() - start < POLL_TIMEOUT_MS) {
+    const res = await apiClient.get(MAINTAINER_ROUTES.GET, {
+      headers,
+      responseType: 'json',
+    });
+    const body = res.body as { maintainers: MaintainerEntry[] };
+    const entry = body.maintainers.find((m) => m.id === maintainerId);
+
+    if (entry && entry.runs >= minRuns) {
+      return entry;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+  }
+
+  throw new Error(`Maintainer "${maintainerId}" did not reach ${minRuns} run(s) within timeout`);
 }
 
 for (const integration of INTEGRATION_CONFIGS) {
@@ -87,6 +127,13 @@ for (const integration of INTEGRATION_CONFIGS) {
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
       await apiClient
+        .put(MAINTAINER_ROUTES.STOP(MAINTAINER_ID), {
+          headers: defaultHeaders,
+          responseType: 'json',
+        })
+        .catch(() => {});
+
+      await apiClient
         .post(ENTITY_STORE_ROUTES.UNINSTALL, {
           headers: defaultHeaders,
           responseType: 'json',
@@ -98,15 +145,25 @@ for (const integration of INTEGRATION_CONFIGS) {
     });
 
     apiTest('Should compute access relationships from events', async ({ apiClient, esClient }) => {
-      const maintainerResponse = await apiClient.post(MAINTAINER_ROUTES.RUN, {
+      const startResponse = await apiClient.put(MAINTAINER_ROUTES.START(MAINTAINER_ID), {
         headers: defaultHeaders,
         responseType: 'json',
-        body: {},
       });
-      expect(maintainerResponse.statusCode).toBe(200);
-      expect(maintainerResponse.body.totalBuckets).toBe(6);
-      expect(maintainerResponse.body.totalAccessRecords).toBe(16);
-      expect(maintainerResponse.body.totalUpserted).toBe(16);
+      expect(startResponse.statusCode).toBe(200);
+
+      const maintainerEntry = await waitForMaintainerRun(
+        apiClient,
+        defaultHeaders,
+        MAINTAINER_ID,
+        1
+      );
+
+      expect(maintainerEntry.customState).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const state = maintainerEntry.customState!;
+      expect(state.totalBuckets).toBe(6);
+      expect(state.totalAccessRecords).toBe(16);
+      expect(state.totalUpserted).toBe(16);
 
       const extractionResponse = await apiClient.post(
         ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
@@ -210,9 +267,9 @@ for (const integration of INTEGRATION_CONFIGS) {
 
         const source = entities.hits.hits[0]._source as Record<string, unknown>;
 
-        expect(
-          toArray(getField(source, 'entity.relationships.accesses_frequently'))
-        ).toHaveLength(0);
+        expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toHaveLength(
+          0
+        );
         expect(
           toArray(getField(source, 'entity.relationships.accesses_infrequently'))
         ).toStrictEqual(['test-host-002']);

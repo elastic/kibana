@@ -30,9 +30,13 @@ export const ENTITY_STORE_ROUTES = {
 };
 
 export const MAINTAINER_ROUTES = {
-  RUN: 'internal/security_solution/poc/run_maintainer',
+  START: (id: string) =>
+    stripLeadingSlash(`${BASE_ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_START}/${id}`),
+  STOP: (id: string) =>
+    stripLeadingSlash(`${BASE_ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP}/${id}`),
+  GET: stripLeadingSlash(BASE_ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET),
 } as const;
 
-export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
+export const ENTITY_STORE_TAGS = [...tags.stateful.classic];
 
 export const LATEST_INDEX = '.entities.v2.latest.security_default';
