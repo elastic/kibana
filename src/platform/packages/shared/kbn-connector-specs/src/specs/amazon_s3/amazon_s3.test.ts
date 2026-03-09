@@ -9,11 +9,11 @@
 
 import type { ActionContext } from '../../connector_spec';
 
-let mockListAmazonS3Buckets = jest.fn();
-let mockListAmazonS3BucketObjects = jest.fn();
-let mockGetAmazonS3BucketObjectMetadata = jest.fn();
-let mockGenerateAmazonS3BucketObjectPresignedUrl = jest.fn();
-let mockDownloadAmazonS3BucketObject = jest.fn();
+const mockListAmazonS3Buckets = jest.fn();
+const mockListAmazonS3BucketObjects = jest.fn();
+const mockGetAmazonS3BucketObjectMetadata = jest.fn();
+const mockGenerateAmazonS3BucketObjectPresignedUrl = jest.fn();
+const mockDownloadAmazonS3BucketObject = jest.fn();
 
 jest.mock('./amazon_s3_api', () => ({
   listAmazonS3Buckets: mockListAmazonS3Buckets,
@@ -66,33 +66,35 @@ describe('AmazonS3', () => {
 
     expect(mockListAmazonS3Buckets).toHaveBeenCalledTimes(1);
     expect(result).toEqual([
-        {
-          name: 'test-bucket-name',
-          creationDate: 'ISO_Timestamp',
-        },
-      ]);
+      {
+        name: 'test-bucket-name',
+        creationDate: 'ISO_Timestamp',
+      },
+    ]);
   });
 
   it('should list buckets with pagination', async () => {
-    mockListAmazonS3Buckets.mockResolvedValueOnce({
-      buckets: [
-        {
-          name: 'test-bucket-name',
-          creationDate: 'ISO_Timestamp',
-        },
-      ],
-      nextContinuationToken: "next-token",
-      isTruncated: true,
-    }).mockResolvedValueOnce({
-      buckets: [
-        {
-          name: 'second-bucket-name',
-          creationDate: 'ISO_Timestamp',
-        },
-      ],
-      nextContinuationToken: undefined,
-      isTruncated: false,
-    });
+    mockListAmazonS3Buckets
+      .mockResolvedValueOnce({
+        buckets: [
+          {
+            name: 'test-bucket-name',
+            creationDate: 'ISO_Timestamp',
+          },
+        ],
+        nextContinuationToken: 'next-token',
+        isTruncated: true,
+      })
+      .mockResolvedValueOnce({
+        buckets: [
+          {
+            name: 'second-bucket-name',
+            creationDate: 'ISO_Timestamp',
+          },
+        ],
+        nextContinuationToken: undefined,
+        isTruncated: false,
+      });
 
     const result = await AmazonS3.actions.listBuckets.handler(mockContext, {});
 
@@ -159,33 +161,35 @@ describe('AmazonS3', () => {
   });
 
   it('should list bucket objects with pagination', async () => {
-    mockListAmazonS3BucketObjects.mockResolvedValueOnce({
-      bucket: 'test-bucket-name',
-      objectCount: 2,
-      objects: [
-        {
-          key: 'test-object-key',
-          size: 12345,
-          lastModified: 'ISO_Timestamp',
-          storageClass: 'STANDARD',
-        }
-      ],
-      nextContinuationToken: "next-token",
-      isTruncated: true,
-    }).mockResolvedValueOnce({
-      bucket: 'test-bucket-name',
-      objectCount: 2,
-      objects: [
-        {
-          key: 'second-object-key',
-          size: 98765,
-          lastModified: 'ISO_Timestamp',
-          storageClass: 'STANDARD',
-        }
-      ],
-      nextContinuationToken: undefined,
-      isTruncated: false,
-    });
+    mockListAmazonS3BucketObjects
+      .mockResolvedValueOnce({
+        bucket: 'test-bucket-name',
+        objectCount: 2,
+        objects: [
+          {
+            key: 'test-object-key',
+            size: 12345,
+            lastModified: 'ISO_Timestamp',
+            storageClass: 'STANDARD',
+          },
+        ],
+        nextContinuationToken: 'next-token',
+        isTruncated: true,
+      })
+      .mockResolvedValueOnce({
+        bucket: 'test-bucket-name',
+        objectCount: 2,
+        objects: [
+          {
+            key: 'second-object-key',
+            size: 98765,
+            lastModified: 'ISO_Timestamp',
+            storageClass: 'STANDARD',
+          },
+        ],
+        nextContinuationToken: undefined,
+        isTruncated: false,
+      });
 
     const result = await AmazonS3.actions.listBucketObjects.handler(mockContext, {
       bucket: 'test-bucket-name',
@@ -201,9 +205,9 @@ describe('AmazonS3', () => {
           size: 12345,
           lastModified: 'ISO_Timestamp',
           storageClass: 'STANDARD',
-        }
+        },
       ],
-      nextContinuationToken: "next-token",
+      nextContinuationToken: 'next-token',
       isTruncated: true,
     });
 
@@ -221,7 +225,7 @@ describe('AmazonS3', () => {
           size: 98765,
           lastModified: 'ISO_Timestamp',
           storageClass: 'STANDARD',
-        }
+        },
       ],
       nextContinuationToken: undefined,
       isTruncated: false,

@@ -10,7 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import { type ConnectorSpec } from '../../connector_spec';
-import { downloadAmazonS3BucketObject, generateAmazonS3BucketObjectPresignedUrl, getAmazonS3BucketObjectMetadata, listAmazonS3BucketObjects, listAmazonS3Buckets } from './amazon_s3_api';
+import {
+  downloadAmazonS3BucketObject,
+  generateAmazonS3BucketObjectPresignedUrl,
+  getAmazonS3BucketObjectMetadata,
+  listAmazonS3BucketObjects,
+  listAmazonS3Buckets,
+} from './amazon_s3_api';
 
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
@@ -60,11 +66,17 @@ export const AmazonS3: ConnectorSpec = {
           prefix?: string;
         };
 
-        let buckets: { name?: string, creationDate?: string }[] = [];
+        let buckets: { name?: string; creationDate?: string }[] = [];
 
-        let continuationToken: string | undefined = undefined;
+        let continuationToken: string | undefined;
         while (true) {
-          const response = await listAmazonS3Buckets(ctx, typedInput.region, typedInput.prefix, undefined, continuationToken);
+          const response = await listAmazonS3Buckets(
+            ctx,
+            typedInput.region,
+            typedInput.prefix,
+            undefined,
+            continuationToken
+          );
           buckets = buckets.concat(response.buckets);
 
           if (!response.isTruncated || !response.nextContinuationToken) {
@@ -82,7 +94,10 @@ export const AmazonS3: ConnectorSpec = {
       isTool: true,
       input: z.object({
         bucket: z.string().min(1).describe('The name of the S3 bucket'),
-        region: z.string().optional().describe('The region of the S3 bucket. If not specified, will attempt to auto-detect.'),
+        region: z
+          .string()
+          .optional()
+          .describe('The region of the S3 bucket. If not specified, will attempt to auto-detect.'),
         prefix: z.string().optional().describe('The prefix to filter objects by'),
         continuationToken: z
           .string()
@@ -93,7 +108,9 @@ export const AmazonS3: ConnectorSpec = {
           .int()
           .positive()
           .optional()
-          .describe('Maximum number of keys to return in a single page. Defaults to 1000. Maximum allowed is 1000.')
+          .describe(
+            'Maximum number of keys to return in a single page. Defaults to 1000. Maximum allowed is 1000.'
+          )
           .default(1000),
       }),
       handler: async (ctx, input) => {
@@ -105,7 +122,14 @@ export const AmazonS3: ConnectorSpec = {
           maxKeys?: number;
         };
 
-        return await listAmazonS3BucketObjects(ctx, typedInput.bucket, typedInput.region, typedInput.prefix, typedInput.maxKeys, typedInput.continuationToken);
+        return await listAmazonS3BucketObjects(
+          ctx,
+          typedInput.bucket,
+          typedInput.region,
+          typedInput.prefix,
+          typedInput.maxKeys,
+          typedInput.continuationToken
+        );
       },
     },
 
@@ -129,7 +153,11 @@ export const AmazonS3: ConnectorSpec = {
           maximumDownloadSizeBytes?: number;
         };
 
-        const metadata = await getAmazonS3BucketObjectMetadata(ctx, typedInput.bucket, typedInput.key);
+        const metadata = await getAmazonS3BucketObjectMetadata(
+          ctx,
+          typedInput.bucket,
+          typedInput.key
+        );
         if (!metadata) {
           throw new Error('Failed to retrieve file metadata');
         }
@@ -137,7 +165,12 @@ export const AmazonS3: ConnectorSpec = {
         const contentType = metadata.contentType || 'application/octet-stream';
         const maxSize = typedInput.maximumDownloadSizeBytes ?? MAX_DOWNLOAD_FILE_SIZE_BYTES;
         if (metadata.contentLength && metadata.contentLength > maxSize) {
-          const urlString = await generateAmazonS3BucketObjectPresignedUrl(ctx, typedInput.bucket, typedInput.key, 300);
+          const urlString = await generateAmazonS3BucketObjectPresignedUrl(
+            ctx,
+            typedInput.bucket,
+            typedInput.key,
+            300
+          );
 
           return {
             bucket: typedInput.bucket,

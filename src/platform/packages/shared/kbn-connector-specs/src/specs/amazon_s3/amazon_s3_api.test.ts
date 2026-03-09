@@ -33,7 +33,7 @@ describe('amazon_s3_api exports', () => {
     jest.clearAllMocks();
   });
 
-  it("should listAmazonS3BucketObjects without any buckets", async () => {
+  it('should listAmazonS3BucketObjects without any buckets', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketsNoBuckets });
 
     const result = await listAmazonS3Buckets(mockContext, 'us-east-1');
@@ -45,41 +45,45 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it("should listAmazonS3BucketObjects with a single bucket", async () => {
+  it('should listAmazonS3BucketObjects with a single bucket', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketsSingleBucket });
 
     const result = await listAmazonS3Buckets(mockContext, 'us-east-1');
     expect(result).toEqual({
-      buckets: [{
-        name: 'test-bucket-name',
-        creationDate: 'ISO_Timestamp',
-      }],
+      buckets: [
+        {
+          name: 'test-bucket-name',
+          creationDate: 'ISO_Timestamp',
+        },
+      ],
       nextContinuationToken: undefined,
       isTruncated: false,
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it("should listAmazonS3BucketObjects with multiple buckets", async () => {
+  it('should listAmazonS3BucketObjects with multiple buckets', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketsMultipleBuckets });
 
     const result = await listAmazonS3Buckets(mockContext, 'us-east-1');
     expect(result).toEqual({
-      buckets: [{
-        name: 'test-bucket-name',
-        creationDate: 'ISO_Timestamp',
-      },
-      {
-        name: 'second-bucket-name',
-        creationDate: 'ISO_Timestamp',
-      }],
-      nextContinuationToken: "continuation-token",
+      buckets: [
+        {
+          name: 'test-bucket-name',
+          creationDate: 'ISO_Timestamp',
+        },
+        {
+          name: 'second-bucket-name',
+          creationDate: 'ISO_Timestamp',
+        },
+      ],
+      nextContinuationToken: 'continuation-token',
       isTruncated: false,
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it("should listAmazonS3BucketObjects with no objects in bucket", async () => {
+  it('should listAmazonS3BucketObjects with no objects in bucket', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketObjectsNoObjects });
     const result = await listAmazonS3BucketObjects(mockContext, 'test-bucket-name', 'us-east-1');
     expect(result).toEqual({
@@ -92,25 +96,27 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it("should listAmazonS3BucketObjects with a single object in bucket", async () => {
+  it('should listAmazonS3BucketObjects with a single object in bucket', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketObjectsSingleObject });
     const result = await listAmazonS3BucketObjects(mockContext, 'test-bucket-name', 'us-east-1');
     expect(result).toEqual({
       bucket: 'test-bucket-name',
       objectCount: 1,
-      objects: [{
-        key: 'test-object-key',
-        size: 12345,
-        lastModified: 'ISO_Timestamp',
-        storageClass: 'STANDARD',
-      }],
+      objects: [
+        {
+          key: 'test-object-key',
+          size: 12345,
+          lastModified: 'ISO_Timestamp',
+          storageClass: 'STANDARD',
+        },
+      ],
       nextContinuationToken: undefined,
       isTruncated: false,
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it("should listAmazonS3BucketObjects with a multiple objects in bucket", async () => {
+  it('should listAmazonS3BucketObjects with a multiple objects in bucket', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketObjectsMultipleObjects });
     const result = await listAmazonS3BucketObjects(mockContext, 'test-bucket-name', 'us-east-1');
     expect(result).toEqual({
@@ -122,23 +128,28 @@ describe('amazon_s3_api exports', () => {
           size: 12345,
           lastModified: 'ISO_Timestamp',
           storageClass: 'STANDARD',
-        }, 
+        },
         {
           key: 'second-object-key',
           size: 555222,
           lastModified: 'ISO_Timestamp',
           storageClass: 'STANDARD',
-        }
+        },
       ],
-      nextContinuationToken: "continuation-token",
+      nextContinuationToken: 'continuation-token',
       isTruncated: true,
     });
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it("should getAmazonS3BucketObjectMetadata", async () => {
+  it('should getAmazonS3BucketObjectMetadata', async () => {
     mockClient.head.mockResolvedValueOnce({ headers: responseGetBucketObjectMetadata });
-    const result = await getAmazonS3BucketObjectMetadata(mockContext, 'test-bucket-name', 'test-object-key', 'us-east-1');
+    const result = await getAmazonS3BucketObjectMetadata(
+      mockContext,
+      'test-bucket-name',
+      'test-object-key',
+      'us-east-1'
+    );
     expect(result).toEqual({
       bucket: 'test-bucket-name',
       key: 'test-object-key',
@@ -160,20 +171,36 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.head).toBeCalledTimes(1);
   });
 
-  // TODO --- 
+  // TODO ---
   it('should generate a Amazon S3 bucket object presigned url', async () => {
     const nodeCrypto = await import('crypto');
     Object.defineProperty(global, 'crypto', {
       value: nodeCrypto,
       writable: true,
     });
-    const result = await generateAmazonS3BucketObjectPresignedUrl(mockContext, 'test-bucket-name', 'test-object-key', 300, 'us-east-1');
-    expect(result).toMatch(/^https:\/\/s3\.amazonaws\.com\/test-object-key\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.+&X-Amz-Date=.+&X-Amz-Expires=300&X-Amz-Signature=.+&X-Amz-SignedHeaders=.+$/);
+    const result = await generateAmazonS3BucketObjectPresignedUrl(
+      mockContext,
+      'test-bucket-name',
+      'test-object-key',
+      300,
+      'us-east-1'
+    );
+    expect(result).toMatch(
+      /^https:\/\/s3\.amazonaws\.com\/test-object-key\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.+&X-Amz-Date=.+&X-Amz-Expires=300&X-Amz-Signature=.+&X-Amz-SignedHeaders=.+$/
+    );
   });
 
-  it("should downloadAmazonS3BucketObject file", async () => {
-    mockClient.get.mockResolvedValueOnce({ headers: responseDownloadBucketObjectHeaders, data: responseDownloadBucketObjectData });
-    const result = await downloadAmazonS3BucketObject(mockContext, 'test-bucket-name', 'test-object-key', 'us-east-1');
+  it('should downloadAmazonS3BucketObject file', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      headers: responseDownloadBucketObjectHeaders,
+      data: responseDownloadBucketObjectData,
+    });
+    const result = await downloadAmazonS3BucketObject(
+      mockContext,
+      'test-bucket-name',
+      'test-object-key',
+      'us-east-1'
+    );
     expect(result).toEqual({
       bucket: 'test-bucket-name',
       key: 'test-object-key',
@@ -187,7 +214,7 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  const responseListBucketsNoBuckets = "<ListAllMyBucketsResult></ListAllMyBucketsResult>";
+  const responseListBucketsNoBuckets = '<ListAllMyBucketsResult></ListAllMyBucketsResult>';
 
   const responseListBucketsSingleBucket = `
   <ListAllMyBucketsResult>
@@ -228,8 +255,9 @@ describe('amazon_s3_api exports', () => {
    <ContinuationToken>continuation-token</ContinuationToken>
    <Prefix></Prefix>
 </ListAllMyBucketsResult>`;
-  
-  const responseListBucketObjectsNoObjects = "<ListBucketResult><KeyCount>0</KeyCount></ListBucketResult>";
+
+  const responseListBucketObjectsNoObjects =
+    '<ListBucketResult><KeyCount>0</KeyCount></ListBucketResult>';
 
   const responseListBucketObjectsSingleObject = `
   <ListBucketResult>
@@ -266,28 +294,28 @@ describe('amazon_s3_api exports', () => {
   </ListBucketResult>`;
 
   const responseGetBucketObjectMetadata = {
-    "accept-ranges": "bytes",
-    "content-length": "12345",
-    "content-type": "application/octet-stream",
-    "last-modified": "ISO_Timestamp",
-    "ETag": "test-etag",
-    "cache-control": "no-cache",
-    "content-disposition": "attachment; filename=\"test-file-name\"",
-    "content-encoding": "gzip",
-    "content-language": "en",
-    "content-range": "bytes 0-12344/12345",
-    "expires": "Wed, 21 Oct 2025 07:28:00 GMT",
-    "server": "AmazonS3",
-    "x-amz-storage-class": "STANDARD",
+    'accept-ranges': 'bytes',
+    'content-length': '12345',
+    'content-type': 'application/octet-stream',
+    'last-modified': 'ISO_Timestamp',
+    ETag: 'test-etag',
+    'cache-control': 'no-cache',
+    'content-disposition': 'attachment; filename="test-file-name"',
+    'content-encoding': 'gzip',
+    'content-language': 'en',
+    'content-range': 'bytes 0-12344/12345',
+    expires: 'Wed, 21 Oct 2025 07:28:00 GMT',
+    server: 'AmazonS3',
+    'x-amz-storage-class': 'STANDARD',
   };
 
   const responseDownloadBucketObjectHeaders = {
-    "content-length": "12345",
-    "content-type": "application/octet-stream",
-    "last-modified": "ISO_Timestamp",
-    "ETag": "test-etag",
-    "expires": "Wed, 21 Oct 2025 07:28:00 GMT",
-  }
+    'content-length': '12345',
+    'content-type': 'application/octet-stream',
+    'last-modified': 'ISO_Timestamp',
+    ETag: 'test-etag',
+    expires: 'Wed, 21 Oct 2025 07:28:00 GMT',
+  };
   const responseDownloadBucketObjectData = Uint8Array.from([0x01, 0x10, 0x02, 0x20]);
-  const responseDownloadBucketObjectDataBase64 = "ARACIA==";
+  const responseDownloadBucketObjectDataBase64 = 'ARACIA==';
 });

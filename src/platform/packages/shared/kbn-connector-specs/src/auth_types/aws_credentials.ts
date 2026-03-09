@@ -23,7 +23,9 @@ const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4959
  * Parse an AWS hostname into service and region.
  * Supports: {service}.{region}.amazonaws.com
  */
-function parseAwsHost(hostname: string): { service: string; region: string, itemName?: string } | null {
+function parseAwsHost(
+  hostname: string
+): { service: string; region: string; itemName?: string } | null {
   if (!hostname.endsWith('.amazonaws.com')) {
     return null;
   }
