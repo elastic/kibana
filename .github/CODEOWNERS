@@ -1689,6 +1689,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/functional/config.firefox.ts @elastic/obs-exploration-team
+/x-pack/solutions/observability/test/functional/config.firefox.2.ts @elastic/obs-exploration-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-exploration-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_analysis @elastic/obs-exploration-team
 /x-pack/solutions/observability/plugins/infra/common/log_analysis @elastic/obs-exploration-team
