@@ -562,7 +562,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.orchestrator.organization = LAST(TO_STRING(orchestrator.organization), @timestamp) WHERE orchestrator.organization IS NOT NULL,
  recent.orchestrator.resource.annotation = LAST(TO_STRING(orchestrator.resource.annotation), @timestamp) WHERE orchestrator.resource.annotation IS NOT NULL,
  recent.orchestrator.resource.id = LAST(TO_STRING(orchestrator.resource.id), @timestamp) WHERE orchestrator.resource.id IS NOT NULL,
- recent.orchestrator.resource.ip = LAST(TO_STRING(orchestrator.resource.ip), @timestamp) WHERE orchestrator.resource.ip IS NOT NULL,
+ recent.orchestrator.resource.ip = LAST(TO_IP(orchestrator.resource.ip), @timestamp) WHERE orchestrator.resource.ip IS NOT NULL,
  recent.orchestrator.resource.label = LAST(TO_STRING(orchestrator.resource.label), @timestamp) WHERE orchestrator.resource.label IS NOT NULL,
  recent.orchestrator.resource.name = LAST(TO_STRING(orchestrator.resource.name), @timestamp) WHERE orchestrator.resource.name IS NOT NULL,
  recent.orchestrator.resource.parent.type = LAST(TO_STRING(orchestrator.resource.parent.type), @timestamp) WHERE orchestrator.resource.parent.type IS NOT NULL,
