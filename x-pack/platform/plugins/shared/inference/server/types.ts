@@ -161,9 +161,7 @@ export interface InferenceServerStart {
    * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
    * @returns A promise that resolves to an array of inference endpoints
    */
-  getInferenceEndpoints: (
-    taskType?: InferenceTaskType
-  ) => Promise<InferenceEndpoint[]>;
+  getInferenceEndpoints: (taskType?: InferenceTaskType) => Promise<InferenceEndpoint[]>;
 
   /**
    * Retrieves a specific Elasticsearch inference endpoint by its ID.

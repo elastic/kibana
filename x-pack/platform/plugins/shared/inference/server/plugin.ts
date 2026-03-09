@@ -16,6 +16,7 @@ import type {
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
@@ -35,7 +36,6 @@ import { getConnectorById } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
