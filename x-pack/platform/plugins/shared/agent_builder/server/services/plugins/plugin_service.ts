@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest, Logger, ElasticsearchServiceStart } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import type { ParsedPluginArchive, ParsedSkillFile } from '@kbn/agent-builder-common';
 import type { PersistedSkillCreateRequest } from '@kbn/agent-builder-common';
@@ -15,7 +14,7 @@ import { getCurrentSpaceId } from '../../utils/spaces';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 import { createClient, parsedArchiveToCreateRequest } from './client';
 import { parsePluginFromUrl, parsePluginFromFile } from './utils';
-import type { SkillClient } from '../skills/persisted/client';
+import { createClient as createSkillClient } from '../skills/persisted/client';
 
 type InstallPluginSource = { type: 'url'; url: string } | { type: 'file'; filePath: string };
 
@@ -40,10 +39,6 @@ export interface PluginsServiceStartDeps {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
-  createScopedSkillClient: (options: {
-    esClient: ElasticsearchClient;
-    space: string;
-  }) => SkillClient;
 }
 
 export const createPluginsService = (): PluginsService => {
@@ -74,17 +69,14 @@ class PluginsServiceImpl implements PluginsService {
     return this.startDeps;
   }
 
-  private getScopedClients({ request }: { request: KibanaRequest }): {
-    pluginClient: PluginClient;
-    skillClient: SkillClient;
-  } {
-    const { elasticsearch, logger, spaces, createScopedSkillClient } = this.getStartDeps();
+  private getScopedClients({ request }: { request: KibanaRequest }) {
+    const { elasticsearch, logger, spaces } = this.getStartDeps();
     const esClient = elasticsearch.client.asScoped(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces });
 
     return {
       pluginClient: createClient({ esClient, logger, space }),
-      skillClient: createScopedSkillClient({ esClient, space }),
+      skillClient: createSkillClient({ esClient, logger, space }),
     };
   }
 

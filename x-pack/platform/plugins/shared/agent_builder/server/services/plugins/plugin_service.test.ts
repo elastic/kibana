@@ -25,6 +25,11 @@ jest.mock('./client', () => ({
   createClient: (...args: unknown[]) => mockCreateClient(...args),
 }));
 
+const mockCreateSkillClient = jest.fn();
+jest.mock('../skills/persisted/client', () => ({
+  createClient: (...args: unknown[]) => mockCreateSkillClient(...args),
+}));
+
 jest.mock('../../utils/spaces', () => ({
   getCurrentSpaceId: jest.fn(() => 'default'),
 }));
@@ -113,6 +118,7 @@ describe('PluginsService', () => {
     };
 
     mockCreateClient.mockReturnValue(mockClient);
+    mockCreateSkillClient.mockReturnValue(mockSkillClient);
 
     const mockElasticsearch = {
       client: {
@@ -127,7 +133,6 @@ describe('PluginsService', () => {
     start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
-      createScopedSkillClient: () => mockSkillClient,
     });
   });
 
