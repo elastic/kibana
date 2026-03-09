@@ -25,6 +25,10 @@ jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
   },
 }));
 
+jest.mock('uuid', () => ({
+  v4: jest.fn().mockReturnValueOnce('generated-id'),
+}));
+
 describe('resolveLinkInfo', () => {
   it('resolves a dashboard link with no label', async () => {
     const link: Link = {
@@ -84,7 +88,7 @@ describe('resolveLinks', () => {
       },
     ];
     const resolvedLinks = await resolveLinks(links);
-    expect(resolvedLinks[0].id).toBeDefined();
+    expect(resolvedLinks[0].id).toEqual('generated-id');
     expect(resolvedLinks[1].id).toEqual('2');
   });
 });
