@@ -181,7 +181,8 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
           abortController: abortController.current,
           batchId,
           checkAllStartTime: startTime,
-          formatBytes,
+          formatBytes: (value: number | undefined) =>
+            value !== undefined ? formatBytes(value) : '-',
           formatNumber: (value: number | undefined) =>
             value !== undefined ? formatNumber(value) : '-',
           httpFetch: http.fetch,
@@ -200,16 +201,18 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
                 sizeInBytes: 0,
               });
 
-              // Create and track the save promise
-              const savePromise = http
-                .fetch(SAVE_INDEX_RESULTS_ENDPOINT, {
-                  method: 'POST',
-                  version: INTERNAL_API_VERSION,
-                  body: JSON.stringify(storageResult),
-                })
-                .catch(() => {
+              // Create and track the save promise using async/await
+              const savePromise = (async () => {
+                try {
+                  await http.fetch(SAVE_INDEX_RESULTS_ENDPOINT, {
+                    method: 'POST',
+                    version: INTERNAL_API_VERSION,
+                    body: JSON.stringify(storageResult),
+                  });
+                } catch {
                   // Silently fail - we don't want to stop the checks
-                });
+                }
+              })();
 
               currentSavePromise = savePromise;
 
