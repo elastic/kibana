@@ -255,7 +255,7 @@
           "string[]"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-as-data-utils/src/search/security/fields.ts",
-        "lineNumber": 47,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
