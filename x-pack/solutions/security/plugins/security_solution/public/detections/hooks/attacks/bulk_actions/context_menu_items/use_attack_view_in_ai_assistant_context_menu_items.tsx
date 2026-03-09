@@ -12,32 +12,38 @@ import {
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
+
 import { useReportAddToChat } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
 import { useAttackDiscoveryAttachment } from '../../../../../attack_discovery/pages/results/use_attack_discovery_attachment';
 import * as i18n from '../../../../../attack_discovery/pages/results/take_action/translations';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 
 export interface UseAttackViewInAiAssistantContextMenuItemsProps {
-  /**
-   * The attack discovery object
-   */
+  /** The attack discovery object */
   attack: AttackDiscoveryAlert;
-  /**
-   * Optional callback to close the containing popover menu
-   */
+  /** Optional callback to close the containing popover menu */
   closePopover?: () => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 export const useAttackViewInAiAssistantContextMenuItems = ({
   attack,
   closePopover,
+  telemetrySource,
 }: UseAttackViewInAiAssistantContextMenuItemsProps): {
   items: EuiContextMenuPanelItemDescriptorEntry[];
 } => {
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const { registerPromptContext, showAssistantOverlay, unRegisterPromptContext } =
     useAssistantContext();
+  const {
+    services: { telemetry },
+  } = useKibana();
 
   const promptContextId = attack.id ?? null;
   const viewInAiAssistantDisabled = !hasAssistantPrivilege || promptContextId == null;
@@ -49,6 +55,10 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
 
     const lastFive = attack.id ? ` - ${attack.id.slice(-5)}` : '';
     const conversationTitle = `${attack.title ?? ''}${lastFive}`;
+
+    if (telemetrySource) {
+      telemetry.reportEvent(AttacksEventTypes.AIAssistantOpened, { source: telemetrySource });
+    }
 
     unRegisterPromptContext(promptContextId);
     registerPromptContext({
@@ -75,6 +85,8 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
     registerPromptContext,
     showAssistantOverlay,
     unRegisterPromptContext,
+    telemetrySource,
+    telemetry,
   ]);
 
   const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
@@ -87,6 +99,7 @@ export const useAttackViewInAiAssistantContextMenuItems = ({
       pathway: 'attacks_page_group_take_action',
       attachments: ['alert'],
     });
+
     openAgentBuilderFlyout();
   }, [openAgentBuilderFlyout, reportAddToChatClick]);
 
