@@ -13,6 +13,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+
+import type { SearchInferenceEndpointsConfig } from './config';
+import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import type {
   SearchInferenceEndpointsPluginSetup,
@@ -32,9 +35,12 @@ export class SearchInferenceEndpointsPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly config: SearchInferenceEndpointsConfig;
+  private dynamicConnectorsPoller?: DynamicConnectorsPoller;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
   }
 
   public setup(
@@ -88,9 +94,26 @@ export class SearchInferenceEndpointsPlugin
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
+    if (this.config.dynamicConnectors.enabled) {
+      this.logger.debug(
+        `dynamic connectors enabled: ${this.config.dynamicConnectors.enabled} - polling ${this.config.dynamicConnectors.pollingIntervalMins} mins`
+      );
+      this.dynamicConnectorsPoller = new DynamicConnectorsPoller(
+        this.logger,
+        plugins.actions,
+        core.elasticsearch.client.asInternalUser,
+        this.config.dynamicConnectors.pollingIntervalMins
+      );
+      this.dynamicConnectorsPoller.start();
+    }
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.dynamicConnectorsPoller) {
+      this.dynamicConnectorsPoller.stop();
+    }
+  }
 }

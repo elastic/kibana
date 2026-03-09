@@ -12,15 +12,14 @@ import type {
   EntityStoreCoreSetup,
   EntityStoreRequestHandlerContext,
 } from './types';
-import { AssetManager } from './domain/asset_manager';
+import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
 import { FeatureFlags } from './infra/feature_flags';
-import {
-  EngineDescriptorClient,
-  EntityStoreGlobalStateClient,
-} from './domain/definitions/saved_objects';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
-import { CRUDClient } from './domain/crud_client';
+import { HistorySnapshotClient } from './domain/history_snapshot';
+import { CRUDClient } from './domain/crud';
+import { ResolutionClient } from './domain/resolution';
 import type { TelemetryReporter } from './telemetry/events';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -80,10 +79,17 @@ export async function createRequestHandlerContext({
     ccsLogsExtractionClient,
   });
 
+  const historySnapshotClient = new HistorySnapshotClient({
+    logger,
+    esClient,
+    namespace,
+    globalStateClient,
+  });
+
   return {
     core,
     logger,
-    assetManager: new AssetManager({
+    assetManagerClient: new AssetManagerClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
       taskManager: taskManagerStart,
@@ -94,6 +100,7 @@ export async function createRequestHandlerContext({
       logsExtractionClient,
       security: startPlugins.security,
       analytics,
+      savedObjectsClient: core.savedObjects.client,
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,
@@ -101,9 +108,15 @@ export async function createRequestHandlerContext({
       namespace,
     }),
     crudClient,
+    resolutionClient: new ResolutionClient({
+      logger,
+      esClient: core.elasticsearch.client.asCurrentUser,
+      namespace,
+    }),
     ccsLogsExtractionClient,
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,
+    historySnapshotClient,
     security: startPlugins.security,
     namespace,
   };

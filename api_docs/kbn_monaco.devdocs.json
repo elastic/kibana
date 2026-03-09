@@ -1481,12 +1481,13 @@
           {
             "parentPluginId": "@kbn/monaco",
             "id": "def-common.Language.brackets",
-            "type": "Any",
+            "type": "Array",
             "tags": [],
             "label": "brackets",
             "description": [],
             "signature": [
-              "any"
+              "languages",
+              ".IMonarchLanguageBracket[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/painless/lexer_rules/painless.ts",
             "lineNumber": 14,
