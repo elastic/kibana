@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { CRUDClient } from '../../domain/crud';
 
 export const EntityMaintainerTaskStatus = {
   NEVER_STARTED: 'never_started',
@@ -19,7 +20,6 @@ export type EntityMaintainerTaskStatus =
 
 export interface EntityMaintainerRegistryData {
   interval: string;
-  taskStatus: EntityMaintainerTaskStatus;
   description?: string;
 }
 
@@ -43,6 +43,7 @@ export interface EntityMaintainerState {
 export interface EntityMaintainerStatus extends Record<string, unknown> {
   metadata: EntityMaintainerStatusMetadata;
   state: EntityMaintainerState;
+  taskStatus: EntityMaintainerTaskStatus;
 }
 
 interface EntityMaintainerTaskMethodContext {
@@ -51,6 +52,7 @@ interface EntityMaintainerTaskMethodContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
+  crudClient: CRUDClient;
 }
 
 export type EntityMaintainerTaskMethod = (
