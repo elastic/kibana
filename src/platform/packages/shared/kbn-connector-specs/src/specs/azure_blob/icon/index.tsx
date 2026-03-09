@@ -8,25 +8,10 @@
  */
 
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
+import azureStorageIcon from './azure_storage.svg';
 
-// Azure Blob Storage–style icon (cloud and container)
-export default (props: ConnectorIconProps) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="32"
-    height="32"
-    viewBox="0 0 32 32"
-    fill="none"
-    {...props}
-  >
-    <path
-      fill="#0078D4"
-      d="M16 4C9.4 4 4 9.4 4 16s5.4 12 12 12 12-5.4 12-12S22.6 4 16 4zm0 21c-5 0-9-4-9-9s4-9 9-9 9 4 9 9-4 9-9 9z"
-    />
-    <path
-      fill="#0078D4"
-      d="M16 10c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6zm0 10c-2.2 0-4-1.8-4-4s1.8-4 4-4 4 1.8 4 4-1.8 4-4 4z"
-    />
-  </svg>
-);
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={azureStorageIcon} {...props} />;
+};
