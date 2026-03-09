@@ -9,12 +9,28 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core/public';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 import { getOriginatingAppBreadcrumbs } from '@kbn/breadcrumbs-utils';
 
 const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
 });
+
+const getVisualizeLibraryCrumbs = (originatingAppName?: string) => {
+  if (originatingAppName) {
+    return [];
+  }
+
+  return [
+    {
+      text: i18n.translate('visualizations.listing.breadcrumb', {
+        defaultMessage: 'Visualize library',
+      }),
+      href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
+    },
+  ];
+};
 
 export function getCreateBreadcrumbs({
   originatingApp,
@@ -52,6 +68,7 @@ export function getCreateBreadcrumbs({
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...getVisualizeLibraryCrumbs(originatingAppName),
     {
       text: i18n.translate('visualizations.editor.createBreadcrumb', {
         defaultMessage: 'Create',
@@ -114,6 +131,7 @@ export function getEditBreadcrumbs(
   }
   return [
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
+    ...getVisualizeLibraryCrumbs(originatingAppName),
     {
       text: title,
     },

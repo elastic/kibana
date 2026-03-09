@@ -91,15 +91,21 @@ export function setBreadcrumbsTitle(
   const breadcrumbs: EuiBreadcrumb[] = [];
 
   if (breadcrumbTitle && originatingApp && originatingPath) {
-    breadcrumbs.push(
-      ...getOriginatingAppBreadcrumbs({
-        originatingApp,
-        originatingPath,
-        breadcrumbTitle,
-        originatingAppName,
-        navigateToApp: application.navigateToApp,
-      })
-    );
+    const originatingAppBreadcrumbs = getOriginatingAppBreadcrumbs({
+      originatingApp,
+      originatingPath,
+      breadcrumbTitle,
+      originatingAppName,
+      navigateToApp: application.navigateToApp,
+    });
+    if (
+      originatingAppBreadcrumbs.length === 2 &&
+      originatingAppBreadcrumbs[0]?.text === originatingAppBreadcrumbs[1]?.text
+    ) {
+      breadcrumbs.push(originatingAppBreadcrumbs[0]);
+    } else {
+      breadcrumbs.push(...originatingAppBreadcrumbs);
+    }
   } else if ((isFromLegacyEditor || originatingAppName) && originatingAppName && redirectToOrigin) {
     breadcrumbs.push({
       onClick: () => {

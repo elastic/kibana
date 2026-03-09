@@ -75,7 +75,8 @@ type CustomTableViewProps = Pick<
 
 const useTableListViewProps = (
   closeNewVisModal: MutableRefObject<() => void>,
-  listingLimit: number
+  listingLimit: number,
+  breadcrumbTitle: string
 ): CustomTableViewProps => {
   const {
     services: {
@@ -94,8 +95,12 @@ const useTableListViewProps = (
   const visualizedUserContent = useRef<VisualizeUserContent[]>();
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = showNewVisModal();
-  }, [closeNewVisModal]);
+    closeNewVisModal.current = showNewVisModal({
+      originatingApp: VisualizeConstants.APP_ID,
+      originatingPath: window.location.hash,
+      breadcrumbTitle,
+    });
+  }, [closeNewVisModal, breadcrumbTitle]);
 
   const editItem = useCallback(
     async ({ attributes: { id }, editor = { editUrl: '' } }: VisualizeUserContent) => {
@@ -344,7 +349,17 @@ export const VisualizeListing = () => {
   const listingLimit = uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
-  const tableViewProps = useTableListViewProps(closeNewVisModal, listingLimit);
+  const visualizeLibraryBreadcrumbTitle = i18n.translate(
+    'visualizations.listing.breadcrumbsTitle',
+    {
+      defaultMessage: 'Visualize library',
+    }
+  );
+  const tableViewProps = useTableListViewProps(
+    closeNewVisModal,
+    listingLimit,
+    visualizeLibraryBreadcrumbTitle
+  );
 
   const visualizeLibraryTitle = i18n.translate('visualizations.listing.table.listTitle', {
     defaultMessage: 'Visualize library',
