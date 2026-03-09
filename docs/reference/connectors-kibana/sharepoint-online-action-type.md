@@ -2,8 +2,6 @@
 navigation_title: "SharePoint Online"
 type: reference
 description: "Use the SharePoint Online connector to search across SharePoint sites, pages, drives, and lists using the Microsoft Graph API."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/sharepoint-online-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview

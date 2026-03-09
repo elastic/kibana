@@ -7,10 +7,13 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+
 import { useAddToExistingCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_existing_case';
 import { useAddToNewCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
 import { APP_ID } from '../../../../../../common';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
@@ -23,6 +26,8 @@ export interface UseBulkAttackCaseItemsProps {
   onCasesAdd?: () => void;
   /** Optional callback to close the popover after triggering action */
   closePopover?: () => void;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -32,9 +37,10 @@ export const useBulkAttackCaseItems = ({
   title,
   onCasesAdd,
   closePopover,
+  telemetrySource,
 }: UseBulkAttackCaseItemsProps): BulkAttackActionItems => {
   const {
-    services: { cases },
+    services: { cases, telemetry },
   } = useKibana();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
@@ -69,10 +75,17 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
+          source: telemetrySource,
+          action: 'add_to_new_case',
+        });
+      }
+
       onAddToNewCase({ alertIds, markdownComments });
       closePopover?.();
     },
-    [closePopover, onAddToNewCase]
+    [closePopover, onAddToNewCase, telemetrySource, telemetry]
   );
 
   const onAddToExistingCaseClick = useCallback<Required<BulkActionsConfig>['onClick']>(
@@ -90,10 +103,17 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
+      if (telemetrySource) {
+        telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
+          source: telemetrySource,
+          action: 'add_to_existing_case',
+        });
+      }
+
       onAddToExistingCase({ alertIds, markdownComments });
       closePopover?.();
     },
-    [closePopover, onAddToExistingCase]
+    [closePopover, onAddToExistingCase, telemetrySource, telemetry]
   );
 
   const items = useMemo<BulkActionsConfig[]>(
