@@ -21,6 +21,12 @@ export interface PendingProposal extends ProposedChange {
   originalContent: string;
   viewZoneId: string;
   decorationIds: string[];
+  /** Line where the undo range ends (inclusive for replace/delete, exclusive col-1 for insert) */
+  undoEndLine: number;
+  /** Column where the undo range ends */
+  undoEndColumn: number;
+  /** How many lines the new content occupies in the model (0 for delete) */
+  newContentLineCount: number;
 }
 
 export interface ProposalManagerOptions {
@@ -32,8 +38,6 @@ export class ProposalManager {
   private proposals = new Map<string, PendingProposal>();
   private editor: monaco.editor.IStandaloneCodeEditor | null = null;
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
-  private undoTimers = new Map<string, ReturnType<typeof setTimeout>>();
-  private undoListeners = new Map<string, monaco.IDisposable>();
   private decorationCollections = new Map<string, monaco.editor.IEditorDecorationsCollection>();
   private options: ProposalManagerOptions = {};
 
@@ -67,14 +71,57 @@ export class ProposalManager {
   proposeChange(change: ProposedChange): void {
     if (!this.editor) return;
 
+    const model = this.editor.getModel();
+    if (!model) return;
+
     const originalContent = this.getOriginalContent(change);
-    const { viewZoneId, decorationIds } = this.showProposalUI(change);
+
+    const endLine = change.endLine ?? change.startLine;
+    const endColumn = change.endLine ? model.getLineMaxColumn(endLine) : 1;
+    const lineCountBefore = model.getLineCount();
+
+    this.editor.pushUndoStop();
+    model.pushEditOperations(
+      null,
+      [
+        {
+          range: new monaco.Range(change.startLine, 1, endLine, endColumn),
+          text: change.newText,
+        },
+      ],
+      () => null
+    );
+    this.editor.pushUndoStop();
+
+    const linesDelta = model.getLineCount() - lineCountBefore;
+    const origLineSpan = change.type === 'insert' ? 0 : endLine - change.startLine + 1;
+    const newContentLineCount = origLineSpan + linesDelta;
+
+    let undoEndLine: number;
+    let undoEndColumn: number;
+
+    if (change.type === 'insert') {
+      undoEndLine = change.startLine + linesDelta;
+      undoEndColumn = 1;
+    } else {
+      undoEndLine = change.startLine + Math.max(newContentLineCount - 1, 0);
+      undoEndColumn = model.getLineMaxColumn(undoEndLine);
+    }
+
+    const { viewZoneId, decorationIds } = this.showProposalUI(
+      change,
+      originalContent,
+      newContentLineCount
+    );
 
     this.proposals.set(change.proposalId, {
       ...change,
       originalContent,
       viewZoneId,
       decorationIds,
+      undoEndLine,
+      undoEndColumn,
+      newContentLineCount,
     });
 
     this.editor.revealLineInCenter(change.startLine);
@@ -84,34 +131,34 @@ export class ProposalManager {
     const proposal = this.proposals.get(proposalId);
     if (!proposal || !this.editor) return;
 
+    this.clearProposal(proposalId);
+    this.options.onAccept?.(proposalId);
+  }
+
+  rejectProposal(proposalId: string): void {
+    const proposal = this.proposals.get(proposalId);
+    if (!proposal || !this.editor) return;
+
     const model = this.editor.getModel();
     if (!model) return;
-
-    const contentBefore = this.getOriginalContent(proposal);
-
-    const endLine = proposal.endLine ?? proposal.startLine;
-    const endColumn = proposal.endLine ? model.getLineMaxColumn(endLine) : 1;
 
     this.editor.pushUndoStop();
     model.pushEditOperations(
       null,
       [
         {
-          range: new monaco.Range(proposal.startLine, 1, endLine, endColumn),
-          text: proposal.newText,
+          range: new monaco.Range(
+            proposal.startLine,
+            1,
+            proposal.undoEndLine,
+            proposal.undoEndColumn
+          ),
+          text: proposal.originalContent,
         },
       ],
       () => null
     );
     this.editor.pushUndoStop();
-
-    this.clearProposal(proposalId);
-    this.options.onAccept?.(proposalId);
-    this.setupUndoDetection(proposalId, contentBefore, proposal);
-  }
-
-  rejectProposal(proposalId: string): void {
-    if (!this.proposals.has(proposalId)) return;
 
     this.clearProposal(proposalId);
     this.options.onReject?.(proposalId);
@@ -148,16 +195,6 @@ export class ProposalManager {
         domNode.removeEventListener('keydown', this.keydownHandler, true);
       }
     }
-
-    for (const timer of this.undoTimers.values()) {
-      clearTimeout(timer);
-    }
-    this.undoTimers.clear();
-
-    for (const listener of this.undoListeners.values()) {
-      listener.dispose();
-    }
-    this.undoListeners.clear();
 
     for (const collection of this.decorationCollections.values()) {
       collection.clear();
@@ -197,40 +234,48 @@ export class ProposalManager {
     return model.getValueInRange(new monaco.Range(change.startLine, 1, endLine, endColumn));
   }
 
-  private showProposalUI(change: ProposedChange): {
+  private showProposalUI(
+    change: ProposedChange,
+    originalContent: string,
+    newContentLineCount: number
+  ): {
     viewZoneId: string;
     decorationIds: string[];
   } {
     const editor = this.editor;
+    if (!editor) return { viewZoneId: '', decorationIds: [] };
+
     const wrapper = document.createElement('div');
     wrapper.className = 'wfDiffWrapper';
 
     const container = document.createElement('div');
     container.className = 'wfDiffContainer';
 
-    if (editor) {
-      const fontInfo = editor.getOption(monaco.editor.EditorOption.fontInfo);
-      container.style.fontFamily = fontInfo.fontFamily;
-      container.style.fontSize = `${fontInfo.fontSize}px`;
-      container.style.lineHeight = `${fontInfo.lineHeight}px`;
-      container.style.letterSpacing = `${fontInfo.letterSpacing}px`;
-      container.style.fontWeight = fontInfo.fontWeight;
-    }
+    const fontInfo = editor.getOption(monaco.editor.EditorOption.fontInfo);
+    const { contentLeft } = editor.getLayoutInfo();
+    container.style.fontFamily = fontInfo.fontFamily;
+    container.style.fontSize = `${fontInfo.fontSize}px`;
+    container.style.lineHeight = `${fontInfo.lineHeight}px`;
+    container.style.letterSpacing = `${fontInfo.letterSpacing}px`;
+    container.style.fontWeight = fontInfo.fontWeight;
+    container.style.paddingLeft = `${contentLeft}px`;
 
     wrapper.appendChild(container);
 
-    const lines = change.newText ? change.newText.split('\n') : [];
+    const originalLines = originalContent ? originalContent.split('\n') : [];
+    const hasOriginalContent =
+      change.type !== 'insert' && originalLines.length > 0 && originalContent !== '';
 
-    if (lines.length > 0) {
+    if (hasOriginalContent) {
       const codeContainer = document.createElement('div');
       codeContainer.className = 'wfDiffCodeContainer';
       container.appendChild(codeContainer);
 
-      const editorModel = editor?.getModel();
+      const editorModel = editor.getModel();
       const languageId = editorModel?.getLanguageId() ?? 'yaml';
-      const tempModel = monaco.editor.createModel(change.newText, languageId);
+      const tempModel = monaco.editor.createModel(originalContent, languageId);
 
-      lines.forEach((_, index) => {
+      originalLines.forEach((_, index) => {
         const lineDiv = document.createElement('div');
         lineDiv.className = 'wfDiffLine';
 
@@ -286,11 +331,8 @@ export class ProposalManager {
 
     wrapper.appendChild(pill);
 
-    const afterLineNumber =
-      change.type === 'insert' ? change.startLine - 1 : change.endLine ?? change.startLine;
-    const heightInLines = Math.max(lines.length, 1);
-
-    if (!editor) return { viewZoneId: '', decorationIds: [] };
+    const afterLineNumber = change.startLine - 1;
+    const heightInLines = hasOriginalContent ? Math.max(originalLines.length + 1, 2) : 2;
 
     let viewZoneId = '';
     editor.changeViewZones((accessor) => {
@@ -303,16 +345,16 @@ export class ProposalManager {
     });
 
     const decorationIds: string[] = [];
-    if (change.type === 'replace' || change.type === 'delete') {
-      const endLine = change.endLine ?? change.startLine;
+    if (newContentLineCount > 0 && change.type !== 'delete') {
       const newDecorations: monaco.editor.IModelDeltaDecoration[] = [];
-      for (let line = change.startLine; line <= endLine; line++) {
+      const decoEndLine = change.startLine + newContentLineCount - 1;
+      for (let line = change.startLine; line <= decoEndLine; line++) {
         newDecorations.push({
           range: new monaco.Range(line, 1, line, 1),
           options: {
             isWholeLine: true,
-            className: 'wfDiffLineDeleteBg',
-            glyphMarginClassName: 'wfDiffGlyphDelete',
+            className: 'wfDiffLineAddBg',
+            glyphMarginClassName: 'wfDiffGlyphAdd',
           },
         });
       }
@@ -322,42 +364,6 @@ export class ProposalManager {
     }
 
     return { viewZoneId, decorationIds };
-  }
-
-  private setupUndoDetection(
-    proposalId: string,
-    contentBefore: string,
-    change: ProposedChange
-  ): void {
-    const model = this.editor?.getModel();
-    if (!model) return;
-
-    const timer = setTimeout(() => {
-      this.undoListeners.get(proposalId)?.dispose();
-      this.undoListeners.delete(proposalId);
-      this.undoTimers.delete(proposalId);
-    }, 10_000);
-
-    this.undoTimers.set(proposalId, timer);
-
-    const listener = model.onDidChangeContent(() => {
-      const endLine = change.endLine ?? change.startLine;
-      const currentEndLine = Math.min(endLine, model.getLineCount());
-      const endColumn = model.getLineMaxColumn(currentEndLine);
-      const currentContent = model.getValueInRange(
-        new monaco.Range(change.startLine, 1, currentEndLine, endColumn)
-      );
-
-      if (currentContent === contentBefore) {
-        listener.dispose();
-        this.undoListeners.delete(proposalId);
-        clearTimeout(timer);
-        this.undoTimers.delete(proposalId);
-        this.proposeChange(change);
-      }
-    });
-
-    this.undoListeners.set(proposalId, listener);
   }
 
   private clearProposal(proposalId: string): void {
@@ -373,18 +379,6 @@ export class ProposalManager {
     this.editor.changeViewZones((accessor) => {
       accessor.removeZone(proposal.viewZoneId);
     });
-
-    const timer = this.undoTimers.get(proposalId);
-    if (timer) {
-      clearTimeout(timer);
-      this.undoTimers.delete(proposalId);
-    }
-
-    const listener = this.undoListeners.get(proposalId);
-    if (listener) {
-      listener.dispose();
-      this.undoListeners.delete(proposalId);
-    }
 
     this.proposals.delete(proposalId);
   }
