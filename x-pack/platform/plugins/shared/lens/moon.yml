@@ -148,6 +148,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/cps-utils'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/data-view-utils'
 tags:
   - plugin
   - prod
