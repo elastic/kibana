@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
+import type { EvaluationCriterion, Evaluator, Example, TaskOutput } from '@kbn/evals';
 
-export interface CreateScenarioCriteriaLlmEvaluatorOptions {
-  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
+export interface CreateScenarioCriteriaLlmEvaluatorOptions<
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+> {
+  criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator<TExample, TTaskOutput>;
   criteria: EvaluationCriterion[];
-  transformOutput?: (output: unknown) => unknown;
+  transformOutput?: (output: TTaskOutput) => TTaskOutput;
   name?: string;
 }
 
@@ -26,12 +29,18 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions {
  *  sent to the criteria evaluator. Use this when the evaluator
  *  output wraps the relevant data (e.g. `{ features: [...] }`).
  */
-export const createScenarioCriteriaLlmEvaluator = ({
+export const createScenarioCriteriaLlmEvaluator = <
+  TExample extends Example = Example,
+  TTaskOutput extends TaskOutput = TaskOutput
+>({
   name = 'scenario_criteria',
   criteria = [],
   criteriaFn,
   transformOutput,
-}: CreateScenarioCriteriaLlmEvaluatorOptions): Evaluator => ({
+}: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TTaskOutput>): Evaluator<
+  TExample,
+  TTaskOutput
+> => ({
   name,
   kind: 'LLM' as const,
   evaluate: async (params) => {
