@@ -241,7 +241,11 @@ describe('group selector', () => {
         },
       };
       // @ts-expect-error Mocking partial ES aggregation shape
-      const result = parseGroupingQuery('source.ip', mocktestProps1.uniqueValue, filteredAggs) as GroupingAggregation<{}>;
+      const result = parseGroupingQuery(
+        'source.ip',
+        mocktestProps1.uniqueValue,
+        filteredAggs
+      ) as GroupingAggregation<{}>;
       expect(result.unitsCount).toEqual({ value: 42 });
     });
 
