@@ -3,20 +3,16 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
-  "exclude": [
-    "target/**/*"
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/features-plugin",
     "@kbn/kibana-react-plugin",
+    "@kbn/storage-adapter",
+    "@kbn/es-errors",
     "@kbn/evals-common",
     "@kbn/i18n",
     "@kbn/react-kibana-context-render",
@@ -24,6 +20,7 @@
     "@kbn/shared-ux-router",
     "@kbn/i18n-react",
     "@kbn/core-logging-server-mocks",
-    "@kbn/core-http-router-server-mocks"
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/code-editor"
   ]
 }
