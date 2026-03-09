@@ -74,8 +74,8 @@ describe('useAttackDetails', () => {
       useAttackDetails({ attackId: 'attack-1', indexName: '.alerts-default' })
     );
 
-    expect(result.current.attackDiscovery).not.toBeNull();
-    expect(result.current.attackDiscovery?.title).toBe('Test');
+    expect(result.current.attack).not.toBeNull();
+    expect(result.current.attack?.title).toBe('Test');
     expect(mockTransformDocumentToApi).toHaveBeenCalled();
     expect(mockTransformFromApi).toHaveBeenCalled();
   });
@@ -87,11 +87,11 @@ describe('useAttackDetails', () => {
       useAttackDetails({ attackId: 'attack-1', indexName: '.alerts-default' })
     );
 
-    expect(result.current.attackDiscovery).toBeNull();
+    expect(result.current.attack).toBeNull();
     expect(mockTransformDocumentToApi).not.toHaveBeenCalled();
   });
 
-  it('returns null attackDiscovery when searchHit._source is undefined', () => {
+  it('returns null attack when searchHit._source is undefined', () => {
     useTimelineEventsDetails.mockReturnValue([
       false,
       [],
@@ -104,11 +104,11 @@ describe('useAttackDetails', () => {
       useAttackDetails({ attackId: 'attack-1', indexName: '.alerts-default' })
     );
 
-    expect(result.current.attackDiscovery).toBeNull();
+    expect(result.current.attack).toBeNull();
     expect(mockTransformDocumentToApi).not.toHaveBeenCalled();
   });
 
-  it('returns null attackDiscovery when attackId is empty', () => {
+  it('returns null attack when attackId is empty', () => {
     const searchHit = createSearchHit({ 'kibana.alert.attack_discovery.title': 'Test' });
     useTimelineEventsDetails.mockReturnValue([false, [], searchHit, null, mockRefetch]);
 
@@ -116,11 +116,11 @@ describe('useAttackDetails', () => {
       useAttackDetails({ attackId: '', indexName: '.alerts-default' })
     );
 
-    expect(result.current.attackDiscovery).toBeNull();
+    expect(result.current.attack).toBeNull();
     expect(mockTransformDocumentToApi).not.toHaveBeenCalled();
   });
 
-  it('returns null attackDiscovery when transform throws', () => {
+  it('returns null attack when transform throws', () => {
     const searchHit = createSearchHit({});
     useTimelineEventsDetails.mockReturnValue([false, [], searchHit, null, mockRefetch]);
     mockTransformDocumentToApi.mockImplementation(() => {
@@ -131,6 +131,6 @@ describe('useAttackDetails', () => {
       useAttackDetails({ attackId: 'attack-1', indexName: '.alerts-default' })
     );
 
-    expect(result.current.attackDiscovery).toBeNull();
+    expect(result.current.attack).toBeNull();
   });
 });

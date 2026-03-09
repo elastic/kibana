@@ -28,7 +28,7 @@ export { FLYOUT_FOOTER_TEST_ID };
  * Bottom section of the flyout that contains the take action button
  */
 export const PanelFooter = () => {
-  const { attackDiscovery, refetch } = useAttackDetailsContext();
+  const { attack, refetch } = useAttackDetailsContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -68,7 +68,7 @@ export const PanelFooter = () => {
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            {attackDiscovery ? (
+            {attack ? (
               <EuiPopover
                 id="AttackDetailsTakeActionPanel"
                 button={takeActionButton}
@@ -79,10 +79,11 @@ export const PanelFooter = () => {
                 repositionOnScroll
               >
                 <AttacksGroupTakeActionItems
-                  attack={attackDiscovery}
+                  attack={attack}
                   onActionSuccess={onActionSuccess}
                   closePopover={closePopover}
                   size="s"
+                  telemetrySource="attacks_page_flyout_take_action"
                 />
               </EuiPopover>
             ) : null}

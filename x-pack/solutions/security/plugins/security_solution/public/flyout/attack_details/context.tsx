@@ -23,7 +23,7 @@ export interface AttackDetailsContext {
   /**
    * The attack discovery alert object constructed from the search hit
    */
-  attackDiscovery: AttackDiscoveryAlert | null;
+  attack: AttackDiscoveryAlert | null;
   /**
    * Index name where the attack document is stored
    */
@@ -71,7 +71,7 @@ export const AttackDetailsProvider = memo(
     const scopeId = useSpaceId();
     // data view side: browserFields + field-browser data
     const {
-      attackDiscovery,
+      attack,
       browserFields,
       dataFormattedForFieldBrowser,
       searchHit,
@@ -86,7 +86,7 @@ export const AttackDetailsProvider = memo(
     const contextValue = useMemo<AttackDetailsContext | undefined>(
       () =>
         attackId &&
-        attackDiscovery &&
+        attack &&
         browserFields &&
         dataFormattedForFieldBrowser &&
         indexName &&
@@ -94,7 +94,7 @@ export const AttackDetailsProvider = memo(
         scopeId
           ? {
               attackId,
-              attackDiscovery,
+              attack,
               browserFields,
               indexName,
               scopeId,
@@ -106,7 +106,7 @@ export const AttackDetailsProvider = memo(
           : undefined,
       [
         attackId,
-        attackDiscovery,
+        attack,
         browserFields,
         indexName,
         scopeId,

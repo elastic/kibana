@@ -38,7 +38,7 @@ export interface UseAttackEventDetailsResult {
   /**
    * The attack discovery alert object constructed from the search hit
    */
-  attackDiscovery: AttackDiscoveryAlert | null;
+  attack: AttackDiscoveryAlert | null;
   /**
    * An object containing fields by type
    */
@@ -87,7 +87,7 @@ export const useAttackDetails = ({
 
   // build AttackDiscoveryAlert from raw _source using shared document-API-internal transform
   // returns null when source/attackId missing or transform throws
-  const attackDiscovery = useMemo(() => {
+  const attack = useMemo(() => {
     const source = searchHit?._source;
     if (!source || !attackId) {
       return null;
@@ -108,7 +108,7 @@ export const useAttackDetails = ({
   const { getFieldsData } = useGetFieldsData({ fieldsData: searchHit?.fields });
 
   return {
-    attackDiscovery,
+    attack,
     browserFields,
     dataFormattedForFieldBrowser,
     searchHit,

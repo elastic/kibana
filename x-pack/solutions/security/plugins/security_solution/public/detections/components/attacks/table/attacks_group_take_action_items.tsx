@@ -24,6 +24,7 @@ import { useAttackTagsContextMenuItems } from '../../../hooks/attacks/bulk_actio
 import { useAttackInvestigateInTimelineContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_investigate_in_timeline_context_menu_items';
 import { useAttackCaseContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items';
 import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_view_in_ai_assistant_context_menu_items';
+import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry/events/attacks/types';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -33,6 +34,8 @@ interface AttacksGroupTakeActionItemsProps {
   onActionSuccess?: () => void;
   /** Optional size for the context menu for flyout */
   size?: 's' | 'm';
+  /** Telemetry source for action events (e.g. flyout vs table) */
+  telemetrySource: AttacksActionTelemetrySource;
 }
 
 export function AttacksGroupTakeActionItems({
@@ -40,6 +43,7 @@ export function AttacksGroupTakeActionItems({
   closePopover,
   onActionSuccess,
   size,
+  telemetrySource,
 }: AttacksGroupTakeActionItemsProps) {
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
@@ -66,8 +70,6 @@ export function AttacksGroupTakeActionItems({
     refetchQuery();
     onActionSuccess?.();
   }, [invalidateAttackDiscoveriesCache, refetchQuery, onActionSuccess]);
-
-  const telemetrySource = 'attacks_page_group_take_action';
 
   const { items: assignItems, panels: assignPanels } = useAttackAssigneesContextMenuItems({
     attacksWithAssignees,

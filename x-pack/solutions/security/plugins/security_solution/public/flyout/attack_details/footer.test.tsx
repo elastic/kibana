@@ -48,7 +48,7 @@ const renderFooter = (contextOverrides: Partial<AttackDetailsContextType> = {}) 
   );
 
 describe('PanelFooter', () => {
-  it('renders the footer with Take Action button when attackDiscovery is present', () => {
+  it('renders the footer with Take Action button when attack is present', () => {
     renderFooter();
 
     expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
@@ -56,15 +56,15 @@ describe('PanelFooter', () => {
     expect(screen.getByRole('button', { name: 'Take action' })).toBeInTheDocument();
   });
 
-  it('does not render the Take Action button when attackDiscovery is null', () => {
-    renderFooter({ attackDiscovery: null });
+  it('does not render the Take Action button when attack is null', () => {
+    renderFooter({ attack: null });
 
     expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(screen.queryByTestId(FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('does not render the Take Action button when attackId is empty and attackDiscovery is null', () => {
-    renderFooter({ attackId: '', attackDiscovery: null });
+  it('does not render the Take Action button when attackId is empty and attack is null', () => {
+    renderFooter({ attackId: '', attack: null });
 
     expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
     expect(screen.queryByTestId(FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID)).not.toBeInTheDocument();
