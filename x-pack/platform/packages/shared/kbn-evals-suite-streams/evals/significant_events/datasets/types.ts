@@ -54,6 +54,16 @@ export interface FeatureExtractionScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
+export interface FeatureSoftDeleteScenario {
+  input: {
+    scenario_id: string;
+    sample_document_count: number;
+    delete_count: number;
+    follow_up_runs: number;
+  };
+  snapshot_source?: SnapshotSourceOverride;
+}
+
 /**
  * A dataset provider supplies snapshot source defaults and evaluation criteria
  * for both query generation and feature extraction evals.
@@ -70,4 +80,5 @@ export interface DatasetConfig {
   gcs: GcsConfig;
   queryGeneration: QueryGenerationScenario[];
   featureExtraction: FeatureExtractionScenario[];
+  featureSoftDelete: FeatureSoftDeleteScenario[];
 }
