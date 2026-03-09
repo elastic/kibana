@@ -291,7 +291,7 @@ export const useTopNavLinks = ({
                 items: [
                   savedAsButton,
                   {
-                    run: () => services.embeddableEditor.transferBackToEditor(),
+                    run: () => services.embeddableEditor.transferBackToEditor(undefined, true),
                     id: 'cancel',
                     order: 100,
                     label: i18n.translate('discover.localMenu.cancelTitle', {

@@ -34,7 +34,7 @@ export class EmbeddableEditorService {
     }
   };
 
-  public transferBackToEditor = (state?: SavedSearchByValueAttributes) => {
+  public transferBackToEditor = (state?: SavedSearchByValueAttributes, cancel?: boolean) => {
     if (this.embeddableState) {
       const app = this.embeddableState.originatingApp;
       const path = this.embeddableState.originatingPath;
@@ -43,13 +43,15 @@ export class EmbeddableEditorService {
         this.embeddableStateTransfer.clearEditorState('discover');
         this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
           path,
-          state: [
-            {
-              type: SEARCH_EMBEDDABLE_TYPE,
-              serializedState: { attributes: state },
-              embeddableId: this.embeddableState?.embeddableId,
-            },
-          ],
+          state: !cancel
+            ? [
+                {
+                  type: SEARCH_EMBEDDABLE_TYPE,
+                  serializedState: { attributes: state },
+                  embeddableId: this.embeddableState?.embeddableId,
+                },
+              ]
+            : [],
         });
       }
     }

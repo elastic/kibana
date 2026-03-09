@@ -42,7 +42,11 @@ import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
-import { ACTION_VIEW_SAVED_SEARCH, LEGACY_LOG_STREAM_EMBEDDABLE } from './embeddable/constants';
+import {
+  ACTION_ADD_DISCOVER_SESSION_PANEL,
+  ACTION_VIEW_SAVED_SEARCH,
+  LEGACY_LOG_STREAM_EMBEDDABLE,
+} from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
@@ -248,12 +252,18 @@ export class DiscoverPlugin
       }
     );
 
-    plugins.uiActions.registerActionAsync('addDiscoverByValuePanelAction', async () => {
-      const { getAddDiscoverByValuePanelAction } = await import('./plugin_imports/ui_actions');
-      return getAddDiscoverByValuePanelAction(this.locator!, plugins);
-    });
-
-    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addDiscoverByValuePanelAction');
+    plugins.uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ACTION_ADD_DISCOVER_SESSION_PANEL,
+      async () => {
+        const { AddDiscoverSessionPanelAction } = await getEmbeddableServices();
+        return new AddDiscoverSessionPanelAction(
+          core.application,
+          this.locator!,
+          plugins.embeddable
+        );
+      }
+    );
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 

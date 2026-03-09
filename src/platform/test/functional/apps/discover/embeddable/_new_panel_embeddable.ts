@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'discover',
   ]);
 
-  describe('new discover panel embeddable', () => {
+  describe('add new discover panel embeddable', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discover
           .getSavedSearchTitle()
           .then((lastBreadcrumb) =>
-            expect(lastBreadcrumb).to.be('Editing New By-value Discover session')
+            expect(lastBreadcrumb).to.be('Editing New by-value Discover session')
           ),
         testSubjects
           .exists('unifiedTabs_tabsBar', { timeout: 1000 })
@@ -83,6 +83,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.waitForRenderComplete();
       await dashboard.verifyNoRenderErrors();
       expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+    });
+
+    it('can cancel adding a new Discover session panel', async () => {
+      await dashboardAddPanel.clickAddDiscoverPanel();
+      await header.waitUntilLoadingHasFinished();
+
+      await queryBar.setQuery('test');
+      await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
+
+      await discover.clickCancelButton();
+
+      await dashboard.waitForRenderComplete();
+      await dashboard.verifyNoRenderErrors();
+
+      expect(await discover.getAllSavedSearchDocumentCount()).to.eql([]);
     });
   });
 }
