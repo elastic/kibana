@@ -16,7 +16,6 @@ import {
 } from './script_details_flyout';
 import { EndpointScriptsGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_scripts_generator';
 import { SORTED_SCRIPT_TAGS_KEYS } from '../../../../../../../common/endpoint/service/scripts_library/constants';
-import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 
 describe('EndpointScriptDetailsFlyout', () => {
   let render: (
