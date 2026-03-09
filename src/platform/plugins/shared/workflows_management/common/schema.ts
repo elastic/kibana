@@ -125,9 +125,6 @@ function convertDynamicConnectorsToContractsInternal(
 ): ConnectorContractUnion[] {
   const connectorContracts: ConnectorContractUnion[] = [];
   Object.values(connectorTypes).forEach((connectorType) => {
-    if (connectorType.enabled === false) {
-      return;
-    }
     try {
       const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
 
@@ -288,13 +285,8 @@ export function setCachedAllConnectorsMap(_allConnectors: ConnectorContractUnion
 export function addDynamicConnectorsToCache(
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
 ): void {
-  // Create a simple hash of the connector types to detect changes.
-  // Include the `enabled` flag to avoid keeping stale (now-disabled) connector contracts in cache.
-  const currentHash = JSON.stringify(
-    Object.entries(dynamicConnectorTypes)
-      .map(([key, value]) => [key, value.enabled !== false] as const)
-      .sort(([a], [b]) => a.localeCompare(b))
-  );
+  // Create a simple hash of the connector types to detect changes
+  const currentHash = JSON.stringify(Object.keys(dynamicConnectorTypes).sort());
 
   // Skip processing if the connector types haven't changed
   const lastHash = stepSchemas.getLastProcessedConnectorTypesHash();
@@ -307,29 +299,42 @@ export function addDynamicConnectorsToCache(
   stepSchemas.setDynamicConnectorTypesCache(dynamicConnectorTypes);
   stepSchemas.setLastProcessedConnectorTypesHash(currentHash);
 
-  // Rebuild the connector cache so we correctly handle additions, removals, and changes
-  // in dynamic connector types (e.g. connector type becomes disabled/unavailable).
-  const registeredStepDefinitions = getRegisteredStepDefinitions();
-  const elasticsearchConnectors = getElasticsearchConnectors();
-  const kibanaConnectors = getKibanaConnectors();
-  const baseConnectors = [
-    ...staticConnectors,
-    ...elasticsearchConnectors,
-    ...kibanaConnectors,
-    ...registeredStepDefinitions,
-  ];
-
-  const dynamicConnectors = convertDynamicConnectorsToContractsInternal(dynamicConnectorTypes);
-  const connectorByType = new Map<string, ConnectorContractUnion>(
-    baseConnectors.map((c) => [c.type, c])
-  );
-  for (const connector of dynamicConnectors) {
-    connectorByType.set(connector.type, connector);
+  // Get base connectors if cache is empty
+  if (stepSchemas.getAllConnectorsCache() === null) {
+    // Get registered step definitions
+    const registeredStepDefinitions = getRegisteredStepDefinitions();
+    // Get base connectors
+    const elasticsearchConnectors = getElasticsearchConnectors();
+    const kibanaConnectors = getKibanaConnectors();
+    const allConnectors = [
+      ...staticConnectors,
+      ...elasticsearchConnectors,
+      ...kibanaConnectors,
+      ...registeredStepDefinitions,
+    ];
+    stepSchemas.setAllConnectorsCache(allConnectors);
   }
 
-  const updatedCache = Array.from(connectorByType.values());
-  stepSchemas.setAllConnectorsCache(updatedCache);
-  stepSchemas.setAllConnectorsMapCache(connectorByType);
+  // Convert dynamic connectors to ConnectorContract format
+  const dynamicConnectors = convertDynamicConnectorsToContractsInternal(dynamicConnectorTypes);
+
+  // Get existing connector types to avoid duplicates
+  const allConnectorsCache = stepSchemas.getAllConnectorsCache();
+  if (allConnectorsCache === null) {
+    return;
+  }
+
+  const existingTypes = new Set(allConnectorsCache.map((c) => c.type));
+
+  // Add only new dynamic connectors
+  const newDynamicConnectors = dynamicConnectors.filter((c) => !existingTypes.has(c.type));
+
+  if (newDynamicConnectors.length > 0) {
+    const updatedCache = [...allConnectorsCache, ...newDynamicConnectors];
+    stepSchemas.setAllConnectorsCache(updatedCache);
+    const mapCache = new Map(updatedCache.map((c) => [c.type, c]));
+    stepSchemas.setAllConnectorsMapCache(mapCache);
+  }
 }
 
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {

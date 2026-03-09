@@ -8,7 +8,6 @@
  */
 
 export { ExecutionError } from './errors/execution_error';
-export { loadWorkflowExampleContent } from './examples';
 export {
   getStepExecutionsByIds,
   getStepExecutionsByWorkflowExecution,
