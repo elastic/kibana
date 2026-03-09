@@ -75,7 +75,6 @@ export const panelBodyStyles = (euiThemeContext: UseEuiTheme) => {
     flex-grow: 1;
     overflow-block: auto;
     ${euiScrollBarStyles(euiThemeContext)}
-    padding-inline: ${euiTheme.size.s};
 
     &:not(:first-child) {
       border-block-start: ${euiTheme.border.thin};
@@ -215,7 +214,7 @@ export const panelSpacingStyles = ({ euiTheme }: UseEuiTheme) => {
     padding-block: ${euiTheme.size.s};
   `;
   const inline = css`
-    padding-inline: ${euiTheme.size.base};
+    padding-inline: ${euiTheme.size.s};
   `;
   const both = css`
     ${block}
