@@ -299,6 +299,25 @@ describe('plugin converters', () => {
       });
       expect(result.skill_ids).toEqual(['my-plugin-skill-a', 'my-plugin-skill-b']);
     });
+
+    it('uses nameOverride instead of manifest name when provided', () => {
+      const result = parsedArchiveToCreateRequest({
+        parsedArchive: baseArchive,
+        sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
+        nameOverride: 'custom-name',
+      });
+      expect(result.name).toBe('custom-name');
+    });
+
+    it('falls back to manifest name when nameOverride is not provided', () => {
+      const result = parsedArchiveToCreateRequest({
+        parsedArchive: baseArchive,
+        sourceUrl: 'https://example.com/plugin.zip',
+        skillIds: [],
+      });
+      expect(result.name).toBe('my-plugin');
+    });
   });
 
   describe('updateRequestToEs', () => {

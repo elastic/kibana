@@ -26,6 +26,7 @@ export interface PluginsServiceStart {
   installPlugin(options: {
     request: KibanaRequest;
     source: InstallPluginSource;
+    pluginName?: string;
   }): Promise<PersistedPluginDefinition>;
   deletePlugin(options: { request: KibanaRequest; pluginId: string }): Promise<void>;
 }
@@ -83,9 +84,11 @@ class PluginsServiceImpl implements PluginsService {
   private async installPlugin({
     request,
     source,
+    pluginName: pluginNameOverride,
   }: {
     request: KibanaRequest;
     source: InstallPluginSource;
+    pluginName?: string;
   }): Promise<PersistedPluginDefinition> {
     let parsedArchive: ParsedPluginArchive;
     let sourceUrl: string | undefined;
@@ -97,26 +100,27 @@ class PluginsServiceImpl implements PluginsService {
       parsedArchive = await parsePluginFromFile(source.filePath);
     }
 
-    const { manifest } = parsedArchive;
+    const pluginName = pluginNameOverride ?? parsedArchive.manifest.name;
     const { pluginClient, skillClient } = this.getScopedClients({ request });
 
-    const existing = await pluginClient.findByName(manifest.name);
+    const existing = await pluginClient.findByName(pluginName);
     if (existing) {
       throw createBadRequestError(
-        `Plugin '${manifest.name}' is already installed (id: ${existing.id}, version: ${existing.version}).`
+        `Plugin '${pluginName}' is already installed (id: ${existing.id}, version: ${existing.version}).`
       );
     }
 
-    const skillIds = parsedArchive.skills.map((skill) => `${manifest.name}-${skill.dirName}`);
+    const skillIds = parsedArchive.skills.map((skill) => `${pluginName}-${skill.dirName}`);
 
     for (const skill of parsedArchive.skills) {
-      await skillClient.create(toSkillCreateRequest({ skill, pluginName: manifest.name }));
+      await skillClient.create(toSkillCreateRequest({ skill, pluginName }));
     }
 
     const createRequest = parsedArchiveToCreateRequest({
       parsedArchive,
       sourceUrl,
       skillIds,
+      nameOverride: pluginNameOverride,
     });
 
     return pluginClient.create(createRequest);

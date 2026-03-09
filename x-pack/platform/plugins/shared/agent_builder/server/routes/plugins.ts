@@ -31,6 +31,13 @@ const installPluginBodySchema = schema.object({
   url: schema.string({
     meta: { description: 'URL to install the plugin from (GitHub URL or direct zip URL).' },
   }),
+  plugin_name: schema.maybe(
+    schema.string({
+      meta: {
+        description: 'Optional name override for the plugin. Defaults to the manifest name.',
+      },
+    })
+  ),
 });
 
 const featureFlagConfig = {
@@ -170,11 +177,12 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { url } = request.body;
+        const { url, plugin_name: pluginName } = request.body;
         const { plugins: pluginService } = getInternalServices();
         const plugin = await pluginService.installPlugin({
           request,
           source: { type: 'url', url },
+          pluginName,
         });
         return response.ok<InstallPluginResponse>({
           body: toPluginDefinition(plugin),
@@ -189,6 +197,7 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       validate: {
         body: schema.object({
           file: schema.stream(),
+          plugin_name: schema.maybe(schema.string()),
         }),
       },
       options: {
@@ -202,13 +211,17 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const { file } = request.body as { file: Readable };
+      const { file, plugin_name: pluginName } = request.body as {
+        file: Readable;
+        plugin_name?: string;
+      };
       const { filePath, cleanup } = await saveUploadedFile(file);
       try {
         const { plugins: pluginService } = getInternalServices();
         const plugin = await pluginService.installPlugin({
           request,
           source: { type: 'file', filePath },
+          pluginName,
         });
         return response.ok<InstallPluginResponse>({
           body: toPluginDefinition(plugin),

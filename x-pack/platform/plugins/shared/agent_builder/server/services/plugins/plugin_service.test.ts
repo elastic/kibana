@@ -343,6 +343,50 @@ describe('PluginsService', () => {
         ).rejects.toThrow('Invalid zip');
       });
     });
+
+    describe('with pluginName override', () => {
+      it('uses the provided pluginName instead of the manifest name', async () => {
+        const persistedPlugin = createMockPersistedPlugin({
+          name: 'custom-name',
+          skill_ids: ['custom-name-pdf-processor', 'custom-name-code-reviewer'],
+        });
+
+        mockParsePluginFromUrl.mockResolvedValue(archiveWithSkills);
+        mockClient.findByName.mockResolvedValue(undefined);
+        mockClient.create.mockResolvedValue(persistedPlugin);
+        mockSkillClient.create.mockResolvedValue({} as any);
+
+        const result = await start.installPlugin({
+          request: mockRequest,
+          source: { type: 'url', url: 'https://example.com/plugin.zip' },
+          pluginName: 'custom-name',
+        });
+
+        expect(mockClient.findByName).toHaveBeenCalledWith('custom-name');
+
+        expect(mockSkillClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'custom-name-pdf-processor',
+            plugin_id: 'custom-name',
+          })
+        );
+        expect(mockSkillClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'custom-name-code-reviewer',
+            plugin_id: 'custom-name',
+          })
+        );
+
+        expect(mockClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'custom-name',
+            skill_ids: ['custom-name-pdf-processor', 'custom-name-code-reviewer'],
+          })
+        );
+
+        expect(result).toBe(persistedPlugin);
+      });
+    });
   });
 
   describe('deletePlugin', () => {
