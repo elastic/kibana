@@ -240,11 +240,10 @@ describe('group selector', () => {
           },
         },
       };
-      // @ts-expect-error Mocking partial ES aggregation shape
       const result = parseGroupingQuery(
         'source.ip',
         mocktestProps1.uniqueValue,
-        filteredAggs
+        filteredAggs as unknown as GroupingAggregation<{}>
       ) as GroupingAggregation<{}>;
       expect(result.unitsCount).toEqual({ value: 42 });
     });
