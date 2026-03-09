@@ -17,10 +17,9 @@ import type {
   ScoutWorkerFixtures,
 } from '@kbn/scout';
 
-import type { WorkflowsApiService } from './apis/workflows';
-import { getWorkflowsApiService } from './apis/workflows';
 import type { WorkflowsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
+import { WorkflowsApiService } from '../../common/apis/workflows';
 
 export interface WorkflowsApiServicesFixture extends ApiServicesFixture {
   workflows: WorkflowsApiService;
@@ -64,7 +63,7 @@ export const spaceTest = spaceBaseTest.extend<WorkflowsTestFixtures, WorkflowsWo
       use: (extendedApiServices: WorkflowsApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as WorkflowsApiServicesFixture;
-      extendedApiServices.workflows = getWorkflowsApiService(kbnClient);
+      extendedApiServices.workflows = new WorkflowsApiService(kbnClient);
       await use(extendedApiServices);
     },
     { scope: 'worker' },
