@@ -7,12 +7,12 @@
 
 export { Streams } from './src/models/streams';
 export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base';
-export { Ingest, IngestStream, type IngestUpsertRequest } from './src/models/ingest';
-export { WiredIngest, WiredStream, type WiredIngestUpsertRequest } from './src/models/ingest/wired';
+export { Ingest, IngestStream, IngestUpsertRequest } from './src/models/ingest';
+export { WiredIngest, WiredStream, WiredIngestUpsertRequest } from './src/models/ingest/wired';
 export {
   ClassicIngest,
   ClassicStream,
-  type ClassicIngestUpsertRequest,
+  ClassicIngestUpsertRequest,
 } from './src/models/ingest/classic';
 export { Query, QueryStream } from './src/models/query';
 export {
