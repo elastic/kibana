@@ -99,6 +99,28 @@ spaceTest.describe(
       }
     );
 
+    spaceTest(
+      'should redirect old entity store URL to the management page',
+      async ({ pageObjects }) => {
+        const managementPage = pageObjects.entityAnalyticsManagementPage;
+
+        await managementPage.navigateToOldEntityStoreUrl();
+        await expect(managementPage.managementPage).toBeVisible({ timeout: 30000 });
+        await expect(managementPage.pageTitle).toContainText('Entity analytics');
+      }
+    );
+
+    spaceTest(
+      'should redirect old asset criticality URL to Asset Criticality tab',
+      async ({ pageObjects }) => {
+        const managementPage = pageObjects.entityAnalyticsManagementPage;
+
+        await managementPage.navigateToOldAssetCriticalityUrl();
+        await expect(managementPage.managementPage).toBeVisible({ timeout: 30000 });
+        await expect(managementPage.assetCriticalityTab).toHaveAttribute('aria-selected', 'true');
+      }
+    );
+
     spaceTest('should show error panel when init fails', async ({ pageObjects, page }) => {
       spaceTest.setTimeout(120000);
       const managementPage = pageObjects.entityAnalyticsManagementPage;

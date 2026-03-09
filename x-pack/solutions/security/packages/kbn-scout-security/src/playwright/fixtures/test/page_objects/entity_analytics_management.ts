@@ -8,6 +8,8 @@
 import type { ScoutPage, Locator } from '@kbn/scout';
 
 const PAGE_URL = 'security/entity_analytics_management';
+const OLD_ENTITY_STORE_URL = 'security/entity_analytics_entity_store';
+const OLD_ASSET_CRITICALITY_URL = 'security/entity_analytics_asset_criticality';
 
 export class EntityAnalyticsManagementPage {
   // Page header
@@ -39,6 +41,8 @@ export class EntityAnalyticsManagementPage {
   public assetCriticalityInfoPanel: Locator;
   public assetCriticalityFileUploadSection: Locator;
   public assetCriticalityDocLink: Locator;
+  public assetCriticalityInsufficientPrivilegesCallout: Locator;
+  public assetCriticalityIssueCallout: Locator;
 
   // Engine Status tab
   public engineComponentsStatusTable: Locator;
@@ -68,10 +72,10 @@ export class EntityAnalyticsManagementPage {
     this.riskScoreErrorPanel = this.page.testSubj.locator('risk-score-error-panel');
 
     // Risk Score tab - Form inputs
-    this.riskScoreRetainCheckbox = this.page.locator('#riskScoreRetainCheckbox');
+    this.riskScoreRetainCheckbox = this.page.testSubj.locator('riskScoreRetainCheckbox');
     this.includeClosedAlertsSwitch = this.page.testSubj.locator('includeClosedAlertsSwitch');
     this.riskScoreSaveButton = this.page.testSubj.locator('riskScoreSaveButton');
-    this.riskScoreDiscardButton = this.page.locator('button:has-text("Discard Changes")');
+    this.riskScoreDiscardButton = this.page.testSubj.locator('riskScoreDiscardButton');
 
     // Asset Criticality tab
     this.assetCriticalityInfoPanel = this.page.testSubj.locator('asset-criticality-info-panel');
@@ -79,6 +83,12 @@ export class EntityAnalyticsManagementPage {
       'asset-criticality-file-upload-section'
     );
     this.assetCriticalityDocLink = this.page.testSubj.locator('asset-criticality-doc-link');
+    this.assetCriticalityInsufficientPrivilegesCallout = this.page.testSubj.locator(
+      'asset-criticality-insufficient-privileges'
+    );
+    this.assetCriticalityIssueCallout = this.page.testSubj.locator(
+      'asset-criticality-issue-callout'
+    );
 
     // Engine Status tab
     this.engineComponentsStatusTable = this.page.testSubj.locator('engine-status-panel');
@@ -94,6 +104,14 @@ export class EntityAnalyticsManagementPage {
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
+  }
+
+  async navigateToOldEntityStoreUrl() {
+    await this.page.gotoApp(OLD_ENTITY_STORE_URL);
+  }
+
+  async navigateToOldAssetCriticalityUrl() {
+    await this.page.gotoApp(OLD_ASSET_CRITICALITY_URL);
   }
 
   async navigateToRiskScoreTab() {
