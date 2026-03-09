@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   fetch$,
   initializeStateManager,
@@ -22,19 +18,17 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
   SLO_EMBEDDABLE_SUPPORTED_TRIGGERS,
   SLO_OVERVIEW_EMBEDDABLE_ID,
 } from '../../../../common/embeddables/overview/constants';
-import { GroupSloView } from './group_view/group_view';
-import { SloOverview } from './slo_overview';
-import { SloCardChartList } from './slo_overview_grid';
+import { SloOverviewPanelContent } from './slo_overview_panel_content';
 import type { SloOverviewApi } from './types';
 import type {
   GroupOverviewCustomState,
@@ -81,7 +75,7 @@ export const getOverviewEmbeddableFactory = ({
       Omit<SingleOverviewCustomState, 'overview_mode'>
     >(state as SingleOverviewCustomState, {
       slo_id: '',
-      slo_instance_id: undefined,
+      slo_instance_id: ALL_VALUE,
       remote_name: undefined,
     });
     const groupSloManager = initializeStateManager<Omit<GroupOverviewCustomState, 'overview_mode'>>(
@@ -209,52 +203,6 @@ export const getOverviewEmbeddableFactory = ({
             fetchSubscription.unsubscribe();
           };
         }, []);
-        const renderOverview = () => {
-          if (overviewMode === 'groups') {
-            const groupBy = groupFilters?.group_by ?? 'status';
-            const kqlQuery = groupFilters?.kql_query ?? '';
-            const groups = groupFilters?.groups ?? [];
-            return (
-              <div
-                css={({ euiTheme }: UseEuiTheme) => css`
-                  width: 100%;
-                  padding: ${euiTheme.size.xs} ${euiTheme.size.base};
-                  overflow: scroll;
-
-                  .euiAccordion__buttonContent {
-                    min-width: ${euiTheme.base * 6}px;
-                  }
-                `}
-              >
-                <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
-                  <EuiFlexItem
-                    css={({ euiTheme }: UseEuiTheme) => css`
-                      margin-top: ${euiTheme.base * 1.25}px;
-                    `}
-                  >
-                    <GroupSloView
-                      view="cardView"
-                      groupBy={groupBy}
-                      groups={groups}
-                      kqlQuery={kqlQuery}
-                      filters={toStoredFilters(groupFilters?.filters) ?? []}
-                      reloadSubject={reload$}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            );
-          } else {
-            return (
-              <SloOverview
-                sloId={sloId!}
-                sloInstanceId={sloInstanceId}
-                reloadSubject={reload$}
-                remoteName={remoteName}
-              />
-            );
-          }
-        };
 
         const queryClient = new QueryClient();
         return (
@@ -270,19 +218,14 @@ export const getOverviewEmbeddableFactory = ({
                 }}
               >
                 <QueryClientProvider client={queryClient}>
-                  {overviewMode === 'groups' ? (
-                    renderOverview()
-                  ) : sloInstanceId === ALL_VALUE ? (
-                    <div
-                      data-test-subj="sloSingleOverviewPanel"
-                      data-shared-item=""
-                      style={{ width: '100%' }}
-                    >
-                      <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId!} />
-                    </div>
-                  ) : (
-                    renderOverview()
-                  )}
+                  <SloOverviewPanelContent
+                    sloId={sloId ?? undefined}
+                    sloInstanceId={sloInstanceId}
+                    overviewMode={overviewMode}
+                    groupFilters={groupFilters}
+                    remoteName={remoteName}
+                    reloadSubject={reload$}
+                  />
                 </QueryClientProvider>
               </PluginContext.Provider>
             </KibanaContextProvider>
