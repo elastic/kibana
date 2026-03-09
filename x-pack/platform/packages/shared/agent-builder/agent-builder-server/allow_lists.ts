@@ -38,6 +38,18 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+
+  // Workflows
+  `${internalNamespaces.workflows}.validate_workflow`,
+  `${internalNamespaces.workflows}.get_step_definitions`,
+  `${internalNamespaces.workflows}.get_trigger_definitions`,
+  `${internalNamespaces.workflows}.get_connectors`,
+  `${internalNamespaces.workflows}.list_workflows`,
+  `${internalNamespaces.workflows}.get_workflow`,
+  `${internalNamespaces.workflows}.get_examples`,
+  `${internalNamespaces.workflows}.execute_workflow`,
+  `${internalNamespaces.workflows}.execute_workflow_step`,
+  `${internalNamespaces.workflows}.get_workflow_execution_status`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];

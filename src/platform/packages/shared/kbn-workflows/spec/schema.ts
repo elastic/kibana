@@ -184,8 +184,8 @@ export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
 export type StepWithOnFailure = z.infer<typeof StepWithOnFailureSchema>;
 
-const StepWithIfConditionSchema = z.object({
-  if: z.string().optional(),
+export const StepWithIfConditionSchema = z.object({
+  if: z.string().optional().describe('KQL condition that controls whether this step runs'),
 });
 export type StepWithIfCondition = z.infer<typeof StepWithIfConditionSchema>;
 

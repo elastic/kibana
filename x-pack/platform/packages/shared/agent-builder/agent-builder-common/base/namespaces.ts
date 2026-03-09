@@ -16,6 +16,7 @@ export const internalNamespaces = {
   attachments: 'attachments',
   observability: 'observability',
   security: 'security',
+  workflows: 'platform.workflows',
 } as const;
 
 /**
@@ -28,6 +29,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.observability,
   internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
   internalNamespaces.security,
+  internalNamespaces.workflows,
 ];
 
 /**
