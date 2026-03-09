@@ -11,11 +11,13 @@ import { expect } from '@kbn/scout-security/ui';
 const DEFAULT_QUERY = 'host.name: *';
 
 spaceTest.describe(
-  'Timelines',
+  'Timeline creation',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeEach(async ({ apiServices }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, pageObjects }) => {
       await apiServices.timeline.deleteAll();
+      await browserAuth.loginAsPlatformEngineer();
+      await pageObjects.timelinePage.navigateToTimelines();
     });
 
     spaceTest.afterAll(async ({ apiServices }) => {
@@ -24,7 +26,7 @@ spaceTest.describe(
 
     spaceTest(
       'should create a timeline from a template and have the same query',
-      async ({ browserAuth, pageObjects, apiServices }) => {
+      async ({ pageObjects, apiServices }) => {
         const { timelinePage } = pageObjects;
 
         await apiServices.timeline.createTimelineTemplate({
@@ -32,7 +34,6 @@ spaceTest.describe(
           description: 'This is the best timeline',
           query: DEFAULT_QUERY,
         });
-        await browserAuth.loginAsPlatformEngineer();
 
         await spaceTest.step('Navigate to templates and select custom tab', async () => {
           await timelinePage.navigateToTemplates();
@@ -49,49 +50,20 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'should be able to create timeline with crud privileges',
-      async ({ browserAuth, pageObjects }) => {
-        const { timelinePage } = pageObjects;
-
-        await browserAuth.loginAsPlatformEngineer();
-        await timelinePage.navigateToTimelines();
-        await timelinePage.open();
-        await timelinePage.createNew();
-
-        await timelinePage.addNameAndDescription('Security Timeline', 'This is the best timeline');
-
-        await expect(timelinePage.panel).toBeVisible();
-      }
-    );
-
-    spaceTest(
-      'should not be able to create/update timeline with only read privileges',
-      async ({ browserAuth, pageObjects }) => {
-        const { timelinePage } = pageObjects;
-
-        await browserAuth.loginAsT1Analyst();
-        await timelinePage.navigateToTimelines();
-        await timelinePage.open();
-        await timelinePage.createNew();
-
-        await expect(timelinePage.panel).toBeVisible();
-        await expect(timelinePage.saveButton).toBeDisabled();
-
-        await spaceTest.step('Hover save button and verify read-only tooltip', async () => {
-          await timelinePage.hoverSaveButton();
-          await expect(timelinePage.saveTooltip).toContainText(
-            'you do not have the required permissions to save timelines'
-          );
-        });
-      }
-    );
-
-    spaceTest('should show the different timeline states', async ({ browserAuth, pageObjects }) => {
+    spaceTest('should be able to create timeline', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
 
-      await browserAuth.loginAsPlatformEngineer();
-      await timelinePage.navigateToTimelines();
+      await timelinePage.open();
+      await timelinePage.createNew();
+
+      await timelinePage.addNameAndDescription('Security Timeline', 'This is the best timeline');
+
+      await expect(timelinePage.panel).toBeVisible();
+    });
+
+    spaceTest('should show the different timeline states', async ({ pageObjects }) => {
+      const { timelinePage } = pageObjects;
+
       await timelinePage.open();
 
       await spaceTest.step('Verify unsaved state on new timeline', async () => {
@@ -110,11 +82,8 @@ spaceTest.describe(
       });
     });
 
-    spaceTest('should save timelines as new', async ({ browserAuth, pageObjects }) => {
+    spaceTest('should save timelines as new', async ({ pageObjects }) => {
       const { timelinePage } = pageObjects;
-
-      await browserAuth.loginAsPlatformEngineer();
-      await timelinePage.navigateToTimelines();
 
       await spaceTest.step('Verify no timelines exist initially', async () => {
         await expect(timelinePage.timelinesTable).toContainText(
