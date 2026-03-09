@@ -207,7 +207,7 @@
           "(_base: TBaseSchema, narrow: TNarrowSchema) => <TValue extends z.output<TBaseSchema>>(value: TValue) => value is Extract<TValue, z.output<TNarrowSchema>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-        "lineNumber": 10,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -223,7 +223,7 @@
               "TBaseSchema"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 13,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +240,7 @@
               "TNarrowSchema"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 13,
+            "lineNumber": 20,
             "columnNumber": 23,
             "deprecated": false,
             "trackAdoption": false,
@@ -816,10 +816,13 @@
         "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getDiscoverEsqlQuery",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "timestamp",
+          "timestamp"
+        ],
         "label": "getDiscoverEsqlQuery",
         "description": [
-          "\nGenerates a base ES|QL query for Discover from a stream definition.\n\nUses 'TS' source command for TSDB mode streams, 'FROM' otherwise.\nOptionally includes METADATA _source for wired streams.\n"
+          "\nGenerates a base ES|QL query for Discover from a stream definition.\n\nUses 'TS' source command for TSDB mode streams, 'FROM' otherwise.\nOptionally includes METADATA _source for wired streams.\nResults are sorted by @timestamp descending by default for FROM queries.\nTS (time series) queries do not add explicit sorting as TSDB data is inherently time-ordered.\n"
         ],
         "signature": [
           "(options: ",
@@ -845,7 +848,7 @@
               "GetDiscoverEsqlQueryOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/get_discover_esql_query.ts",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -870,7 +873,7 @@
           "(streamName: string) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
-        "lineNumber": 14,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -888,7 +891,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
-            "lineNumber": 20,
+            "lineNumber": 36,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -1336,7 +1339,7 @@
           ".all.Definition) => string[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/hierarchy_helpers.ts",
-        "lineNumber": 25,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1359,7 +1362,7 @@
               ".all.Definition"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/hierarchy_helpers.ts",
-            "lineNumber": 25,
+            "lineNumber": 28,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -1382,7 +1385,7 @@
           "(viewName: string) => string | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
-        "lineNumber": 24,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1400,7 +1403,7 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
-            "lineNumber": 31,
+            "lineNumber": 47,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -1698,7 +1701,7 @@
               "TValue"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 15,
+            "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -1786,7 +1789,7 @@
               "TValue"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 15,
+            "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -1983,7 +1986,7 @@
               "TValue"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 15,
+            "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -2056,7 +2059,7 @@
               "TValue"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 15,
+            "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -2143,7 +2146,7 @@
               "TValue"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 15,
+            "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -2343,6 +2346,45 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isRecord",
+        "type": "Function",
+        "tags": [],
+        "label": "isRecord",
+        "description": [
+          "\nType guard to check if a value is a non-null object (record).\nUseful for safely accessing properties on unknown values."
+        ],
+        "signature": [
+          "(value: unknown) => value is Record<string, unknown>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isRecord.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
+            "lineNumber": 14,
+            "columnNumber": 26,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.isRoot",
         "type": "Function",
         "tags": [],
@@ -2406,7 +2448,7 @@
               "TValue"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 15,
+            "lineNumber": 22,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -2461,7 +2503,7 @@
           "(schema: TSchema, value: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-        "lineNumber": 33,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2477,7 +2519,7 @@
               "TSchema"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 34,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2494,7 +2536,7 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/shared/type_guards.ts",
-            "lineNumber": 35,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5324,13 +5366,13 @@
         "tags": [],
         "label": "ESQL_VIEW_PREFIX",
         "description": [
-          "\nPrefix used for ES|QL view names to avoid shadowing existing streams/indices.\nFor example, a query stream named \"cars.electric\" will have an ES|QL view named \"$.cars.electric\"."
+          "\nPrefix used for ES|QL view names created by query streams.\n\nThis prefix serves two purposes:\n1. **Avoids shadowing**: Prevents query stream views from colliding with existing\n   data streams or indices that share the same name.\n2. **Isolates query streams from parent views**: Ingest streams query their data using\n   patterns like `FROM logs.otel, logs.otel.*`. Because query stream views live in the\n   `$.` namespace (e.g. `$.logs.otel.electric`), they are never matched by these\n   wildcard patterns. This ensures that aggregated or transformed columns defined by\n   query streams do not leak into parent stream schemas.\n\nTo query a query stream directly, use its prefixed view name: `FROM $.cars.electric`.\n"
         ],
         "signature": [
           "\"$.\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
-        "lineNumber": 12,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
