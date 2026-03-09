@@ -149,6 +149,25 @@ const getMarkdownContent = (panel: AttachmentPanel): string | undefined => {
   return typeof content === 'string' ? content : undefined;
 };
 
+const MARKDOWN_GRID_W = 48;
+const MARKDOWN_MIN_H = 4;
+const MARKDOWN_MAX_H = 9;
+
+const estimateMarkdownGridHeight = (content: string): number => {
+  const nonEmptyLines = content.split('\n').filter((line) => line.trim().length > 0).length;
+  return Math.min(MARKDOWN_MAX_H, Math.max(MARKDOWN_MIN_H, nonEmptyLines + 2));
+};
+
+const buildMarkdownGrid = (
+  content: string,
+  existingGrid?: { w: number; h: number; x: number; y: number }
+) => ({
+  w: MARKDOWN_GRID_W,
+  h: estimateMarkdownGridHeight(content),
+  x: existingGrid?.x ?? 0,
+  y: existingGrid?.y ?? 0,
+});
+
 export const upsertMarkdownPanel = (
   panels: AttachmentPanel[],
   markdownContent?: string
@@ -163,6 +182,7 @@ export const upsertMarkdownPanel = (
       type: MARKDOWN_EMBEDDABLE_TYPE,
       panelId: uuidv4(),
       rawConfig: { content: markdownContent },
+      grid: buildMarkdownGrid(markdownContent),
     };
     return {
       panels: [markdownPanel, ...panels],
@@ -185,6 +205,7 @@ export const upsertMarkdownPanel = (
       ...existingMarkdownPanel.rawConfig,
       content: markdownContent,
     },
+    grid: buildMarkdownGrid(markdownContent, existingMarkdownPanel.grid),
   };
   const updatedPanels = [...panels];
   updatedPanels[existingMarkdownPanelIndex] = updatedMarkdownPanel;
