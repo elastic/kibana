@@ -241,6 +241,7 @@ export const PackagePolicyBaseSchema = {
       }),
     ])
   ),
+  package_agent_version_condition: schema.maybe(schema.string()),
 };
 
 export const NewPackagePolicySchema = schema.object({

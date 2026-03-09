@@ -262,6 +262,35 @@ export async function getPackagePolicySavedObjectType() {
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 }
 
+/**
+ * Returns all agent version strings that have been compiled into `inputs_for_versions`
+ * across the package policies belonging to the given agent policy. These versions are
+ * used to generate version-specific fleet-policies documents so agents on non-default
+ * versions continue to receive policy updates after the policy is revised.
+ */
+export async function getCompiledVersionsForAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  agentPolicyId: string
+): Promise<string[]> {
+  const savedObjectType = await getPackagePolicySavedObjectType();
+  const result = await soClient.find<PackagePolicySOAttributes>({
+    type: savedObjectType,
+    filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)} AND ${savedObjectType}.attributes.latest_revision:true`,
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  const versionSet = new Set<string>();
+  for (const so of result.saved_objects) {
+    const inputsForVersions = so.attributes?.inputs_for_versions;
+    if (inputsForVersions) {
+      for (const version of Object.keys(inputsForVersions)) {
+        versionSet.add(version);
+      }
+    }
+  }
+  return Array.from(versionSet);
+}
+
 export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
     return normalizeKuery(
@@ -622,6 +651,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           created_by: options?.user?.username ?? 'system',
           updated_at: isoDate,
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo.conditions?.agent?.version,
         },
 
         { ...options, id: packagePolicyId }
@@ -1592,6 +1622,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           revision: oldPackagePolicy.revision + 1,
           updated_at: new Date().toISOString(),
           updated_by: options?.user?.username ?? 'system',
+          package_agent_version_condition: pkgInfo?.conditions?.agent?.version,
         },
         {
           version,

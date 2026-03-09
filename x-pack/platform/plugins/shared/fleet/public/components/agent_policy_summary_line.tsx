@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo } from 'react';
 import { css } from '@emotion/css';
+import satisfies from 'semver/functions/satisfies';
 
 import type { AgentPolicy, Agent } from '../../common/types';
 import { useLink } from '../hooks';
@@ -49,6 +51,20 @@ export const AgentPolicySummaryLine = memo<{
 
     const revision = agent ? agent.policy_revision : policy.revision;
     const isOutdated = agent?.policy_revision && policy.revision > agent.policy_revision;
+
+    const agentVersion: string | undefined = agent?.local_metadata?.elastic?.agent?.version;
+    const incompatibleIntegrations =
+      agentVersion && policy.package_agent_version_conditions
+        ? policy.package_agent_version_conditions.filter(({ version_condition }) => {
+            try {
+              return !satisfies(agentVersion, version_condition);
+            } catch {
+              return false;
+            }
+          })
+        : [];
+    const showIncompatibilityBadge =
+      incompatibleIntegrations.length > 0 && Boolean(policy.min_agent_version);
 
     if (agent?.type === 'OPAMP') {
       return <EuiText>-</EuiText>;
@@ -163,6 +179,32 @@ export const AgentPolicySummaryLine = memo<{
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
+            </EuiToolTip>
+          </EuiFlexItem>
+        )}
+        {showIncompatibilityBadge && (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsTooltip',
+                {
+                  defaultMessage:
+                    'This policy contains the following incompatible integrations: {integrations}. Upgrade agent to {minVersion} or higher.',
+                  values: {
+                    integrations: incompatibleIntegrations
+                      .map(({ title, name }) => title || name)
+                      .join(', '),
+                    minVersion: policy.min_agent_version,
+                  },
+                }
+              )}
+            >
+              <EuiBadge color="warning">
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicySummaryLine.incompatibleIntegrationsLabel"
+                  defaultMessage="Incompatible integrations"
+                />
+              </EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
         )}
