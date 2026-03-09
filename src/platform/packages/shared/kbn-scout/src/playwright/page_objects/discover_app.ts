@@ -348,6 +348,13 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
   }
 
+  async navigateToTabByName(name: string) {
+    const tabsBar = this.page.testSubj.locator('unifiedTabs_tabsBar');
+    const tab = tabsBar.getByRole('tab', { name });
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-selected', 'true');
+  }
+
   async waitForDataGridRowWithRefresh(rowLocator: Locator, timeout = 30_000) {
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
