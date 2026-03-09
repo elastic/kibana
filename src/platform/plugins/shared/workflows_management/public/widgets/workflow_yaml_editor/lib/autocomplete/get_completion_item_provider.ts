@@ -10,7 +10,7 @@
 import { monaco } from '@kbn/monaco';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
-import { getSuggestions } from './suggestions/get_suggestions';
+import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -29,6 +29,13 @@ const DEPRECATED_TYPE_ALIASES = new Set([
   'kibana.updateCaseDefaultSpace',
   'kibana.addCaseCommentDefaultSpace',
 ]);
+
+/**
+ * Step types that are only valid inside loop bodies (foreach / while).
+ * The monaco-yaml schema provider suggests them everywhere, so the
+ * completion provider must strip them when the cursor is outside a loop.
+ */
+const LOOP_ONLY_STEP_TYPES = new Set(['flow.break', 'flow.continue']);
 
 /**
  * Get the deduplication key for a suggestion.
@@ -142,6 +149,12 @@ export function getCompletionItemProvider(
         position,
       });
       mapSuggestions(deduplicatedMap, workflowSuggestions);
+
+      if (!isInsideLoopBody(autocompleteContext)) {
+        for (const key of LOOP_ONLY_STEP_TYPES) {
+          deduplicatedMap.delete(key);
+        }
+      }
 
       return {
         suggestions: Array.from(deduplicatedMap.values()),

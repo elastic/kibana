@@ -17,6 +17,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
+import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -213,16 +214,32 @@ export class WorkflowExecutionRuntimeManager {
    * the enclosing loop scope (enter-while or enter-foreach) is on top.
    * Called by flow.break/flow.continue before navigating to the loop exit node,
    * so that exitScope() in run_node.ts can correctly pop the loop scope.
+   *
+   * For each unwound scope, creates a StepExecutionRuntime via the factory and
+   * calls finishStep() to properly tear down any started container steps
+   * (e.g. enter-if steps that were left RUNNING).
    */
-  public unwindScopesToLoop(): void {
+  public unwindScopesToLoop(stepExecutionRuntimeFactory: StepExecutionRuntimeFactory): void {
     let scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
 
     while (!scopeStack.isEmpty()) {
       const currentScope = scopeStack.getCurrentScope();
-      if (currentScope?.nodeType === 'enter-while' || currentScope?.nodeType === 'enter-foreach') {
+      if (
+        !currentScope ||
+        currentScope.nodeType === 'enter-while' ||
+        currentScope.nodeType === 'enter-foreach'
+      ) {
         break;
       }
       scopeStack = scopeStack.exitScope();
+
+      const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: currentScope.nodeId,
+        stackFrames: scopeStack.stackFrames,
+      });
+      if (scopeStepRuntime.stepExecutionExists()) {
+        scopeStepRuntime.finishStep();
+      }
     }
 
     this.workflowExecutionState.updateWorkflowExecution({

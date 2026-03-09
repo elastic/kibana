@@ -9,6 +9,7 @@
 
 import type { FlowContinueNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { FlowContinueNodeImpl } from '../flow_continue_node_impl';
@@ -18,6 +19,7 @@ describe('FlowContinueNodeImpl', () => {
   let stepExecutionRuntime: StepExecutionRuntime;
   let wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager;
   let workflowLogger: IWorkflowEventLogger;
+  let stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   let underTest: FlowContinueNodeImpl;
 
   beforeEach(() => {
@@ -44,11 +46,14 @@ describe('FlowContinueNodeImpl', () => {
       logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
+    stepExecutionRuntimeFactory = {} as StepExecutionRuntimeFactory;
+
     underTest = new FlowContinueNodeImpl(
       node,
       stepExecutionRuntime,
       wfExecutionRuntimeManager,
-      workflowLogger
+      workflowLogger,
+      stepExecutionRuntimeFactory
     );
   });
 
@@ -64,7 +69,9 @@ describe('FlowContinueNodeImpl', () => {
   it('should unwind scopes and navigate to the loop exit node', () => {
     underTest.run();
 
-    expect(wfExecutionRuntimeManager.unwindScopesToLoop).toHaveBeenCalled();
+    expect(wfExecutionRuntimeManager.unwindScopesToLoop).toHaveBeenCalledWith(
+      stepExecutionRuntimeFactory
+    );
     expect(wfExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitForeach_my_loop');
   });
 });

@@ -32,7 +32,7 @@ const loopStepTypes = new Set(['foreach', 'while']);
  * Checks whether the current cursor position in the YAML document is inside
  * the body (`steps` array) of a foreach or while loop step.
  */
-function isInsideLoopBody(ctx: ExtendedAutocompleteContext): boolean {
+export function isInsideLoopBody(ctx: ExtendedAutocompleteContext): boolean {
   const { yamlDocument, path } = ctx;
   if (!yamlDocument || !path) return false;
 

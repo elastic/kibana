@@ -198,14 +198,16 @@ export class NodesFactory {
           node as FlowBreakNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.stepExecutionRuntimeFactory
         );
       case 'flow-continue':
         return new FlowContinueNodeImpl(
           node as FlowContinueNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.stepExecutionRuntimeFactory
         );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
