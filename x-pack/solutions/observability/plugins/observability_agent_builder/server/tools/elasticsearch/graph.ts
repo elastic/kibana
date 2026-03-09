@@ -39,7 +39,7 @@ import { truncateJsonResponse } from './truncate_response';
 const NODE_NAMES = {
   ROUTE_ENTRY: 'route_entry',
   GENERATE_TOOLS: 'generate_tools',
-  AGENT: 'agent',
+  LLM_SELECT_TOOLS: 'llm_select_tools',
   ASK_FOR_CONFIRMATION: 'ask_for_confirmation',
   EXECUTE_TOOL: 'execute_tool',
 } as const;
@@ -158,7 +158,7 @@ const parseToolResponse = (
  * 1. routeEntry: Routes execution based on whether the invocation is fresh or resumed
  * 2. generateTools: Retrieves OpenAPI specs and generates LangChain tools
  * 3. terminateIfInvalidTools: Validates that tools were generated successfully
- * 4. agent: Calls the LLM to generate tool calls based on natural language query
+ * 4. llmSelectTools: Invokes the LLM to select which Elasticsearch API tools to call
  * 5. askForConfirmation: Checks if confirmation was provided (for dangerous operations)
  * 6. executeTool: Runs the selected tool against Elasticsearch
  *
@@ -278,7 +278,7 @@ export const createElasticsearchToolGraph = async ({
   };
 
   const terminateIfInvalidTools = async (state: StateType) => {
-    return state.toolsValid ? NODE_NAMES.AGENT : END;
+    return state.toolsValid ? NODE_NAMES.LLM_SELECT_TOOLS : END;
   };
 
   const askForConfirmation = async (state: StateType) => {
@@ -302,7 +302,7 @@ export const createElasticsearchToolGraph = async ({
     return { prompt: confirmation };
   };
 
-  const callElasticsearchAgent = async (state: StateType) => {
+  const llmSelectTools = async (state: StateType) => {
     events?.reportProgress(progressMessages.callingElasticsearchAgent());
     const searchModel = model.chatModel.bindTools(state.tools).withConfig({
       tags: ['observability-elasticsearch-tool'],
@@ -355,7 +355,7 @@ export const createElasticsearchToolGraph = async ({
       ends: [NODE_NAMES.GENERATE_TOOLS, NODE_NAMES.EXECUTE_TOOL, END],
     })
     .addNode(NODE_NAMES.GENERATE_TOOLS, generateTools)
-    .addNode(NODE_NAMES.AGENT, callElasticsearchAgent, {
+    .addNode(NODE_NAMES.LLM_SELECT_TOOLS, llmSelectTools, {
       ends: [NODE_NAMES.ASK_FOR_CONFIRMATION, NODE_NAMES.EXECUTE_TOOL],
     })
     .addNode(NODE_NAMES.ASK_FOR_CONFIRMATION, askForConfirmation)
@@ -363,7 +363,7 @@ export const createElasticsearchToolGraph = async ({
     // edges
     .addEdge(START, NODE_NAMES.ROUTE_ENTRY)
     .addConditionalEdges(NODE_NAMES.GENERATE_TOOLS, terminateIfInvalidTools, {
-      [NODE_NAMES.AGENT]: NODE_NAMES.AGENT,
+      [NODE_NAMES.LLM_SELECT_TOOLS]: NODE_NAMES.LLM_SELECT_TOOLS,
       [END]: END,
     })
     .addEdge(NODE_NAMES.ASK_FOR_CONFIRMATION, END)
