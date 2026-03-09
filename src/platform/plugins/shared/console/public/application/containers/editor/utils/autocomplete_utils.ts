@@ -358,6 +358,10 @@ const getSuggestions = (
     ? unquotedFieldWithDotMatch[1]
     : null;
   const isQuotedField = !!quotedFieldWithDotMatch;
+  const bodyContentLines = bodyContentBeforePosition.split('\n');
+  const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+  const isUnmatchedEndpointQuotedContext =
+    !context.endpoint && hasUnclosedQuote(currentContentLine);
 
   // Adjust the range start column if we have a field with a dot
   let startColumn = wordUntilPosition.startColumn;
@@ -389,6 +393,14 @@ const getSuggestions = (
     filterTermsWithoutName(autocompleteSet)
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
+        if (
+          isUnmatchedEndpointQuotedContext &&
+          ((typeof item.name === 'string' && getStructuralSnippet(item.name)) ||
+            (typeof item.insertValue === 'string' && getStructuralSnippet(item.insertValue)))
+        ) {
+          return false;
+        }
+
         if (fieldBeingTyped) {
           // Only show fields that start with what the user has typed so far
           return typeof item.name === 'string' && item.name.startsWith(fieldBeingTyped);
@@ -411,6 +423,17 @@ const getSuggestions = (
       })
   );
 };
+
+const getStructuralSnippet = (token: string) => {
+  if (token === '{') {
+    return '{$0}';
+  }
+  if (token === '[') {
+    return '[$0]';
+  }
+  return undefined;
+};
+
 export const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
@@ -422,10 +445,9 @@ export const getInsertText = (
 
   let insertText = '';
   if (typeof name === 'string') {
-    if (name === '{') {
-      insertText = '{$0}';
-    } else if (name === '[') {
-      insertText = '[$0]';
+    const structuralSnippet = getStructuralSnippet(name);
+    if (structuralSnippet) {
+      insertText = structuralSnippet;
     } else {
       const bodyContentLines = bodyContent.split('\n');
       const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
@@ -436,11 +458,9 @@ export const getInsertText = (
         // The cursor is at the beginning of a field so the insert text should start with a quote
         insertText = '"';
       }
-      if (insertValue && insertValue !== '{' && insertValue !== '[') {
-        insertText += `${insertValue}"`;
-      } else {
-        insertText += `${name}"`;
-      }
+      // insertValue can override the inserted token, but structural tokens are inserted as snippets above
+      const insertableName = insertValue && !getStructuralSnippet(insertValue) ? insertValue : name;
+      insertText += `${insertableName}"`;
     }
   } else {
     insertText = name + '';

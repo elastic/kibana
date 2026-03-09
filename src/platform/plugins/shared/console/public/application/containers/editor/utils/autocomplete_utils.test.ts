@@ -401,6 +401,39 @@ describe('autocomplete_utils', () => {
         endColumn: 21, // Including the closing quote
       });
     });
+
+    it('filters structural suggestions in unmatched endpoint quoted context', async () => {
+      const mockAutocompleteSet = [
+        { name: '{' },
+        { name: 'match_all' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      const mockModel = {
+        getLineContent: () => 'POST not_a_real_endpoint',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n  "query": "';
+          }
+          if (range.startLineNumber === 3 && range.startColumn === 1) {
+            return '  "query": "';
+          }
+          return '';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 12, word: '' }),
+        getLineMaxColumn: () => 12,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 3, column: 12 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.map((item) => item.label)).toEqual(['match_all']);
+    });
   });
 
   describe('getInsertText', () => {
@@ -437,7 +470,17 @@ describe('autocomplete_utils', () => {
     it('wraps insertValue with quotes when appropriate', () => {
       expect(
         getInsertText(
-          { name: 'match_all' } as ResultTerm,
+          { name: 'query', insertValue: 'match_all' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('"match_all"');
+    });
+
+    it('uses name when insertValue is a structural token', () => {
+      expect(
+        getInsertText(
+          { name: 'match_all', insertValue: '{' } as ResultTerm,
           '{\n' + '    "query": {\n' + '      ',
           mockContext
         )
