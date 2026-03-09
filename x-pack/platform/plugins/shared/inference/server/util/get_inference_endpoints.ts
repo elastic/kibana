@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 export interface InferenceEndpoint {
   inferenceId: string;
-  taskType: string;
+  taskType: InferenceTaskType;
   service: string;
   serviceSettings?: Record<string, unknown>;
 }
@@ -23,7 +24,7 @@ export const getInferenceEndpoints = async ({
   taskType,
 }: {
   esClient: ElasticsearchClient;
-  taskType?: string;
+  taskType?: InferenceTaskType;
 }): Promise<InferenceEndpoint[]> => {
   const response = await esClient.inference.get();
 
