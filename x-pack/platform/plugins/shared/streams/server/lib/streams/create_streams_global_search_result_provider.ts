@@ -101,8 +101,11 @@ async function findStreams({
   });
 
   const hitsWithAccess = searchResponse.hits.hits.filter((hit) => {
-    if (Streams.QueryStream.Definition.is(hit._source)) return queryStreamsEnabled;
-    return privileges[hit._source.name]?.read === true;
+    const canRead = privileges[hit._source.name]?.read === true;
+    if (Streams.QueryStream.Definition.is(hit._source)) {
+      return queryStreamsEnabled && canRead;
+    }
+    return canRead;
   });
 
   if (types.length === 0) {
