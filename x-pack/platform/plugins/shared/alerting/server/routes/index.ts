@@ -63,10 +63,19 @@ import { alertDeleteScheduleRoute } from './alert_delete/apis/schedule/create_al
 import { alertDeleteLastRunRoute } from './alert_delete/apis/last_run/get_alert_delete_last_run_route';
 
 // backfill API
-import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
-import { getBackfillRoute } from './backfill/apis/get/get_backfill_route';
-import { findBackfillRoute } from './backfill/apis/find/find_backfill_route';
-import { deleteBackfillRoute } from './backfill/apis/delete/delete_backfill_route';
+import {
+  scheduleBackfillRoute,
+  scheduleBackfillPublicRoute,
+} from './backfill/apis/schedule/schedule_backfill_route';
+import { getBackfillRoute, getBackfillPublicRoute } from './backfill/apis/get/get_backfill_route';
+import {
+  findBackfillRoute,
+  findBackfillPublicRoute,
+} from './backfill/apis/find/find_backfill_route';
+import {
+  deleteBackfillRoute,
+  deleteBackfillPublicRoute,
+} from './backfill/apis/delete/delete_backfill_route';
 
 // Gaps ApI
 import { findGapsRoute } from './gaps/apis/find/find_gaps_route';
@@ -156,11 +165,17 @@ export function defineRoutes(opts: RouteOptions) {
   alertDeleteScheduleRoute(router, licenseState, core);
   alertDeleteLastRunRoute(router, licenseState);
 
-  // backfill APIs
+  // backfill APIs (internal)
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);
   findBackfillRoute(router, licenseState);
   deleteBackfillRoute(router, licenseState);
+
+  // backfill APIs (public)
+  scheduleBackfillPublicRoute(router, licenseState);
+  getBackfillPublicRoute(router, licenseState);
+  findBackfillPublicRoute(router, licenseState);
+  deleteBackfillPublicRoute(router, licenseState);
 
   // Gaps APIs
   findGapsRoute(router, licenseState);

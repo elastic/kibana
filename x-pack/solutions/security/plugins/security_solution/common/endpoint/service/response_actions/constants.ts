@@ -43,11 +43,11 @@ export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMAND
 
 export type EnabledAutomatedResponseActionsCommands = Extract<
   ResponseActionsApiCommandNames,
-  'isolate' | 'kill-process' | 'suspend-process'
+  'isolate' | 'kill-process' | 'suspend-process' | 'runscript'
 >;
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: EnabledAutomatedResponseActionsCommands[] =
-  ['isolate', 'kill-process', 'suspend-process'];
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: Array<EnabledAutomatedResponseActionsCommands> =
+  ['isolate', 'kill-process', 'suspend-process', 'runscript'];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -274,3 +274,12 @@ export const RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES: Readonly<
   crowdstrike: ['crowdstrike'],
   microsoft_defender_endpoint: ['microsoft_defender_endpoint', 'm365_defender'],
 });
+
+/**
+ * The list of Alert ECS fields we check to try and determine the OS type for the host
+ */
+export const ECS_OS_TYPE_FIELDS = Object.freeze([
+  'host.os.type',
+  'host.os.name',
+  'host.os.platform',
+]);

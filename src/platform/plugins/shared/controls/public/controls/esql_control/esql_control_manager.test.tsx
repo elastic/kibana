@@ -16,16 +16,17 @@ import { BehaviorSubject } from 'rxjs';
 const MOCK_VALUES_FROM_QUERY = ['option1', 'option2', 'option3', 'option4', 'option5'];
 
 jest.mock('./utils/get_esql_single_column_values', () => {
-  const getESQLSingleColumnValues = () => {
-    return { values: MOCK_VALUES_FROM_QUERY };
-  };
-  getESQLSingleColumnValues.isSuccess = () => {
-    return true;
-  };
-  return {
-    getESQLSingleColumnValues,
-  };
+  const fn = Object.assign(
+    jest.fn(async () => ({ values: MOCK_VALUES_FROM_QUERY })),
+    {
+      isSuccess: () => true,
+    }
+  );
+  return { getESQLSingleColumnValues: fn };
 });
+
+const getMock = () =>
+  jest.requireMock('./utils/get_esql_single_column_values').getESQLSingleColumnValues as jest.Mock;
 
 const mockFetch$ = new BehaviorSubject({});
 jest.mock('@kbn/presentation-publishing', () => ({
@@ -296,6 +297,55 @@ describe('initializeESQLControlManager', () => {
       await waitFor(() => {
         expect(setDataLoadingMock).toHaveBeenCalledWith(true);
       });
+    });
+  });
+
+  describe('abort signal', () => {
+    test('should pass an AbortSignal to getESQLSingleColumnValues', async () => {
+      const initialState = {
+        selected_options: [],
+        variable_name: 'variable1',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
+
+      const mock = getMock();
+      mock.mockClear();
+      initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+
+      await waitFor(() => {
+        expect(mock).toHaveBeenCalled();
+      });
+
+      const callArgs = mock.mock.calls[0][0];
+      expect(callArgs.signal).toBeInstanceOf(AbortSignal);
+      expect(callArgs.signal.aborted).toBe(false);
+    });
+
+    test('should abort the signal on cleanup', async () => {
+      const initialState = {
+        selected_options: [],
+        variable_name: 'variable1',
+        variable_type: ESQLVariableType.VALUES,
+        esql_query: 'FROM foo | STATS BY column',
+        control_type: EsqlControlType.VALUES_FROM_QUERY,
+      } as OptionsListESQLControlState;
+
+      const mock = getMock();
+      mock.mockClear();
+      const manager = initializeESQLControlManager(uuid, dashboardApi, initialState, jest.fn());
+
+      await waitFor(() => {
+        expect(mock).toHaveBeenCalled();
+      });
+
+      const callArgs = mock.mock.calls[0][0];
+      expect(callArgs.signal.aborted).toBe(false);
+
+      manager.cleanup();
+
+      expect(callArgs.signal.aborted).toBe(true);
     });
   });
 });
