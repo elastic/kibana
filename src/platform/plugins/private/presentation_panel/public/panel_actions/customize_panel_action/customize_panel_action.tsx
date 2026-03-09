@@ -19,6 +19,7 @@ import type {
   PublishesWritableTitle,
   PublishesUnifiedSearch,
   IsCustomizable,
+  PublishesWritableHideBorder,
 } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
@@ -41,6 +42,7 @@ export type CustomizePanelActionApi = CanAccessViewMode &
       PublishesWritableUnifiedSearch &
       PublishesWritableDescription &
       PublishesWritableTitle &
+      PublishesWritableHideBorder &
       HasParentApi<Partial<PublishesUnifiedSearch & TracksOverlays>>
   >;
 

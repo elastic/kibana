@@ -29,6 +29,7 @@ type UrlParamsDef = Record<string, UrlParamsValue>;
 interface EndpointDescription {
   availability?: EndpointAvailability;
   documentation?: string;
+  documentation_serverless?: string;
   id?: string;
   methods?: string[];
   patterns?: string[];
@@ -91,7 +92,7 @@ class StandaloneSpecDefinitionsService {
   addEndpointDescription(
     endpoint: string,
     description: EndpointDescription = {},
-    docsLinkToApiReference = false
+    isServerless = false
   ) {
     let copiedDescription: EndpointDescription = {};
     if (this.endpoints[endpoint]) {
@@ -118,8 +119,16 @@ class StandaloneSpecDefinitionsService {
       Object.assign(description.url_params, urlParamsDef);
     }
 
-    if (docsLinkToApiReference) {
-      description.documentation = 'https://www.elastic.co/docs/api';
+    if (isServerless) {
+      const serverlessDocUrl =
+        typeof description.documentation_serverless === 'string'
+          ? description.documentation_serverless.trim()
+          : undefined;
+      description.documentation = serverlessDocUrl || 'https://www.elastic.co/docs/api';
+
+      if (!serverlessDocUrl) {
+        delete description.documentation_serverless;
+      }
     }
 
     Object.assign(copiedDescription, description);

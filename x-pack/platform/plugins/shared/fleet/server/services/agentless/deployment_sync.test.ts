@@ -10,12 +10,16 @@ import { createAppContextStartContractMock } from '../../mocks';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
 import type { AgentPolicy } from '../../types';
+import { isAgentlessEnabled } from '../utils/agentless';
 
 import { syncAgentlessDeployments } from './deployment_sync';
 
 jest.mock('../agent_policy');
+jest.mock('../utils/agentless');
 
 function mockDependencies() {
+  jest.mocked(isAgentlessEnabled).mockReturnValue(true);
+
   const logger = loggingSystemMock.createLogger();
   const agentlessAgentService = {
     listAgentlessDeployments: jest.fn(),
@@ -453,6 +457,27 @@ describe('Agentless Deployment Sync', () => {
       expect(logger.info).toHaveBeenCalledWith(
         `[Agentless Deployment Sync][Dry Run] Creating deployment for policy policy8`
       );
+    });
+  });
+
+  describe('agentless not enabled', () => {
+    it('skips sync when agentless is not enabled', async () => {
+      jest.mocked(isAgentlessEnabled).mockReturnValue(false);
+      const logger = loggingSystemMock.createLogger();
+      const agentlessAgentService = {
+        listAgentlessDeployments: jest.fn(),
+        createAgentlessAgent: jest.fn(),
+        deleteAgentlessAgent: jest.fn(),
+      };
+
+      await syncAgentlessDeployments({ logger, agentlessAgentService });
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '[Agentless Deployment Sync] Agentless is not enabled. Skipping sync process.'
+      );
+      expect(agentlessAgentService.listAgentlessDeployments).not.toHaveBeenCalled();
+      expect(agentlessAgentService.createAgentlessAgent).not.toHaveBeenCalled();
+      expect(agentlessAgentService.deleteAgentlessAgent).not.toHaveBeenCalled();
     });
   });
 

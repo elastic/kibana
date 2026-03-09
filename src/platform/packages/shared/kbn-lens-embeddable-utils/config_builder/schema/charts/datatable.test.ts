@@ -687,8 +687,7 @@ describe('Datatable Schema', () => {
               range: 'absolute',
               steps: [
                 {
-                  type: 'from',
-                  from: 0,
+                  lt: 0,
                   color: '#000000',
                 },
               ],
@@ -779,8 +778,7 @@ describe('Datatable Schema', () => {
               range: 'absolute',
               steps: [
                 {
-                  type: 'from',
-                  from: 0,
+                  lt: 0,
                   color: '#000000',
                 },
               ],
@@ -798,8 +796,7 @@ describe('Datatable Schema', () => {
               range: 'absolute',
               steps: [
                 {
-                  type: 'from',
-                  from: 0,
+                  lt: 0,
                   color: '#000000',
                 },
               ],

@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
+import {
+  DeprecationInfoSchema,
+  ExperimentalDataStreamFeaturesSchema,
+} from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -143,23 +147,6 @@ const PackageIconSchema = schema.object({
   type: schema.maybe(schema.string()),
   size: schema.maybe(schema.string()),
   dark_mode: schema.maybe(schema.boolean()),
-});
-
-const DeprecationInfoSchema = schema.object({
-  description: schema.string(),
-  since: schema.string(),
-  replaced_by: schema.maybe(
-    schema.recordOf(
-      schema.oneOf([
-        schema.literal('package'),
-        schema.literal('policyTemplate'),
-        schema.literal('input'),
-        schema.literal('dataStream'),
-        schema.literal('variable'),
-      ]),
-      schema.string()
-    )
-  ),
 });
 
 export const PackageInfoSchema = schema
@@ -352,6 +339,7 @@ export const GetInputsResponseSchema = schema.oneOf([
       }),
       { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 

@@ -243,6 +243,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             <EuiSpacer size="m" />
             <SetupTechnologySelector
               disabled={isEditPage}
+              packageInfo={packageInfo}
               setupTechnology={setupTechnology}
               allowedSetupTechnologies={[SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS]}
               showBetaBadge={false}

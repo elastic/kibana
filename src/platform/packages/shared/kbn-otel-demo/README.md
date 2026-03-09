@@ -25,7 +25,7 @@ node scripts/otel_demo.js --teardown
 ## What This Does
 
 1. **Ensures minikube is running** - Starts it if needed
-2. **Enables Streams in Kibana** - Calls `POST /api/streams/_enable` to set up the logs index
+2. **Enables Streams in Kibana** - Calls `POST /api/streams/_enable` to set up the logs.otel index
 3. **Deploys OTel Demo to Kubernetes** - Creates namespace, deployments, services
 4. **Configures OTel Collector** with:
    - `filelog` receiver to collect container logs from `/var/log/pods`
@@ -75,7 +75,7 @@ node scripts/otel_demo.js [options]
 
 Options:
   --config, -c         Path to Kibana config file (default: config/kibana.dev.yml)
-  --logs-index         Index name for logs (default: "logs")
+  --logs-index         Index name for logs (default: "logs.otel")
   --teardown           Stop and remove the OTel Demo from Kubernetes
   --scenario, -s       Apply a failure scenario (can be repeated)
   --patch, -p          Patch scenarios onto running cluster (no redeploy)

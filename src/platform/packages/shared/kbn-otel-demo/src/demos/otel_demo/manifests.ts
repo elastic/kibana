@@ -53,7 +53,7 @@ function createCommonManifests(options: ManifestOptions): object[] {
     },
   });
 
-  // ClusterRole for k8sattributes
+  // ClusterRole for k8sattributes, k8s_cluster, kubeletstats, and k8s_events receivers
   manifests.push({
     apiVersion: 'rbac.authorization.k8s.io/v1',
     kind: 'ClusterRole',
@@ -63,12 +63,37 @@ function createCommonManifests(options: ManifestOptions): object[] {
     rules: [
       {
         apiGroups: [''],
-        resources: ['pods', 'namespaces'],
+        resources: [
+          'pods',
+          'namespaces',
+          'nodes',
+          'nodes/stats',
+          'nodes/proxy',
+          'services',
+          'events',
+          'replicationcontrollers',
+          'resourcequotas',
+        ],
         verbs: ['get', 'watch', 'list'],
       },
       {
         apiGroups: ['apps'],
-        resources: ['replicasets'],
+        resources: ['replicasets', 'deployments', 'daemonsets', 'statefulsets'],
+        verbs: ['get', 'watch', 'list'],
+      },
+      {
+        apiGroups: ['batch'],
+        resources: ['jobs', 'cronjobs'],
+        verbs: ['get', 'watch', 'list'],
+      },
+      {
+        apiGroups: ['autoscaling'],
+        resources: ['horizontalpodautoscalers'],
+        verbs: ['get', 'watch', 'list'],
+      },
+      {
+        apiGroups: ['events.k8s.io'],
+        resources: ['events'],
         verbs: ['get', 'watch', 'list'],
       },
     ],
@@ -131,6 +156,34 @@ function createCommonManifests(options: ManifestOptions): object[] {
                 { containerPort: 4318, name: 'otlp-http' },
                 { containerPort: 13133, name: 'health' },
               ],
+              securityContext: {
+                runAsUser: 0,
+                runAsGroup: 0,
+                privileged: true,
+                readOnlyRootFilesystem: false,
+              },
+              env: [
+                {
+                  name: 'K8S_NODE_NAME',
+                  valueFrom: { fieldRef: { fieldPath: 'spec.nodeName' } },
+                },
+                {
+                  name: 'OTEL_K8S_NODE_NAME',
+                  valueFrom: { fieldRef: { fieldPath: 'spec.nodeName' } },
+                },
+                {
+                  name: 'K8S_POD_NAME',
+                  valueFrom: { fieldRef: { fieldPath: 'metadata.name' } },
+                },
+                {
+                  name: 'K8S_POD_NAMESPACE',
+                  valueFrom: { fieldRef: { fieldPath: 'metadata.namespace' } },
+                },
+                {
+                  name: 'K8S_POD_IP',
+                  valueFrom: { fieldRef: { fieldPath: 'status.podIP' } },
+                },
+              ],
               volumeMounts: [
                 {
                   name: 'config',
@@ -144,8 +197,18 @@ function createCommonManifests(options: ManifestOptions): object[] {
                   mountPath: '/var/lib/docker/containers',
                   readOnly: true,
                 },
+                {
+                  name: 'hostfs',
+                  mountPath: '/hostfs',
+                  readOnly: true,
+                  mountPropagation: 'HostToContainer',
+                },
               ],
               livenessProbe: {
+                httpGet: { path: '/', port: 13133 },
+                initialDelaySeconds: 10,
+              },
+              readinessProbe: {
                 httpGet: { path: '/', port: 13133 },
                 initialDelaySeconds: 5,
               },
@@ -174,6 +237,12 @@ function createCommonManifests(options: ManifestOptions): object[] {
               name: 'varlibdockercontainers',
               hostPath: {
                 path: '/var/lib/docker/containers',
+              },
+            },
+            {
+              name: 'hostfs',
+              hostPath: {
+                path: '/',
               },
             },
           ],
@@ -348,6 +417,7 @@ export const otelDemoManifests: DemoManifestGenerator = {
         finalEnv = {
           ...finalEnv,
           OTEL_EXPORTER_OTLP_ENDPOINT: `http://otel-collector:${otlpPort}`,
+          OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE: 'cumulative',
           OTEL_RESOURCE_ATTRIBUTES: `service.namespace=${demoId}`,
           OTEL_SERVICE_NAME: svc.name,
         };

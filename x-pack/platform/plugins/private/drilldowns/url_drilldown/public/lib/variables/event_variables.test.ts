@@ -8,10 +8,10 @@
 import type { ValueClickTriggerEventScope } from './event_variables';
 import { getEventScopeValues, getEventVariableList } from './event_variables';
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_CLICK_ROW } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createPoint, rowClickData } from '../test/data';
 
-describe('VALUE_CLICK_TRIGGER', () => {
+describe('on_click_value', () => {
   describe('supports `points[]`', () => {
     test('getEventScopeValues()', () => {
       const mockDataPoints = [
@@ -84,9 +84,9 @@ describe('VALUE_CLICK_TRIGGER', () => {
   });
 });
 
-describe('ROW_CLICK_TRIGGER', () => {
+describe('on_click_row', () => {
   test('getEventVariableList() returns correct list of runtime variables', () => {
-    const vars = getEventVariableList(ROW_CLICK_TRIGGER);
+    const vars = getEventVariableList(ON_CLICK_ROW);
     expect(vars.map(({ label }) => label)).toEqual([
       'event.values',
       'event.keys',

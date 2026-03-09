@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/zod-helpers'
   - '@kbn/task-manager-plugin'
-  - '@kbn/core-lifecycle-server'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-http-server'
   - '@kbn/config-schema'
@@ -39,6 +38,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/scout-security'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/std'
   - '@kbn/es-query'
   - '@kbn/security-plugin'
 tags:

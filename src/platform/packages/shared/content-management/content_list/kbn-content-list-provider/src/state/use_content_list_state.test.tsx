@@ -50,25 +50,32 @@ describe('useContentListState', () => {
     consoleSpy.mockRestore();
   });
 
-  it('returns state, dispatch, and refetch', () => {
+  it('returns state, dispatch, and refetch when inside provider', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.state).toBeDefined();
-    expect(result.current.dispatch).toBeInstanceOf(Function);
-    expect(result.current.refetch).toBeInstanceOf(Function);
+    expect(result.current).toHaveProperty('state');
+    expect(result.current).toHaveProperty('dispatch');
+    expect(result.current).toHaveProperty('refetch');
   });
 
-  it('provides state with expected shape', () => {
+  it('returns state with the expected shape', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
     const { state } = result.current;
+
+    // Client state.
     expect(state).toHaveProperty('search');
+    expect(state.search).toHaveProperty('queryText');
     expect(state).toHaveProperty('filters');
     expect(state).toHaveProperty('sort');
+    expect(state.sort).toHaveProperty('field');
+    expect(state.sort).toHaveProperty('direction');
+
+    // Query data.
     expect(state).toHaveProperty('items');
     expect(state).toHaveProperty('totalItems');
     expect(state).toHaveProperty('isLoading');
@@ -89,5 +96,21 @@ describe('useContentListState', () => {
 
     expect(result.current.state.search.queryText).toBe('test query');
     expect(result.current.state.filters).toEqual({ search: 'test query' });
+  });
+
+  it('provides dispatch as a function', () => {
+    const { result } = renderHook(() => useContentListState(), {
+      wrapper: createWrapper(),
+    });
+
+    expect(typeof result.current.dispatch).toBe('function');
+  });
+
+  it('provides refetch as a function', () => {
+    const { result } = renderHook(() => useContentListState(), {
+      wrapper: createWrapper(),
+    });
+
+    expect(typeof result.current.refetch).toBe('function');
   });
 });

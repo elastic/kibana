@@ -25,6 +25,8 @@ import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObjectAttributes, IBasePath, SavedObjectsServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
@@ -71,6 +73,7 @@ const adHocTaskCounter = new AdHocTaskCounter();
 const randomId = () => `id-${_.random(1, 20)}`;
 
 const coreStart = coreMock.createStart();
+const mockExecutionContextStart = executionContextServiceMock.createSetupContract();
 
 const basePathMock = { get: () => '/', serverBasePath: '/' } as unknown as IBasePath;
 
@@ -84,6 +87,10 @@ beforeEach(() => {
   mockGetValidatedTaskInstanceForUpdating = jest
     .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceForUpdating')
     .mockImplementation((task) => task);
+
+  mockExecutionContextStart.withContext.mockImplementation((ctx: unknown, fn: () => unknown) =>
+    fn()
+  );
 });
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -146,6 +153,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -275,6 +283,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -429,6 +438,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       const task = {
@@ -552,6 +562,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -679,6 +690,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -866,6 +878,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -994,6 +1007,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -1223,6 +1237,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
       store.registerEncryptedSavedObjectsClient(esoClient);
     });
@@ -1984,6 +1999,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => false,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
@@ -2058,6 +2074,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -2610,6 +2627,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2734,6 +2752,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2808,6 +2827,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -2875,6 +2895,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -2977,6 +2998,7 @@ describe('TaskStore', () => {
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
             basePath: basePathMock,
+            executionContext: mockExecutionContextStart,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -3006,6 +3028,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -3033,6 +3056,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -3062,6 +3086,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -3335,6 +3360,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       const task1 = {
@@ -3370,6 +3396,7 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -3628,6 +3655,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3680,6 +3708,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3728,6 +3757,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
     test('should pass requestTimeout and retryOnTimeout', async () => {
@@ -3765,6 +3795,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 
@@ -3882,6 +3913,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
       });
     });
 

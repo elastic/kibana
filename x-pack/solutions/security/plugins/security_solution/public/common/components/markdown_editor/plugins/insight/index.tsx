@@ -36,7 +36,11 @@ import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/comp
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { getFieldValue } from '@kbn/discover-utils';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
 import { FormProvider, useController, useForm } from 'react-hook-form';
+import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../../../hooks/use_experimental_features';
@@ -45,7 +49,7 @@ import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
 import { useInsightQuery } from './use_insight_query';
 import { type Provider, useInsightDataProviders } from './use_insight_data_providers';
-import { BasicAlertDataContext } from '../../../../../flyout/document_details/left/components/investigation_guide_view';
+import { AlertDataContext } from '../../../../../flyout_v2/investigation_guide/components/investigation_guide_view';
 import { InvestigateInTimelineButton } from '../../../event_details/investigate_in_timeline_button';
 import {
   DEFAULT_FROM_MOMENT,
@@ -156,13 +160,19 @@ const LicensedInsightComponent = ({
       title: i18n.PARSE_ERROR,
     });
   }
-  const { data: alertData, timestamp } = useContext(BasicAlertDataContext);
+  const hit = useContext(AlertDataContext);
+  // This is a duplication of the code happening in the `timelineSearchStrategy`
+  // We're doing this here to avoid having to refactor the current logic to receive the data in a different format.
+  // The approach is to recreate the array similar to the one returned within the `timelineSearchStrategy` and that we often call in the call `dataFormattedForFieldBrowser`;
+  // We should eventually refactor to accept the raw hit.
+  const alertData = getTimelineFieldsDataFromHit(hit.raw as SearchHit<EventHit>);
   const { dataProviders, filters } = useInsightDataProviders({
     providers: parsedProviders,
     alertData,
   });
   const relativeTimerange: TimeRange | null = useMemo(() => {
     if (relativeFrom && relativeTo) {
+      const timestamp = getFieldValue(hit, '@timestamp') as string | undefined;
       const alertRelativeDate = timestamp ? moment(timestamp) : moment();
       const from = parseDateWithDefault(
         relativeFrom,
@@ -186,7 +196,7 @@ const LicensedInsightComponent = ({
     } else {
       return null;
     }
-  }, [relativeFrom, relativeTo, timestamp]);
+  }, [hit, relativeFrom, relativeTo]);
 
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
@@ -227,7 +237,7 @@ const LicensedInsightComponent = ({
           keepDataView={true}
           data-test-subj="insight-investigate-in-timeline-button"
         >
-          <EuiIcon type="timeline" />
+          <EuiIcon type="timeline" aria-hidden={true} />
           {` ${label} (${numeral(totalCount).format(resultFormat)})`}
         </InvestigateInTimelineButton>
         <div>{description}</div>

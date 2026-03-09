@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/content-list-assembly'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-mock-data'
+  - '@kbn/content-management-tags'
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/content-list-toolbar'

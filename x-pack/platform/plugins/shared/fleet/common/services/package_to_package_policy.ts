@@ -138,7 +138,8 @@ export const packageToPackagePolicyInputs = (
       packageInput.data_streams
     ).map((packageStream) => {
       const stream: NewPackagePolicyInputStream = {
-        enabled: packageStream.enabled === false ? false : true,
+        // disable deprecated streams on new installations
+        enabled: packageStream.deprecated ? false : packageStream.enabled !== false,
         data_stream: packageStream.data_stream,
       };
       if (packageStream.vars && packageStream.vars.length) {
@@ -159,6 +160,10 @@ export const packageToPackagePolicyInputs = (
       ? !!streamsForInput.find((stream) => stream.enabled)
       : true;
 
+    // Disable deprecated inputs on new installations
+    if (enableInput && packageInput.deprecated) {
+      enableInput = false;
+    }
     // If we are wanting to enabling this input, check if we only want
     // to enable specific integrations (aka `policy_template`s)
     if (
@@ -179,6 +184,10 @@ export const packageToPackagePolicyInputs = (
 
     if (Object.keys(varsForInput).length) {
       input.vars = varsForInput;
+    }
+
+    if (packageInput.deprecated) {
+      input.deprecated = packageInput.deprecated;
     }
 
     inputs.push(input);

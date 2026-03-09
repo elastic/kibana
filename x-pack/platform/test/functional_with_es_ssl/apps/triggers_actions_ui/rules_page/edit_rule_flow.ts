@@ -213,6 +213,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         // Click the edit button
+        await testSubjects.click('ruleActionsButton');
         await testSubjects.click('openEditRuleFlyoutButton');
 
         // Wait for navigation to edit page
@@ -302,6 +303,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         // Click the edit button
+        await testSubjects.click('ruleActionsButton');
         await testSubjects.click('openEditRuleFlyoutButton');
 
         // Wait for edit form to load

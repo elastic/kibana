@@ -7,66 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css, type SerializedStyles } from '@emotion/react';
-import { useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { type UseEuiTheme, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { useMemo } from 'react';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { AiButtonVariant } from './types';
+import type {
+  AiButtonGradientOptions,
+  AiButtonGradientStyles,
+  AiGradientColors,
+  ResolvedVariantStyles,
+  SvgAiGradient,
+} from './gradient_types';
 
-// Keep constants local to this file so Storybook can be used to iterate independently.
-// Hard-coded values are used to avoid relying on EUI tokens that are not yet available.
-const gradientStartPercent = 2.98;
-const gradientEndPercent = 66.24;
+const DIAGONAL_GRADIENT_START_PERCENT = 2.98;
+const DIAGONAL_GRADIENT_END_PERCENT = 66.24;
+const DIAGONAL_GRADIENT_ANGLE = 135;
+const HORIZONTAL_GRADIENT_ANGLE = 90;
+const VERTICAL_GRADIENT_ANGLE = 180;
+const HOVER_GRADIENT_START_PERCENT = 18;
+const HOVER_GRADIENT_END_PERCENT = 83;
+// Text buttons are wider than icon-only, so steepen the gradient angle to match the design.
+const ANGLE_BOOST = 30;
 
-const diagonalButtonGradientAngle = 150;
-const verticalButtonGradientAngle = 90;
-const buttonGradientStartPercent = 3.97;
-const buttonGradientEndPercent = 65.6;
-
-const buttonTextGradientAngle = 170;
-
-const gradients = {
-  buttonBackground: {
-    diagonalAngle: diagonalButtonGradientAngle,
-    verticalAngle: verticalButtonGradientAngle,
-    startPercent: buttonGradientStartPercent,
-    endPercent: buttonGradientEndPercent,
-    lightMode: { startColor: '#D9E8FF', endColor: '#ECE2FE' },
-    darkMode: { startColor: '#123A79', endColor: '#3B1D66' },
-  },
-  foreground: {
-    angle: buttonTextGradientAngle,
-    startPercent: gradientStartPercent,
-    endPercent: gradientEndPercent,
-    lightMode: { startColor: '#1750BA', endColor: '#6B3C9F' },
-    darkMode: { startColor: '#D9E8FF', endColor: '#ECE2FE' },
-  },
-} as const;
-
-// TEMP: design iteration shades for dark-mode base background.
-// These will be replaced with tokens once EUI exposes AI button gradient tokens.
-const darkModeBaseBackgroundColors = {
-  startColor: '#61A2FF',
-  endColor: '#C5A5FA',
-} as const;
-
-// TEMP: design iteration shades for dark-mode filled background.
-const darkModeFilledBackgroundColors = {
-  startColor: '#0D2F5E',
-  endColor: '#3E2C63',
-} as const;
-
-const darkModeBaseForegroundColor = '#07101F';
-
-// TEMP: design iteration shades for light-mode filled background.
-const lightModeFilledBackgroundColors = {
-  startColor: '#0B64DD',
-  endColor: '#8144CC',
-} as const;
-
-const lightModeFilledForegroundColor = '#FFFFFF';
-
-const makeLinearGradient = ({
+const linearGradientCss = ({
   angle,
   startColor,
   startPercent,
@@ -80,87 +43,61 @@ const makeLinearGradient = ({
   endPercent: number;
 }) => `linear-gradient(${angle}deg, ${startColor} ${startPercent}%, ${endColor} ${endPercent}%)`;
 
-export interface AiButtonGradientOptions {
-  readonly isFilled?: boolean;
-  /**
-   * When provided, variant-specific gradient behavior can be applied.
-   * This is optional to keep backwards compatibility with existing `fill` callers.
-   */
-  readonly variant?: AiButtonVariant;
-}
-
-export interface AiButtonGradientStyles {
-  readonly buttonCss: SerializedStyles;
-  readonly labelCss: SerializedStyles;
-}
-
-export interface AiGradientStopsDefinition {
-  readonly startColor: string;
-  readonly endColor: string;
-  readonly startOffsetPercent: number;
-  readonly endOffsetPercent: number;
-}
-
-interface AiGradientColors {
-  readonly startColor: string;
-  readonly endColor: string;
-}
-
-const makeButtonBackgroundGradient = ({
-  colors,
-  angle,
-}: {
-  colors: AiGradientColors;
-  angle: number;
-}) =>
-  makeLinearGradient({
+const buildLinearGradient = (
+  colors: AiGradientColors,
+  {
+    angle = DIAGONAL_GRADIENT_ANGLE,
+    startPercent = DIAGONAL_GRADIENT_START_PERCENT,
+    endPercent = DIAGONAL_GRADIENT_END_PERCENT,
+  }: { angle?: number; startPercent?: number; endPercent?: number } = {}
+): string =>
+  linearGradientCss({
     angle,
     startColor: colors.startColor,
-    startPercent: gradients.buttonBackground.startPercent,
+    startPercent,
     endColor: colors.endColor,
-    endPercent: gradients.buttonBackground.endPercent,
+    endPercent,
   });
 
-const makeForegroundGradient = (colors: AiGradientColors) =>
-  makeLinearGradient({
-    angle: gradients.foreground.angle,
-    startColor: colors.startColor,
-    startPercent: gradients.foreground.startPercent,
-    endColor: colors.endColor,
-    endPercent: gradients.foreground.endPercent,
-  });
-
-const makeForegroundStops = (colors: AiGradientColors): AiGradientStopsDefinition => ({
-  startColor: colors.startColor,
-  endColor: colors.endColor,
-  startOffsetPercent: gradients.foreground.startPercent,
-  endOffsetPercent: gradients.foreground.endPercent,
-});
-
-const getForegroundColors = ({
-  isDarkMode,
+const resolveGradientAngle = ({
+  iconOnly,
   variant,
-}: {
-  isDarkMode: boolean;
-  variant?: AiButtonVariant;
-}): AiGradientColors => {
-  if (isDarkMode && (variant === 'accent' || variant === 'empty' || variant === 'outlined')) {
-    return darkModeBaseBackgroundColors;
+}: Pick<AiButtonGradientOptions, 'iconOnly' | 'variant'>): number => {
+  if (iconOnly) {
+    return DIAGONAL_GRADIENT_ANGLE;
   }
 
-  return isDarkMode ? gradients.foreground.darkMode : gradients.foreground.lightMode;
+  if (variant === 'base') {
+    return HORIZONTAL_GRADIENT_ANGLE;
+  }
+
+  return DIAGONAL_GRADIENT_ANGLE + ANGLE_BOOST;
 };
 
-const gradientTextCss = (cssGradient: string) => css`
+const getLabelColors = (colors: UseEuiTheme['euiTheme']['colors']): AiGradientColors => ({
+  startColor: colors.textPrimary,
+  endColor: colors.textAssistance,
+});
+
+const gradientLabelCss = (cssGradient: string, hoverGradient?: string) => css`
   display: inline-block;
   background: ${cssGradient} !important;
   background-clip: text !important;
   -webkit-background-clip: text !important;
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
+
+  ${hoverGradient
+    ? `button:hover:not(:disabled) &,
+      button:focus-visible:not(:disabled) & {
+        background: ${hoverGradient} !important;
+        background-clip: text !important;
+        -webkit-background-clip: text !important;
+      }`
+    : ''}
 `;
 
-const solidTextCss = (color: string) => css`
+const plainLabelCss = (color: string) => css`
   background: none !important;
   background-clip: initial !important;
   -webkit-background-clip: initial !important;
@@ -168,12 +105,13 @@ const solidTextCss = (color: string) => css`
   -webkit-text-fill-color: currentColor !important;
 `;
 
-const outlinedBorderRingCss = (borderGradient: string) => css`
+// Uses ::after so it doesn't collide with EUI's ::before interaction overlay.
+const outlinedBorderGradientCss = (borderGradient: string) => css`
   position: relative;
   border: none;
   isolation: isolate;
 
-  &::before {
+  &::after {
     content: '';
     position: absolute;
     inset: 0;
@@ -188,139 +126,147 @@ const outlinedBorderRingCss = (borderGradient: string) => css`
   }
 `;
 
+const resolveVariantStyles = (
+  variant: AiButtonVariant,
+  euiTheme: UseEuiTheme['euiTheme'],
+  buttonGradientAngle: number
+): ResolvedVariantStyles => {
+  const {
+    colors,
+    components: {
+      buttons: { backgroundPrimaryHover, backgroundAssistanceHover },
+    },
+  } = euiTheme;
+  const labelGradient = buildLinearGradient(getLabelColors(colors));
+
+  const hoverGradient = linearGradientCss({
+    angle: VERTICAL_GRADIENT_ANGLE,
+    startColor: backgroundPrimaryHover,
+    startPercent: HOVER_GRADIENT_START_PERCENT,
+    endColor: backgroundAssistanceHover,
+    endPercent: HOVER_GRADIENT_END_PERCENT,
+  });
+
+  const defaultLabelColor = colors.textPrimary;
+
+  switch (variant) {
+    case 'empty':
+      return {
+        buttonBackground: 'transparent',
+        hoverBackground: hoverGradient,
+        labelColor: defaultLabelColor,
+        labelCss: gradientLabelCss(labelGradient),
+      };
+
+    case 'outlined':
+      return {
+        buttonBackground: 'transparent',
+        hoverBackground: hoverGradient,
+        borderGradient: buildLinearGradient(
+          {
+            startColor: colors.backgroundFilledPrimary,
+            endColor: colors.backgroundFilledAssistance,
+          },
+          {
+            angle: buttonGradientAngle,
+          }
+        ),
+        labelColor: defaultLabelColor,
+        labelCss: gradientLabelCss(labelGradient),
+      };
+
+    case 'accent': {
+      const accentBackground = buildLinearGradient(
+        {
+          startColor: colors.backgroundFilledPrimary,
+          endColor: colors.backgroundFilledAssistance,
+        },
+        { angle: buttonGradientAngle }
+      );
+
+      return {
+        buttonBackground: accentBackground,
+        hoverBackground: `${hoverGradient}, ${accentBackground}`,
+        labelColor: colors.textInverse,
+        labelCss: plainLabelCss(colors.textInverse),
+      };
+    }
+
+    case 'base': {
+      const baseBackground = buildLinearGradient(
+        {
+          startColor: colors.backgroundLightPrimary,
+          endColor: colors.backgroundLightAssistance,
+        },
+        { angle: buttonGradientAngle }
+      );
+
+      return {
+        buttonBackground: baseBackground,
+        hoverBackground: `${hoverGradient}, ${baseBackground}`,
+        labelColor: defaultLabelColor,
+        labelCss: gradientLabelCss(labelGradient, `${hoverGradient}, ${labelGradient}`),
+      };
+    }
+  }
+};
+
 export const useAiButtonGradientStyles = ({
-  isFilled,
-  variant,
+  variant = 'base',
+  iconOnly,
 }: AiButtonGradientOptions = {}): AiButtonGradientStyles => {
-  const isDarkMode = useKibanaIsDarkMode();
+  const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
-    const resolvedVariant = (variant ?? (isFilled ? 'accent' : 'base')) as AiButtonVariant;
-
-    const accentGradientColors = isDarkMode
-      ? darkModeFilledBackgroundColors
-      : lightModeFilledBackgroundColors;
-    const accentBackgroundAngle = isDarkMode
-      ? gradients.buttonBackground.verticalAngle
-      : gradients.buttonBackground.diagonalAngle;
-    const baseBackgroundAngle = isDarkMode
-      ? gradients.buttonBackground.diagonalAngle
-      : gradients.buttonBackground.verticalAngle;
-
-    let outlinedBorderGradientCss: string | undefined;
-    let buttonBackground: string;
-    if (resolvedVariant === 'empty') {
-      buttonBackground = 'transparent';
-    } else if (resolvedVariant === 'outlined') {
-      outlinedBorderGradientCss = makeButtonBackgroundGradient({
-        colors: accentGradientColors,
-        angle: accentBackgroundAngle,
-      });
-      buttonBackground = 'transparent';
-    } else if (resolvedVariant === 'accent') {
-      buttonBackground = makeButtonBackgroundGradient({
-        colors: accentGradientColors,
-        angle: accentBackgroundAngle,
-      });
-    } else {
-      // base
-      buttonBackground = makeButtonBackgroundGradient({
-        colors: isDarkMode ? darkModeBaseBackgroundColors : gradients.buttonBackground.lightMode,
-        angle: baseBackgroundAngle,
-      });
-    }
-    let buttonForegroundColor: string | undefined;
-    if (!isDarkMode && resolvedVariant === 'accent') {
-      buttonForegroundColor = lightModeFilledForegroundColor;
-    } else if (isDarkMode && resolvedVariant === 'base') {
-      buttonForegroundColor = darkModeBaseForegroundColor;
-    }
+    const buttonGradientAngle = resolveGradientAngle({ iconOnly, variant });
+    const { buttonBackground, hoverBackground, borderGradient, labelColor, labelCss } =
+      resolveVariantStyles(variant, euiTheme, buttonGradientAngle);
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
-      border-radius: 4px;
-      ${buttonForegroundColor ? `color: ${buttonForegroundColor} !important;` : ''}
-      ${outlinedBorderGradientCss ? outlinedBorderRingCss(outlinedBorderGradientCss) : ''}
+      border-radius: ${euiTheme.border.radius.medium};
+      color: ${labelColor} !important;
+      ${borderGradient ? outlinedBorderGradientCss(borderGradient) : ''}
 
-      &:hover:not(:disabled) {
-        background: ${buttonBackground} !important;
-      }
-      &:focus:not(:disabled) {
-        background: ${buttonBackground} !important;
-      }
-      &:disabled {
-        opacity: 0.5;
+      &:hover:not(:disabled),
+      &:focus-visible:not(:disabled) {
+        background: ${hoverBackground} !important;
+        /* EUI applies hover/active via an opaque ::before overlay
+           (euiButtonInteractionStyles in global_styling/mixins/_button).
+           Neutralising it so our custom gradient background is visible. */
+        &::before {
+          background-color: transparent !important;
+        }
       }
     `;
 
-    let labelCss: SerializedStyles;
-    if (isDarkMode && resolvedVariant === 'base') {
-      labelCss = solidTextCss(darkModeBaseForegroundColor);
-    } else if (!isDarkMode && resolvedVariant === 'accent') {
-      labelCss = css`
-        color: ${lightModeFilledForegroundColor};
-      `;
-    } else {
-      labelCss = gradientTextCss(
-        makeForegroundGradient(getForegroundColors({ isDarkMode, variant: resolvedVariant }))
-      );
-    }
-
-    return {
-      buttonCss,
-      labelCss,
-    };
-  }, [isFilled, isDarkMode, variant]);
+    return { buttonCss, labelCss };
+  }, [variant, iconOnly, euiTheme]);
 };
 
-export interface SvgAiGradient {
-  /**
-   * Emotion CSS that applies the gradient to EUI icons (`.euiIcon`) via `fill/stroke`.
-   */
-  readonly iconGradientCss?: SerializedStyles;
-  /**
-   * The generated gradient id used by `SvgAiGradientDefs`.
-   */
-  readonly gradientId: string;
-  /**
-   * The gradient stops used by the defs component.
-   */
-  readonly stops: AiGradientStopsDefinition;
-}
-export const useSvgAiGradient = ({
-  isFilled,
-  variant,
-}: AiButtonGradientOptions = {}): SvgAiGradient => {
-  const isDarkMode = useKibanaIsDarkMode();
-
+export const useSvgAiGradient = ({ variant }: AiButtonGradientOptions = {}): SvgAiGradient => {
+  const { euiTheme } = useEuiTheme();
   const gradientId = useGeneratedHtmlId({ prefix: 'kbnAiButtonIconGradient' });
-  const gradientUrl = `url(#${gradientId})`;
 
-  const iconGradientCss = useMemo(() => {
-    // Backwards compatible default: filled buttons don't use gradient icons unless a variant is provided.
-    if (variant == null && isFilled) return undefined;
-    // Dark mode base should be a solid foreground color.
-    if (variant === 'base' && isDarkMode) return undefined;
-    // Keep light mode filled icons as solid (existing behavior); apply gradient in dark mode.
-    if (variant === 'accent' && isFilled && !isDarkMode) return undefined;
-    return css`
-      & .euiIcon {
-        fill: ${gradientUrl} !important;
-      }
-      & .euiIcon [fill]:not([fill='none']) {
-        fill: ${gradientUrl} !important;
-      }
-      & .euiIcon [stroke]:not([stroke='none']) {
-        stroke: ${gradientUrl} !important;
-      }
-    `;
-  }, [gradientUrl, isDarkMode, isFilled, variant]);
+  return useMemo(() => {
+    const gradientUrl = `url(#${gradientId})`;
 
-  const foregroundColors = getForegroundColors({ isDarkMode, variant });
+    const iconGradientCss =
+      variant !== 'accent'
+        ? css`
+            & .euiIcon,
+            & .euiIcon [fill]:not([fill='none']) {
+              fill: ${gradientUrl} !important;
+            }
+          `
+        : undefined;
 
-  return {
-    iconGradientCss,
-    gradientId,
-    stops: makeForegroundStops(foregroundColors),
-  };
+    const labelColors = getLabelColors(euiTheme.colors);
+
+    return {
+      iconGradientCss,
+      gradientId,
+      colors: labelColors,
+    };
+  }, [gradientId, variant, euiTheme]);
 };

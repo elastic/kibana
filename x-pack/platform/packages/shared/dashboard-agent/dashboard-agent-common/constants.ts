@@ -11,11 +11,6 @@
 export const DASHBOARD_ATTACHMENT_TYPE = 'platform.dashboard.dashboard_state';
 
 /**
- * Dashboard agent ID
- */
-export const DASHBOARD_AGENT_ID = 'platform.dashboard.dashboard_agent';
-
-/**
  * UI event type for panel added
  */
 export const DASHBOARD_PANEL_ADDED_EVENT = 'dashboard:panel_added';

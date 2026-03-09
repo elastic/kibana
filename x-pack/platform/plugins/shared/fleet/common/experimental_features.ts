@@ -24,9 +24,12 @@ const _allowedExperimentalValues = {
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
   enableEsqlViewInstall: false,
   enableSloTemplates: true,
-  newBrowseIntegrationUx: false, // When enabled integrations, browse integrations page will use the new UX.
+  newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: false, // When enabled, version specific policies will be created when packages use agent version conditions
-  enableIntegrationInactivityAlerting: false, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
+  enableVarGroups: false, // When enabled, var_groups from the package spec drive conditional variable visibility and input filtering.
+  enableIntegrationInactivityAlerting: true, // When enabled, an inactivity monitoring alerting rule template is created on fresh integration package install.
+  enableSimplifiedAgentlessUX: true, // When enabled, the agentless deployment mode will be simplified for single input/datastreams integrations.
+  enableOpAMP: false, // When enabled, OpAMP features will be available in the API and UI.
 };
 
 /**

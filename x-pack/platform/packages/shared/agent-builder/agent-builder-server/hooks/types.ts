@@ -10,6 +10,7 @@ import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
 import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
+import type { ToolHandlerContext } from '../tools/handler';
 
 export { HookLifecycle, HookExecutionMode };
 
@@ -33,6 +34,7 @@ interface ToolCallHookContextBase extends AgentHookContextBase {
 export type BeforeToolCallHookContext = ToolCallHookContextBase;
 export interface AfterToolCallHookContext extends ToolCallHookContextBase {
   toolReturn: RunToolReturn;
+  toolHandlerContext: ToolHandlerContext;
 }
 
 export interface HookContextByLifecycle {

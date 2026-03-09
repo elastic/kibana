@@ -51,6 +51,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   varsReducer,
+  hasMultipleEnabledPolicyTemplates,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -263,32 +264,34 @@ export async function getPackagePolicySavedObjectType() {
 }
 
 /**
- * Returns all agent version strings that have been compiled into `inputs_for_versions`
- * across the package policies belonging to the given agent policy. These versions are
- * used to generate version-specific fleet-policies documents so agents on non-default
- * versions continue to receive policy updates after the policy is revised.
+ * Returns the union of all agent version keys stored in inputs_for_versions across every
+ * package policy that belongs to the given agent policy. Used by deployPolicies to ensure
+ * non-default agent versions (e.g. 9.1 from an enrolled agent) get updated .fleet-policies
+ * documents when the agent policy changes, not just the common default versions.
  */
 export async function getCompiledVersionsForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicyId: string
 ): Promise<string[]> {
+  if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
+    return [];
+  }
   const savedObjectType = await getPackagePolicySavedObjectType();
-  const result = await soClient.find<PackagePolicySOAttributes>({
+  const packagePolicySOs = await soClient.find<PackagePolicySOAttributes>({
     type: savedObjectType,
-    filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)} AND ${savedObjectType}.attributes.latest_revision:true`,
+    filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
+      agentPolicyId
+    )} AND ${savedObjectType}.attributes.latest_revision:true`,
     perPage: SO_SEARCH_LIMIT,
   });
 
-  const versionSet = new Set<string>();
-  for (const so of result.saved_objects) {
-    const inputsForVersions = so.attributes?.inputs_for_versions;
-    if (inputsForVersions) {
-      for (const version of Object.keys(inputsForVersions)) {
-        versionSet.add(version);
-      }
+  const versionKeys = new Set<string>();
+  for (const so of packagePolicySOs.saved_objects) {
+    for (const version of Object.keys(so.attributes.inputs_for_versions ?? {})) {
+      versionKeys.add(version);
     }
   }
-  return Array.from(versionSet);
+  return [...versionKeys];
 }
 
 export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
@@ -721,8 +724,36 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
     const t = apm.startTransaction('compile-package-policy-versions', 'fleet');
 
+    const savedObjectType = await getPackagePolicySavedObjectType();
+
+    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
+      savedObjectType,
+      packagePolicy.id
+    );
+
+    const existingInputsForVersions = packagePolicySO.attributes.inputs_for_versions ?? {};
+
+    let versionsToCompile: string[];
+    if (agentVersions) {
+      // Async task path: skip versions already compiled to avoid unnecessary recompilation and
+      // deployment. The stored inputs are guaranteed to be current because the create/update
+      // path (below) recompiles all previously stored versions whenever the package policy changes.
+      versionsToCompile = agentVersions.filter((v) => !existingInputsForVersions[v]);
+      if (versionsToCompile.length === 0) {
+        t.end();
+        return;
+      }
+    } else {
+      // Create/update path: compile default common agent versions plus any extra versions already
+      // stored in inputs_for_versions (e.g. from agents that enrolled on older versions), so
+      // that all stored inputs stay current after a package policy configuration change.
+      const defaultVersions = await getAgentVersionsForVersionSpecificPolicies();
+      const existingVersionKeys = Object.keys(existingInputsForVersions);
+      versionsToCompile = [...new Set([...defaultVersions, ...existingVersionKeys])];
+    }
+
     const inputsForVersions: Record<string, PackagePolicyInput[]> = {};
-    for (const version of agentVersions ?? (await getAgentVersionsForVersionSpecificPolicies())) {
+    for (const version of versionsToCompile) {
       const inputs = await recompileInputsWithAgentVersion(
         packageInfo!,
         packagePolicy,
@@ -732,17 +763,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       inputsForVersions[version] = inputs;
     }
 
-    const savedObjectType = await getPackagePolicySavedObjectType();
-
-    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(
-      savedObjectType,
-      packagePolicy.id
-    );
-
     await soClient
       .update<PackagePolicySOAttributes>(savedObjectType, packagePolicy.id, {
         inputs_for_versions: {
-          ...packagePolicySO.attributes.inputs_for_versions,
+          ...existingInputsForVersions,
           ...inputsForVersions,
         },
       })
@@ -3438,6 +3462,15 @@ function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: 
         })
       );
     }
+  }
+
+  if (
+    pkgInfo.policy_templates_behavior === 'individual_policies' &&
+    hasMultipleEnabledPolicyTemplates(packagePolicy)
+  ) {
+    throw new FleetError(
+      `Unable to create integration policy. Package '${pkgInfo.name}' with individual policy templates cannot have enabled inputs from multiple policy templates.`
+    );
   }
 }
 

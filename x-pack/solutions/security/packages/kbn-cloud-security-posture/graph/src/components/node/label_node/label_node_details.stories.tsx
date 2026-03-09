@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { ThemeProvider, css } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { LabelNodeViewModel } from '../..';
 import { Graph } from '../..';
@@ -41,17 +41,15 @@ const Template = () => {
   );
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
-      <Graph
-        css={css`
-          height: 100%;
-          width: 100%;
-        `}
-        nodes={nodes}
-        edges={[]}
-        interactive={true}
-      />
-    </ThemeProvider>
+    <Graph
+      css={css`
+        height: 100%;
+        width: 100%;
+      `}
+      nodes={nodes}
+      edges={[]}
+      interactive={true}
+    />
   );
 };
 

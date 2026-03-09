@@ -119,7 +119,7 @@ export const checkForUnknownDocs =
     UnknownDocsFound | {}
   > =>
   () => {
-    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery.bool);
+    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery?.bool);
     return getAggregatedTypesDocuments(client, indexName, excludeQuery)
       .then((unknownDocs) => {
         if (unknownDocs.length) {
