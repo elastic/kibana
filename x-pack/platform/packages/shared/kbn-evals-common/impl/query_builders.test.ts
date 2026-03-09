@@ -7,6 +7,8 @@
 
 import {
   buildRunFilterQuery,
+  buildExampleScoresQuery,
+  buildDatasetExampleScoresQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
   SCORES_SORT_ORDER,
@@ -17,6 +19,29 @@ import {
 } from './query_builders';
 
 describe('query_builders', () => {
+  describe('buildExampleScoresQuery', () => {
+    it('filters by example.id', () => {
+      const query = buildExampleScoresQuery('example-123');
+      expect(query).toEqual({
+        bool: { must: [{ term: { 'example.id': 'example-123' } }] },
+      });
+    });
+  });
+
+  describe('buildDatasetExampleScoresQuery', () => {
+    it('filters by example.dataset.id and run_id', () => {
+      const query = buildDatasetExampleScoresQuery('dataset-123', 'run-123');
+      expect(query).toEqual({
+        bool: {
+          must: [
+            { term: { 'example.dataset.id': 'dataset-123' } },
+            { term: { run_id: 'run-123' } },
+          ],
+        },
+      });
+    });
+  });
+
   describe('buildRunFilterQuery', () => {
     it('filters by run_id only when no options provided', () => {
       const query = buildRunFilterQuery('run-123');
@@ -103,13 +128,29 @@ describe('query_builders', () => {
       });
     });
 
+    it('filters by datasetId', () => {
+      const query = buildRunsListingFilterQuery({ datasetId: 'dataset-1' });
+      expect(query).toEqual({
+        bool: { filter: [{ term: { 'example.dataset.id': 'dataset-1' } }] },
+      });
+    });
+
+    it('filters by datasetName', () => {
+      const query = buildRunsListingFilterQuery({ datasetName: 'Dataset One' });
+      expect(query).toEqual({
+        bool: { filter: [{ term: { 'example.dataset.name': 'Dataset One' } }] },
+      });
+    });
+
     it('combines all filters when all options are provided', () => {
       const query = buildRunsListingFilterQuery({
         suiteId: 'suite-a',
         modelId: 'gpt-4',
         branch: 'main',
+        datasetId: 'dataset-1',
+        datasetName: 'Dataset One',
       }) as { bool: { filter: unknown[] } };
-      expect(query.bool.filter).toHaveLength(3);
+      expect(query.bool.filter).toHaveLength(5);
     });
   });
 
@@ -136,6 +177,8 @@ describe('query_builders', () => {
         expect.arrayContaining([
           'latest_timestamp',
           'suite_id',
+          'dataset_id',
+          'dataset_name',
           'task_model_id',
           'task_model_family',
           'task_model_provider',
@@ -157,6 +200,8 @@ describe('query_builders', () => {
       doc_count: 10,
       latest_timestamp: { value_as_string: '2025-01-01T00:00:00Z' },
       suite_id: { buckets: [{ key: 'suite-a' }] },
+      dataset_id: { buckets: [{ key: 'dataset-1' }] },
+      dataset_name: { buckets: [{ key: 'Dataset One' }] },
       task_model_id: { buckets: [{ key: 'gpt-4' }] },
       task_model_family: { buckets: [{ key: 'gpt-4' }] },
       task_model_provider: { buckets: [{ key: 'openai' }] },
@@ -196,6 +241,8 @@ describe('query_builders', () => {
         run_id: 'run-1',
         timestamp: '2025-01-01T00:00:00Z',
         suite_id: 'suite-a',
+        dataset_id: 'dataset-1',
+        dataset_name: 'Dataset One',
         task_model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' },
         evaluator_model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' },
         git_branch: 'main',
@@ -235,11 +282,15 @@ describe('query_builders', () => {
       const bucket = makeBucket({
         git_branch: { buckets: [] },
         git_commit_sha: undefined,
+        dataset_id: { buckets: [] },
+        dataset_name: undefined,
       });
       const aggs = { total_runs: { value: 1 }, runs: { buckets: [bucket] } };
       const result = parseRunsListingResponse(aggs, { page: 1, perPage: 25 });
       expect(result.runs[0].git_branch).toBeNull();
       expect(result.runs[0].git_commit_sha).toBeNull();
+      expect(result.runs[0].dataset_id).toBeNull();
+      expect(result.runs[0].dataset_name).toBeNull();
     });
 
     it('defaults total_repetitions to 1 when missing', () => {
