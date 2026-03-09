@@ -49,9 +49,9 @@ describe('getInferenceEndpointById', () => {
   it('throws a 404 error if the endpoint is not found', async () => {
     mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
-    await expect(
-      getInferenceEndpointById({ inferenceId: 'missing', esClient })
-    ).rejects.toThrow("Inference endpoint 'missing' not found");
+    await expect(getInferenceEndpointById({ inferenceId: 'missing', esClient })).rejects.toThrow(
+      "Inference endpoint 'missing' not found"
+    );
 
     await expect(getInferenceEndpointById({ inferenceId: 'missing', esClient })).rejects.toEqual(
       expect.objectContaining({
