@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { CRUDClient } from '../../domain/crud_client';
+import type { CRUDClient } from '../../domain/crud';
 
 export const EntityMaintainerTaskStatus = {
   NEVER_STARTED: 'never_started',

@@ -16,11 +16,7 @@ import {
 } from '../../../../server/domain/constants';
 import { getLatestEntitiesIndexName } from '../../../../server/domain/asset_manager/latest_index';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
-import {
-  COMMON_HEADERS,
-  ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
-} from '../fixtures/constants';
+import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 // Init/stop/start/run behavior with registered maintainers is covered by Jest
@@ -70,104 +66,94 @@ const getRoleWithoutTargetIndexPrivileges = () => buildRoleDescriptor({ withTarg
 const getRoleWithoutSavedObjectCreate = () => buildRoleDescriptor({ withSavedObjectCreate: false });
 
 apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, () => {
-  apiTest.describe('privilege checks', () => {
-    apiTest.beforeEach(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
-    });
+  let defaultHeaders: Record<string, string>;
 
-    apiTest(
-      'Should return 403 when user lacks permissions for target index patterns',
-      async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
-          getRoleWithoutTargetIndexPrivileges()
-        );
-
-        const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-          responseType: 'json',
-          body: {},
-        });
-
-        expect(response.statusCode).toBe(403);
-        expect(response.body.attributes).toMatchObject({
-          missing_elasticsearch_privileges: {
-            cluster: [],
-            index: [
-              {
-                index: TARGET_INDEX_LATEST,
-                privileges: expect.arrayContaining(ENTITY_STORE_TARGET_INDICES_PRIVILEGES),
-              },
-            ],
-          },
-        });
-      }
-    );
-
-    apiTest(
-      'Should return 403 when user lacks permissions for entity store saved object descriptor',
-      async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
-          getRoleWithoutSavedObjectCreate()
-        );
-
-        const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-          responseType: 'json',
-          body: {},
-        });
-
-        expect(response.statusCode).toBe(403);
-        expect(response.body.attributes).toMatchObject({
-          missing_kibana_privileges: [SAVED_OBJECT_PRIVILEGE],
-        });
-      }
-    );
+  apiTest.beforeAll(async ({ samlAuth }) => {
+    const credentials = await samlAuth.asInteractiveUser('admin');
+    defaultHeaders = {
+      ...credentials.cookieHeader,
+      ...COMMON_HEADERS,
+    };
   });
 
-  apiTest.describe('init logic', () => {
-    let defaultHeaders: Record<string, string>;
-
-    apiTest.beforeAll(async ({ samlAuth }) => {
-      const credentials = await samlAuth.asInteractiveUser('admin');
-      defaultHeaders = {
-        ...credentials.cookieHeader,
-        ...COMMON_HEADERS,
-      };
+  apiTest.beforeEach(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.update({
+      [FF_ENABLE_ENTITY_STORE_V2]: true,
     });
+  });
 
-    apiTest.beforeEach(async ({ kbnClient }) => {
-      await kbnClient.uiSettings.update({
-        [FF_ENABLE_ENTITY_STORE_V2]: true,
-      });
+  apiTest.afterEach(async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
     });
+  });
 
-    apiTest.afterEach(async ({ apiClient }) => {
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-    });
-
-    apiTest('Should return 400 when entity store is not installed', async ({ apiClient }) => {
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-
-      const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {},
-      });
-
-      expect(initResponse.statusCode).toBe(400);
-      expect(initResponse.body.message).toBe(
-        'Entity store is not installed. Install the entity store first, then initialize entity maintainers.'
+  apiTest(
+    'Should return 403 when user lacks permissions for target index patterns',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutTargetIndexPrivileges()
       );
+
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: {},
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_elasticsearch_privileges: {
+          cluster: [],
+          index: [
+            {
+              index: TARGET_INDEX_LATEST,
+              privileges: expect.arrayContaining(ENTITY_STORE_TARGET_INDICES_PRIVILEGES),
+            },
+          ],
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'Should return 403 when user lacks permissions for entity store saved object descriptor',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+        headers: { ...COMMON_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: {},
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [SAVED_OBJECT_PRIVILEGE],
+      });
+    }
+  );
+
+  apiTest('Should return 400 when entity store is not installed', async ({ apiClient }) => {
+    await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
     });
+
+    const initResponse = await apiClient.post(ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_INIT, {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: {},
+    });
+
+    expect(initResponse.statusCode).toBe(400);
+    expect(initResponse.body.message).toBe(
+      'Entity store is not installed. Install the entity store first, then initialize entity maintainers.'
+    );
   });
 });
