@@ -17,7 +17,9 @@ import type {
   TypedLensSerializedState,
   ValueFormatConfig,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 
+import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type {
   ConvertibleLayer,
   ConvertToEsqlParams,
@@ -103,15 +105,23 @@ function buildTextBasedState(
         const column: TextBasedLayerColumn = {
           columnId: sourceColumn.id,
           fieldName: esqlFieldName,
-          label: sourceColumn.label ?? esqlFieldName,
           meta: {
             type: metaType,
           },
         };
 
-        // Only include customLabel if it's explicitly set to true
-        if (sourceColumn.customLabel) {
-          column.customLabel = sourceColumn.customLabel;
+        const hasCustomLabel = Boolean(sourceColumn.customLabel);
+
+        column.customLabel = true; // set always to true so we can use the default label as a custom label
+        if (hasCustomLabel) {
+          column.label = sourceColumn.label;
+        } else {
+          // use the generated default label
+          column.label = operationDefinitionMap[sourceColumn.operationType].getDefaultLabel(
+            layer.columns[sourceColumn.id],
+            layer.columns,
+            indexPattern
+          );
         }
 
         // Determine format: user-configured first, then data view field format as fallback
@@ -196,7 +206,7 @@ export function convertFormBasedToTextBasedLayer({
     ...attributes,
     state: {
       ...attributes.state,
-      query: esqlQuery,
+      query: { esql: esql(esqlQuery.esql).print('wrapping') },
       datasourceStates: {
         textBased: newDatasourceState,
       },
