@@ -11,6 +11,7 @@ import {
   isNotEmptyCondition,
 } from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
+import { recentData } from './esql';
 import { collectValues as collect, newestValue } from './field_retention_operations';
 
 export const userEntityDefinition: EntityDefinitionWithoutId = {
@@ -46,7 +47,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
       [{ field: 'user.name' }, { sep: '@' }, { field: 'entity.namespace' }],
     ],
     /**
-     * UEBA user documents filter
+     * UEBA user documents filter (pre-aggregation: which documents enter the pipeline).
      */
     documentsFilter: {
       and: [
@@ -58,10 +59,15 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
           ],
         },
 
-        // exclude enrichment kind
-        { field: 'event.kind', neq: 'enrichment' },
+        // exclude enrichment kind (allow missing event.kind so iam/asset docs without it pass)
+        {
+          or: [
+            { field: 'event.kind', exists: false },
+            { field: 'event.kind', neq: 'enrichment' },
+          ],
+        },
 
-        // contains at least of the id fields
+        // contains at least one of the id fields
         {
           or: [
             isNotEmptyCondition('user.email'),
@@ -69,33 +75,38 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
             isNotEmptyCondition('user.name'),
           ],
         },
-        {
-          or: [
-            // is asset kind (use includes to allow multiple values
-            // CCS can ingest a document with multiple values)
-            { field: 'event.kind', includes: 'asset' },
-
-            // or iam category of type user, creation, deletion, or group
-            {
-              and: [
-                { field: 'event.category', includes: 'iam' },
-                {
-                  or: [
-                    { field: 'event.type', eq: 'user' },
-                    { field: 'event.type', eq: 'creation' },
-                    { field: 'event.type', eq: 'deletion' },
-                    { field: 'event.type', eq: 'group' },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
       ],
     },
   },
   entityTypeFallback: 'Identity',
   indexPatterns: [],
+  /**
+   * Post-aggregation filter (after LOOKUP JOIN): keep row if already in entity store or IDP-like.
+   */
+  postAggFilter: {
+    or: [
+      // if entity.id exists after look up join, data is already in the entity store
+      { field: 'entity.id', exists: true },
+
+      // or recent data (not stored) is asset kind (use includes to allow multiple values; CCS can ingest multiple values)
+      { field: recentData('event.kind'), includes: 'asset' },
+
+      // or recent data (not stored) is iam category of type user, creation, deletion, or group
+      {
+        and: [
+          { field: recentData('event.category'), includes: 'iam' },
+          {
+            or: [
+              { field: recentData('event.type'), includes: 'user' },
+              { field: recentData('event.type'), includes: 'creation' },
+              { field: recentData('event.type'), includes: 'deletion' },
+              { field: recentData('event.type'), includes: 'group' },
+            ],
+          },
+        ],
+      },
+    ],
+  },
   fields: [
     newestValue({ destination: 'entity.name', source: 'user.name' }),
 

@@ -177,7 +177,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (\`event.kind\` IS NULL OR \`event.kind\` != \\"enrichment\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
   | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
@@ -561,12 +561,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for generic e
  recent.entity.risk.calculated_score = LAST(TO_DOUBLE(entity.risk.calculated_score), @timestamp) WHERE entity.risk.calculated_score IS NOT NULL,
  recent.entity.risk.calculated_score_norm = LAST(TO_DOUBLE(entity.risk.calculated_score_norm), @timestamp) WHERE entity.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
-  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
-  
-  | LIMIT 10000
   | EVAL recent.entity.id = recent.entity.EngineMetadata.UntypedId
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  entity.source = COALESCE(recent.entity.source, entity.source),
  entity.type = COALESCE(recent.entity.type, entity.type),
@@ -797,12 +797,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host enti
  recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
-  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
-  
-  | LIMIT 10000
   | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
@@ -1053,14 +1053,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
+  | LOOKUP JOIN latest-index
+      ON recent.entity.id == entity.id
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
             OR (entity.EngineMetadata.FirstSeenLogInPage == TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
                 AND recent.entity.EngineMetadata.UntypedId > \\"123\\")
   | LIMIT 10000
-  | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
-  | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
@@ -1311,14 +1311,14 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for host with
  recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(host.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE host.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
+  | LOOKUP JOIN latest-index
+      ON recent.entity.id == entity.id
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   | WHERE entity.EngineMetadata.FirstSeenLogInPage > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
             OR (entity.EngineMetadata.FirstSeenLogInPage == TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\") 
                 AND recent.entity.EngineMetadata.UntypedId > \\"recover\\")
   | LIMIT 10000
-  | EVAL recent.entity.id = CONCAT(\\"host:\\", recent.entity.EngineMetadata.UntypedId)
-  | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  host.entity.id = COALESCE(host.entity.id, recent.host.entity.id),
  host.name = MV_SLICE(MV_UNION(recent.host.name, host.name), 0, 9),
@@ -1543,12 +1543,12 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for service e
  recent.entity.relationships.resolution.risk.calculated_score = LAST(TO_DOUBLE(service.entity.relationships.resolution.risk.calculated_score), @timestamp) WHERE service.entity.relationships.resolution.risk.calculated_score IS NOT NULL,
  recent.entity.relationships.resolution.risk.calculated_score_norm = LAST(TO_DOUBLE(service.entity.relationships.resolution.risk.calculated_score_norm), @timestamp) WHERE service.entity.relationships.resolution.risk.calculated_score_norm IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
-  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
-  
-  | LIMIT 10000
   | EVAL recent.entity.id = CONCAT(\\"service:\\", recent.entity.EngineMetadata.UntypedId)
   | LOOKUP JOIN latest-index
       ON recent.entity.id == entity.id
+  | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
+  
+  | LIMIT 10000
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  service.entity.id = COALESCE(service.entity.id, recent.service.entity.id),
  service.name = MV_SLICE(MV_UNION(recent.service.name, service.name), 0, 9),
@@ -1670,7 +1670,7 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (\`event.kind\` IS NULL OR \`event.kind\` != \\"enrichment\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
   | EVAL _src_entity_namespace0 = MV_FIRST(event.module),
  _src_entity_namespace1 = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), \\".\\")),
  _src_entity_namespace = CASE((_src_entity_namespace0 IS NOT NULL AND _src_entity_namespace0 != \\"\\"), _src_entity_namespace0, (_src_entity_namespace1 IS NOT NULL AND _src_entity_namespace1 != \\"\\"), _src_entity_namespace1, NULL),
@@ -1740,12 +1740,13 @@ exports[`buildLogsExtractionEsqlQuery generates the expected query for user enti
  recent.host.id = MV_DEDUPE(TOP(TO_STRING(host.id), 10)) WHERE host.id IS NOT NULL,
  recent.host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL
     BY recent.entity.EngineMetadata.UntypedId
+  | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
+  | LOOKUP JOIN latest-index
+      ON recent.entity.id == entity.id| WHERE NOT(\`entity.id\` IS NULL) OR MV_CONTAINS(\`recent.event.kind\`, \\"asset\\") OR MV_CONTAINS(\`recent.event.category\`, \\"iam\\") AND (MV_CONTAINS(\`recent.event.type\`, \\"user\\") OR MV_CONTAINS(\`recent.event.type\`, \\"creation\\") OR MV_CONTAINS(\`recent.event.type\`, \\"deletion\\") OR MV_CONTAINS(\`recent.event.type\`, \\"group\\"))
+  
   | SORT entity.EngineMetadata.FirstSeenLogInPage ASC, recent.entity.EngineMetadata.UntypedId ASC
   
   | LIMIT 10000
-  | EVAL recent.entity.id = CONCAT(\\"user:\\", recent.entity.EngineMetadata.UntypedId)
-  | LOOKUP JOIN latest-index
-      ON recent.entity.id == entity.id
   | EVAL entity.name = COALESCE(recent.entity.name, entity.name),
  event.module = MV_SLICE(MV_UNION(recent.event.module, event.module), 0, 9),
  data_stream.dataset = MV_SLICE(MV_UNION(recent.data_stream.dataset, data_stream.dataset), 0, 49),
@@ -1913,6 +1914,6 @@ exports[`buildRemainingLogsCountQuery generates the expected query for user enti
   | WHERE 
       @timestamp > TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
-      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND \`event.kind\` != \\"enrichment\\" AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\") AND (MV_CONTAINS(\`event.kind\`, \\"asset\\") OR MV_CONTAINS(\`event.category\`, \\"iam\\") AND (\`event.type\` == \\"user\\" OR \`event.type\` == \\"creation\\" OR \`event.type\` == \\"deletion\\" OR \`event.type\` == \\"group\\")))
+      AND ((\`event.outcome\` IS NULL OR \`event.outcome\` != \\"failure\\") AND (\`event.kind\` IS NULL OR \`event.kind\` != \\"enrichment\\") AND (NOT(\`user.email\` IS NULL) AND \`user.email\` != \\"\\" OR NOT(\`user.id\` IS NULL) AND \`user.id\` != \\"\\" OR NOT(\`user.name\` IS NULL) AND \`user.name\` != \\"\\"))
   | STATS document_count = COUNT()"
 `;

@@ -6,6 +6,8 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { conditionToESQL } from '@kbn/streamlang';
+import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
   type EntityDefinition,
@@ -51,10 +53,11 @@ const CCS_FIELDS_TO_KEEP = [
   EVENT_KIND_FIELD,
 ];
 
-const RECENT_DATA_PREFIX = 'recent';
-// Some fields have only src and we need to fallback to it.
-function recentData(dest: string) {
-  return `${RECENT_DATA_PREFIX}.${dest}`;
+/** ESQL WHERE clause fragment after LOOKUP JOIN when entity definition has postAggFilter; otherwise empty. */
+function postAggFilter(entityDefinition: EntityDefinition): string {
+  return entityDefinition.postAggFilter
+    ? `| WHERE ${conditionToESQL(entityDefinition.postAggFilter)}\n  `
+    : '';
 }
 
 interface PaginationFields {
@@ -165,18 +168,6 @@ export function buildLogsExtractionEsqlQuery({
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${aggregationStats(fields)}
     BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}` +
-    // early sort, paginate and limit so we perform data retention operations (LOOKUP JOIN) only on documents
-    // that are needed
-    `
-  | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )} ASC
-  ${getPaginationWhereClause(
-    MAIN_EXTRACTION_PAGINATION_FIELDS,
-    pagination,
-    recoveryId ? { fromDateISO, recoveryId } : undefined
-  )}
-  | LIMIT ${docsLimit}` +
     // Main entity id: type-prefixed (when needed) for LOOKUP JOIN
     `
   | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = ${getMainEntityIdFromUntypedEsql(
@@ -189,7 +180,20 @@ export function buildLogsExtractionEsqlQuery({
     // Obs: this not an aggregation.
     `
   | LOOKUP JOIN ${latestIndex}
-      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}
+      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}` +
+    // Post-aggregation filter keep row if already in entity store or IDP-like (or any other filter in the definition).
+    `${postAggFilter(entityDefinition)}` +
+    // Pagination after post aggregation filter
+    `
+  | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
+      ENGINE_METADATA_UNTYPED_ID_FIELD
+    )} ASC
+  ${getPaginationWhereClause(
+    MAIN_EXTRACTION_PAGINATION_FIELDS,
+    pagination,
+    recoveryId ? { fromDateISO, recoveryId } : undefined
+  )}
+  | LIMIT ${docsLimit}
   | EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)}
   | EVAL ${customFieldEvalLogic(type, entityTypeFallback)}` +
     // Rename the fields to the original names

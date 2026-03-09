@@ -250,7 +250,7 @@ const isNotEmptyClause = (field: string) => ({
 });
 
 describe('getEuidDslDocumentsContainsIdFilter', () => {
-  it('user: returns documentsFilter DSL ', () => {
+  it('user: returns documentsFilter DSL (exclusions and at least one id field)', () => {
     const result = getEuidDslDocumentsContainsIdFilter('user');
 
     expect(result).toEqual({
@@ -282,11 +282,26 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
           },
           {
             bool: {
-              must_not: {
-                match: {
-                  'event.kind': 'enrichment',
+              should: [
+                {
+                  bool: {
+                    must_not: {
+                      exists: {
+                        field: 'event.kind',
+                      },
+                    },
+                  },
                 },
-              },
+                {
+                  bool: {
+                    must_not: {
+                      match: {
+                        'event.kind': 'enrichment',
+                      },
+                    },
+                  },
+                },
+              ],
             },
           },
           {
@@ -295,54 +310,6 @@ describe('getEuidDslDocumentsContainsIdFilter', () => {
                 isNotEmptyClause('user.email'),
                 isNotEmptyClause('user.id'),
                 isNotEmptyClause('user.name'),
-              ],
-            },
-          },
-          {
-            bool: {
-              should: [
-                {
-                  terms: {
-                    'event.kind': ['asset'],
-                  },
-                },
-                {
-                  bool: {
-                    must: [
-                      {
-                        terms: {
-                          'event.category': ['iam'],
-                        },
-                      },
-                      {
-                        bool: {
-                          should: [
-                            {
-                              match: {
-                                'event.type': 'user',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.type': 'creation',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.type': 'deletion',
-                              },
-                            },
-                            {
-                              match: {
-                                'event.type': 'group',
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                },
               ],
             },
           },

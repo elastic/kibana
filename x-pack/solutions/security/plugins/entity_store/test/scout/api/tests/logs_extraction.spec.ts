@@ -393,6 +393,121 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
   });
 
   apiTest(
+    'Should store user entities from both IDP and non-IDP sources with and without existing latest',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-01T10:00:00Z';
+      const to = '2026-03-01T12:00:00Z';
+
+      // 1. IDP entity (asset kind) without existing entity in latest → extracted!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:01:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'postagg-idp-nolatest',
+          name: 'IDP NoLatest',
+        },
+      });
+      const ext1 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext1.statusCode).toBe(200);
+      const hit1 = await searchDocById(esClient, 'user:postagg-idp-nolatest@okta');
+      expect(hit1.hits.hits).toHaveLength(1);
+      expect(hit1.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-nolatest@okta',
+          type: 'Identity',
+          name: 'IDP NoLatest',
+        },
+      });
+
+      // 2. IDP entity (asset kind) with existing entity in latest → extracted and updated!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:02:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'postagg-idp-inlatest',
+          name: 'IDP InLatest',
+        },
+      });
+      await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:03:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'postagg-idp-inlatest',
+          name: 'IDP InLatest Updated',
+        },
+      });
+      const ext2 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext2.statusCode).toBe(200);
+      const hit2 = await searchDocById(esClient, 'user:postagg-idp-inlatest@okta');
+      expect(hit2.hits.hits).toHaveLength(1);
+      expect(hit2.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-inlatest@okta',
+          type: 'Identity',
+          name: 'IDP InLatest Updated',
+        },
+      });
+
+      // 3. Non-IDP entity without existing entity in latest → not extracted!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:04:00Z',
+        event: { kind: 'random-kind', module: 'okta' },
+        user: {
+          id: 'postagg-nonidp-nolatest',
+          name: 'NonIDP NoLatest',
+        },
+      });
+      const ext3 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext3.statusCode).toBe(200);
+      const hit3 = await searchDocById(esClient, 'user:postagg-nonidp-nolatest@okta');
+      expect(hit3.hits.hits).toHaveLength(0);
+
+      // 4. NonIDP entity (iam/user) with existing entity in latest → extracted and updated!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:05:00Z',
+        event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-nonidp-inlatest',
+          name: 'NonIDP InLatest',
+        },
+      });
+      const ext4 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext4.statusCode).toBe(200);
+      const hit4 = await searchDocById(esClient, 'user:postagg-nonidp-inlatest@active_directory');
+      expect(hit4.hits.hits).toHaveLength(1);
+      expect(hit4.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-nonidp-inlatest@active_directory',
+          type: 'Identity',
+          name: 'NonIDP InLatest',
+        },
+      });
+
+      await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:06:00Z',
+        event: { kind: 'not-idp-kind', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-nonidp-inlatest',
+          name: 'NonIDP InLatest Updated',
+        },
+      });
+      const ext5 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext5.statusCode).toBe(200);
+      const hit5 = await searchDocById(esClient, 'user:postagg-nonidp-inlatest@active_directory');
+      expect(hit5.hits.hits).toHaveLength(1);
+      expect(hit5.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-nonidp-inlatest@active_directory',
+          type: 'Identity',
+          name: 'NonIDP InLatest Updated',
+        },
+      });
+    }
+  );
+
+  apiTest(
     'Should store _source as nested objects after ingest pipeline',
     async ({ apiClient, esClient }) => {
       const extractionResponse = await apiClient.post(

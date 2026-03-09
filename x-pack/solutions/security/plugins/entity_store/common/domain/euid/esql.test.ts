@@ -183,11 +183,11 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
     expect(result).toBe(expected);
   });
 
-  it('returns documents filter AND contains-id expression for user', () => {
+  it('returns documents filter for user (exclusions and at least one id field)', () => {
     const result = getEuidEsqlDocumentsContainsIdFilter('user');
 
+    expect(result).toMatch(/event\.outcome/);
     expect(result).toMatch(/event\.kind/);
-    expect(result).toMatch(/event\.category/);
     expect(result).toMatch(/AND\s+\(/);
     expect(result).toMatch(/user\.email/);
     expect(result).toMatch(/user\.id/);

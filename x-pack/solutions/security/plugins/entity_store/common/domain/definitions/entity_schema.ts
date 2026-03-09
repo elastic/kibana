@@ -102,6 +102,9 @@ export const entitySchema = z.object({
   fields: z.array(fieldSchema),
   identityField: identityFieldSchema,
   indexPatterns: z.array(z.string()),
+  // Optional filter (Condition from @kbn/streamlang) applied in ESQL only, right after the
+  // LOOKUP JOIN, to filter rows (e.g. keep already-stored entities or IDP-like events). No DSL equivalent.
+  postAggFilter: z.optional(streamlangConditionSchema),
 });
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
