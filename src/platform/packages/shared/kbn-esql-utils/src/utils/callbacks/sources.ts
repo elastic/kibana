@@ -28,18 +28,23 @@ interface IntegrationsResponse {
  * Fetches the list of indices, aliases, and data streams from the Elasticsearch cluster.
  * @param core The core start contract to make HTTP requests.
  * @param areRemoteIndicesAvailable A boolean indicating if remote indices should be included.
+ * @param signal Optional AbortSignal to cancel the request.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
 export const getIndicesList = async (
   core: Pick<CoreStart, 'http'>,
-  areRemoteIndicesAvailable: boolean
+  areRemoteIndicesAvailable: boolean,
+  signal?: AbortSignal
 ): Promise<ESQLSourceResult[]> => {
   const scope = areRemoteIndicesAvailable ? 'all' : 'local';
-  const response = await core.http.get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`).catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error('Failed to fetch the sources', error);
-    return [];
-  });
+  const response = await core.http
+    .get(`${SOURCES_AUTOCOMPLETE_ROUTE}${scope}`, { signal })
+    .catch((error) => {
+      if (signal?.aborted) return [];
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch the sources', error);
+      return [];
+    });
 
   return response as ESQLSourceResult[];
 };
@@ -50,7 +55,8 @@ export const getIndicesList = async (
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
 const getIntegrations = async (
-  core: Pick<CoreStart, 'application' | 'http'>
+  core: Pick<CoreStart, 'application' | 'http'>,
+  signal?: AbortSignal
 ): Promise<ESQLSourceResult[]> => {
   const fleetCapabilities = core.application.capabilities.fleet;
   if (!fleetCapabilities?.read) {
@@ -62,8 +68,13 @@ const getIntegrations = async (
   // and this needs to be done in various places in the codebase which use the editor
   // https://github.com/elastic/kibana/issues/186061
   const response = (await core.http
-    .get(INTEGRATIONS_API, { query: { showOnlyActiveDataStreams: true }, version: API_VERSION })
+    .get(INTEGRATIONS_API, {
+      query: { showOnlyActiveDataStreams: true },
+      version: API_VERSION,
+      signal,
+    })
     .catch((error) => {
+      if (signal?.aborted) return undefined;
       // eslint-disable-next-line no-console
       console.error('Failed to fetch integrations', error);
     })) as IntegrationsResponse;
@@ -84,18 +95,20 @@ const getIntegrations = async (
 /** Fetches ESQL sources including indices, aliases, data streams, and integrations.
  * @param core The core start contract to make HTTP requests and access application capabilities.
  * @param getLicense An optional function to retrieve the current license information.
+ * @param signal Optional AbortSignal to cancel the request.
  * @returns A promise that resolves to an array of ESQLSourceResult objects.
  */
 export const getESQLSources = async (
   core: Pick<CoreStart, 'application' | 'http'>,
-  getLicense: (() => Promise<ILicense | undefined>) | undefined
+  getLicense: (() => Promise<ILicense | undefined>) | undefined,
+  signal?: AbortSignal
 ): Promise<ESQLSourceResult[]> => {
   const ls = await getLicense?.();
   const ccrFeature = ls?.getFeature('ccr');
   const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
   const [allIndices, integrations] = await Promise.all([
-    getIndicesList(core, areRemoteIndicesAvailable),
-    getIntegrations(core),
+    getIndicesList(core, areRemoteIndicesAvailable, signal),
+    getIntegrations(core, signal),
   ]);
   return [...allIndices, ...integrations];
 };

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OpenInDiscover } from './open_in_discover';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
@@ -28,11 +28,11 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';
 
-jest.mock('../../../../context/apm_service/use_apm_service_context');
+jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
-  typeof useApmServiceContext
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+  typeof useApmIndexSettingsContext
 >;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
   typeof useApmPluginContext
@@ -45,9 +45,7 @@ const mockLocatorGet = jest.fn().mockReturnValue({
 
 describe('OpenInDiscover', () => {
   beforeEach(() => {
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName: 'test-service',
-      transactionType: 'request',
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [
         {
           configurationName: 'transaction',
@@ -145,9 +143,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should be disabled when indexSettings is empty', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -168,9 +164,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should show loading state when indexSettingsStatus is LOADING', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [
           {
             configurationName: 'transaction',
@@ -196,6 +190,53 @@ describe('OpenInDiscover', () => {
     });
   });
 
+  describe('outlinedButton variant', () => {
+    it('should render an outlined button with custom label', () => {
+      const { getByTestId } = render(
+        <OpenInDiscover
+          variant="outlinedButton"
+          dataTestSubj="testOutlinedButton"
+          indexType="traces"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          queryParams={{ serviceName: 'my-service' }}
+          label="Explore traces"
+        />
+      );
+
+      const button = getByTestId('testOutlinedButton');
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent('Explore traces');
+      expect(button).toHaveAttribute('href', 'http://test-discover-url');
+    });
+
+    it('should render disabled outlined button when indexSettingsStatus is not SUCCESS', () => {
+      mockUseApmIndexSettingsContext.mockReturnValue({
+        indexSettings: [
+          {
+            configurationName: 'transaction',
+            defaultValue: MOCK_TRACES_INDEX,
+          },
+        ],
+        indexSettingsStatus: FETCH_STATUS.LOADING,
+      } as any);
+
+      const { getByTestId } = render(
+        <OpenInDiscover
+          variant="outlinedButton"
+          dataTestSubj="testOutlinedButton"
+          indexType="traces"
+          rangeFrom="now-15m"
+          rangeTo="now"
+          queryParams={{}}
+        />
+      );
+
+      const button = getByTestId('testOutlinedButton');
+      expect(button).toBeDisabled();
+    });
+  });
+
   describe('link variant', () => {
     it('should render a link with correct props', () => {
       const { getByTestId } = render(
@@ -216,9 +257,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should render disabled link when indexSettings is empty', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);
@@ -240,9 +279,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should render disabled link when indexSettingsStatus is not SUCCESS', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [
           {
             configurationName: 'transaction',
@@ -338,9 +375,7 @@ describe('OpenInDiscover', () => {
     });
 
     it('should return null ESQL query when indexSettings is empty', () => {
-      mockUseApmServiceContext.mockReturnValue({
-        serviceName: 'test-service',
-        transactionType: 'request',
+      mockUseApmIndexSettingsContext.mockReturnValue({
         indexSettings: [],
         indexSettingsStatus: FETCH_STATUS.SUCCESS,
       } as any);

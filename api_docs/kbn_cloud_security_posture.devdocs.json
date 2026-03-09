@@ -242,7 +242,7 @@
           "React.NamedExoticComponent<CloudSetupProps>"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/cloud_setup.tsx",
-        "lineNumber": 355,
+        "lineNumber": 356,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

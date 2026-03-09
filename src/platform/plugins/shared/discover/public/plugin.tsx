@@ -28,6 +28,7 @@ import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -236,6 +237,8 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
+
     plugins.uiActions.addTriggerActionAsync(
       ON_OPEN_PANEL_MENU,
       ACTION_VIEW_SAVED_SEARCH,

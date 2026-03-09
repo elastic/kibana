@@ -1,11 +1,10 @@
 steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
-    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 150
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -15,15 +14,16 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
-    cancel_on_build_failing: true
     label: 'Defend Workflows Cypress Tests on Serverless'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 105
+      diskSizeGb: 150
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -33,4 +33,6 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1

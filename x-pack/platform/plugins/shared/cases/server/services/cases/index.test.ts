@@ -16,7 +16,11 @@
 import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
-import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import {
+  CASE_EXTENDED_FIELDS,
+  CASE_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
@@ -56,6 +60,7 @@ import {
   CasePersistedStatus,
   CaseTransformedAttributesRt,
 } from '../../common/types/case';
+import type { ConfigType } from '../../config';
 
 const createUpdateSOResponse = ({
   connector,
@@ -168,6 +173,7 @@ describe('CasesService', () => {
     log: mockLogger,
     persistableStateAttachmentTypeRegistry,
     unsecuredSavedObjectsClient,
+    config: {} as ConfigType,
   });
 
   let service: CasesService;
@@ -2307,7 +2313,9 @@ describe('CasesService', () => {
       'in_progress_at',
       'time_to_acknowledge',
       'time_to_resolve',
-      'time_to_investigate'
+      'time_to_investigate',
+      'template',
+      CASE_EXTENDED_FIELDS
     );
 
     describe('getCaseIdsByAlertId', () => {
