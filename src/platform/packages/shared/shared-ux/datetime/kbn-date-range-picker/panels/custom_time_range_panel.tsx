@@ -357,18 +357,14 @@ export function CustomTimeRangePanel() {
     [applyRange]
   );
 
-  const formStyles = css`
-    padding-block: 8px;
-  `;
-
   return (
     <PanelContainer>
       <PanelHeader>
         <SubPanelHeading>Custom time range</SubPanelHeading>
       </PanelHeader>
-      <PanelBody>
+      <PanelBody spacingSide="both">
         <PanelBodySection>
-          <form id={formId} onSubmit={onSubmit} css={formStyles}>
+          <form id={formId} onSubmit={onSubmit}>
             <EuiFlexGroup gutterSize="l" direction="column" responsive={false}>
               <DatePartPicker label="Start date" state={startState} onChange={setStartState} />
               <DatePartPicker label="End date" state={endState} onChange={setEndState} />
