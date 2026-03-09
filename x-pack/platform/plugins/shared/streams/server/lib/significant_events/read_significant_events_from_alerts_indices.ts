@@ -11,10 +11,14 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ChangePointType } from '@kbn/es-types/src';
-import type { StreamQuery, SignificantEventsGetResponse } from '@kbn/streams-schema';
+import type {
+  StreamQuery,
+  SignificantEventsGetResponse,
+  QueryLinkFilters,
+} from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
 import type { QueryLink } from '../../../common/queries';
-import type { QueryClient, QueryLinkFilters } from '../streams/assets/query/query_client';
+import type { QueryClient } from '../streams/assets/query/query_client';
 import { parseError } from '../streams/errors/parse_error';
 import { SecurityError } from '../streams/errors/security_error';
 
