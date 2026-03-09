@@ -32,6 +32,30 @@ export interface WorkflowsPublicPluginSetupDependencies {
 
 import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
+/**
+ * Lightweight interface for the Agent Builder plugin's public start contract.
+ * Defined here instead of importing from the plugin directly to avoid circular
+ * dependencies (workflowsManagement uses runtimePluginDependencies).
+ */
+export interface AgentBuilderPluginStartContract {
+  openConversationFlyout: (options?: {
+    sessionTag?: string;
+    agentId?: string;
+    initialMessage?: string;
+    autoSendInitialMessage?: boolean;
+    attachments?: Array<{ type: string; data: Record<string, unknown> }>;
+    browserApiTools?: Array<{
+      id: string;
+      description: string;
+      schema: unknown;
+      handler: (params: unknown) => void | Promise<void>;
+    }>;
+  }) => { flyoutRef: { close: () => void } };
+  attachments: {
+    addAttachmentType: (type: string, definition: unknown) => void;
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsPublicPluginStart {}
 
@@ -52,6 +76,7 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
   workflowsManagement: {
     telemetry: TelemetryServiceClient;
+    agentBuilder?: AgentBuilderPluginStartContract;
   };
 }
 
