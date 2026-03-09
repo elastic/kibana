@@ -122,7 +122,8 @@ import {
   elasticAgentStandaloneManifest,
 } from './elastic_agent_manifest';
 
-import { bulkInstallPackages } from './epm/packages';
+import { bulkInstallPackages, getPackageInfo } from './epm/packages';
+import { getAgentTemplateAssetsMap } from './epm/packages/get';
 import { getAgentsByKuery } from './agents';
 import {
   getPackagePolicySavedObjectType,
@@ -1254,13 +1255,61 @@ class AgentPolicyService {
   }> {
     const packagePolicies = await packagePolicyService.findAllForAgentPolicy(soClient, policyId);
 
-    const conditions: AgentPolicyAgentVersionCondition[] = packagePolicies
-      .filter((pp) => Boolean(pp.package_agent_version_condition))
-      .map((pp) => ({
-        name: pp.package?.name ?? '',
-        title: pp.package?.title ?? '',
-        version_condition: pp.package_agent_version_condition!,
-      }));
+    const conditions: AgentPolicyAgentVersionCondition[] = [];
+    for (const pp of packagePolicies) {
+      let versionCondition = pp.package_agent_version_condition;
+
+      // For package policies created before this field was introduced, fall back
+      // to looking up the installed package info to get the version condition.
+      if (!versionCondition && pp.package?.name && pp.package?.version) {
+        try {
+          const pkgInfo = await getPackageInfo({
+            savedObjectsClient: soClient,
+            pkgName: pp.package.name,
+            pkgVersion: pp.package.version,
+            prerelease: true,
+          });
+          versionCondition = pkgInfo.conditions?.agent?.version;
+
+          // Also scan .hbs templates for {{#semverSatisfies _meta.agent.version "..."}} conditions
+          // to support packages that embed version requirements in Handlebars templates rather
+          // than the manifest-level conditions.agent.version field.
+          if (!versionCondition) {
+            const assetsMap = await getAgentTemplateAssetsMap({
+              savedObjectsClient: soClient,
+              packageInfo: pkgInfo,
+              logger: appContextService.getLogger(),
+            });
+            const templateVersionRegex =
+              /\{\{#(?:semver)?[Ss]atisfies\s+_meta\.agent\.version\s+"([^"]+)"\}\}/g;
+            let highestTemplateMin: string | undefined;
+            assetsMap?.forEach((assetBuffer, assetPath) => {
+              if (!assetPath.endsWith('.hbs') || !assetBuffer) return;
+              const content = assetBuffer.toString();
+              let match;
+              templateVersionRegex.lastIndex = 0;
+              while ((match = templateVersionRegex.exec(content)) !== null) {
+                const parsed = minVersion(match[1]);
+                if (parsed && (!highestTemplateMin || gt(parsed.version, highestTemplateMin))) {
+                  highestTemplateMin = parsed.version;
+                  versionCondition = match[1];
+                }
+              }
+            });
+          }
+        } catch {
+          // ignore — package might not be installed or accessible
+        }
+      }
+
+      if (versionCondition) {
+        conditions.push({
+          name: pp.package?.name ?? '',
+          title: pp.package?.title ?? '',
+          version_condition: versionCondition,
+        });
+      }
+    }
 
     if (conditions.length === 0) {
       return { minAgentVersion: undefined, packageAgentVersionConditions: undefined };

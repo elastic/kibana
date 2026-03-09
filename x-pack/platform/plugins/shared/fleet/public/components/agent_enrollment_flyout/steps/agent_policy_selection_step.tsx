@@ -51,7 +51,7 @@ export const AgentPolicySelectionStep = ({
           refreshAgentPolicies={refreshAgentPolicies}
           excludeFleetServer={excludeFleetServer}
         />
-        {selectedPolicy?.min_agent_version && (
+        {selectedPolicy?.min_agent_version != null && (
           <MinAgentVersionCallout minVersion={selectedPolicy.min_agent_version} />
         )}
       </>

@@ -8,7 +8,6 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { type CriteriaWithPagination } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +16,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import satisfies from 'semver/functions/satisfies';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
@@ -210,63 +208,14 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         const agentPolicy = agentPoliciesIndexedById[basePolicyId];
         const isVersionSpecific = hasVersionSuffix(policyId);
 
-        const agentVersion: string | undefined =
-          agent.local_metadata?.elastic?.agent?.version;
-        const incompatibleIntegrations =
-          agentVersion && agentPolicy?.package_agent_version_conditions
-            ? agentPolicy.package_agent_version_conditions.filter(
-                ({ version_condition }) => {
-                  try {
-                    return !satisfies(agentVersion, version_condition);
-                  } catch {
-                    return false;
-                  }
-                }
-              )
-            : [];
-
-        const minAgentVersion = agentPolicy?.min_agent_version;
-        const showIncompatibilityBadge =
-          incompatibleIntegrations.length > 0 && Boolean(minAgentVersion);
-
         return (
           agentPolicy && (
-            <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false} css={{ minWidth: 0 }}>
-              <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
-                <AgentPolicySummaryLine
-                  policy={agentPolicy}
-                  agent={agent}
-                  showPolicyId
-                  isVersionSpecific={isVersionSpecific}
-                />
-              </EuiFlexItem>
-              {showIncompatibilityBadge && (
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.fleet.agentList.incompatibleIntegrationsTooltip',
-                      {
-                        defaultMessage:
-                          'This policy contains the following incompatible integrations: {integrations}. Upgrade agent to {minVersion} or higher.',
-                        values: {
-                          integrations: incompatibleIntegrations
-                            .map(({ title, name }) => title || name)
-                            .join(', '),
-                          minVersion: minAgentVersion,
-                        },
-                      }
-                    )}
-                  >
-                    <EuiBadge color="warning">
-                      <FormattedMessage
-                        id="xpack.fleet.agentList.incompatibleIntegrationsLabel"
-                        defaultMessage="Incompatible integrations"
-                      />
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <AgentPolicySummaryLine
+              policy={agentPolicy}
+              agent={agent}
+              showPolicyId
+              isVersionSpecific={isVersionSpecific}
+            />
           )
         );
       },
