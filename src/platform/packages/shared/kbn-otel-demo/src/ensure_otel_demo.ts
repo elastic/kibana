@@ -43,12 +43,11 @@ const DATA_DIR = Path.join(REPO_ROOT, 'data', 'demo_environments');
 async function down(log: ToolingLog, namespace: string, demoName: string) {
   log.info(`Stopping ${demoName}...`);
   await deleteNamespace(namespace);
-  // Also delete the ClusterRole and ClusterRoleBinding
   await execa
-    .command('kubectl delete clusterrole otel-collector --ignore-not-found')
+    .command(`kubectl delete clusterrole otel-collector-${namespace} --ignore-not-found`)
     .catch(() => {});
   await execa
-    .command('kubectl delete clusterrolebinding otel-collector --ignore-not-found')
+    .command(`kubectl delete clusterrolebinding otel-collector-${namespace} --ignore-not-found`)
     .catch(() => {});
 }
 
@@ -291,7 +290,7 @@ export async function ensureOtelDemo({
 
   const waitAndReport = async () => {
     try {
-      await waitForPodsReady(namespace, 300);
+      await waitForPodsReady(namespace, 600);
 
       const minikubeIp = await getMinikubeIp();
 
