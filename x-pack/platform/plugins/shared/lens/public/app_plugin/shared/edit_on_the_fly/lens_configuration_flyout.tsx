@@ -109,19 +109,35 @@ export function LensEditConfigurationFlyout({
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
+    const datasource = datasourceMap[datasourceId];
+
+    const rawState = datasourceStates[datasourceId].state;
+    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
+
     const previousAttrs = previousAttributes.current;
+    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
+    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
+    // formBased attributes are already persistable and getPersistableState expects private state.
+    let previousPersistable: typeof currentPersistable = null;
+    if (previousDsState) {
+      previousPersistable =
+        datasourceId === 'textBased'
+          ? datasource.getPersistableState(previousDsState)
+          : {
+              state: previousDsState,
+              references: previousAttrs.references,
+            };
+    }
+
     const datasourceStatesAreSame =
-      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
-        ? datasourceMap[datasourceId].isEqual(
-            previousAttrs.state.datasourceStates[datasourceId],
-            previousAttrs.references,
-            datasourceStates[datasourceId].state,
-            // Extract references from the current state as they contain resolved data view IDs
-            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
-            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
-              .references
-          )
-        : false;
+      currentPersistable != null &&
+      previousPersistable != null &&
+      datasource.isEqual(
+        previousPersistable.state,
+        previousPersistable.references,
+        currentPersistable.state,
+        currentPersistable.references
+      );
 
     if (!datasourceStatesAreSame) return true;
 
