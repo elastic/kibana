@@ -24,11 +24,8 @@ export type ObltApiServicesFixture = ApiServicesFixture;
 
 export interface ObltWorkerFixtures extends ScoutWorkerFixtures {
   apiServices: ObltApiServicesFixture;
-<<<<<<< HEAD
   profilingSetup: ProfilingSetupFixture;
-=======
   sloData: SloDataFixture;
->>>>>>> 726042c9a91 ([SLO] Migrate synthetics to scout !! (#225035))
 }
 
 export interface ObltParallelTestFixtures extends ScoutParallelTestFixtures {
