@@ -10,7 +10,9 @@ import type {
   TypedLensSerializedState,
   DatasourceStates,
   IndexPattern,
+  IndexPatternField,
 } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import { createMockFramePublicAPI } from '../../../mocks';
 import { convertFormBasedToTextBasedLayer } from './convert_to_text_based_layer';
 import type { ConvertibleLayer, EsqlConversionData } from './esql_conversion_types';
@@ -24,13 +26,38 @@ describe('convertFormBasedToTextBasedLayer', () => {
     name: 'test-index',
     timeFieldName: '@timestamp',
     fields: [
-      { name: '@timestamp', type: 'date', aggregatable: true, searchable: true },
-      { name: 'bytes', type: 'number', aggregatable: true, searchable: true },
-    ],
+      {
+        name: '@timestamp',
+        type: 'date',
+        aggregatable: true,
+        searchable: true,
+        displayName: '@timestamp',
+      },
+      {
+        name: 'bytes',
+        type: 'number',
+        aggregatable: true,
+        searchable: true,
+        displayName: 'bytes',
+      },
+      {
+        displayName: 'Records',
+        customLabel: 'Records',
+        name: 'records',
+        type: 'document',
+        aggregatable: true,
+        searchable: true,
+      },
+    ] satisfies IndexPatternField[],
     getFieldByName: (name: string) =>
       ({
-        '@timestamp': { name: '@timestamp', type: 'date' },
-        bytes: { name: 'bytes', type: 'number' },
+        '@timestamp': { name: '@timestamp', type: 'date', displayName: '@timestamp' },
+        bytes: { name: 'bytes', type: 'number', displayName: 'bytes' },
+        records: {
+          name: 'records',
+          displayName: 'Records',
+          type: 'document',
+        },
       }[name]),
     getFormatterForField: () => ({ id: 'number', params: {} }),
     hasRestrictions: false,
@@ -51,7 +78,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
       },
       col2: {
         operationType: 'count',
-        sourceField: '___records___',
+        sourceField: 'records',
         label: 'Count of records',
         dataType: 'number',
         isBucketed: false,
@@ -128,7 +155,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
       id,
       label,
       operationType: (overrides.operationType as string) ?? 'count',
-      sourceField: (overrides.sourceField as string) ?? '___records___',
+      sourceField: (overrides.sourceField as string) ?? 'records',
       dataType,
       interval: undefined as never,
       ...overrides,
@@ -200,7 +227,10 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
     expect(result).toBeDefined();
     expect(result?.state.datasourceStates.textBased).toBeDefined();
-    expect(result?.state.query).toEqual({ esql: defaultConvertibleLayers[0].query });
+    // Conversion formats the query with the composer before adding to state
+    expect(result?.state.query).toEqual({
+      esql: esql(defaultConvertibleLayers[0].query).print('wrapping'),
+    });
   });
 
   it('preserves original column IDs in visualization state', () => {
@@ -216,11 +246,18 @@ describe('convertFormBasedToTextBasedLayer', () => {
     expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns).toEqual([
       {
         columnId: 'col2',
+        customLabel: true,
         fieldName: 'bucket_0_0',
         label: 'Count of records',
         meta: { type: 'number' },
       },
-      { columnId: 'col1', fieldName: '@timestamp', label: '@timestamp', meta: { type: 'date' } },
+      {
+        columnId: 'col1',
+        customLabel: true,
+        fieldName: '@timestamp',
+        label: '@timestamp',
+        meta: { type: 'date' },
+      },
     ]);
   });
 
@@ -290,6 +327,7 @@ describe('convertFormBasedToTextBasedLayer', () => {
 
       expect(result?.state.datasourceStates.textBased?.layers[layerId]?.columns?.[0]).toEqual({
         columnId: 'col2',
+        customLabel: true,
         fieldName: 'my_count',
         label: 'My Label',
         meta: { type: 'number' },
