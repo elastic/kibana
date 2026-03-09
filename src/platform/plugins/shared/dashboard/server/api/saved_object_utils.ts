@@ -46,13 +46,19 @@ export function getDashboardCRUResponseBody(
   let sanatizedDashboardState: DashboardState;
   let warnings: string[] = [];
   try {
-    let dashboardState = transformDashboardOut(savedObject.attributes, savedObject.references, isDashboardAppRequest);
+    let dashboardState = transformDashboardOut(
+      savedObject.attributes,
+      savedObject.references,
+      isDashboardAppRequest
+    );
     if (!isDashboardAppRequest && operation === 'read') {
-      const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(dashboardState as Partial<DashboardState>);
+      const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
+        dashboardState as Partial<DashboardState>
+      );
       dashboardState = scopedDashboardState;
       warnings = scopeWarnings;
     }
-    
+
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
     sanatizedDashboardState = dashboardStateSchema.validate(dashboardState);
