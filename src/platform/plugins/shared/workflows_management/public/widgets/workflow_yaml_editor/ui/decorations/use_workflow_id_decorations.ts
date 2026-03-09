@@ -128,11 +128,7 @@ export const useWorkflowIdDecorations = ({
               // Look up workflow name from Redux store (like connectors do)
               const workflow = workflows.workflows[workflowId];
               if (workflow) {
-                const decoration = createWorkflowIdDecoration(
-                  model,
-                  workflowIdPair,
-                  workflow.name
-                );
+                const decoration = createWorkflowIdDecoration(model, workflowIdPair, workflow.name);
                 if (decoration) {
                   decorations.push(decoration);
                 }
