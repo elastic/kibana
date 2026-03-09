@@ -143,7 +143,6 @@ export enum EsqlCommandNames {
   SORT = 'sort',
   STATS = 'stats',
   TS_INFO = 'ts_info',
-  TS_INFO = 'ts_info',
   URI_PARTS = 'uri_parts',
   WHERE = 'where',
 }
