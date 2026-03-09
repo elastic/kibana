@@ -24,7 +24,10 @@ import { getVariableSuggestions } from './variable/get_variable_suggestions';
 import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
 import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
 import { getPropertyHandler } from '../../../../../../common/schema';
-import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
+import type {
+  AutocompleteContext,
+  ExtendedAutocompleteContext,
+} from '../context/autocomplete.types';
 
 const loopStepTypes = new Set(['foreach', 'while']);
 
@@ -32,7 +35,7 @@ const loopStepTypes = new Set(['foreach', 'while']);
  * Checks whether the current cursor position in the YAML document is inside
  * the body (`steps` array) of a foreach or while loop step.
  */
-export function isInsideLoopBody(ctx: ExtendedAutocompleteContext): boolean {
+export function isInsideLoopBody(ctx: Pick<AutocompleteContext, 'yamlDocument' | 'path'>): boolean {
   const { yamlDocument, path } = ctx;
   if (!yamlDocument || !path) return false;
 

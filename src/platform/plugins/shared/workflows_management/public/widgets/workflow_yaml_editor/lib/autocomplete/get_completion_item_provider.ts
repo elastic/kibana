@@ -150,14 +150,18 @@ export function getCompletionItemProvider(
       });
       mapSuggestions(deduplicatedMap, workflowSuggestions);
 
+      let suggestions = Array.from(deduplicatedMap.values());
+
       if (!isInsideLoopBody(autocompleteContext)) {
-        for (const key of LOOP_ONLY_STEP_TYPES) {
-          deduplicatedMap.delete(key);
-        }
+        suggestions = suggestions.filter((s) => {
+          const label = typeof s.label === 'string' ? s.label : s.label.label;
+          const text = typeof s.insertText === 'string' ? s.insertText : '';
+          return !LOOP_ONLY_STEP_TYPES.has(label) && !LOOP_ONLY_STEP_TYPES.has(text);
+        });
       }
 
       return {
-        suggestions: Array.from(deduplicatedMap.values()),
+        suggestions,
         incomplete: isIncomplete,
       };
     },
