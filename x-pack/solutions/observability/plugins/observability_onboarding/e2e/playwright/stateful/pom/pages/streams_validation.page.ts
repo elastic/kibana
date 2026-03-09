@@ -14,11 +14,11 @@ export class StreamsValidationPage {
     this.streamsTable = this.page.getByTestId('streamsTable');
   }
 
-  async waitForStreamsToLoad() {
+  async waitForStreamsToLoad(): Promise<void> {
     await this.streamsTable.waitFor({ state: 'visible', timeout: 60000 });
   }
 
-  async assertStreamDocCountGreaterThanZero(streamName: string) {
+  async assertStreamDocCountGreaterThanZero(streamName: string): Promise<void> {
     const docCount = this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`);
     await docCount.waitFor({ state: 'visible', timeout: 60000 });
 

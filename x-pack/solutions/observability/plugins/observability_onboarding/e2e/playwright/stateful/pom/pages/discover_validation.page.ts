@@ -32,7 +32,7 @@ export class DiscoverValidationPage {
     ).toBe(true);
   }
 
-  async assertHitCountGreaterThanZero() {
+  async assertHitCountGreaterThanZero(): Promise<void> {
     const hitsContainer = this.page.getByTestId('discoverQueryTotalHits');
     await hitsContainer.waitFor({ state: 'visible', timeout: 60000 });
 

@@ -36,7 +36,7 @@ export class WiredStreamsSelector {
     );
   }
 
-  public async selectWiredStreamsMode() {
+  public async selectWiredStreamsMode(): Promise<void> {
     await expect(
       this.ingestionModeSelector,
       'Expected ingestion mode selector to be visible before selecting Wired Streams'
@@ -45,8 +45,12 @@ export class WiredStreamsSelector {
     await this.wiredStreamsOption.click();
 
     // The enable confirmation modal is shown only if wired streams are not yet enabled on the cluster.
-    try {
-      await this.enableWiredStreamsModal.waitFor({ state: 'visible', timeout: 5000 });
+    const modalVisible = await this.enableWiredStreamsModal
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (modalVisible) {
       await this.enableWiredStreamsConfirmButton.click();
 
       // Spinner exists only while the enable API call is in progress.
@@ -60,8 +64,6 @@ export class WiredStreamsSelector {
       if (spinnerAppeared) {
         await this.enablingSpinner.waitFor({ state: 'hidden', timeout: 60000 });
       }
-    } catch {
-      // Modal did not appear. Wired streams may already be enabled.
     }
 
     await this.wiredStreamsDescription.waitFor({ state: 'visible', timeout: 60000 });
