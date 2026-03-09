@@ -22,7 +22,7 @@ export class InferenceEndpointIdCache {
   private readonly ttlMs: number;
   private esClient?: ElasticsearchClient;
 
-  constructor(options?: { ttlMs?: number, esClient?: ElasticsearchClient }) {
+  constructor(options?: { ttlMs?: number; esClient?: ElasticsearchClient }) {
     this.ttlMs = options?.ttlMs ?? DEFAULT_TTL_MS;
     if (options?.esClient) {
       this.esClient = options.esClient;
@@ -61,7 +61,10 @@ export class InferenceEndpointIdCache {
     if (!this.esClient) {
       throw new Error('Elasticsearch client is not set');
     }
-    const endpoints = await getInferenceEndpoints({ esClient: this.esClient, taskType: 'chat_completion' });
+    const endpoints = await getInferenceEndpoints({
+      esClient: this.esClient,
+      taskType: 'chat_completion',
+    });
     this.knownIds = new Set(endpoints.map((ep) => ep.inferenceId));
     this.lastRefresh = Date.now();
   }

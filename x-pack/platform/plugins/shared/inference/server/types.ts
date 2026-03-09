@@ -160,9 +160,7 @@ export interface InferenceServerStart {
    * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
    * @returns A promise that resolves to an array of inference endpoints
    */
-  getInferenceEndpoints: (
-    taskType?: string
-  ) => Promise<InferenceEndpoint[]>;
+  getInferenceEndpoints: (taskType?: string) => Promise<InferenceEndpoint[]>;
 
   /**
    * Retrieves a specific Elasticsearch inference endpoint by its ID.
@@ -172,9 +170,7 @@ export interface InferenceServerStart {
    * @returns A promise that resolves to the inference endpoint metadata
    * @throws Error if the endpoint does not exist
    */
-  getInferenceEndpointById: (
-    inferenceId: string
-  ) => Promise<InferenceEndpoint>;
+  getInferenceEndpointById: (inferenceId: string) => Promise<InferenceEndpoint>;
 }
 
 /**
