@@ -826,6 +826,50 @@
   "type": "doc",
   "value": {
     "data_stream": ".entities.v2.updates.security_default",
+    "id": "dset1_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:20Z",
+      "event": { "kind": "asset" },
+      "data_stream": { "dataset": "entityanalytics_okta.users" },
+      "user": { "name": "okta.from.dataset" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dset2_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:21Z",
+      "event": { "kind": "asset" },
+      "data_stream": { "dataset": "aws.cloudtrail" },
+      "user": { "name": "cloudtrail.user" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "none1_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:22Z",
+      "event": { "kind": "asset" },
+      "user": { "name": "no.module.user" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
     "id": "dkzh_5sBzpZGGHYpLUFB",
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {

@@ -18,24 +18,15 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 const DOCS_LIMIT = 2;
-const CCS_TEST_HOST_LOGS_INDEX = 'ccs-test-host-logs';
-const CCS_TEST_USER_LOGS_INDEX = 'ccs-test-user-logs';
-const CCS_TEST_SERVICE_LOGS_INDEX = 'ccs-test-service-logs';
-const CCS_TEST_GENERIC_LOGS_INDEX = 'ccs-test-generic-logs';
+const CCS_TEST_LOGS_INDEX = 'ccs-test-logs';
 const FROM_DATE = '2026-02-25T10:00:00Z';
 const TO_DATE = '2026-02-25T12:00:00Z';
 const MAX_DATE_OF_UPDATES = '2026-02-25T12:10:01Z';
 
-const CCS_TEST_INDICES = [
-  CCS_TEST_HOST_LOGS_INDEX,
-  CCS_TEST_USER_LOGS_INDEX,
-  CCS_TEST_SERVICE_LOGS_INDEX,
-  CCS_TEST_GENERIC_LOGS_INDEX,
-];
-
-async function createCcsTestHostLogsIndex(esClient: EsClient) {
+async function createCcsTestLogsIndex(esClient: EsClient) {
+  await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
   await esClient.indices.create({
-    index: CCS_TEST_HOST_LOGS_INDEX,
+    index: CCS_TEST_LOGS_INDEX,
     mappings: {
       properties: {
         '@timestamp': { type: 'date' },
@@ -54,17 +45,6 @@ async function createCcsTestHostLogsIndex(esClient: EsClient) {
             architecture: { type: 'keyword' },
           },
         },
-      },
-    },
-  });
-}
-
-async function createCcsTestUserLogsIndex(esClient: EsClient) {
-  await esClient.indices.create({
-    index: CCS_TEST_USER_LOGS_INDEX,
-    mappings: {
-      properties: {
-        '@timestamp': { type: 'date' },
         user: {
           properties: {
             name: { type: 'keyword' },
@@ -80,34 +60,17 @@ async function createCcsTestUserLogsIndex(esClient: EsClient) {
             module: { type: 'keyword' },
           },
         },
-      },
-    },
-  });
-}
-
-async function createCcsTestServiceLogsIndex(esClient: EsClient) {
-  await esClient.indices.create({
-    index: CCS_TEST_SERVICE_LOGS_INDEX,
-    mappings: {
-      properties: {
-        '@timestamp': { type: 'date' },
+        data_stream: {
+          properties: {
+            dataset: { type: 'keyword' },
+          },
+        },
         service: {
           properties: {
             name: { type: 'keyword' },
             version: { type: 'keyword' },
           },
         },
-      },
-    },
-  });
-}
-
-async function createCcsTestGenericLogsIndex(esClient: EsClient) {
-  await esClient.indices.create({
-    index: CCS_TEST_GENERIC_LOGS_INDEX,
-    mappings: {
-      properties: {
-        '@timestamp': { type: 'date' },
         entity: {
           properties: {
             id: { type: 'keyword' },
@@ -160,11 +123,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
-      await Promise.all(
-        CCS_TEST_INDICES.map(async (index) => {
-          await esClient.indices.delete({ index }, { ignore: [404] });
-        })
-      );
+      await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
 
       await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
         headers: defaultHeaders,
@@ -180,29 +139,29 @@ apiTest.describe(
     apiTest(
       'Should run CCS extraction for host and write to updates then latest index',
       async ({ apiClient, esClient }) => {
-        await createCcsTestHostLogsIndex(esClient);
+        await createCcsTestLogsIndex(esClient);
 
-        await ingestDoc(esClient, CCS_TEST_HOST_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:00:01Z',
           host: { name: 'name-a1', architecture: 'x86_64', entity: { sub_type: 'bare-metal' } },
         });
-        await ingestDoc(esClient, CCS_TEST_HOST_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:05:00Z',
           host: { name: 'name-a1', architecture: 'aarch64', entity: { sub_type: 'vm' } },
         });
-        await ingestDoc(esClient, CCS_TEST_HOST_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:10:00Z',
           host: { name: 'name-a1', architecture: 'arm64', entity: { sub_type: 'container' } },
         });
-        await ingestDoc(esClient, CCS_TEST_HOST_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:15:00Z',
           host: { id: 'host-id-b', name: 'server-b' },
         });
-        await ingestDoc(esClient, CCS_TEST_HOST_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:20:00Z',
           host: { hostname: 'server-c' },
         });
-        await ingestDoc(esClient, CCS_TEST_HOST_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:25:00Z',
           host: { name: 'server-d', domain: 'example.com', hostname: 'server-d-hostname' },
         });
@@ -213,7 +172,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
             body: {
-              indexPatterns: [CCS_TEST_HOST_LOGS_INDEX],
+              indexPatterns: [CCS_TEST_LOGS_INDEX],
               fromDateISO: FROM_DATE,
               toDateISO: TO_DATE,
               docsLimit: DOCS_LIMIT,
@@ -298,30 +257,52 @@ apiTest.describe(
     apiTest(
       'Should run CCS extraction for user and write to updates then latest index',
       async ({ apiClient, esClient }) => {
-        await createCcsTestUserLogsIndex(esClient);
+        await createCcsTestLogsIndex(esClient);
 
-        await ingestDoc(esClient, CCS_TEST_USER_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:30:00Z',
           user: { name: 'alice', domain: 'elastic.co' },
           event: { kind: 'asset', module: 'entityanalytics_ad' },
         });
-        await ingestDoc(esClient, CCS_TEST_USER_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:35:00Z',
           user: { email: 'bob@email.com', id: 'u2', name: 'bob' },
           event: { kind: 'asset', module: 'aws' },
         });
 
         // Shared module user
-        await ingestDoc(esClient, CCS_TEST_USER_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:35:01Z',
           user: { name: 'romulo.farias' },
           event: { kind: 'asset', module: 'okta' },
         });
 
-        await ingestDoc(esClient, CCS_TEST_USER_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:35:01Z',
           user: { name: 'romulo.farias' },
           event: { kind: 'asset', module: 'entityanalytics_okta' },
+        });
+
+        // User with two different data_stream.dataset values (no event.module); both resolve to okta
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:35:02Z',
+          user: { name: 'cecilia' },
+          event: { kind: 'asset' },
+          data_stream: { dataset: 'entityanalytics_okta.users' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:35:03Z',
+          user: { name: 'cecilia' },
+          event: { kind: 'asset' },
+          data_stream: { dataset: 'okta.logs' },
+        });
+
+        // User with empty event.module and data_stream.dataset → namespace fallback 'unknown'
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:35:04Z',
+          user: { name: 'flora' },
+          event: { kind: 'asset', module: '' },
+          data_stream: { dataset: '' },
         });
 
         const extractResponse = await apiClient.post(
@@ -330,7 +311,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
             body: {
-              indexPatterns: [CCS_TEST_USER_LOGS_INDEX],
+              indexPatterns: [CCS_TEST_LOGS_INDEX],
               fromDateISO: FROM_DATE,
               toDateISO: TO_DATE,
               docsLimit: DOCS_LIMIT,
@@ -338,7 +319,7 @@ apiTest.describe(
           }
         );
         expect(extractResponse.statusCode).toBe(200);
-        expect(extractResponse.body).toMatchObject({ count: 3, pages: 2 });
+        expect(extractResponse.body).toMatchObject({ count: 5, pages: 3 });
 
         const logExtractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
@@ -369,47 +350,69 @@ apiTest.describe(
                       'user:alice@elastic.co@active_directory',
                       'user:bob@email.com@aws',
                       'user:romulo.farias@okta',
+                      'user:cecilia@okta',
+                      'user:flora@unknown',
                     ],
                   },
                 },
               ],
             },
           },
-          sort: 'entity.id:asc',
         });
 
-        expect(latestSearchResponse.hits.hits).toHaveLength(3);
-        const hits = latestSearchResponse.hits.hits;
-        expect(get(hits[0], ['_source', 'entity', 'id'])).toBe(
-          'user:alice@elastic.co@active_directory'
+        const byId = Object.fromEntries(
+          latestSearchResponse.hits.hits.map((h) => [get(h._source, ['entity', 'id']), h._source])
         );
-        expect(get(hits[0], ['_source', 'user', 'name'])).toBe('alice');
-        expect(get(hits[0], ['_source', 'user', 'domain'])).toBe('elastic.co');
-        expect(get(hits[0], ['_source', 'event', 'kind'])).toBe('asset');
 
-        expect(get(hits[1], ['_source', 'entity', 'id'])).toBe('user:bob@email.com@aws');
-        expect(get(hits[1], ['_source', 'event', 'kind'])).toBe('asset');
+        const entityA = byId['user:alice@elastic.co@active_directory'];
+        expect(entityA).toBeDefined();
+        expect(get(entityA, ['entity', 'name'])).toBe('alice');
+        expect(get(entityA, ['entity', 'namespace'])).toBe('active_directory');
+        expect(get(entityA, ['user', 'domain'])).toBe('elastic.co');
+        expect(get(entityA, ['event', 'kind'])).toBe('asset');
 
-        expect(get(hits[2], ['_source', 'entity', 'id'])).toBe('user:romulo.farias@okta');
-        expect(get(hits[2], ['_source', 'user', 'name'])).toBe('romulo.farias');
-        expect(get(hits[2], ['_source', 'event', 'module'])).toMatchObject([
-          'entityanalytics_okta',
-          'okta',
+        const entityB = byId['user:bob@email.com@aws'];
+        expect(entityB).toBeDefined();
+        expect(get(entityB, ['entity', 'name'])).toBe('bob');
+        expect(get(entityB, ['entity', 'namespace'])).toBe('aws');
+        expect(get(entityB, ['user', 'email'])).toBe('bob@email.com');
+        expect(get(entityB, ['event', 'kind'])).toBe('asset');
+
+        const entityC = byId['user:romulo.farias@okta'];
+        expect(entityC).toBeDefined();
+        expect(get(entityC, ['entity', 'name'])).toBe('romulo.farias');
+        expect(get(entityC, ['entity', 'namespace'])).toBe('okta');
+        expect(get(entityC, ['event', 'module'])).toMatchObject(['entityanalytics_okta', 'okta']);
+        expect(get(entityC, ['event', 'kind'])).toBe('asset');
+
+        const entityD = byId['user:cecilia@okta'];
+        expect(entityD).toBeDefined();
+        expect(get(entityD, ['entity', 'name'])).toBe('cecilia');
+        expect(get(entityD, ['entity', 'namespace'])).toBe('okta');
+        expect(get(entityD, ['event', 'kind'])).toBe('asset');
+        expect(get(entityD, ['data_stream', 'dataset'])).toMatchObject([
+          'entityanalytics_okta.users',
+          'okta.logs',
         ]);
-        expect(get(hits[2], ['_source', 'event', 'kind'])).toBe('asset');
+
+        const entityE = byId['user:flora@unknown'];
+        expect(entityE).toBeDefined();
+        expect(get(entityE, ['entity', 'name'])).toBe('flora');
+        expect(get(entityE, ['entity', 'namespace'])).toBe('unknown');
+        expect(get(entityE, ['event', 'kind'])).toBe('asset');
       }
     );
 
     apiTest(
       'Should run CCS extraction for service and write to updates then latest index',
       async ({ apiClient, esClient }) => {
-        await createCcsTestServiceLogsIndex(esClient);
+        await createCcsTestLogsIndex(esClient);
 
-        await ingestDoc(esClient, CCS_TEST_SERVICE_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:40:00Z',
           service: { name: 'svc-a', version: '1.0' },
         });
-        await ingestDoc(esClient, CCS_TEST_SERVICE_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:45:00Z',
           service: { name: 'svc-b' },
         });
@@ -420,7 +423,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
             body: {
-              indexPatterns: [CCS_TEST_SERVICE_LOGS_INDEX],
+              indexPatterns: [CCS_TEST_LOGS_INDEX],
               fromDateISO: FROM_DATE,
               toDateISO: TO_DATE,
               docsLimit: DOCS_LIMIT,
@@ -478,13 +481,13 @@ apiTest.describe(
     apiTest(
       'Should run CCS extraction for generic and write to updates then latest index',
       async ({ apiClient, esClient }) => {
-        await createCcsTestGenericLogsIndex(esClient);
+        await createCcsTestLogsIndex(esClient);
 
-        await ingestDoc(esClient, CCS_TEST_GENERIC_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:50:00Z',
           entity: { id: 'gen-1', name: 'Generic One' },
         });
-        await ingestDoc(esClient, CCS_TEST_GENERIC_LOGS_INDEX, {
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
           '@timestamp': '2026-02-25T10:55:00Z',
           entity: { id: 'gen-2', name: 'Generic Two' },
         });
@@ -495,7 +498,7 @@ apiTest.describe(
             headers: defaultHeaders,
             responseType: 'json',
             body: {
-              indexPatterns: [CCS_TEST_GENERIC_LOGS_INDEX],
+              indexPatterns: [CCS_TEST_LOGS_INDEX],
               fromDateISO: FROM_DATE,
               toDateISO: TO_DATE,
               docsLimit: DOCS_LIMIT,

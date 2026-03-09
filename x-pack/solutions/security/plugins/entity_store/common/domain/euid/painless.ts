@@ -8,7 +8,7 @@
 import type { EntityType, EuidAttribute, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { isEuidField, isEuidSeparator } from './commons';
+import { isEuidField } from './commons';
 
 /**
  * Returns an Elasticsearch runtime keyword field mapping whose Painless script
@@ -92,7 +92,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   if (identityField.euidFields.length === 1) {
     const comp = identityField.euidFields[0];
     const first = comp[0];
-    if (isEuidSeparator(first)) {
+    if (!isEuidField(first)) {
       throw new Error('Separator found in single field, invalid euid logic definition');
     }
     const field = first.field;
@@ -155,13 +155,22 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
   for (const ev of evaluations) {
     const varName = destinationToVarName(ev.destination);
     evaluatedVars.set(ev.destination, varName);
-    const srcEsc = escapePainlessField(ev.source);
-    const sourceNotEmpty = `doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != ""`;
-    const stmts: string[] = [
-      `String ${varName} = null;`,
-      `if (${sourceNotEmpty}) {`,
-      `  String _src = doc['${srcEsc}'].value;`,
-    ];
+    const stmts: string[] = [`String ${varName} = null;`, `String _src = null;`];
+    for (const source of ev.sources) {
+      if ('field' in source) {
+        const srcEsc = escapePainlessField(source.field);
+        stmts.push(
+          `if (_src == null && doc.containsKey('${srcEsc}') && doc['${srcEsc}'].size() > 0 && doc['${srcEsc}'].value != null && doc['${srcEsc}'].value != "") { _src = doc['${srcEsc}'].value; }`
+        );
+      } else {
+        const fieldEsc = escapePainlessField(source.firstChunkOfField);
+        const delimInString = escapePainlessString(source.splitBy);
+        stmts.push(
+          `if (_src == null && doc.containsKey('${fieldEsc}') && doc['${fieldEsc}'].size() > 0 && doc['${fieldEsc}'].value != null && doc['${fieldEsc}'].value != "") { String _raw = doc['${fieldEsc}'].value; int _idx = _raw.indexOf("${delimInString}"); String _first = _idx >= 0 ? _raw.substring(0, _idx) : _raw; if (_first != null && _first != "") { _src = _first; } }`
+        );
+      }
+    }
+    stmts.push(`if (_src != null) {`);
     let first = true;
     for (const clause of ev.whenClauses) {
       const conds = clause.sourceMatchesAny
@@ -172,7 +181,7 @@ function buildFieldEvaluationsPreamble(evaluations: FieldEvaluation[]): {
       first = false;
     }
     stmts.push(`  else { ${varName} = _src; }`);
-    stmts.push('}');
+    stmts.push(`} else { ${varName} = "${escapePainlessString(ev.fallbackValue)}"; }`);
     parts.push(stmts.join(' '));
   }
   const preamble = parts.join(' ');

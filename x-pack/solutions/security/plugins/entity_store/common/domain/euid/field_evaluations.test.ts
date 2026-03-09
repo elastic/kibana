@@ -15,11 +15,19 @@ describe('applyFieldEvaluations', () => {
     getEntityDefinitionWithoutId('user').identityField as { fieldEvaluations?: FieldEvaluation[] }
   ).fieldEvaluations!;
 
-  it('omits entity.namespace when event.module is null or missing (no clause matches)', () => {
-    expect(applyFieldEvaluations({}, userEvaluations)).toEqual({});
-    expect(applyFieldEvaluations({ event: {} }, userEvaluations)).toEqual({});
-    expect(applyFieldEvaluations({ event: { module: null } }, userEvaluations)).toEqual({});
-    expect(applyFieldEvaluations({ event: { module: '' } }, userEvaluations)).toEqual({});
+  it('sets entity.namespace to fallbackValue when both event.module and data_stream.dataset are missing', () => {
+    expect(applyFieldEvaluations({}, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
+    expect(applyFieldEvaluations({ event: {} }, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
+    expect(applyFieldEvaluations({ event: { module: null } }, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
+    expect(applyFieldEvaluations({ event: { module: '' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
   });
 
   it('maps okta and entityanalytics_okta to okta', () => {
@@ -80,5 +88,32 @@ describe('applyFieldEvaluations', () => {
 
   it('returns empty object when fieldEvaluations is empty', () => {
     expect(applyFieldEvaluations({ event: { module: 'okta' } }, [])).toEqual({});
+  });
+
+  it('uses first chunk of data_stream.dataset when event.module is missing', () => {
+    expect(
+      applyFieldEvaluations({ data_stream: { dataset: 'okta.logs' } }, userEvaluations)
+    ).toEqual({ 'entity.namespace': 'okta' });
+    expect(
+      applyFieldEvaluations(
+        { data_stream: { dataset: 'entityanalytics_entra_id.metrics' } },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('prefers event.module over data_stream.dataset when both are present', () => {
+    expect(
+      applyFieldEvaluations(
+        { event: { module: 'azure' }, data_stream: { dataset: 'okta.logs' } },
+        userEvaluations
+      )
+    ).toEqual({ 'entity.namespace': 'entra_id' });
+  });
+
+  it('sets entity.namespace to unknown when only data_stream.dataset is present but empty', () => {
+    expect(applyFieldEvaluations({ data_stream: { dataset: '' } }, userEvaluations)).toEqual({
+      'entity.namespace': 'unknown',
+    });
   });
 });

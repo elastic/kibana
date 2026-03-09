@@ -17,7 +17,6 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
-  getFieldEvaluationsSourcesFilterEsql,
 } from '../../../../common/domain/euid/esql';
 
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
@@ -132,9 +131,8 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const sourceFilter = getFieldEvaluationsSourcesFilterEsql('user');
       const evalFragment = getFieldEvaluationsEsql('user');
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${sourceFilter} | EVAL ${evalFragment} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${UPDATES_INDEX} | EVAL ${evalFragment} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
         drop_null_columns: true,
@@ -156,9 +154,8 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
     expect(filter).toBeDefined();
 
-    const sourceFilter = getFieldEvaluationsSourcesFilterEsql('user');
     const evalFragment = getFieldEvaluationsEsql('user');
-    const query = `FROM ${UPDATES_INDEX} | WHERE ${sourceFilter} | EVAL ${evalFragment} | WHERE ${filter} | LIMIT 10`;
+    const query = `FROM ${UPDATES_INDEX} | EVAL ${evalFragment} | WHERE ${filter} | LIMIT 10`;
     const result = await esClient.esql.query({
       query,
       drop_null_columns: true,

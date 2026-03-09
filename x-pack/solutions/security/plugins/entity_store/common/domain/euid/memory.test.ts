@@ -104,8 +104,10 @@ describe('getEuidFromObject', () => {
       ).toBe('user:a@b.com@custom_module');
     });
 
-    it('returns undefined when user.email is present but event.module is null (entity.namespace null)', () => {
-      expect(getEuidFromObject('user', { user: { email: 'dev@example.com' } })).toBeUndefined();
+    it('returns euid with entity.namespace fallback when user.email is present but no source (event.module/data_stream.dataset) is set', () => {
+      expect(getEuidFromObject('user', { user: { email: 'dev@example.com' } })).toBe(
+        'user:dev@example.com@unknown'
+      );
     });
 
     it('uses user.name + "@" + entity.namespace when user.name and event.module are present', () => {

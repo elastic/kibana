@@ -115,12 +115,16 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns undefined when user.email is present but event.module is missing (entity.namespace not set)', () => {
+    it('returns filter with term on user.email when user.email is present and entity.namespace falls back (evaluated field not in DSL)', () => {
       const result = getEuidDslFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
       });
 
-      expect(result).toBeUndefined();
+      expect(result).toEqual({
+        bool: {
+          filter: [{ term: { 'user.email': 'alice@example.com' } }],
+        },
+      });
     });
 
     it('returns filter with term on user.name only and must_not on higher-ranked identity fields (entity.namespace excluded)', () => {

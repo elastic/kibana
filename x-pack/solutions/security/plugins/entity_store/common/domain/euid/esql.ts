@@ -76,21 +76,56 @@ export function getEuidEsqlFilterBasedOnDocument(entityType: EntityType, doc: an
   return `(${[...onExpressions, ...outExpressions].join(' AND ')})`;
 }
 
+function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
+  if ('field' in source) {
+    return `MV_FIRST(${source.field})`;
+  }
+  return `MV_FIRST(SPLIT(MV_FIRST(${source.firstChunkOfField}), "${escapeEsqlString(
+    source.splitBy
+  )}"))`;
+}
+
 /**
- * Supports source fields that are arrays by using MV_FIRST.
+ * Supports source fields that are arrays by using MV_FIRST; multiple sources combined with CASE (first non-null and non-empty).
+ * When there are multiple sources, assigns each to a variable (_src_<dest>0, _src_<dest>1, ...) then CASE over those vars for readability.
+ * Emits EVAL lines then destination = CASE(effectiveSource IS NULL OR effectiveSource == "", fallbackValue, whenClauses..., effectiveSource).
  */
 function buildOneFieldEvaluationEsql(evaluation: FieldEvaluation): string {
-  const { destination, source, whenClauses } = evaluation;
-  const firstSource = `MV_FIRST(${source})`;
-  const caseParts: string[] = [];
+  const { destination, sources, fallbackValue, whenClauses } = evaluation;
+  const sourceExpressions = sources.map((s) => sourceToEsqlExpression(s));
+  const baseName = `_src_${destination.replace(/\./g, '_')}`;
+  const effectiveSourceName = baseName;
+  const destinationCaseParts: string[] = [
+    `(${effectiveSourceName} IS NULL OR ${effectiveSourceName} == ""), "${escapeEsqlString(
+      fallbackValue
+    )}"`,
+  ];
   for (const clause of whenClauses) {
     const conditions = clause.sourceMatchesAny
-      .map((v) => `${firstSource} == "${escapeEsqlString(v)}"`)
+      .map((v) => `${effectiveSourceName} == "${escapeEsqlString(v)}"`)
       .join(' OR ');
-    caseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
+    destinationCaseParts.push(`(${conditions}), "${escapeEsqlString(clause.then)}"`);
   }
-  caseParts.push(firstSource);
-  return `${destination} = CASE(${caseParts.join(', ')})`;
+  destinationCaseParts.push(effectiveSourceName);
+
+  const assignments: string[] = [];
+
+  if (sourceExpressions.length === 1) {
+    assignments.push(`${effectiveSourceName} = ${sourceExpressions[0]}`);
+  } else {
+    for (let i = 0; i < sourceExpressions.length; i++) {
+      assignments.push(`${baseName}${i} = ${sourceExpressions[i]}`);
+    }
+    const sourceVarCaseParts = sourceExpressions.flatMap((_, i) => {
+      const v = `${baseName}${i}`;
+      return [`(${v} IS NOT NULL AND ${v} != "")`, v];
+    });
+    sourceVarCaseParts.push('NULL');
+    assignments.push(`${effectiveSourceName} = CASE(${sourceVarCaseParts.join(', ')})`);
+  }
+
+  assignments.push(`${destination} = CASE(${destinationCaseParts.join(', ')})`);
+  return assignments.join(',\n ');
 }
 
 function escapeEsqlString(s: string): string {
@@ -111,26 +146,6 @@ export function getFieldEvaluationsEsql(entityType: EntityType) {
     return undefined;
   }
   return evaluations.map(buildOneFieldEvaluationEsql).join(',\n ');
-}
-
-/**
- * Returns an ESQL WHERE condition requiring all identityField.fieldEvaluations source fields to be NOT NULL and not empty.
- * Use in the main query filter so only documents with source data reach the EVAL step (performance).
- * Supports source fields that are arrays by using MV_FIRST.
- */
-export function getFieldEvaluationsSourcesFilterEsql(entityType: EntityType) {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
-  if (isSingleFieldIdentity(identityField)) {
-    return undefined;
-  }
-  const evaluations = identityField.fieldEvaluations;
-  if (!evaluations || evaluations.length === 0) {
-    return undefined;
-  }
-  const conditions = evaluations
-    .map((e) => `(${esqlIsNotNullOrEmpty(`MV_FIRST(${e.source})`)})`)
-    .join(' AND ');
-  return conditions;
 }
 
 /**
@@ -157,18 +172,7 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
     return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
   }
 
-  const filters = [conditionToESQL(identityField.documentsFilter)];
-
-  const evaluationSourceFilter = getFieldEvaluationsSourcesFilterEsql(entityType);
-  if (evaluationSourceFilter) {
-    filters.push(evaluationSourceFilter);
-  }
-
-  if (filters.length === 1) {
-    return filters[0];
-  }
-
-  return filters.map((filter) => `(${filter})`).join(' AND ');
+  return conditionToESQL(identityField.documentsFilter);
 }
 
 /**

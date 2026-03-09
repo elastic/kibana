@@ -562,6 +562,62 @@ export const expectedUserEntities = [
       },
     },
   },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: '5cb0c0bb84d9141af0df2789a245182d',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:19.000Z',
+      user: { name: 'not-captured-no-module' },
+      entity: {
+        name: 'not-captured-no-module',
+        type: 'Identity',
+        id: 'user:not-captured-no-module@unknown',
+        EngineMetadata: { Type: 'user', UntypedId: 'not-captured-no-module@unknown' },
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: '70858af64ff6f823645c9f2030942f2f',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:20.000Z',
+      user: { name: 'okta.from.dataset' },
+      entity: {
+        name: 'okta.from.dataset',
+        type: 'Identity',
+        id: 'user:okta.from.dataset@okta',
+        EngineMetadata: { Type: 'user', UntypedId: 'okta.from.dataset@okta' },
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: '67e5305b77e994a4e5061980e161917f',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:21.000Z',
+      user: { name: 'cloudtrail.user' },
+      entity: {
+        name: 'cloudtrail.user',
+        type: 'Identity',
+        id: 'user:cloudtrail.user@aws',
+        EngineMetadata: { Type: 'user', UntypedId: 'cloudtrail.user@aws' },
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default',
+    _id: 'aa9c2809da7706d63d4b195e9ae73a81',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:22.000Z',
+      user: { name: 'no.module.user' },
+      entity: {
+        name: 'no.module.user',
+        type: 'Identity',
+        id: 'user:no.module.user@unknown',
+        EngineMetadata: { Type: 'user', UntypedId: 'no.module.user@unknown' },
+      },
+    },
+  },
 ];
 
 export const expectedServiceEntities = [

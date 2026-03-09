@@ -20,9 +20,11 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
     fieldEvaluations: [
       {
         destination: 'entity.namespace',
-        // we support multiple values in event.module. It's needed for CCS extraction
-        // the logic is first value in event.module that matches any of the whenClauses
-        source: 'event.module',
+        sources: [
+          { field: 'event.module' },
+          { firstChunkOfField: 'data_stream.dataset', splitBy: '.' },
+        ],
+        fallbackValue: 'unknown',
         whenClauses: [
           { sourceMatchesAny: ['okta', 'entityanalytics_okta'], then: 'okta' },
           { sourceMatchesAny: ['azure', 'entityanalytics_entra_id'], then: 'entra_id' },
@@ -82,7 +84,14 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
   fields: [
     newestValue({ destination: 'entity.name', source: 'user.name' }),
 
+    // Having multiple values in event.module or data_stream.dataset is a good feature
+    // but causes complexity for CCS extraction.
+    // That's why event.module and data_stream.dataset always use MV_FIRST on its usage
     collect({ source: 'event.module' }),
+    // keep field length large for safety to not lose idps
+    // with many datasets
+    collect({ source: 'data_stream.dataset', fieldHistoryLength: 50 }),
+
     collect({ source: 'event.kind' }),
     collect({ source: 'event.category' }),
     collect({ source: 'event.type' }),

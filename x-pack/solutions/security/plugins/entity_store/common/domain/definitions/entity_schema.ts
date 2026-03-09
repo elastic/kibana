@@ -37,16 +37,21 @@ const euidSeparatorSchema = z.object({
   sep: z.string(),
 });
 
-// Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value).
-// Source fields are required in the main query filter so only documents with source set reach evaluation.
+// Field evaluation: pre-evaluate a field before euid generation (first match wins; fallback to source value or fallbackValue).
 const fieldEvaluationWhenClauseSchema = z.object({
   sourceMatchesAny: z.array(z.string()),
   then: z.string(),
 });
 
+const fieldEvaluationSourceSchema = z.union([
+  z.object({ field: z.string() }),
+  z.object({ firstChunkOfField: z.string(), splitBy: z.string() }),
+]);
+
 const fieldEvaluationSchema = z.object({
   destination: z.string(),
-  source: z.string(),
+  sources: z.array(fieldEvaluationSourceSchema),
+  fallbackValue: z.string(),
   whenClauses: z.array(fieldEvaluationWhenClauseSchema),
 });
 
@@ -110,6 +115,7 @@ export type EuidField = z.infer<typeof euidFieldSchema>;
 export type EuidSeparator = z.infer<typeof euidSeparatorSchema>;
 export type EuidAttribute = EuidField | EuidSeparator;
 export type FieldEvaluationWhenClause = z.infer<typeof fieldEvaluationWhenClauseSchema>;
+export type FieldEvaluationSource = z.infer<typeof fieldEvaluationSourceSchema>;
 export type FieldEvaluation = z.infer<typeof fieldEvaluationSchema>;
 
 export function isSingleFieldIdentity(identity: EntityIdentity): identity is SingleFieldIdentity {

@@ -106,7 +106,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(20);
+    expect(extractionResponse.body.count).toBe(24);
 
     const entities = await esClient.search({
       index: '.entities.v2.latest.security_default',
@@ -121,7 +121,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(20);
+    expect(entities.hits.hits).toHaveLength(24);
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);

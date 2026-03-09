@@ -6,14 +6,12 @@
  */
 
 import { get } from 'lodash';
-import type { FieldEvaluation } from '../definitions/entity_schema';
+import type { FieldEvaluation, FieldEvaluationSource } from '../definitions/entity_schema';
 
-function getSourceValue(doc: any, source: string): string | undefined {
-  const flattened = doc[source];
+function getFieldValue(doc: any, field: string): string | undefined {
+  const flattened = doc[field];
   const value =
-    flattened !== undefined && flattened !== null && flattened !== ''
-      ? flattened
-      : get(doc, source);
+    flattened !== undefined && flattened !== null && flattened !== '' ? flattened : get(doc, field);
   if (value === undefined || value === null || value === '') {
     return undefined;
   }
@@ -27,14 +25,27 @@ function getSourceValue(doc: any, source: string): string | undefined {
   return String(value);
 }
 
+function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | undefined {
+  if ('field' in source) {
+    return getFieldValue(doc, source.field);
+  }
+  const raw = getFieldValue(doc, source.firstChunkOfField);
+  if (raw === undefined || raw === '') {
+    return undefined;
+  }
+  const parts = raw.split(source.splitBy);
+  const first = parts[0];
+  return first !== undefined && first !== '' ? first : undefined;
+}
+
 /**
  * Applies field evaluations to a document and returns a map of destination field to value.
- * First matching whenClause wins; if none matches, falls back to source value (first value if array).
+ * Tries each source in order; first matching whenClause wins; if none matches, uses raw source value; if no source has a value, uses fallbackValue.
  * Used before euid resolution so that getFieldValue(doc, 'entity.namespace') etc. see computed values.
  *
  * @param doc - The document (flat or nested)
  * @param fieldEvaluations - List of evaluations from identityField.fieldEvaluations
- * @returns Map of destination field name to evaluated value (string). Destinations are omitted when source is missing and no clause matches.
+ * @returns Map of destination field name to evaluated value (string).
  */
 export function applyFieldEvaluations(
   doc: any,
@@ -42,19 +53,25 @@ export function applyFieldEvaluations(
 ): Record<string, string> {
   const result: Record<string, string> = {};
   for (const evaluation of fieldEvaluations) {
-    const sourceValue = getSourceValue(doc, evaluation.source);
-    if (sourceValue === undefined) {
-      continue;
-    }
-    let value: string | undefined;
-    for (const clause of evaluation.whenClauses) {
-      if (clause.sourceMatchesAny.includes(sourceValue)) {
-        value = clause.then;
+    let sourceValue: string | undefined;
+    for (const source of evaluation.sources) {
+      sourceValue = resolveSourceValue(doc, source);
+      if (sourceValue !== undefined) {
         break;
       }
     }
-    if (value === undefined) {
-      value = sourceValue;
+    let value: string;
+    if (sourceValue === undefined) {
+      value = evaluation.fallbackValue;
+    } else {
+      const resolved = sourceValue;
+      value = resolved;
+      for (const clause of evaluation.whenClauses) {
+        if (clause.sourceMatchesAny.includes(resolved)) {
+          value = clause.then;
+          break;
+        }
+      }
     }
     result[evaluation.destination] = value;
   }

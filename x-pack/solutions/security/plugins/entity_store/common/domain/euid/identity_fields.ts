@@ -23,9 +23,7 @@ export interface IdentitySourceFields {
 
 /**
  * Returns the identity source field names for a given entity type.
- * When a composition field is a fieldEvaluation destination (e.g. entity.namespace),
- * the evaluation's source field (e.g. event.module) is returned instead, since the
- * destination is computed and not stored.
+ * Field evaluation destinations (e.g. entity.namespace) are excluded, since they are computed and not stored.
  *
  * @param entityType - The entity type (e.g. 'host', 'user', 'service')
  * @returns requiresOneOf (same as identitySourceFields) and identitySourceFields from euidFields
@@ -42,20 +40,13 @@ export function getEuidSourceFields(entityType: EntityType): IdentitySourceField
   }
 
   const { euidFields, fieldEvaluations } = identityField;
-  const evaluationDestinationToSource = new Map(
-    (fieldEvaluations ?? []).map((e) => [e.destination, e.source])
-  );
-  const identitySourceFields = Array.from(
+  const evaluationDestinations = new Set((fieldEvaluations ?? []).map((e) => e.destination));
+  const allFields = Array.from(
     new Set(
-      euidFields.flatMap((composition) =>
-        composition.filter(isEuidField).map((attr) => {
-          const field = attr.field;
-          // if the field is a fieldEvaluation destination, return the source field
-          return evaluationDestinationToSource.get(field) ?? field;
-        })
-      )
+      euidFields.flatMap((composition) => composition.filter(isEuidField).map((attr) => attr.field))
     )
   );
+  const identitySourceFields = allFields.filter((field) => !evaluationDestinations.has(field));
   return {
     requiresOneOf: identitySourceFields,
     identitySourceFields,

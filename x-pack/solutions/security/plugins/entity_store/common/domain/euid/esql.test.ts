@@ -10,7 +10,6 @@ import {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlFilterBasedOnDocument,
   getFieldEvaluationsEsql,
-  getFieldEvaluationsSourcesFilterEsql,
 } from './esql';
 
 const normalize = (s: string) =>
@@ -85,12 +84,14 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       expect(result).toBe('((user.email == "alice@example.com") AND (entity.namespace == "okta"))');
     });
 
-    it('returns undefined when user.email is present but event.module is null (entity.namespace not set)', () => {
+    it('returns filter with entity.namespace fallback when user.email is present but no source (event.module/data_stream.dataset) is set', () => {
       const result = getEuidEsqlFilterBasedOnDocument('user', {
         user: { email: 'alice@example.com' },
       });
 
-      expect(result).toBeUndefined();
+      expect(result).toBe(
+        '((user.email == "alice@example.com") AND (entity.namespace == "unknown"))'
+      );
     });
 
     it('returns filter with equality on user.name and entity.namespace and null/empty checks on higher-ranked identity fields when user.name is present', () => {
@@ -201,27 +202,18 @@ describe('getFieldEvaluationsEsql', () => {
     expect(getFieldEvaluationsEsql('service')).toBe(undefined);
   });
 
-  it('returns EVAL fragment for user entity.namespace from event.module using MV_FIRST', () => {
+  it('returns EVAL fragment for user entity.namespace with var per source then CASE', () => {
     const result = getFieldEvaluationsEsql('user');
-    expect(result).toContain('entity.namespace = CASE(');
-    expect(result).toContain('MV_FIRST(event.module)');
-    expect(result).toContain('"okta"');
-    expect(result).toContain('"entra_id"');
-    expect(result).toContain('"microsoft_365"');
-  });
-});
-
-describe('getFieldEvaluationsSourcesFilterEsql', () => {
-  it('returns empty string for entity types without field evaluations', () => {
-    expect(getFieldEvaluationsSourcesFilterEsql('generic')).toBe(undefined);
-    expect(getFieldEvaluationsSourcesFilterEsql('host')).toBe(undefined);
-  });
-
-  it('returns NOT NULL and not empty condition for user event.module', () => {
-    const result = getFieldEvaluationsSourcesFilterEsql('user');
-    expect(result).toContain('event.module');
-    expect(result).toMatch(/IS NOT NULL/);
-    expect(result).toMatch(/!= ""/);
+    const base = '_src_entity_namespace';
+    const v0 = `${base}0`;
+    const v1 = `${base}1`;
+    const expected = [
+      `${v0} = MV_FIRST(event.module)`,
+      `${v1} = MV_FIRST(SPLIT(MV_FIRST(data_stream.dataset), "."))`,
+      `${base} = CASE((${v0} IS NOT NULL AND ${v0} != ""), ${v0}, (${v1} IS NOT NULL AND ${v1} != ""), ${v1}, NULL)`,
+      `entity.namespace = CASE((${base} IS NULL OR ${base} == ""), "unknown", (${base} == "okta" OR ${base} == "entityanalytics_okta"), "okta", (${base} == "azure" OR ${base} == "entityanalytics_entra_id"), "entra_id", (${base} == "o365" OR ${base} == "o365_metrics"), "microsoft_365", (${base} == "entityanalytics_ad"), "active_directory", ${base})`,
+    ].join(', ');
+    expect(result?.replace(/\s+/g, ' ').trim()).toBe(expected.replace(/\s+/g, ' ').trim());
   });
 });
 
