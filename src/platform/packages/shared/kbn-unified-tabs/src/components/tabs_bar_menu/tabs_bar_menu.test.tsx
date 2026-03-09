@@ -214,7 +214,7 @@ describe('TabsBarMenu', () => {
     expect(screen.queryByText('Recently closed')).not.toBeInTheDocument();
   });
 
-  it('marks the selected tab as checked', async () => {
+  it('marks the selected tab with aria-current', async () => {
     const user = userEvent.setup();
     render(
       <div style={{ width: '1000px' }}>
@@ -226,7 +226,10 @@ describe('TabsBarMenu', () => {
     await user.click(menuButton);
 
     const selectedTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab1');
-    expect(selectedTabOption).toHaveAttribute('aria-label', 'Tab 1, selected tab');
+    const unselectedTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab2');
+
+    expect(selectedTabOption).toHaveAttribute('aria-current', 'true');
+    expect(unselectedTabOption).not.toHaveAttribute('aria-current');
   });
 
   it('displays relative time for recently closed items', async () => {

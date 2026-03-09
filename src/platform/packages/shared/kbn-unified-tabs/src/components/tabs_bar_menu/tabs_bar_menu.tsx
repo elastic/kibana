@@ -93,12 +93,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         const isSelected = selectedItem?.id === tab.id;
         const icon = isSelected ? 'check' : 'empty';
         const name = getOpenedTabItemContents(tab);
-        const ariaLabel = isSelected
-          ? i18n.translate('unifiedTabs.tabsBarMenu.openedTabSelectedAriaLabel', {
-              defaultMessage: '{tabLabel}, selected tab',
-              values: { tabLabel: tab.label },
-            })
-          : tab.label;
 
         const onClick = () => {
           onSelect(tab);
@@ -125,7 +119,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                     size="s"
                     onClick={onClick}
                     data-test-subj={`unifiedTabs_tabsMenu_openedTab_${tab.id}`}
-                    aria-label={ariaLabel}
+                    aria-current={isSelected ? 'true' : undefined}
                   >
                     {name}
                   </EuiContextMenuItem>
@@ -136,11 +130,18 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         }
 
         return {
-          name,
-          icon,
-          onClick,
-          'data-test-subj': `unifiedTabs_tabsMenu_openedTab_${tab.id}`,
-          'aria-label': ariaLabel,
+          key: tab.id,
+          renderItem: () => (
+            <EuiContextMenuItem
+              icon={icon}
+              size="s"
+              onClick={onClick}
+              data-test-subj={`unifiedTabs_tabsMenu_openedTab_${tab.id}`}
+              aria-current={isSelected ? 'true' : undefined}
+            >
+              {name}
+            </EuiContextMenuItem>
+          ),
         };
       });
 
