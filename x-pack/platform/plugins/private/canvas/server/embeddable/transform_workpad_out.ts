@@ -13,7 +13,7 @@ import { EmbeddableTypes } from '../../canvas_plugin_src/expression_types';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
-import { embeddableService, logger, expressionsService } from '../kibana_services';
+import { embeddableService, logger } from '../kibana_services';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -42,6 +42,29 @@ const extractMapCenterFromAst = (
     : undefined;
 };
 
+const BY_REF_TYPES = ['links', 'search', 'visualization', 'lens', 'map'];
+
+export function transformPanelReferencesOut(
+  panelReferences: SavedObjectReference[],
+  panelRefName?: string
+) {
+  console.log('panelReferences', panelReferences);
+  console.log('panelRefName', panelRefName);
+  return panelRefName
+    ? panelReferences.map((ref) => {
+        console.log('type', ref.type);
+        return ref.name === panelRefName && BY_REF_TYPES.includes(ref.type)
+          ? {
+              ...ref,
+              // Embeddable transforms for BY_REF_TYPES embeddable types
+              // are looking for by-reference reference with name 'savedObjectRef'
+              name: 'savedObjectRef',
+            }
+          : ref;
+      })
+    : panelReferences;
+}
+
 export function transformWorkpadOut(
   workpad: WorkpadAttributes,
   references: SavedObjectReference[] = []
@@ -53,7 +76,7 @@ export function transformWorkpadOut(
       }
 
       // remove element ID prefix from references for the current element
-      const referencesForElement = references
+      let referencesForElement = references
         .filter(({ name }) => name.startsWith(`${element.id}:`))
         .map((reference) => ({
           ...reference,
@@ -61,11 +84,7 @@ export function transformWorkpadOut(
         }));
 
       // use expressions service to inject references for by-reference embeddables using Canvas defined references
-      const ast =
-        referencesForElement.length > 0 &&
-        referencesForElement.some((ref) => embeddableFunctions.some((fn) => ref.name.includes(fn)))
-          ? expressionsService.inject(fromExpression(element.expression), referencesForElement)
-          : fromExpression(element.expression);
+      const ast = fromExpression(element.expression);
 
       ast.chain = ast.chain.map((fn) => {
         if (!embeddableFunctions.includes(fn.function)) return fn;
@@ -132,22 +151,13 @@ export function transformWorkpadOut(
         const transforms = embeddableService.getTransforms(embeddableType);
 
         try {
-          // If an embeddable has a savedObjectId, it means it was created before the embeddable transforms were introduced,
-          // so transforms haven't been applied yet. By calling `transformIn`, we extract the correct stored state and references
-          // before passing both into `transformOut` to get the correct transformed runtime config. This should only execute
-          // once per legacy embeddable element because stored embeddables should no longer have a savedObjectId.
-          // This could cause problems in the future if there is an embeddable that stores `savedObjectId` in its stored state,
-          // but currently we don't have any embeddables that do this.
+          // / BWC: Legacy Canvas embeddables have a savedObjectId and incorrect reference names,
+          // so we need to transform the references to use the correct reference name 'savedObjectRef'
           if (embeddableConfig.savedObjectId) {
-            if (transforms?.transformIn && transforms.transformOut) {
-              const { state: storedState, references: storedReferences } =
-                transforms.transformIn(embeddableConfig);
-
-              // transform out with the references extracted during transform in
-              const transformedConfig = transforms.transformOut(storedState, storedReferences);
-              fn.arguments.config[0] = encode(transformedConfig);
-            }
-            return fn;
+            referencesForElement = transformPanelReferencesOut(
+              referencesForElement,
+              embeddableConfig.savedObjectId
+            );
           }
 
           if (transforms?.transformOut) {
