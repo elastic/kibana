@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreStart, IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -60,6 +60,7 @@ export interface EditorFramePlugins {
   timefilter: TimefilterContract;
   nowProvider: DataPublicPluginStart['nowProvider'];
   eventAnnotationService: EventAnnotationServiceType;
+  http?: HttpStart;
 }
 
 async function collectAsyncDefinitions<T extends { id: string; alias?: string[] }>(

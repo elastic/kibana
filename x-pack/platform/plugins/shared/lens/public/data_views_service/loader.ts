@@ -12,7 +12,9 @@ import type {
   DataViewSpec,
   DataViewField,
 } from '@kbn/data-views-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
 import { keyBy } from 'lodash';
+import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import type {
   IndexPattern,
   IndexPatternField,
@@ -162,6 +164,8 @@ export async function loadIndexPatterns({
   cache,
   adHocDataViews,
   onIndexPatternRefresh,
+  http,
+  esqlQueries,
 }: {
   dataViews: MinimalDataViewsContract;
   patterns: string[];
@@ -169,6 +173,8 @@ export async function loadIndexPatterns({
   cache: Record<string, IndexPattern>;
   adHocDataViews?: Record<string, DataViewSpec>;
   onIndexPatternRefresh?: () => void;
+  http?: HttpStart;
+  esqlQueries?: Record<string, string>;
 }) {
   const missingIds = patterns.filter((id) => !cache[id] && !adHocDataViews?.[id]);
   const hasAdHocDataViews = Object.values(adHocDataViews || {}).length > 0;
@@ -199,14 +205,25 @@ export async function loadIndexPatterns({
       }
     }
   }
+
+  const hasAdHocWithoutTimeField = Object.values(adHocDataViews || {}).some(
+    (spec) => !spec.timeFieldName
+  );
+  const resolvedEsqlTimeFields = hasAdHocWithoutTimeField
+    ? await resolveEsqlTimeFields(http, esqlQueries)
+    : new Map<string, string | undefined>();
+
   indexPatterns.push(
     ...(await Promise.all(
       Object.values(adHocDataViews || {}).map(async (spec) => {
         const dv = await dataViews.create(spec);
         if (!dv.timeFieldName) {
-          const tsField = dv.getFieldByName('@timestamp');
-          if (tsField?.type === 'date') {
-            dv.timeFieldName = '@timestamp';
+          const esqlQuery = spec.id ? esqlQueries?.[spec.id] : undefined;
+          if (esqlQuery && resolvedEsqlTimeFields.has(esqlQuery)) {
+            const timeField = resolvedEsqlTimeFields.get(esqlQuery);
+            if (timeField) {
+              dv.timeFieldName = timeField;
+            }
           }
         }
         return dv;
@@ -223,6 +240,32 @@ export async function loadIndexPatterns({
   );
 
   return indexPatternsObject;
+}
+
+async function resolveEsqlTimeFields(
+  http?: HttpStart,
+  esqlQueries?: Record<string, string>
+): Promise<Map<string, string | undefined>> {
+  const results = new Map<string, string | undefined>();
+  if (!http || !esqlQueries) {
+    return results;
+  }
+
+  const uniqueQueries = [...new Set(Object.values(esqlQueries))];
+
+  await Promise.all(
+    uniqueQueries.map(async (query) => {
+      const response = await http
+        .get<{ timeField?: string }>(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to fetch the timefield', error);
+          return undefined;
+        });
+      results.set(query, response?.timeField);
+    })
+  );
+  return results;
 }
 
 export async function ensureIndexPattern({

@@ -106,7 +106,7 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: { index: string; timeFieldName: string | undefined }) {
+function generateAdHocDataViewId(dataView: Pick<APIAdHocDataView, 'index' | 'timeFieldName'>) {
   return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
 }
 
