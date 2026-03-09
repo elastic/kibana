@@ -24,7 +24,6 @@ test.describe('Onboarding UI Validation', () => {
       tag: [
         ...tags.stateful.classic,
         ...tags.serverless.observability.complete,
-        ...tags.serverless.observability.logs_essentials,
       ],
     },
     async ({ page, pageObjects }) => {
