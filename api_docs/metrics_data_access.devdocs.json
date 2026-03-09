@@ -1062,7 +1062,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1144,7 +1144,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1226,7 +1226,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1308,7 +1308,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1390,7 +1390,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1472,7 +1472,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1554,7 +1554,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1636,7 +1636,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1750,7 +1750,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1832,7 +1832,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1914,7 +1914,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1996,7 +1996,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2078,7 +2078,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2160,7 +2160,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2242,7 +2242,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2324,7 +2324,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2422,7 +2422,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2504,7 +2504,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2586,7 +2586,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2684,7 +2684,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2766,7 +2766,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2848,7 +2848,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2930,7 +2930,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }>; readonly pod: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }>; readonly pod: ",
           "InventoryModel",
           "<\"pod\", { memory: ",
           {
@@ -3144,7 +3144,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3226,7 +3226,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3340,7 +3340,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3422,7 +3422,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3536,7 +3536,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3618,7 +3618,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }>; readonly awsEC2: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }>; readonly awsEC2: ",
           "InventoryModel",
           "<\"awsEC2\", { cpu: ",
           {
@@ -4570,7 +4570,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4652,7 +4652,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4734,7 +4734,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4816,7 +4816,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4898,7 +4898,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4980,7 +4980,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5062,7 +5062,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5144,7 +5144,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5258,7 +5258,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5340,7 +5340,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5422,7 +5422,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5504,7 +5504,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5586,7 +5586,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5668,7 +5668,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5750,7 +5750,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5832,7 +5832,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5930,7 +5930,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6012,7 +6012,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6094,7 +6094,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6192,7 +6192,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6274,7 +6274,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6356,7 +6356,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6438,7 +6438,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }> | ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }> | ",
           "InventoryModel",
           "<\"pod\", { memory: ",
           {
@@ -6652,7 +6652,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6734,7 +6734,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6848,7 +6848,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6930,7 +6930,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -7044,7 +7044,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -7126,7 +7126,7 @@
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
           "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }> | ",
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }> | ",
           "InventoryModel",
           "<\"awsEC2\", { cpu: ",
           {
