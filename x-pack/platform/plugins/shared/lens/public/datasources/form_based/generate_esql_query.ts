@@ -127,6 +127,7 @@ export function generateEsqlQuery(
   }
 
   // indexPattern.title is the actual ES pattern
+  // ES|QL Composer API docs: https://github.com/elastic/esql-js/blob/main/src/composer/README.md
   const queryParts: string[] = [`FROM ${esql.src(indexPattern.title)}`];
 
   if (indexPattern.timeFieldName) {
