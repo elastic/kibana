@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiTabbedContent,
   EuiText,
+  EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -432,12 +433,16 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             {!isCreateMode && agentState?.created_by?.username && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="agentFormOwnerLabel">
-                  {i18n.translate('xpack.agentBuilder.agents.form.ownerLabel', {
-                    defaultMessage: 'Owned by: {username}',
-                    values: {
-                      username: agentState.created_by.username,
-                    },
-                  })}
+                  <EuiTextTruncate
+                    text={i18n.translate('xpack.agentBuilder.agents.form.ownerLabel', {
+                      defaultMessage: 'Owner: {username}',
+                      values: {
+                        username: agentState.created_by.username,
+                      },
+                    })}
+                    truncation="end"
+                    width={160}
+                  />
                 </EuiText>
               </EuiFlexItem>
             )}

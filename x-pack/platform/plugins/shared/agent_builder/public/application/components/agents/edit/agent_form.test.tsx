@@ -128,7 +128,7 @@ describe('AgentForm', () => {
     renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
 
     expect(screen.getByTestId('agentFormOwnerLabel')).toBeInTheDocument();
-    expect(screen.getByText('Owned by: test-owner')).toBeInTheDocument();
+    expect(screen.getByText('Owner: test-owner')).toBeInTheDocument();
   });
 
   it('does not display owner label in edit mode when agent has no created_by username', () => {
