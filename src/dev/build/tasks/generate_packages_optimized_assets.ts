@@ -15,7 +15,8 @@ import { cpus } from 'os';
 import { promisify } from 'util';
 
 import { minify } from '@swc/core';
-import { transform as lightningTransform } from 'lightningcss';
+import { transform as lightningTransform, browserslistToTargets } from 'lightningcss';
+import browserslist from 'browserslist';
 import { asyncForEachWithLimit } from '@kbn/std';
 import type { ToolingLog } from '@kbn/tooling-log';
 import globby from 'globby';
@@ -32,6 +33,7 @@ const getSize = (paths: string[]) => paths.reduce((acc, path) => acc + fs.statSy
 const BROTLI_QUALITY = 9;
 const PARALLEL_CONCURRENCY = cpus().length;
 const brotliCompressAsync = promisify(zlib.brotliCompress);
+const cssTargets = browserslistToTargets(browserslist());
 
 async function optimizeAssets(log: ToolingLog, assetDir: string) {
   log.info('Creating optimized assets for', assetDir);
@@ -49,6 +51,7 @@ async function optimizeAssets(log: ToolingLog, assetDir: string) {
         filename: Path.basename(file),
         code,
         minify: true,
+        targets: cssTargets,
       });
       await Fsp.writeFile(file, result.code);
     });

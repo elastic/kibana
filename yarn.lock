@@ -17150,7 +17150,7 @@ browserify-zlib@^0.2.0:
   dependencies:
     pako "~1.0.5"
 
-browserslist@^4.0.0, browserslist@^4.20.3, browserslist@^4.23.0, browserslist@^4.24.0, browserslist@^4.24.5, browserslist@^4.27.0:
+browserslist@4.28.0, browserslist@^4.0.0, browserslist@^4.20.3, browserslist@^4.23.0, browserslist@^4.24.0, browserslist@^4.24.5, browserslist@^4.27.0:
   version "4.28.0"
   resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.28.0.tgz#9cefece0a386a17a3cd3d22ebf67b9deca1b5929"
   integrity sha512-tbydkR/CxfMwelN0vwdP/pLkDwyAASZ+VfWm4EOwlB6SWhx1sYnWLqo8N5j0rAzPfzfRaxt0mM/4wPU/Su84RQ==
