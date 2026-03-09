@@ -790,7 +790,87 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               });
             });
 
-            it('should error when `new_list` query param is `true`', async () => {});
+            describe('`new_list` query parameter', () => {
+              it('should error when list exists and `new_list` query param is `true`, but import items', async () => {
+                await endpointArtifactTestResources.createList(artifact.listId);
+                await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                  item_id: 'existing-artifact',
+                  tags: [GLOBAL_ARTIFACT_TAG],
+                });
+
+                await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                  .post(`${EXCEPTION_LIST_URL}/_import`)
+                  .query({ new_list: true })
+                  .set('kbn-xsrf', 'true')
+                  .on('error', createSupertestErrorLogger(log))
+                  .attach(
+                    'file',
+                    buildImportBuffer(artifact.listId, [
+                      {
+                        item_id: 'imported-artifact',
+                        tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      },
+                    ]),
+                    'import_data.ndjson'
+                  )
+                  .expect(200)
+                  .expect({
+                    errors: [
+                      {
+                        error: {
+                          message: `Found that list_id: "${artifact.listId}" already exists. Import of list_id: "${artifact.listId}" skipped.`,
+                          status_code: 409,
+                        },
+                        list_id: artifact.listId,
+                      },
+                    ],
+                    success: false,
+                    success_count: 1,
+                    success_exception_lists: false,
+                    success_count_exception_lists: 0,
+                    success_exception_list_items: true,
+                    success_count_exception_list_items: 1,
+                  } as ImportExceptionsResponseSchema);
+
+                const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                expect(items.map(({ item_id }) => item_id)).to.eql([
+                  'existing-artifact',
+                  'imported-artifact',
+                ]);
+              });
+
+              it('should succeed when list does not exist and `new_list` query param is `true`', async () => {
+                await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                  .post(`${EXCEPTION_LIST_URL}/_import`)
+                  .query({ new_list: true })
+                  .set('kbn-xsrf', 'true')
+                  .on('error', createSupertestErrorLogger(log))
+                  .attach(
+                    'file',
+                    buildImportBuffer(artifact.listId, [
+                      {
+                        item_id: 'imported-artifact',
+                        tags: [CURRENT_SPACE_OWNER_ID, GLOBAL_ARTIFACT_TAG],
+                      },
+                    ]),
+                    'import_data.ndjson'
+                  )
+                  .expect(200)
+                  .expect({
+                    errors: [],
+                    success: true,
+                    success_count: 2,
+                    success_exception_lists: true,
+                    success_count_exception_lists: 1,
+                    success_exception_list_items: true,
+                    success_count_exception_list_items: 1,
+                  } as ImportExceptionsResponseSchema);
+
+                const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                expect(items.map(({ item_id }) => item_id)).to.eql(['imported-artifact']);
+              });
+            });
+
             it('should add a comment to imported artifacts with relevant data', async () => {});
             it('should add a tag to imported artifacts', async () => {});
 
