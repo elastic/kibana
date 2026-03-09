@@ -34,6 +34,7 @@ const storageSettings = {
       tags: types.keyword({}), // We search by this
       createdBy: types.keyword({}), // We filter by this
       spaceId: types.keyword({}), // We filter by this
+      triggerTypes: types.keyword({}), // We filter by trigger subscription (e.g. event-driven)
       updated_at: types.date({}), // We sort by this
       // Non-searchable fields (stored but not indexed)
       yaml: types.text({ index: false }),
@@ -52,6 +53,7 @@ export interface WorkflowProperties {
   description?: string;
   enabled: boolean;
   tags: string[];
+  triggerTypes: string[];
   yaml: string;
   definition: WorkflowYaml | null;
   createdBy: string;
