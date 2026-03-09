@@ -9,7 +9,9 @@ import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachm
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   dashboardAttachmentDataSchema,
+  dashboardAttachmentOriginSchema,
   type DashboardAttachmentData,
+  type DashboardAttachmentOrigin,
 } from '@kbn/dashboard-agent-common';
 
 /**
@@ -17,7 +19,8 @@ import {
  */
 export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
   typeof DASHBOARD_ATTACHMENT_TYPE,
-  DashboardAttachmentData
+  DashboardAttachmentData,
+  DashboardAttachmentOrigin
 > => {
   return {
     id: DASHBOARD_ATTACHMENT_TYPE,
@@ -28,6 +31,13 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
       } else {
         return { valid: false, error: parseResult.error.message };
       }
+    },
+    validateOrigin: (input) => {
+      const parseResult = dashboardAttachmentOriginSchema.safeParse(input);
+      if (parseResult.success) {
+        return { valid: true, data: parseResult.data };
+      }
+      return { valid: false, error: parseResult.error.message };
     },
     format: (attachment) => {
       return {
