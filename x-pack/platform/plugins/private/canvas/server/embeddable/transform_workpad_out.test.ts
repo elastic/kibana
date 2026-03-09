@@ -62,25 +62,6 @@ describe('transformWorkpadOut', () => {
   });
 
   describe('embeddable', () => {
-    it('migrates embeddable with an explicit saved object id without references', () => {
-      const expression = `embeddable type="lens" config="${encode({
-        savedObjectId: 'embeddable-id',
-        timeRange: DEFAULT_TIME_RANGE,
-      })}" | render`;
-      const workpad = makeWorkpad(expression);
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
-      expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
-      expect(getDecodedConfig(transformedWorkpad)).toEqual({
-        timeRange: DEFAULT_TIME_RANGE,
-        savedObjectId: 'embeddable-id',
-      });
-      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
-      expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
-        { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'embeddable-id' },
-        []
-      );
-    });
-
     it('applies transformOut to embeddable config', () => {
       const expression = `embeddable type="lens" config="${encode({
         title: 'Test lens embeddable',
@@ -97,28 +78,48 @@ describe('transformWorkpadOut', () => {
         title: 'Test lens embeddable',
         savedObjectId: 'test-id',
       });
-
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('lens');
       expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
         { title: 'Test lens embeddable', savedObjectId: 'test-id' },
         [{ id: 'test-id', name: 'savedObjectRef', type: 'lens' }]
       );
     });
 
+    it('applies transformOut to embeddable config with an explicit saved object id without references', () => {
+      const expression = `embeddable type="visualization" config="${encode({
+        savedObjectId: 'embeddable-id',
+        timeRange: DEFAULT_TIME_RANGE,
+      })}" | render`;
+      const workpad = makeWorkpad(expression);
+      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
+      expect(getDecodedConfig(transformedWorkpad)).toEqual({
+        timeRange: DEFAULT_TIME_RANGE,
+        savedObjectId: 'embeddable-id',
+      });
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('visualization');
+      expect(mockVisualizationTransforms.transformOut).toHaveBeenCalledWith(
+        { timeRange: DEFAULT_TIME_RANGE, savedObjectId: 'embeddable-id' },
+        []
+      );
+    });
+
     it('overrides the legacy reference names with savedObjectRef', () => {
-      const expression = `embeddable type="lens" config="${encode({
-        title: 'Test lens embeddable',
+      const expression = `embeddable type="map" config="${encode({
+        title: 'Test map embeddable',
         savedObjectId: 'embeddable.id',
       })}" | render`;
       const workpad = makeWorkpad(expression);
-      const references = [{ id: 'test-id', name: 'element-id:embeddable.id', type: 'lens' }];
+      const references = [{ id: 'test-id', name: 'element-id:embeddable.id', type: 'map' }];
       const transformedWorkpad = transformWorkpadOut(workpad, references);
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
-        title: 'Test lens embeddable',
+        title: 'Test map embeddable',
         savedObjectId: 'test-id',
       });
-      expect(mockLensTransforms.transformOut).toHaveBeenCalledWith(
-        { title: 'Test lens embeddable', savedObjectId: 'embeddable.id' },
-        [{ id: 'test-id', name: 'savedObjectRef', type: 'lens' }]
+      expect(embeddableService.getTransforms).toHaveBeenCalledWith('map');
+      expect(mockMapTransforms.transformOut).toHaveBeenCalledWith(
+        { title: 'Test map embeddable', savedObjectId: 'embeddable.id' },
+        [{ id: 'test-id', name: 'savedObjectRef', type: 'map' }]
       );
     });
   });
