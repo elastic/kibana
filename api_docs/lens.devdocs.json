@@ -7274,6 +7274,10 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/partition.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
               },
@@ -7911,6 +7915,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
+              },
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
@@ -9307,7 +9315,7 @@
             "label": "legendDisplay",
             "description": [],
             "signature": [
-              "\"default\" | \"hide\" | \"show\""
+              "\"default\" | \"show\" | \"hide\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/visualizations/partition/types.ts",
             "lineNumber": 37,
@@ -9754,7 +9762,7 @@
             "label": "changeType",
             "description": [],
             "signature": [
-              "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"initial\" | \"extended\" | \"layers\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "lineNumber": 1161,
@@ -10110,7 +10118,7 @@
               "\nThe change type indicates what was changed in this table compared to the currently active table of this layer."
             ],
             "signature": [
-              "\"initial\" | \"layers\" | \"unchanged\" | \"reduced\" | \"extended\" | \"reorder\""
+              "\"initial\" | \"extended\" | \"layers\" | \"unchanged\" | \"reduced\" | \"reorder\""
             ],
             "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
             "lineNumber": 589,
@@ -14919,7 +14927,7 @@
             "label": "valueLabels",
             "description": [],
             "signature": [
-              "\"hide\" | \"show\""
+              "\"show\" | \"hide\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "lineNumber": 243,
@@ -15568,6 +15576,14 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/xy/api_layers.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/xy/api_layers.ts"
+              },
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/xy/basicXY.mock.ts"
@@ -17107,7 +17123,7 @@
           "\"lens\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -23384,7 +23400,7 @@
         "label": "ValueLabelConfig",
         "description": [],
         "signature": [
-          "\"hide\" | \"show\""
+          "\"show\" | \"hide\""
         ],
         "path": "src/platform/packages/shared/kbn-lens-common/types.ts",
         "lineNumber": 232,
@@ -23401,7 +23417,7 @@
         "label": "ValueLabelMode",
         "description": [],
         "signature": [
-          "\"hide\" | \"show\""
+          "\"show\" | \"hide\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "lineNumber": 75,
@@ -23821,7 +23837,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ version?: 1 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ description?: string | null | undefined; state?: any; visualizationType?: string | null | undefined; uiStateJSON?: string | undefined; visState?: string | undefined; savedSearchRefName?: string | undefined; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
@@ -23846,7 +23862,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }>; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
@@ -23863,7 +23879,7 @@
         "signature": [
           "{ readonly id: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
@@ -23880,7 +23896,7 @@
         "signature": [
           "{ readonly id: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
@@ -23905,7 +23921,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }>; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
@@ -23923,7 +23939,7 @@
           "Omit",
           "<Readonly<{ searchFields?: string | string[] | undefined; fields?: string[] | undefined; query?: string | undefined; } & { page: number; perPage: number; }>, \"page\" | \"perPage\"> & Partial<Pick<Readonly<{ searchFields?: string | string[] | undefined; fields?: string[] | undefined; query?: string | undefined; } & { page: number; perPage: number; }>, \"page\" | \"perPage\">>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
@@ -23948,7 +23964,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }>; }>[]; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
@@ -23972,7 +23988,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ version?: 1 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ description?: string | null | undefined; state?: any; visualizationType?: string | null | undefined; uiStateJSON?: string | undefined; visState?: string | undefined; savedSearchRefName?: string | undefined; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
@@ -23989,7 +24005,7 @@
         "signature": [
           "{ readonly id: string; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
@@ -24014,7 +24030,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }>; }"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/types.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/types.ts",
         "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
@@ -24139,7 +24155,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ version?: 1 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ description?: string | null | undefined; state?: any; visualizationType?: string | null | undefined; uiStateJSON?: string | undefined; visState?: string | undefined; savedSearchRefName?: string | undefined; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/create.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/create.ts",
         "lineNumber": 35,
         "columnNumber": 14,
         "deprecated": false,
@@ -24251,7 +24267,7 @@
           },
           "<string | undefined>; }>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/create.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/create.ts",
         "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
@@ -24283,7 +24299,7 @@
           },
           "<string>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/delete.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/delete.ts",
         "lineNumber": 10,
         "columnNumber": 14,
         "deprecated": false,
@@ -24315,7 +24331,7 @@
           },
           "<string>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/get.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/get.ts",
         "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
@@ -24451,7 +24467,7 @@
           },
           "<\"savedObjectConversion\" | \"savedObjectImport\" | undefined>; }>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/get.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/get.ts",
         "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
@@ -24515,7 +24531,7 @@
           },
           "<string[] | undefined>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/search.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/search.ts",
         "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
@@ -24587,7 +24603,7 @@
           },
           "<number | undefined>; }>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/search.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/search.ts",
         "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
@@ -24619,7 +24635,7 @@
           },
           " | Readonly<{ version?: 2 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ version?: 1 | undefined; description?: string | undefined; state?: any; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; visualizationType: string; }> | Readonly<{ description?: string | null | undefined; state?: any; visualizationType?: string | null | undefined; uiStateJSON?: string | undefined; visState?: string | undefined; savedSearchRefName?: string | undefined; } & { title: string; references: Readonly<{} & { id: string; type: string; name: string; }>[]; }>>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/update.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/update.ts",
         "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
@@ -24651,7 +24667,7 @@
           },
           "<string>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/update.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/update.ts",
         "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
@@ -24763,7 +24779,7 @@
           },
           "<string | undefined>; }>; }>"
         ],
-        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/visualizations/schema/update.ts",
+        "path": "x-pack/platform/plugins/shared/lens/server/api/routes/internal/visualizations/schema/update.ts",
         "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
@@ -24779,7 +24795,7 @@
       "label": "LensServerPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-      "lineNumber": 64,
+      "lineNumber": 65,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -24798,7 +24814,7 @@
             "LensEmbeddableRegistryDefinition"
           ],
           "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-          "lineNumber": 65,
+          "lineNumber": 66,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24826,7 +24842,7 @@
             ") => void"
           ],
           "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-          "lineNumber": 69,
+          "lineNumber": 70,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -24842,7 +24858,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-              "lineNumber": 73,
+              "lineNumber": 74,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -24866,7 +24882,7 @@
                 }
               ],
               "path": "x-pack/platform/plugins/shared/lens/server/plugin.tsx",
-              "lineNumber": 74,
+              "lineNumber": 75,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -25025,7 +25041,7 @@
           "\"___records___\""
         ],
         "path": "x-pack/platform/plugins/shared/lens/common/constants.ts",
-        "lineNumber": 57,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
