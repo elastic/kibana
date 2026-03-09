@@ -123,14 +123,6 @@
     {
       "key": "cypress/cloud_security_posture_serverless",
       "name": "[Serverless] Cloud Security Posture - Cypress"
-    },
-    {
-      "key": "cypress/asset_inventory",
-      "name": "Asset Inventory - Cypress"
-    },
-    {
-      "key": "cypress/asset_inventory_serverless",
-      "name": "[Serverless] Asset Inventory - Cypress"
     }
   ]
 }
