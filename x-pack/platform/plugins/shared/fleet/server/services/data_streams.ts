@@ -23,6 +23,7 @@ class DataStreamService {
   public async getAllFleetDataStreams(esClient: ElasticsearchClient) {
     const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
       name: DATA_STREAM_INDEX_PATTERN,
+      expand_wildcards: 'open',
     });
 
     return dataStreamsInfo;
