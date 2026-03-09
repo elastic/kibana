@@ -136,7 +136,7 @@
     "@elastic/elasticsearch": "9.3.3",
     "@elastic/ems-client": "8.6.3",
     "@elastic/esql": "1.1.0",
-    "@elastic/eui": "113.1.0",
+    "@elastic/eui": "113.1.0-snapshot.1773086636385",
     "@elastic/eui-theme-borealis": "6.1.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kibana-d3-color": "npm:@elastic/kibana-d3-color@2.0.1",
