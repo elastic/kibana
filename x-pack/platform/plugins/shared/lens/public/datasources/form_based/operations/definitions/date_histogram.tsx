@@ -45,6 +45,7 @@ import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
+import { AUTO_TARGET_NUMBER_OF_BUCKETS, T_END, T_START } from '../../generate_esql_query';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -230,20 +231,22 @@ export const dateHistogramOperation: OperationDefinition<
     }
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
-  toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
+  toESQL: (column, _columnId, indexPattern, _layer, _uiSettings, _dateRange) => {
     if (column.params?.includeEmptyRows) return;
+
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
-    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
-    const resolvedInterval =
-      interval === 'auto'
-        ? mapToEsqlInterval(
-            calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          )
-        : mapToEsqlInterval(interval);
+    const esqlColumnNode = esql.col(column.sourceField);
 
+    if (interval === 'auto') {
+      return {
+        template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${T_START}, ${T_END})`,
+      };
+    }
+
+    const resolvedInterval = mapToEsqlInterval(interval);
     return {
-      template: `BUCKET(${esql.col(column.sourceField)}, ${resolvedInterval})`,
+      template: `BUCKET(${esqlColumnNode}, ${resolvedInterval})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {

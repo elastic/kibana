@@ -20,6 +20,7 @@ import type {
   GenericIndexPatternColumn,
   StaticValueIndexPatternColumn,
 } from '@kbn/lens-common';
+import { calculateAuto } from '@kbn/calculate-auto';
 import { isColumnOfType, isColumnFormatted } from './operations/definitions/helpers';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { OriginalColumn } from '../../../common/types';
@@ -100,6 +101,11 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
   s: '1s',
   ms: '1ms',
 } as const;
+
+// TODO: Move to another file
+export const T_START = '?_tstart';
+export const T_END = '?_tend';
+export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -317,6 +323,21 @@ export function generateEsqlQuery(
       const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
       const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
+
+      if (dateHistogramColumn.params?.interval === 'auto') {
+        const rangeDuration = moment.duration(
+          new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime(),
+          'ms'
+        );
+        const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
+        interval = moment.duration(intervalDuration).as('ms');
+      } else {
+        const kibanaInterval = dateHistogramColumn.params?.interval || '1h';
+        const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
+        const duration = moment.duration(esInterval.value, esInterval.unit).as('ms');
+        interval = duration;
+      }
+
       const kibanaInterval =
         dateHistogramColumn.params?.interval === 'auto'
           ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
