@@ -16,10 +16,9 @@
     "influencers": [
       "source.ip",
       "winlog.event_data.LogonType",
-      "user.entity.id_computed",
       "user.name",
-      "host.entity.id_computed",
-      "host.name"
+      "host.name",
+      "host.id"
     ]
   },
   "allow_lazy_open": true,
