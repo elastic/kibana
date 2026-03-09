@@ -58,7 +58,48 @@ spaceTest.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, 
 
       await lens.getApplyFlyoutButton().click();
 
+      const editor = lens.getInlineEditor();
+      await expect(editor).toBeHidden();
+
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(editor).toBeVisible();
+      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
+
       // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
+    }
+  );
+
+  spaceTest(
+    'should update and reflect the visualization configuration after the conversion',
+    async ({ pageObjects, page }) => {
+      const { dashboard, lens } = pageObjects;
+
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+
+      await lens.getConvertToEsqlButton().click();
+
+      const modal = lens.getConvertToEsqModal();
+      await expect(modal).toBeVisible();
+
+      await lens.getConvertToEsqModalConfirmButton().click();
+
+      await expect(modal).toBeHidden();
+
+      await page.getByTestId('lnsMetric_primaryMetricDimensionPanel').click();
+      const nameInput = page.getByTestId('name-input');
+      await nameInput.fill('Converted metric');
+      await expect(nameInput).toHaveValue('Converted metric');
+
+      // The changes are reflected in the visualization
+      const panel = dashboard.getPanelByEmbeddableId(testData.INLINE_METRIC_PANEL_ID);
+      await expect(panel).toContainText('Converted metric');
+
+      await lens.getSecondaryFlyoutBackButton().click();
+      await lens.getApplyFlyoutButton().click();
+
+      // The button is disabled after clicking on "Apply and close" button
+      await dashboard.openInlineEditor(testData.INLINE_METRIC_PANEL_ID);
+      await expect(lens.getApplyFlyoutButton()).toBeDisabled();
     }
   );
 
