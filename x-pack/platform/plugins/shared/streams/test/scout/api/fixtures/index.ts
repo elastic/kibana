@@ -74,9 +74,9 @@ export const streamsApiTest = apiTest.extend<{
     await use(extendedSamlAuth);
   },
 
-  apiServices: async ({ apiServices, kbnClient, log }, use) => {
+  apiServices: async ({ apiServices, kbnClient, esClient, log }, use) => {
     const extendedApiServices = apiServices as StreamsApiServicesFixture;
-    extendedApiServices.streamsTest = getStreamsTestApiService({ kbnClient, log });
+    extendedApiServices.streamsTest = getStreamsTestApiService({ kbnClient, esClient, log });
     await use(extendedApiServices);
   },
 });

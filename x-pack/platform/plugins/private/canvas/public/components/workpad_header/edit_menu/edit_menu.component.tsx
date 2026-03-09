@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React, { Fragment, useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ClosePopoverFn } from '../../popover';
@@ -510,30 +509,4 @@ export const EditMenu: FunctionComponent<Props> = ({
       ) : null}
     </Fragment>
   );
-};
-
-EditMenu.propTypes = {
-  cutNodes: PropTypes.func.isRequired,
-  copyNodes: PropTypes.func.isRequired,
-  pasteNodes: PropTypes.func.isRequired,
-  deleteNodes: PropTypes.func.isRequired,
-  cloneNodes: PropTypes.func.isRequired,
-  bringToFront: PropTypes.func.isRequired,
-  bringForward: PropTypes.func.isRequired,
-  sendBackward: PropTypes.func.isRequired,
-  sendToBack: PropTypes.func.isRequired,
-  alignLeft: PropTypes.func.isRequired,
-  alignCenter: PropTypes.func.isRequired,
-  alignRight: PropTypes.func.isRequired,
-  alignTop: PropTypes.func.isRequired,
-  alignMiddle: PropTypes.func.isRequired,
-  alignBottom: PropTypes.func.isRequired,
-  distributeHorizontally: PropTypes.func.isRequired,
-  distributeVertically: PropTypes.func.isRequired,
-  createCustomElement: PropTypes.func.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  selectedNodes: PropTypes.arrayOf(PropTypes.object).isRequired,
-  groupIsSelected: PropTypes.bool.isRequired,
-  groupNodes: PropTypes.func.isRequired,
-  ungroupNodes: PropTypes.func.isRequired,
 };
