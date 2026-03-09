@@ -146,7 +146,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
                       dataViewId: dataView.id,
-                      timeRange: absoluteTimeRange,
+                      time_range: absoluteTimeRange,
                       ...(windowParameters && { windowParameters }),
                     });
                   },

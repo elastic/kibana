@@ -14,6 +14,7 @@ export interface UsageStats {
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
   'securitySolution:alertTags': string;
+  'securitySolution:alertCloseReasons': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
@@ -55,6 +56,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'dataSources:enabled': boolean;
   'workflows:ui:enabled': boolean;
+  'workflows:aiAgent:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -71,7 +73,6 @@ export interface UsageStats {
   'securitySolution:enableNewsFeed': boolean;
   'securitySolution:enableAssetCriticality': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
-  'securitySolution:enableCcsWarning': boolean;
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;
   'securitySolution:enableAssetInventory': boolean;

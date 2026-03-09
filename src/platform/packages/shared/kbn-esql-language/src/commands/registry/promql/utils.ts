@@ -6,9 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { within } from '../../../ast/location';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
+import { within } from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql/types';
 import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
 import { getPreGroupedAggregationName } from '../../definitions/utils/promql';
 import { getTrailingIdentifier } from '../../definitions/utils/shared';

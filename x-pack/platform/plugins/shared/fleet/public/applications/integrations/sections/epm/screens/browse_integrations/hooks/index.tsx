@@ -10,35 +10,29 @@ import { useCallback, useMemo } from 'react';
 import { searchIdField, useLocalSearch } from '../../../../../hooks';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
-import type { ExtendedIntegrationCategory } from '../../home/category_facets';
 import type { IntegrationCardItem } from '../../home';
 
 import { useUrlFilters } from './url_filters';
+import { useUrlCategories, useSetUrlCategory } from './url_categories';
 
 export function useBrowseIntegrationHook({
   prereleaseIntegrationsEnabled,
 }: {
   prereleaseIntegrationsEnabled: boolean;
 }) {
+  const { category: selectedCategory, subCategory: selectedSubCategory } = useUrlCategories();
+  const setUrlCategory = useSetUrlCategory();
   const {
     initialSelectedCategory,
-    selectedCategory,
-    setCategory,
     allCategories,
     mainCategories,
-    onlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    setUrlandPushHistory,
-    setUrlandReplaceHistory,
     filteredCards: originalFilteredCards,
-    availableSubCategories,
-    selectedSubCategory,
-    setSelectedSubCategory,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const urlFilters = useUrlFilters();
@@ -65,6 +59,10 @@ export function useBrowseIntegrationHook({
     return sortedCards;
   }, [originalFilteredCards, urlFilters.sort]);
 
+  const availableSubCategories = useMemo(() => {
+    return allCategories?.filter((c) => c.parent_id === selectedCategory);
+  }, [allCategories, selectedCategory]);
+
   const filteredCards = useMemo(() => {
     const searchResults = searchTerm
       ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
@@ -75,6 +73,17 @@ export function useBrowseIntegrationHook({
     let cards = searchTerm
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
+
+    if (selectedCategory || selectedSubCategory) {
+      cards = cards.filter((c) => {
+        if (selectedCategory === '') {
+          return true;
+        }
+        if (!selectedSubCategory) return c.categories.includes(selectedCategory);
+
+        return c.categories.includes(selectedSubCategory);
+      });
+    }
 
     // Apply status filters
     const statusFilters = urlFilters.status;
@@ -113,6 +122,8 @@ export function useBrowseIntegrationHook({
 
     return cards;
   }, [
+    selectedCategory,
+    selectedSubCategory,
     localSearch,
     searchTerm,
     sortedCards,
@@ -123,16 +134,9 @@ export function useBrowseIntegrationHook({
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
-      setCategory(id as ExtendedIntegrationCategory);
-      setSelectedSubCategory(undefined);
-      setUrlandPushHistory({
-        searchString: '',
-        categoryId: id,
-        subCategoryId: '',
-        onlyAgentless: onlyAgentlessFilter,
-      });
+      setUrlCategory({ category: id });
     },
-    [setCategory, setSelectedSubCategory, setUrlandPushHistory, onlyAgentlessFilter]
+    [setUrlCategory]
   );
 
   const onSortChange = useCallback((sortKey: string) => {}, []);
@@ -140,22 +144,16 @@ export function useBrowseIntegrationHook({
   return {
     initialSelectedCategory,
     selectedCategory,
-    setCategory,
     allCategories,
     mainCategories,
-    onlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    setUrlandPushHistory,
-    setUrlandReplaceHistory,
     filteredCards,
     availableSubCategories,
-    selectedSubCategory,
-    setSelectedSubCategory,
     onCategoryChange,
     onSortChange,
   };

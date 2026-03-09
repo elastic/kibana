@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -13,18 +13,25 @@ import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
-import { extractEsqlQueries, executeEsql } from '../utils/esql';
+import type { ValidateEsqlQueryCallbacks } from '../utils/esql';
+import { extractEsqlQueries, executeEsql, validateEsqlQuery } from '../utils/esql';
 import { resolveResourceWithSamplingStats } from '../utils/resources';
 import { createRequestDocumentationPrompt, createGenerateEsqlPrompt } from './prompts';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
   Action,
   ExecuteQueryAction,
+  ValidateQueryAction,
   AutocorrectQueryAction,
   GenerateQueryAction,
   RequestDocumentationAction,
 } from './actions';
-import { isGenerateQueryAction, isAutocorrectQueryAction, isExecuteQueryAction } from './actions';
+import {
+  isGenerateQueryAction,
+  isAutocorrectQueryAction,
+  isExecuteQueryAction,
+  isValidateQueryAction,
+} from './actions';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -55,10 +62,12 @@ export const createNlToEsqlGraph = ({
   model,
   esClient,
   docBase,
+  esqlCallbacks,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
+  esqlCallbacks?: ValidateEsqlQueryCallbacks;
 }) => {
   // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
@@ -182,13 +191,12 @@ export const createNlToEsqlGraph = ({
     if (state.executeQuery) {
       return 'execute_query';
     } else {
-      return 'finalize';
+      return 'validate_query';
     }
   };
 
-  // execute query step - execute the query and get the results
-  const executeQuery = async (state: StateType) => {
-    let query;
+  const validateQueryStep = async (state: StateType) => {
+    let query: string;
     const lastAction = state.actions[state.actions.length - 1];
     if (isGenerateQueryAction(lastAction) && lastAction.query) {
       query = lastAction.query;
@@ -196,6 +204,57 @@ export const createNlToEsqlGraph = ({
       query = lastAction.output;
     } else {
       throw new Error(`Last action is not a generate_query or autocorrect_query action`);
+    }
+
+    const errorMessage = await validateEsqlQuery(query, esqlCallbacks);
+    const action: ValidateQueryAction = {
+      type: 'validate_query',
+      success: !errorMessage,
+      query,
+      error: errorMessage,
+    };
+
+    return {
+      actions: [action],
+    };
+  };
+
+  const branchAfterValidate = async (state: StateType) => {
+    const lastAction = state.actions[state.actions.length - 1];
+    if (!isValidateQueryAction(lastAction)) {
+      throw new Error(`Last action is not a validate_query action`);
+    }
+    if (lastAction.success || state.currentTry >= state.maxRetries) {
+      return 'finalize';
+    } else {
+      return 'generate_esql';
+    }
+  };
+
+  // execute query step - validate first (ANTLR), then execute only if valid
+  const executeQuery = async (state: StateType) => {
+    let query: string;
+    const lastAction = state.actions[state.actions.length - 1];
+    if (isGenerateQueryAction(lastAction) && lastAction.query) {
+      query = lastAction.query;
+    } else if (isAutocorrectQueryAction(lastAction)) {
+      query = lastAction.output;
+    } else {
+      throw new Error(`Last action is not a generate_query or autocorrect_query action`);
+    }
+
+    const validationError = await validateEsqlQuery(query, esqlCallbacks);
+    if (validationError) {
+      return {
+        actions: [
+          {
+            type: 'execute_query',
+            success: false,
+            query,
+            error: validationError,
+          },
+        ],
+      };
     }
 
     let action: ExecuteQueryAction;
@@ -247,7 +306,15 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // ended via autocorrect - if executeQuery=false
+    // ended via AST validation when executeQuery=false - success or failure hitting max retries
+    if (isValidateQueryAction(lastAction)) {
+      return {
+        answer: generateActions[generateActions.length - 1].response,
+        query: lastAction.query,
+        error: lastAction.error,
+      };
+    }
+    // ended via autocorrect - when executeQuery=false and validation was skipped (should not happen after adding validate_query)
     if (isAutocorrectQueryAction(lastAction)) {
       return {
         answer: generateActions[generateActions.length - 1].response,
@@ -274,6 +341,7 @@ export const createNlToEsqlGraph = ({
     .addNode('generate_esql', generateEsql)
     .addNode('autocorrect_query', autocorrectQuery)
     .addNode('execute_query', executeQuery)
+    .addNode('validate_query', validateQueryStep)
     .addNode('finalize', finalize)
     // edges
     .addEdge('__start__', 'resolve_target')
@@ -286,9 +354,13 @@ export const createNlToEsqlGraph = ({
     })
     .addConditionalEdges('autocorrect_query', branchAfterAutocorrect, {
       execute_query: 'execute_query',
-      finalize: 'finalize',
+      validate_query: 'validate_query',
     })
     .addConditionalEdges('execute_query', branchAfterQueryExecution, {
+      generate_esql: 'generate_esql',
+      finalize: 'finalize',
+    })
+    .addConditionalEdges('validate_query', branchAfterValidate, {
       generate_esql: 'generate_esql',
       finalize: 'finalize',
     })

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
@@ -42,7 +41,6 @@ jest.mock('./components/single_tab_view/main_app', () => {
 
 const defaultRootProfileState: RootProfileState = {
   rootProfileLoading: false,
-  AppWrapper: ({ children }: { children?: ReactNode }) => <>{children}</>,
   getDefaultAdHocDataViews: () => [],
   getDefaultEsqlQuery: () => undefined,
 };

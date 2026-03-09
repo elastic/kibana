@@ -11,7 +11,7 @@
         "label": "ProjectPicker",
         "description": [],
         "signature": [
-          "({ projectRouting, onProjectRoutingChange, fetchProjects, totalProjectCount, isReadonly, settingsComponent, }: ",
+          "({ projectRouting, onProjectRoutingChange, projects, totalProjectCount, isReadonly, settingsComponent, }: ",
           {
             "pluginId": "@kbn/cps-utils",
             "scope": "public",
@@ -22,7 +22,7 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-        "lineNumber": 44,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,7 +32,7 @@
             "id": "def-public.ProjectPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  fetchProjects,\n  totalProjectCount,\n  isReadonly = false,\n  settingsComponent,\n}",
+            "label": "{\n  projectRouting,\n  onProjectRoutingChange,\n  projects,\n  totalProjectCount,\n  isReadonly = false,\n  settingsComponent,\n}",
             "description": [],
             "signature": [
               {
@@ -44,7 +44,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 44,
+            "lineNumber": 43,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -61,13 +61,13 @@
         "tags": [],
         "label": "ProjectPickerContainer",
         "description": [
-          "\nContainer component that connects ProjectPicker to CPSManager\nHandles observable subscriptions and provides bound fetchProjects\nAccess control is managed by CPSManager based on current app and route"
+          "\nContainer component that connects ProjectPicker to CPSManager.\nDelegates to ActiveProjectPicker or DisabledProjectPicker based on access level,\nso the fetch hook only runs when the picker is actually active."
         ],
         "signature": [
           "({ cpsManager }: ProjectPickerContainerProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -83,7 +83,7 @@
               "ProjectPickerContainerProps"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker_container.tsx",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 79,
             "deprecated": false,
             "trackAdoption": false,
@@ -151,7 +151,7 @@
         "tags": [],
         "label": "useFetchProjects",
         "description": [
-          "\nHook for fetching projects data from CPSManager.\nReturns loading/error states alongside the fetched data."
+          "\nHook for fetching projects data from CPSManager.\nUses a single state object to batch all updates into one re-render per fetch cycle."
         ],
         "signature": [
           "(fetchProjects: (routing?: ",
@@ -188,7 +188,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
-        "lineNumber": 25,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -220,7 +220,7 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
-            "lineNumber": 26,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -243,7 +243,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/use_fetch_projects.ts",
-            "lineNumber": 27,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -263,7 +263,7 @@
         "label": "CPSProject",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-        "lineNumber": 25,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -276,7 +276,7 @@
             "label": "_id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -289,7 +289,7 @@
             "label": "_alias",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -302,7 +302,7 @@
             "label": "_type",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -315,7 +315,7 @@
             "label": "_organisation",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -331,7 +331,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -347,7 +347,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 31,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -363,7 +363,7 @@
               "[key: string]:  string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 32,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -379,7 +379,7 @@
         "label": "ICPSManager",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -395,7 +395,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -429,7 +429,7 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -451,7 +451,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 47,
+                "lineNumber": 54,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -471,7 +471,7 @@
               "() => number"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 48,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -499,7 +499,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -525,7 +525,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 50,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -547,7 +547,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 50,
+                "lineNumber": 57,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -582,7 +582,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 51,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -604,7 +604,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 51,
+                "lineNumber": 58,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -631,7 +631,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -657,7 +657,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -679,7 +679,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-                "lineNumber": 53,
+                "lineNumber": 60,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -709,7 +709,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -718,27 +718,69 @@
           },
           {
             "parentPluginId": "@kbn/cps-utils",
-            "id": "def-public.ICPSManager.getProjectPickerAccess",
+            "id": "def-public.ICPSManager.registerAppAccess",
             "type": "Function",
             "tags": [],
-            "label": "getProjectPickerAccess",
+            "label": "registerAppAccess",
             "description": [],
             "signature": [
-              "() => ",
+              "(appId: string, resolver: ",
               {
                 "pluginId": "@kbn/cps-utils",
                 "scope": "public",
                 "docId": "kibKbnCpsUtilsPluginApi",
-                "section": "def-public.ProjectRoutingAccess",
-                "text": "ProjectRoutingAccess"
-              }
+                "section": "def-public.CPSAppAccessResolver",
+                "text": "CPSAppAccessResolver"
+              },
+              ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.registerAppAccess.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/cps-utils",
+                "id": "def-public.ICPSManager.registerAppAccess.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "resolver",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/cps-utils",
+                    "scope": "public",
+                    "docId": "kibKbnCpsUtilsPluginApi",
+                    "section": "def-public.CPSAppAccessResolver",
+                    "text": "CPSAppAccessResolver"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -872,7 +914,7 @@
         "label": "ProjectPickerProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-        "lineNumber": 35,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -888,7 +930,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 36,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -912,7 +954,7 @@
               ") => void"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -934,7 +976,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-                "lineNumber": 37,
+                "lineNumber": 36,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -945,61 +987,25 @@
           },
           {
             "parentPluginId": "@kbn/cps-utils",
-            "id": "def-public.ProjectPickerProps.fetchProjects",
-            "type": "Function",
+            "id": "def-public.ProjectPickerProps.projects",
+            "type": "Object",
             "tags": [],
-            "label": "fetchProjects",
+            "label": "projects",
             "description": [],
             "signature": [
-              "(routing?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.ProjectRouting",
-                "text": "ProjectRouting"
-              },
-              ") => Promise<",
               {
                 "pluginId": "@kbn/cps-utils",
                 "scope": "public",
                 "docId": "kibKbnCpsUtilsPluginApi",
-                "section": "def-public.ProjectsData",
-                "text": "ProjectsData"
-              },
-              " | null>"
-            ],
-            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 38,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/cps-utils",
-                "id": "def-public.ProjectPickerProps.fetchProjects.$1",
-                "type": "string",
-                "tags": [],
-                "label": "routing",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.ProjectRouting",
-                    "text": "ProjectRouting"
-                  }
-                ],
-                "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-                "lineNumber": 38,
-                "columnNumber": 19,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "section": "def-public.UseFetchProjectsResult",
+                "text": "UseFetchProjectsResult"
               }
             ],
-            "returnComment": []
+            "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/cps-utils",
@@ -1009,7 +1015,7 @@
             "label": "totalProjectCount",
             "description": [],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 39,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1025,7 +1031,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 40,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1041,7 +1047,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/components/project_picker.tsx",
-            "lineNumber": 41,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1057,7 +1063,7 @@
         "label": "ProjectsData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-        "lineNumber": 40,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1080,7 +1086,7 @@
               " | null"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1103,7 +1109,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1119,7 +1125,7 @@
         "label": "ProjectTagsResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-        "lineNumber": 35,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1143,7 +1149,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 36,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1167,7 +1173,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1286,6 +1292,48 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/cps-utils",
+        "id": "def-public.CPSAppAccessResolver",
+        "type": "Type",
+        "tags": [],
+        "label": "CPSAppAccessResolver",
+        "description": [
+          "\nFunction that determines the project picker access level for a given location.\nApps register one of these via `registerAppAccess` to control picker behavior\nbased on runtime conditions (feature flags, config values, route patterns, etc.)."
+        ],
+        "signature": [
+          "(location: string) => ",
+          {
+            "pluginId": "@kbn/cps-utils",
+            "scope": "public",
+            "docId": "kibKbnCpsUtilsPluginApi",
+            "section": "def-public.ProjectRoutingAccess",
+            "text": "ProjectRoutingAccess"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-utils",
+            "id": "def-public.CPSAppAccessResolver.$1",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-cps-utils/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cps-utils",
         "id": "def-public.ProjectRoutingValue",

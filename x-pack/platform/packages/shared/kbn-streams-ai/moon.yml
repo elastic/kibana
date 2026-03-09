@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/zod'
   - '@kbn/inference-prompt-utils'
-  - '@kbn/es-query'
   - '@kbn/zod-helpers'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/apm-utils'
