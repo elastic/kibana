@@ -405,7 +405,7 @@ describe('autocomplete_utils', () => {
     it('filters structural suggestions in unmatched endpoint quoted context', async () => {
       const mockAutocompleteSet = [
         { name: '{' },
-        { name: 'match_all' },
+        { name: 'match_all', insertValue: '{' },
       ] as unknown as AutoCompleteContext['autoCompleteSet'];
 
       mockPopulateContext.mockImplementation((...args) => {

@@ -312,6 +312,19 @@ export const getBodyCompletionItems = async (
   );
 };
 
+const getStructuralSnippet = (token: string) => {
+  if (token === '{') {
+    return '{$0}';
+  }
+  if (token === '[') {
+    return '[$0]';
+  }
+  return undefined;
+};
+
+const usesStructuralSnippet = ({ name }: Pick<ResultTerm, 'name'>): boolean =>
+  typeof name === 'string' && getStructuralSnippet(name) !== undefined;
+
 const getSuggestions = (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
@@ -393,11 +406,7 @@ const getSuggestions = (
     filterTermsWithoutName(autocompleteSet)
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
-        if (
-          isUnmatchedEndpointQuotedContext &&
-          ((typeof item.name === 'string' && getStructuralSnippet(item.name)) ||
-            (typeof item.insertValue === 'string' && getStructuralSnippet(item.insertValue)))
-        ) {
+        if (isUnmatchedEndpointQuotedContext && usesStructuralSnippet(item)) {
           return false;
         }
 
@@ -422,16 +431,6 @@ const getSuggestions = (
         return suggestion;
       })
   );
-};
-
-const getStructuralSnippet = (token: string) => {
-  if (token === '{') {
-    return '{$0}';
-  }
-  if (token === '[') {
-    return '[$0]';
-  }
-  return undefined;
 };
 
 export const getInsertText = (
