@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
-import { getMockAttackDiscoveryAlerts } from '../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
 import type { AttackDetailsContext as AttackDetailsContextType } from './context';
 import { PanelFooter } from './footer';
 import { AttackDetailsContext } from './context';
@@ -27,7 +26,21 @@ const createMockContextValue = (
 ): AttackDetailsContextType =>
   ({
     attackId: 'attack-1',
-    attackDiscovery: getMockAttackDiscoveryAlerts()[0],
+    attack: {
+      id: 'test-alert-1',
+      alertIds: ['alert-1'],
+      detectionEngineRuleId: 'rule-1',
+      ruleStatus: 'enabled',
+      ruleVersion: 1,
+      timestamp: '2024-01-01T00:00:00Z',
+      entities: {
+        users: [],
+        hosts: [],
+      },
+      summaryMarkdown: '# Test Alert Summary',
+      mitreTactics: [],
+      mitreTechniques: [],
+    },
     indexName: '.alerts-default',
     scopeId: 'default',
     searchHit: defaultSearchHit,
