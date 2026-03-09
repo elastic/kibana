@@ -64,9 +64,10 @@ export const ENTITY_STORE_ROUTES = {
   RESOLUTION_LINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/link`,
   RESOLUTION_UNLINK: `${ENTITY_STORE_BASE_ROUTE}/resolution/unlink`,
   RESOLUTION_GROUP: `${ENTITY_STORE_BASE_ROUTE}/resolution/group`,
-  ENTITY_MAINTAINERS_START: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/start`,
-  ENTITY_MAINTAINERS_STOP: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/stop`,
+  ENTITY_MAINTAINERS_START: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/start/{id}`,
+  ENTITY_MAINTAINERS_STOP: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/stop/{id}`,
   ENTITY_MAINTAINERS_GET: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers`,
+  ENTITY_MAINTAINERS_INIT: `${ENTITY_STORE_BASE_ROUTE}/entity_maintainers/init`,
 } as const satisfies Record<string, string>;
 
 export const getErrorMessage = (error: unknown): string => {

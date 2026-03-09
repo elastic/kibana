@@ -19,6 +19,7 @@ export const COMMON_HEADERS = {
  */
 export const ENTITY_STORE_ROUTES = {
   INSTALL: 'internal/security/entity_store/install',
+  ENTITY_MAINTAINERS_INIT: 'internal/security/entity_store/entity_maintainers/init',
   START: 'internal/security/entity_store/start',
   STOP: 'internal/security/entity_store/stop',
   UNINSTALL: 'internal/security/entity_store/uninstall',
@@ -33,6 +34,11 @@ export const ENTITY_STORE_ROUTES = {
   RESOLUTION_LINK: 'internal/security/entity_store/resolution/link',
   RESOLUTION_UNLINK: 'internal/security/entity_store/resolution/unlink',
   RESOLUTION_GROUP: 'internal/security/entity_store/resolution/group',
+  ENTITY_MAINTAINERS_GET: 'internal/security/entity_store/entity_maintainers',
+  ENTITY_MAINTAINERS_START: (id: string) =>
+    `internal/security/entity_store/entity_maintainers/start/${id}`,
+  ENTITY_MAINTAINERS_STOP: (id: string) =>
+    `internal/security/entity_store/entity_maintainers/stop/${id}`,
 } as const;
 
 export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
