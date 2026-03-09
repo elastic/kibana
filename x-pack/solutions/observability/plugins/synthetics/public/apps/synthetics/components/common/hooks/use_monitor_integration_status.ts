@@ -8,6 +8,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectMonitorListState } from '../../../state';
+import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 
 export interface MonitorIntegrationStatus {
@@ -15,6 +16,16 @@ export interface MonitorIntegrationStatus {
   locationId: string;
   policyId: string;
   isMissing: boolean;
+}
+
+interface UseMonitorIntegrationStatusOptions {
+  configIds?: string[];
+  /**
+   * When provided, the hook uses these monitors directly instead of reading
+   * from the monitor-list Redux slice.  Useful on pages (e.g. monitor edit)
+   * where the list state may not be populated.
+   */
+  providedMonitors?: SyntheticsMonitor[];
 }
 
 interface UseMonitorIntegrationStatusReturn {
@@ -36,15 +47,19 @@ interface UseMonitorIntegrationStatusReturn {
  * internals will swap to real HTTP calls with no consumer-side changes.
  */
 export const useMonitorIntegrationStatus = (
-  configIds?: string[]
+  options?: UseMonitorIntegrationStatusOptions
 ): UseMonitorIntegrationStatusReturn => {
+  const { configIds, providedMonitors } = options ?? {};
   const [isResetting, setIsResetting] = useState(false);
   const [resetIds, setResetIds] = useState<Set<string>>(new Set());
 
   const {
-    data: { monitors },
-    loaded,
+    data: { monitors: listMonitors },
+    loaded: listLoaded,
   } = useSelector(selectMonitorListState);
+
+  const monitors = providedMonitors ?? listMonitors;
+  const loaded = providedMonitors ? providedMonitors.length > 0 : listLoaded;
 
   const statuses = useMemo(() => {
     const map = new Map<string, MonitorIntegrationStatus[]>();

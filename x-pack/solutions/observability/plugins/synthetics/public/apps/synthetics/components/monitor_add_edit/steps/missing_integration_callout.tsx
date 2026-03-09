@@ -8,11 +8,20 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationStatus } from '../../common/hooks/use_monitor_integration_status';
 
-export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
-  const { hasMissingIntegrations, resetMonitor, isResetting } =
-    useMonitorIntegrationStatus([configId]);
+export const MissingIntegrationCallout = ({
+  configId,
+  monitor,
+}: {
+  configId: string;
+  monitor?: SyntheticsMonitor;
+}) => {
+  const { hasMissingIntegrations, resetMonitor, isResetting } = useMonitorIntegrationStatus({
+    configIds: [configId],
+    providedMonitors: monitor ? [monitor] : undefined,
+  });
 
   const [resetSuccess, setResetSuccess] = useState(false);
 
