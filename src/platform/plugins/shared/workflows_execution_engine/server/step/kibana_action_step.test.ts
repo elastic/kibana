@@ -687,4 +687,102 @@ describe('KibanaActionStepImpl - Fetcher Configuration', () => {
       expect(fetchOptions.redirect).toBe('manual');
     });
   });
+
+  describe('empty response body handling (204 No Content)', () => {
+    it('should succeed with empty output when response is 204 No Content', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+        json: jest.fn(),
+        text: jest.fn().mockResolvedValue(''),
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'delete_rule',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'DELETE',
+          path: '/api/alerting/rule/some-rule-id',
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({});
+    });
+
+    it('should include _debug info for empty responses when debug is true', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 204,
+        json: jest.fn(),
+        text: jest.fn().mockResolvedValue(''),
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'delete_rule',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'DELETE',
+          path: '/api/alerting/rule/some-rule-id',
+          debug: true,
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output._debug).toBeDefined();
+      expect(result.output._debug.method).toBe('DELETE');
+    });
+
+    it('should still parse JSON normally when response body is non-empty', async () => {
+      mockedFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: jest.fn().mockResolvedValue({ id: 'case-1', title: 'Test' }),
+        text: jest.fn().mockResolvedValue(JSON.stringify({ id: 'case-1', title: 'Test' })),
+      } as any);
+
+      const step: KibanaActionStep = {
+        name: 'create_case',
+        type: 'kibana.request',
+        spaceId: 'default',
+        with: {
+          method: 'POST',
+          path: '/api/cases',
+          body: { title: 'Test' },
+        },
+      };
+
+      const kibanaStep = new KibanaActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (kibanaStep as any)._run(step.with);
+
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual({ id: 'case-1', title: 'Test' });
+    });
+  });
 });

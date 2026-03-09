@@ -108,7 +108,7 @@
             },
             {
               "plugin": "slo",
-              "path": "x-pack/solutions/observability/plugins/slo/public/plugin.ts"
+              "path": "x-pack/solutions/observability/plugins/slo/public/register_embeddables.ts"
             },
             {
               "plugin": "securitySolution",
