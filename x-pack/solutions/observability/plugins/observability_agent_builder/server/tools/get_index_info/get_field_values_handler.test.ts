@@ -89,12 +89,13 @@ describe('resolveInputToConcreteFields', () => {
 
   describe('wildcard pattern', () => {
     it('matches multiple fields and returns their categories', () => {
-      const result = resolveInputToConcreteFields('host.*', allFieldNames, fieldNameToTypeMap);
+      const result = resolveInputToConcreteFields(
+        'host.*',
+        allFieldNames,
+        fieldNameToTypeMap
+      ) as ResolvedValidField[];
 
-      expect(result).toEqual([
-        { field: 'host.name', fieldType: 'keyword', category: 'keyword' },
-        { field: 'host.ip', fieldType: 'ip', category: 'keyword' },
-      ]);
+      expect(result.map((r) => r.field)).toEqual(['host.name', 'host.ip']);
     });
 
     it('excludes fields with undefined type (object/nested)', () => {

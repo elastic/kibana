@@ -230,7 +230,7 @@ export interface ResolvedValidField {
   fieldType: string;
   category: ReturnType<typeof getFieldCategory>;
 }
-export interface ResolvedErrorField {
+interface ResolvedErrorField {
   input: string;
   error: string;
 }
