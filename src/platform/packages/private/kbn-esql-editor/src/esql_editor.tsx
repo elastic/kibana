@@ -1228,23 +1228,19 @@ const ESQLEditorInternal = function ESQLEditor({
                   // Add Tab keybinding rules for inline suggestions
                   addTabKeybindingRules();
 
-                  editor.onMouseDown(() => {
+                  editor.onMouseDown((e) => {
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
-                  });
-
-                  editor.onMouseDown((e) => {
+                    if (isVisorOpenRef.current) {
+                      setIsVisorOpen(false);
+                    }
                     if (enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
                     }
                   });
 
                   editor.onDidFocusEditorText(() => {
-                    if (isVisorOpenRef.current) {
-                      setIsVisorOpen(false);
-                    }
-
                     // Skip triggering suggestions on initial focus to avoid interfering
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
