@@ -32,7 +32,6 @@ import {
 export interface RuleGenerationTaskOutput {
   generatedRule?: Partial<ReferenceRule>;
   error?: string;
-  traceId?: string;
 }
 
 // ---------------------------------------------------------------------------
