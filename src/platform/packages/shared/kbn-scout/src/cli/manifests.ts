@@ -76,10 +76,14 @@ async function updateScoutConfigManifests(
 
     // Start manifest update task
     log.info(`Generating manifest for test config at '${config.path}'`);
-    const manifestUpdateTask = generateScoutConfigManifest(config.path, log).then(() => {
-      updatedConfigPaths.push(config.path);
-      ongoingManifestUpdates.delete(manifestUpdateTask);
-    });
+    const manifestUpdateTask = generateScoutConfigManifest(config.path, log)
+      .then(() => {
+        updatedConfigPaths.push(config.path);
+      })
+      .finally(() => {
+        ongoingManifestUpdates.delete(manifestUpdateTask);
+      });
+
     ongoingManifestUpdates.add(manifestUpdateTask);
   }
 

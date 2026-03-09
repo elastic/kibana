@@ -76,13 +76,13 @@ async function distributeScoutTestsOnLanes() {
 
       const laneEnv = {
         SCOUT_TEST_LANE_LOADS_PATH: testLaneLoadsFilePath,
-        SCOUT_TEST_LANE_NUMBER: effectiveLaneNumber,
+        SCOUT_TEST_LANE_NUMBER: `${effectiveLaneNumber}`,
         SCOUT_TEST_TARGET_LOCATION: testTarget.location,
         SCOUT_TEST_TARGET_ARCH: testTarget.arch,
         SCOUT_TEST_TARGET_DOMAIN: testTarget.domain,
         SCOUT_TEST_SERVER_CONFIG_SET: server.configSet,
         SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS:
-          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || 180,
+          process.env.SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS || '180',
         ...envVarsIfSet([
           'SERVERLESS_TESTS_ONLY',
           'UIAM_DOCKER_IMAGE',

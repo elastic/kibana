@@ -40,7 +40,8 @@ function loadScoutCIConfig(): ScoutCIConfig {
   try {
     return yaml.load(readFileSync(SCOUT_CI_CONFIG_PATH, 'utf-8')) as ScoutCIConfig;
   } catch (e) {
-    throw createFlagError(e.message);
+    const message = e instanceof Error ? e.message : String(e);
+    throw createFlagError(`Failed to load Scout CI config: ${message}`);
   }
 }
 
@@ -48,7 +49,8 @@ function loadTestConfigStats(): ScoutTestConfigStats {
   try {
     return ScoutTestConfigStats.fromFile(SCOUT_TEST_CONFIG_STATS_PATH);
   } catch (e) {
-    throw createFlagError(e.message);
+    const message = e instanceof Error ? e.message : String(e);
+    throw createFlagError(`Failed to load Scout test config stats: ${message}`);
   }
 }
 
@@ -80,6 +82,7 @@ export function identifyTestLoads(
 
         case 'package':
           enabled = !scoutCIConfig.packages.disabled?.includes(config.module.name);
+          break;
       }
 
       return {
@@ -475,7 +478,7 @@ export const createTestTracks: Command<void> = {
           .flatMap((loads) => loads)
           .filter((load) => load.enabled)
           .map((load): number => load.stats?.runtime.estimate || 0)
-          .reduce((prevEstimate, currentEstimate) => Math.max(prevEstimate, currentEstimate));
+          .reduce((prevEstimate, currentEstimate) => Math.max(prevEstimate, currentEstimate), 0);
     }
 
     if (runtimeTarget === 0) {
