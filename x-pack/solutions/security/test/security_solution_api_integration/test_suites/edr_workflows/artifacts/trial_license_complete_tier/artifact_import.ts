@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type TestAgent from 'supertest/lib/agent';
-import expect from '@kbn/expect';
+import expect from 'expect';
 import {
   ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_ARTIFACT_LIST_IDS,
@@ -273,13 +273,13 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
 
-                  expect(items.length).to.eql(2);
-                  expect(items[1].tags).to.eql([
+                  expect(items.length).toEqual(2);
+                  expect(items[1].tags).toEqual([
                     CURRENT_SPACE_OWNER_ID,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                     buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
                   ]);
-                  expect(items[0].tags).to.eql([CURRENT_SPACE_OWNER_ID]);
+                  expect(items[0].tags).toEqual([CURRENT_SPACE_OWNER_ID]);
                 });
 
                 it('should not import per-policy artifacts to other spaces when importing without global artifact privilege', async () => {
@@ -324,8 +324,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
 
-                  expect(items.length).to.eql(1);
-                  expect(items[0].item_id).to.eql('good-item');
+                  expect(items.length).toEqual(1);
+                  expect(items[0].item_id).toEqual('good-item');
                 });
 
                 it('should not import global artifacts when importing without global artifact privilege', async () => {
@@ -369,8 +369,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     } as ImportExceptionsResponseSchema);
 
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
-                  expect(items.length).to.eql(1);
-                  expect(items[0].item_id).to.eql('good-item');
+                  expect(items.length).toEqual(1);
+                  expect(items[0].item_id).toEqual('good-item');
                 });
               });
 
@@ -401,7 +401,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                     } as ImportExceptionsResponseSchema);
 
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
-                  expect(items.length).to.eql(3);
+                  expect(items.length).toEqual(3);
                 });
 
                 it('should import per-policy artifacts to other space if assigned to policy in current space', async () => {
@@ -436,8 +436,8 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
 
-                  expect(items.length).to.eql(1);
-                  expect(items[0].tags).to.eql([
+                  expect(items.length).toEqual(1);
+                  expect(items[0].tags).toEqual([
                     OTHER_SPACE_OWNER_ID,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                     // policy id in other space is kept
@@ -487,23 +487,23 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
 
-                  expect(items.length).to.eql(1);
+                  expect(items.length).toEqual(1);
 
                   // invalid policy ids are removed, valid ones are kept
-                  expect(items[0].tags).to.eql([
+                  expect(items[0].tags).toEqual([
                     CURRENT_SPACE_OWNER_ID,
                     buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
                     buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
                   ]);
 
                   // changes indicated in a comment
-                  expect(items[0].comments.length).to.eql(1);
-                  expect(items[0].comments[0].comment).to.eql(
+                  expect(items[0].comments.length).toEqual(1);
+                  expect(items[0].comments[0].comment).toEqual(
                     `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n- "i-do-not-exist"\n- "me-neither"`
                   );
 
                   const username = `${artifact.listId}_allWithGlobal`;
-                  expect(items[0].comments[0].created_by).to.eql(username);
+                  expect(items[0].comments[0].created_by).toEqual(username);
                 });
               });
 
@@ -552,7 +552,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   await fetchArtifacts(CURRENT_SPACE_ID, 'item_id')
                 ).map((item) => item.item_id);
 
-                expect(artifactsInCurrentSpace).to.eql([
+                expect(artifactsInCurrentSpace).toEqual([
                   'existing-global-artifact-in-current-space',
                   'existing-per-policy-artifact-in-current-space',
                   'imported-artifact',
@@ -658,7 +658,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       await fetchArtifacts(OTHER_SPACE_ID, 'item_id')
                     ).map((item) => item.item_id);
 
-                    expect(artifactsInCurrentSpace).to.eql([
+                    expect(artifactsInCurrentSpace).toEqual([
                       'existing-global-artifact-in-current-space',
                       'existing-global-artifact-in-other-space',
                       // 'existing-per-policy-artifact-in-current-space', => deleted
@@ -666,7 +666,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       'imported-artifact',
                     ]);
 
-                    expect(artifactsInOtherSpace).to.eql([
+                    expect(artifactsInOtherSpace).toEqual([
                       'existing-global-artifact-in-current-space',
                       'existing-global-artifact-in-other-space',
                       'existing-per-policy-artifact-in-other-space',
@@ -710,12 +710,12 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                       await fetchArtifacts(OTHER_SPACE_ID, 'item_id')
                     ).map((item) => item.item_id);
 
-                    expect(artifactsInCurrentSpace).to.eql([
+                    expect(artifactsInCurrentSpace).toEqual([
                       // all visible artifacts are deleted, even if not owned by current space
                       'imported-artifact',
                     ]);
 
-                    expect(artifactsInOtherSpace).to.eql([
+                    expect(artifactsInOtherSpace).toEqual([
                       // 'existing-global-artifact-in-current-space', => deleted
                       // 'existing-global-artifact-in-other-space',   => deleted
                       'existing-per-policy-artifact-in-other-space',
@@ -833,7 +833,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   } as ImportExceptionsResponseSchema);
 
                 const items = await fetchArtifacts(CURRENT_SPACE_ID);
-                expect(items.map(({ item_id }) => item_id)).to.eql([
+                expect(items.map(({ item_id }) => item_id)).toEqual([
                   'existing-artifact',
                   'imported-artifact',
                 ]);
@@ -867,7 +867,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   } as ImportExceptionsResponseSchema);
 
                 const items = await fetchArtifacts(CURRENT_SPACE_ID);
-                expect(items.map(({ item_id }) => item_id)).to.eql(['imported-artifact']);
+                expect(items.map(({ item_id }) => item_id)).toEqual(['imported-artifact']);
               });
             });
 
@@ -897,7 +897,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               .attach('file', buildImportBuffer(listId), 'import_data.ndjson')
               .expect(400);
 
-            expect(body.message).to.eql(
+            expect(body.message).toEqual(
               'EndpointArtifactError: Import is not supported for Endpoint artifact exceptions'
             );
           });
@@ -926,10 +926,10 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
           )(CURRENT_SPACE_ID);
 
           // After import - all items should be returned on a GET `find` request.
-          expect(items.length).to.eql(3);
+          expect(items.length).toEqual(3);
 
           for (const endpointException of items) {
-            expect(endpointException.tags).to.include.string(GLOBAL_ARTIFACT_TAG);
+            expect(endpointException.tags).toContain(GLOBAL_ARTIFACT_TAG);
           }
 
           await endpointArtifactTestResources.deleteList(
@@ -979,7 +979,7 @@ const buildRole = (
 });
 
 const anEndpointArtifactErrorOf = (message: string) => (res: { body: { message: string } }) =>
-  expect(res.body.message).to.be(`EndpointArtifactError: ${message}`);
+  expect(res.body.message).toBe(`EndpointArtifactError: ${message}`);
 
 const buildImportBuffer = (
   listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
