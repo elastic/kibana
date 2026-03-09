@@ -112,7 +112,7 @@ describe('ExitWhileNodeImpl', () => {
       underTest.run();
 
       expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-        `Exiting while step "${node.stepId}" after condition evaluated to false. Completed 3 iterations.`,
+        `Exiting while step "${node.stepId}" after condition. Completed 3 iterations.`,
         { workflow: { step_id: node.stepId } }
       );
     });
@@ -143,7 +143,7 @@ describe('ExitWhileNodeImpl', () => {
         underTest.run();
 
         expect(workflowLogger.logDebug).toHaveBeenCalledWith(
-          `Exiting while step "${node.stepId}" after reached max-iterations limit of 2. Completed 2 iterations.`,
+          `Exiting while step "${node.stepId}" after max-iterations. Completed 2 iterations.`,
           { workflow: { step_id: node.stepId } }
         );
       });

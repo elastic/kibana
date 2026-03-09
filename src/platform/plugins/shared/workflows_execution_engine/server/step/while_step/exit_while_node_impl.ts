@@ -64,14 +64,14 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       );
     }
 
-    this.stepExecutionRuntime.finishStep();
+    this.stepExecutionRuntime.finishStep({
+      exitReason: maxReached ? 'max-iterations' : 'condition',
+    });
 
-    const reason = maxReached
-      ? `reached max-iterations limit of ${this.node.maxIterations}`
-      : 'condition evaluated to false';
     this.workflowLogger.logDebug(
-      `Exiting while step "${this.node.stepId}" after ${reason}. ` +
-        `Completed ${nextIteration} iterations.`,
+      `Exiting while step "${this.node.stepId}" after ${
+        maxReached ? 'max-iterations' : 'condition'
+      }. Completed ${nextIteration} iterations.`,
       { workflow: { step_id: this.node.stepId } }
     );
     this.wfExecutionRuntimeManager.navigateToNextNode();
