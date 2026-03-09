@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -87,23 +87,22 @@ export function useMonitorListColumns({
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
         const isMissing = hasMissingIntegrations(monitor[ConfigKey.CONFIG_ID]);
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <MonitorDetailsLink monitor={monitor} />
-            </EuiFlexItem>
+          <span>
+            <MonitorDetailsLink monitor={monitor} />
             {isMissing && (
-              <EuiFlexItem grow={false}>
+              <>
+                {' '}
                 <EuiToolTip content={MISSING_INTEGRATION_TOOLTIP}>
-                  <EuiBadge
+                  <EuiIcon
+                    type="warning"
                     color="warning"
                     data-test-subj="syntheticsMissingIntegrationBadge"
-                  >
-                    {MISSING_INTEGRATION_BADGE}
-                  </EuiBadge>
+                    aria-label={MISSING_INTEGRATION_BADGE}
+                  />
                 </EuiToolTip>
-              </EuiFlexItem>
+              </>
             )}
-          </EuiFlexGroup>
+          </span>
         );
       },
     },
