@@ -109,7 +109,6 @@ export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
 // ============================================================================
 // - OAuth2 (clientId, clientSecret, token refresh)
 // - SSL/mTLS (certificate-based authentication)
-// - AWS SigV4 (AWS service authentication)
 // - Custom (connector-specific auth flows)
 
 // ============================================================================
