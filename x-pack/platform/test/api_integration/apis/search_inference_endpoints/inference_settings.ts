@@ -16,7 +16,6 @@ const API_PATH = '/internal/search_inference_endpoints/settings';
 const API_VERSION = '1' as const;
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('inference_settings - /internal/search_inference_endpoints/settings', function () {
@@ -31,10 +30,11 @@ export default function ({ getService }: FtrProviderContext) {
     describe('authorized user', function () {
       describe('GET settings', function () {
         it('should return empty defaults when no settings exist', async () => {
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get(API_PATH)
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
 
           expect(body).toBeDefined();
@@ -47,11 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('PUT settings', function () {
         afterEach(async () => {
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send({ features: [] })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
         });
 
@@ -65,11 +66,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
 
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .put(API_PATH)
             .send(settings)
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
 
           expect(body._meta.id).toBe('default');
@@ -84,11 +86,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
 
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send(initialSettings)
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
 
           const updatedSettings = {
@@ -98,11 +101,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
 
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .put(API_PATH)
             .send(updatedSettings)
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
 
           expect(body.data.features).toEqual(updatedSettings.features);
@@ -116,17 +120,19 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
 
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send(settings)
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
 
-          const { body } = await supertest
+          const { body } = await supertestWithoutAuth
             .get(API_PATH)
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(200);
 
           expect(body.data.features).toEqual(settings.features);
@@ -135,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('validation', function () {
         it('should reject duplicate feature_id values', async () => {
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send({
               features: [
@@ -145,11 +151,12 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(400);
         });
 
         it('should reject duplicate endpoint_ids within a feature', async () => {
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send({
               features: [
@@ -158,37 +165,41 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(400);
         });
 
         it('should reject empty feature_id', async () => {
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send({
               features: [{ feature_id: '', endpoint_ids: ['.endpoint-a'] }],
             })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(400);
         });
 
         it('should reject empty endpoint_ids array', async () => {
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send({
               features: [{ feature_id: 'agent_builder', endpoint_ids: [] }],
             })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(400);
         });
 
         it('should reject missing features field', async () => {
-          await supertest
+          await supertestWithoutAuth
             .put(API_PATH)
             .send({})
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+            .auth(USERS.ALL.username, USERS.ALL.password)
             .expect(400);
         });
       });

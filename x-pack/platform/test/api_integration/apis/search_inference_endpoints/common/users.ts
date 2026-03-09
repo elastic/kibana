@@ -8,6 +8,12 @@
 import type { User } from './types';
 import { ROLES } from './roles';
 
+export const inferenceSettingsAllUser: User = {
+  username: 'inference_settings_test_all',
+  password: 'password',
+  roles: [ROLES.ALL.name],
+};
+
 export const inferenceSettingsNoAccessUser: User = {
   username: 'inference_settings_test_no_access',
   password: 'password',
@@ -15,6 +21,7 @@ export const inferenceSettingsNoAccessUser: User = {
 };
 
 export const USERS = {
+  ALL: inferenceSettingsAllUser,
   NO_ACCESS: inferenceSettingsNoAccessUser,
 };
 

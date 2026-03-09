@@ -77,7 +77,7 @@ export class SearchInferenceEndpointsPlugin
       privileges: {
         all: {
           app: [],
-          api: [],
+          api: [PLUGIN_ID],
           catalogue: [],
           management: {
             ml: [INFERENCE_ENDPOINTS_APP_ID],

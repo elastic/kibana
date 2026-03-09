@@ -7,6 +7,22 @@
 
 import type { Role } from './types';
 
+export const inferenceSettingsAllRole: Role = {
+  name: 'inference_settings_test_all',
+  privileges: {
+    elasticsearch: {
+      indices: [{ names: ['*'], privileges: ['all'] }],
+    },
+    kibana: [
+      {
+        base: ['all'],
+        feature: {},
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const inferenceSettingsNoAccessRole: Role = {
   name: 'inference_settings_test_no_access',
   privileges: {
@@ -25,6 +41,7 @@ export const inferenceSettingsNoAccessRole: Role = {
 };
 
 export const ROLES = {
+  ALL: inferenceSettingsAllRole,
   NO_ACCESS: inferenceSettingsNoAccessRole,
 };
 
