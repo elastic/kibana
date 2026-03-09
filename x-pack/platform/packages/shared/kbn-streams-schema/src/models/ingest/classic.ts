@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { IngestBase, IngestBaseStream, IngestBaseUpsertRequest } from './base';
 import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
 import { classicIngestStreamEffectiveLifecycleSchema } from './lifecycle';
@@ -12,7 +12,7 @@ import type { ElasticsearchAssets } from './common';
 import { elasticsearchAssetsSchema } from './common';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
+import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
@@ -69,15 +69,16 @@ type OmitClassicStreamUpsertProps<
   };
 };
 
-type ClassicStreamDefaults = {
-  Source: z.input<IClassicStreamSchema['Definition']>;
+interface ClassicStreamDefaults {
+  Definition: z.output<IClassicStreamSchema['Definition']>;
+  Source: z.output<IClassicStreamSchema['Definition']>;
   GetResponse: {
-    stream: z.input<IClassicStreamSchema['Definition']>;
-  };
+    stream: z.output<IClassicStreamSchema['Definition']>;
+  } & z.output<IClassicStreamSchema['GetResponse']>;
   UpsertRequest: {
-    stream: OmitClassicStreamUpsertProps<{} & z.input<IClassicStreamSchema['Definition']>>;
+    stream: OmitClassicStreamUpsertProps<{} & z.output<IClassicStreamSchema['Definition']>>;
   };
-} & ModelOfSchema<IClassicStreamSchema>;
+}
 
 export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {

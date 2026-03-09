@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback } from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiButtonIcon,
   EuiDescriptionList,
@@ -179,9 +178,4 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
-
-KioskControls.propTypes = {
-  autoplayInterval: PropTypes.number.isRequired,
-  onSetInterval: PropTypes.func.isRequired,
 };
