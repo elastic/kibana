@@ -25,6 +25,7 @@ export const BASIC_MAPPINGS: Record<PropertyName, MappingProperty> = {
   workflowRunId: mappings.keyword(),
   status: mappings.keyword(),
   createdAt: mappings.date(),
+  finishedAt: mappings.date(),
   triggeredBy: mappings.keyword(),
 };
 
