@@ -162,7 +162,7 @@ export const useEntityNodeExpandPopover = (
       // Create the entity details item (shared between both modes - single-entity and grouped-entities)
       const entityDetailsItem: ItemExpandPopoverListItemProps = {
         type: 'item',
-        iconType: 'expand',
+        iconType: 'maximize',
         testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
         label: i18n.translate(
           'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',

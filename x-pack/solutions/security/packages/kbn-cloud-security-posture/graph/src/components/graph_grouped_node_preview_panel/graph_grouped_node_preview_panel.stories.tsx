@@ -189,7 +189,7 @@ EventsGroup.args = {
       id: 'event-3',
       action: 'process_execution',
       actor: { id: 'user-003', label: 'admin', icon: 'user' },
-      target: { id: 'process-003', label: 'powershell.exe', icon: 'console' },
+      target: { id: 'process-003', label: 'powershell.exe', icon: 'commandLine' },
     }),
   ],
 };
@@ -241,7 +241,7 @@ EventsAndAlertsGroup.args = {
       id: 'event-mixed-1',
       action: 'user_login',
       actor: { id: 'user-normal', label: 'jane.smith', icon: 'user' },
-      target: { id: 'workstation-01', label: 'WS-001', icon: 'desktop' },
+      target: { id: 'workstation-01', label: 'WS-001', icon: 'display' },
     }),
     createAlertItem({
       id: 'alert-mixed-1',

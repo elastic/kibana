@@ -315,7 +315,7 @@ export const AwsCredentialsFormAgentless = ({
                 data-test-subj={AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ}
                 target="_blank"
                 iconSide="left"
-                iconType="launch"
+                iconType="rocket"
                 href={cloudFormationConfig.templateUrl}
               >
                 <FormattedMessage
