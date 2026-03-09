@@ -247,25 +247,32 @@ const bulkDisableRulesWithOCC = async (
   );
 
   // Track history
-  // TODO: Remove items that failed
-  const changes = rulesToDisable.map((rule) => {
-    const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
-    const original = rulesFinderRules.find((r) => r.id === rule.id);
-    return {
-      objectId: rule.id,
-      objectType: rule.type,
-      module: type.solution,
-      before: original ? pick(original, ['attributes', 'references']) : undefined,
-      after: pick(rule, ['attributes', 'references']),
-    } as RuleChange;
-  });
-  context.changeTrackingService?.logBulk(changes, {
-    action: RuleChangeTrackingAction.ruleDisable,
-    username: username ?? 'unknown',
-    spaceId: context.spaceId,
-    data: { metadata: { bulkCount: rulesToDisable.length } },
-    refresh: 'wait_for',
-  });
+  const changes = rulesToDisable.reduce((acc, rule) => {
+    const updated = result.saved_objects.find((r) => r.id === rule.id);
+    if (updated && !updated.error) {
+      const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+      if (type?.trackChanges) {
+        const original = rulesFinderRules.find((r) => r.id === rule.id);
+        acc.push({
+          objectId: rule.id,
+          objectType: rule.type,
+          module: type.solution,
+          before: original ? pick(original, ['attributes', 'references']) : undefined,
+          after: pick(rule, ['attributes', 'references']),
+        });
+      }
+    }
+    return acc;
+  }, [] as RuleChange[]);
+  if (context.changeTrackingService && changes.length) {
+    await context.changeTrackingService?.logBulk(changes, {
+      action: RuleChangeTrackingAction.ruleDisable,
+      username: username ?? 'unknown',
+      spaceId: context.spaceId,
+      data: { metadata: { bulkCount: rulesToDisable.length } },
+      refresh: 'wait_for',
+    });
+  }
 
   const taskIdsToDisable: string[] = [];
   const taskIdsToDelete: string[] = [];

@@ -475,7 +475,7 @@ export const RuleDetailsPage = connector(
             </RuleStatus>
           )}
           <EuiFlexItem grow={false}>
-            <RuleSnoozeBadge ruleId={ruleId} showTooltipInline />
+            <RuleSnoozeBadge ruleId={ruleId} onSnoozeChange={refreshRule} showTooltipInline />
           </EuiFlexItem>
         </>
       );

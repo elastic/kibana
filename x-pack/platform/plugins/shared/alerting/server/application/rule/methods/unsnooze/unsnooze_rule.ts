@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
+import type { RawRule } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -40,7 +42,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
   } catch (error) {
     throw Boom.badRequest(`Error validating unsnooze params - ${error.message}`);
   }
-  const { attributes, version } = await withSpan(
+  const { attributes, version, references } = await withSpan(
     { name: 'getRuleSavedObject', type: 'rules' },
     () =>
       getRuleSavedObject(context, {
@@ -80,8 +82,9 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
   const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
+  const username = await context.getUserName();
 
-  await updateRuleSo({
+  const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
     id,
@@ -91,4 +94,25 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
       updatedAt: new Date().toISOString(),
     }),
   });
+
+  // Success? Track changes
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+  if (context.changeTrackingService && ruleType.trackChanges) {
+    const change = {
+      objectId: id,
+      objectType: RULE_SAVED_OBJECT_TYPE,
+      module: ruleType.solution,
+      before: { attributes, references },
+      after: {
+        attributes: { ...attributes, ...updatedRuleRaw.attributes } as RawRule,
+        references: updatedRuleRaw.references || [],
+      },
+    };
+    await context.changeTrackingService.log(change, {
+      action: RuleChangeTrackingAction.ruleUnsnooze,
+      username: username ?? 'unknown',
+      spaceId: context.spaceId,
+      refresh: 'wait_for',
+    });
+  }
 }

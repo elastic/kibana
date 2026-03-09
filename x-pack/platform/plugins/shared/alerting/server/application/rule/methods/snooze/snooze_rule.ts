@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -54,7 +55,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
   context: RulesClientContext,
   { id, snoozeSchedule }: SnoozeRuleOptions
 ) {
-  const { attributes, version } = await withSpan(
+  const { attributes, references, version } = await withSpan(
     { name: 'getRuleSavedObject', type: 'rules' },
     () =>
       getRuleSavedObject(context, {
@@ -102,23 +103,46 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     throw Boom.badRequest(error.message);
   }
 
+  const username = await context.getUserName();
+
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
-      updatedBy: await context.getUserName(),
+      updatedBy: username,
       updatedAt: new Date().toISOString(),
     }),
   });
+
+  // Success? Track changes
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+  if (context.changeTrackingService && ruleType.trackChanges) {
+    const change = {
+      objectId: id,
+      objectType: RULE_SAVED_OBJECT_TYPE,
+      module: ruleType.solution,
+      before: { attributes, references },
+      after: {
+        attributes: { ...attributes, ...updatedRuleRaw.attributes } as RawRule,
+        references: updatedRuleRaw.references || [],
+      },
+    };
+    await context.changeTrackingService.log(change, {
+      action: RuleChangeTrackingAction.ruleSnooze,
+      username: username ?? 'unknown',
+      spaceId: context.spaceId,
+      refresh: 'wait_for',
+    });
+  }
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
     updatedRuleRaw.attributes as RawRule,
     {
       id: updatedRuleRaw.id,
       logger: context.logger,
-      ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId!),
+      ruleType,
       references: updatedRuleRaw.references,
     },
     context.isSystemAction

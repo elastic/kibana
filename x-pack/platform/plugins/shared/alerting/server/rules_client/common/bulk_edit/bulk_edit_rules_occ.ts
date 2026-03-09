@@ -201,25 +201,32 @@ async function saveBulkUpdatedRules({
       savedObjectsBulkCreateOptions: { overwrite: true },
     });
 
-    // 1. Track changes
-    // TODO: Remove items that failed
-    const changes = rules.map((rule) => {
-      const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
-      const original = originalRules.find((r) => rule.id === r.id);
-      return {
-        objectId: rule.id,
-        objectType: rule.type,
-        module: type.solution,
-        before: original ? pick(original, ['attributes', 'references']) : undefined,
-        after: pick(rule, ['attributes', 'references']),
-      };
-    }) as RuleChange[];
-    context.changeTrackingService?.logBulk(changes, {
-      username: (await context.getUserName()) ?? 'unknown',
-      action: RuleChangeTrackingAction.ruleUpdate,
-      spaceId: context.spaceId,
-      data: { metadata: { bulkCount: rules.length } },
-    });
+    // Track changes
+    const changes = rules.reduce((acc, rule) => {
+      const updated = result.saved_objects.find((r: unknown) => r.id === rule.id);
+      if (updated && !updated.error) {
+        const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
+        if (type?.trackChanges) {
+          const original = originalRules.find((r) => rule.id === r.id);
+          acc.push({
+            objectId: rule.id,
+            objectType: rule.type,
+            module: type.solution,
+            before: original ? pick(original, ['attributes', 'references']) : undefined,
+            after: pick(rule, ['attributes', 'references']),
+          });
+        }
+      }
+      return acc;
+    }, [] as RuleChange[]);
+    if (context.changeTrackingService && changes.length) {
+      context.changeTrackingService.logBulk(changes, {
+        username: (await context.getUserName()) ?? 'unknown',
+        action: RuleChangeTrackingAction.ruleUpdate,
+        spaceId: context.spaceId,
+        data: { metadata: { bulkCount: rules.length } },
+      });
+    }
   } catch (e) {
     // avoid unused newly generated API keys
 

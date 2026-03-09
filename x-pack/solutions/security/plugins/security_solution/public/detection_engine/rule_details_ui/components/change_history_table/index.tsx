@@ -78,8 +78,6 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
     page: activePage + 1,
     perPage: itemsPerPage,
   });
-  // const items = data?.items || [];
-  const maxItems = (data?.total ?? 1) + 1;
 
   const items = data?.items?.map((item) => {
     const visibleChanges = item.changes.filter((c) => !IGNORED_FIELDS.includes(c));
@@ -130,6 +128,10 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   //   [setPageIndex, setPageSize]
   // );
 
+  // Last item is the date change histories started.
+  // So we always have 1 item minimum.
+  const maxItems = (data?.total ?? 0) + 1;
+
   // Memoized state
   const pagination = useMemo(() => {
     const pageCount = Math.ceil(maxItems / itemsPerPage);
@@ -143,8 +145,7 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
     };
   }, [maxItems, activePage, itemsPerPage]);
 
-  // Last item on last page contains
-  // the date rule history tracking started
+  // Add date change tracking started
   if (pagination.lastPage)
     items?.push(
       <EuiTimelineItem

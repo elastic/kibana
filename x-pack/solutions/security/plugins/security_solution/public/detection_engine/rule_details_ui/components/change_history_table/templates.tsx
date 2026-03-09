@@ -96,6 +96,8 @@ export const CHANGE_HISTORY_ACTION_TEMPLATE = {
   },
   [RuleChangeTrackingAction.ruleEnable]: () => <>{' enabled the rule.'}</>,
   [RuleChangeTrackingAction.ruleDisable]: () => <>{' disabled the rule.'}</>,
+  [RuleChangeTrackingAction.ruleSnooze]: () => <>{' snoozed the rule.'}</>,
+  [RuleChangeTrackingAction.ruleUnsnooze]: () => <>{' unsnoozed the rule.'}</>,
 } as Record<string, (item: ChangeHistoryResult, euiTheme: EuiThemeComputed) => JSX.Element>;
 
 const renderChanges = (item: ChangeHistoryResult, euiTheme: EuiThemeComputed) => {
