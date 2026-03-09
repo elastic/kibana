@@ -59,12 +59,12 @@
  * }
  * ```
  *
- * Validate via Log Search agent:
+ * Validate via Observability agent (with log search skill):
  *
  * ```
  * POST kbn:///api/agent_builder/converse
  * {
- *   "agent_id": "observability.log_search_agent",
+ *   "agent_id": "observability.agent",
  *   "input": "Something is wrong with checkout. Can you investigate the logs?"
  * }
  * ```

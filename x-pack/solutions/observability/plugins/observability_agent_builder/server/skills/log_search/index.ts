@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type {
-  ObservabilityAgentBuilderCoreSetup,
-  ObservabilityAgentBuilderPluginSetupDependencies,
-} from '../types';
-import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../tools/get_logs/constants';
-import { OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID } from '../tools/get_log_groups/tool';
-import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '../tools/run_log_rate_analysis/tool';
-import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools/get_index_info/tool';
-import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { OBSERVABILITY_LOG_SEARCH_AGENT_ID } from '../../common/constants';
-import { getKqlInstructions } from './register_observability_agent';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../../tools/get_logs/constants';
+import { OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID } from '../../tools/get_log_groups/tool';
+import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '../../tools/run_log_rate_analysis/tool';
+import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../../tools/get_index_info/tool';
+import { getKqlInstructions } from '../../agent/register_observability_agent';
 
 const LOG_SEARCH_TOOL_IDS = [
   OBSERVABILITY_GET_LOGS_TOOL_ID,
@@ -26,43 +20,27 @@ const LOG_SEARCH_TOOL_IDS = [
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
 ];
 
-export async function registerLogSearchAgent({
-  core,
-  plugins,
-  logger,
-}: {
-  core: ObservabilityAgentBuilderCoreSetup;
-  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
-  logger: Logger;
-}) {
-  plugins.agentBuilder?.agents.register({
-    id: OBSERVABILITY_LOG_SEARCH_AGENT_ID,
-    name: 'Log Search Agent',
+export const createLogSearchSkill = () =>
+  defineSkillType({
+    id: 'observability.log-search',
+    name: 'log-search',
+    basePath: 'skills/observability',
     description:
-      'Investigates log data to find root causes of incidents by iteratively searching, filtering, and analyzing logs',
-    avatar_icon: 'logoObservability',
-    availability: {
-      cacheMode: 'space',
-      handler: async ({ request }) => {
-        return getAgentBuilderResourceAvailability({ core, request, logger });
-      },
-    },
-    configuration: () => {
-      return {
-        instructions: buildLogSearchSystemPrompt(),
-        replace_default_instructions: true,
-        tools: [{ tool_ids: LOG_SEARCH_TOOL_IDS }],
-      };
-    },
+      'Investigates log data to find root causes of incidents by iteratively searching, filtering, and analyzing logs. Use when the user asks about errors, anomalies, or issues visible in logs, or wants to understand what happened during an incident.',
+    content: buildLogSearchSkillContent(),
+    getRegistryTools: () => LOG_SEARCH_TOOL_IDS,
   });
 
-  logger.debug('Successfully registered log search agent in agent-builder');
-}
+function buildLogSearchSkillContent(): string {
+  return dedent(`## When to Use This Skill
 
-function buildLogSearchSystemPrompt(): string {
-  return dedent(`You are an SRE investigating log data in Elasticsearch to find root causes.
+    Use this skill when:
+    - A user asks to investigate errors, anomalies, or incidents visible in log data
+    - A user wants to find the root cause of an outage, performance degradation, or failure
+    - A user asks "what happened" or "why are there errors" in a service, host, or container
+    - A user wants to search, filter, or analyze logs in Elasticsearch
+    - You need to correlate log patterns across services to trace cascading failures
 
-    <sop>
     ## Standard Operating Procedure
 
     You MUST follow this procedure.
@@ -73,7 +51,7 @@ function buildLogSearchSystemPrompt(): string {
     Read three things:
     - **totalCount**: How many logs match? This is an indicator of noise.
     - **histogram**: Is there a spike or dip? Note the timestamp if so. This is an indicator of a root cause.
-    - **samples**: What do the logs look like? Health checks? Real errors? Cron noise? 
+    - **samples**: What do the logs look like? Health checks? Real errors? Cron noise?
 
     Decision:
     - totalCount < 500 → skip to Answer (small enough to review samples directly)
@@ -133,9 +111,7 @@ function buildLogSearchSystemPrompt(): string {
     - **Key evidence**: specific log lines, timestamps, service names, error messages
     - **Investigation trail**: briefly describe what you filtered and why
     - **Suggested next steps** if the root cause is not fully confirmed
-    </sop>
 
-    <critical_rules>
     ## Critical Rules
 
     1. ALWAYS start with \`get_logs\`. Never call another tool first.
@@ -146,11 +122,9 @@ function buildLogSearchSystemPrompt(): string {
     6. Before each tool call, explain what you see and why you're taking the next action.
     7. If a tool call returns an error, try a different approach. Do not retry the same failing call more than once.
     8. If \`run_log_rate_analysis\` fails or returns no results, continue with \`get_logs\` alone.
-    </critical_rules>
 
     ${getKqlInstructions()}
 
-    <otel_exceptions>
     ## OTel Exception Events
 
     OpenTelemetry exception events are structurally different from regular logs:
@@ -165,9 +139,7 @@ function buildLogSearchSystemPrompt(): string {
     - \`get_log_groups\` automatically categorizes exceptions into \`spanException\` and \`logException\` groups.
     - Each group includes \`error.exception.message\`, \`error.exception.type\`, and optionally \`error.stack_trace\`.
     - This is the most effective tool for discovering and understanding exception patterns.
-    </otel_exceptions>
 
-    <tips>
     ## Tips
 
     - Use \`get_index_info\` with operation="get-field-values" to discover the actual values of keyword fields.
@@ -182,9 +154,7 @@ function buildLogSearchSystemPrompt(): string {
       from the sample, then call \`get_logs\` with a tight time window (e.g. ±30s around the timestamp), scoped to that
       entity via kqlFilter, with limit=50. This shows what happened immediately before and after the event — the same "surrounding
       documents" view that Discover provides.
-    </tips>
 
-    <example_investigation>
     ## Example Investigation
 
     User: "Why are there errors in the checkout service?"
@@ -203,9 +173,7 @@ function buildLogSearchSystemPrompt(): string {
     (Note: "ERROR" and "WARN" are the exact values observed in the Phase 1 histogram breakdown.)
 
     **Answer**: Checkout service OOMKilled at 14:07, causing cascading timeouts in payment-service.
-    </example_investigation>
 
-    <example_investigation_otel>
     ## Example Investigation (OTel Exceptions)
 
     User: "Something is wrong with our microservices"
@@ -226,6 +194,5 @@ function buildLogSearchSystemPrompt(): string {
     → spanException group: checkout → "rpc error: code = Unavailable desc = connection refused" (55 occurrences). logException group: frontend → "Error: request failed with status 500" (120 occurrences). Confirms checkout→payment is the origin.
 
     **Answer**: Payment service is unreachable, causing gRPC "Unavailable" errors in checkout (55 exceptions) which cascade as HTTP 500s to the frontend (120 exceptions).
-    </example_investigation_otel>
   `);
 }
