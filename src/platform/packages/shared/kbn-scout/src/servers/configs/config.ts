@@ -134,7 +134,7 @@ export class Config {
         password: this.get('servers.kibana.password'),
       },
 
-      ...(this.get('servers.linkedElasticsearch.port')
+      ...(this.get('esServerlessOptions.cps', false) && this.get('servers.linkedElasticsearch.port')
         ? {
             linkedProject: {
               hosts: {
