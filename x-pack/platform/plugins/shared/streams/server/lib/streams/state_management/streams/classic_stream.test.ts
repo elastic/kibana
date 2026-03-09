@@ -34,6 +34,7 @@ describe('ClassicStream', () => {
     ({
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       isServerless: false,
+      isWiredStreamViewsEnabled: true,
       isDev: false,
       scopedClusterClient: {
         asCurrentUser: {

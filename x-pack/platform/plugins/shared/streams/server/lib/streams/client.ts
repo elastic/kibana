@@ -83,6 +83,7 @@ export class StreamsClient {
       logger: Logger;
       request: KibanaRequest;
       isServerless: boolean;
+      isWiredStreamViewsEnabled: boolean;
       isDev: boolean;
     }
   ) {}
