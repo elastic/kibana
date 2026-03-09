@@ -94,6 +94,35 @@ export const runExecutionValidation = async (
     } catch (exc) {
       warnings.push(`Encountered an error validating threat index patterns: ${exc}`);
     }
+
+    if (!skipExecution) {
+      try {
+        const threatFieldCapsResponse = await withSecuritySpan('fieldCapsThreatIndex', () =>
+          scopedClusterClient.asCurrentUser.fieldCaps(
+            {
+              index: params.threatIndex,
+              fields: secondaryTimestamp
+                ? [primaryTimestamp, secondaryTimestamp]
+                : [primaryTimestamp],
+              include_unmapped: true,
+              ignore_unavailable: true,
+            },
+            { meta: true }
+          )
+        );
+
+        const { warningMessage: missingThreatTimestampWarning } = await hasTimestampFields({
+          timestampField: primaryTimestamp,
+          timestampFieldCapsResponse: threatFieldCapsResponse,
+          ruleExecutionLogger,
+        });
+        if (missingThreatTimestampWarning) {
+          warnings.push(missingThreatTimestampWarning);
+        }
+      } catch (exc) {
+        warnings.push(`Threat index timestamp fields check failed to execute ${exc}`);
+      }
+    }
   }
 
   if (skipExecution) {

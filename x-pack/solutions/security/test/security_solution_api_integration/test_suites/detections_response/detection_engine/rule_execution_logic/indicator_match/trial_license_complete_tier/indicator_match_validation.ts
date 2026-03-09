@@ -15,6 +15,7 @@ import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder'
 
 const INPUT_INDEX_WARNING = 'Unable to find matching indices for rule';
 const THREAT_INDEX_WARNING = 'Unable to find matching threat indicator indices for rule';
+const MISSING_TIMESTAMP_FIELD = 'missing the timestamp field "@timestamp"';
 
 const warningsContain = (warnings: string[], substring: string): boolean =>
   warnings.some((w) => w.includes(substring));
@@ -93,6 +94,33 @@ export default ({ getService }: FtrProviderContext) => {
         expect(logs).toHaveLength(1);
         expect(warningsContain(logs[0].warnings, INPUT_INDEX_WARNING)).toBe(true);
         expect(warningsContain(logs[0].warnings, THREAT_INDEX_WARNING)).toBe(true);
+      });
+    });
+
+    describe('threat index timestamp validation', () => {
+      const noAtTimestampFieldArchivePath =
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/no_at_timestamp_field';
+      const threatIndexNoTimestamp = 'auditbeat-no_at_timestamp_field';
+
+      before(async () => {
+        await esArchiver.load(noAtTimestampFieldArchivePath);
+      });
+
+      after(async () => {
+        await esArchiver.unload(noAtTimestampFieldArchivePath);
+      });
+
+      it('results in partial failure when threat index exists but is missing the timestamp field', async () => {
+        const rule: ThreatMatchRuleCreateProps = {
+          ...getThreatMatchRuleForAlertTesting(['auditbeat-*'], 'im-threat-no-timestamp', true),
+          threat_index: [threatIndexNoTimestamp],
+          enabled: true,
+        };
+
+        const { logs } = await previewRule({ supertest, rule });
+
+        expect(logs).toHaveLength(1);
+        expect(warningsContain(logs[0].warnings, MISSING_TIMESTAMP_FIELD)).toBe(true);
       });
     });
   });
