@@ -11,9 +11,10 @@ import type {
   UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
 } from './types';
 import type { AlertRuleData } from '.';
+import { createAlertRuleData } from '.';
 import type { AlertsFilter } from '../types';
 
-export const alertRuleData: AlertRuleData = {
+export const alertRuleData: AlertRuleData = createAlertRuleData({
   consumer: 'bar',
   executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
   id: '1',
@@ -27,7 +28,7 @@ export const alertRuleData: AlertRuleData = {
   alertDelay: 0,
   muteAll: false,
   mutedInstanceIds: [],
-};
+});
 
 export const mockAAD = {
   _index: '.internal.alerts-observability.metrics.alerts-default-000001',

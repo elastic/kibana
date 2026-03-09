@@ -8,6 +8,7 @@ import type { IRouter } from '@kbn/core/server';
 import {
   transformRequestParamsToApplicationV1,
   transformRequestQueryToApplicationV1,
+  transformRequestBodyToApplicationV1,
 } from './transforms';
 import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
@@ -17,10 +18,12 @@ import { BASE_ALERTING_API_PATH } from '../../../../types';
 import type {
   MuteAlertRequestQueryV1,
   MuteAlertRequestParamsV1,
+  MuteAlertRequestBodyV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import {
   muteAlertParamsSchemaV1,
   muteAlertQuerySchemaV1,
+  muteAlertBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
@@ -41,6 +44,7 @@ export const muteAlertRoute = (
         request: {
           params: muteAlertParamsSchemaV1,
           query: muteAlertQuerySchemaV1,
+          body: muteAlertBodySchemaV1,
         },
         response: {
           204: {
@@ -64,11 +68,13 @@ export const muteAlertRoute = (
         const rulesClient = await alertingContext.getRulesClient();
         const params: MuteAlertRequestParamsV1 = req.params;
         const query: MuteAlertRequestQueryV1 = req.query || {};
+        const body: MuteAlertRequestBodyV1 | undefined = req.body;
 
         try {
           await rulesClient.muteInstance({
             params: transformRequestParamsToApplicationV1(params),
             query: transformRequestQueryToApplicationV1(query),
+            body: transformRequestBodyToApplicationV1(body),
           });
           return res.noContent();
         } catch (e) {

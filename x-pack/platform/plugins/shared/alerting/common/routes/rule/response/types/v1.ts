@@ -42,6 +42,7 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   mute_all: RuleResponseSchemaType['mute_all'];
   notify_when?: RuleResponseSchemaType['notify_when'];
   muted_alert_ids: RuleResponseSchemaType['muted_alert_ids'];
+  snoozed_instances?: RuleResponseSchemaType['snoozed_instances'];
   execution_status?: RuleResponseSchemaType['execution_status'];
   monitoring?: RuleResponseSchemaType['monitoring'];
   snooze_schedule?: RuleResponseSchemaType['snooze_schedule'];

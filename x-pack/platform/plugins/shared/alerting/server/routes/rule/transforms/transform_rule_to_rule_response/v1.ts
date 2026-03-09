@@ -100,6 +100,27 @@ export const transformFlapping = (flapping: Rule['flapping']) => {
   };
 };
 
+export const transformSnoozedInstances = (
+  snoozedInstances: NonNullable<Rule['snoozedInstances']>
+): RuleResponseV1['snoozed_instances'] =>
+  snoozedInstances.map((entry) => ({
+    instance_id: entry.instanceId,
+    ...(entry.expiresAt !== undefined ? { expires_at: entry.expiresAt } : {}),
+    ...(entry.conditions?.length
+      ? {
+          conditions: entry.conditions.map((c) => ({
+            type: c.type,
+            field: c.field,
+            ...(c.value !== undefined ? { value: c.value } : {}),
+            ...(c.snapshotValue !== undefined ? { snapshot_value: c.snapshotValue } : {}),
+          })),
+        }
+      : {}),
+    ...(entry.conditionOperator !== undefined
+      ? { condition_operator: entry.conditionOperator }
+      : {}),
+  }));
+
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   rule: Rule<Params>
 ): RuleResponseV1<RuleParamsV1> => ({
@@ -126,6 +147,9 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   mute_all: rule.muteAll,
   ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
+  snoozed_instances: rule.snoozedInstances?.length
+    ? transformSnoozedInstances(rule.snoozedInstances)
+    : [],
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   ...(rule.executionStatus
     ? {

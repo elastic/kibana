@@ -11,6 +11,7 @@ export {
   transformRuleLastRun,
   transformMonitoring,
   transformFlapping,
+  transformSnoozedInstances,
 } from './transform_rule_to_rule_response/latest';
 export {
   transformRuleToRuleResponse as transformRuleToRuleResponseV1,
@@ -18,4 +19,5 @@ export {
   transformRuleLastRun as transformRuleLastRunV1,
   transformMonitoring as transformMonitoringV1,
   transformFlapping as transformFlappingV1,
+  transformSnoozedInstances as transformSnoozedInstancesV1,
 } from './transform_rule_to_rule_response/v1';

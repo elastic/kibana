@@ -268,6 +268,7 @@ describe('bulkEnableRulesRoute', () => {
             mute_all: false,
             notify_when: 'onActionGroupChange',
             muted_alert_ids: [],
+            snoozed_instances: [],
             execution_status: {
               status: 'unknown',
               last_execution_date: '2020-08-20T19:23:38.000Z',

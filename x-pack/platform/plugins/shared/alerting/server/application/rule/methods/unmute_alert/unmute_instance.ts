@@ -44,6 +44,15 @@ async function unmuteInstanceWithOCC(
     ruleId
   );
 
+  const mutedInstanceIds = attributes.mutedInstanceIds || [];
+  const snoozedInstances = attributes.snoozedInstances ?? [];
+  const isSimpleMute = mutedInstanceIds.includes(alertInstanceId);
+  const isConditionalSnooze = snoozedInstances.some((e) => e.instanceId === alertInstanceId);
+  const auditAction =
+    attributes.muteAll || isSimpleMute
+      ? RuleAuditAction.UNMUTE_ALERT
+      : RuleAuditAction.UNSNOOZE_ALERT;
+
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: attributes.alertTypeId,
@@ -57,7 +66,7 @@ async function unmuteInstanceWithOCC(
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.UNMUTE_ALERT,
+        action: auditAction,
         savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
         error,
       })
@@ -67,7 +76,7 @@ async function unmuteInstanceWithOCC(
 
   context.auditLogger?.log(
     ruleAuditEvent({
-      action: RuleAuditAction.UNMUTE_ALERT,
+      action: auditAction,
       outcome: 'unknown',
       savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: attributes.name },
     })
@@ -75,28 +84,42 @@ async function unmuteInstanceWithOCC(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const mutedInstanceIds = attributes.mutedInstanceIds || [];
-  if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-    const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+  if (attributes.muteAll) {
+    return;
+  }
 
-    await updateRuleSo({
-      savedObjectsClient: context.unsecuredSavedObjectsClient,
-      savedObjectsUpdateOptions: { version },
-      id: ruleId,
-      updateRuleAttributes: updateMeta(context, {
-        mutedInstanceIds: mutedInstanceIds.filter((id: string) => id !== alertInstanceId),
-        updatedBy: await context.getUserName(),
-        updatedAt: new Date().toISOString(),
-      }),
+  if (!isSimpleMute && !isConditionalSnooze) {
+    return;
+  }
+
+  const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+
+  const ruleUpdates: Record<string, unknown> = {
+    updatedBy: await context.getUserName(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (isSimpleMute) {
+    ruleUpdates.mutedInstanceIds = mutedInstanceIds.filter((id: string) => id !== alertInstanceId);
+  }
+
+  if (isConditionalSnooze) {
+    ruleUpdates.snoozedInstances = snoozedInstances.filter((e) => e.instanceId !== alertInstanceId);
+  }
+
+  await updateRuleSo({
+    savedObjectsClient: context.unsecuredSavedObjectsClient,
+    savedObjectsUpdateOptions: { version },
+    id: ruleId,
+    updateRuleAttributes: updateMeta(context, ruleUpdates),
+  });
+
+  if (indices && indices.length > 0) {
+    await context.alertsService?.clearSnoozeAndUnmuteAlertInstances({
+      ruleId,
+      alertInstanceIds: [alertInstanceId],
+      indices,
+      logger: context.logger,
     });
-
-    if (indices && indices.length > 0) {
-      await context.alertsService?.unmuteAlertInstance({
-        ruleId,
-        alertInstanceId,
-        indices,
-        logger: context.logger,
-      });
-    }
   }
 }

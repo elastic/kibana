@@ -193,6 +193,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 api_key_owner: user.username,
                 mute_all: false,
                 muted_alert_ids: [],
+                snoozed_instances: [],
                 execution_status: response.body.execution_status,
                 revision: 0,
                 last_run: {

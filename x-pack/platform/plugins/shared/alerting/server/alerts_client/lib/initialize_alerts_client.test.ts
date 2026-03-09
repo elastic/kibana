@@ -137,6 +137,8 @@ describe('initializeAlertsClient', () => {
         revision: 0,
         spaceId: 'default',
         tags: ['rule-', '-tags'],
+        mutedInstanceIdsSet: expect.any(Set),
+        snoozedInstanceIdsSet: expect.any(Set),
       },
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).not.toHaveBeenCalled();
@@ -147,6 +149,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt,
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });
@@ -200,6 +203,8 @@ describe('initializeAlertsClient', () => {
         revision: 0,
         spaceId: 'default',
         tags: ['rule-', '-tags'],
+        mutedInstanceIdsSet: expect.any(Set),
+        snoozedInstanceIdsSet: expect.any(Set),
       },
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).not.toHaveBeenCalled();
@@ -210,6 +215,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });
@@ -264,6 +270,8 @@ describe('initializeAlertsClient', () => {
         revision: 0,
         spaceId: 'default',
         tags: ['rule-', '-tags'],
+        mutedInstanceIdsSet: expect.any(Set),
+        snoozedInstanceIdsSet: expect.any(Set),
       },
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
@@ -281,6 +289,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });
@@ -337,6 +346,8 @@ describe('initializeAlertsClient', () => {
         revision: 0,
         spaceId: 'default',
         tags: ['rule-', '-tags'],
+        mutedInstanceIdsSet: expect.any(Set),
+        snoozedInstanceIdsSet: expect.any(Set),
       },
     });
     expect(LegacyAlertsClientModule.LegacyAlertsClient).toHaveBeenCalledWith({
@@ -357,6 +368,7 @@ describe('initializeAlertsClient', () => {
       recoveredAlertsFromState: {},
       ruleLabel: `test:1: 'rule-name'`,
       startedAt: expect.any(Date),
+      snoozedInstances: undefined,
     });
     spy1.mockRestore();
   });

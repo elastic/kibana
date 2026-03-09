@@ -1361,6 +1361,68 @@ instanceStateValue: true
           }
         });
 
+        it('should exclude muted instances from summarized alerts', async () => {
+          const reference = alertUtils.generateReference();
+          const response = await alertUtils.createAlwaysFiringRuleWithSummaryAction({
+            reference,
+            overwrites: {
+              enabled: false,
+              schedule: { interval: '1s' },
+            },
+            notifyWhen: 'onActiveAlert',
+            throttle: null,
+            summary: true,
+          });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
+              const ruleId = response.body.id;
+              await alertUtils.enable(ruleId);
+              await alertUtils.runSoon(ruleId);
+              await esTestIndexTool.waitForDocs('rule:test.always-firing-alert-as-data', reference);
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+              await alertUtils.muteInstance(ruleId, '1');
+              await alertUtils.runSoon(ruleId);
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
+              await retry.try(async () => {
+                const searchResult = await esTestIndexTool.search(
+                  'action:test.index-record',
+                  reference
+                );
+                const hits = searchResult.body.hits.hits as Array<{
+                  _source: { params: { message: string } };
+                  sort?: string[];
+                }>;
+                expect(hits.length).to.be.greaterThan(1);
+                const messages = hits.map((h) => h._source.params.message);
+                const afterMuteMessage = messages.find(
+                  (m) =>
+                    (m.includes('all:1') || m.includes('ongoing:1')) &&
+                    m.includes('IDs:[2,]') &&
+                    !m.includes('IDs:[1,2,]')
+                );
+                expect(afterMuteMessage).to.not.eql(
+                  undefined,
+                  `Expected at least one action message after mute to show only instance 2. Got: ${messages.join(
+                    '; '
+                  )}`
+                );
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
         it('should filter alerts by hours', async () => {
           const now = new Date();
           now.setHours(now.getHours() + 1);

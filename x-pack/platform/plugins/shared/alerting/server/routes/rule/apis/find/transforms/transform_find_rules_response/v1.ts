@@ -17,6 +17,7 @@ import {
   transformMonitoringV1,
   transformRuleLastRunV1,
   transformFlappingV1,
+  transformSnoozedInstancesV1,
 } from '../../../../transforms';
 
 export const transformPartialRule = <Params extends RuleParams = never>(
@@ -50,6 +51,9 @@ export const transformPartialRule = <Params extends RuleParams = never>(
     ...(rule.muteAll !== undefined ? { mute_all: rule.muteAll } : {}),
     ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
     ...(rule.mutedInstanceIds ? { muted_alert_ids: rule.mutedInstanceIds } : {}),
+    snoozed_instances: rule.snoozedInstances?.length
+      ? transformSnoozedInstancesV1(rule.snoozedInstances)
+      : [],
     ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
     ...(rule.executionStatus
       ? {

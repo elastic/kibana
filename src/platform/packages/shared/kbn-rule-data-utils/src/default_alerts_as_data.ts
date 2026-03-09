@@ -151,6 +151,12 @@ const ALERT_INDEX_PATTERN = `${ALERT_NAMESPACE}.index_pattern` as const;
 
 const ALERT_MUTED = `${ALERT_NAMESPACE}.muted` as const;
 
+// kibana.alert.snooze.* - per-alert snooze (conditional / time-based)
+const ALERT_SNOOZE_EXPIRES_AT = `${ALERT_NAMESPACE}.snooze.expires_at` as const;
+const ALERT_SNOOZE_CONDITIONS = `${ALERT_NAMESPACE}.snooze.conditions` as const;
+const ALERT_SNOOZE_CONDITION_OPERATOR = `${ALERT_NAMESPACE}.snooze.condition_operator` as const;
+const ALERT_SNOOZE_SNAPSHOT = `${ALERT_NAMESPACE}.snooze.snapshot` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -206,6 +212,10 @@ export const fields = {
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
 };
 
 export {
@@ -263,6 +273,10 @@ export {
   TIMESTAMP,
   VERSION,
   ALERT_MUTED,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
 };
 
 export type DefaultAlertFieldName = ValuesType<typeof fields & typeof namespaces>;

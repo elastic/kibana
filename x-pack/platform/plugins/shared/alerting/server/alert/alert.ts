@@ -22,6 +22,7 @@ import type {
 } from '../../common';
 
 import { parseDuration } from '../lib';
+import type { SnoozedInstanceEntry } from '../lib/snooze_types';
 
 interface ScheduledExecutionOptions<
   State extends AlertInstanceState,
@@ -62,6 +63,7 @@ export class Alert<
   private readonly id: string;
   private alertAsData: AlertAsData | undefined;
   private status: AlertStatus | undefined;
+  private snoozedInstance?: SnoozedInstanceEntry;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
@@ -377,5 +379,13 @@ export class Alert<
 
   isDelayed() {
     return this.status === ALERT_STATUS_DELAYED;
+  }
+
+  setSnoozeConfig(entry: SnoozedInstanceEntry | undefined): void {
+    this.snoozedInstance = entry;
+  }
+
+  getSnoozeConfig(): SnoozedInstanceEntry | undefined {
+    return this.snoozedInstance;
   }
 }

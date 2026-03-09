@@ -182,7 +182,38 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstances: [],
     });
+  });
+
+  test('initializeExecution() should set snooze config on alerts when snoozedInstances is provided', async () => {
+    const setSnoozeConfigSpy = jest.spyOn(Alert.prototype, 'setSnoozeConfig');
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozedInstances = [
+      {
+        instanceId: '1',
+        expiresAt: '2025-01-01T00:00:00.000Z',
+        conditions: [{ type: 'eq', field: 'kibana.alert.severity', value: 'low' }],
+        conditionOperator: 'all' as const,
+      },
+    ];
+
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      snoozedInstances,
+    });
+
+    expect(setSnoozeConfigSpy).toHaveBeenCalledTimes(1);
+    expect(setSnoozeConfigSpy).toHaveBeenCalledWith(snoozedInstances[0]);
+    setSnoozeConfigSpy.mockRestore();
   });
 
   test('initializeExecution() should set maxAlerts and pass the configured value to the alert factory if greater than the max allowed threshold', async () => {
@@ -207,6 +238,7 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 10000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstances: [],
     });
   });
 

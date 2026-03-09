@@ -101,7 +101,9 @@ describe('checking changes on all registered encrypted SO types', () => {
       .filter((soType) => esoTypes.includes(soType.name));
 
     const modelVersionMap: string[] = sortBy(soTypestoCheck, 'name').flatMap((type, index) => {
-      const typeMigrationInfo = sortBy(extractMigrationInfo(type).modelVersions, 'version')
+      const typeMigrationInfo = sortBy(extractMigrationInfo(type).modelVersions, (mv) =>
+        Number(mv.version)
+      )
         .reverse()
         .map((mv) => `${type.name}|${mv.version}`);
 
@@ -116,6 +118,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ad_hoc_run_params|3",
         "ad_hoc_run_params|2",
         "ad_hoc_run_params|1",
+        "alert|10",
         "alert|9",
         "alert|8",
         "alert|7",

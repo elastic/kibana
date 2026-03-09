@@ -104,6 +104,7 @@ describe('updateRuleRoute', () => {
     ...updateRequest,
     mute_all: false,
     muted_alert_ids: [],
+    snoozed_instances: [],
     api_key_owner: 'api-key-owner',
     consumer: 'bar',
     created_by: 'elastic',

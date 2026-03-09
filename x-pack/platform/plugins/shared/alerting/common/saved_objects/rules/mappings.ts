@@ -239,6 +239,29 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       },
     },
     // NO NEED TO BE INDEXED
+    // snoozedInstances: {
+    //   properties: {
+    //     instanceId: {
+    //       type: 'keyword',
+    //     },
+    //     expiresAt: {
+    //       type: 'date',
+    //       format: 'strict_date_optional_time||epoch_millis',
+    //     },
+    //     conditions: {
+    //       properties: {
+    //         type: { type: 'keyword' },
+    //         field: { type: 'keyword' },
+    //         value: { type: 'keyword' },
+    //         snapshotValue: { type: 'keyword' },
+    //       },
+    //     },
+    //     conditionOperator: {
+    //       type: 'keyword',
+    //     },
+    //   },
+    // },
+    // NO NEED TO BE INDEXED
     // flapping: {
     //   index: false,
     //   properties: {

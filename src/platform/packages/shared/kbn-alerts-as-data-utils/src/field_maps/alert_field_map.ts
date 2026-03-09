@@ -59,6 +59,10 @@ import {
   ALERT_SCHEDULED_ACTION_DATE,
   ALERT_SCHEDULED_ACTION_THROTTLING,
   ALERT_MUTED,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
@@ -354,6 +358,26 @@ export const alertFieldMap = {
   },
   [ALERT_MUTED]: {
     type: 'boolean',
+    array: false,
+    required: false,
+  },
+  [ALERT_SNOOZE_EXPIRES_AT]: {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  [ALERT_SNOOZE_CONDITIONS]: {
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  [ALERT_SNOOZE_CONDITION_OPERATOR]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_SNOOZE_SNAPSHOT]: {
+    type: 'object',
     array: false,
     required: false,
   },

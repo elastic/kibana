@@ -24,6 +24,10 @@ import {
   ALERT_TIME_RANGE,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
   EVENT_ACTION,
   EVENT_KIND,
   SPACE_IDS,
@@ -38,11 +42,36 @@ import {
 import type { DeepPartial } from '@kbn/utility-types';
 import type { Alert as LegacyAlert } from '../../../alert/alert';
 import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../../types';
-import type { AlertRule, AlertRuleData } from '../../types';
+import type { AlertRule, AlertRuleData, SnoozedInstanceEntry } from '../../types';
 import { stripFrameworkFields } from '../strip_framework_fields';
 import { nanosToMicros } from '../nanos_to_micros';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
+
+export function snoozeEntryToAadFields(
+  entry: SnoozedInstanceEntry
+): Partial<Record<string, unknown>> {
+  const fields: Partial<Record<string, unknown>> = {};
+  if (entry.expiresAt != null) {
+    fields[ALERT_SNOOZE_EXPIRES_AT] = entry.expiresAt;
+  }
+  if (entry.conditions != null && entry.conditions.length > 0) {
+    fields[ALERT_SNOOZE_CONDITIONS] = entry.conditions;
+    if (entry.conditionOperator != null) {
+      fields[ALERT_SNOOZE_CONDITION_OPERATOR] = entry.conditionOperator;
+    }
+    const snapshot: Record<string, string> = {};
+    for (const c of entry.conditions) {
+      if (c.snapshotValue != null) {
+        snapshot[c.field] = c.snapshotValue;
+      }
+    }
+    if (Object.keys(snapshot).length > 0) {
+      fields[ALERT_SNOOZE_SNAPSHOT] = snapshot;
+    }
+  }
+  return fields;
+}
 
 interface BuildNewAlertOpts<
   AlertData extends RuleAlertData,
@@ -94,12 +123,16 @@ export const buildNewAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
-  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData, legacyAlert);
+
+  const snoozeEntry = legacyAlert.getSnoozeConfig();
+  const snoozeFields = snoozeEntry ? snoozeEntryToAadFields(snoozeEntry) : {};
 
   return deepmerge.all(
     [
       cleanedPayload,
       rule,
+      snoozeFields,
       {
         [TIMESTAMP]: timestamp,
         [EVENT_ACTION]: 'open',

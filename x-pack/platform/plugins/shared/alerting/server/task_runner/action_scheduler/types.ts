@@ -67,6 +67,7 @@ export interface ActionSchedulerOptions<
   ruleConsumer: string;
   executionId: string;
   ruleLabel: string;
+  mutedInstanceIdsSet?: ReadonlySet<string>;
   previousStartedAt: Date | null;
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
@@ -107,6 +108,12 @@ export interface ActionsToSchedule {
   actionToLog: ActionOpts;
 }
 
+/** Alert instance that should be auto-unmuted because its snooze conditions were met */
+export interface AlertToAutoUnmute {
+  alertInstanceId: string;
+  reason: string;
+}
+
 export interface IActionScheduler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
@@ -117,6 +124,7 @@ export interface IActionScheduler<
   getActionsToSchedule(
     opts: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
   ): Promise<ActionsToSchedule[]>;
+  getAlertsToAutoUnmute?(): AlertToAutoUnmute[];
 }
 
 export interface RuleUrl {

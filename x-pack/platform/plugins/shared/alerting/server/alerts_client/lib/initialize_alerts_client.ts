@@ -9,6 +9,7 @@ import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger } from '@kbn/core/server';
 import { LegacyAlertsClient } from '..';
 import type { IAlertsClient } from '../types';
+import { createAlertRuleData } from '../types';
 import type { AlertsService } from '../../alerts_service';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type {
@@ -32,6 +33,7 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'params'
   | 'muteAll'
   | 'mutedInstanceIds'
+  | 'snoozedInstances'
 >;
 
 interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
@@ -40,6 +42,10 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   executionId: string;
   logger: Logger;
   maxAlerts: number;
+  prebuiltSets?: {
+    mutedInstanceIdsSet?: ReadonlySet<string>;
+    snoozedInstanceIdsSet?: ReadonlySet<string>;
+  };
   rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
   runTimestamp?: Date;
@@ -60,6 +66,7 @@ export const initializeAlertsClient = async <
   executionId,
   logger,
   maxAlerts,
+  prebuiltSets,
   rule,
   ruleType,
   runTimestamp,
@@ -100,19 +107,23 @@ export const initializeAlertsClient = async <
       >({
         ...alertsClientParams,
         namespace: context.namespace ?? DEFAULT_NAMESPACE_STRING,
-        rule: {
-          consumer: rule.consumer,
-          executionId,
-          id: rule.id,
-          name: rule.name,
-          parameters: rule.params,
-          revision: rule.revision,
-          spaceId: context.spaceId,
-          tags: rule.tags,
-          alertDelay: rule.alertDelay?.active ?? 0,
-          muteAll: rule.muteAll,
-          mutedInstanceIds: rule.mutedInstanceIds,
-        },
+        rule: createAlertRuleData(
+          {
+            consumer: rule.consumer,
+            executionId,
+            id: rule.id,
+            name: rule.name,
+            parameters: rule.params,
+            revision: rule.revision,
+            spaceId: context.spaceId,
+            tags: rule.tags,
+            alertDelay: rule.alertDelay?.active ?? 0,
+            muteAll: rule.muteAll,
+            mutedInstanceIds: rule.mutedInstanceIds,
+            snoozedInstances: rule.snoozedInstances,
+          },
+          prebuiltSets
+        ),
       })) ?? null;
 
     alertsClient = client
@@ -138,6 +149,7 @@ export const initializeAlertsClient = async <
     runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
+    snoozedInstances: rule.snoozedInstances,
   });
 
   return alertsClient;

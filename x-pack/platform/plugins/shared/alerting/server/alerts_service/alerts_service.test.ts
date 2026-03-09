@@ -29,6 +29,9 @@ import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_e
 
 jest.mock('../alerts_client');
 
+const { createAlertRuleData } =
+  jest.requireActual<typeof import('../alerts_client')>('../alerts_client');
+
 const maintenanceWindowsService = maintenanceWindowsServiceMock.create();
 const alertingEventLogger = alertingEventLoggerMock.create();
 
@@ -1545,7 +1548,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1559,7 +1562,7 @@ describe('Alerts Service', () => {
               alertDelay: 0,
               muteAll: false,
               mutedInstanceIds: [],
-            },
+            }),
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
@@ -1587,6 +1590,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -1615,7 +1620,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -1629,7 +1634,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(result).toBe(null);
@@ -1672,7 +1677,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -1686,7 +1691,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1728,6 +1733,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -1787,7 +1794,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -1801,7 +1808,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             }),
             alertsService.createAlertsClient({
               alertingEventLogger,
@@ -1811,7 +1818,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -1825,7 +1832,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             }),
           ]);
 
@@ -1867,6 +1874,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -1918,7 +1927,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -1932,7 +1941,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(AlertsClient).toHaveBeenCalledWith({
@@ -1960,6 +1969,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -2019,7 +2030,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -2033,7 +2044,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             });
           };
 
@@ -2068,6 +2079,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              mutedInstanceIdsSet: expect.any(Set),
+              snoozedInstanceIdsSet: expect.any(Set),
             },
             kibanaVersion: '8.8.0',
           });
@@ -2132,7 +2145,7 @@ describe('Alerts Service', () => {
               maintenanceWindowsService,
               namespace: 'default',
               spaceId: 'default',
-              rule: {
+              rule: createAlertRuleData({
                 muteAll: false,
                 mutedInstanceIds: [],
                 consumer: 'bar',
@@ -2146,7 +2159,7 @@ describe('Alerts Service', () => {
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
                 alertDelay: 0,
-              },
+              }),
             });
           };
 
@@ -2206,7 +2219,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -2220,7 +2233,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -2280,7 +2293,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -2294,7 +2307,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -2352,7 +2365,7 @@ describe('Alerts Service', () => {
             maintenanceWindowsService,
             namespace: 'default',
             spaceId: 'default',
-            rule: {
+            rule: createAlertRuleData({
               muteAll: false,
               mutedInstanceIds: [],
               consumer: 'bar',
@@ -2366,7 +2379,7 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
-            },
+            }),
           });
 
           expect(AlertsClient).not.toHaveBeenCalled();
@@ -3168,6 +3181,268 @@ describe('Alerts Service', () => {
           await expect(
             alertsService.unmuteAlertInstances({
               targets: [{ ruleId: 'rule-1', alertInstanceIds: ['alert-1'] }],
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('snoozeAlertInstance', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.snoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to snooze alert instance for rule 'rule-1' - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with ALERT_MUTED and clear snooze fields when no expiresAt or conditions', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1, total: 1, failures: [] });
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.snoozeAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: true,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                ],
+              },
+            },
+            script: {
+              source: [
+                `ctx._source['kibana.alert.muted'] = true;`,
+                `ctx._source.remove('kibana.alert.snooze.expires_at');`,
+                `ctx._source.remove('kibana.alert.snooze.conditions');`,
+                `ctx._source.remove('kibana.alert.snooze.condition_operator');`,
+                `ctx._source.remove('kibana.alert.snooze.snapshot');`,
+              ].join('\n'),
+              lang: 'painless',
+              params: {},
+            },
+          });
+        });
+
+        test('should call updateByQuery with expiresAt when provided', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 1, total: 1, failures: [] });
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+          const expiresAt = '2025-03-01T12:00:00.000Z';
+
+          await alertsService.snoozeAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+            expiresAt,
+          });
+
+          const call = clusterClient.updateByQuery.mock.calls[0][0];
+          const script = call.script as { source: string; params: Record<string, unknown> };
+          expect(script).toBeDefined();
+          expect(script.source).toContain(`ctx._source['kibana.alert.muted'] = true;`);
+          expect(script.source).toContain(
+            `ctx._source['kibana.alert.snooze.expires_at'] = params.expiresAt;`
+          );
+          expect(script.params).toEqual({ expiresAt });
+        });
+
+        test('should throw when no matching alert documents were updated', async () => {
+          clusterClient.updateByQuery.mockResolvedValue({ updated: 0, total: 0, failures: [] });
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.snoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to snooze alert instance 'alert-1' for rule 'rule-1' - no matching alert documents were updated"`
+          );
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.snoozeAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('clearSnoozeAndUnmuteAlertInstances', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.clearSnoozeAndUnmuteAlertInstances({
+              ruleId: 'rule-1',
+              alertInstanceIds: ['alert-1'],
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to clear snooze and unmute alert instances for rule 'rule-1' - no alert indices available"`
+          );
+        });
+
+        test('should not call updateByQuery when alertInstanceIds is empty', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.clearSnoozeAndUnmuteAlertInstances({
+            ruleId: 'rule-1',
+            alertInstanceIds: [],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+        });
+
+        test('should call updateByQuery with correct script to clear snooze and set ALERT_MUTED false', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.clearSnoozeAndUnmuteAlertInstances({
+            ruleId: 'rule-1',
+            alertInstanceIds: ['alert-1', 'alert-2'],
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            wait_for_completion: true,
+            refresh: true,
+            ignore_unavailable: true,
+            query: {
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                  { terms: { 'kibana.alert.instance.id': ['alert-1', 'alert-2'] } },
+                ],
+              },
+            },
+            script: {
+              source: [
+                `ctx._source['kibana.alert.muted'] = false;`,
+                `ctx._source.remove('kibana.alert.snooze.expires_at');`,
+                `ctx._source.remove('kibana.alert.snooze.conditions');`,
+                `ctx._source.remove('kibana.alert.snooze.condition_operator');`,
+                `ctx._source.remove('kibana.alert.snooze.snapshot');`,
+              ].join('\n'),
+              lang: 'painless',
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.clearSnoozeAndUnmuteAlertInstances({
+              ruleId: 'rule-1',
+              alertInstanceIds: ['alert-1'],
               indices: ['.alerts-default'],
               logger,
             })

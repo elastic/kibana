@@ -368,6 +368,9 @@ describe('Task Runner', () => {
             revision: 0,
             spaceId: 'default',
             tags: ['rule-', '-tags'],
+            snoozedInstances: undefined,
+            mutedInstanceIdsSet: expect.any(Set),
+            snoozedInstanceIdsSet: expect.any(Set),
           },
         });
         expect(LegacyAlertsClientModule.LegacyAlertsClient).not.toHaveBeenCalled();

@@ -12,6 +12,7 @@ import type { PublicAlert } from './alert';
 import { Alert } from './alert';
 import { processAlerts } from '../lib';
 import { ALLOWED_MAX_ALERTS, getMaxAlertLimit } from '../../common';
+import type { SnoozedInstanceEntry } from '../lib/snooze_types';
 
 export interface AlertFactory<
   State extends AlertInstanceState,
@@ -57,6 +58,8 @@ export interface CreateAlertFactoryOpts<
   configuredMaxAlerts: number;
   autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
+  /** When the rule type creates a new alert (e.g. re-fired after recovery), apply snooze from rule if present */
+  snoozedInstances?: SnoozedInstanceEntry[];
 }
 
 export function createAlertFactory<
@@ -69,6 +72,7 @@ export function createAlertFactory<
   configuredMaxAlerts,
   autoRecoverAlerts,
   canSetRecoveryContext = false,
+  snoozedInstances,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
@@ -86,6 +90,9 @@ export function createAlertFactory<
   let hasReportedLimitReached = false;
 
   const maxAlerts = getMaxAlertLimit(configuredMaxAlerts);
+
+  // Build a Map for O(1) snooze lookups per alert creation
+  const snoozedInstancesMap = new Map((snoozedInstances ?? []).map((e) => [e.instanceId, e]));
 
   let isDone = false;
   return {
@@ -106,6 +113,10 @@ export function createAlertFactory<
 
       if (!alerts[id]) {
         alerts[id] = new Alert<State, Context>(id);
+        const snoozeEntry = snoozedInstancesMap.get(id);
+        if (snoozeEntry) {
+          alerts[id].setSnoozeConfig(snoozeEntry);
+        }
       }
 
       return alerts[id];

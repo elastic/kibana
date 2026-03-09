@@ -11,7 +11,12 @@ import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
 import type { ThrottledActions } from '../../types';
-import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from './types';
+import type {
+  ActionSchedulerOptions,
+  ActionsToSchedule,
+  AlertToAutoUnmute,
+  IActionScheduler,
+} from './types';
 import type { Alert } from '../../alert';
 import type {
   AlertInstanceContext,
@@ -155,5 +160,20 @@ export class ActionScheduler<
     }
 
     return { throttledSummaryActions };
+  }
+
+  /**
+   * Returns alert instances that were conditionally snoozed but whose
+   * conditions were met during this execution, so they should be auto-unmuted.
+   */
+  public getAlertsToAutoUnmute(): AlertToAutoUnmute[] {
+    const results: AlertToAutoUnmute[] = [];
+    for (const scheduler of this.schedulers) {
+      const list = scheduler.getAlertsToAutoUnmute?.();
+      if (list?.length) {
+        results.push(...list);
+      }
+    }
+    return results;
   }
 }

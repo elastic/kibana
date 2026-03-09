@@ -15,6 +15,7 @@ import {
   ruleExecutionStatusErrorReason as ruleExecutionStatusErrorReasonV1,
   ruleExecutionStatusWarningReason as ruleExecutionStatusWarningReasonV1,
   ruleLastRunOutcomeValues as ruleLastRunOutcomeValuesV1,
+  snoozeConditionOperator as snoozeConditionOperatorV1,
 } from '../../common/constants/v1';
 import { validateNotifyWhenV1 } from '../../validation';
 import { flappingSchemaV2 } from '../../common';
@@ -597,6 +598,38 @@ export const ruleResponseSchema = schema.object({
         description: 'List of identifiers of muted alerts. ',
       },
     })
+  ),
+  snoozed_instances: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        instance_id: schema.string({
+          meta: { description: 'The alert instance identifier that is snoozed.' },
+        }),
+        expires_at: schema.maybe(
+          schema.string({
+            meta: {
+              description: 'ISO timestamp after which the snooze expires automatically.',
+            },
+          })
+        ),
+        conditions: schema.maybe(
+          schema.arrayOf(
+            schema.object({
+              type: schema.string(),
+              field: schema.string(),
+              value: schema.maybe(schema.string()),
+              snapshot_value: schema.maybe(schema.string()),
+            })
+          )
+        ),
+        condition_operator: schema.maybe(
+          schema.oneOf([
+            schema.literal(snoozeConditionOperatorV1.ANY),
+            schema.literal(snoozeConditionOperatorV1.ALL),
+          ])
+        ),
+      })
+    )
   ),
   execution_status: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),

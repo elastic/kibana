@@ -227,6 +227,14 @@ export interface Artifacts {
   };
 }
 
+/** Per-alert snooze condition (e.g. severity_equals, field_change) */
+export interface SnoozeCondition {
+  type: string;
+  field: string;
+  value?: string;
+  snapshotValue?: string;
+}
+
 export interface Rule<Params extends RuleTypeParams = never> {
   id: string;
   enabled: boolean;
@@ -251,7 +259,23 @@ export interface Rule<Params extends RuleTypeParams = never> {
   throttle?: string | null;
   muteAll: boolean;
   notifyWhen?: RuleNotifyWhenType | null;
+  /**
+   * Indefinite mutes: instance IDs stored here when mute API is called with no body (or null/empty body).
+   * These are never written to snoozedInstances.
+   */
   mutedInstanceIds: string[];
+  /**
+   * Conditional snoozes only: entries are created when the mute API receives a body with
+   * expires_at and/or non-empty conditions. Each entry must have at least one of those;
+   * the mute API does not create snoozedInstances entries with only instanceId (that path
+   * is stored in mutedInstanceIds as an indefinite mute).
+   */
+  snoozedInstances?: Array<{
+    instanceId: string;
+    expiresAt?: string;
+    conditions?: SnoozeCondition[];
+    conditionOperator?: 'any' | 'all';
+  }>;
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API

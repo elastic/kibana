@@ -43,6 +43,7 @@ import {
 } from '../format_alert';
 import { filterAlertState } from '../filter_alert_state';
 import { getAlertMutedStatus } from '../get_alert_muted_status';
+import { snoozeEntryToAadFields } from './build_new_alert';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -106,11 +107,15 @@ export const buildOngoingAlert = <
   const filteredAlertState = filterAlertState(alertState);
   const hasAlertState = Object.keys(filteredAlertState).length > 0;
   const alertInstanceId = legacyAlert.getId();
-  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData);
+  const isMuted = getAlertMutedStatus(alertInstanceId, ruleData, legacyAlert);
+  const snoozeEntry = legacyAlert.getSnoozeConfig();
+  const snoozeFields = snoozeEntry ? snoozeEntryToAadFields(snoozeEntry) : {};
 
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
+    // Set latest snooze fields from rule SO (may be empty when not snoozed)
+    ...snoozeFields,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'active',

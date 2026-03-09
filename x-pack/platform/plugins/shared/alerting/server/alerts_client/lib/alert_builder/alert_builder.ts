@@ -208,6 +208,10 @@ export class AlertBuilder<
             })
           );
         } else {
+          // "New" / open lifecycle:
+          // (1) no tracked doc for this UUID (first-time active or re-fire with new UUID), or
+          // (2) tracked doc exists but is recovered (new alert, reusing recovered doc).
+          // Snooze is carried on the alert (set in initializeExecution from rule SO).
           activeAlertsToIndex.push(
             buildNewAlert<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>({
               legacyAlert: activeAlert,

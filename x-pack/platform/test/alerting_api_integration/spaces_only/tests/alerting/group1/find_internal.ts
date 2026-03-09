@@ -129,6 +129,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           notify_when: null,
           mute_all: false,
           muted_alert_ids: [],
+          snoozed_instances: [],
           created_at: match.created_at,
           updated_at: match.updated_at,
           execution_status: match.execution_status,

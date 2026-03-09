@@ -13,6 +13,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
+
 import type {
   RuleRunnerErrorStackTraceLog,
   RuleTaskInstance,
@@ -47,6 +48,7 @@ import type {
 } from '../../common';
 import { RuleLastRunOutcomeOrderMap } from '../../common';
 import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import type { InMemoryMetrics } from '../monitoring';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
@@ -60,6 +62,7 @@ import { RuleResultService } from '../monitoring/rule_result_service';
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import type { AlertsToUpdateWithLastScheduledActions } from '../alerts_client/types';
+import type { SnoozedInstanceEntry } from '../lib/snooze_types';
 import {
   createTaskRunnerLogger,
   withAlertingSpan,
@@ -151,6 +154,7 @@ export class TaskRunner<
     AlertData
   >;
   private runDate = new Date();
+  private pendingSnoozedInstancesUpdate?: SnoozedInstanceEntry[];
 
   constructor({
     context,
@@ -214,6 +218,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstances?: SnoozedInstanceEntry[];
     }
   ) {
     const client = this.context.elasticsearch.client.asInternalUser;
@@ -275,6 +280,8 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    this.pendingSnoozedInstancesUpdate = undefined;
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
       apm.currentTransaction.addLabels({
@@ -320,6 +327,16 @@ export class TaskRunner<
       isServerless: this.context.isServerless,
       shouldGrantUiam: this.context.shouldGrantUiam,
     };
+    // Build lookup Sets once and share them with both the alerts client
+    // (via createAlertRuleData) and the action scheduler to avoid redundant
+    // allocations. Only mutedInstanceIdsSet is passed to the action scheduler
+    // because PerAlertActionScheduler needs it for O(1) mute checks;
+    // snoozedInstanceIdsSet is only consumed by the alerts client path.
+    const mutedInstanceIdsSet: ReadonlySet<string> = new Set(rule.mutedInstanceIds);
+    const snoozedInstanceIdsSet: ReadonlySet<string> = new Set(
+      (rule.snoozedInstances ?? []).map((e) => e.instanceId)
+    );
+
     const alertsClient = await withAlertingSpan('alerting:initialize-alerts-client', () =>
       initializeAlertsClient<
         Params,
@@ -344,7 +361,9 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: rule.snoozedInstances,
         },
+        prebuiltSets: { mutedInstanceIdsSet, snoozedInstanceIdsSet },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
         taskInstance: this.taskInstance,
@@ -409,6 +428,7 @@ export class TaskRunner<
       ruleConsumer: this.ruleConsumer!,
       executionId: this.executionId,
       ruleLabel,
+      mutedInstanceIdsSet,
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
@@ -416,6 +436,7 @@ export class TaskRunner<
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
+    let alertsToAutoUnmute: Array<{ alertInstanceId: string; reason: string }> = [];
 
     await withAlertingSpan('alerting:schedule-actions', () =>
       this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
@@ -431,6 +452,8 @@ export class TaskRunner<
             activeAlerts: alertsClient.getProcessedAlerts('active'),
             recoveredAlerts: alertsClient.getProcessedAlerts('recovered'),
           });
+
+          alertsToAutoUnmute = actionScheduler.getAlertsToAutoUnmute();
         }
       })
     );
@@ -449,12 +472,47 @@ export class TaskRunner<
         alertsClient.getAlertsToUpdateWithLastScheduledActions();
     }
 
+    // Auto-unmute: remove from snoozedInstances on the rule SO and clear
+    // ALERT_MUTED on the AAD docs in the same execution.
+    const alertUuidsToAutoUnmute: string[] = [];
+    if (alertsToAutoUnmute.length > 0) {
+      const autoUnmuteInstanceIds = new Set(alertsToAutoUnmute.map((a) => a.alertInstanceId));
+      const updatedSnoozedInstances = (rule.snoozedInstances ?? []).filter(
+        (e) => !autoUnmuteInstanceIds.has(e.instanceId)
+      );
+      const getAlertMeta = (instanceId: string) =>
+        alertsToReturn[instanceId]?.meta ?? recoveredAlertsToReturn[instanceId]?.meta;
+
+      for (const { alertInstanceId, reason } of alertsToAutoUnmute) {
+        const meta = getAlertMeta(alertInstanceId);
+        const uuid = meta?.uuid;
+        if (uuid) {
+          alertUuidsToAutoUnmute.push(uuid);
+        }
+        this.logger.info(
+          `Auto-unmuting alert '${alertInstanceId}' for rule '${rule.id}': ${reason}`
+        );
+        this.alertingEventLogger.logAlert({
+          action: EVENT_LOG_ACTIONS.autoUnsnooze,
+          id: alertInstanceId,
+          uuid: uuid ?? alertInstanceId,
+          message: `${ruleLabel} auto-unsnoozed alert '${alertInstanceId}': ${reason}`,
+          flapping: meta?.flapping ?? false,
+        });
+      }
+
+      // Defer snoozedInstances persistence to updateRuleSavedObjectPostRun so it is
+      // batched with the other post-run attribute writes (one ES update instead of two).
+      this.pendingSnoozedInstancesUpdate = updatedSnoozedInstances;
+    }
+
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       await withAlertingSpan('alerting:update-alerts', () =>
         this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
           await alertsClient.updatePersistedAlerts({
             alertsToUpdateWithLastScheduledActions,
             alertsToUpdateWithMaintenanceWindows,
+            alertUuidsToAutoUnmute,
           });
         })
       );
@@ -677,6 +735,9 @@ export class TaskRunner<
             nextRun,
             lastRun: lastRunToRaw(lastRun),
             monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+            ...(this.pendingSnoozedInstancesUpdate != null
+              ? { snoozedInstances: this.pendingSnoozedInstancesUpdate }
+              : {}),
           });
         }
 

@@ -34,6 +34,7 @@ const getDefaultRules = (response: any) => ({
   updated_by: response.body.rules[0].updated_by,
   mute_all: false,
   muted_alert_ids: [],
+  snoozed_instances: [],
   schedule: { interval: '1m' },
   actions: [],
   params: {},

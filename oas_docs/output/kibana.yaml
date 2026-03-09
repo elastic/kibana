@@ -5405,6 +5405,42 @@ paths:
                         - duration
                         - rRule
                     type: array
+                  snoozed_instances:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        condition_operator:
+                          enum:
+                            - any
+                            - all
+                          type: string
+                        conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              field:
+                                type: string
+                              snapshot_value:
+                                type: string
+                              type:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - type
+                              - field
+                          type: array
+                        expires_at:
+                          description: ISO timestamp after which the snooze expires automatically.
+                          type: string
+                        instance_id:
+                          description: The alert instance identifier that is snoozed.
+                          type: string
+                      required:
+                        - instance_id
+                    type: array
                   tags:
                     items:
                       description: The tags for the rule.
@@ -6816,6 +6852,42 @@ paths:
                         - duration
                         - rRule
                     type: array
+                  snoozed_instances:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        condition_operator:
+                          enum:
+                            - any
+                            - all
+                          type: string
+                        conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              field:
+                                type: string
+                              snapshot_value:
+                                type: string
+                              type:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - type
+                              - field
+                          type: array
+                        expires_at:
+                          description: ISO timestamp after which the snooze expires automatically.
+                          type: string
+                        instance_id:
+                          description: The alert instance identifier that is snoozed.
+                          type: string
+                      required:
+                        - instance_id
+                    type: array
                   tags:
                     items:
                       description: The tags for the rule.
@@ -7864,6 +7936,42 @@ paths:
                         - duration
                         - rRule
                     type: array
+                  snoozed_instances:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        condition_operator:
+                          enum:
+                            - any
+                            - all
+                          type: string
+                        conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              field:
+                                type: string
+                              snapshot_value:
+                                type: string
+                              type:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - type
+                              - field
+                          type: array
+                        expires_at:
+                          description: ISO timestamp after which the snooze expires automatically.
+                          type: string
+                        instance_id:
+                          description: The alert instance identifier that is snoozed.
+                          type: string
+                      required:
+                        - instance_id
+                    type: array
                   tags:
                     items:
                       description: The tags for the rule.
@@ -8339,6 +8447,51 @@ paths:
           required: false
           schema:
             type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              nullable: true
+              type: object
+              properties:
+                condition_operator:
+                  description: 'How conditions combine: any (OR, default), all (AND).'
+                  enum:
+                    - any
+                    - all
+                  type: string
+                conditions:
+                  description: Conditions that auto-lift the snooze.
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      field:
+                        description: The alert doc field to monitor.
+                        type: string
+                      snapshot_value:
+                        description: Snapshot at snooze time for severity_change/field_change.
+                        type: string
+                      type:
+                        description: 'Condition type evaluated by the alerting framework: severity_change, field_change, severity_equals.'
+                        enum:
+                          - severity_change
+                          - field_change
+                          - severity_equals
+                        type: string
+                      value:
+                        description: Target value for severity_equals.
+                        type: string
+                    required:
+                      - type
+                      - field
+                  maxItems: 10
+                  type: array
+                expires_at:
+                  description: ISO date after which the snooze expires. Absent = indefinite.
+                  type: string
+              x-oas-optional: true
       responses:
         '204':
           description: Indicates a successful call.
@@ -9379,6 +9532,42 @@ paths:
                       required:
                         - duration
                         - rRule
+                    type: array
+                  snoozed_instances:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        condition_operator:
+                          enum:
+                            - any
+                            - all
+                          type: string
+                        conditions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              field:
+                                type: string
+                              snapshot_value:
+                                type: string
+                              type:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - type
+                              - field
+                          type: array
+                        expires_at:
+                          description: ISO timestamp after which the snooze expires automatically.
+                          type: string
+                        instance_id:
+                          description: The alert instance identifier that is snoozed.
+                          type: string
+                      required:
+                        - instance_id
                     type: array
                   tags:
                     items:

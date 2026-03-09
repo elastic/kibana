@@ -72,7 +72,10 @@ export class SystemActionScheduler<
       const options: GetSummarizedAlertsParams = {
         spaceId: this.context.taskInstance.params.spaceId,
         ruleId: this.context.rule.id,
-        excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
+        excludedAlertInstanceIds: [
+          ...this.context.rule.mutedInstanceIds,
+          ...(this.context.rule.snoozedInstances ?? []).map((e) => e.instanceId),
+        ],
         executionUuid: this.context.executionId,
       };
 

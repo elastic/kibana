@@ -907,3 +907,32 @@ describe('isDelayed', () => {
     expect(alert.isDelayed()).toEqual(true);
   });
 });
+
+describe('snooze config', () => {
+  test('getSnoozeConfig returns undefined by default', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    expect(alert.getSnoozeConfig()).toBeUndefined();
+  });
+
+  test('setSnoozeConfig and getSnoozeConfig round-trip', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const entry = {
+      instanceId: '1',
+      expiresAt: '2025-01-01T00:00:00Z',
+      conditions: [{ type: 'eq', field: 'kibana.alert.severity', value: 'low' }],
+      conditionOperator: 'all' as const,
+    };
+    alert.setSnoozeConfig(entry);
+    expect(alert.getSnoozeConfig()).toEqual(entry);
+  });
+
+  test('setSnoozeConfig(undefined) clears snooze', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    alert.setSnoozeConfig({
+      instanceId: '1',
+      expiresAt: '2025-01-01T00:00:00Z',
+    });
+    alert.setSnoozeConfig(undefined);
+    expect(alert.getSnoozeConfig()).toBeUndefined();
+  });
+});

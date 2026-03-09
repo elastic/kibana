@@ -37,8 +37,11 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
+import type { SnoozedInstanceConfig, SnoozedInstanceEntry } from '../lib/snooze_types';
 
-export interface AlertRuleData {
+export type { SnoozedInstanceConfig, SnoozedInstanceEntry };
+
+export interface AlertRuleDataInput {
   consumer: string;
   executionId: string;
   id: string;
@@ -50,7 +53,36 @@ export interface AlertRuleData {
   alertDelay: number;
   muteAll: boolean;
   mutedInstanceIds: string[];
+  snoozedInstances?: SnoozedInstanceEntry[];
 }
+
+export interface AlertRuleData extends AlertRuleDataInput {
+  readonly mutedInstanceIdsSet: ReadonlySet<string>;
+  readonly snoozedInstanceIdsSet: ReadonlySet<string>;
+}
+
+/**
+ * Builds AlertRuleData with derived Sets for O(1) lookups.
+ * `mutedInstanceIds` and `snoozedInstances` are shallow-copied so
+ * post-construction mutations on the caller side cannot desync the
+ * derived Sets. `tags` is passed through by reference (no derived
+ * Set depends on it).
+ */
+export const createAlertRuleData = (
+  input: AlertRuleDataInput,
+  prebuiltSets?: {
+    mutedInstanceIdsSet?: ReadonlySet<string>;
+    snoozedInstanceIdsSet?: ReadonlySet<string>;
+  }
+): AlertRuleData => ({
+  ...input,
+  mutedInstanceIds: [...input.mutedInstanceIds],
+  snoozedInstances: input.snoozedInstances ? [...input.snoozedInstances] : undefined,
+  mutedInstanceIdsSet: prebuiltSets?.mutedInstanceIdsSet ?? new Set(input.mutedInstanceIds),
+  snoozedInstanceIdsSet:
+    prebuiltSets?.snoozedInstanceIdsSet ??
+    new Set((input.snoozedInstances ?? []).map((e) => e.instanceId)),
+});
 
 export interface AlertRule {
   [ALERT_RULE_CATEGORY]: string;
@@ -101,9 +133,11 @@ export interface IAlertsClient<
   updatePersistedAlerts({
     alertsToUpdateWithMaintenanceWindows,
     alertsToUpdateWithLastScheduledActions,
+    alertUuidsToAutoUnmute,
   }: {
     alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
     alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+    alertUuidsToAutoUnmute?: string[];
   }): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
@@ -124,6 +158,8 @@ export interface IAlertsClient<
   > | null;
   determineFlappingAlerts(): void;
   determineDelayedAlerts(opts: DetermineDelayedAlertsOpts): void;
+  getTrackedAlertByInstanceId?(id: string): Record<string, unknown> | undefined;
+  getBuiltAlertByInstanceId?(id: string): Record<string, unknown> | undefined;
 }
 
 export interface ProcessAndLogAlertsOpts {
@@ -152,6 +188,7 @@ export interface InitializeExecutionOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   activeAlertsFromState: Record<string, RawAlertInstance>;
   recoveredAlertsFromState: Record<string, RawAlertInstance>;
+  snoozedInstances?: SnoozedInstanceEntry[];
 }
 
 export interface TrackedAlerts<

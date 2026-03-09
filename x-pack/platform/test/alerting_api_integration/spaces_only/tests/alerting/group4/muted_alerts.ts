@@ -9,16 +9,23 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import {
   ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
-  ALERT_STATUS,
   ALERT_MUTED,
+  ALERT_RULE_UUID,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { nodeBuilder } from '@kbn/es-query';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  AlertUtils,
+  getEventLog,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+} from '../../../../common/lib';
 
-const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
+const alertAsDataIndexPattern = '.internal.alerts-observability.test.alerts.alerts-default-*';
 
 export default function createDisableRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -34,7 +41,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       supertestWithoutAuth: supertest,
     });
 
-    const createRule = async () => {
+    const createRule = async (overwrites: Record<string, unknown> = {}) => {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -48,6 +55,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
               index: ES_TEST_INDEX_NAME,
               reference: 'test',
             },
+            ...overwrites,
           })
         )
         .expect(200);
@@ -57,10 +65,12 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     };
 
     const getAlerts = async () => {
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
+        ignore_unavailable: true,
         query: { match_all: {} },
       });
 
@@ -68,10 +78,12 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     };
 
     const getAlertsByRuleId = async (ruleId: string): Promise<any[]> => {
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
       const {
         hits: { hits: alerts },
       } = await es.search({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
+        ignore_unavailable: true,
         query: {
           bool: {
             must: [{ term: { [ALERT_RULE_UUID]: ruleId } }, { term: { [ALERT_STATUS]: 'active' } }],
@@ -88,7 +100,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
 
     afterEach(async () => {
       await es.deleteByQuery({
-        index: alertAsDataIndex,
+        index: alertAsDataIndexPattern,
         query: {
           match_all: {},
         },
@@ -105,6 +117,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
     it('should reflect muted alert instance ids in rule', async () => {
       const createdRule1 = await createRule();
       const createdRule2 = await createRule();
+
+      // Trigger first execution so alerts are created (schedule is 24h)
+      await alertUtils.runSoon(createdRule1);
+      await alertUtils.runSoon(createdRule2);
 
       let alerts: any[] = [];
 
@@ -231,13 +247,10 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         expect(mutedAlert._source[ALERT_MUTED]).to.be(true);
       });
 
-      // Now unmute the alert instance
+      // Now unmute the alert instance (updates rule SO and AAD doc via updateByQuery with refresh)
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
-      // Run the rule to trigger reconciliation
-      await alertUtils.runSoon(ruleId);
-
-      // Wait for alert document to be updated
+      // Wait for alert document to reflect unmuted state
       await retry.try(async () => {
         const unmutedAlerts = await getAlertsByRuleId(ruleId);
         const unmutedAlert: any = unmutedAlerts.find(
@@ -296,7 +309,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         });
       });
 
-      // Now unmute all alerts
+      // Now unmute all
       await alertUtils.getUnmuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
@@ -340,7 +353,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       // Wrap in retry because concurrent updates may cause version conflicts with conflicts: 'proceed'
       await retry.try(async () => {
         await es.updateByQuery({
-          index: alertAsDataIndex,
+          index: alertAsDataIndexPattern,
           conflicts: 'proceed',
           query: {
             bool: {
@@ -376,6 +389,570 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         );
         expect(reconciledAlert).to.not.be(undefined);
         expect(reconciledAlert._source[ALERT_MUTED]).to.be(true);
+      });
+    });
+
+    it('should auto-unsnooze when time-based TTL expires', async () => {
+      const ruleId = await createRule();
+
+      // Wait for alerts to be created. The first execution may fail due to
+      // shards not being available yet; runSoon retries until successful.
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet, retrying...');
+        }
+      });
+
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      // Snooze with a short TTL (5s) so auto-unsnooze runs on the next execution after expiry
+      const snoozeMs = 5000;
+      const expiresAt = new Date(Date.now() + snoozeMs).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      // If the API returns snoozed_instances, validate the mute path wrote correctly
+      const { body: ruleAfterMute } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      if (Array.isArray(ruleAfterMute?.snoozed_instances)) {
+        expect(ruleAfterMute.snoozed_instances).to.have.length(1);
+        expect(ruleAfterMute.snoozed_instances[0].instance_id).to.eql(alertInstanceId);
+        expect(ruleAfterMute.snoozed_instances[0].expires_at).to.eql(expiresAt);
+      }
+
+      // Run the rule so ALERT_MUTED is materialized on the alert doc
+      await alertUtils.runSoon(ruleId);
+
+      // Verify ALERT_MUTED is true after snooze
+      await retry.try(async () => {
+        const snoozedAlerts = await getAlertsByRuleId(ruleId);
+        const snoozedAlert: any = snoozedAlerts.find(
+          (a: any) => a._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(snoozedAlert._source[ALERT_MUTED]).to.be(true);
+      });
+
+      // Wait for TTL to expire (wait past snooze TTL so auto-unsnooze is applied on next run)
+      await new Promise((resolve) => setTimeout(resolve, snoozeMs + 2000));
+
+      // Run again to trigger auto-unsnooze (remove from rule SO snoozedInstances + clear ALERT_MUTED)
+      await alertUtils.runSoon(ruleId);
+
+      // Wait for the execution to complete (runSoon returns before the task finishes)
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 3 }]]),
+        });
+      });
+
+      // Allow the 3rd execution to finish writing to the alerts index
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Ensure the alerts index is refreshed so the search sees the updated ALERT_MUTED
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
+
+      // Verify ALERT_MUTED is false after auto-unsnooze (poll for index refresh)
+      await retry.try(async () => {
+        const unsnoozedAlerts = await getAlertsByRuleId(ruleId);
+        const unsnoozedAlert: any = unsnoozedAlerts.find(
+          (a: any) => a._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(unsnoozedAlert).to.not.be(undefined);
+        expect(unsnoozedAlert._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
+    it('should keep alert snoozed across recovery and re-fire via rule SO', async () => {
+      const patternAadIndex = '.internal.alerts-test.patternfiring.alerts-default-*';
+
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.patternFiringAad',
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: {
+              pattern: { alert1: [true, false, true] },
+            },
+            actions: [],
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+      // Wait for alert doc to appear. The first execution may fail due to
+      // shards not being available; runSoon retries until successful.
+      await retry.try(async () => {
+        const {
+          hits: { hits },
+        } = await es.search({
+          index: patternAadIndex,
+          ignore_unavailable: true,
+          query: {
+            bool: {
+              must: [
+                { term: { [ALERT_RULE_UUID]: createdRule.id } },
+                { term: { [ALERT_INSTANCE_ID]: 'alert1' } },
+              ],
+            },
+          },
+        });
+        if (hits.length === 0) {
+          await alertUtils.runSoon(createdRule.id);
+          throw new Error('No alerts yet, retrying...');
+        }
+      });
+
+      // Snooze with far-future TTL (capture so we can assert on re-fired alert doc)
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${
+            createdRule.id
+          }/alert/alert1/_mute?validate_alerts_existence=false`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      // Run 2: alert recovers (pattern[1] = false)
+      await alertUtils.runSoon(createdRule.id);
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 2 }]]),
+        });
+      });
+
+      // Run 3: alert re-fires (pattern[2] = true) -- new UUID, snooze from rule SO
+      await alertUtils.runSoon(createdRule.id);
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdRule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 3 }]]),
+        });
+      });
+
+      // The re-fired alert (run 3) creates a new doc with status=active.
+      // It should have ALERT_MUTED=true and snooze detail fields (e.g. expires_at)
+      // materialized from the rule SO, since the new doc has no prior AAD document.
+      await retry.try(async () => {
+        await es.indices.refresh({ index: patternAadIndex, ignore_unavailable: true });
+        const {
+          hits: { hits },
+        } = await es.search({
+          index: patternAadIndex,
+          ignore_unavailable: true,
+          query: {
+            bool: {
+              must: [
+                { term: { [ALERT_RULE_UUID]: createdRule.id } },
+                { term: { [ALERT_INSTANCE_ID]: 'alert1' } },
+                { term: { [ALERT_STATUS]: 'active' } },
+              ],
+            },
+          },
+          sort: [{ '@timestamp': { order: 'desc' } }],
+          size: 1,
+        });
+        expect(hits.length).to.be(1);
+        const activeAlert: any = hits[0];
+        expect(activeAlert._source[ALERT_MUTED]).to.be(true);
+        expect(activeAlert._source[ALERT_SNOOZE_EXPIRES_AT]).to.eql(expiresAt);
+      });
+
+      // Cleanup
+      await es.deleteByQuery({
+        index: patternAadIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+        ignore_unavailable: true,
+      });
+    });
+
+    it('should auto-unsnooze when rule has no actions and TTL expires', async () => {
+      const ruleId = await createRule({ actions: [] });
+
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet, retrying...');
+        }
+      });
+
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+      const snoozeMs = 5000;
+      const expiresAt = new Date(Date.now() + snoozeMs).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      await alertUtils.runSoon(ruleId);
+      await retry.try(async () => {
+        const snoozedAlerts = await getAlertsByRuleId(ruleId);
+        const a = snoozedAlerts.find((x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId);
+        expect(a._source[ALERT_MUTED]).to.be(true);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, snoozeMs + 2000));
+      await alertUtils.runSoon(ruleId);
+
+      await retry.try(async () => {
+        await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: 3 }]]),
+        });
+      });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await es.indices.refresh({ index: alertAsDataIndexPattern, ignore_unavailable: true });
+
+      const { body: ruleAfterRun } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      const snoozedInstances = ruleAfterRun.snoozed_instances ?? [];
+      expect(snoozedInstances.find((e: any) => e.instance_id === alertInstanceId)).to.be(undefined);
+
+      await retry.try(async () => {
+        const unsnoozedAlerts = await getAlertsByRuleId(ruleId);
+        const a = unsnoozedAlerts.find(
+          (x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(a).to.not.be(undefined);
+        expect(a._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
+    it('should clear snooze and set ALERT_MUTED false when explicitly unmuting after conditional snooze', async () => {
+      const ruleId = await createRule();
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      await alertUtils.runSoon(ruleId);
+      await retry.try(async () => {
+        const a = (await getAlertsByRuleId(ruleId)).find(
+          (x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(a._source[ALERT_MUTED]).to.be(true);
+      });
+
+      await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
+
+      const { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(
+        (rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)
+      ).to.be(false);
+
+      await retry.try(async () => {
+        const unmutedAlerts = await getAlertsByRuleId(ruleId);
+        const a = unmutedAlerts.find((x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId);
+        expect(a._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
+    it('should transition from simple mute to conditional snooze on same instance', async () => {
+      const ruleId = await createRule();
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
+      let { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(rule.muted_alert_ids).to.contain(alertInstanceId);
+      expect(rule.snoozed_instances ?? []).to.have.length(0);
+
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      rule = (await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`))
+        .body;
+      expect(rule.muted_alert_ids || []).not.to.contain(alertInstanceId);
+      expect(rule.snoozed_instances).to.have.length(1);
+      expect(rule.snoozed_instances[0].instance_id).to.eql(alertInstanceId);
+      expect(rule.snoozed_instances[0].expires_at).to.eql(expiresAt);
+
+      await alertUtils.runSoon(ruleId);
+      await retry.try(async () => {
+        const a = (await getAlertsByRuleId(ruleId)).find(
+          (x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId
+        );
+        expect(a._source[ALERT_MUTED]).to.be(true);
+      });
+    });
+
+    it('should unmute an alert that is both simple-muted and conditional-snoozed in a single rule SO update', async () => {
+      const ruleId = await createRule();
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+
+      // Step 1: Apply conditional snooze (adds to snoozedInstances)
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      // Step 2: Apply simple mute (additive -- adds to mutedInstanceIds)
+      await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
+
+      // Verify both are populated
+      let { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(rule.muted_alert_ids).to.contain(alertInstanceId);
+      expect(
+        (rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)
+      ).to.be(true);
+
+      // Step 3: Unmute -- should remove from both lists
+      await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
+
+      rule = (await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`))
+        .body;
+      expect(rule.muted_alert_ids || []).not.to.contain(alertInstanceId);
+      expect(
+        (rule.snoozed_instances ?? []).some((e: any) => e.instance_id === alertInstanceId)
+      ).to.be(false);
+
+      // Verify AAD doc is also unmuted
+      await alertUtils.runSoon(ruleId);
+      await retry.try(async () => {
+        const unmutedAlerts = await getAlertsByRuleId(ruleId);
+        const a = unmutedAlerts.find((x: any) => x._source[ALERT_INSTANCE_ID] === alertInstanceId);
+        expect(a).to.not.be(undefined);
+        expect(a._source[ALERT_MUTED]).to.be(false);
+      });
+    });
+
+    it('should return 400 when applying conditional snooze to rule with muteAll', async () => {
+      const ruleId = await createRule();
+      await alertUtils.getMuteAllRequest(ruleId);
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+
+      const { body, status } = await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute?validate_alerts_existence=false`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt });
+
+      expect(status).to.eql(400);
+      expect(body.message).to.contain('muteAll');
+    });
+
+    it('should return snoozed_instances with correct shape in GET rule (time-based)', async () => {
+      const ruleId = await createRule();
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+      const expiresAt = new Date(Date.now() + 86400000).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+
+      const { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(rule.snoozed_instances).to.have.length(1);
+      expect(rule.snoozed_instances[0].instance_id).to.eql(alertInstanceId);
+      expect(rule.snoozed_instances[0].expires_at).to.eql(expiresAt);
+
+      await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
+      const { body: ruleAfterUnmute } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(
+        (ruleAfterUnmute.snoozed_instances ?? []).filter(
+          (e: any) => e.instance_id === alertInstanceId
+        )
+      ).to.have.length(0);
+    });
+
+    it('should return snoozed_instances with conditions and condition_operator in GET rule', async () => {
+      const ruleId = await createRule();
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({
+          conditions: [{ type: 'severity_equals', field: 'kibana.alert.severity', value: 'low' }],
+          condition_operator: 'any',
+        })
+        .expect(204);
+
+      const { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+      expect(rule.snoozed_instances).to.have.length(1);
+      expect(rule.snoozed_instances[0].instance_id).to.eql(alertInstanceId);
+      expect(rule.snoozed_instances[0].conditions).to.have.length(1);
+      expect(rule.snoozed_instances[0].conditions[0].type).to.eql('severity_equals');
+      expect(rule.snoozed_instances[0].condition_operator).to.eql('any');
+    });
+
+    it('should log auto-unsnooze in event log when TTL expires', async () => {
+      // Rule with no actions: same code path as "auto-unsnooze when no actions" and avoids
+      // action connector cleanup races when asserting on the event log.
+      const ruleId = await createRule({ actions: [] });
+      let alerts: any[] = [];
+      await retry.try(async () => {
+        alerts = await getAlertsByRuleId(ruleId);
+        if (alerts.length === 0) {
+          await alertUtils.runSoon(ruleId);
+          throw new Error('No alerts yet');
+        }
+      });
+      const alertInstanceId = alerts[0]._source[ALERT_INSTANCE_ID];
+      const snoozeMs = 8000;
+      const expiresAt = new Date(Date.now() + snoozeMs).toISOString();
+      await supertest
+        .post(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/alerting/rule/${ruleId}/alert/${alertInstanceId}/_mute`
+        )
+        .set('kbn-xsrf', 'foo')
+        .send({ expires_at: expiresAt })
+        .expect(204);
+      await alertUtils.runSoon(ruleId);
+      await new Promise((resolve) => setTimeout(resolve, snoozeMs + 4000));
+      await alertUtils.runSoon(ruleId);
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      await alertUtils.runSoon(ruleId);
+
+      await retry.try(async () => {
+        const events = await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([
+            ['execute', { gte: 3 }],
+            ['auto-unsnooze', { gte: 1 }],
+          ]),
+        });
+        const autoUnsnoozeEvents = events.filter((e: any) => e?.event?.action === 'auto-unsnooze');
+        expect(autoUnsnoozeEvents.length).to.be.greaterThan(0);
       });
     });
   });

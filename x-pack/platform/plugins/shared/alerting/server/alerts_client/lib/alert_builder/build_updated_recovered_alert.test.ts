@@ -216,4 +216,64 @@ describe('buildUpdatedRecoveredAlert', () => {
       [TAGS]: ['rule-', '-tags'],
     });
   });
+
+  // Snooze config now lives on the rule SO, not on alert docs.
+  // The scheduler handles TTL/condition evaluation; the builder no longer
+  // clears snooze fields during recovery.
+
+  describe('ALERT_MUTED field', () => {
+    test('should preserve ALERT_MUTED true from existing recovered alert (e.g. materialized from rule SO snoozedInstances)', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+      legacyAlert.setFlappingHistory([false, false, true, true]);
+      legacyAlert.setMaintenanceWindowIds(['maint-1', 'maint-321']);
+
+      const recoveredAlertWithMuted = {
+        ...existingFlattenedRecoveredAlert,
+        [ALERT_MUTED]: true,
+      };
+
+      const result = buildUpdatedRecoveredAlert<{}>({
+        alert: recoveredAlertWithMuted,
+        legacyRawAlert: {
+          meta: {
+            flapping: true,
+            flappingHistory: [false, false, true, true],
+            maintenanceWindowIds: ['maint-1', 'maint-321'],
+          },
+          state: {
+            start: '3023-03-27T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(true);
+    });
+
+    test('should preserve ALERT_MUTED false from existing recovered alert when not in snoozedInstances or mutedInstanceIds', () => {
+      const legacyAlert = new LegacyAlert<{}, {}, 'default'>('alert-A');
+      legacyAlert.scheduleActions('default');
+      legacyAlert.setFlappingHistory([false, false, true, true]);
+
+      const result = buildUpdatedRecoveredAlert<{}>({
+        alert: existingFlattenedRecoveredAlert,
+        legacyRawAlert: {
+          meta: {
+            flapping: true,
+            flappingHistory: [false, false, true, true],
+            maintenanceWindowIds: [],
+          },
+          state: {
+            start: '3023-03-27T12:27:28.159Z',
+          },
+        },
+        rule: alertRule,
+        timestamp: '2023-03-29T12:27:28.159Z',
+      });
+
+      expect((result as Record<string, unknown>)[ALERT_MUTED]).toBe(false);
+    });
+  });
 });

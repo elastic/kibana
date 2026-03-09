@@ -6,6 +6,7 @@
  */
 
 import { isEmpty, isEqual, omit } from 'lodash';
+import type { SnoozeCondition } from '@kbn/alerting-types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
@@ -18,6 +19,10 @@ import {
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_SNOOZE_EXPIRES_AT,
+  ALERT_SNOOZE_CONDITIONS,
+  ALERT_SNOOZE_CONDITION_OPERATOR,
+  ALERT_SNOOZE_SNAPSHOT,
 } from '@kbn/rule-data-utils';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
@@ -615,25 +620,6 @@ export class AlertsService implements IAlertsService {
     });
   }
 
-  public async unmuteAlertInstance({
-    ruleId,
-    alertInstanceId,
-    indices,
-    logger,
-  }: {
-    ruleId: string;
-    alertInstanceId: string;
-    indices: string[];
-    logger: Logger;
-  }) {
-    return this._updateMuteState({
-      muted: false,
-      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
-      indices,
-      logger,
-    });
-  }
-
   public async muteAllAlerts({
     ruleId,
     indices,
@@ -700,5 +686,196 @@ export class AlertsService implements IAlertsService {
       indices,
       logger,
     });
+  }
+
+  public async unmuteAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this.unmuteAlertInstances({
+      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
+      indices,
+      logger,
+    });
+  }
+
+  /**
+   * Materializes snooze state on the alert ES document by setting
+   * ALERT_MUTED=true and writing snooze fields for visibility/debugging.
+   * The durable source of truth is rule SO snoozedInstances; this doc
+   * write enables query-time filtering (e.g. summarized alert exclusion).
+   */
+  public async snoozeAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+    expiresAt,
+    conditions,
+    conditionOperator,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+    expiresAt?: string;
+    conditions?: SnoozeCondition[];
+    conditionOperator?: 'any' | 'all';
+  }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to snooze alert instance for rule '${ruleId}' - no alert indices available`
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [
+          { term: { [ALERT_RULE_UUID]: ruleId } },
+          { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+        ],
+      },
+    };
+
+    // Clear all snooze fields first, then conditionally re-set the ones from this
+    // request. This prevents stale fields from a prior snooze (e.g. conditions from
+    // a condition-based snooze) from surviving when re-snoozing with a simpler config.
+    const scriptParts: string[] = [
+      `ctx._source['${ALERT_MUTED}'] = true;`,
+      `ctx._source.remove('${ALERT_SNOOZE_EXPIRES_AT}');`,
+      `ctx._source.remove('${ALERT_SNOOZE_CONDITIONS}');`,
+      `ctx._source.remove('${ALERT_SNOOZE_CONDITION_OPERATOR}');`,
+      `ctx._source.remove('${ALERT_SNOOZE_SNAPSHOT}');`,
+    ];
+    const params: Record<string, unknown> = {};
+
+    if (expiresAt) {
+      scriptParts.push(`ctx._source['${ALERT_SNOOZE_EXPIRES_AT}'] = params.expiresAt;`);
+      params.expiresAt = expiresAt;
+    }
+
+    if (conditions && conditions.length > 0) {
+      scriptParts.push(`ctx._source['${ALERT_SNOOZE_CONDITIONS}'] = params.conditions;`);
+      params.conditions = conditions;
+
+      if (conditionOperator) {
+        scriptParts.push(
+          `ctx._source['${ALERT_SNOOZE_CONDITION_OPERATOR}'] = params.conditionOperator;`
+        );
+        params.conditionOperator = conditionOperator;
+      }
+
+      const snapshot: Record<string, string> = {};
+      for (const c of conditions) {
+        if (c.snapshotValue != null) {
+          snapshot[c.field] = c.snapshotValue;
+        }
+      }
+      if (Object.keys(snapshot).length > 0) {
+        scriptParts.push(`ctx._source['${ALERT_SNOOZE_SNAPSHOT}'] = params.snapshot;`);
+        params.snapshot = snapshot;
+      }
+    }
+
+    try {
+      const response = await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        refresh: true,
+        ignore_unavailable: true,
+        query,
+        script: {
+          source: scriptParts.join('\n'),
+          lang: 'painless',
+          params,
+        },
+      });
+      if ((response.updated ?? 0) === 0) {
+        throw new Error(
+          `Unable to snooze alert instance '${alertInstanceId}' for rule '${ruleId}' - no matching alert documents were updated`
+        );
+      }
+    } catch (error) {
+      logger.error(
+        `Error snoozing alert instance '${alertInstanceId}' for rule '${ruleId}' - ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Clears all per-alert snooze fields and sets kibana.alert.muted = false
+   * in a single updateByQuery call. Accepts one or more alert instance IDs
+   * so that all matching documents are updated in a single ES round-trip.
+   * Used during auto-unmute when conditional snooze conditions are met,
+   * and by the explicit unmute API.
+   */
+  public async clearSnoozeAndUnmuteAlertInstances({
+    ruleId,
+    alertInstanceIds,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceIds: string[];
+    indices: string[];
+    logger: Logger;
+  }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to clear snooze and unmute alert instances for rule '${ruleId}' - no alert indices available`
+      );
+    }
+
+    if (alertInstanceIds.length === 0) {
+      return;
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [
+          { term: { [ALERT_RULE_UUID]: ruleId } },
+          { terms: { [ALERT_INSTANCE_ID]: alertInstanceIds } },
+        ],
+      },
+    };
+
+    try {
+      await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        refresh: true,
+        ignore_unavailable: true,
+        query,
+        script: {
+          source: [
+            `ctx._source['${ALERT_MUTED}'] = false;`,
+            `ctx._source.remove('${ALERT_SNOOZE_EXPIRES_AT}');`,
+            `ctx._source.remove('${ALERT_SNOOZE_CONDITIONS}');`,
+            `ctx._source.remove('${ALERT_SNOOZE_CONDITION_OPERATOR}');`,
+            `ctx._source.remove('${ALERT_SNOOZE_SNAPSHOT}');`,
+          ].join('\n'),
+          lang: 'painless',
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `Error clearing snooze and unmuting alert instances for rule '${ruleId}' - ${error.message}`
+      );
+      throw error;
+    }
   }
 }

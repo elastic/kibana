@@ -7,7 +7,8 @@
 
 export { type LegacyAlertsClientParams, LegacyAlertsClient } from './legacy_alerts_client';
 export { AlertsClient } from './alerts_client';
-export type { AlertRuleData } from './types';
+export type { AlertRuleData, AlertRuleDataInput } from './types';
+export { createAlertRuleData } from './types';
 export {
   sanitizeBulkErrorResponse,
   initializeAlertsClient,

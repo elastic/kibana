@@ -114,6 +114,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           api_key_created_by_user: true,
           mute_all: false,
           muted_alert_ids: [],
+          snoozed_instances: [],
           actions: [],
           scheduled_task_id: ruleId,
           created_at: response.body.created_at,
@@ -170,6 +171,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           api_key_created_by_user: false,
           mute_all: false,
           muted_alert_ids: [],
+          snoozed_instances: [],
           actions: [],
           scheduled_task_id: ruleId,
           created_at: response.body.created_at,
@@ -227,6 +229,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           api_key_owner: 'elastic',
           mute_all: false,
           muted_alert_ids: [],
+          snoozed_instances: [],
           execution_status: response.body.execution_status,
           revision: 0,
           last_run: {
@@ -312,6 +315,7 @@ export default function userManagedApiKeyTest({ getService }: FtrProviderContext
           api_key_owner: 'elastic',
           mute_all: false,
           muted_alert_ids: [],
+          snoozed_instances: [],
           execution_status: response.body.execution_status,
           revision: 0,
           last_run: {
