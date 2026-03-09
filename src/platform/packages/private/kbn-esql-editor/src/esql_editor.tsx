@@ -62,6 +62,8 @@ import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
 import { ESQLMenu } from './editor_menu';
+import { useNLToEsql } from './use_nl_to_esql';
+import { useNlToEsqlCheck } from './hooks/use_nl_to_esql-check';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './use_esql_editor_actions';
 import {
@@ -214,6 +216,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const esqlService = kibana.services?.esql;
   const variablesService = esqlService?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
+
+  const isNlToEsqlEnabled = useNlToEsqlCheck();
   const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -768,6 +772,18 @@ const ESQLEditorInternal = function ESQLEditor({
     suppressSuggestionsRef,
   });
 
+  const { generateFromComment, nlSyncDecorationStyle, updateNlSyncDecorations } = useNLToEsql({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+    onQuerySubmit,
+    isEnabled: isNlToEsqlEnabled,
+  });
+
+  const generateFromCommentRef = useRef(generateFromComment);
+  generateFromCommentRef.current = generateFromComment;
+
   const {
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
@@ -1143,6 +1159,7 @@ const ESQLEditorInternal = function ESQLEditor({
         styles={css`
           ${lookupIndexBadgeStyle}
           ${sourcesBadgeStyle}
+          ${nlSyncDecorationStyle}
         `}
       />
       {Boolean(editorIsInline) && !hideRunQueryButton ? (
@@ -1252,7 +1269,9 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
+                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery, () =>
+                    generateFromCommentRef.current()
+                  );
 
                   // Store disposables for cleanup
                   const currentEditor = editorRef.current;
@@ -1317,6 +1336,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (enableResourceBrowser) {
                       addSourcesDecorator();
                     }
+                    updateNlSyncDecorations();
                     maybeTriggerSuggestions();
                   });
 
