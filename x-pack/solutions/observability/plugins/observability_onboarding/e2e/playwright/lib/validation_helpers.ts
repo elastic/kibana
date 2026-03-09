@@ -9,7 +9,10 @@ import type { Page } from '@playwright/test';
 import { DiscoverValidationPage } from '../stateful/pom/pages/discover_validation.page';
 import { StreamsValidationPage } from '../stateful/pom/pages/streams_validation.page';
 
-export async function assertDiscoverHasData(page: Page, { assertHitCount = false } = {}): Promise<void> {
+export async function assertDiscoverHasData(
+  page: Page,
+  { assertHitCount = false } = {}
+): Promise<void> {
   const discoverValidation = new DiscoverValidationPage(page);
   await discoverValidation.waitForDiscoverToLoad();
   await discoverValidation.assertHasAnyLogData();
