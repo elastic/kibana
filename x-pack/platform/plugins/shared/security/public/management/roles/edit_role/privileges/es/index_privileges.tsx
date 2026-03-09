@@ -104,7 +104,7 @@ export class IndexPrivileges extends Component<Props, State> {
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={this.addIndexPrivilege}
                   disabled={remoteIndexPrivilegesDisabled}
                 >
