@@ -13,7 +13,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
-import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
+import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
+import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { paths } from '../../constants';
 
@@ -60,16 +61,24 @@ const EditRuleFormPageContent = ({ ruleId }: { ruleId: string }) => {
   }
 
   const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
+  const initialValues = mapRuleResponseToFormValues(rule);
 
-  return <RuleFormPageContent ruleId={ruleId} initialQuery={initialQuery} />;
+  return (
+    <RuleFormPageContent
+      ruleId={ruleId}
+      initialQuery={initialQuery}
+      initialValues={initialValues}
+    />
+  );
 };
 
 interface RuleFormPageContentProps {
   ruleId?: string;
   initialQuery?: string;
+  initialValues?: Partial<FormValues>;
 }
 
-const RuleFormPageContent = ({ ruleId, initialQuery }: RuleFormPageContentProps) => {
+const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPageContentProps) => {
   const isEditing = Boolean(ruleId);
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
@@ -124,6 +133,8 @@ const RuleFormPageContent = ({ ruleId, initialQuery }: RuleFormPageContentProps)
         includeSubmission
         onSuccess={onSuccess}
         onCancel={onCancel}
+        ruleId={ruleId}
+        initialValues={initialValues}
         submitLabel={
           isEditing ? (
             <FormattedMessage
