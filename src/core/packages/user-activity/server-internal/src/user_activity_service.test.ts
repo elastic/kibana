@@ -16,8 +16,8 @@ import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user
 import { UserActivityService } from './user_activity_service';
 import type { InternalUserActivityServiceSetup } from './types';
 
-const TEST_ACTION = 'test_action' as UserActivityActionId;
-const OTHER_ACTION = 'other_action' as UserActivityActionId;
+const TEST_ACTION = 'create_alerting_rule' as UserActivityActionId;
+const OTHER_ACTION = 'create_alerting_rule_bulk' as UserActivityActionId;
 
 const defaultConfig = {
   enabled: true,

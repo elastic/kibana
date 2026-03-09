@@ -30,9 +30,10 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
       // Track the user action
       coreStart.userActivity.trackUserAction({
         event: {
-          // using `as any` because we don't want to add this action to the public docs
-          action: 'example_button_click' as any,
-          type: 'change',
+          // using `as any` because we don't want to add this action to the public docs,
+          // action ids should follow the format {verb}_{context}_{noun}, more info the service readme
+          action: 'create_security_rule' as any,
+          type: 'creation',
           start: new Date(start).toISOString(),
           end: new Date().toISOString(),
           duration: (Date.now() - start) * 1_000_000,
