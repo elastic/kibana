@@ -101,6 +101,7 @@ export function CreateESQLRuleFlyout({
           data,
           dataViews,
           notifications,
+          application: core.application,
         }}
         query={query}
         onClose={onClose}

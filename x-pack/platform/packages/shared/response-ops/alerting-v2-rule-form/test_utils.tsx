@@ -8,10 +8,12 @@
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import type { FormValues } from './form/types';
 import { RuleFormServicesProvider, type RuleFormServices } from './form/contexts';
 
@@ -39,6 +41,7 @@ export const createMockServices = (): RuleFormServices => ({
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
+  application: applicationServiceMock.createStartContract(),
 });
 
 /**
@@ -68,6 +71,9 @@ export const defaultTestFormValues: FormValues = {
       base: '',
     },
   },
+  recoveryPolicy: {
+    type: 'no_breach',
+  },
 };
 
 /**
@@ -90,11 +96,13 @@ export const createFormWrapper = (
     });
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <FormProvider {...form}>
-          <RuleFormServicesProvider services={services}>{children}</RuleFormServicesProvider>
-        </FormProvider>
-      </QueryClientProvider>
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <FormProvider {...form}>
+            <RuleFormServicesProvider services={services}>{children}</RuleFormServicesProvider>
+          </FormProvider>
+        </QueryClientProvider>
+      </IntlProvider>
     );
   };
 

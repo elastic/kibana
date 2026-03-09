@@ -19,14 +19,18 @@ describe('useFormDefaults', () => {
         enabled: true,
         description: '',
       },
-      timeField: '', // Auto-selected by TimeFieldSelect component
+      timeField: '@timestamp', // Default to @timestamp; TimeFieldSelect may update if not available
       schedule: { every: '5m', lookback: '1m' },
       evaluation: {
         query: {
           base: '',
+          condition: '',
         },
       },
       grouping: undefined,
+      recoveryPolicy: {
+        type: 'no_breach',
+      },
     });
   });
 
@@ -46,19 +50,31 @@ describe('useFormDefaults', () => {
     expect(result.current.grouping).toEqual({ fields: ['host.name', 'service.name'] });
   });
 
-  it('includes the query in evaluation.query.base', () => {
+  it('includes the query in evaluation.query.base when no WHERE clause', () => {
     const query = 'FROM logs-* | STATS count() BY host.name';
     const { result } = renderHook(() => useFormDefaults({ query }));
 
     expect(result.current.evaluation.query.base).toBe(query);
+    expect(result.current.evaluation.query.condition).toBe('');
   });
 
-  it('returns undefined grouping for query without STATS BY', () => {
+  it('splits query into base and condition when WHERE clause exists', () => {
+    const query = 'FROM logs-* | STATS count() BY host.name | WHERE count > 100';
+    const { result } = renderHook(() => useFormDefaults({ query }));
+
+    expect(result.current.evaluation.query.base).toBe('FROM logs-* | STATS COUNT() BY host.name');
+    expect(result.current.evaluation.query.condition).toBe('count > 100');
+  });
+
+  it('returns undefined grouping for query with WHERE but no STATS BY', () => {
     const { result } = renderHook(() =>
-      useFormDefaults({ query: 'FROM logs-* | WHERE status = 200' })
+      useFormDefaults({ query: 'FROM logs-* | WHERE status == 200' })
     );
 
     expect(result.current.grouping).toBeUndefined();
+    // WHERE at the end gets split
+    expect(result.current.evaluation.query.base).toBe('FROM logs-*');
+    expect(result.current.evaluation.query.condition).toBe('status == 200');
   });
 
   it('memoizes the result', () => {
@@ -79,12 +95,14 @@ describe('useFormDefaults', () => {
 
     expect(result.current.grouping).toEqual({ fields: ['host.name'] });
     expect(result.current.evaluation.query.base).toBe('FROM logs-* | STATS count() BY host.name');
+    expect(result.current.evaluation.query.condition).toBe('');
 
-    rerender({ query: 'FROM logs-* | STATS count() BY service.name' });
+    rerender({ query: 'FROM logs-* | STATS count() BY service.name | WHERE count > 50' });
 
     expect(result.current.grouping).toEqual({ fields: ['service.name'] });
     expect(result.current.evaluation.query.base).toBe(
-      'FROM logs-* | STATS count() BY service.name'
+      'FROM logs-* | STATS COUNT() BY service.name'
     );
+    expect(result.current.evaluation.query.condition).toBe('count > 50');
   });
 });

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { RuleFormFlyout, RULE_FORM_ID } from './rule_form_flyout';
+import { RuleFormFlyout } from './rule_form_flyout';
 import { StandaloneRuleForm } from '../form/standalone_rule_form';
 import { useCreateRule } from '../form/hooks/use_create_rule';
 import type { FormValues } from '../form/types';
@@ -30,7 +30,9 @@ export interface StandaloneRuleFormFlyoutProps {
  * Use this for a classic flyout experience where the user controls everything
  * from the form after initial mount. External prop changes are ignored.
  *
- * Time field is auto-selected by TimeFieldSelect based on available date fields.
+ * The flyout manages its own submission via useCreateRule so it can control
+ * the loading state of its footer buttons. Time field is auto-selected by
+ * TimeFieldSelect based on available date fields.
  */
 const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = ({
   push,
@@ -38,11 +40,9 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
   query,
   services,
 }) => {
-  const { http, notifications } = services;
-
   const { createRule, isLoading } = useCreateRule({
-    http,
-    notifications,
+    http: services.http,
+    notifications: services.notifications,
     onSuccess: onClose ?? (() => {}),
   });
 
@@ -53,8 +53,8 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
   return (
     <RuleFormFlyout push={push} onClose={onClose} isLoading={isLoading}>
       <StandaloneRuleForm
-        formId={RULE_FORM_ID}
         onSubmit={handleSubmit}
+        isSubmitting={isLoading}
         query={query}
         services={services}
       />

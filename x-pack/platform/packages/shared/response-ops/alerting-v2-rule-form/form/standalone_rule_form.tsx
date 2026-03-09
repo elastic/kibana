@@ -8,18 +8,32 @@
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FormValues } from './types';
-import { RuleForm, type RuleFormServices } from './rule_form';
+import { RuleForm } from './rule_form';
+import type { RuleFormServices } from './contexts';
 import { useFormDefaults } from './hooks/use_form_defaults';
 
 export interface StandaloneRuleFormProps {
-  /** Form ID for submission */
-  formId: string;
   /** Initial query for the rule */
   query: string;
-  /** Services required for form fields */
   services: RuleFormServices;
-  /** Submit handler */
-  onSubmit: (values: FormValues) => void;
+  /**
+   * External submit handler. When provided, form submission delegates to this callback.
+   * When omitted (and `includeSubmission` is true), the form uses `useCreateRule` internally.
+   */
+  onSubmit?: (values: FormValues) => void;
+  /** Callback invoked after a successful internal submission (useCreateRule). */
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  /** Whether to include YAML editor toggle (default: false). Requires services.application. */
+  includeYaml?: boolean;
+  /** Whether the form is in a loading/disabled state */
+  isDisabled?: boolean;
+  /** Whether the form is currently submitting (controls button loading state) */
+  isSubmitting?: boolean;
+  /** Whether to show submit/cancel buttons (default: false) */
+  includeSubmission?: boolean;
+  submitLabel?: React.ReactNode;
+  cancelLabel?: React.ReactNode;
 }
 
 /**
@@ -28,14 +42,25 @@ export interface StandaloneRuleFormProps {
  * Use this component for a classic flyout experience where the user controls
  * everything from the form after initial mount. External prop changes are ignored.
  *
+ * When `onSubmit` is provided, form submission delegates to that callback.
+ * When `onSubmit` is omitted and `includeSubmission` is true, the form
+ * automatically persists the rule via the API and calls `onSuccess` afterwards.
+ *
  * Uses react-hook-form's `defaultValues` for static initialization.
  * Time field is auto-selected by TimeFieldSelect based on available date fields.
  */
 export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
-  formId,
   query,
   services,
   onSubmit,
+  onSuccess,
+  includeYaml = false,
+  isDisabled = false,
+  isSubmitting = false,
+  includeSubmission = false,
+  onCancel,
+  submitLabel,
+  cancelLabel,
 }) => {
   const defaultValues = useFormDefaults({ query });
 
@@ -46,7 +71,18 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
 
   return (
     <FormProvider {...methods}>
-      <RuleForm formId={formId} services={services} onSubmit={onSubmit} />
+      <RuleForm
+        services={services}
+        onSubmit={onSubmit}
+        onSuccess={onSuccess}
+        includeYaml={includeYaml}
+        isDisabled={isDisabled}
+        isSubmitting={isSubmitting}
+        includeSubmission={includeSubmission}
+        onCancel={onCancel}
+        submitLabel={submitLabel}
+        cancelLabel={cancelLabel}
+      />
     </FormProvider>
   );
 };

@@ -27,9 +27,9 @@ export const LookbackWindowField: React.FC = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.lookbackWindowLabel', {
             defaultMessage: 'Lookback Window',
           })}
-          fullWidth
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <LookbackWindow {...field} errors={error?.message} />
         </EuiFormRow>

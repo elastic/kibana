@@ -17,12 +17,55 @@ interface UseCreateRuleProps {
 }
 
 /**
+ * Builds the `recovery_policy.query` portion of the API payload.
+ *
+ * Two modes:
+ * 1. **Condition mode** – The user specified an evaluation condition (WHERE clause)
+ *    and wrote a recovery condition. The base query for recovery is the same
+ *    evaluation base query.
+ * 2. **Full-query mode** – The user wrote a standalone recovery base query
+ *    (no evaluation condition was split out).
+ */
+const buildRecoveryQuery = (
+  recoveryPolicy: NonNullable<FormValues['recoveryPolicy']>,
+  evaluation: FormValues['evaluation']
+): { query: { base: string; condition?: string } } | Record<string, never> => {
+  const { query } = recoveryPolicy;
+
+  // Condition-only mode: recovery WHERE clause applied to the evaluation base query
+  if (query?.condition) {
+    return {
+      query: {
+        base: query.base || evaluation.query.base,
+        condition: query.condition,
+      },
+    };
+  }
+
+  // Full-query mode: user provided a standalone recovery base query
+  if (query?.base) {
+    return { query: { base: query.base } };
+  }
+
+  return {};
+};
+
+/**
  * Maps form values to the API request payload.
  * This function serves as the boundary between the form contract (FormValues)
  * and the API contract (CreateRuleData).
  */
 const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData => {
-  const { kind, metadata, timeField, schedule, evaluation, grouping, stateTransition } = formValues;
+  const {
+    kind,
+    metadata,
+    timeField,
+    schedule,
+    evaluation,
+    grouping,
+    recoveryPolicy,
+    stateTransition,
+  } = formValues;
 
   const hasStateTransition =
     kind === 'alert' &&
@@ -44,10 +87,20 @@ const mapFormValuesToCreateRuleData = (formValues: FormValues): CreateRuleData =
     evaluation: {
       query: {
         base: evaluation.query.base,
-        condition: undefined, // Set when condition support is added to the form.
+        ...(evaluation.query.condition ? { condition: evaluation.query.condition } : {}),
       },
     },
     ...(grouping?.fields?.length ? { grouping: { fields: grouping.fields } } : {}),
+    ...(recoveryPolicy
+      ? {
+          recovery_policy: {
+            type: recoveryPolicy.type,
+            ...(recoveryPolicy.type === 'query'
+              ? buildRecoveryQuery(recoveryPolicy, evaluation)
+              : {}),
+          },
+        }
+      : {}),
     ...(hasStateTransition
       ? {
           state_transition: {

@@ -15,6 +15,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFormWrapper } from '../../test_utils';
 import { GroupFieldSelect } from './group_field_select';
 import { useQueryColumns } from '../hooks/use_query_columns';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../hooks/use_query_columns');
 
@@ -25,6 +26,7 @@ const mockServices = {
   data: dataPluginMock.createStartContract(),
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
+  application: applicationServiceMock.createStartContract(),
 };
 
 describe('GroupFieldSelect', () => {
