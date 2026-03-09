@@ -472,7 +472,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       request
     );
 
-    const agentPolicies = [];
+    const agentPolicies: AgentPolicy[] = [];
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
@@ -2260,7 +2260,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
-    const agentlessAgentPolicies = [];
+    const agentlessAgentPolicies: string[] = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {

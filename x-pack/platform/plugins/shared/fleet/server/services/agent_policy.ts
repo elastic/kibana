@@ -25,7 +25,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -576,7 +576,7 @@ class AgentPolicyService {
       forcePackagePolicyCreation,
     });
 
-    const createdPackagePolicyIds = [];
+    const createdPackagePolicyIds: string[] = [];
 
     try {
       for (const packagePolicy of packagePolicies) {
@@ -925,7 +925,7 @@ class AgentPolicyService {
       }
     }
 
-    const agentPolicies = agentPoliciesSO.saved_objects.map((agentPolicySO) => {
+    const agentPolicies: AgentPolicy[] = agentPoliciesSO.saved_objects.map((agentPolicySO) => {
       const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
       agentPolicy.agents = 0;
       return agentPolicy;
@@ -934,7 +934,7 @@ class AgentPolicyService {
     if (options.withAgentCount || withPackagePolicies) {
       await pMap(
         agentPolicies,
-        async (agentPolicy) => {
+        async (agentPolicy: AgentPolicy) => {
           if (withPackagePolicies) {
             agentPolicy.package_policies =
               (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicy.id)) || [];
@@ -1051,7 +1051,7 @@ class AgentPolicyService {
       });
     }
     const { monitoring_enabled: monitoringEnabled } = agentPolicy;
-    const packagesToInstall = [];
+    const packagesToInstall: string[] = [];
     if (!existingAgentPolicy.monitoring_enabled && monitoringEnabled?.length) {
       packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
     }
@@ -1917,7 +1917,7 @@ class AgentPolicyService {
 
       if (bulkResponse.errors) {
         const erroredDocuments = bulkResponse.items.reduce((acc, item, idx) => {
-          const value: BulkResponseItem | undefined = item.index;
+          const value: estypes.BulkResponseItem | undefined = item.index;
           if (!value || !value.error) {
             return acc;
           }
@@ -1929,7 +1929,7 @@ class AgentPolicyService {
             revisionIdx: policy?.revision_idx,
           });
           return acc;
-        }, [] as Array<{ bulkItem: BulkResponseItem; policyId?: string; revisionIdx?: number }>);
+        }, [] as Array<{ bulkItem: estypes.BulkResponseItem; policyId?: string; revisionIdx?: number }>);
 
         const errorMessage = `Failed to deploy ${
           erroredDocuments.length
