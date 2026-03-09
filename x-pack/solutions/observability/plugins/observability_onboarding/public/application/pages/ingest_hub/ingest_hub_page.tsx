@@ -10,10 +10,10 @@ import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
-  EuiCard,
   EuiCopy,
   EuiEmptyPrompt,
   EuiFieldSearch,
@@ -29,15 +29,16 @@ import {
   EuiIcon,
   EuiLink,
   EuiPageTemplate,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   EuiSideNav,
   EuiSpacer,
-  EuiStepNumber,
   EuiTab,
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import {
@@ -64,6 +65,7 @@ import apiEndpointHeaderImg from './assets/api-endpoint-header.png';
 import platformMigrationHeaderImg from './assets/platform-migration-header.png';
 import dashboardsHeaderImg from './assets/dashboards-header.png';
 import rulesHeaderImg from './assets/rules-header.png';
+
 
 type TaggedTile = IntegrationTile & { badge?: string };
 
@@ -156,20 +158,37 @@ export const IngestHubPage: React.FC = () => {
     overflow: hidden;
     & > .euiAccordion__triggerWrapper {
       padding: 24px;
+      position: relative;
       cursor: pointer;
       text-decoration: none !important;
     }
     & .euiAccordion__triggerWrapper * {
       text-decoration: none !important;
     }
+    & > .euiAccordion__triggerWrapper .euiAccordion__button {
+      position: static;
+      width: 100%;
+    }
+    & > .euiAccordion__triggerWrapper .euiAccordion__buttonContent {
+      width: 100%;
+    }
+    & > .euiAccordion__triggerWrapper .euiAccordion__button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
     & .euiAccordion__children {
       padding: 0 24px 24px;
+    }
+    & .euiAccordion__children > .euiEmptyPrompt {
+      max-width: 100% !important;
+      margin-inline-start: 0 !important;
     }
     & .euiAccordion__triggerWrapper > .euiFlexGroup {
       gap: 16px;
     }
     & .euiAccordion__iconWrapper {
-      margin-inline-end: 16px;
+      margin-inline-end: 12px;
     }
   `;
 
@@ -1222,14 +1241,16 @@ export const IngestHubPage: React.FC = () => {
                   gap: 16px;
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiStepNumber number={1} status="current" titleSize="none" />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3>Get started adding your data</h3>
+                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                        <EuiIcon type="addDataApp" size="m" />
+                      </span>
+                      Get started adding your data
+                    </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
                     <p>Browse integrations or migrate from another platform.</p>
                   </EuiText>
                 </EuiFlexItem>
@@ -1369,29 +1390,65 @@ export const IngestHubPage: React.FC = () => {
                   gap: 16px;
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiStepNumber number={2} status="incomplete" titleSize="none" />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3>Structure your data</h3>
+                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                        <EuiIcon type="devToolsApp" size="m" />
+                      </span>
+                      Turn raw data into structured with Streams
+                    </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
                     <p>
                       Use Streams to route, transform, and organize your incoming data into
                       structured formats for easier querying and analysis.
                     </p>
                   </EuiText>
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">Requires data</EuiBadge>
+                </EuiFlexItem>
               </EuiFlexGroup>
             }
           >
-            <EuiText size="s" color="subdued">
-              <p>
-                Streams allow you to define how data flows through your Elastic deployment, applying
-                transformations, filters, and routing rules to organize incoming data.
-              </p>
-            </EuiText>
+            <EuiEmptyPrompt
+              color="dark"
+              layout="horizontal"
+              css={css`
+                border-radius: 8px;
+              `}
+              body={
+                <EuiText size="s">
+                  <p>
+                    Streams provides a centralized UI that streamlines common tasks like rerouting
+                    data, extracting fields, or setting data retention, so you don&apos;t need to
+                    navigate to multiple applications or manually configure underlying Elasticsearch
+                    components.
+                  </p>
+                </EuiText>
+              }
+              actions={[
+                <EuiToolTip content="Ingest data first to unlock Streams" key="streams-btn">
+                  <EuiButton disabled>Open Streams</EuiButton>
+                </EuiToolTip>,
+              ]}
+              icon={
+                <div
+                  css={css`
+                    width: 100%;
+                    min-height: 180px;
+                    border-radius: 6px;
+                    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiIcon type="image" size="xxl" color="subdued" />
+                </div>
+              }
+            />
           </EuiAccordion>
 
           <EuiAccordion
@@ -1412,29 +1469,64 @@ export const IngestHubPage: React.FC = () => {
                   gap: 16px;
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiStepNumber number={3} status="incomplete" titleSize="none" />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3>Analyze your data</h3>
+                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                        <EuiIcon type="dashboardApp" size="m" />
+                      </span>
+                      Analyze your data using Dashboards
+                    </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
                     <p>
                       Create and customize dashboards to visualize your data, track key metrics, and
                       gain insights across your infrastructure and applications.
                     </p>
                   </EuiText>
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">Requires data</EuiBadge>
+                </EuiFlexItem>
               </EuiFlexGroup>
             }
           >
-            <EuiText size="s" color="subdued">
-              <p>
-                Dashboards provide a powerful way to visualize and explore your observability data
-                in real time.
-              </p>
-            </EuiText>
+            <EuiEmptyPrompt
+              color="dark"
+              layout="horizontal"
+              css={css`
+                border-radius: 8px;
+              `}
+              body={
+                <EuiText size="s">
+                  <p>
+                    Dashboards provide a powerful way to visualize and explore your observability
+                    data in real time. Create custom views, track key metrics, and gain insights
+                    across your infrastructure and applications.
+                  </p>
+                </EuiText>
+              }
+              actions={[
+                <EuiToolTip content="Ingest data first to unlock Dashboards" key="dashboards-btn">
+                  <EuiButton disabled>Open Dashboards</EuiButton>
+                </EuiToolTip>,
+              ]}
+              icon={
+                <div
+                  css={css`
+                    width: 100%;
+                    min-height: 180px;
+                    border-radius: 6px;
+                    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiIcon type="image" size="xxl" color="subdued" />
+                </div>
+              }
+            />
           </EuiAccordion>
 
           <EuiAccordion
@@ -1455,29 +1547,64 @@ export const IngestHubPage: React.FC = () => {
                   gap: 16px;
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiStepNumber number={4} status="incomplete" titleSize="none" />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3>Get notified when issues occur with alerts</h3>
+                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                        <EuiIcon type="watchesApp" size="m" />
+                      </span>
+                      Get notified when issues occur with alerts
+                    </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
                     <p>
                       Set up alerting rules to get notified when metrics cross thresholds, services
                       go down, or anomalies are detected.
                     </p>
                   </EuiText>
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">Requires data</EuiBadge>
+                </EuiFlexItem>
               </EuiFlexGroup>
             }
           >
-            <EuiText size="s" color="subdued">
-              <p>
-                Configure alerting rules and notification channels to stay informed about issues in
-                your infrastructure.
-              </p>
-            </EuiText>
+            <EuiEmptyPrompt
+              color="dark"
+              layout="horizontal"
+              css={css`
+                border-radius: 8px;
+              `}
+              body={
+                <EuiText size="s">
+                  <p>
+                    Configure alerting rules and notification channels to stay informed about issues
+                    in your infrastructure. Get notified when metrics cross thresholds, services go
+                    down, or anomalies are detected.
+                  </p>
+                </EuiText>
+              }
+              actions={[
+                <EuiToolTip content="Ingest data first to unlock Alerts" key="alerts-btn">
+                  <EuiButton disabled>Open Alerts</EuiButton>
+                </EuiToolTip>,
+              ]}
+              icon={
+                <div
+                  css={css`
+                    width: 100%;
+                    min-height: 180px;
+                    border-radius: 6px;
+                    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiIcon type="image" size="xxl" color="subdued" />
+                </div>
+              }
+            />
           </EuiAccordion>
 
           <EuiAccordion
@@ -1498,29 +1625,64 @@ export const IngestHubPage: React.FC = () => {
                   gap: 16px;
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiStepNumber number={5} status="incomplete" titleSize="none" />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiTitle size="s">
-                    <h3>Spot and troubleshoot issues early with SLOs</h3>
+                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                        <EuiIcon type="uptimeApp" size="m" />
+                      </span>
+                      Spot and troubleshoot issues early with SLOs
+                    </h3>
                   </EuiTitle>
-                  <EuiText size="s" color="subdued">
+                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
                     <p>
                       Define Service Level Objectives to track reliability, measure error budgets,
                       and catch degradations before they impact users.
                     </p>
                   </EuiText>
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="warning">Requires data</EuiBadge>
+                </EuiFlexItem>
               </EuiFlexGroup>
             }
           >
-            <EuiText size="s" color="subdued">
-              <p>
-                SLOs help you set measurable targets for service reliability and track your error
-                budget over time.
-              </p>
-            </EuiText>
+            <EuiEmptyPrompt
+              color="dark"
+              layout="horizontal"
+              css={css`
+                border-radius: 8px;
+              `}
+              body={
+                <EuiText size="s">
+                  <p>
+                    SLOs help you set measurable targets for service reliability and track your
+                    error budget over time. Define Service Level Objectives to catch degradations
+                    before they impact users.
+                  </p>
+                </EuiText>
+              }
+              actions={[
+                <EuiToolTip content="Ingest data first to unlock SLOs" key="slos-btn">
+                  <EuiButton disabled>Open SLOs</EuiButton>
+                </EuiToolTip>,
+              ]}
+              icon={
+                <div
+                  css={css`
+                    width: 100%;
+                    min-height: 180px;
+                    border-radius: 6px;
+                    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                  `}
+                >
+                  <EuiIcon type="image" size="xxl" color="subdued" />
+                </div>
+              }
+            />
           </EuiAccordion>
         </div>
 
@@ -1528,41 +1690,47 @@ export const IngestHubPage: React.FC = () => {
 
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <EuiCard
+            <EuiPanel
               data-test-subj="observabilityOnboardingGetStartedDemoEnvironmentCard"
-              icon={<EuiIcon type="desktop" size="l" color="primary" />}
-              title="Demo environment"
-              description="Explore our live demo environment"
               hasBorder
-              footer={
+              paddingSize="m"
+              css={css`border-radius: 8px; text-align: center;`}
+            >
+              <EuiTitle size="xxs"><h4>Demo environment</h4></EuiTitle>
+              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>Explore our live demo environment.</EuiText>
+              <EuiText size="xs">
                 <EuiLink href="https://demo.elastic.co" target="_blank" external>
                   Explore demo
                 </EuiLink>
-              }
-            />
+              </EuiText>
+            </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
-              data-test-subj="observabilityOnboardingGetStartedExploreForumCard"
-              icon={<EuiIcon type="discuss" size="l" color="primary" />}
-              title="Explore forum"
-              description="Exchange thoughts about Elastic"
+            <EuiPanel
+              data-test-subj="observabilityOnboardingGetStartedObservabilityForumCard"
               hasBorder
-              footer={
+              paddingSize="m"
+              css={css`border-radius: 8px; text-align: center;`}
+            >
+              <EuiTitle size="xxs"><h4>Observability Forum</h4></EuiTitle>
+              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>Exchange thoughts about Elastic.</EuiText>
+              <EuiText size="xs">
                 <EuiLink href="https://discuss.elastic.co" target="_blank" external>
-                  Discuss forum
+                  Discuss in Forum
                 </EuiLink>
-              }
-            />
+              </EuiText>
+            </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
-              data-test-subj="observabilityOnboardingGetStartedBrowseDocumentationCard"
-              icon={<EuiIcon type="documentation" size="l" color="primary" />}
-              title="Browse documentation"
-              description="In-depth guides on all Elastic features"
+            <EuiPanel
+              data-test-subj="observabilityOnboardingGetStartedDocumentationCard"
               hasBorder
-              footer={
+              paddingSize="m"
+              css={css`border-radius: 8px; text-align: center;`}
+            >
+              <EuiTitle size="xxs"><h4>Documentation</h4></EuiTitle>
+              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>In-depth guides and reference content.</EuiText>
+              <EuiText size="xs">
                 <EuiLink
                   href="https://www.elastic.co/docs/solutions/observability"
                   target="_blank"
@@ -1570,22 +1738,24 @@ export const IngestHubPage: React.FC = () => {
                 >
                   Learn more
                 </EuiLink>
-              }
-            />
+              </EuiText>
+            </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiCard
+            <EuiPanel
               data-test-subj="observabilityOnboardingGetStartedSupportHubCard"
-              icon={<EuiIcon type="help" size="l" color="primary" />}
-              title="Support Hub"
-              description="Get help by opening a case or checking our articles"
               hasBorder
-              footer={
+              paddingSize="m"
+              css={css`border-radius: 8px; text-align: center;`}
+            >
+              <EuiTitle size="xxs"><h4>Support Hub</h4></EuiTitle>
+              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>Get help by opening a case.</EuiText>
+              <EuiText size="xs">
                 <EuiLink href="https://support.elastic.co" target="_blank" external>
                   Open Support Hub
                 </EuiLink>
-              }
-            />
+              </EuiText>
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
         <div style={{ height: 40 }} />
