@@ -8,7 +8,7 @@
  */
 
 import { ActionContext } from "../../connector_spec";
-import { calculateAWSA4Signature, sha256Hash } from "../../auth_types/aws_credentials";
+import { calculateAWSA4Signature, sha256Hash } from "../../auth_types/aws_credentials_helpers";
 import { Parser } from 'xml2js';
 
 type AmazonS3Bucket = {
@@ -68,8 +68,6 @@ type AmazonS3Object = {
     contentUrl?: string,
     message?: string,
 }
-
-const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
 function createQueryQueryString(params: Record<string, string | undefined>): string {
     const queryParams: Record<string, string> = {};
@@ -284,13 +282,12 @@ export async function generateAmazonS3BucketObjectPresignedUrl(ctx: ActionContex
 
     const accessKey = (ctx.secrets as {accessKeyId: string, secretAccessKey: string}).accessKeyId;
     const secretKey = (ctx.secrets as {accessKeyId: string, secretAccessKey: string}).secretAccessKey;
-    const credentialValue = `${accessKey}/${amzDateOnly}/${region}/s3/aws4_request`;
+    const dateRegionService = `${amzDateOnly}/${region}/s3/aws4_request`;
+    const credentialValue = `${accessKey}/${dateRegionService}`;
 
     // our headers we need to set
     const headersList: Record<string, string> = {
         'host': awsS3Host,
-        'X-Amz-Date': amzDateOnly,
-        'x-amz-content-sha256': EMPTY_BODY_SHA256,
     }
     const canonicalHeaders = Object.keys(headersList).sort().map(key => `${key.toLowerCase()}:${headersList[key]}`).join('\n');
     const signedHeadersString = Object.keys(headersList).map(key => key.toLowerCase()).sort().join(';');
@@ -306,17 +303,17 @@ export async function generateAmazonS3BucketObjectPresignedUrl(ctx: ActionContex
     const queryString = createQueryQueryString(queryStringValues);
 
     // and create the actual request
-    const canonicalUri = objectKey;
-    const canonicalRequest = `GET\n${canonicalUri}\n${queryString}\n${canonicalHeaders}\n${signedHeadersString}\n${EMPTY_BODY_SHA256}`;
+    const canonicalUri = `/${objectKey}`;
+    const canonicalRequest = `GET\n${canonicalUri}\n${queryString}\n${canonicalHeaders}\n\n${signedHeadersString}\nUNSIGNED-PAYLOAD`;
 
     // assemble the string to sign
-    const stringToSign = `AWS4-HMAC-SHA256\n${amzDateTime}\n${credentialValue}\n${await sha256Hash(canonicalRequest)}`;
+    const stringToSign = `AWS4-HMAC-SHA256\n${amzDateTime}\n${dateRegionService}\n${await sha256Hash(canonicalRequest)}`;
 
-    // and add in the signature
+    // and add in the signature and return the full URL
     const signature = await calculateAWSA4Signature(secretKey, amzDateOnly, region, 's3', stringToSign);
     queryStringValues['X-Amz-Signature'] = signature;
 
-    return `https://s3.amazonaws.com/${canonicalUri}?${createQueryQueryString(queryStringValues)}`;
+    return `https://${awsS3Host}${canonicalUri}?${createQueryQueryString(queryStringValues)}`;
 }
 
 

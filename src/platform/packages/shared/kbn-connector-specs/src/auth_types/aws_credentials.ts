@@ -11,54 +11,13 @@ import { z } from '@kbn/zod/v4';
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
+import { calculateAWSA4Signature, sha256Hash } from './aws_credentials_helpers';
 
 // ============================================================================
 // SigV4 Signing Utilities
 // ============================================================================
 
 const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
-
-export async function sha256Hash(message: string): Promise<string> {
-  const textEncoder = new TextEncoder();
-  const data = textEncoder.encode(message);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function hmacSha256(key: BufferSource, message: string): Promise<ArrayBuffer> {
-  const textEncoder = new TextEncoder();
-  const messageData = textEncoder.encode(message);
-
-  const cryptoKey = await crypto.subtle.importKey(
-    'raw',
-    key,
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-
-  return await crypto.subtle.sign('HMAC', cryptoKey, messageData);
-}
-
-export async function calculateAWSA4Signature(
-  secretAccessKey: string,
-  dateStamp: string,
-  region: string,
-  service: string,
-  stringToSign: string
-): Promise<string> {
-  const textEncoder = new TextEncoder();
-
-  const kDate = await hmacSha256(textEncoder.encode('AWS4' + secretAccessKey), dateStamp);
-  const kRegion = await hmacSha256(kDate, region);
-  const kService = await hmacSha256(kRegion, service);
-  const kSigning = await hmacSha256(kService, 'aws4_request');
-  const signature = await hmacSha256(kSigning, stringToSign);
-
-  const signatureArray = Array.from(new Uint8Array(signature));
-  return signatureArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 /**
  * Parse an AWS hostname into service and region.
