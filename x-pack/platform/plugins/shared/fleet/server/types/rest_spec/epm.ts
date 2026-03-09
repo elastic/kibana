@@ -622,6 +622,7 @@ export const InstallPackageFromRegistryRequestSchema = {
     prerelease: schema.maybe(schema.boolean()),
     ignoreMappingUpdateErrors: schema.boolean({ defaultValue: false }),
     skipDataStreamRollover: schema.boolean({ defaultValue: false }),
+    skipDependencyCheck: schema.boolean({ defaultValue: false }),
   }),
   body: schema.nullable(
     schema.object({

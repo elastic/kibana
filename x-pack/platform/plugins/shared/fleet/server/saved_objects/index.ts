@@ -1226,6 +1226,7 @@ export const getSavedObjectTypes = (
           install_version: { type: 'keyword' },
           install_status: { type: 'keyword' },
           install_source: { type: 'keyword' },
+          is_dependency: { type: 'boolean' },
           install_format_schema_version: { type: 'version' },
           experimental_data_stream_features: {
             type: 'nested',
@@ -1305,6 +1306,7 @@ export const getSavedObjectTypes = (
                     version: { type: 'keyword' },
                   },
                 },
+                is_dependency: { type: 'boolean' },
               },
             },
           ],

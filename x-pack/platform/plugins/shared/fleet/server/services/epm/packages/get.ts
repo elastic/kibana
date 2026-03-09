@@ -825,15 +825,6 @@ export async function getInstallation(options: {
   return savedObject?.attributes;
 }
 
-export async function getAllInstallationForDependency(options: {
-  savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  logger?: Logger;
-}) {
-  const savedObject = await getInstallationObject(options);
-  return savedObject?.attributes;
-}
-
 /**
  * Return an installed package with his related assets
  */

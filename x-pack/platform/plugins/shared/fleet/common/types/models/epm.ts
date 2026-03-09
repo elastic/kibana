@@ -718,6 +718,8 @@ export interface StateContext<T> {
   latestExecutedState?: LatestExecutedState<T>;
 }
 
+export type PackageDependencies = { name: string; version: string }[];
+
 export interface Installation {
   installed_kibana: KibanaAssetReference[];
   additional_spaces_installed_kibana?: Record<string, KibanaAssetReference[]>;
@@ -745,10 +747,8 @@ export interface Installation {
   previous_version?: string | null;
   rolled_back?: boolean;
   is_rollback_ttl_expired?: boolean;
-  dependencies?: Array<{
-    name: string;
-    version: string;
-  }> | null;
+  dependencies?: PackageDependencies | null;
+  is_dependency?: boolean;
 }
 
 export interface PackageUsageStats {

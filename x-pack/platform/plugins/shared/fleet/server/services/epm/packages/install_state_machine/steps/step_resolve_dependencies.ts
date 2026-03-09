@@ -11,22 +11,30 @@ import semverRcompare from 'semver/functions/rcompare';
 import semverGt from 'semver/functions/gt';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { appContextService } from '../../../../app_context';
+
 import { type InstallablePackage, SO_SEARCH_LIMIT } from '../../../../../../common';
 import { getInstallation, getInstalledPackageSavedObjects } from '../../get';
 import { installPackage } from '../../install';
 import type { InstallContext } from '../_state_machine_package_install';
 import { fetchList, pkgToPkgKey } from '../../../registry';
 import { withPackageSpan } from '../../utils';
+import { PackageDependencyError } from '../../../../../../common/errors';
 
 export async function stepResolveDependencies(context: InstallContext) {
   const { logger } = context;
 
-  const isPrerelease = true; // TODO Should probably come from install context
+  if (appContextService.getExperimentalFeatures().enableResolveDependencies !== true) {
+    return;
+  }
+
+  // default to false since https://github.com/elastic/package-registry/pull/1538
+  const isPrerelease = false;
 
   // if install request and not install dependencies Query dependendant packages
   await withPackageSpan('Resolving dependencies', async () => {
-    // Check dependants package TODO allow flag to skip dependency check for now use force
-    if (!context.force) {
+    // Check package dependencies
+    if (!context.skipDependencyCheck && !context.force) {
       const dependants = await getDependantsPackages(
         context.savedObjectsClient,
         context.packageInstallContext.packageInfo.name
@@ -44,7 +52,7 @@ export async function stepResolveDependencies(context: InstallContext) {
             dependencyRequiredVersion
           )
         ) {
-          throw new Error(
+          throw new PackageDependencyError(
             `Package ${context.packageInstallContext.packageInfo.name}@${context.packageInstallContext.packageInfo.version} is not compatible with dependant ${dependant.attributes.name}@${dependant.attributes.version}`
           );
         }
@@ -76,7 +84,7 @@ export async function stepResolveDependencies(context: InstallContext) {
           spaceId: context.spaceId,
           force: context.force,
           prerelease: isPrerelease,
-          // TODO pass some flag to say it's install from dependency resolution
+          isDependency: true,
         });
       } else if (dependency.status === 'to_update') {
         logger.info(
@@ -90,7 +98,7 @@ export async function stepResolveDependencies(context: InstallContext) {
           spaceId: context.spaceId,
           force: context.force,
           prerelease: isPrerelease,
-          // TODO pass some flag to say it's install from dependency resolution
+          isDependency: true,
         });
       }
     }
@@ -169,8 +177,7 @@ async function buildDependencies(
         prerelease: opts?.prerelease,
       });
       if (semverGt(installation.version, resolvedVersion)) {
-        // TODO create proper Fleet error with metadata to handle this case in the UI
-        throw new Error(
+        throw new PackageDependencyError(
           `Required package ${name}@${requiredVersion} is not compatible with installed version ${installation.version}, you need to downgrade that package first.`
         );
       }
@@ -217,8 +224,7 @@ async function getCompatibleVersion(
     }
   }
 
-  // TODO create proper Fleet error with metadata to handle this case in the UI
-  throw new Error(
+  throw new PackageDependencyError(
     `No compatible version found for ${pkgName} with constraints ${versionConstrains.join(', ')}`
   );
 }

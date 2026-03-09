@@ -87,6 +87,8 @@ export interface InstallContext extends StateContext<StateNames> {
   // output values
   esReferences?: EsAssetReference[];
   kibanaAssetPromise?: Promise<KibanaAssetReference[]>;
+  isDependency?: boolean;
+  skipDependencyCheck?: boolean;
 }
 /**
  * This data structure defines the sequence of the states and the transitions
@@ -97,7 +99,6 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
     onTransition: stepCreateRestartInstallation,
     onPostTransition: updateLatestExecutedState,
   },
-  // TODO Put that step behind a feature flag
   resolve_dependencies: {
     onTransition: stepResolveDependencies,
     nextState: INSTALL_STATES.INSTALL_PRECHECK,
