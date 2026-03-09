@@ -36,6 +36,27 @@ export interface TracesFlyout {
 
   readonly spanLinksSection: Locator;
   readonly spanLinksOpenInDiscoverButton: Locator;
+
+  getWaterfallItem(name: string): {
+    readonly content: Locator;
+    readonly errorBadge: Locator;
+  };
+  readonly childFlyout: {
+    readonly aboutSection: Locator;
+    readonly logMessage: Locator;
+    readonly traceSummarySection: Locator;
+    readonly errors: {
+      readonly section: Locator;
+      readonly openInDiscoverButton: Locator;
+    };
+    readonly logs: {
+      readonly openInDiscoverButton: Locator;
+    };
+    readonly spanLinks: {
+      readonly openInDiscoverButton: Locator;
+    };
+    close(): Promise<void>;
+  };
 }
 
 export function createTracesFlyout(page: ScoutPage): TracesFlyout {
@@ -80,5 +101,46 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
 
     spanLinksSection: page.testSubj.locator('unifiedDocViewerSpanLinksAccordion'),
     spanLinksOpenInDiscoverButton: page.testSubj.locator('docViewerSpanLinksOpenInDiscoverButton'),
+
+    getWaterfallItem(name: string) {
+      const row = page
+        .getByRole('dialog', { name: 'Trace timeline' })
+        .locator('[data-test-subj="traceItemRowWrapper"]')
+        .filter({ hasText: name });
+      return {
+        content: row.locator('[data-test-subj="traceItemRowContent"]'),
+        errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
+      };
+    },
+    childFlyout: (() => {
+      const container = page.locator('[id^="documentDetailFlyout"]');
+      return {
+        aboutSection: container.locator('[data-test-subj="UnifiedDocViewerTableGrid"]'),
+        logMessage: container.locator('[data-test-subj="unifiedDocViewLogsOverviewMessage"]'),
+        traceSummarySection: container.locator(
+          '[data-test-subj="unifiedDocViewerTraceSummarySection"]'
+        ),
+        errors: {
+          section: container.locator('[data-test-subj="unifiedDocViewerErrorsAccordion"]'),
+          openInDiscoverButton: container.locator(
+            '[data-test-subj="docViewerErrorsOpenInDiscoverButton"]'
+          ),
+        },
+        logs: {
+          openInDiscoverButton: container.locator(
+            '[data-test-subj="unifiedDocViewerLogsOpenInDiscoverButton"]'
+          ),
+        },
+        spanLinks: {
+          openInDiscoverButton: container.locator(
+            '[data-test-subj="docViewerSpanLinksOpenInDiscoverButton"]'
+          ),
+        },
+        async close() {
+          await page.keyboard.press('Escape');
+          await container.waitFor({ state: 'detached' });
+        },
+      };
+    })(),
   };
 }
