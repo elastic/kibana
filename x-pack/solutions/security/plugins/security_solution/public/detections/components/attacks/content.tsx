@@ -144,30 +144,36 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem>
-              <FilterByAssigneesPopover
-                selectedUserIds={assignees}
-                onSelectionChange={onAssigneesSelectionChange}
-                compressed={true}
+          <EuiFlexGroup direction="row" responsive={false} wrap={true}>
+            <EuiFlexItem grow={1} style={{ minWidth: 480 }}>
+              <EuiFlexGroup direction="row" responsive={false}>
+                <EuiFlexItem grow={1}>
+                  <FilterByAssigneesPopover
+                    selectedUserIds={assignees}
+                    onSelectionChange={onAssigneesSelectionChange}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <ConnectorFilter
+                    aiConnectors={aiConnectors}
+                    connectorNames={aiConnectorNames}
+                    selectedConnectorNames={selectedConnectorNames}
+                    setSelectedConnectorNames={setSelectedConnectorNames}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={1} style={{ minWidth: 480 }}>
+              <FiltersSection
+                dataView={dataView}
+                pageFilters={pageFilters}
+                setStatusFilter={setStatusFilter}
+                setPageFilters={setPageFilters}
+                setPageFilterHandler={setPageFilterHandler}
               />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <ConnectorFilter
-                aiConnectors={aiConnectors}
-                connectorNames={aiConnectorNames}
-                selectedConnectorNames={selectedConnectorNames}
-                setSelectedConnectorNames={setSelectedConnectorNames}
-                compressed={true}
-              />
-            </EuiFlexItem>
-            <FiltersSection
-              dataView={dataView}
-              pageFilters={pageFilters}
-              setStatusFilter={setStatusFilter}
-              setPageFilters={setPageFilters}
-              setPageFilterHandler={setPageFilterHandler}
-            />
           </EuiFlexGroup>
           <EuiSpacer size="l" />
         </Display>
