@@ -24,11 +24,11 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import {
   getColorMode,
-  getDefaultConfigForMode,
   getSecondaryLabelSelected,
   getSecondaryTrendPalettes,
   getSecondaryDynamicTrendBaselineValue,
 } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?

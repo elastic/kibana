@@ -29,7 +29,7 @@ import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import { getDefaultConfigForMode } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();

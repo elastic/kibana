@@ -33,7 +33,7 @@ import {
   DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { getDefaultConfigForMode } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219

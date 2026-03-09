@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KbnPalette, getKbnPalettes } from '@kbn/palettes';
+import { getKbnPalettes } from '@kbn/palettes';
 import type { CoreTheme } from '@kbn/core/public';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import type {
@@ -15,12 +15,9 @@ import type {
   SecondaryTrend,
   SecondaryTrendType,
 } from '@kbn/lens-common';
-import { LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR } from '@kbn/lens-common';
-
-export interface SecondaryTrendPalettes {
-  palette: [string, string, string];
-  textPalette: [string, string, string];
-}
+import { getDefaultConfigForMode } from './palette_config';
+import { getMappedSecondaryTrendPalettes } from './trend_palette_mapping';
+import type { PaletteTriplet, SecondaryTrendPalettes } from './types';
 
 export function getColorMode(
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
@@ -73,26 +70,6 @@ export function getSecondaryLabelSelected(
   return { mode: 'custom', label: state.secondaryLabel ?? defaultSecondaryLabel };
 }
 
-const DEFAULT_PALETTE_ID = KbnPalette.CompareTo;
-export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTrend {
-  if (mode === 'none') {
-    return { type: 'none' };
-  }
-  if (mode === 'static') {
-    return {
-      type: 'static',
-      color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
-    };
-  }
-  return {
-    type: 'dynamic',
-    visuals: 'both',
-    paletteId: DEFAULT_PALETTE_ID,
-    reversed: false,
-    baselineValue: 0,
-  };
-}
-
 export function getTrendPalette(
   colorMode: SecondaryTrendType,
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
@@ -115,46 +92,8 @@ export function getTrendPalette(
   return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
 }
 
-type PaletteTriplet = [string, string, string];
-
 const reverseTriplet = ([a, b, c]: PaletteTriplet): PaletteTriplet => [c, b, a];
 const getEuiThemeVars = (theme: CoreTheme) => (theme.darkMode ? euiDarkVars : euiLightVars);
-const getMappedSecondaryTrendPalettes = (
-  paletteId: string,
-  euiTheme: ReturnType<typeof getEuiThemeVars>
-): SecondaryTrendPalettes => {
-  const euiTextParagraph = euiTheme.euiColorTextParagraph;
-
-  // Mapping: https://github.com/elastic/kibana/issues/251614
-  const palettesById: Record<string, SecondaryTrendPalettes> = {
-    [KbnPalette.CompareTo]: {
-      palette: [
-        euiTheme.euiColorBackgroundLightDanger,
-        euiTheme.euiColorBackgroundLightText,
-        euiTheme.euiColorBackgroundLightSuccess,
-      ],
-      textPalette: [euiTheme.euiColorTextDanger, euiTextParagraph, euiTheme.euiColorTextSuccess],
-    },
-    [KbnPalette.Complementary]: {
-      palette: [
-        euiTheme.euiColorBackgroundLightPrimary,
-        euiTheme.euiColorBackgroundLightText,
-        euiTheme.euiColorBackgroundLightWarning,
-      ],
-      textPalette: [euiTheme.euiColorTextPrimary, euiTextParagraph, euiTheme.euiColorTextWarning],
-    },
-    [KbnPalette.Temperature]: {
-      palette: [
-        euiTheme.euiColorBackgroundLightPrimary,
-        euiTheme.euiColorBackgroundLightText,
-        euiTheme.euiColorBackgroundLightDanger,
-      ],
-      textPalette: [euiTheme.euiColorTextPrimary, euiTextParagraph, euiTheme.euiColorTextDanger],
-    },
-  };
-
-  return palettesById[paletteId] ?? palettesById[DEFAULT_PALETTE_ID]!;
-};
 
 export function getSecondaryTrendPalettes(
   colorMode: SecondaryTrendType,
