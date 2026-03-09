@@ -188,7 +188,7 @@ export function registerSkillsRoutes({
         const parseResult = skillCreateRequestSchema.safeParse(request.body);
         if (!parseResult.success) {
           return response.badRequest({
-            body: { message: parseResult.error.errors.map((e) => e.message).join('; ') },
+            body: { message: parseResult.error.issues.map((e) => e.message).join('; ') },
           });
         }
         const createRequest: CreateSkillPayload = parseResult.data;
@@ -262,7 +262,7 @@ export function registerSkillsRoutes({
         const parseResult = skillUpdateRequestSchema.safeParse(request.body);
         if (!parseResult.success) {
           return response.badRequest({
-            body: { message: parseResult.error.errors.map((e) => e.message).join('; ') },
+            body: { message: parseResult.error.issues.map((e) => e.message).join('; ') },
           });
         }
         const { skills: skillService, auditLogService } = getInternalServices();
