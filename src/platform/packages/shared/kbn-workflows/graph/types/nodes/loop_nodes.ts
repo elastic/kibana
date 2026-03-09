@@ -29,6 +29,8 @@ export const ExitForeachNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-foreach'),
   startNodeId: z.string(),
+  maxIterations: z.number().int().positive().optional(),
+  onLimit: z.enum(['continue', 'fail']).optional(),
 });
 
 export type ExitForeachNode = z.infer<typeof ExitForeachNodeSchema>;
