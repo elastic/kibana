@@ -314,7 +314,7 @@ export default function Expressions(props: CustomThresholdRuleExpressionProps) {
     }
 
     if (typeof ruleParams.noDataBehavior === 'undefined') {
-      setRuleParams('noDataBehavior', 'recover');
+      setRuleParams('noDataBehavior', getNoDataBehaviorValue(ruleParams, hasGroupBy));
     }
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 

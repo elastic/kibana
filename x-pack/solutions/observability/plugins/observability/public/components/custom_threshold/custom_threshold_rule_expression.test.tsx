@@ -163,6 +163,15 @@ describe('Expression', () => {
     ]);
   });
 
+  it('should derive noDataBehavior from alertOnNoData when noDataBehavior is undefined', async () => {
+    const { ruleParams } = await setup(undefined, {
+      alertOnNoData: true,
+      noDataBehavior: undefined,
+    });
+
+    expect(ruleParams.noDataBehavior).toBe('alertOnNoData');
+  });
+
   it('should prefill the rule using the context metadata', async () => {
     const index = 'changedMockedIndex';
     const currentOptions: CustomThresholdPrefillOptions = {
