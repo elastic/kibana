@@ -25,7 +25,7 @@
     },
     {
       "id": "e9644e578f7a84b-ea81a422591a428",
-      "title": "Workflows Extensions - Custom Trigger Definitions Approval should validate that all registered custom trigger definitions are approved by workflows-eng team",
+      "title": "Workflows Extensions - Event-Driven Trigger Definitions Approval should validate that all registered event-driven trigger definitions are approved by workflows-eng team",
       "expectedStatus": "passed",
       "tags": [
         "@ess",
