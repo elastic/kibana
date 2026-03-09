@@ -32,6 +32,7 @@ import { SavedReport } from '../store';
 import type { ScheduledReportType } from '../../types';
 import { EmailNotificationService } from '../../services/notifications/email_notification_service';
 import { eventTrackerMock } from '../../usage/event_tracker.mock';
+import { MAX_DELAY_SECONDS } from '../retry_on_error';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -753,6 +754,7 @@ describe('Run Scheduled Report Task', () => {
   });
 
   it('should retry up to maxRetries', async () => {
+    jest.useFakeTimers();
     const runAt = new Date('2023-10-01T00:00:00Z');
     configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
     mockReporting = await createMockReportingCore(configType);
@@ -808,7 +810,13 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    const runPromise = taskRunner.run();
+    const expectPromise = expect(runPromise).rejects.toThrowError('failure generating report');
+    // Advance past all retry delays
+    for (let i = 0; i < 10; i++) {
+      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+    }
+    await expectPromise;
 
     expect(runThisTaskFn).toHaveBeenCalledTimes(2); // should retry 2 times
     expect(logger.error).toHaveBeenCalledWith(
@@ -828,6 +836,7 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
+    jest.useRealTimers();
   });
 
   describe('notify', () => {
