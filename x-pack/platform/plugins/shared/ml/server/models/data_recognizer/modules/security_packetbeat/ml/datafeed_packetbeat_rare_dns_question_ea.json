@@ -1,5 +1,5 @@
 {
-  "job_id": "packetbeat_dns_tunneling_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -31,7 +31,7 @@
           "bool": {
             "filter": {
               "term": {
-                "destination.ip": "169.254.169.254"
+                "dns.question.type": "PTR"
               }
             }
           }
@@ -53,21 +53,6 @@
           }
         }
       ]
-    }
-  },
-  "runtime_mappings": {
-    "dns_question_etld": {
-      "type": "keyword",
-      "script": {
-        "source": "if(!doc.containsKey('dns.question.etld_plus_one') || doc['dns.question.etld_plus_one'].size() == 0)\r\n{\r\n  if(doc.containsKey('dns.question.registered_domain') && doc['dns.question.registered_domain'].size() != 0)\r\n  { emit(doc['dns.question.registered_domain'].value); }\r\n  else { emit('None'); }\r\n}\r\nelse { emit(doc['dns.question.etld_plus_one'].value); }"
-      }
-    }
-  },
-  "script_fields": {
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
-      }
     }
   }
 }

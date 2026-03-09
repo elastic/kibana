@@ -1,5 +1,5 @@
 {
-  "job_id": "packetbeat_rare_user_agent_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -11,26 +11,20 @@
           "term": {
             "agent.type": "packetbeat"
           }
-        }
-      ],
-      "should": [
-        {
-          "term": {
-            "event.dataset": "http"
-          }
         },
         {
-          "term": {
-            "event.dataset": "network_traffic.http"
+          "exists": {
+            "field": "url.full"
           }
         }
       ],
-      "minimum_should_match": 1,
       "must_not": [
         {
-          "wildcard": {
-            "user_agent.original": {
-              "value": "Mozilla*"
+          "bool": {
+            "filter": {
+              "term": {
+                "destination.ip": "169.254.169.254"
+              }
             }
           }
         },
@@ -51,13 +45,6 @@
           }
         }
       ]
-    }
-  },
-  "script_fields": {
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
-      }
     }
   }
 }

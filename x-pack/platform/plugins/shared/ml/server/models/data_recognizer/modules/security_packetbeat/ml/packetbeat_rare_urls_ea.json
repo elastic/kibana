@@ -1,22 +1,22 @@
 {
-  "description": "Security: Packetbeat - Looks for unusual DNS activity that could indicate command-and-control activity.",
+  "description": "Security: Packetbeat - Looks for unusual web browsing URL activity that could indicate execution, persistence, command-and-control or data exfiltration activity.",
   "groups": [
     "security",
-    "packetbeat",
-    "dns"
+    "packetbeat"
   ],
   "analysis_config": {
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare DNS question names.",
+        "detector_description": "Detects rare URLs.",
         "function": "rare",
-        "by_field_name": "dns.question.name"
+        "by_field_name": "url.full"
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
-      "host.name"
+      "host.name",
+      "host.id",
+      "destination.ip"
     ]
   },
   "allow_lazy_open": true,
@@ -28,7 +28,7 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-packetbeat",
-    "security_app_display_name": "Unusual DNS Activity",
+    "security_app_display_name": "Unusual Web Request",
     "managed": true,
     "job_revision": 4
   }

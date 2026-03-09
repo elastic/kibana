@@ -14,8 +14,8 @@
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
       "host.name",
+      "host.id",
       "destination.ip"
     ]
   },

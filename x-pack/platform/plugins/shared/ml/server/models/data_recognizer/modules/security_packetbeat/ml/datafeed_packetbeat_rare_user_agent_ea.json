@@ -1,5 +1,5 @@
 {
-  "job_id": "packetbeat_rare_dns_question_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -16,23 +16,21 @@
       "should": [
         {
           "term": {
-            "event.dataset": "dns"
+            "event.dataset": "http"
           }
         },
         {
           "term": {
-            "event.dataset": "network_traffic.dns"
+            "event.dataset": "network_traffic.http"
           }
         }
       ],
       "minimum_should_match": 1,
       "must_not": [
         {
-          "bool": {
-            "filter": {
-              "term": {
-                "dns.question.type": "PTR"
-              }
+          "wildcard": {
+            "user_agent.original": {
+              "value": "Mozilla*"
             }
           }
         },
@@ -53,13 +51,6 @@
           }
         }
       ]
-    }
-  },
-  "script_fields": {
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
-      }
     }
   }
 }

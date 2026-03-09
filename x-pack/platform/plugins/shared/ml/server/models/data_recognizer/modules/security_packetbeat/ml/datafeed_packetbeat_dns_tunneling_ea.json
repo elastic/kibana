@@ -1,5 +1,5 @@
 {
-  "job_id": "packetbeat_rare_urls_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -11,13 +11,21 @@
           "term": {
             "agent.type": "packetbeat"
           }
+        }
+      ],
+      "should": [
+        {
+          "term": {
+            "event.dataset": "dns"
+          }
         },
         {
-          "exists": {
-            "field": "url.full"
+          "term": {
+            "event.dataset": "network_traffic.dns"
           }
         }
       ],
+      "minimum_should_match": 1,
       "must_not": [
         {
           "bool": {
@@ -47,10 +55,11 @@
       ]
     }
   },
-  "script_fields": {
-    "host.entity.id_computed": {
+  "runtime_mappings": {
+    "dns_question_etld": {
+      "type": "keyword",
       "script": {
-        "id": "euid_host_entity"
+        "source": "if(!doc.containsKey('dns.question.etld_plus_one') || doc['dns.question.etld_plus_one'].size() == 0)\r\n{\r\n  if(doc.containsKey('dns.question.registered_domain') && doc['dns.question.registered_domain'].size() != 0)\r\n  { emit(doc['dns.question.registered_domain'].value); }\r\n  else { emit('None'); }\r\n}\r\nelse { emit(doc['dns.question.etld_plus_one'].value); }"
       }
     }
   }

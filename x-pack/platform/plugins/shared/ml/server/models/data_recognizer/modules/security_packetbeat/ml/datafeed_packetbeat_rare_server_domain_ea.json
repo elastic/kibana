@@ -1,5 +1,5 @@
 {
-  "job_id": "packetbeat_rare_server_domain_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -33,13 +33,6 @@
             "winlogbeat"
           ]
         }
-      }
-    }
-  },
-  "script_fields": {
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
       }
     }
   }

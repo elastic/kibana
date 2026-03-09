@@ -31,8 +31,8 @@
     ],
     "influencers": [
       "destination.ip",
-      "host.entity.id_computed",
       "host.name",
+      "host.id",
       "dns_question_etld"
     ]
   },
