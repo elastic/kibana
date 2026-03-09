@@ -45,9 +45,9 @@ export interface InternalSkillDefinition {
    */
   referencedContent?: ReferencedContent[];
   /**
-   * Base path for filesystem mounting. Only defined for builtin skills.
+   * Base path for filesystem mounting.
    */
-  basePath?: string;
+  basePath: string;
   /**
    * Returns tool IDs from the tool registry that this skill can use.
    * - Builtin skills: returns from the skill definition's getRegistryTools()

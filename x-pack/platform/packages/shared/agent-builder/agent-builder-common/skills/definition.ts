@@ -9,8 +9,11 @@
  * Referenced content for a skill.
  */
 export interface SkillReferencedContent {
+  /** Display name for the referenced content. */
   name: string;
+  /** Path relative to the skill (e.g. ./.cursor/skills/foo/SKILL.md). */
   relativePath: string;
+  /** Raw content of the referenced file. */
   content: string;
 }
 
