@@ -6,32 +6,37 @@
  */
 
 import { validateUniqueName } from './validators';
-import type { NormalizedFields } from '../types';
+import type { NormalizedField, NormalizedFields } from '../types';
+
+const createField = (id: string, name: string, parentId?: string): NormalizedField => ({
+  id,
+  source: { name, type: 'keyword' },
+  parentId,
+  isMultiField: false,
+  childFieldsName: undefined,
+  canHaveChildFields: false,
+  hasChildFields: false,
+  canHaveMultiFields: false,
+  hasMultiFields: false,
+  childFields: [],
+  isExpanded: false,
+  nestedDepth: parentId ? 1 : 0,
+  path: parentId ? ['parent', name] : [name],
+});
 
 const createNormalizedFields = (
-  fieldNames: string[]
+  fieldNames: string[],
+  parentId?: string
 ): Pick<NormalizedFields, 'rootLevelFields' | 'byId'> => {
   const byId: NormalizedFields['byId'] = {};
   const rootLevelFields: string[] = [];
 
   fieldNames.forEach((name, index) => {
     const id = `field-${index}`;
-    rootLevelFields.push(id);
-    byId[id] = {
-      id,
-      source: { name, type: 'keyword' },
-      parentId: undefined,
-      isMultiField: false,
-      childFields: [],
-      childFieldsName: undefined,
-      canHaveChildFields: false,
-      hasChildFields: false,
-      canHaveMultiFields: false,
-      hasMultiFields: false,
-      isExpanded: false,
-      nestedDepth: 0,
-      path: [name],
-    } as unknown as NormalizedFields['byId'][string];
+    if (!parentId) {
+      rootLevelFields.push(id);
+    }
+    byId[id] = createField(id, name, parentId);
   });
 
   return { byId, rootLevelFields };
@@ -98,6 +103,27 @@ describe('validateUniqueName', () => {
       expect(result).toEqual({
         message: 'There is already a field with this name.',
       });
+    });
+
+    it('SHOULD return error for nested field name that exists under the same parent', () => {
+      const parentId = 'parent-field';
+      const pendingFields = createNormalizedFields([]);
+      const mappingViewFields = createNormalizedFields(['child_field'], parentId);
+      const validator = validateUniqueName(pendingFields, undefined, parentId, mappingViewFields);
+      const result = validator({ value: 'child_field' } as any);
+      expect(result).toEqual({
+        message:
+          'A field with this name already exists in the index. Use a different name or edit the existing field.',
+      });
+    });
+
+    it('SHOULD allow nested field name that does not exist under the same parent', () => {
+      const parentId = 'parent-field';
+      const pendingFields = createNormalizedFields([]);
+      const mappingViewFields = createNormalizedFields(['child_field'], parentId);
+      const validator = validateUniqueName(pendingFields, undefined, parentId, mappingViewFields);
+      const result = validator({ value: 'new_child' } as any);
+      expect(result).toBeUndefined();
     });
   });
 });

@@ -31,10 +31,14 @@ export const validateUniqueName = (
       };
     }
 
-    if (mappingViewFields && !parentId) {
-      const existingMappingNames = mappingViewFields.rootLevelFields.map(
-        (fieldId) => mappingViewFields.byId[fieldId].source.name
-      );
+    if (mappingViewFields) {
+      const existingMappingNames = parentId
+        ? Object.values(mappingViewFields.byId)
+            .filter((field) => field.parentId === parentId)
+            .map((field) => field.source.name)
+        : mappingViewFields.rootLevelFields.map(
+            (fieldId) => mappingViewFields.byId[fieldId].source.name
+          );
       if (existingMappingNames.includes(value as string)) {
         return {
           message: i18n.translate(
