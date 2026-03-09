@@ -34,7 +34,7 @@ export function extractReferences(links: LinksState['links']) {
   });
 
   return {
-    links: newLinks as LinksState['links'],
+    links: newLinks as StoredLinksState['links'],
     references: extractedReferences,
   };
 }

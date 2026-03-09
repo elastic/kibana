@@ -31,7 +31,7 @@ export function transformIn(state: LinksEmbeddableState) {
   return {
     state: {
       ...state,
-      links: links?.map((link, order) => ({ ...link, order, id: link.id ?? uuid() })),
+      links: links?.map((link) => ({ ...link, id: link.id ?? uuid() })),
     },
     references,
   };

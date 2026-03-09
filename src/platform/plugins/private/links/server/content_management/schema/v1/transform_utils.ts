@@ -9,8 +9,10 @@
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Reference } from '@kbn/content-management-utils/src/types';
+import { omit } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { LinksItem } from '../../../../common/content_management';
-import type { DashboardLink, ExternalLink, LinksState, StoredLinksState } from './types';
+import type { DashboardLink, ExternalLink, Link, LinksState, StoredLinksState } from './types';
 import {
   extractReferences,
   injectReferences,
@@ -30,7 +32,12 @@ export function savedObjectToItem(
   savedObject: SavedObject<StoredLinksState> | PartialSavedObject<StoredLinksState>
 ): LinksItem | PartialLinksItem {
   const { references, attributes, ...rest } = savedObject;
-  const links = injectReferences(savedObject.attributes.links ?? [], savedObject.references);
+
+  const links = injectReferences(
+    transformOrderedLinks(attributes.links ?? []) as StoredLinksState['links'],
+    savedObject.references
+  );
+
   return {
     ...rest,
     attributes: {
@@ -51,12 +58,26 @@ export function itemToAttributes(state: LinksState): {
   attributes: StoredLinksState;
   references: Reference[];
 } {
-  const { links, references } = extractReferences(state.links ?? []);
+  const transformedLinks = transformOrderedLinks(state.links ?? []).map((link) => ({
+    id: link.id ?? uuidv4(),
+  })) as LinksState['links'];
+  const { links, references } = extractReferences(transformedLinks ?? []);
   return {
     attributes: {
       ...state,
-      links: links?.map((link, order) => ({ ...link, order })),
+      links,
     },
     references,
   };
 }
+
+// 9.3.0 state stored links with an `order` property instead of deriving their
+// order from their array position
+const transformOrderedLinks = (
+  links: Array<Link & { order?: number }> | StoredLinksState['links']
+) =>
+  links
+    .sort((linkA, linkB) => {
+      return (linkA.order ?? 0) - (linkB.order ?? 0);
+    })
+    .map((link) => omit(link, 'order'));

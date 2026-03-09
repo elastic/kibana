@@ -30,7 +30,6 @@ describe('resolveLinkInfo', () => {
     const link: Link = {
       id: '1',
       type: DASHBOARD_LINK_TYPE,
-      order: 0,
       destination: '001',
     };
     const resolvedLink = await resolveLinkInfo(link);
@@ -45,7 +44,6 @@ describe('resolveLinkInfo', () => {
     const link: Link = {
       id: '1',
       type: DASHBOARD_LINK_TYPE,
-      order: 0,
       destination: '001',
       label: 'My Dashboard',
     };
@@ -61,7 +59,6 @@ describe('resolveLinkInfo', () => {
     const link: Link = {
       id: '1',
       type: DASHBOARD_LINK_TYPE,
-      order: 0,
       destination: '404',
     };
     const resolvedLink = await resolveLinkInfo(link);

@@ -22,14 +22,12 @@ describe('LinksEditor', () => {
     {
       id: 'foo',
       type: 'dashboardLink' as const,
-      order: 1,
       destination: '123',
       title: 'dashboard 01',
     },
     {
       id: 'bar',
       type: 'dashboardLink' as const,
-      order: 4,
       destination: '456',
       title: 'dashboard 02',
       description: 'awesome dashboard if you ask me',
@@ -37,14 +35,12 @@ describe('LinksEditor', () => {
     {
       id: 'bizz',
       type: 'externalLink' as const,
-      order: 3,
       destination: 'http://example.com',
       title: 'http://example.com',
     },
     {
       id: 'buzz',
       type: 'externalLink' as const,
-      order: 2,
       destination: 'http://elastic.co',
       title: 'Elastic website',
     },
@@ -83,7 +79,7 @@ describe('LinksEditor', () => {
   });
 
   test('shows links in order', async () => {
-    const expectedLinkIds = [...someLinks].sort((a, b) => a.order - b.order).map(({ id }) => id);
+    const expectedLinkIds = [...someLinks].map(({ id }) => id);
     renderEditor({ initialLinks: someLinks });
 
     expect(screen.getByTestId('links--panelEditor--title')).toHaveTextContent(
@@ -98,24 +94,22 @@ describe('LinksEditor', () => {
   });
 
   test('saving by reference panels calls onSaveToLibrary', async () => {
-    const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     const onSaveToLibrary = jest.fn().mockImplementation(() => Promise.resolve());
     renderEditor({ initialLinks: someLinks, onSaveToLibrary, isByReference: true });
 
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onSaveToLibrary).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
-    const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     const onAddToDashboard = jest.fn();
     renderEditor({ initialLinks: someLinks, onAddToDashboard, isByReference: false });
 
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(onAddToDashboard).toHaveBeenCalledWith(someLinks, LINKS_VERTICAL_LAYOUT);
   });
 });

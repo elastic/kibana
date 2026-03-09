@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import type { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
@@ -30,7 +31,7 @@ export function serializeResolvedLinks(resolvedLinks: ResolvedLink[]) {
 export async function resolveLinks(links: Link[] = []) {
   const resolvedLinkInfos = await Promise.all(
     links.map(async (link) => {
-      return { ...link, ...(await resolveLinkInfo(link)) };
+      return { ...link, ...(await resolveLinkInfo(link)), id: link.id ?? uuidv4() };
     })
   );
   return resolvedLinkInfos;

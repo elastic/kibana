@@ -20,7 +20,6 @@ import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
 describe('external link component', () => {
   const defaultLinkInfo: ResolvedLink = {
     destination: 'https://example.com',
-    order: 1,
     id: 'foo',
     type: 'externalLink' as const,
     title: 'https://example.com',

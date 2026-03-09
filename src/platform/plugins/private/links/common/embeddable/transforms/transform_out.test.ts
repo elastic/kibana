@@ -21,7 +21,6 @@ describe('transformOut', () => {
         {
           type: 'dashboardLink',
           id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-          order: 0,
           destination: 'https://github.com/',
           options: {
             openInNewTab: false,
@@ -48,7 +47,6 @@ describe('transformOut', () => {
         {
           type: 'externalLink',
           id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-          order: 0,
           destination: 'https://github.com/',
           options: {
             open_in_new_tab: true,
@@ -71,7 +69,6 @@ describe('transformOut', () => {
         {
           type: 'dashboardLink',
           id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-          order: 0,
           destinationRefName: 'link_e2ab286f-0945-4e17-b256-f497b6c3102e_dashboard',
         },
       ],
@@ -90,7 +87,6 @@ describe('transformOut', () => {
           Object {
             "destination": "7adfa750-4c81-11e8-b3d7-01146121b73d",
             "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
-            "order": 0,
             "type": "dashboardLink",
           },
         ],
@@ -108,7 +104,6 @@ describe('transformOut', () => {
           {
             type: 'dashboardLink',
             id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
-            order: 0,
             destinationRefName: 'link_e2ab286f-0945-4e17-b256-f497b6c3102e_dashboard',
           },
         ],
@@ -128,7 +123,6 @@ describe('transformOut', () => {
           Object {
             "destination": "7adfa750-4c81-11e8-b3d7-01146121b73d",
             "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
-            "order": 0,
             "type": "dashboardLink",
           },
         ],

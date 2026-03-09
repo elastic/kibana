@@ -25,23 +25,23 @@ import {
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
-  id: schema.string({ meta: { description: 'The unique ID of the link' } }),
+  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the link' } })),
   label: schema.maybe(
     schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
   ),
-  order: schema.number({
-    meta: { description: 'The position this link should appear in the order of the list' },
-  }),
 };
 
-export const dashboardLinkSchema = schema.object({
-  ...baseLinkSchema,
-  destination: schema.string({
-    meta: { description: 'Linked dashboard saved object id' },
-  }),
-  type: schema.literal(DASHBOARD_LINK_TYPE),
-  options: schema.maybe(dashboardNavigationOptionsSchema),
-});
+export const dashboardLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    destination: schema.string({
+      meta: { description: 'Linked dashboard saved object id' },
+    }),
+    type: schema.literal(DASHBOARD_LINK_TYPE),
+    options: schema.maybe(dashboardNavigationOptionsSchema),
+  },
+  { unknowns: 'ignore' } // Allow legacy `order` prop to pass validation for bwc
+);
 
 export const externalLinkOptionsSchema = schema.object(
   {
@@ -63,14 +63,16 @@ export const externalLinkOptionsSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const externalLinkSchema = schema.object({
-  ...baseLinkSchema,
-  type: schema.literal(EXTERNAL_LINK_TYPE),
-  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-  options: schema.maybe(externalLinkOptionsSchema),
-});
+export const externalLinkSchema = schema.object(
+  {
+    ...baseLinkSchema,
+    type: schema.literal(EXTERNAL_LINK_TYPE),
+    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+    options: schema.maybe(externalLinkOptionsSchema),
+  },
+  { unknowns: 'ignore' } // Allow legacy `order` prop to pass validation for bwc
+);
 
-// Shared schema for links array - used by both saved objects and embeddables
 export const linksArraySchema = schema.arrayOf(
   schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
   {
@@ -94,6 +96,26 @@ export const linksSchema = serializedTitlesSchema.extends(
   },
   { unknowns: 'forbid' }
 );
+
+const baseLinkSavedObjectSchema = {
+  id: schema.string(),
+  label: schema.maybe(schema.string()),
+  // Deprecated, included in schema for BWC
+  order: schema.maybe(schema.number()),
+};
+
+export const storedDashboardLinkSchema = dashboardLinkSchema.extends({
+  ...baseLinkSavedObjectSchema,
+  destination: undefined,
+  destinationRefName: schema.string(),
+});
+
+export const storedLinksSchema = serializedTitlesSchema.extends({
+  layout: layoutSchema,
+  links: schema.arrayOf(
+    schema.oneOf([storedDashboardLinkSchema, externalLinkSchema.extends(baseLinkSavedObjectSchema)])
+  ),
+});
 
 const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 

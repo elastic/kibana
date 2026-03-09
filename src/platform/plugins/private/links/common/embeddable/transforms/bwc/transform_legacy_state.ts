@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './cm_services';
-export * from './transform_utils';
-export type * from './types';
+import type { StoredLinksEmbeddableState } from '../../types';
+import type { StoredLinksByValueState910 } from './types';
+
+export function transformLegacyState(
+  state: StoredLinksByValueState910
+): StoredLinksEmbeddableState {
+  // 9.1.0 by-value state stored state under attributes
+  const { attributes, ...rest } = state;
+  return {
+    ...attributes,
+    ...rest,
+  };
+}
