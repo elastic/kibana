@@ -843,11 +843,7 @@ describe('releaseSlotAndPromote orchestration', () => {
 
     await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
 
-    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
-      'group-1',
-      'default',
-      'queued-1'
-    );
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith('group-1', 'default', 'queued-1');
     expect(mockRepo.updateWorkflowExecution).toHaveBeenCalledWith(
       { id: 'queued-1', status: ExecutionStatus.QUEUED },
       { refresh: 'wait_for' }
