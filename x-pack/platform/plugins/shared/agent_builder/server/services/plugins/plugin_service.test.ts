@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
-import { PluginServiceImpl } from './plugin_service';
+import { createPluginsService, type PluginsServiceStart } from './plugin_service';
 import type { PluginClient, PersistedPluginDefinition } from './client';
 
 const mockParsePluginFromUrl = jest.fn();
@@ -82,8 +82,8 @@ const createMockPersistedPlugin = (
   ...overrides,
 });
 
-describe('PluginServiceImpl', () => {
-  let service: PluginServiceImpl;
+describe('PluginsService', () => {
+  let start: PluginsServiceStart;
   let mockClient: jest.Mocked<PluginClient>;
   const mockRequest = {} as KibanaRequest;
 
@@ -110,7 +110,9 @@ describe('PluginServiceImpl', () => {
       },
     };
 
-    service = new PluginServiceImpl({
+    const service = createPluginsService();
+    service.setup();
+    start = service.start({
       logger: loggerMock.create(),
       elasticsearch: mockElasticsearch as any,
     });
@@ -118,7 +120,7 @@ describe('PluginServiceImpl', () => {
 
   describe('getScopedClient', () => {
     it('creates a client with the correct parameters', async () => {
-      const client = await service.getScopedClient({ request: mockRequest });
+      const client = await start.getScopedClient({ request: mockRequest });
 
       expect(client).toBe(mockClient);
       expect(mockCreateClient).toHaveBeenCalledWith(
@@ -139,7 +141,7 @@ describe('PluginServiceImpl', () => {
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
 
-        const result = await service.installPlugin({
+        const result = await start.installPlugin({
           request: mockRequest,
           source: { type: 'url', url: 'https://github.com/test/repo/tree/main/plugin' },
         });
@@ -178,7 +180,7 @@ describe('PluginServiceImpl', () => {
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(createMockPersistedPlugin());
 
-        await service.installPlugin({
+        await start.installPlugin({
           request: mockRequest,
           source: { type: 'url', url: 'https://example.com/plugin.zip' },
         });
@@ -198,7 +200,7 @@ describe('PluginServiceImpl', () => {
         );
 
         try {
-          await service.installPlugin({
+          await start.installPlugin({
             request: mockRequest,
             source: { type: 'url', url: 'https://example.com/plugin.zip' },
           });
@@ -214,7 +216,7 @@ describe('PluginServiceImpl', () => {
         mockParsePluginFromUrl.mockRejectedValue(new Error('Download failed'));
 
         await expect(
-          service.installPlugin({
+          start.installPlugin({
             request: mockRequest,
             source: { type: 'url', url: 'https://example.com/bad.zip' },
           })
@@ -231,7 +233,7 @@ describe('PluginServiceImpl', () => {
         mockClient.findByName.mockResolvedValue(undefined);
         mockClient.create.mockResolvedValue(persistedPlugin);
 
-        const result = await service.installPlugin({
+        const result = await start.installPlugin({
           request: mockRequest,
           source: { type: 'file', filePath: '/tmp/plugin.zip' },
         });
@@ -256,7 +258,7 @@ describe('PluginServiceImpl', () => {
         );
 
         await expect(
-          service.installPlugin({
+          start.installPlugin({
             request: mockRequest,
             source: { type: 'file', filePath: '/tmp/plugin.zip' },
           })
@@ -269,7 +271,7 @@ describe('PluginServiceImpl', () => {
         mockParsePluginFromFile.mockRejectedValue(new Error('Invalid zip'));
 
         await expect(
-          service.installPlugin({
+          start.installPlugin({
             request: mockRequest,
             source: { type: 'file', filePath: '/tmp/bad.zip' },
           })
@@ -282,7 +284,7 @@ describe('PluginServiceImpl', () => {
     it('delegates to client.delete', async () => {
       mockClient.delete.mockResolvedValue(undefined);
 
-      await service.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
+      await start.deletePlugin({ request: mockRequest, pluginId: 'plugin-1' });
 
       expect(mockClient.delete).toHaveBeenCalledWith('plugin-1');
     });
@@ -291,7 +293,7 @@ describe('PluginServiceImpl', () => {
       mockClient.delete.mockRejectedValue(new Error('Not found'));
 
       await expect(
-        service.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
+        start.deletePlugin({ request: mockRequest, pluginId: 'missing-id' })
       ).rejects.toThrow('Not found');
     });
   });

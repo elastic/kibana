@@ -22,7 +22,7 @@ import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
 import { createMeteringService, type MeteringService } from './metering';
-import { PluginServiceImpl } from './plugins';
+import { type PluginsService, createPluginsService } from './plugins';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -30,6 +30,7 @@ interface ServiceInstances {
   attachments: AttachmentService;
   hooks: HooksService;
   skills: SkillService;
+  plugins: PluginsService;
   metering: MeteringService;
 }
 
@@ -50,6 +51,7 @@ export class ServiceManager {
       attachments: createAttachmentService(),
       hooks: new HooksService(),
       skills: createSkillService(),
+      plugins: createPluginsService(),
       metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
     };
 
@@ -59,6 +61,7 @@ export class ServiceManager {
       attachments: this.services.attachments.setup(),
       hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: this.services.skills.setup(),
+      plugins: this.services.plugins.setup(),
       metering: this.services.metering,
     };
 
@@ -184,7 +187,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
     });
 
-    const plugins = new PluginServiceImpl({
+    const plugins = this.services.plugins.start({
       logger: logger.get('plugins'),
       elasticsearch,
       spaces,

@@ -15,7 +15,10 @@ import { parsePluginFromUrl, parsePluginFromFile } from './utils';
 
 type InstallPluginSource = { type: 'url'; url: string } | { type: 'file'; filePath: string };
 
-export interface PluginService {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PluginsServiceSetup {}
+
+export interface PluginsServiceStart {
   getScopedClient(options: { request: KibanaRequest }): Promise<PluginClient>;
   installPlugin(options: {
     request: KibanaRequest;
@@ -24,31 +27,54 @@ export interface PluginService {
   deletePlugin(options: { request: KibanaRequest; pluginId: string }): Promise<void>;
 }
 
-interface PluginServiceDeps {
+export interface PluginsService {
+  setup(): PluginsServiceSetup;
+  start(deps: PluginsServiceStartDeps): PluginsServiceStart;
+}
+
+export interface PluginsServiceStartDeps {
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
 }
 
-export class PluginServiceImpl implements PluginService {
-  private readonly logger: Logger;
-  private readonly elasticsearch: ElasticsearchServiceStart;
-  private readonly spaces?: SpacesPluginStart;
+export const createPluginsService = (): PluginsService => {
+  return new PluginsServiceImpl();
+};
 
-  constructor({ logger, elasticsearch, spaces }: PluginServiceDeps) {
-    this.logger = logger;
-    this.elasticsearch = elasticsearch;
-    this.spaces = spaces;
+class PluginsServiceImpl implements PluginsService {
+  private startDeps?: PluginsServiceStartDeps;
+
+  setup(): PluginsServiceSetup {
+    return {};
   }
 
-  async getScopedClient({ request }: { request: KibanaRequest }): Promise<PluginClient> {
-    const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
-    const space = getCurrentSpaceId({ request, spaces: this.spaces });
+  start(deps: PluginsServiceStartDeps): PluginsServiceStart {
+    this.startDeps = deps;
 
-    return createClient({ esClient, logger: this.logger, space });
+    return {
+      getScopedClient: (options) => this.getScopedClient(options),
+      installPlugin: (options) => this.installPlugin(options),
+      deletePlugin: (options) => this.deletePlugin(options),
+    };
   }
 
-  async installPlugin({
+  private getStartDeps(): PluginsServiceStartDeps {
+    if (!this.startDeps) {
+      throw new Error('PluginsService#start has not been called');
+    }
+    return this.startDeps;
+  }
+
+  private async getScopedClient({ request }: { request: KibanaRequest }): Promise<PluginClient> {
+    const { elasticsearch, logger, spaces } = this.getStartDeps();
+    const esClient = elasticsearch.client.asScoped(request).asInternalUser;
+    const space = getCurrentSpaceId({ request, spaces });
+
+    return createClient({ esClient, logger, space });
+  }
+
+  private async installPlugin({
     request,
     source,
   }: {
@@ -83,7 +109,7 @@ export class PluginServiceImpl implements PluginService {
     return client.create(createRequest);
   }
 
-  async deletePlugin({
+  private async deletePlugin({
     request,
     pluginId,
   }: {
