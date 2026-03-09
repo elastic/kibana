@@ -15,6 +15,7 @@ import { monaco } from '@kbn/monaco';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { NL_TO_ESQL_ROUTE, QuerySource } from '@kbn/esql-types';
 import type { CoreStart } from '@kbn/core/public';
+import { isMac } from '@kbn/shared-ux-utility';
 
 enum NLSyncStatus {
   Synced = 'synced',
@@ -39,6 +40,8 @@ const COMMENT_PREFIX_REGEX = /^\/\/\s*/;
 const SYNC_INDICATOR_WIDTH = '3px';
 const SYNCED_CLASS = 'esqlNlSyncIndicatorSynced';
 const OUT_OF_SYNC_CLASS = 'esqlNlSyncIndicatorOutOfSync';
+const HINT_CLASS = 'esqlNlGhostHint';
+const COMMAND_KEY = isMac ? '\u2318' : 'Ctrl';
 
 /**
  * Extracts consecutive leading `//` comment lines from the editor model.
@@ -89,6 +92,7 @@ export const useNLToEsql = ({
   const { euiTheme } = useEuiTheme();
   const syncStateRef = useRef<NLSyncState | null>(null);
   const decorationIdsRef = useRef<string[]>([]);
+  const hintDecorationIdsRef = useRef<string[]>([]);
   const isGeneratingRef = useRef(false);
 
   const isEnabledRef = useRef(isEnabled);
@@ -106,6 +110,12 @@ export const useNLToEsql = ({
       background: ${euiTheme.colors.warning};
       width: ${SYNC_INDICATOR_WIDTH} !important;
       margin-left: ${SYNC_INDICATOR_WIDTH};
+    }
+    .${HINT_CLASS}::after {
+      content: '  Press ${COMMAND_KEY}+J to generate ES|QL';
+      color: ${euiTheme.colors.textSubdued};
+      font-style: italic;
+      opacity: 0.6;
     }
   `;
 
@@ -138,24 +148,51 @@ export const useNLToEsql = ({
     [editorModel]
   );
 
+  const updateHintDecoration = useCallback(
+    (show: boolean, lastCommentLine: number) => {
+      const model = editorModel.current;
+      if (!model) return;
+
+      if (!show) {
+        hintDecorationIdsRef.current = model.deltaDecorations(hintDecorationIdsRef.current, []);
+        return;
+      }
+
+      hintDecorationIdsRef.current = model.deltaDecorations(hintDecorationIdsRef.current, [
+        {
+          range: new monaco.Range(lastCommentLine, 1, lastCommentLine, 1),
+          options: {
+            isWholeLine: true,
+            afterContentClassName: HINT_CLASS,
+          },
+        },
+      ]);
+    },
+    [editorModel]
+  );
+
   const updateNlSyncDecorations = useCallback(() => {
-    // Only update the decorations if the NL to ES|QL feature is enabled
     if (!isEnabledRef.current) return;
 
     const model = editorModel.current;
-    if (!model) return;
-
-    const syncState = syncStateRef.current;
-    if (!syncState) {
-      // Clear the decorations
-      updateDecorations(0, null);
-      return;
-    }
+    const editor = editorRef.current;
+    if (!model || !editor) return;
 
     const { commentLineCount, commentText } = extractLeadingComment(model);
+    const syncState = syncStateRef.current;
 
     if (commentLineCount === 0) {
       syncStateRef.current = null;
+      updateDecorations(0, null);
+      updateHintDecoration(false, 0);
+      return;
+    }
+
+    const cursorLine = editor.getPosition()?.lineNumber ?? 0;
+    const cursorOnComment = cursorLine >= 1 && cursorLine <= commentLineCount;
+    updateHintDecoration(cursorOnComment && Boolean(commentText), commentLineCount);
+
+    if (!syncState) {
       updateDecorations(0, null);
       return;
     }
@@ -167,7 +204,7 @@ export const useNLToEsql = ({
     const status = commentChanged || queryChanged ? NLSyncStatus.OutOfSync : NLSyncStatus.Synced;
 
     updateDecorations(commentLineCount, status);
-  }, [editorModel, updateDecorations]);
+  }, [editorModel, editorRef, updateDecorations, updateHintDecoration]);
 
   const generateFromComment = useCallback(async () => {
     if (!isEnabledRef.current || isGeneratingRef.current) return;
@@ -194,6 +231,7 @@ export const useNLToEsql = ({
     }
 
     isGeneratingRef.current = true;
+    updateHintDecoration(false, 0);
 
     try {
       const currentBody = getEsqlBody(model, commentLineCount);
@@ -251,7 +289,7 @@ export const useNLToEsql = ({
     } finally {
       isGeneratingRef.current = false;
     }
-  }, [editorModel, editorRef, http, notifications.toasts, updateDecorations]);
+  }, [editorModel, editorRef, http, notifications.toasts, updateDecorations, updateHintDecoration]);
 
   return {
     generateFromComment,

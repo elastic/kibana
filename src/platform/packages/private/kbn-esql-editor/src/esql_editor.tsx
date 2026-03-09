@@ -1340,6 +1340,10 @@ const ESQLEditorInternal = function ESQLEditor({
                     maybeTriggerSuggestions();
                   });
 
+                  editor.onDidChangeCursorPosition(() => {
+                    updateNlSyncDecorations();
+                  });
+
                   // Auto-focus the editor and move the cursor to the end.
                   if (!disableAutoFocus) {
                     editor.focus();
