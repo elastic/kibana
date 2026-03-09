@@ -24,6 +24,7 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../common/lib/telemetry';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
@@ -71,7 +72,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const { globalFullScreen } = useGlobalFullScreen();
   const [selectedConnectorNames, setSelectedConnectorNames] = useState<string[]>([]);
   const {
-    services: { settings },
+    services: { settings, telemetry },
   } = useKibana();
 
   const { http, inferenceEnabled } = useAssistantContext();
@@ -93,7 +94,10 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
   const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
   const openSchedulesFlyout = useCallback(() => {
     setShowSchedulesFlyout(true);
-  }, []);
+    telemetry.reportEvent(AttacksEventTypes.ScheduleFlyoutOpened, {
+      source: 'attacks_page_header',
+    });
+  }, [telemetry]);
   const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
 
