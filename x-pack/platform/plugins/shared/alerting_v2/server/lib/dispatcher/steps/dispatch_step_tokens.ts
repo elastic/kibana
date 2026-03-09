@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ServiceIdentifier } from 'inversify';
+
+export const EncryptedSavedObjectsClientToken = Symbol.for(
+  'alerting_v2.EncryptedSavedObjectsClient'
+) as ServiceIdentifier<EncryptedSavedObjectsClient>;
 
 export const WorkflowsManagementApiToken = Symbol.for(
   'alerting_v2.WorkflowsManagementApi'

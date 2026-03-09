@@ -14,7 +14,8 @@ import type { SavedObjectError } from '@kbn/core/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { inject, injectable, unmanaged } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
 import type { NotificationPolicySavedObjectAttributes } from '../../../saved_objects';
 import { NOTIFICATION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
@@ -72,7 +73,8 @@ export class NotificationPolicySavedObjectService
     private readonly savedObjectsClientFactory: ISavedObjectsClientFactory,
     @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
     private readonly spaces: SpacesPluginStart,
-    @unmanaged() private readonly encryptedSavedObjectsClient?: EncryptedSavedObjectsClient
+    @inject(EncryptedSavedObjectsClientToken)
+    private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient
   ) {
     this.client = this.savedObjectsClientFactory({
       includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE],
@@ -167,10 +169,6 @@ export class NotificationPolicySavedObjectService
   ): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
     if (ids.length === 0) {
       return [];
-    }
-
-    if (!this.encryptedSavedObjectsClient) {
-      throw new Error('bulkGetDecryptedByIds requires an EncryptedSavedObjectsClient');
     }
 
     const filter = nodeBuilder.or(
