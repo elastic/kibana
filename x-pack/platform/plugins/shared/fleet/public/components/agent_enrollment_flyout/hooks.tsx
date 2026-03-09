@@ -223,7 +223,7 @@ export function useGetCreateApiKey() {
     try {
       setIsLoading(true);
       const res = await sendCreateStandaloneAgentAPIKey({
-        name: crypto.randomBytes(16).toString('hex'),
+        name: crypto.randomBytes(32).toString('hex'),
       });
 
       const newApiKey = `${res.item.id}:${res.item.api_key}`;
