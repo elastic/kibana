@@ -12,6 +12,7 @@ import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/wo
 import {
   DataSetStepSchema,
   ForEachStepSchema,
+  getBuiltInStepStability,
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
@@ -129,6 +130,12 @@ export function getConnectorTypeSuggestions(
         endColumn: Math.max(range.endColumn, 1000),
       };
 
+      const stability = getBuiltInStepStability(stepType.type);
+      const detail =
+        stability === 'tech_preview'
+          ? 'Built-in workflow step (Tech Preview)'
+          : 'Built-in workflow step';
+
       suggestions.push({
         label: stepType.type,
         kind: stepType.icon,
@@ -137,8 +144,8 @@ export function getConnectorTypeSuggestions(
         range: extendedRange,
         documentation: stepType.description,
         filterText: stepType.type,
-        sortText: `!${stepType.type}`, // Priority prefix to sort before connector suggestions
-        detail: 'Built-in workflow step',
+        sortText: `!${stepType.type}`,
+        detail,
         preselect: false,
       });
     });

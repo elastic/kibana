@@ -15,6 +15,7 @@ import { collectAllCustomPropertyItems } from './collect_all_custom_property_ite
 import { collectAllVariables } from './collect_all_variables';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateCustomProperties } from './validate_custom_properties';
+import { validateIfConditions } from './validate_if_conditions';
 import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
@@ -122,12 +123,15 @@ export function useYamlValidation(
       // workflow-inputs validation still provide feedback.
       const results: YamlValidationResult[] = [
         ...validateStepNameUniqueness(yamlDocument),
-        ...validateLiquidTemplate(model.getValue()),
+        ...validateLiquidTemplate(model.getValue(), yamlDocument),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...validateWorkflowOutputsInYaml(yamlDocument, model, workflowDefinition?.outputs),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
         ...(workflowLookup && lineCounter
-          ? validateWorkflowInputs(workflowLookup, workflows, lineCounter)
+          ? [
+              ...validateWorkflowInputs(workflowLookup, workflows, lineCounter),
+              ...validateIfConditions(workflowLookup, lineCounter),
+            ]
           : []),
       ];
 
@@ -329,6 +333,9 @@ function createMarkersAndDecorations(validationResults: YamlValidationResult[]):
         options: {
           inlineClassName: `${validationResult.owner}-${validationResult.severity ?? 'valid'}`,
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+          hoverMessage: validationResult.hoverMessage
+            ? createMarkdownContent(validationResult.hoverMessage)
+            : null,
           after: validationResult.afterMessage
             ? {
                 content: validationResult.afterMessage,
