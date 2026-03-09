@@ -6,6 +6,7 @@
  */
 
 import { syncEditedMonitorBulk } from './edit_monitor_bulk';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../../../../common/runtime_types';
 
 jest.mock('../../telemetry/monitor_upgrade_sender', () => ({
@@ -94,14 +95,26 @@ describe('syncEditedMonitorBulk', () => {
             expect.objectContaining({
               id: 'monitor-1',
               references: [
-                { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
-                { id: 'monitor-1-loc-2', name: 'monitor-1-loc-2', type: 'ingest-package-policies' },
+                {
+                  id: 'monitor-1-loc-1',
+                  name: 'monitor-1-loc-1',
+                  type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                },
+                {
+                  id: 'monitor-1-loc-2',
+                  name: 'monitor-1-loc-2',
+                  type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                },
               ],
             }),
             expect.objectContaining({
               id: 'monitor-2',
               references: [
-                { id: 'monitor-2-loc-1', name: 'monitor-2-loc-1', type: 'ingest-package-policies' },
+                {
+                  id: 'monitor-2-loc-1',
+                  name: 'monitor-2-loc-1',
+                  type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                },
               ],
             }),
           ]),
@@ -191,7 +204,11 @@ describe('syncEditedMonitorBulk', () => {
             expect.objectContaining({
               id: 'monitor-1',
               references: [
-                { id: 'monitor-1-loc-1', name: 'monitor-1-loc-1', type: 'ingest-package-policies' },
+                {
+                  id: 'monitor-1-loc-1',
+                  name: 'monitor-1-loc-1',
+                  type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                },
               ],
             }),
           ]),

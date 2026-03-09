@@ -7,6 +7,7 @@
 
 import { syncEditedMonitor } from './edit_monitor';
 import type { SavedObject } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
@@ -123,7 +124,7 @@ describe('syncEditedMonitor', () => {
           {
             id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
             name: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
-            type: 'ingest-package-policies',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
         ],
       })
