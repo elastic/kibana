@@ -324,5 +324,53 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
       ]);
     });
+
+    it('switches to Discover mode if search is saved as new', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveAsSearch('Rendering Test: saved as search');
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Discover')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Rendering Test: saved as search')
+          ),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
+      ]);
+    });
+
+    it('switches by-value to Discover mode if search is saved as new', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardPanelActions.clickPanelAction('embeddablePanelAction-unlinkFromLibrary');
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      expect(await testSubjects.exists('unifiedTabs_tabsBar', { timeout: 1000 })).to.be(false);
+      await discover.saveAsSearch('Rendering Test: saved as search by-value');
+      await header.waitUntilLoadingHasFinished();
+      // Run validations concurrently
+      await Promise.all([
+        globalNav
+          .getFirstBreadcrumb()
+          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Discover')),
+        discover
+          .getSavedSearchTitle()
+          .then((lastBreadcrumb) =>
+            expect(lastBreadcrumb).to.be('Rendering Test: saved as search by-value')
+          ),
+        testSubjects
+          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
+        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
+      ]);
+    });
   });
 }
