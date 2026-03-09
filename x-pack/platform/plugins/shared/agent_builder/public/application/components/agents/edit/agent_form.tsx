@@ -22,6 +22,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -428,6 +429,18 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             <EuiFlexItem data-test-subj="agentFormPageTitle">
               {isCreateMode ? labels.agents.newAgent : agentName}
             </EuiFlexItem>
+            {!isCreateMode && agentState?.created_by?.username && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="agentFormOwnerLabel">
+                  {i18n.translate('xpack.agentBuilder.agents.form.ownerLabel', {
+                    defaultMessage: 'Owned by: {username}',
+                    values: {
+                      username: agentState.created_by.username,
+                    },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         description={
