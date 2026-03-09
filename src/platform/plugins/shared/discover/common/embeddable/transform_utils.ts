@@ -84,13 +84,14 @@ export function byReferenceSavedSearchToDiscoverSessionEmbeddableState(
     headerRowHeight,
     density,
     grid,
+    selectedTabId,
     ...otherAttrs
   } = storedState;
   return {
     ...otherAttrs,
     ...fromStoredSearchEmbeddableState(storedState),
     discover_session_id: savedObjectRef.id,
-    selected_tab_id: undefined, // Waiting on https://github.com/elastic/kibana/pull/252311
+    selected_tab_id: selectedTabId,
   };
 }
 
