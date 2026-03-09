@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-/**
- * Author information from the Claude plugin manifest.
- */
-export interface PluginManifestAuthor {
-  name: string;
-  email?: string;
-  url?: string;
-}
+import type { PluginManifestAuthor, UnmanagedPluginAssets } from './plugin_definition';
 
 /**
  * Claude plugin manifest schema.
@@ -68,52 +61,10 @@ export interface ParsedSkillReferencedFile {
 }
 
 /**
- * Assets present in the plugin archive that are not yet supported for installation.
- * Each field contains the list of file paths found for that asset type.
- */
-export interface UnmanagedPluginAssets {
-  commands: string[];
-  agents: string[];
-  hooks: string[];
-  mcpServers: string[];
-  outputStyles: string[];
-  lspServers: string[];
-}
-
-/**
  * Result of parsing and validating a Claude plugin zip archive.
  */
 export interface ParsedPluginArchive {
   manifest: PluginManifest;
   skills: ParsedSkillFile[];
   unmanagedAssets: UnmanagedPluginAssets;
-}
-
-/**
- * Manifest metadata stored alongside a persisted plugin.
- * Contains the optional manifest fields that are not promoted to
- * top-level plugin fields.
- */
-export interface PluginManifestMetadata {
-  author?: PluginManifestAuthor;
-  homepage?: string;
-  repository?: string;
-  license?: string;
-  keywords?: string[];
-}
-
-/**
- * Public API-facing representation of an installed plugin.
- */
-export interface PluginDefinition {
-  id: string;
-  name: string;
-  version: string;
-  description: string;
-  manifest: PluginManifestMetadata;
-  source_url?: string;
-  skill_ids: string[];
-  unmanaged_assets: UnmanagedPluginAssets;
-  created_at: string;
-  updated_at: string;
 }

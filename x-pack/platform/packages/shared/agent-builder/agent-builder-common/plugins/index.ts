@@ -7,12 +7,15 @@
 
 export type {
   PluginManifestAuthor,
+  UnmanagedPluginAssets,
+  PluginManifestMetadata,
+  PluginDefinition,
+} from './plugin_definition';
+
+export type {
   PluginManifest,
   ParsedSkillMeta,
   ParsedSkillFile,
   ParsedSkillReferencedFile,
-  UnmanagedPluginAssets,
   ParsedPluginArchive,
-  PluginManifestMetadata,
-  PluginDefinition,
-} from './manifest';
+} from './parsing';
