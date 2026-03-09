@@ -125,22 +125,11 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>
     );
 
-    const submitScriptItem = useMemo(
-      () => ({
-        ...formState.scriptItem,
-        pathToExecutable:
-          formState.scriptItem.fileType === 'archive'
-            ? (formState.scriptItem.pathToExecutable as unknown as string)
-            : undefined,
-      }),
-      [formState.scriptItem]
-    );
-
     const {
       isLoading: isSubmittingData,
       mutateAsync: submitScriptData,
       error: submitScriptError,
-    } = useSubmitScript(submitScriptItem);
+    } = useSubmitScript(formState.scriptItem);
 
     const onSuccessSubmit = useCallback(() => {
       toasts.addSuccess(
@@ -160,8 +149,8 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     }, [toasts, isEditForm, isMounted, queryParams, onSuccess, setUrlParams]);
 
     const onSubmit = useCallback(() => {
-      submitScriptData(submitScriptItem).then(onSuccessSubmit);
-    }, [onSuccessSubmit, submitScriptData, submitScriptItem]);
+      submitScriptData(formState.scriptItem).then(onSuccessSubmit);
+    }, [onSuccessSubmit, submitScriptData, formState.scriptItem]);
 
     const onCloseFlyoutHandler = useCallback(
       () => onCloseFlyout(formState.hasFormChanged),

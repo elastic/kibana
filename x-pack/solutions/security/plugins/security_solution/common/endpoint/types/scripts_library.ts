@@ -8,7 +8,7 @@
 import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
 import type { SupportedHostOsType } from '../constants';
 
-interface EndpointScriptBase {
+export interface EndpointScript<TFileType extends 'script' | 'archive' = 'script' | 'archive'> {
   id: string;
   name: string;
   platform: Array<SupportedHostOsType>;
@@ -19,6 +19,9 @@ interface EndpointScriptBase {
   fileHash: string;
   /** Id of the internally stored file for this script */
   fileId: string;
+  fileType: TFileType;
+  /** The file path inside the archive to be executed. Only applicable if `fileType` is `'archive'`. */
+  pathToExecutable: TFileType extends 'archive' ? string : undefined;
   /** If `true`, then the script, when invoked, requires input arguments to be provided */
   requiresInput: boolean;
   /**
@@ -34,24 +37,6 @@ interface EndpointScriptBase {
   updatedAt: string;
   version: string;
 }
-
-/**
- * A script stored in the Endpoint (Elastic Defend) Scripts Library.
- * Discriminated union on `fileType`: when `'archive'`, `pathToExecutable` is a required string;
- * when `'script'`, `pathToExecutable` is `undefined`.
- */
-export type EndpointScript =
-  | (EndpointScriptBase & {
-      /** The type of the file — a plain script */
-      fileType: 'script';
-      pathToExecutable?: undefined;
-    })
-  | (EndpointScriptBase & {
-      /** The type of the file — an archive containing an executable */
-      fileType: 'archive';
-      /** The file path inside the archive to be executed */
-      pathToExecutable: string;
-    });
 
 export interface EndpointScriptApiResponse {
   data: EndpointScript;

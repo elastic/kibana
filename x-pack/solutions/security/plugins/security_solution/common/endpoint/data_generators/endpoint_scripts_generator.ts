@@ -62,7 +62,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
       version: this.randomDocVersion(),
     };
 
-    return merge(randomScript, overrides) as EndpointScript;
+    return merge(randomScript, overrides);
   }
 
   generateListOfScripts(overrides: DeepPartial<EndpointScript>[] = [{}]): EndpointScript[] {

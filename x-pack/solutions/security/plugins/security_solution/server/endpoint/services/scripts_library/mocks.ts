@@ -46,13 +46,14 @@ const generateScriptEntryMock = (overrides: Partial<EndpointScript> = {}): Endpo
     updatedAt: '2025-11-21T14:37:07.903Z',
     version: 'soVersionHere==',
     ...overrides,
-  } as EndpointScript;
+  };
 };
 
 const generateCreateScriptBodyMock = (
   overrides: Partial<CreateScriptRequestBody> = {}
 ): CreateScriptRequestBody => {
-  // @ts-expect-error pathToExecutable is conditionally required
+  const { fileType, pathToExecutable, ...rest } = overrides;
+  const _fileType = fileType ? fileType : 'script';
   return {
     name: 'script one',
     platform: ['linux', 'macos'],
@@ -62,8 +63,10 @@ const generateCreateScriptBodyMock = (
     requiresInput: false,
     tags: ['dataCollection'],
     file: createHapiReadableStreamMock(),
-    fileType: 'script',
-    ...overrides,
+    fileType: _fileType,
+    // @ts-expect-error pathToExecutable is conditionally required
+    pathToExecutable: _fileType === 'archive' ? pathToExecutable : undefined,
+    ...rest,
   };
 };
 

@@ -133,7 +133,7 @@ describe('EndpointScriptDetailsFlyout', () => {
           example: '',
           pathToExecutable: undefined,
           fileType: 'script',
-        } as EndpointScript,
+        },
       });
       const { getByTestId } = renderResult;
       const body = getByTestId('test-body');

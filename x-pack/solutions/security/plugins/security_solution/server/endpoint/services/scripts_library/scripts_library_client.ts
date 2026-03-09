@@ -138,7 +138,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
   }: SavedObject<ScriptsLibrarySavedObjectAttributes>): EndpointScript {
     const downloadUri = SCRIPTS_LIBRARY_ITEM_DOWNLOAD_ROUTE.replace('{script_id}', id);
 
-    const baseEndpointScript = {
+    return {
       id,
       name,
       platform: platform as EndpointScript['platform'],
@@ -146,6 +146,8 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       fileName,
       fileSize,
       fileHash,
+      fileType,
+      pathToExecutable: fileType === 'archive' ? pathToExecutable : undefined,
       downloadUri,
       requiresInput,
       description,
@@ -157,20 +159,6 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       createdAt,
       updatedAt,
       version,
-    };
-
-    if (fileType === 'archive') {
-      return {
-        ...baseEndpointScript,
-        fileType: 'archive',
-        pathToExecutable: pathToExecutable as string,
-      };
-    }
-
-    return {
-      ...baseEndpointScript,
-      fileType: 'script',
-      pathToExecutable: undefined,
     };
   }
 
