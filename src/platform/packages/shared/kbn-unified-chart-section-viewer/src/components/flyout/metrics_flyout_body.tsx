@@ -33,10 +33,12 @@ const tabs = [
   {
     id: tabIds.OVERVIEW,
     name: OverviewTabName,
+    'data-test-subj': 'metricsExperienceFlyoutOverviewTab',
   },
   {
     id: tabIds.ESQL_QUERY,
     name: EsqlQueryTabName,
+    'data-test-subj': 'metricsExperienceFlyoutEsqlQueryTab',
   },
 ];
 
@@ -59,6 +61,7 @@ export const MetricFlyoutBody = ({ metric, esqlQuery, description }: MetricFlyou
         key={index}
         onClick={() => onSelectedTabChanged(tab.id)}
         isSelected={tab.id === selectedTabId}
+        data-test-subj={tab['data-test-subj']}
       >
         {tab.name}
       </EuiTab>

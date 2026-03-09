@@ -19,13 +19,10 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import {
-  EngineDescriptorType,
-  EntityStoreGlobalStateType,
-} from './domain/definitions/saved_objects';
-import { registerEntityMaintainerTask } from './tasks/entity_maintainer';
-import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer/types';
-import { CRUDClient } from './domain/crud_client';
+import { EngineDescriptorType, EntityStoreGlobalStateType } from './domain/saved_objects';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+import { CRUDClient } from './domain/crud';
 import { registerTelemetry, createReportEvent } from './telemetry/events';
 
 export class EntityStorePlugin
