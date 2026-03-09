@@ -272,7 +272,7 @@ describe('hidden panel link', () => {
     ]);
 
     // No management link under Stack Management
-    expect(footerItems[3]!.sections!.map((s) => s.label)).toMatchInlineSnapshot(`
+    expect(footerItems?.[3]?.sections?.map((s) => s.label)).toMatchInlineSnapshot(`
       Array [
         undefined,
         "Alerts and Insights",
@@ -287,5 +287,73 @@ describe('hidden panel link', () => {
 
     // But management panel is considered active
     expect(activeItemId).toBe('stack_management');
+  });
+});
+
+describe('MenuItem onClick handler', () => {
+  it('should preserve onClick handler from navigation node', () => {
+    const tree = structuredClone(navigationTree);
+    const primaryNode = tree.body[1];
+
+    // @ts-expect-error to avoid excess type checking for test
+    primaryNode.onClick = jest.fn();
+
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+    console.log('primaryItems', primaryItems);
+    
+    const menuItem = primaryItems.find((item) => item.id === primaryNode.id);
+    expect(menuItem).toBeDefined();
+    expect(menuItem?.onClick).toBeDefined();
+    expect(typeof menuItem?.onClick).toBe('function');
+  });
+
+  it('should handle menu items without onClick handler', () => {
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems();
+
+    // Verify that all primary items are defined and can have optional onClick
+    primaryItems.forEach((item) => {
+      expect(item).toBeDefined();
+      expect(item.onClick === undefined || typeof item.onClick === 'function').toBe(true);
+    });
+  });
+});
+
+describe('footerItems optional', () => {
+  it('should return empty footerItems when navigation tree has no footer', () => {
+    const tree = structuredClone(navigationTree);
+    tree.footer = undefined;
+
+    const { navItems } = createNavigationItems(tree);
+    expect(navItems.footerItems).toEqual([]);
+  });
+
+  it('should return empty footerItems when footer is empty array', () => {
+    const tree = structuredClone(navigationTree);
+    tree.footer = [];
+
+    const { navItems } = createNavigationItems(tree);
+    expect(navItems.footerItems).toEqual([]);
+  });
+
+  it('should return footerItems when navigation tree has footer nodes', () => {
+    const { navItems } = createNavigationItems();
+    expect(navItems.footerItems).toBeDefined();
+    expect(Array.isArray(navItems.footerItems)).toBe(true);
+    expect(navItems.footerItems!.length).toBeGreaterThan(0);
+  });
+
+  it('should handle footerItems safely when footer is absent', () => {
+    const tree = structuredClone(navigationTree);
+    tree.footer = undefined;
+
+    const { navItems } = createNavigationItems(tree);
+
+    // Should not throw when accessing as an empty array
+    expect(navItems.footerItems?.[0]).toBeUndefined();
+    expect(navItems.footerItems?.map((item) => item.id)).toEqual([]);
   });
 });
