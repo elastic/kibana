@@ -61,7 +61,7 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
     const modalTitleId = useGeneratedHtmlId();
     const closeModal = useCallback(() => setIsModalOpen(false), []);
 
-    const { handleAccept, handleDismiss, isLoading } = useUpgradeReviewActions({
+    const { handleAccept, handleDeclined, isLoading } = useUpgradeReviewActions({
       pkgName,
       pkgTitle,
       targetVersion,
@@ -127,10 +127,10 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               </EuiText>
             </EuiModalBody>
             <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => handleDismiss(closeModal)} isLoading={isLoading}>
+              <EuiButtonEmpty onClick={() => handleDeclined(closeModal)} isLoading={isLoading}>
                 <FormattedMessage
-                  id="xpack.fleet.epmInstalledIntegrations.pauseUpgradeButton"
-                  defaultMessage="Dismiss"
+                  id="xpack.fleet.epmInstalledIntegrations.declineUpgradeButton"
+                  defaultMessage="Decline"
                 />
               </EuiButtonEmpty>
               <EuiButton

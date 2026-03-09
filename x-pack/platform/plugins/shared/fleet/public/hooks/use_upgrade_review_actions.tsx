@@ -53,20 +53,17 @@ export const useUpgradeReviewActions = ({
     [reviewUpgradeMutation, pkgName, pkgTitle, targetVersion, notifications.toasts]
   );
 
-  const handleDismiss = useCallback(
+  const handleDeclined = useCallback(
     (onSuccess?: () => void) => {
       reviewUpgradeMutation.mutate(
         { pkgName, action: 'decline', targetVersion },
         {
           onSuccess: () => {
             notifications.toasts.addInfo({
-              title: i18n.translate(
-                'xpack.fleet.upgradeReviewActions.upgradeReviewDismissedTitle',
-                {
-                  defaultMessage: 'Auto-upgrade declined for {title} {version}',
-                  values: { title: pkgTitle, version: targetVersion },
-                }
-              ),
+              title: i18n.translate('xpack.fleet.upgradeReviewActions.upgradeReviewDeclinedTitle', {
+                defaultMessage: 'Auto-upgrade declined for {title} {version}',
+                values: { title: pkgTitle, version: targetVersion },
+              }),
             });
             onSuccess?.();
           },
@@ -85,7 +82,7 @@ export const useUpgradeReviewActions = ({
 
   return {
     handleAccept,
-    handleDismiss,
+    handleDeclined,
     handleReEnable,
     isLoading: reviewUpgradeMutation.isLoading,
   };
