@@ -95,6 +95,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
@@ -115,6 +116,7 @@ describe('NotificationPolicyClient', () => {
           version: 'WzEsMV0=',
           name: 'my-policy',
           description: 'my-policy description',
+          enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             owner: 'test-user',
@@ -154,6 +156,7 @@ describe('NotificationPolicyClient', () => {
         expect.objectContaining({
           name: 'my-policy',
           description: 'my-policy description',
+          enabled: true,
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           auth: {
             apiKey: 'encoded-es-api-key',
@@ -218,6 +221,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'test-policy',
         description: 'test-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'test-workflow' }],
         auth: {
           apiKey: 'encrypted-api-key',
@@ -269,6 +273,7 @@ describe('NotificationPolicyClient', () => {
       const firstAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-two',
         description: 'policy-two description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-two' }],
         auth: {
           apiKey: 'secret-key-2',
@@ -283,6 +288,7 @@ describe('NotificationPolicyClient', () => {
       const secondAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-one',
         description: 'policy-one description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-one' }],
         auth: {
           apiKey: 'secret-key-1',
@@ -334,6 +340,7 @@ describe('NotificationPolicyClient', () => {
       const firstAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-found-one',
         description: 'policy-found-one description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-one' }],
         auth: {
           apiKey: 'key-1',
@@ -348,6 +355,7 @@ describe('NotificationPolicyClient', () => {
       const thirdAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-found-three',
         description: 'policy-found-three description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-found-three' }],
         auth: {
           apiKey: 'key-3',
@@ -404,6 +412,7 @@ describe('NotificationPolicyClient', () => {
       const validAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-valid',
         description: 'policy-valid description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-valid' }],
         auth: {
           apiKey: 'valid-key',
@@ -454,6 +463,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
@@ -564,6 +574,7 @@ describe('NotificationPolicyClient', () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'original-policy',
         description: 'original-policy description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'original-workflow' }],
         auth: {
           apiKey: 'old-api-key',
@@ -601,11 +612,265 @@ describe('NotificationPolicyClient', () => {
     });
   });
 
+  describe('enableNotificationPolicy', () => {
+    it('enables a policy and clears snoozedUntil', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'snoozed-policy',
+        description: 'snoozed-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        snoozedUntil: '2025-02-01T00:00:00.000Z',
+        auth: {
+          apiKey: 'some-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-enable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-enable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.enableNotificationPolicy({ id: 'policy-id-enable' });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-enable',
+        expect.objectContaining({
+          enabled: true,
+          snoozedUntil: undefined,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        { version: 'WzEsMV0=' }
+      );
+
+      expect(res.id).toBe('policy-id-enable');
+      expect(res.auth).not.toHaveProperty('apiKey');
+    });
+
+    it('throws 404 when policy is not found', async () => {
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-enable-404'
+        )
+      );
+
+      await expect(
+        client.enableNotificationPolicy({ id: 'policy-id-enable-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  describe('disableNotificationPolicy', () => {
+    it('disables a policy and clears snoozedUntil', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'active-policy',
+        description: 'active-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        snoozedUntil: '2025-02-01T00:00:00.000Z',
+        auth: {
+          apiKey: 'some-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-disable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-disable',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.disableNotificationPolicy({ id: 'policy-id-disable' });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-disable',
+        expect.objectContaining({
+          enabled: false,
+          snoozedUntil: undefined,
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        { version: 'WzEsMV0=' }
+      );
+
+      expect(res.id).toBe('policy-id-disable');
+      expect(res.auth).not.toHaveProperty('apiKey');
+    });
+  });
+
+  describe('snoozeNotificationPolicy', () => {
+    it('snoozes a policy until a specific datetime', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'active-policy',
+        description: 'active-policy description',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        auth: {
+          apiKey: 'some-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-snooze',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: existingAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-snooze',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      const res = await client.snoozeNotificationPolicy({
+        id: 'policy-id-snooze',
+        snoozedUntil: '2025-06-01T12:00:00.000Z',
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-snooze',
+        expect.objectContaining({
+          snoozedUntil: '2025-06-01T12:00:00.000Z',
+          updatedAt: '2025-01-01T00:00:00.000Z',
+        }),
+        { version: 'WzEsMV0=' }
+      );
+
+      expect(res.id).toBe('policy-id-snooze');
+    });
+  });
+
+  describe('bulkActionNotificationPolicies', () => {
+    it('processes mixed bulk actions and returns results', async () => {
+      const createExistingAttributes = (
+        name: string
+      ): NotificationPolicySavedObjectAttributes => ({
+        name,
+        description: `${name} description`,
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'test-workflow' }],
+        auth: {
+          apiKey: 'some-key',
+          owner: 'test-user',
+          createdByUser: false,
+        },
+        createdBy: 'elastic_profile_uid',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'elastic_profile_uid',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      });
+
+      mockSavedObjectsClient.get
+        .mockResolvedValueOnce({
+          id: 'policy-1',
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createExistingAttributes('policy-1'),
+          references: [],
+          version: 'WzEsMV0=',
+        })
+        .mockResolvedValueOnce({
+          id: 'policy-2',
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: createExistingAttributes('policy-2'),
+          references: [],
+          version: 'WzIsMV0=',
+        });
+
+      mockSavedObjectsClient.update
+        .mockResolvedValueOnce({
+          id: 'policy-1',
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as NotificationPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzMsMV0=',
+        })
+        .mockResolvedValueOnce({
+          id: 'policy-2',
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as NotificationPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzQsMV0=',
+        });
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [
+          { id: 'policy-1', action: 'enable' },
+          { id: 'policy-2', action: 'disable' },
+        ],
+      });
+
+      expect(res).toEqual({
+        processed: 2,
+        total: 2,
+        errors: [],
+      });
+    });
+
+    it('collects errors for failed actions', async () => {
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'missing-policy'
+        )
+      );
+
+      const res = await client.bulkActionNotificationPolicies({
+        actions: [{ id: 'missing-policy', action: 'enable' }],
+      });
+
+      expect(res.processed).toBe(0);
+      expect(res.total).toBe(1);
+      expect(res.errors).toHaveLength(1);
+      expect(res.errors[0].id).toBe('missing-policy');
+    });
+  });
+
   describe('deleteNotificationPolicy', () => {
     it('deletes a notification policy successfully', async () => {
       const existingAttributes: NotificationPolicySavedObjectAttributes = {
         name: 'policy-to-delete',
         description: 'policy-to-delete description',
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-to-delete' }],
         auth: {
           apiKey: 'some-key',

@@ -71,6 +71,7 @@ function mockNpBulkGet(mockSoClient: jest.Mocked<SavedObjectsClientContract>, po
       attributes: {
         name: `Policy ${id}`,
         description: `Description for ${id}`,
+        enabled: true,
         destinations: [{ type: 'workflow', id: 'workflow-test-id' }],
         createdBy: null,
         updatedBy: null,

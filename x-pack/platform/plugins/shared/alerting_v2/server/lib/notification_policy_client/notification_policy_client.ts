@@ -23,9 +23,12 @@ import { NotificationPolicySavedObjectServiceScopedToken } from '../services/not
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type {
+  BulkActionNotificationPoliciesParams,
+  BulkActionNotificationPoliciesResponse,
   CreateNotificationPolicyParams,
   FindNotificationPoliciesParams,
   FindNotificationPoliciesResponse,
+  SnoozeNotificationPolicyParams,
   UpdateNotificationPolicyParams,
 } from './types';
 
@@ -62,6 +65,7 @@ export class NotificationPolicyClient {
 
     const attributes: NotificationPolicySavedObjectAttributes = {
       ...parsed.data,
+      enabled: true,
       auth: apiKeyAttrs,
       createdBy: userProfileUid,
       createdAt: now,
@@ -200,9 +204,105 @@ export class NotificationPolicyClient {
     };
   }
 
+  public async enableNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { enabled: true, snoozedUntil: undefined });
+  }
+
+  public async disableNotificationPolicy({
+    id,
+  }: {
+    id: string;
+  }): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { enabled: false, snoozedUntil: undefined });
+  }
+
+  public async snoozeNotificationPolicy({
+    id,
+    snoozedUntil,
+  }: SnoozeNotificationPolicyParams): Promise<NotificationPolicyResponse> {
+    return this.updatePolicyState(id, { snoozedUntil });
+  }
+
+  public async bulkActionNotificationPolicies({
+    actions,
+  }: BulkActionNotificationPoliciesParams): Promise<BulkActionNotificationPoliciesResponse> {
+    const errors: Array<{ id: string; message: string }> = [];
+    let processed = 0;
+
+    for (const action of actions) {
+      try {
+        switch (action.action) {
+          case 'enable':
+            await this.enableNotificationPolicy({ id: action.id });
+            break;
+          case 'disable':
+            await this.disableNotificationPolicy({ id: action.id });
+            break;
+          case 'snooze':
+            await this.snoozeNotificationPolicy({
+              id: action.id,
+              snoozedUntil: action.snoozed_until,
+            });
+            break;
+        }
+        processed++;
+      } catch (e) {
+        errors.push({ id: action.id, message: e.message });
+      }
+    }
+
+    return { processed, total: actions.length, errors };
+  }
+
   public async deleteNotificationPolicy({ id }: { id: string }): Promise<void> {
     await this.getNotificationPolicy({ id });
     await this.notificationPolicySavedObjectService.delete({ id });
+  }
+
+  private async updatePolicyState(
+    id: string,
+    stateUpdate: { enabled?: boolean; snoozedUntil?: string | undefined }
+  ): Promise<NotificationPolicyResponse> {
+    const userProfileUid = await this.getUserProfileUid();
+    const now = new Date().toISOString();
+
+    const doc = await this.notificationPolicySavedObjectService.get(id);
+
+    const nextAttrs: NotificationPolicySavedObjectAttributes = {
+      ...doc.attributes,
+      ...stateUpdate,
+      updatedBy: userProfileUid,
+      updatedAt: now,
+    };
+
+    try {
+      const updated = await this.notificationPolicySavedObjectService.update({
+        id,
+        attrs: nextAttrs,
+        version: doc.version!,
+      });
+
+      return {
+        id,
+        version: updated.version,
+        ...omit(nextAttrs, ['auth']),
+        auth: toAuthResponse(nextAttrs.auth),
+      };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        throw Boom.notFound(`Notification policy with id "${id}" not found`);
+      }
+      if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        throw Boom.conflict(
+          `Notification policy with id "${id}" has already been updated by another user`
+        );
+      }
+      throw e;
+    }
   }
 
   private async getUserProfileUid(): Promise<string | null> {

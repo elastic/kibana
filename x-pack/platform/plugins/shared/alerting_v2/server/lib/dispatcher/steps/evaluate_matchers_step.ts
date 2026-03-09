@@ -47,6 +47,9 @@ export function evaluateMatchers(
       const policy = policies.get(policyId);
       if (!policy) continue;
 
+      if (!policy.enabled) continue;
+      if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+
       if (!policy.matcher) {
         matched.push({ episode, policy });
         continue;

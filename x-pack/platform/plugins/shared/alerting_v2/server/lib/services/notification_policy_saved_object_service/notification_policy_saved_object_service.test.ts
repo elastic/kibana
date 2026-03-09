@@ -14,6 +14,7 @@ import { createNotificationPolicySavedObjectService } from './notification_polic
 const mockAttrs: NotificationPolicySavedObjectAttributes = {
   name: 'test-policy',
   description: 'A test notification policy',
+  enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   auth: {
     apiKey: 'test-api-key',
