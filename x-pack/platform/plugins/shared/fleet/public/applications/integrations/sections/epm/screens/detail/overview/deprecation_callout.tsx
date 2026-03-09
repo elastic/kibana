@@ -77,9 +77,7 @@ export const DeprecationCallout: React.FC<{
   );
 };
 
-export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
-  packageInfo,
-}) => {
+export const DeprecatedFeaturesList: React.FC<{ packageInfo: PackageInfo }> = ({ packageInfo }) => {
   interface DeprecatedFeature {
     type: 'input' | 'variable' | 'data stream' | 'policy template';
     name: string;
@@ -157,6 +155,35 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
     return null;
   }
 
+  return deprecatedFeatures.length < 3 ? (
+    <ul>
+      {deprecatedFeatures.map(({ type, name, description }) => (
+        <li key={`${type}-${name}`}>
+          <strong>{name}</strong> ({type}): {description}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <EuiAccordion
+      id="deprecatedFeaturesAccordion"
+      buttonContent={i18n.translate('xpack.fleet.epm.deprecatedFeaturesAccordionButtonContent', {
+        defaultMessage: 'Expand to show all the deprecated features',
+      })}
+    >
+      <ul>
+        {deprecatedFeatures.map(({ type, name, description }) => (
+          <li key={`${type}-${name}`}>
+            <strong>{name}</strong> ({type}): {description}
+          </li>
+        ))}
+      </ul>
+    </EuiAccordion>
+  );
+};
+
+export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> = ({
+  packageInfo,
+}) => {
   return (
     <>
       <EuiCallOut
@@ -167,23 +194,7 @@ export const DeprecatedFeaturesCallout: React.FC<{ packageInfo: PackageInfo }> =
         color="warning"
         iconType="warning"
       >
-        <EuiAccordion
-          id="deprecatedFeaturesAccordion"
-          buttonContent={i18n.translate(
-            'xpack.fleet.epm.deprecatedFeaturesAccordionButtonContent',
-            {
-              defaultMessage: 'Expand to show all the deprecated features',
-            }
-          )}
-        >
-          <ul>
-            {deprecatedFeatures.map(({ type, name, description }) => (
-              <li key={`${type}-${name}`}>
-                <strong>{name}</strong> ({type}): {description}
-              </li>
-            ))}
-          </ul>
-        </EuiAccordion>
+        <DeprecatedFeaturesList packageInfo={packageInfo} />
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

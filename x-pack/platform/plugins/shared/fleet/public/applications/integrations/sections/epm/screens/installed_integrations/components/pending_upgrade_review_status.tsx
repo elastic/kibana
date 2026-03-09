@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiButton,
-  EuiLink,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -21,13 +20,17 @@ import {
   EuiText,
   useGeneratedHtmlId,
   EuiToolTip,
+  EuiPanel,
+  EuiSpacer,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 
-import { useLink, useUpgradeReviewActions } from '../../../../../../../hooks';
+import { useGetPackageInfoByKeyQuery, useUpgradeReviewActions } from '../../../../../../../hooks';
 import type { UpgradeReviewProps } from '../../../../../../../hooks';
+import { DeprecatedFeaturesList } from '../../detail/overview/deprecation_callout';
 
 const autoOpenModalForPackages = new Set<string>();
 
@@ -40,12 +43,17 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
       }
       return false;
     });
-    const { getHref } = useLink();
+    const { data: packageInfoData, isLoading: isPackageInfoLoading } = useGetPackageInfoByKeyQuery(
+      pkgName,
+      pendingUpgradeReview.target_version,
+      {
+        prerelease: true,
+        full: true,
+      }
+    );
+    const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
 
     const targetVersion = pendingUpgradeReview.target_version;
-    const settingsHref = getHref('integration_details_settings', {
-      pkgkey: `${pkgName}-${targetVersion}`,
-    });
 
     const modalTitleId = useGeneratedHtmlId();
     const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -87,17 +95,31 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               <EuiText size="s">
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewDescription"
-                  defaultMessage="This version introduces deprecations that might affect your current setup. {settingsLink} before upgrading."
-                  values={{
-                    settingsLink: (
-                      <EuiLink href={settingsHref}>
-                        <FormattedMessage
-                          id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewSettingsLink"
-                          defaultMessage="Review the changes"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
+                  defaultMessage="This version introduces deprecations that might affect your current setup. Review the following changes before upgrading."
+                />
+              </EuiText>
+              <EuiSpacer size="m" />
+              {isPackageInfoLoading ? (
+                <EuiSkeletonText lines={3} />
+              ) : (
+                <EuiPanel paddingSize="m" color="warning">
+                  {packageInfo && <DeprecatedFeaturesList packageInfo={packageInfo} />}
+                </EuiPanel>
+              )}
+              <EuiSpacer size="m" />
+              <EuiText size="s">
+                <EuiIcon
+                  type="info"
+                  size="m"
+                  aria-label={i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewAcceptDescriptionIconLabel',
+                    { defaultMessage: 'Info' }
+                  )}
+                />
+                &nbsp;
+                <FormattedMessage
+                  id="xpack.fleet.epmInstalledIntegrations.pendingUpgradeReviewAcceptDescription"
+                  defaultMessage="Fleet will attempt to upgrade and deploy your policies automatically."
                 />
               </EuiText>
             </EuiModalBody>
@@ -105,7 +127,7 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
               <EuiButtonEmpty onClick={() => handleDismiss(closeModal)} isLoading={isLoading}>
                 <FormattedMessage
                   id="xpack.fleet.epmInstalledIntegrations.pauseUpgradeButton"
-                  defaultMessage="Pause upgrade"
+                  defaultMessage="Dismiss"
                 />
               </EuiButtonEmpty>
               <EuiButton

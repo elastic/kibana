@@ -40,7 +40,6 @@ import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
-import { PendingUpgradeReviewStatus, DeclinedUpgradeStatus } from './pending_upgrade_review_status';
 import { AlertsCell } from './alerts_cell';
 import { DashboardsCell } from './dashboards_cell';
 
@@ -270,37 +269,52 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   </EuiLink>
                 </DisabledWrapperTooltip>
               ) : null;
-
               if (showPendingReview) {
                 return (
                   <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
                     {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
                     <EuiFlexItem grow={false}>
-                      <PendingUpgradeReviewStatus
-                        pkgTitle={item.title ?? ''}
-                        pkgName={item.name}
-                        pendingUpgradeReview={review}
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={i18n.translate(
+                          'xpack.fleet.installedIntegrations.upgradePausedTooltip',
+                          {
+                            defaultMessage: 'Auto-upgrade to version {version} has been paused.',
+                            values: {
+                              version:
+                                item.installationInfo?.pending_upgrade_review?.target_version,
+                            },
+                          }
+                        )}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 );
               }
-
               if (showDeclinedReview) {
                 return (
                   <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center" wrap={true}>
                     {policiesLink && <EuiFlexItem grow={false}>{policiesLink}</EuiFlexItem>}
                     <EuiFlexItem grow={false}>
-                      <DeclinedUpgradeStatus
-                        pkgName={item.name}
-                        pendingUpgradeReview={review}
-                        pkgTitle={item.title ?? ''}
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={i18n.translate(
+                          'xpack.fleet.installedIntegrations.upgradeDeclinedTooltip',
+                          {
+                            defaultMessage: 'Auto-upgrade to version {version} has been declined.',
+                            values: {
+                              version:
+                                item.installationInfo?.pending_upgrade_review?.target_version,
+                            },
+                          }
+                        )}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 );
               }
-
               return policiesLink;
             },
           },
