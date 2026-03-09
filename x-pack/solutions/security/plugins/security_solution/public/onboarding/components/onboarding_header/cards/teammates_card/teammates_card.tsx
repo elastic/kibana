@@ -19,9 +19,7 @@ export const TeammatesCard = React.memo<{ isDarkMode: boolean }>(() => {
   return (
     <LinkCard
       id={OnboardingHeaderCardId.teammates}
-      icon={
-        <HighFiveIllustration size={64} alt={i18n.ONBOARDING_HEADER_TEAMMATES_TITLE} />
-      }
+      icon={<HighFiveIllustration size={64} alt={i18n.ONBOARDING_HEADER_TEAMMATES_TITLE} />}
       title={i18n.ONBOARDING_HEADER_TEAMMATES_TITLE}
       description={i18n.ONBOARDING_HEADER_TEAMMATES_DESCRIPTION}
       href={usersUrl}

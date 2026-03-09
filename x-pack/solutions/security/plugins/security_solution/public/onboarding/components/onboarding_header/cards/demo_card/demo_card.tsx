@@ -15,12 +15,7 @@ export const DemoCard = React.memo<{ isDarkMode: boolean }>(() => {
   return (
     <LinkCard
       id={OnboardingHeaderCardId.demo}
-      icon={
-        <ObservabilityGraphsIllustration
-          size={64}
-          alt={i18n.ONBOARDING_HEADER_DEMO_TITLE}
-        />
-      }
+      icon={<ObservabilityGraphsIllustration size={64} alt={i18n.ONBOARDING_HEADER_DEMO_TITLE} />}
       title={i18n.ONBOARDING_HEADER_DEMO_TITLE}
       description={i18n.ONBOARDING_HEADER_DEMO_DESCRIPTION}
       href="https://demo.elastic.co/app/security/get_started"

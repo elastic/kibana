@@ -53,11 +53,7 @@ export const ObservabilityGraphsIllustration: React.FC<{
       />
     </mask>
     <g mask={`url(#${MASK_ID})`}>
-      <path
-        d="M97.49 13.5H11.5V25.74H97.49V13.5Z"
-        stroke="#101C3F"
-        strokeMiterlimit="10"
-      />
+      <path d="M97.49 13.5H11.5V25.74H97.49V13.5Z" stroke="#101C3F" strokeMiterlimit="10" />
     </g>
     <path
       d="M91.89 14H16.92C14.269 14 12.12 16.149 12.12 18.8V79.06C12.12 81.711 14.269 83.86 16.92 83.86H91.89C94.541 83.86 96.69 81.711 96.69 79.06V18.8C96.69 16.149 94.541 14 91.89 14Z"

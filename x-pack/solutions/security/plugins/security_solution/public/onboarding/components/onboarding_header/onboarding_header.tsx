@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
@@ -44,10 +44,7 @@ export const OnboardingHeader = React.memo(() => {
     <>
       <EuiFlexGroup justifyContent="center" alignItems="center" className={styles}>
         <EuiFlexItem grow={false}>
-          <CloudRocketIllustration
-            size={128}
-            alt={filteredHeaderConfig.subTitle}
-          />
+          <CloudRocketIllustration size={128} alt={filteredHeaderConfig.subTitle} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="onboardingHeaderTitleWrapper">
           {currentUserName && (
