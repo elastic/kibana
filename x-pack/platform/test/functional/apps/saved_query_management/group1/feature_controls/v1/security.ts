@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FeatureApp, FeatureName } from '../create_security_tests';
-import { createSecurityTests } from '../create_security_tests';
+import type { FeatureApp, FeatureName } from '../../../feature_controls/create_security_tests';
+import { createSecurityTests } from '../../../feature_controls/create_security_tests';
 
 const featureConfigs: Array<{
   feature: FeatureName;
@@ -21,16 +21,6 @@ const featureConfigs: Array<{
   {
     feature: 'dashboard',
     app: 'dashboard',
-    hasImplicitSaveQueryManagement: true,
-  },
-  {
-    feature: 'maps',
-    app: 'maps',
-    hasImplicitSaveQueryManagement: true,
-  },
-  {
-    feature: 'visualize',
-    app: 'visualize',
     hasImplicitSaveQueryManagement: true,
   },
 ];
