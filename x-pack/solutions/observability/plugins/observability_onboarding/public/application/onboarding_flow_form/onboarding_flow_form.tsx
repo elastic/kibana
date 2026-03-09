@@ -10,9 +10,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
+  EuiBetaBadge,
+  EuiButton,
   EuiCheckableCard,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,6 +28,8 @@ import {
 import { css } from '@emotion/react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
@@ -49,9 +54,10 @@ interface UseCaseOption {
 export const OnboardingFlowForm: FunctionComponent = () => {
   const {
     services: {
-      context: { isCloud },
+      context: { isCloud, isDev },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+  const history = useHistory();
 
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
@@ -207,8 +213,77 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   let isSelectingCategoryWithKeyboard: boolean = false;
 
+  const { href: agentOnboardingHref, onClick: agentOnboardingOnClick } = reactRouterNavigate(
+    history,
+    '/agent-onboarding'
+  );
+
   return (
     <EuiPanel hasBorder paddingSize="xl">
+      {isDev && (
+        <>
+          <EuiPanel
+            color="subdued"
+            paddingSize="l"
+            hasBorder
+            data-test-subj="observabilityOnboardingAgentCallout"
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="sparkles" size="xl" color="primary" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="baseline" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xs">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.onboardingFlowForm.agentCallout.title',
+                          { defaultMessage: 'Onboard with AI in your terminal' }
+                        )}
+                      </strong>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={i18n.translate(
+                        'xpack.observability_onboarding.onboardingFlowForm.agentCallout.techPreview',
+                        { defaultMessage: 'Technical preview' }
+                      )}
+                      size="s"
+                      color="hollow"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="xs" />
+                <EuiText size="s" color="subdued">
+                  {i18n.translate(
+                    'xpack.observability_onboarding.onboardingFlowForm.agentCallout.description',
+                    {
+                      defaultMessage:
+                        'Let Claude Code guide you through setting up observability — it auto-detects your systems and installs the right collectors.',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  href={agentOnboardingHref}
+                  onClick={agentOnboardingOnClick}
+                  iconType="sparkles"
+                  data-test-subj="observabilityOnboardingAgentCalloutButton"
+                >
+                  {i18n.translate(
+                    'xpack.observability_onboarding.onboardingFlowForm.agentCallout.button',
+                    { defaultMessage: 'Get started' }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer size="xl" />
+        </>
+      )}
       <EuiTitle size="s" id={categorySelectorTitleId}>
         <strong>
           {i18n.translate(

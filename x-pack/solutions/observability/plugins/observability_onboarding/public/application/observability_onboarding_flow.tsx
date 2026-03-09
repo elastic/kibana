@@ -19,6 +19,7 @@ import {
   FirehosePage,
   OtelApmPage,
   CloudForwarderPage,
+  AgentOnboardingPage,
 } from './pages';
 import type { ObservabilityOnboardingAppServices } from '..';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
@@ -70,6 +71,11 @@ export function ObservabilityOnboardingFlow() {
         {(isServerless || isDev) && (
           <Route path="/cloudforwarder">
             <CloudForwarderPage />
+          </Route>
+        )}
+        {isDev && (
+          <Route path="/agent-onboarding">
+            <AgentOnboardingPage />
           </Route>
         )}
         <Route>
