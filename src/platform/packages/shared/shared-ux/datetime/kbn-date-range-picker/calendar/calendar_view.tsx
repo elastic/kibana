@@ -9,9 +9,10 @@
 
 import React from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
+import { useEuiTheme } from '@elastic/eui';
 import 'react-day-picker/style.css';
 
-import { useCalendarViewStyles } from './calendar_view.styles';
+import { calendarViewStyles } from './calendar_view.styles';
 
 interface CalendarViewProps {
   /** The month to display in the calendar. */
@@ -24,13 +25,14 @@ interface CalendarViewProps {
 
 /**
  * The calendar view component. Displays a calendar with the given month and range.
- * Based on `react-day-picker`.
  */
 export function CalendarView({ month, range, setRange }: CalendarViewProps) {
-  const styles = useCalendarViewStyles();
+  const euiThemeContext = useEuiTheme();
+  const styles = calendarViewStyles(euiThemeContext);
 
   return (
     <DayPicker
+      css={styles.dayPicker}
       disableNavigation
       hideNavigation
       mode="range"
@@ -38,7 +40,6 @@ export function CalendarView({ month, range, setRange }: CalendarViewProps) {
       onSelect={setRange}
       required={false}
       selected={range}
-      styles={styles.dayPicker}
     />
   );
 }

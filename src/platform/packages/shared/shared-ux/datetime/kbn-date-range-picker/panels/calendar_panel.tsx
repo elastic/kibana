@@ -189,7 +189,7 @@ export function CalendarPanel() {
           {mainPanelTexts.calendarPanelTitle}
         </SubPanelHeading>
       </PanelHeader>
-      <PanelBody padding={false}>
+      <PanelBody>
         <Calendar range={range} onRangeChange={handleRangeChange} />
       </PanelBody>
       <PanelFooter>

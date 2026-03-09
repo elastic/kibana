@@ -7,39 +7,142 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import { useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 /**
- * Returns layout styles for the DayPicker `styles` prop (applied as inline styles on UI elements)
- * and CSS custom properties for the wrapper div (cascade into react-day-picker's class-based rules).
+ * Returns layout styles for the DayPicker `css` prop.
  *
- * Range selection states (range_start, range_end, range_middle) are styled via CSS variables
- * because react-day-picker v9 applies them on `.rdp-range_start .rdp-day_button` child selectors,
- * which inline styles on the parent <td> cannot reach.
+ * @see https://daypicker.dev/docs/styling
  */
-export const useCalendarViewStyles = () => {
-  const { euiTheme } = useEuiTheme();
+export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
+  const dayPicker = css`
+    .rdp-root {
+      width: 100%;
+    }
 
-  const dayPicker = useMemo(
-    () => ({
-      root: {
-        width: '100%',
-      },
-      months: {
-        width: '100%',
-      },
-      month: {
-        padding: `0 ${euiTheme.size.base}`,
-      },
-      month_caption: {
-        display: 'flex',
-        fontSize: euiTheme.font.scale.xs * euiTheme.base,
-        justifyContent: 'center',
-      },
-    }),
-    [euiTheme]
-  );
+    .rdp-months {
+      max-width: initial;
+      width: 100%;
+    }
+
+    .rdp-month {
+      width: 100%;
+    }
+
+    .rdp-month_caption {
+      color: ${euiTheme.colors.textHeading};
+      display: flex;
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-weight: ${euiTheme.font.weight.bold};
+      height: 36px;
+      justify-content: center;
+      padding-bottom: ${euiTheme.size.s};
+      padding-top: ${euiTheme.size.m};
+    }
+
+    .rdp-month_grid {
+      border-collapse: separate;
+      border-spacing: 0 ${euiTheme.size.xxs};
+      width: 100%;
+    }
+
+    .rdp-weekday {
+      border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+      color: ${euiTheme.colors.textSubdued};
+      height: ${euiTheme.size.l};
+      font-size: ${euiTheme.font.scale.xxs * euiTheme.base}px;
+      padding: ${euiTheme.size.xs};
+      vertical-align: middle;
+    }
+
+    .rdp-weeks tr:first-child td {
+      padding-top: ${euiTheme.size.xs};
+    }
+
+    .rdp-day, .rdp-range_start, .rdp-range_end {
+      background: transparent;
+      height: ${euiTheme.size.xl};
+    }
+    
+    :not(.rdp-today) .rdp-day_button {
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-weight: ${euiTheme.font.weight.regular};
+      height: ${euiTheme.size.xl};
+      width: 100%;
+    }
+  
+    .rdp-today .rdp-day_button {
+      position: relative;
+      color: ${euiTheme.colors.textParagraph};
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 6px;
+        height: 6px;
+        background-color: ${euiTheme.colors.backgroundFilledPrimary};
+        border-radius: 3px;
+      }
+    }
+    
+    .rdp-selected.rdp-range_start .rdp-day_button::after,
+    .rdp-selected.rdp-range_end .rdp-day_button::after {
+      background-color: ${euiTheme.colors.textInverse};
+    }
+
+    .rdp-selected .rdp-day_button {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+      border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary};
+      color: ${euiTheme.colors.textPrimary};
+      font-weight: ${euiTheme.font.weight.semiBold};
+    }
+    
+    .rdp-selected:not(.rdp-range_middle) .rdp-day_button {
+      border-radius: ${euiTheme.border.radius.small};
+      font-weight: ${euiTheme.font.weight.bold};
+    }
+    
+    .rdp-range_middle .rdp-day_button {
+      background-color: ${euiTheme.colors.backgroundLightPrimary};
+      border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.backgroundLightPrimary};
+      color: ${euiTheme.colors.textPrimary};
+
+      &:hover {
+        background-color: ${euiTheme.components.buttons.backgroundPrimaryHover};
+      }
+    }
+
+    /* Left rounding: row edge or month edge (preceded by outside cell) */
+    .rdp-range_middle:not(.rdp-outside):first-child .rdp-day_button,
+    .rdp-outside + .rdp-range_middle:not(.rdp-outside) .rdp-day_button {
+      border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
+    }
+
+    /* Right rounding: row edge or month edge (followed by outside cell) */
+    .rdp-range_middle:not(.rdp-outside):last-child .rdp-day_button,
+    .rdp-range_middle:not(.rdp-outside):has(+ .rdp-outside) .rdp-day_button {
+      border-radius: 0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small} 0;
+    }
+
+    /* Remove the inward border radius on the start and end of the range when they are siblings */
+    .rdp-range_start:has(+ .rdp-range_end) .rdp-day_button {
+      border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
+    }
+    
+    .rdp-range_start + .rdp-range_end .rdp-day_button {
+      border-radius: 0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small} 0;
+    }
+    
+    .rdp-range_end .rdp-day_button, .rdp-range_start .rdp-day_button {
+      background-color: ${euiTheme.colors.backgroundFilledPrimary};
+      border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.backgroundFilledPrimary};
+      color: ${euiTheme.colors.textInverse};
+      font-weight: ${euiTheme.font.weight.bold};
+    }
+  }`;
 
   return { dayPicker };
 };
