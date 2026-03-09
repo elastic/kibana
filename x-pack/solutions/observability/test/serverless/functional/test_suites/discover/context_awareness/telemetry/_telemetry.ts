@@ -94,7 +94,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         // should reset the profiles when navigating away from Discover
         await common.navigateToApp('management');
         await header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('cards-navigation-page');
+        await testSubjects.existOrFail('app-card-index_management');
+        await testSubjects.click('app-card-index_management');
 
         await retry.try(async () => {
           const eventsAfter = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
