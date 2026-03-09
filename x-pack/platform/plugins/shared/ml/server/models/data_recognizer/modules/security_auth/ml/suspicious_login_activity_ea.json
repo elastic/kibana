@@ -1,5 +1,5 @@
 {
-  "description": "Security: Authentication - Detects unusually high number of authentication attempts for a unique host identifier.",
+  "description": "Security: Authentication - Detects unusually high number of authentication attempts for a host.",
   "groups": [
     "security",
     "authentication"
