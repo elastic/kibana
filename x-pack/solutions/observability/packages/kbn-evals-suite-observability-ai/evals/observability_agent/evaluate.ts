@@ -55,7 +55,9 @@ export const evaluate = base.extend<
   evaluateDataset: [
     ({ chatClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(async ({ dataset: { name, description, examples } }) => {
-        const includeQuantitativeCorrectness = examples.some((example) => Boolean(example.output.expected));
+        const includeQuantitativeCorrectness = examples.some((example) =>
+          Boolean(example.output.expected)
+        );
 
         await executorClient.runExperiment(
           {
@@ -71,9 +73,11 @@ export const evaluate = base.extend<
                     input,
                     expected: { expected: output.expected },
                     output: {
-                      messages: [response.messages[response.messages.length - 1]].map((message) => ({
-                        message: message.content,
-                      })),
+                      messages: [response.messages[response.messages.length - 1]].map(
+                        (message) => ({
+                          message: message.content,
+                        })
+                      ),
                     },
                     metadata,
                   })
