@@ -35,7 +35,7 @@ import { getConnectorById } from './util/get_connector_by_id';
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
