@@ -91,6 +91,8 @@
     "updatedBy"
   ],
   "alerting_notification_policy": [
+    "enabled",
+    "snoozedUntil",
     "auth",
     "auth.apiKey",
     "auth.createdByUser",
