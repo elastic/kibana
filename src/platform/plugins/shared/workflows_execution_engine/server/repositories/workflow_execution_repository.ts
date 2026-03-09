@@ -9,7 +9,11 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ActiveExecutionStatuses,
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
 export class WorkflowExecutionRepository {
@@ -95,7 +99,8 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves when the update operation is complete.
    */
   public async updateWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>
+    workflowExecution: Partial<EsWorkflowExecution>,
+    options: { refresh?: boolean | 'wait_for' } = {}
   ): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for update');
@@ -104,7 +109,7 @@ export class WorkflowExecutionRepository {
     await this.esClient.update<Partial<EsWorkflowExecution>>({
       index: this.indexName,
       id: workflowExecution.id,
-      refresh: false,
+      refresh: options.refresh ?? false,
       doc: workflowExecution,
     });
   }
@@ -270,9 +275,8 @@ export class WorkflowExecutionRepository {
   }
 
   /**
-   * Retrieves non-terminal workflow execution IDs by concurrency group key.
-   * For cancel-in-progress strategy, we need to cancel any non-terminal executions (PENDING, RUNNING, etc.)
-   * to make room for new executions.
+   * Retrieves active (slot-occupying) workflow execution IDs by concurrency group key.
+   * Uses ActiveExecutionStatuses which excludes QUEUED — queued executions don't occupy a slot.
    *
    * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
    * Results are sorted by createdAt ascending (oldest first).
@@ -292,10 +296,9 @@ export class WorkflowExecutionRepository {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
       { term: { spaceId } },
-      // Direct match on in-progress statuses is faster than must_not on terminal statuses
       {
         terms: {
-          status: NonTerminalExecutionStatuses,
+          status: ActiveExecutionStatuses,
         },
       },
     ];
@@ -327,5 +330,66 @@ export class WorkflowExecutionRepository {
     return response.hits.hits
       .map((hit) => hit._source?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
+  }
+
+  /**
+   * Retrieves QUEUED workflow executions by concurrency group key, sorted FIFO (oldest first).
+   *
+   * @param concurrencyGroupKey - The concurrency group key to filter by.
+   * @param spaceId - The ID of the space associated with the workflow execution.
+   * @param size - Optional limit on the number of results to return. Defaults to 5000.
+   * @returns A promise that resolves to an array of { id, workflowId } sorted by createdAt (oldest first).
+   */
+  public async getQueuedExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    size: number = 5000
+  ): Promise<Array<{ id: string; workflowId: string }>> {
+    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id' | 'workflowId'>>({
+      index: this.indexName,
+      query: {
+        bool: {
+          filter: [
+            { term: { concurrencyGroupKey } },
+            { term: { spaceId } },
+            { term: { status: ExecutionStatus.QUEUED } },
+          ],
+        },
+      },
+      _source: ['id', 'workflowId'],
+      sort: [{ createdAt: { order: 'asc' } }],
+      size: Math.min(size, 10000),
+    });
+
+    return response.hits.hits
+      .map((hit) => ({
+        id: hit._source?.id ?? hit._id ?? '',
+        workflowId: hit._source?.workflowId ?? '',
+      }))
+      .filter((item) => item.id !== undefined);
+  }
+
+  /**
+   * Atomically promotes a QUEUED execution to PENDING using a painless script.
+   * If the execution is no longer QUEUED (e.g., cancelled or already promoted by another process),
+   * the update is a no-op. This guards against concurrent promoters racing on the same execution.
+   *
+   * @param id - The ID of the execution to promote.
+   * @returns 'updated' if the execution was promoted, 'noop' if it was already in a different status.
+   */
+  public async promoteQueuedExecution(id: string): Promise<'updated' | 'noop'> {
+    const response = await this.esClient.update({
+      index: this.indexName,
+      id,
+      script: {
+        lang: 'painless',
+        source: `if (ctx._source.status == 'queued') {
+          ctx._source.status = 'pending';
+        } else {
+          ctx.op = 'noop';
+        }`,
+      },
+    });
+    return response.result === 'updated' ? 'updated' : 'noop';
   }
 }
