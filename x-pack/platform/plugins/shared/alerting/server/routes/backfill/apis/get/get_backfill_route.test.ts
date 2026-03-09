@@ -10,7 +10,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { getBackfillRoute } from './get_backfill_route';
+import { getBackfillRoute, getBackfillPublicRoute } from './get_backfill_route';
 import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponseV1 } from '../../transforms';
 
@@ -20,40 +20,40 @@ jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
+const mockBackfillResult: Backfill = {
+  id: 'abc',
+  createdAt: '2024-01-30T00:00:00.000Z',
+  duration: '12h',
+  enabled: true,
+  initiator: 'user',
+  rule: {
+    name: 'my rule name',
+    tags: ['foo'],
+    alertTypeId: 'myType',
+    params: {},
+    actions: [],
+    apiKeyOwner: 'user',
+    apiKeyCreatedByUser: false,
+    consumer: 'myApp',
+    enabled: true,
+    schedule: { interval: '12h' },
+    createdBy: 'user',
+    updatedBy: 'user',
+    createdAt: '2019-02-12T21:01:22.479Z',
+    updatedAt: '2019-02-12T21:01:22.479Z',
+    revision: 0,
+    id: '1',
+  },
+  spaceId: 'default',
+  start: '2023-11-16T08:00:00.000Z',
+  status: 'pending',
+  schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
+};
+
 describe('getBackfillRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-
-  const mockBackfillResult: Backfill = {
-    id: 'abc',
-    createdAt: '2024-01-30T00:00:00.000Z',
-    duration: '12h',
-    enabled: true,
-    initiator: 'user',
-    rule: {
-      name: 'my rule name',
-      tags: ['foo'],
-      alertTypeId: 'myType',
-      params: {},
-      actions: [],
-      apiKeyOwner: 'user',
-      apiKeyCreatedByUser: false,
-      consumer: 'myApp',
-      enabled: true,
-      schedule: { interval: '12h' },
-      createdBy: 'user',
-      updatedBy: 'user',
-      createdAt: '2019-02-12T21:01:22.479Z',
-      updatedAt: '2019-02-12T21:01:22.479Z',
-      revision: 0,
-      id: '1',
-    },
-    spaceId: 'default',
-    start: '2023-11-16T08:00:00.000Z',
-    status: 'pending',
-    schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
-  };
 
   test('should get the backfill', async () => {
     const licenseState = licenseStateMock.create();
@@ -102,5 +102,47 @@ describe('getBackfillRoute', () => {
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: 'abc' } });
 
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+});
+
+describe('getBackfillPublicRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('should register the public route with the correct path', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getBackfillPublicRoute(router, licenseState);
+
+    const [config] = router.get.mock.calls[0];
+
+    expect(config.path).toEqual('/api/alerting/rules/backfill/{id}');
+    expect(config.options).toEqual(
+      expect.objectContaining({
+        access: 'public',
+        summary: 'Get a backfill by ID',
+        tags: ['oas-tag:alerting'],
+      })
+    );
+  });
+
+  test('should get the backfill via the public route', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getBackfillPublicRoute(router, licenseState);
+
+    rulesClient.getBackfill.mockResolvedValueOnce(mockBackfillResult);
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: 'abc' } });
+
+    await handler(context, req, res);
+
+    expect(rulesClient.getBackfill).toHaveBeenLastCalledWith('abc');
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: transformBackfillToBackfillResponseV1(mockBackfillResult),
+    });
   });
 });
