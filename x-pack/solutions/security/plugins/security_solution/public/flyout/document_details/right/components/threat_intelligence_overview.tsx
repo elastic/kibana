@@ -11,7 +11,7 @@ import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useDocumentDetailsContext } from '../../shared/context';

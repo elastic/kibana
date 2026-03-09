@@ -69,10 +69,10 @@ export default function QualityIssueFlyout() {
   const isDegradedType = expandedDegradedField && expandedDegradedField.type === 'degraded';
 
   const degradedEsqlQuery = isDegradedType
-    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE MV_CONTAINS(${_IGNORED}, "${expandedDegradedField.name}")`
+    ? `FROM ${datasetDetails.rawName} METADATA ${_IGNORED} | WHERE MV_CONTAINS(${_IGNORED}, "${expandedDegradedField.name}") | SORT @timestamp DESC`
     : '';
 
-  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures`;
+  const failedEsqlQuery = `FROM ${datasetDetails.rawName}::failures | SORT @timestamp DESC`;
 
   const esqlQuery = isDegradedType ? degradedEsqlQuery : failedEsqlQuery;
 
