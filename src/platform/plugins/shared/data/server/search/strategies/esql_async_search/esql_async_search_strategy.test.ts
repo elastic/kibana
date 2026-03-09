@@ -207,8 +207,7 @@ describe('ES|QL async search strategy', () => {
 
         expect(mockAsyncQueryStop).toBeCalled();
         const request = mockAsyncQueryStop.mock.calls[0][0];
-        expect(request.id).toEqual(
-          'FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ=='
+        expect(request.id).toEqual(id);
         );
       });
 
