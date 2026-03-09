@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionContext } from '../../connector_spec';
+import type { ActionContext } from '../../connector_spec';
 import {
   listAmazonS3Buckets,
   listAmazonS3BucketObjects,

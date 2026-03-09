@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionContext } from "../../connector_spec";
+import type { ActionContext } from "../../connector_spec";
 import { calculateAWSA4Signature, sha256Hash } from "../../auth_types/aws_credentials_helpers";
 import { Parser } from 'xml2js';
 
