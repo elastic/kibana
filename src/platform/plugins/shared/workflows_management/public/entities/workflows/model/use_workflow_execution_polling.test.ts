@@ -71,6 +71,7 @@ describe('useWorkflowExecutionPolling', () => {
     stepExecutions: [],
     duration: PollingIntervalMs * 2,
     triggeredBy: 'manual',
+    createdAt: new Date().toISOString(),
     yaml: 'version: "1"\\nname: test-workflow\\nenabled: true\\ntriggers:\\n  - type: manual\\nsteps:\\n  - name: test-step\\n    type: console.log\\n    with:\\n      message: Hello World',
   });
 

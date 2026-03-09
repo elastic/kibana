@@ -111,6 +111,7 @@ const StoryWrapper: React.FC<{
           error: null,
           startedAt: new Date().toISOString(),
           finishedAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
           workflowDefinition: createMockWorkflowDefinition(),
           stepExecutions,
           duration: null,

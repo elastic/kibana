@@ -8,7 +8,11 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ActiveExecutionStatuses,
+  ExecutionStatus,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
@@ -155,18 +159,44 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         (exec) =>
           exec.concurrencyGroupKey === concurrencyGroupKey &&
           exec.spaceId === spaceId &&
-          !TerminalExecutionStatuses.includes(exec.status) &&
+          ActiveExecutionStatuses.includes(exec.status) &&
           (!excludeExecutionId || exec.id !== excludeExecutionId)
       )
       .sort((a, b) => {
         const aTime = new Date(a.createdAt).getTime();
         const bTime = new Date(b.createdAt).getTime();
-        return aTime - bTime; // Oldest first
+        return aTime - bTime;
       })
       .map((exec) => exec.id)
-      .slice(0, Math.min(size, 10000)); // Cap at ES default max_result_window
+      .slice(0, Math.min(size, 10000));
 
     return results;
+  }
+
+  public async getQueuedExecutionsByConcurrencyGroup(
+    concurrencyGroupKey: string,
+    spaceId: string,
+    size: number = 5000
+  ): Promise<Array<{ id: string; workflowId: string }>> {
+    return Array.from(this.workflowExecutions.values())
+      .filter(
+        (exec) =>
+          exec.concurrencyGroupKey === concurrencyGroupKey &&
+          exec.spaceId === spaceId &&
+          exec.status === ExecutionStatus.QUEUED
+      )
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .slice(0, Math.min(size, 10000))
+      .map((exec) => ({ id: exec.id, workflowId: exec.workflowId }));
+  }
+
+  public async promoteQueuedExecution(id: string): Promise<'updated' | 'noop'> {
+    const exec = this.workflowExecutions.get(id);
+    if (exec && exec.status === ExecutionStatus.QUEUED) {
+      exec.status = ExecutionStatus.PENDING;
+      return 'updated';
+    }
+    return 'noop';
   }
 
   public async bulkUpdateWorkflowExecutions(

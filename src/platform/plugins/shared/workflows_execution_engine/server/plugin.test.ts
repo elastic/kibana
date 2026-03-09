@@ -627,6 +627,273 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   });
 });
 
+describe('QUEUED execution cancellation', () => {
+  it('should directly transition QUEUED execution to CANCELLED without TM interaction', async () => {
+    const esClient =
+      elasticsearchServiceMock.createElasticsearchClient() as unknown as jest.Mocked<Client>;
+    esClient.update = jest.fn().mockResolvedValue({} as any);
+    esClient.get = jest.fn().mockResolvedValue({
+      _source: {
+        id: 'queued-exec-1',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        status: ExecutionStatus.QUEUED,
+      },
+    } as any);
+
+    const repo = new WorkflowExecutionRepository(esClient);
+
+    const execution = await repo.getWorkflowExecutionById('queued-exec-1', 'default');
+    expect(execution?.status).toBe(ExecutionStatus.QUEUED);
+
+    await repo.updateWorkflowExecution({
+      id: 'queued-exec-1',
+      status: ExecutionStatus.CANCELLED,
+      cancelRequested: true,
+      cancellationReason: 'Cancelled by user',
+      cancelledAt: new Date().toISOString(),
+      cancelledBy: 'system',
+    });
+
+    expect(esClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        id: 'queued-exec-1',
+        doc: expect.objectContaining({
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled by user',
+        }),
+      })
+    );
+  });
+});
+
+describe('releaseSlotAndPromote orchestration', () => {
+  let plugin: any;
+  let mockRepo: any;
+  let mockSemaphoreRepo: any;
+  let mockTaskManager: any;
+  let mockLogger: Logger;
+  let mockRequest: any;
+
+  const queueConcurrencySettings = {
+    key: 'group-1',
+    strategy: 'queue' as const,
+    max: 1,
+    maxQueueSize: 10,
+  };
+
+  const makeExecution = (overrides: Record<string, unknown> = {}) => ({
+    id: 'completed-exec',
+    workflowId: 'wf-1',
+    spaceId: 'default',
+    status: ExecutionStatus.COMPLETED,
+    concurrencyGroupKey: 'group-1',
+    workflowDefinition: { settings: { concurrency: queueConcurrencySettings } },
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    mockLogger = loggingSystemMock.create().get();
+    mockRequest = { isFakeRequest: true } as any;
+
+    mockRepo = {
+      getWorkflowExecutionById: jest.fn(),
+      getQueuedExecutionsByConcurrencyGroup: jest.fn().mockResolvedValue([]),
+      promoteQueuedExecution: jest.fn(),
+      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+      searchWorkflowExecutions: jest.fn().mockResolvedValue([]),
+    };
+    mockSemaphoreRepo = {
+      tryAcquireSlot: jest.fn().mockResolvedValue(true),
+      releaseSlot: jest.fn().mockResolvedValue(undefined),
+    };
+    mockTaskManager = {
+      scheduleExecutionTask: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const initializerContext = {
+      logger: { get: () => mockLogger },
+      config: { get: () => ({ collectQueueMetrics: false, logging: { console: false } }) },
+      env: { packageInfo: { version: '8.0.0' } },
+    };
+
+    const { WorkflowsExecutionEnginePlugin } = jest.requireActual('./plugin');
+    plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
+    plugin.workflowExecutionRepository = mockRepo;
+    plugin.concurrencySemaphoreRepository = mockSemaphoreRepo;
+    plugin.workflowTaskManager = mockTaskManager;
+  });
+
+  it('should promote oldest queued execution when a slot frees up', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
+    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+      { id: 'queued-1', workflowId: 'wf-1' },
+    ]);
+    mockRepo.promoteQueuedExecution.mockResolvedValue('updated');
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'completed-exec'
+    );
+    expect(mockSemaphoreRepo.tryAcquireSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'queued-1',
+      1
+    );
+    expect(mockRepo.promoteQueuedExecution).toHaveBeenCalledWith('queued-1');
+    expect(mockTaskManager.scheduleExecutionTask).toHaveBeenCalledWith({
+      executionId: 'queued-1',
+      workflowId: 'wf-1',
+      spaceId: 'default',
+      fakeRequest: mockRequest,
+    });
+  });
+
+  it('should promote multiple queued executions when multiple slots are free', async () => {
+    const execution = makeExecution({
+      workflowDefinition: {
+        settings: { concurrency: { ...queueConcurrencySettings, max: 3 } },
+      },
+    });
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(execution);
+    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+      { id: 'queued-1', workflowId: 'wf-1' },
+      { id: 'queued-2', workflowId: 'wf-1' },
+      { id: 'queued-3', workflowId: 'wf-1' },
+    ]);
+    mockRepo.promoteQueuedExecution.mockResolvedValue('updated');
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockRepo.promoteQueuedExecution).toHaveBeenCalledTimes(3);
+    expect(mockTaskManager.scheduleExecutionTask).toHaveBeenCalledTimes(3);
+  });
+
+  it('should not promote when no slots are available', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
+    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+      { id: 'queued-1', workflowId: 'wf-1' },
+    ]);
+    mockSemaphoreRepo.tryAcquireSlot.mockResolvedValue(false);
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockRepo.promoteQueuedExecution).not.toHaveBeenCalled();
+    expect(mockTaskManager.scheduleExecutionTask).not.toHaveBeenCalled();
+  });
+
+  it('should release semaphore slot for terminal triggering execution', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(
+      makeExecution({ status: ExecutionStatus.COMPLETED })
+    );
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'completed-exec'
+    );
+  });
+
+  it('should NOT release semaphore slot for non-terminal triggering execution', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(
+      makeExecution({ status: ExecutionStatus.WAITING })
+    );
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockSemaphoreRepo.releaseSlot).not.toHaveBeenCalled();
+  });
+
+  it('should skip promotion when CAS returns noop (concurrent promoter won)', async () => {
+    mockRepo.getWorkflowExecutionById
+      .mockResolvedValueOnce(makeExecution())
+      .mockResolvedValueOnce({ id: 'queued-1', status: ExecutionStatus.PENDING });
+    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+      { id: 'queued-1', workflowId: 'wf-1' },
+    ]);
+    mockRepo.promoteQueuedExecution.mockResolvedValue('noop');
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockRepo.promoteQueuedExecution).toHaveBeenCalledWith('queued-1');
+    expect(mockTaskManager.scheduleExecutionTask).not.toHaveBeenCalled();
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledTimes(1);
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith(
+      'group-1',
+      'default',
+      'completed-exec'
+    );
+  });
+
+  it('should revert to QUEUED when task scheduling fails after promotion', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(makeExecution());
+    mockRepo.getQueuedExecutionsByConcurrencyGroup.mockResolvedValue([
+      { id: 'queued-1', workflowId: 'wf-1' },
+    ]);
+    mockRepo.promoteQueuedExecution.mockResolvedValue('updated');
+    mockTaskManager.scheduleExecutionTask.mockRejectedValue(new Error('TM unavailable'));
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockSemaphoreRepo.releaseSlot).toHaveBeenCalledWith('group-1', 'default', 'queued-1');
+    expect(mockRepo.updateWorkflowExecution).toHaveBeenCalledWith(
+      { id: 'queued-1', status: ExecutionStatus.QUEUED },
+      { refresh: 'wait_for' }
+    );
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to schedule promoted execution queued-1')
+    );
+  });
+
+  it('should no-op for non-queue strategy (drop)', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(
+      makeExecution({
+        workflowDefinition: {
+          settings: { concurrency: { key: 'group-1', strategy: 'drop', max: 1 } },
+        },
+      })
+    );
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
+  });
+
+  it('should no-op when execution has no concurrency group key', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(
+      makeExecution({ concurrencyGroupKey: undefined })
+    );
+
+    await plugin.releaseSlotAndPromote('completed-exec', 'default', mockRequest);
+
+    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
+  });
+
+  it('should no-op when execution is not found', async () => {
+    mockRepo.getWorkflowExecutionById.mockResolvedValue(null);
+
+    await plugin.releaseSlotAndPromote('nonexistent', 'default', mockRequest);
+
+    expect(mockRepo.getQueuedExecutionsByConcurrencyGroup).not.toHaveBeenCalled();
+  });
+
+  it('should no-op when repository or task manager is not initialized', async () => {
+    plugin.workflowExecutionRepository = undefined;
+
+    await plugin.releaseSlotAndPromote('exec-1', 'default', mockRequest);
+
+    expect(mockRepo.getWorkflowExecutionById).not.toHaveBeenCalled();
+  });
+});
+
 describe('elastic-apm-node dynamic import pattern', () => {
   const mockStartSpan = jest.fn().mockReturnValue({ end: jest.fn() });
   const mockSetLabel = jest.fn();
