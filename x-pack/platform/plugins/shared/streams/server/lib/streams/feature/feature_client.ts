@@ -27,6 +27,7 @@ import {
   FEATURE_TAGS,
   FEATURE_META,
   FEATURE_EXPIRES_AT,
+  FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
@@ -250,6 +251,7 @@ function toStorage(stream: string, feature: Feature): StoredFeature {
     [FEATURE_META]: feature.meta,
     [FEATURE_EXPIRES_AT]: feature.expires_at,
     [FEATURE_TITLE]: feature.title,
+    [FEATURE_FILTER]: feature.filter,
   };
 }
 
@@ -271,5 +273,6 @@ function fromStorage(feature: StoredFeature): Feature {
     meta: feature[FEATURE_META],
     expires_at: feature[FEATURE_EXPIRES_AT],
     title: feature[FEATURE_TITLE],
+    filter: feature[FEATURE_FILTER],
   };
 }

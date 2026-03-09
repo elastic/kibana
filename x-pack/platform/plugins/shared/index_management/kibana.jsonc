@@ -25,6 +25,7 @@
       "usageCollection",
       "fleet",
       "cloud",
+      "cloudConnect",
       "ml",
       "streams",
       "console",
