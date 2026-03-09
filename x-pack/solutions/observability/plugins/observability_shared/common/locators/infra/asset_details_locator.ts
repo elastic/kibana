@@ -54,6 +54,14 @@ export class AssetDetailsLocatorDefinition implements LocatorDefinition<AssetDet
   public readonly getLocation = async (
     params: AssetDetailsLocatorParams & { state?: SerializableRecord }
   ) => {
+    if (!params.entityType || !params.entityId) {
+      return {
+        app: 'metrics',
+        path: '/inventory',
+        state: {},
+      };
+    }
+
     // Check which asset types are currently supported
     const isSupportedByAssetDetails = Object.values(SupportedEntityTypes).includes(
       params.entityType as SupportedEntityTypes
