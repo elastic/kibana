@@ -582,6 +582,20 @@ describe('scripts library client', () => {
       );
     });
 
+    it('should error if script id is being used by rules', async () => {
+      rulesClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 10,
+        total: 1,
+        data: [{ id: 'rule-id', name: 'rule id 1 here' }],
+      });
+
+      await expect(scriptsClient.delete('1-2-3')).rejects.toThrow(
+        'Cannot delete script [1-2-3] because it is referenced by the following rules:\n' +
+          'rule id 1 here (ID: rule-id)'
+      );
+    });
+
     it('should throw error when script does not exist', async () => {
       soClientMock.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 

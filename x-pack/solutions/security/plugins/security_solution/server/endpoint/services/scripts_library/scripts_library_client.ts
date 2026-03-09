@@ -311,7 +311,9 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     return fileStorage;
   }
 
-  protected async findRulesUsingScrips(scriptIds: string | string[]): ReturnType<typeof findRules> {
+  protected async findRulesUsingScripts(
+    scriptIds: string | string[]
+  ): ReturnType<typeof findRules> {
     if (!this.rulesClient) {
       throw new ScriptLibraryError('Unable to query for rules - no Rules client available!');
     }
@@ -556,7 +558,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
 
   public async delete(scriptId: string): Promise<void> {
     const scriptSo = await this.getScriptSavedObject(scriptId);
-    const rulesUsingScript = await this.findRulesUsingScrips(scriptId);
+    const rulesUsingScript = await this.findRulesUsingScripts(scriptId);
 
     if (rulesUsingScript.total > 0) {
       throw new ScriptLibraryError(
