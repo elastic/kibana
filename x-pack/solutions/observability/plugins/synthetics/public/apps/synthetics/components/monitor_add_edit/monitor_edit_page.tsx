@@ -26,6 +26,7 @@ import {
   selectSyntheticsMonitorLoading,
 } from '../../state';
 import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
+import { MissingIntegrationCallout } from './steps/missing_integration_callout';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { LocationsLoadingError } from './locations_loading_error';
@@ -102,6 +103,7 @@ export const MonitorEditPage: React.FC = () => {
     <>
       <DisabledCallout />
       <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
+      <MissingIntegrationCallout configId={data[ConfigKey.CONFIG_ID]} />
       <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
       <MonitorForm
         defaultValues={data}

@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -38,6 +38,7 @@ import type {
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
+import { useMonitorIntegrationStatus } from '../../../common/hooks/use_monitor_integration_status';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
@@ -59,6 +60,7 @@ export function useMonitorListColumns({
   const { space } = useKibanaSpace();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
+  const { hasMissingIntegrations } = useMonitorIntegrationStatus();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
@@ -82,9 +84,28 @@ export function useMonitorListColumns({
         defaultMessage: 'Monitor',
       }),
       sortable: true,
-      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorDetailsLink monitor={monitor} />
-      ),
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
+        const isMissing = hasMissingIntegrations(monitor[ConfigKey.CONFIG_ID]);
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <MonitorDetailsLink monitor={monitor} />
+            </EuiFlexItem>
+            {isMissing && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={MISSING_INTEGRATION_TOOLTIP}>
+                  <EuiBadge
+                    color="warning"
+                    data-test-subj="syntheticsMissingIntegrationBadge"
+                  >
+                    {MISSING_INTEGRATION_BADGE}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
+      },
     },
     // Only show Project ID column if project monitors are present
     ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
@@ -364,3 +385,18 @@ export function useMonitorListColumns({
 
   return columns;
 }
+
+const MISSING_INTEGRATION_BADGE = i18n.translate(
+  'xpack.synthetics.management.monitorList.missingIntegration.badge',
+  {
+    defaultMessage: 'Missing integration',
+  }
+);
+
+const MISSING_INTEGRATION_TOOLTIP = i18n.translate(
+  'xpack.synthetics.management.monitorList.missingIntegration.tooltip',
+  {
+    defaultMessage:
+      'This monitor is missing its Fleet package policy on one or more private locations and will not run until reset.',
+  }
+);
