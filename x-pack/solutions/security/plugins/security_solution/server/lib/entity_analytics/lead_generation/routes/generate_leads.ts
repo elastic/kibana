@@ -12,6 +12,7 @@ import type {
   StartServicesAccessor,
   ElasticsearchClient,
 } from '@kbn/core/server';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -177,7 +178,7 @@ const fetchAllEntityStoreRecords = async (
 
   for (const entityType of ['user', 'host'] as const) {
     const index = `.entities.v1.latest.security_${entityType}_${spaceId}`;
-    let searchAfter: unknown[] | undefined;
+    let searchAfter: FieldValue[] | undefined;
 
     while (true) {
       try {
@@ -197,7 +198,7 @@ const fetchAllEntityStoreRecords = async (
         }
 
         if (hits.length < ENTITY_PAGE_SIZE) break;
-        searchAfter = hits[hits.length - 1].sort as unknown[];
+        searchAfter = hits[hits.length - 1].sort as FieldValue[];
       } catch (error) {
         logger.warn(
           `[LeadGeneration] Failed to fetch ${entityType} records from "${index}": ${error}`
@@ -286,7 +287,7 @@ const persistLeads = async (
     // Delete leads from previous runs — only after the new ones are searchable
     await esClient.deleteByQuery({
       index: indexName,
-      body: { query: { bool: { must_not: [{ term: { executionId } }] } } },
+      query: { bool: { must_not: [{ term: { executionId } }] } },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,

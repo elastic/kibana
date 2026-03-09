@@ -196,7 +196,7 @@ const alertSubAggs = () => ({
   top_5_alerts: {
     top_hits: {
       size: 5,
-      sort: [{ 'kibana.alert.risk_score': { order: 'desc' } }],
+      sort: [{ 'kibana.alert.risk_score': { order: 'desc' as const } }],
       _source: false,
       fields: [
         'kibana.alert.severity',
