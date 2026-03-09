@@ -38,7 +38,7 @@ spaceTest.describe(
         const { discover, metricsExperience } = pageObjects;
         const breakdownField = testData.METRICS_DIMENSION_FIELDS.DEFAULT_BREAKDOWN;
 
-        await discover.writeEsqlQuery(testData.ESQL_QUERIES.TS);
+        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
         await expect(metricsExperience.grid).toBeVisible();
 
         await spaceTest.step('set breakdown by dimension from field list', async () => {
@@ -46,8 +46,8 @@ spaceTest.describe(
         });
 
         await spaceTest.step('show selected breakdown in toolbar selector', async () => {
-          await expect(metricsExperience.breakdownSelectorButton).toBeVisible();
-          await expect(metricsExperience.breakdownSelectorButton).toContainText('1');
+          await expect(metricsExperience.breakdownSelector.toggleButton).toBeVisible();
+          await expect(metricsExperience.breakdownSelector.toggleButton).toContainText('1');
         });
 
         await spaceTest.step('keep metrics grid rendered after selecting breakdown', async () => {
