@@ -28,6 +28,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionDetails> = {
       stepId: 'check_ip',
       topologicalIndex: 1,
       status: ExecutionStatus.FAILED,
+      createdAt: '2025-09-01T17:34:54.542Z',
       startedAt: '2025-09-01T17:34:54.542Z',
       id: 'd5c942d5-c788-46ce-961d-5dbab6cf1246',
       scopeStack: [],

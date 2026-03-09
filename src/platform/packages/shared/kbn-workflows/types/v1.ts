@@ -83,12 +83,25 @@ export interface QueueMetrics {
   scheduleDelayMs: number | null;
 }
 
-export interface EsWorkflowExecution {
-  spaceId: string;
+export interface EsBaseExecution {
   id: string;
+  workflowRunId: string;
+  type: unknown;
+  spaceId: string;
+  status: ExecutionStatus;
+  createdBy?: string;
+  createdAt: string;
+  startedAt: string;
+  finishedAt?: string;
+  duration?: number;
+  error?: SerializedError;
+  output?: JsonValue;
+}
+
+export interface EsWorkflowExecution extends EsBaseExecution {
+  type: 'workflow';
   workflowId: string;
   isTestRun: boolean;
-  status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
   yaml: string;
@@ -96,25 +109,49 @@ export interface EsWorkflowExecution {
   /** If specified, the only this step and its children will be executed */
   stepId?: string;
   scopeStack: StackFrame[];
-  createdAt: string;
-  error: SerializedError | null;
-  createdBy?: string; // Keep for backwards compatibility with existing documents
   executedBy?: string; // User who executed the workflow
-  startedAt: string;
-  finishedAt: string;
   cancelRequested: boolean;
   cancellationReason?: string;
   cancelledAt?: string;
   cancelledBy?: string;
-  duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
   taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
   queueMetrics?: QueueMetrics; // Queue delay metrics for observability
-  /** IDs of all step executions, enables O(1) mget lookup instead of search */
+  /** IDs of all step executions in chronological order, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
+}
+
+export type EsExecution = EsWorkflowExecution | EsWorkflowStepExecution;
+
+export interface EsWorkflowStepExecution extends EsBaseExecution {
+  type: 'step';
+  stepId: string;
+  stepType?: string;
+
+  /** Current step's stack frames. */
+  scopeStack: StackFrame[];
+  workflowId: string;
+  duration?: number; // TODO: remove executionTimeMs
+  executionTimeMs?: number;
+
+  /** Topological index of step in workflow graph. */
+  topologicalIndex: number;
+
+  /** Overall execution index in the entire workflow. */
+  globalExecutionIndex: number;
+
+  /**
+   * Execution index within specific stepId.
+   * There might be several instances of the same stepId if it's inside loops, retries, etc.
+   */
+  stepExecutionIndex: number;
+  input?: JsonValue;
+
+  /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
+  state?: Record<string, unknown>;
 }
 
 export interface ProviderInput {
@@ -129,41 +166,7 @@ export interface Provider {
   inputsDefinition: Record<string, ProviderInput>;
 }
 
-export interface EsWorkflowStepExecution {
-  spaceId: string;
-  id: string;
-  stepId: string;
-  stepType?: string;
-
-  /** Current step's stack frames. */
-  scopeStack: StackFrame[];
-  workflowRunId: string;
-  workflowId: string;
-  status: ExecutionStatus;
-  startedAt: string;
-  finishedAt?: string;
-  executionTimeMs?: number;
-
-  /** Topological index of step in workflow graph. */
-  topologicalIndex: number;
-
-  /** Overall execution index in the entire workflow. */
-  globalExecutionIndex: number;
-
-  /**
-   * Execution index within specific stepId.
-   * There might be several instances of the same stepId if it's inside loops, retries, etc.
-   */
-  stepExecutionIndex: number;
-  error?: SerializedError;
-  output?: JsonValue;
-  input?: JsonValue;
-
-  /** Specific step execution instance state. Used by loops, retries, etc to track execution context. */
-  state?: Record<string, unknown>;
-}
-
-export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId'>;
+export type WorkflowStepExecutionDto = Omit<EsWorkflowStepExecution, 'spaceId' | 'type'>;
 
 export interface WorkflowExecutionHistoryModel {
   id: string;
@@ -188,15 +191,15 @@ export interface WorkflowExecutionDto {
   status: ExecutionStatus;
   isTestRun: boolean;
   startedAt: string;
-  error: SerializedError | null;
-  finishedAt: string;
+  error?: SerializedError;
+  finishedAt?: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
   /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
-  duration: number | null;
+  duration?: number;
   executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;

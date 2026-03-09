@@ -15,17 +15,15 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { StepExecutionRepositoryMock, WorkflowExecutionRepositoryMock } from './mocks';
 import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
+import { ExecutionStateRepositoryMock } from './mocks/execution_state_repository.mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
 import { mockContextDependencies } from '../server/execution_functions/__mock__/context_dependencies';
 import { runWorkflow } from '../server/execution_functions/run_workflow';
 
-// Mock the repository classes so setupDependencies uses our mocks
-jest.mock('../server/repositories/workflow_execution_repository');
-jest.mock('../server/repositories/step_execution_repository');
+jest.mock('../server/repositories/execution_state_repository/execution_state_repository');
 
 export class WorkflowRunFixture {
   public readonly taskAbortController = new AbortController();
@@ -37,7 +35,6 @@ export class WorkflowRunFixture {
     debug: jest.fn(),
     trace: jest.fn(),
   } as unknown as Logger;
-  // Create shared execute mock so tests can verify calls regardless of which client is used
   private readonly sharedExecuteMock = jest.fn();
   public readonly unsecuredActionsClientMock = new UnsecuredActionsClientMock();
   public readonly scopedActionsClientMock = new ScopedActionsClientMock();
@@ -54,24 +51,17 @@ export class WorkflowRunFixture {
     },
   } as WorkflowsExecutionEngineConfig;
   public readonly fakeKibanaRequest = {} as KibanaRequest;
-  public readonly workflowExecutionRepositoryMock = new WorkflowExecutionRepositoryMock();
-  public readonly stepExecutionRepositoryMock = new StepExecutionRepositoryMock();
+  public readonly executionStateRepositoryMock = new ExecutionStateRepositoryMock();
   public readonly taskManagerMock = TaskManagerMock.create() as unknown as TaskManagerStartContract;
 
   constructor() {
-    // Mock repository constructors to return our mock instances
-    const workflowRepoModule = jest.requireMock(
-      '../server/repositories/workflow_execution_repository'
+    const executionStateModule = jest.requireMock(
+      '../server/repositories/execution_state_repository/execution_state_repository'
     );
-    const stepRepoModule = jest.requireMock('../server/repositories/step_execution_repository');
-    (workflowRepoModule.WorkflowExecutionRepository as jest.Mock).mockImplementation(
-      () => this.workflowExecutionRepositoryMock
-    );
-    (stepRepoModule.StepExecutionRepository as jest.Mock).mockImplementation(
-      () => this.stepExecutionRepositoryMock
+    (executionStateModule.ExecutionStateRepository as jest.Mock).mockImplementation(
+      () => this.executionStateRepositoryMock
     );
 
-    // Wire both clients to use the same shared execute mock with normalized parameters
     this.unsecuredActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) =>
       this.unsecuredActionsClientMock.returnMockedConnectorResult(options)
     );
@@ -95,11 +85,12 @@ export class WorkflowRunFixture {
     inputs?: Record<string, any>;
     event?: Record<string, any>;
   }) {
-    // clean up before running workflow
     this.cleanup();
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
+      workflowRunId: 'fake_workflow_execution_id',
+      type: 'workflow',
       spaceId: 'fake_space_id',
       workflowId: 'fake_foreach_id',
       isTestRun: false,
@@ -110,10 +101,11 @@ export class WorkflowRunFixture {
       },
       status: ExecutionStatus.PENDING,
       createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
       createdBy: 'system',
-      triggeredBy: 'system', // <-- new field for scheduled workflows
+      triggeredBy: 'system',
     };
-    this.workflowExecutionRepositoryMock.workflowExecutions.set(
+    this.executionStateRepositoryMock.workflowExecutions.set(
       'fake_workflow_execution_id',
       workflowExecution as EsWorkflowExecution
     );
@@ -149,11 +141,12 @@ export class WorkflowRunFixture {
     stepId: string;
     contextOverride?: Record<string, any>;
   }) {
-    // clean up before running workflow
     this.cleanup();
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
+      workflowRunId: 'fake_workflow_execution_id',
+      type: 'workflow',
       spaceId: 'fake_space_id',
       stepId,
       workflowId: 'fake_foreach_id',
@@ -164,10 +157,11 @@ export class WorkflowRunFixture {
       },
       status: ExecutionStatus.PENDING,
       createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
       createdBy: 'system',
-      triggeredBy: 'system', // <-- new field for scheduled workflows
+      triggeredBy: 'system',
     };
-    this.workflowExecutionRepositoryMock.workflowExecutions.set(
+    this.executionStateRepositoryMock.workflowExecutions.set(
       'fake_workflow_execution_id',
       workflowExecution as EsWorkflowExecution
     );
@@ -184,7 +178,7 @@ export class WorkflowRunFixture {
 
   private cleanup() {
     jest.clearAllMocks();
-    this.workflowExecutionRepositoryMock.workflowExecutions.clear();
-    this.stepExecutionRepositoryMock.stepExecutions.clear();
+    this.executionStateRepositoryMock.workflowExecutions.clear();
+    this.executionStateRepositoryMock.stepExecutions.clear();
   }
 }

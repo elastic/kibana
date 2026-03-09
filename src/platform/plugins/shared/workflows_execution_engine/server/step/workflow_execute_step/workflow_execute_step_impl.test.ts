@@ -14,8 +14,7 @@ import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { MAX_WORKFLOW_DEPTH } from './constants';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 import type { WorkflowExecuteStepImplInit } from './workflow_execute_step_impl';
-import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -77,14 +76,10 @@ const createMockInit = (
     cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<WorkflowsExecutionEnginePluginStart>;
 
-  const workflowExecutionRepository = {
-    getWorkflowExecutionById: jest.fn(),
-  } as unknown as jest.Mocked<WorkflowExecutionRepository>;
-
-  const stepExecutionRepository = {
-    searchStepExecutionsByExecutionId: jest.fn().mockResolvedValue([]),
-    getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<StepExecutionRepository>;
+  const executionStateRepository = {
+    getWorkflowExecutions: jest.fn().mockResolvedValue({}),
+    getStepExecutions: jest.fn().mockResolvedValue({}),
+  } as unknown as jest.Mocked<ExecutionStateRepository>;
 
   const workflowLogger = {
     logInfo: jest.fn(),
@@ -100,8 +95,7 @@ const createMockInit = (
     spaceId: 'default',
     request: {} as KibanaRequest,
     workflowsExecutionEngine,
-    workflowExecutionRepository,
-    stepExecutionRepository,
+    executionStateRepository,
     workflowLogger,
     ...overrides,
   };
@@ -294,10 +288,12 @@ describe('WorkflowExecuteStepImpl', () => {
       const init = createMockInit({ node: asyncNode as any });
       const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
       repo.getWorkflow.mockResolvedValue(createMockWorkflow());
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        startedAt: '2024-01-01T00:00:00Z',
+      const stateRepo = init.executionStateRepository as jest.Mocked<ExecutionStateRepository>;
+      stateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          startedAt: '2024-01-01T00:00:00Z',
+        },
       } as any);
 
       const step = new WorkflowExecuteStepImpl(init);
@@ -324,11 +320,13 @@ describe('WorkflowExecuteStepImpl', () => {
         pollCount: 0,
       });
 
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: { result: 'success' } },
+      const stateRepo = init.executionStateRepository as jest.Mocked<ExecutionStateRepository>;
+      stateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: { result: 'success' } },
+        },
       } as any);
 
       const step = new WorkflowExecuteStepImpl(init);
@@ -354,11 +352,13 @@ describe('WorkflowExecuteStepImpl', () => {
         pollCount: 0,
       });
 
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.FAILED,
-        error: { type: 'Error', message: 'child workflow failed' },
+      const stateRepo = init.executionStateRepository as jest.Mocked<ExecutionStateRepository>;
+      stateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.FAILED,
+          error: { type: 'Error', message: 'child workflow failed' },
+        },
       } as any);
 
       const step = new WorkflowExecuteStepImpl(init);
@@ -454,11 +454,13 @@ describe('WorkflowExecuteStepImpl', () => {
         startedAt: '2024-01-01T00:00:00Z',
         pollCount: 0,
       });
-      const execRepo = init.workflowExecutionRepository as jest.Mocked<WorkflowExecutionRepository>;
-      execRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: { result: 'success' } },
+      const stateRepo = init.executionStateRepository as jest.Mocked<ExecutionStateRepository>;
+      stateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: { result: 'success' } },
+        },
       } as any);
 
       const step = new WorkflowExecuteStepImpl(init);

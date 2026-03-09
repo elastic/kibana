@@ -36,6 +36,8 @@ describe('WorkflowTaskManager', () => {
     overrides?: Partial<EsWorkflowExecution>
   ): EsWorkflowExecution => ({
     id: 'test-execution-id',
+    type: 'workflow' as const,
+    workflowRunId: 'test-execution-id',
     workflowId: 'test-workflow-id',
     spaceId: 'default',
     isTestRun: false,
@@ -51,7 +53,7 @@ describe('WorkflowTaskManager', () => {
     yaml: '',
     scopeStack: [],
     createdAt: new Date().toISOString(),
-    error: null,
+    error: undefined,
     createdBy: 'test-user',
     startedAt: new Date().toISOString(),
     finishedAt: '',

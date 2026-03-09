@@ -10,15 +10,17 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionRepository } from '../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import {
+  type EsExecution,
+  type EsWorkflowExecution,
+  type EsWorkflowStepExecution,
+} from '@kbn/workflows';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
-  private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
-  private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map();
+  private changes: Map<string, Partial<EsExecution>> = new Map();
 
   /**
    * Maps step IDs to their execution IDs in chronological order.
@@ -30,17 +32,19 @@ export class WorkflowExecutionState {
 
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
-    private workflowExecutionRepository: WorkflowExecutionRepository,
-    private workflowStepExecutionRepository: StepExecutionRepository
+    private executionStateRepository: ExecutionStateRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
   }
 
   public async load(): Promise<void> {
-    const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
-      this.workflowExecution.id
+    const foundSteps = await this.executionStateRepository.getStepExecutions(
+      new Set(this.workflowExecution.stepExecutionIds ?? []),
+      this.workflowExecution.spaceId
     );
-    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
+    Object.entries(foundSteps).forEach(([id, stepExecution]) =>
+      this.stepExecutions.set(id, stepExecution)
+    );
     this.buildStepIdExecutionIdIndex();
   }
 
@@ -52,11 +56,15 @@ export class WorkflowExecutionState {
     this.workflowExecution = {
       ...this.workflowExecution,
       ...workflowExecution,
+      id: this.workflowExecution.id,
+      workflowRunId: this.workflowExecution.id,
+      type: 'workflow',
+      stepExecutionIds: Array.from(this.stepExecutions.values())
+        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
+        .map((stepExecution) => stepExecution.id),
     };
-    this.workflowDocumentChanges = {
-      ...(this.workflowDocumentChanges || {}),
-      ...workflowExecution,
-    };
+
+    this.changes.set(this.workflowExecution.id, this.workflowExecution);
   }
 
   public getAllStepExecutions(): EsWorkflowStepExecution[] {
@@ -112,35 +120,15 @@ export class WorkflowExecutionState {
     }
   }
 
-  public async flushStepChanges(): Promise<void> {
-    if (!this.stepDocumentsChanges.size) {
-      return;
-    }
-    const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
-
-    this.stepDocumentsChanges.clear();
-    await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
-  }
-
   public async flush(): Promise<void> {
-    await Promise.all([this.flushWorkflowChanges(), this.flushStepChanges()]);
-  }
-
-  private async flushWorkflowChanges(): Promise<void> {
-    if (!this.workflowDocumentChanges) {
+    if (!this.changes.size) {
       return;
     }
-    const changes = this.workflowDocumentChanges;
-    this.workflowDocumentChanges = undefined;
 
-    await this.workflowExecutionRepository.updateWorkflowExecution({
-      ...changes,
-      id: this.workflowExecution.id,
-      // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
-      stepExecutionIds: Array.from(this.stepExecutions.values())
-        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-        .map((step) => step.id),
-    });
+    const changes = Array.from(this.changes.values());
+    this.changes.clear();
+
+    await this.executionStateRepository.bulkUpsert(changes);
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {
@@ -157,9 +145,11 @@ export class WorkflowExecutionState {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
+      createdAt: step.startedAt,
+      type: 'step',
     } as EsWorkflowStepExecution;
     this.stepExecutions.set(step.id as string, newStep);
-    this.stepDocumentsChanges.set(step.id as string, newStep);
+    this.changes.set(step.id as string, newStep);
   }
 
   private updateStep(step: Partial<EsWorkflowStepExecution>) {
@@ -171,8 +161,8 @@ export class WorkflowExecutionState {
     this.stepExecutions.set(step.id!, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes
     // ES partial update (doc_as_upsert) preserves fields not included in the update
-    this.stepDocumentsChanges.set(step.id as string, {
-      ...(this.stepDocumentsChanges.get(step.id as string) || {}),
+    this.changes.set(step.id as string, {
+      ...(this.changes.get(step.id as string) || {}),
       ...step,
     });
   }

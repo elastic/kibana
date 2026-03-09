@@ -40,6 +40,7 @@ const createMockStepExecution = (
   stepType: '__overview',
   status: ExecutionStatus.COMPLETED,
   stepExecutionIndex: 0,
+  createdAt: '2024-01-15T10:30:45.123Z',
   startedAt: '2024-01-15T10:30:45.123Z',
   input: {
     execution: {

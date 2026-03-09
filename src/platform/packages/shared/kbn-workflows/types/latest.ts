@@ -16,6 +16,7 @@ export type {
   EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
+  EsExecution,
   // execution engine
   Provider,
   ProviderInput,

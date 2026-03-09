@@ -9,7 +9,7 @@
 
 import type { CoreStart, ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -23,7 +23,7 @@ export interface WorkflowExecutionLoopParams {
   stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
   workflowLogger: IWorkflowEventLogger;
-  workflowExecutionRepository: WorkflowExecutionRepository;
+  executionStateRepository: ExecutionStateRepository;
   nodesFactory: NodesFactory;
   esClient: ElasticsearchClient;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

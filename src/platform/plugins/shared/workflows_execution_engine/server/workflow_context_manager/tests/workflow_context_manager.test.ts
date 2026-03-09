@@ -1074,7 +1074,7 @@ describe('WorkflowContextManager', () => {
               return {
                 state: { stateValue: 'first' },
                 output: 'output1',
-                error: null,
+                error: undefined,
               };
             case 'secondLogStep':
               return {
@@ -1083,9 +1083,9 @@ describe('WorkflowContextManager', () => {
                 error: new Error('Error in second step'),
               };
             case 'thirdLogStep':
-              return { state: { stateValue: 'third' }, output: 'output3', error: null };
+              return { state: { stateValue: 'third' }, output: 'output3', error: undefined };
             case 'fourthLogStep':
-              return { state: { stateValue: 'fourth' }, output: 'output4', error: null };
+              return { state: { stateValue: 'fourth' }, output: 'output4', error: undefined };
           }
         });
     });
@@ -1112,7 +1112,7 @@ describe('WorkflowContextManager', () => {
       expect(context.steps.firstLogStep).toEqual(
         expect.objectContaining({
           output: 'output1',
-          error: null,
+          error: undefined,
         })
       );
       expect(context.steps.secondLogStep).toEqual(
@@ -1130,7 +1130,7 @@ describe('WorkflowContextManager', () => {
               fourthLogStep: {
                 state: 'fourth',
                 output: 'output4',
-                error: null,
+                error: undefined,
               },
             },
           },
@@ -1145,7 +1145,7 @@ describe('WorkflowContextManager', () => {
         expect.objectContaining({
           state: 'fourth',
           output: 'output4',
-          error: null,
+          error: undefined,
         })
       );
     });
@@ -1206,7 +1206,7 @@ describe('WorkflowContextManager', () => {
             return {
               state: { status: 'completed' },
               output: { data: ['item1', 'item2'], total: 2 },
-              error: null,
+              error: undefined,
             };
           }
           return undefined;
@@ -1263,7 +1263,7 @@ describe('WorkflowContextManager', () => {
                   data: ['item1', 'item2'],
                   total: 2,
                 },
-                error: null,
+                error: undefined,
                 status: 'completed',
               },
             },

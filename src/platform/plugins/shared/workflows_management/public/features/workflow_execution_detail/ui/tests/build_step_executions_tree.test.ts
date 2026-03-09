@@ -22,6 +22,7 @@ const createStepExecution = (
   workflowRunId: 'workflow-run-1',
   workflowId: 'workflow-1',
   status: ExecutionStatus.COMPLETED,
+  createdAt: '2023-01-01T00:00:00Z',
   startedAt: '2023-01-01T00:00:00Z',
   topologicalIndex: 0,
   globalExecutionIndex: 0,

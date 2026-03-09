@@ -52,7 +52,7 @@ steps:
     const startTime = Date.now();
     while (Date.now() - startTime < maxWaitMs) {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       if (workflowExecutionDoc?.status === ExecutionStatus.TIMED_OUT) {
@@ -76,7 +76,7 @@ steps:
 
   it('should have correct step execution count', () => {
     const stepExecutionsWithStepId = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     );
     // With a 2s timeout, step3 may not be created if timeout occurs before it starts
     // So we expect 2-3 step executions (step1, step2, and possibly step3)
@@ -86,7 +86,7 @@ steps:
 
   it('should set timeout status for workflow', () => {
     const workflowExecutionDoc =
-      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
       );
     expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.TIMED_OUT);
@@ -95,7 +95,7 @@ steps:
 
   it('should have completed status for executed steps', () => {
     const allStepExecutions = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).filter((se) => se.stepId && se.stepType === FakeConnectors.slow_1sec_inference.actionTypeId);
 
     // Step1 should always complete (finishes at ~1s, timeout is at 2s)
@@ -126,7 +126,7 @@ steps:
 
   it('should have failed status for step exceeding timeout', () => {
     const allStepExecutions = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).filter(
       (se) =>
         se.stepId?.endsWith('Failed') &&
@@ -159,7 +159,7 @@ steps:
 
   it('should not have started step following failed step', () => {
     const slowInferenceStepExecution = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).find(
       (se) =>
         se.stepId?.endsWith('NotStarted') &&

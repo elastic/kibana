@@ -8,12 +8,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
+import { mappings } from '@kbn/es-mappings';
+import { createIndexWithMappings } from './create_index';
 import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+  WORKFLOWS_EXECUTION_STATE_INDEX,
+  WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS,
 } from './mappings';
 
 interface CreateIndexesOptions {
@@ -23,18 +22,24 @@ interface CreateIndexesOptions {
 
 export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
   const { esClient, logger } = options;
-  await Promise.all([
-    createOrUpdateIndex({
-      esClient,
-      indexName: WORKFLOWS_EXECUTIONS_INDEX,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-      logger,
-    }),
-    createIndexWithMappings({
-      esClient,
-      indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      logger,
-    }),
-  ]);
+  await createIndexWithMappings({
+    esClient,
+    indexName: WORKFLOWS_EXECUTION_STATE_INDEX,
+    mappings: WORKFLOWS_EXECUTION_STATE_INDEX_MAPPINGS,
+    logger,
+  });
+  await createIndexWithMappings({
+    esClient,
+    indexName: '.workflows-migrate-executions-observability',
+    mappings: {
+      properties: {
+        '@timestamp': mappings.date(),
+        duration: mappings.long(),
+        workflowExecutionDuration: mappings.long(),
+        stepExecutionDuration: mappings.long(),
+        deleteDuration: mappings.long(),
+      },
+    },
+    logger,
+  });
 }

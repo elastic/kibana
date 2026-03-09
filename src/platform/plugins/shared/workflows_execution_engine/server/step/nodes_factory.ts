@@ -278,11 +278,8 @@ export class NodesFactory {
         if (!this.dependencies.workflowRepository) {
           throw new Error('WorkflowRepository is not available in dependencies');
         }
-        if (!this.dependencies.workflowExecutionRepository) {
-          throw new Error('WorkflowExecutionRepository is not available in dependencies');
-        }
-        if (!this.dependencies.stepExecutionRepository) {
-          throw new Error('StepExecutionRepository is not available in dependencies');
+        if (!this.dependencies.executionStateRepository) {
+          throw new Error('ExecutionStateRepository is not available in dependencies');
         }
         if (!this.dependencies.spaceId) {
           throw new Error('spaceId is not available in dependencies');
@@ -298,8 +295,7 @@ export class NodesFactory {
           spaceId: this.dependencies.spaceId,
           request: this.dependencies.request,
           workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
-          workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
-          stepExecutionRepository: this.dependencies.stepExecutionRepository,
+          executionStateRepository: this.dependencies.executionStateRepository,
           workflowLogger: this.workflowLogger,
         });
       default:

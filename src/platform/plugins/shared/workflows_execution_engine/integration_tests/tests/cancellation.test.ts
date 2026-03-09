@@ -53,14 +53,14 @@ steps:
       requestCancellationPromise = (async function () {
         while (true) {
           const outerForeachStep = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).find((se) => se.stepId === 'outerForeachStep');
           if (outerForeachStep?.state?.index === 2) {
             const workflowExecutionDoc =
-              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               )!;
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.set(
+            workflowRunFixture.executionStateRepositoryMock.workflowExecutions.set(
               workflowExecutionDoc.id,
               {
                 ...workflowExecutionDoc,
@@ -79,7 +79,7 @@ steps:
     it('should successfully execute workflow', async () => {
       await Promise.all([runWorkflowPromise, requestCancellationPromise]);
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.CANCELLED);
@@ -90,7 +90,7 @@ steps:
     it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
       await Promise.all([runWorkflowPromise, requestCancellationPromise]);
       const outerForeachChildConnectorStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
       expect(outerForeachChildConnectorStepExecutions.length).toBe(3);
     });
@@ -105,7 +105,7 @@ steps:
       requestCancellationPromise = (async function () {
         while (true) {
           const outerForeachStep = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).find((se) => se.stepId === 'outerForeachStep');
           if (outerForeachStep?.state?.index === 2) {
             workflowRunFixture.taskAbortController.abort();
@@ -120,7 +120,7 @@ steps:
     it('should successfully execute workflow', async () => {
       await Promise.all([runWorkflowPromise, requestCancellationPromise]);
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.CANCELLED);
@@ -133,7 +133,7 @@ steps:
     it('should have correct amount of outerForeachChildConnectorStep executions', async () => {
       await Promise.all([runWorkflowPromise, requestCancellationPromise]);
       const outerForeachChildConnectorStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'outerForeachChildConnectorStep');
       expect(outerForeachChildConnectorStepExecutions.length).toBe(3);
     });

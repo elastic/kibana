@@ -8,15 +8,17 @@
  */
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
-import { WorkflowRepository } from '@kbn/workflows';
+import {
+  type EsWorkflowExecution,
+  WorkflowRepository,
+  type WorkflowSettings,
+} from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
@@ -45,17 +47,17 @@ export async function setupDependencies(
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
 
-  const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
-  const stepExecutionRepository = new StepExecutionRepository(internalEsClient);
+  const executionStateRepository = new ExecutionStateRepository(internalEsClient);
   const workflowRepository = new WorkflowRepository({
     esClient: internalEsClient,
     logger,
   });
 
-  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
+  const executions = await executionStateRepository.getWorkflowExecutions(
+    new Set([workflowRunId]),
     spaceId
   );
+  const workflowExecution = executions[workflowRunId];
 
   if (!workflowExecution) {
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
@@ -96,8 +98,7 @@ export async function setupDependencies(
 
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository,
-    stepExecutionRepository
+    executionStateRepository
   );
 
   // Create telemetry client
@@ -122,8 +123,7 @@ export async function setupDependencies(
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,
     workflowRepository,
-    workflowExecutionRepository,
-    stepExecutionRepository,
+    executionStateRepository,
     workflowsExecutionEngine,
     spaceId,
     request: fakeRequest,
@@ -156,7 +156,7 @@ export async function setupDependencies(
     workflowLogger,
     workflowTaskManager,
     nodesFactory,
-    workflowExecutionRepository,
     esClient,
+    executionStateRepository,
   };
 }

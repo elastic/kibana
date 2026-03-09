@@ -68,7 +68,7 @@ steps:
 
       it('should run atomic step successfully', async () => {
         const workflowExecutionDoc =
-          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
             'fake_workflow_execution_id'
           );
         expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -78,7 +78,7 @@ steps:
 
       it('should execute only requested step and its descendants', () => {
         const stepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
         );
         expect(stepExecutions.length).toBe(3);
         expect(stepExecutions.filter((se) => se.stepId === 'innerForeachStep')).toHaveLength(1);
@@ -138,7 +138,7 @@ steps:
 
     it('should run atomic step successfully', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -148,7 +148,7 @@ steps:
 
     it('should execute only the requested step', async () => {
       const stepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       );
       expect(stepExecutions.length).toBe(1);
       expect(stepExecutions[0].stepId).toBe('step2');

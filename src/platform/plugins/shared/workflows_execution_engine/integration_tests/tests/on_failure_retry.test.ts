@@ -90,7 +90,7 @@ steps:
 
           it('should fail workflow', async () => {
             const workflowExecutionDoc =
-              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               );
             expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
@@ -103,7 +103,7 @@ steps:
 
           it('should have correct workflow duration', async () => {
             const workflowExecutionDoc =
-              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               );
             // Duration should be at least 2s (2 retries with 1s delay each)
@@ -114,7 +114,7 @@ steps:
 
           it('should have 3 executions of constantlyFailingStep (1 initial + 2 retries)', async () => {
             const stepExecutions = Array.from(
-              workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+              workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
             ).filter(
               (se) =>
                 se.stepId === 'constantlyFailingStep' &&
@@ -132,7 +132,7 @@ steps:
 
           it('should maintain correct delay between retries', async () => {
             const stepExecutions = Array.from(
-              workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+              workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
             ).filter(
               (se) =>
                 se.stepId === 'constantlyFailingStep' &&
@@ -157,7 +157,7 @@ steps:
 
           it('should not execute finalStep', async () => {
             const stepExecutions = Array.from(
-              workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+              workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
             ).filter((se) => se.stepId === 'finalStep');
             expect(stepExecutions.length).toBe(0);
           });
@@ -177,7 +177,7 @@ steps:
 
           it('should put workflow in waiting state', async () => {
             const workflowExecutionDoc =
-              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               );
             expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.WAITING);
@@ -186,7 +186,7 @@ steps:
 
           it('should have correct currentNodeId in workflow execution', async () => {
             const workflowExecutionDoc =
-              workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+              workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
                 'fake_workflow_execution_id'
               );
             expect(workflowExecutionDoc?.currentNodeId).toBe('enterRetry_constantlyFailingStep');
@@ -238,7 +238,7 @@ steps:
 
         it('should fail workflow', async () => {
           const workflowExecutionDoc =
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
               'fake_workflow_execution_id'
             );
           expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
@@ -251,7 +251,7 @@ steps:
 
         it('should have correct workflow duration', async () => {
           const workflowExecutionDoc =
-            workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
               'fake_workflow_execution_id'
             );
           // Duration should be at least 2s (2 retries with 1s delay each)
@@ -261,7 +261,7 @@ steps:
 
         it('should have 1 executions of constantlyFailingStep', async () => {
           const stepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter(
             (se) =>
               se.stepId === 'constantlyFailingStep' &&
@@ -279,7 +279,7 @@ steps:
 
         it('should not execute finalStep', async () => {
           const stepExecutions = Array.from(
-            workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+            workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
           ).filter((se) => se.stepId === 'finalStep');
           expect(stepExecutions.length).toBe(0);
         });

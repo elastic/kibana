@@ -42,7 +42,7 @@ steps:
 
   it('should fail workflow with error when step times out', async () => {
     const workflowExecutionDoc =
-      workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+      workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
         'fake_workflow_execution_id'
       );
     expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
@@ -56,7 +56,7 @@ steps:
 
   it('should have timeout step with failure status and error', async () => {
     const timeoutStepExecutions = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).filter(
       (se) =>
         se.stepId === 'timeoutStep' &&
@@ -76,7 +76,7 @@ steps:
 
   it('should have execution duration close to configured timeout value', async () => {
     const timeoutStepExecutions = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).filter(
       (se) =>
         se.stepId === 'timeoutStep' &&
@@ -92,7 +92,7 @@ steps:
 
   it('should not execute final step after timeout', async () => {
     const finalStepExecutions = Array.from(
-      workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
     ).filter((se) => se.stepId === 'finalStep');
 
     expect(finalStepExecutions.length).toBe(0);

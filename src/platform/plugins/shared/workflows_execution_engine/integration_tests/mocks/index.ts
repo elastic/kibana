@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkflowExecutionRepositoryMock } from './workflow_execution_repository.mock';
-export { StepExecutionRepositoryMock } from './step_execution_repository.mock';
+export { ExecutionStateRepositoryMock } from './execution_state_repository.mock';
 export { LogsRepositoryMock } from './logs_repository.mock';

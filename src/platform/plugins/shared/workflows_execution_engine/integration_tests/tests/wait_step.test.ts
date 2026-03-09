@@ -56,7 +56,7 @@ steps:
 
     it('should successfully complete workflow', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -66,7 +66,7 @@ steps:
 
     it('should execute firstConnectorStep successfully', async () => {
       const firstStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'firstConnectorStep');
       expect(firstStepExecutions.length).toBe(1);
       expect(firstStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -75,7 +75,7 @@ steps:
 
     it('should execute waitStep successfully', async () => {
       const waitStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'waitStep');
       expect(waitStepExecutions.length).toBe(1);
       expect(waitStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -85,7 +85,7 @@ steps:
 
     it('should execute lastConnectorStep successfully', async () => {
       const lastStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'lastConnectorStep');
       expect(lastStepExecutions.length).toBe(1);
       expect(lastStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -94,7 +94,7 @@ steps:
 
     it('should execute steps in correct order', async () => {
       const allStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
 
       expect(allStepExecutions.length).toBe(3);
@@ -105,7 +105,7 @@ steps:
 
     it('should have correct workflow duration', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       // Duration should be at least 2s (the wait duration)
@@ -116,11 +116,11 @@ steps:
 
     it('should wait for the specified duration between firstConnectorStep and lastConnectorStep', async () => {
       const waitStepExecution = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).find((se) => se.stepId === 'waitStep');
 
       const lastStepExecution = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).find((se) => se.stepId === 'lastConnectorStep');
 
       expect(waitStepExecution).toBeDefined();
@@ -163,7 +163,7 @@ steps:
 
     it('should put workflow in waiting state', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.WAITING);
@@ -172,7 +172,7 @@ steps:
 
     it('should have correct currentNodeId in workflow execution', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.currentNodeId).toBe('waitStep');
@@ -180,7 +180,7 @@ steps:
 
     it('should execute firstConnectorStep successfully before waiting', async () => {
       const firstStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'firstConnectorStep');
       expect(firstStepExecutions.length).toBe(1);
       expect(firstStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -189,7 +189,7 @@ steps:
 
     it('should have waitStep in waiting state', async () => {
       const waitStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'waitStep');
       expect(waitStepExecutions.length).toBe(1);
       expect(waitStepExecutions[0].status).toBe(ExecutionStatus.WAITING);
@@ -198,7 +198,7 @@ steps:
 
     it('should not execute lastConnectorStep yet', async () => {
       const lastStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'lastConnectorStep');
       expect(lastStepExecutions.length).toBe(0);
     });
@@ -231,7 +231,7 @@ steps:
 
     it('should have workflow finish time undefined when waiting', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.finishedAt).toBeUndefined();
@@ -245,7 +245,7 @@ steps:
 
       it('should successfully complete workflow after resume', async () => {
         const workflowExecutionDoc =
-          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
             'fake_workflow_execution_id'
           );
         expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -255,7 +255,7 @@ steps:
 
       it('should execute lastConnectorStep successfully after resume', async () => {
         const lastStepExecutions = Array.from(
-          workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+          workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
         ).filter((se) => se.stepId === 'lastConnectorStep');
         expect(lastStepExecutions.length).toBe(1);
         expect(lastStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);

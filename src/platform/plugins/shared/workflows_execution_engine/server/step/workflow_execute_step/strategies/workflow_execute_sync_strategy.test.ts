@@ -11,8 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecuteSyncStrategy } from './workflow_execute_sync_strategy';
-import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
-import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../../../repositories/execution_state_repository/execution_state_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
@@ -31,8 +30,7 @@ const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
 describe('WorkflowExecuteSyncStrategy', () => {
   let strategy: WorkflowExecuteSyncStrategy;
   let mockEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
-  let mockExecRepo: jest.Mocked<WorkflowExecutionRepository>;
-  let mockStepRepo: jest.Mocked<StepExecutionRepository>;
+  let mockExecutionStateRepo: jest.Mocked<ExecutionStateRepository>;
   let mockStepRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockLogger: jest.Mocked<IWorkflowEventLogger>;
   let mockRequest: KibanaRequest;
@@ -42,12 +40,9 @@ describe('WorkflowExecuteSyncStrategy', () => {
       executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'child-exec-1' }),
     } as any;
 
-    mockExecRepo = {
-      getWorkflowExecutionById: jest.fn(),
-    } as any;
-
-    mockStepRepo = {
-      getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
+    mockExecutionStateRepo = {
+      getWorkflowExecutions: jest.fn().mockResolvedValue({}),
+      getStepExecutions: jest.fn().mockResolvedValue({}),
     } as any;
 
     mockStepRuntime = {
@@ -73,8 +68,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
     strategy = new WorkflowExecuteSyncStrategy(
       mockEngine,
-      mockExecRepo,
-      mockStepRepo,
+      mockExecutionStateRepo,
       mockStepRuntime,
       mockLogger
     );
@@ -161,10 +155,12 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should return completed with output when sub-workflow completes', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: { result: 'done' } },
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: { result: 'done' } },
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -176,10 +172,12 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should return failed when sub-workflow fails', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.FAILED,
-        error: { type: 'Error', message: 'child failed' },
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.FAILED,
+          error: { type: 'Error', message: 'child failed' },
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -190,10 +188,11 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should return failed when sub-workflow is cancelled', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.CANCELLED,
-        error: null,
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.CANCELLED,
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -203,10 +202,11 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should return failed when sub-workflow times out', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.TIMED_OUT,
-        error: null,
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.TIMED_OUT,
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -216,9 +216,11 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should continue polling when sub-workflow is still running', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.RUNNING,
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.RUNNING,
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -232,9 +234,11 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
     it('should use exponential backoff for poll intervals', async () => {
       mockStepRuntime.getCurrentStepState.mockReturnValue({ ...waitState, pollCount: 3 });
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.RUNNING,
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.RUNNING,
+        },
       } as any);
 
       await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -255,10 +259,12 @@ describe('WorkflowExecuteSyncStrategy', () => {
         pollCount: 0,
       };
       mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: { result: 'done' } },
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: { result: 'done' } },
+        },
       } as any);
 
       const result = await strategy.resume('default');
@@ -274,7 +280,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(result.status).toBe('failed');
       expect(result.error?.message).toContain('Cannot resume');
-      expect(mockExecRepo.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(mockExecutionStateRepo.getWorkflowExecutions).not.toHaveBeenCalled();
     });
 
     it('should return failed when state has no executionId', async () => {
@@ -284,7 +290,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(result.status).toBe('failed');
       expect(result.error?.message).toContain('Cannot resume');
-      expect(mockExecRepo.getWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(mockExecutionStateRepo.getWorkflowExecutions).not.toHaveBeenCalled();
     });
   });
 
@@ -351,7 +357,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should fail when execution is not found', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue(null);
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({});
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
@@ -360,7 +366,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should fail when execution repo throws', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockRejectedValue(new Error('ES unavailable'));
+      mockExecutionStateRepo.getWorkflowExecutions.mockRejectedValue(new Error('ES unavailable'));
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
@@ -371,10 +377,12 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should use workflow.output from context when available', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: { message: 'from workflow.output' } },
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: { message: 'from workflow.output' } },
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -383,46 +391,51 @@ describe('WorkflowExecuteSyncStrategy', () => {
         status: 'completed',
         output: { message: 'from workflow.output' },
       });
-      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockExecutionStateRepo.getStepExecutions).not.toHaveBeenCalled();
     });
 
     it('should fall back to step executions when no context output', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: {},
-        stepExecutionIds: ['step-1'],
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: {},
+          stepExecutionIds: ['step-1'],
+        },
       } as any);
 
-      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
-        {
+      mockExecutionStateRepo.getStepExecutions.mockResolvedValue({
+        'step-1': {
           id: 'step-1',
           stepId: 'step1',
           spaceId: 'default',
+          type: 'step',
           scopeStack: [],
           output: { data: 'from last step' },
         },
-      ] as any);
+      } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
       expect(result.status).toBe('completed');
       expect(result.output).toEqual({ data: 'from last step' });
-      expect(mockStepRepo.getStepExecutionsByWorkflowExecution).toHaveBeenCalledWith(
-        'child-exec-1',
-        ['step-1']
+      expect(mockExecutionStateRepo.getStepExecutions).toHaveBeenCalledWith(
+        new Set(['step-1']),
+        'default'
       );
     });
 
     it('should return null output when no step executions exist', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: {},
-        stepExecutionIds: [],
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: {},
+          stepExecutionIds: [],
+        },
       } as any);
 
-      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([]);
+      mockExecutionStateRepo.getStepExecutions.mockResolvedValue({});
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
@@ -431,29 +444,33 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should return the last step output at top level', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: {},
-        stepExecutionIds: ['step-exec-1', 'step-exec-2'],
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: {},
+          stepExecutionIds: ['step-exec-1', 'step-exec-2'],
+        },
       } as any);
 
-      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
-        {
+      mockExecutionStateRepo.getStepExecutions.mockResolvedValue({
+        'step-exec-1': {
           id: 'step-exec-1',
           stepId: 'step1',
           spaceId: 'default',
+          type: 'step',
           scopeStack: [],
           output: { first: true },
         },
-        {
+        'step-exec-2': {
           id: 'step-exec-2',
           stepId: 'step2',
           spaceId: 'default',
+          type: 'step',
           scopeStack: [],
           output: { second: true },
         },
-      ] as any);
+      } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
@@ -462,36 +479,41 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should recurse into children of the last top-level step', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: {},
-        stepExecutionIds: ['step-exec-1', 'step-exec-2', 'step-exec-3'],
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: {},
+          stepExecutionIds: ['step-exec-1', 'step-exec-2', 'step-exec-3'],
+        },
       } as any);
 
-      mockStepRepo.getStepExecutionsByWorkflowExecution.mockResolvedValue([
-        {
+      mockExecutionStateRepo.getStepExecutions.mockResolvedValue({
+        'step-exec-1': {
           id: 'step-exec-1',
           stepId: 'step1',
           spaceId: 'default',
+          type: 'step',
           scopeStack: [],
           output: { top: true },
         },
-        {
+        'step-exec-2': {
           id: 'step-exec-2',
           stepId: 'step2',
           spaceId: 'default',
+          type: 'step',
           scopeStack: [],
           output: undefined,
         },
-        {
+        'step-exec-3': {
           id: 'step-exec-3',
           stepId: 'child-step',
           spaceId: 'default',
+          type: 'step',
           scopeStack: [{ stepId: 'step2' }],
           output: { nested: true },
         },
-      ] as any);
+      } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
 
@@ -500,10 +522,12 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('should handle null output from context as undefined step output', async () => {
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: null },
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: null },
+        },
       } as any);
 
       const result = await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
@@ -534,9 +558,11 @@ describe('WorkflowExecuteSyncStrategy', () => {
         pollCount: 0,
       };
       mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.RUNNING,
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.RUNNING,
+        },
       } as any);
 
       mockStepRuntime.abortController.abort();
@@ -558,10 +584,12 @@ describe('WorkflowExecuteSyncStrategy', () => {
         pollCount: 0,
       };
       mockStepRuntime.getCurrentStepState.mockReturnValue(waitState);
-      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
-        id: 'child-exec-1',
-        status: ExecutionStatus.COMPLETED,
-        context: { output: { result: 'done' } },
+      mockExecutionStateRepo.getWorkflowExecutions.mockResolvedValue({
+        'child-exec-1': {
+          id: 'child-exec-1',
+          status: ExecutionStatus.COMPLETED,
+          context: { output: { result: 'done' } },
+        },
       } as any);
 
       mockStepRuntime.abortController.abort();

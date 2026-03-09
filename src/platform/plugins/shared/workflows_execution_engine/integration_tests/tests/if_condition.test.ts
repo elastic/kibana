@@ -58,7 +58,7 @@ steps:
 
     it('should successfully complete workflow', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -68,7 +68,7 @@ steps:
 
     it('should execute setupStep before condition', async () => {
       const setupStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'setupStep');
       expect(setupStepExecutions.length).toBe(1);
       expect(setupStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -76,7 +76,7 @@ steps:
 
     it('should execute thenStep when condition is true', async () => {
       const thenStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'thenStep');
       expect(thenStepExecutions.length).toBe(1);
       expect(thenStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -85,14 +85,14 @@ steps:
 
     it('should not execute elseStep when condition is true', async () => {
       const elseStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'elseStep');
       expect(elseStepExecutions.length).toBe(0);
     });
 
     it('should execute finalStep after conditional branch', async () => {
       const finalStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'finalStep');
       expect(finalStepExecutions.length).toBe(1);
       expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -157,7 +157,7 @@ steps:
 
     it('should successfully complete workflow', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -167,7 +167,7 @@ steps:
 
     it('should execute setupStep before condition', async () => {
       const setupStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'setupStep');
       expect(setupStepExecutions.length).toBe(1);
       expect(setupStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -175,14 +175,14 @@ steps:
 
     it('should not execute thenStep when condition is false', async () => {
       const thenStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'thenStep');
       expect(thenStepExecutions.length).toBe(0);
     });
 
     it('should execute elseStep when condition is false', async () => {
       const elseStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'elseStep');
       expect(elseStepExecutions.length).toBe(1);
       expect(elseStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -191,7 +191,7 @@ steps:
 
     it('should execute finalStep after conditional branch', async () => {
       const finalStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'finalStep');
       expect(finalStepExecutions.length).toBe(1);
       expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -250,7 +250,7 @@ steps:
 
     it('should successfully complete workflow', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -260,7 +260,7 @@ steps:
 
     it('should execute setupStep before condition', async () => {
       const setupStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'setupStep');
       expect(setupStepExecutions.length).toBe(1);
       expect(setupStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -268,14 +268,14 @@ steps:
 
     it('should not execute thenStep when condition is false', async () => {
       const thenStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'thenStep');
       expect(thenStepExecutions.length).toBe(0);
     });
 
     it('should execute finalStep even when no branch executed', async () => {
       const finalStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'finalStep');
       expect(finalStepExecutions.length).toBe(1);
       expect(finalStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -341,7 +341,7 @@ steps:
 
     it('should successfully complete workflow with nested conditions', async () => {
       const workflowExecutionDoc =
-        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+        workflowRunFixture.executionStateRepositoryMock.workflowExecutions.get(
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
@@ -350,7 +350,7 @@ steps:
 
     it('should execute outer then branch', async () => {
       const outerThenStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'outerThenStep');
       expect(outerThenStepExecutions.length).toBe(1);
       expect(outerThenStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -358,7 +358,7 @@ steps:
 
     it('should execute inner then branch when nested condition is true', async () => {
       const innerThenStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'innerThenStep');
       expect(innerThenStepExecutions.length).toBe(1);
       expect(innerThenStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
@@ -366,7 +366,7 @@ steps:
 
     it('should not execute inner else branch when nested condition is true', async () => {
       const innerElseStepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+        workflowRunFixture.executionStateRepositoryMock.stepExecutions.values()
       ).filter((se) => se.stepId === 'innerElseStep');
       expect(innerElseStepExecutions.length).toBe(0);
     });

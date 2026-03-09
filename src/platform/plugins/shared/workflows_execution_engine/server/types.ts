@@ -24,6 +24,14 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type {
+  getExecutionHistoryStatsFn,
+  getRecentExecutionsForWorkflowsFn,
+  getStepExecutionFn,
+  getStepExecutionsFn,
+  getWorkflowExecutionFn,
+  searchWorkflowExecutionsFn,
+} from './repositories/functions';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
@@ -36,12 +44,19 @@ export interface ExecuteWorkflowStepResponse {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExecutionEnginePluginSetup {}
+
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
+  getWorkflowExecution: ReturnType<typeof getWorkflowExecutionFn>;
+  searchWorkflowExecutions: ReturnType<typeof searchWorkflowExecutionsFn>;
+  getStepExecution: ReturnType<typeof getStepExecutionFn>;
+  getStepExecutions: ReturnType<typeof getStepExecutionsFn>;
+  getExecutionHistoryStats: ReturnType<typeof getExecutionHistoryStatsFn>;
+  getRecentExecutionsForWorkflows: ReturnType<typeof getRecentExecutionsForWorkflowsFn>;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

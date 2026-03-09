@@ -37,6 +37,8 @@ describe('WorkflowExecutionTelemetryClient', () => {
   ): EsWorkflowExecution => {
     return {
       id: 'test-execution-id',
+      type: 'workflow' as const,
+      workflowRunId: 'test-execution-id',
       workflowId: 'test-workflow-id',
       spaceId: 'default',
       isTestRun: false,
@@ -48,7 +50,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       yaml: '',
       scopeStack: [],
       createdAt: '2024-01-01T00:00:00.000Z',
-      error: null,
+      error: undefined,
       createdBy: 'user',
       startedAt: '2024-01-01T00:00:00.000Z',
       finishedAt: '2024-01-01T00:01:00.000Z',
@@ -64,6 +66,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
   ): EsWorkflowStepExecution => {
     return {
       id: 'test-step-execution-id',
+      type: 'step' as const,
       stepId: 'test-step-id',
       stepType: 'slack.postMessage',
       spaceId: 'default',
@@ -71,6 +74,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
       workflowRunId: 'test-execution-id',
       workflowId: 'test-workflow-id',
       status: ExecutionStatus.COMPLETED,
+      createdAt: '2024-01-01T00:00:00.000Z',
       startedAt: '2024-01-01T00:00:00.000Z',
       finishedAt: '2024-01-01T00:00:30.000Z',
       executionTimeMs: 30000,

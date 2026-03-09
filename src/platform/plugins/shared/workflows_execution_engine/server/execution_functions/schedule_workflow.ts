@@ -11,9 +11,9 @@ import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 
-import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { ExecutionStateRepository } from '../repositories/execution_state_repository/execution_state_repository';
 
 /**
  * Checks if there's an existing non-terminal scheduled execution for a workflow.
@@ -43,20 +43,26 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 export async function checkAndSkipIfExistingScheduledExecution(
   workflow: WorkflowExecutionEngineModel,
   spaceId: string,
-  workflowExecutionRepository: WorkflowExecutionRepository,
+  executionStateRepository: ExecutionStateRepository,
   currentTaskInstance: ConcreteTaskInstance,
   logger: Logger
 ): Promise<boolean> {
-  // Check if there's already a scheduled workflow execution in non-terminal state
-  const runningExecutions = await workflowExecutionRepository.getRunningExecutionsByWorkflowId(
-    workflow.id,
-    spaceId,
-    'scheduled'
-  );
+  const searchResults = await executionStateRepository.searchWorkflowExecutions({
+    filter: {
+      spaceId,
+      workflowId: workflow.id,
+      statuses: [...NonTerminalExecutionStatuses],
+      triggeredBy: 'scheduled',
+    },
+    pagination: { size: 1, from: 0 },
+    fields: ['id', 'taskRunAt'],
+  });
+  const runningExecutions = searchResults.results;
 
   // There's already a non-terminal scheduled execution - create SKIPPED execution
   if (runningExecutions.length > 0) {
-    const existingExecution = runningExecutions[0]?._source;
+    const existingExecution = runningExecutions[0];
+
     if (!existingExecution) {
       return false;
     }
@@ -66,8 +72,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       : null;
 
     // taskRunAt is stored in the execution document to link it to a specific scheduled run
-    const executionTaskRunAt = (existingExecution as EsWorkflowExecution & { taskRunAt?: string })
-      .taskRunAt;
+    const executionTaskRunAt = existingExecution.taskRunAt;
 
     // Execution is stale only if:
     // 1. Both taskRunAt values exist and are equal (same scheduled run)
@@ -83,14 +88,16 @@ export async function checkAndSkipIfExistingScheduledExecution(
       logger.warn(
         `Found stale execution ${existingExecution.id} from current scheduled run (taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}, attempts: ${currentTaskInstance.attempts}) - marking as failed and proceeding`
       );
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: existingExecution.id,
-        status: ExecutionStatus.FAILED,
-        error: {
-          type: 'TaskRecoveryError',
-          message: `Execution abandoned due to recovery mechanism. Execution was created for this scheduled run but task was interrupted.`,
+      await executionStateRepository.bulkUpdate([
+        {
+          id: existingExecution.id,
+          status: ExecutionStatus.FAILED,
+          error: {
+            type: 'TaskRecoveryError',
+            message: `Execution abandoned due to recovery mechanism. Execution was created for this scheduled run but task was interrupted.`,
+          },
         },
-      });
+      ]);
       // Proceed with new execution
       return false;
     }
@@ -126,7 +133,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       cancelledAt: workflowCreatedAt.toISOString(),
       cancelledBy: 'system',
     };
-    await workflowExecutionRepository.createWorkflowExecution(skippedExecution);
+    await executionStateRepository.bulkUpsert([skippedExecution]);
     return true;
   }
 

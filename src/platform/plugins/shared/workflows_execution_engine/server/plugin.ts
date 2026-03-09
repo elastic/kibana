@@ -34,8 +34,18 @@ import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { ExecutionStateRepository } from './repositories/execution_state_repository/execution_state_repository';
+import { getExecutionHistoryStatsFn } from './repositories/functions/get_execution_history_stats';
+import { getRecentExecutionsForWorkflowsFn } from './repositories/functions/get_recent_executions_for_workflows';
+import { getStepExecutionFn } from './repositories/functions/get_step_execution';
+import { getStepExecutionsFn } from './repositories/functions/get_step_executions';
+import { getWorkflowExecutionFn } from './repositories/functions/get_workflow_executions';
+import { searchWorkflowExecutionsFn } from './repositories/functions/search_workflow_executions';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { createStepExecutionRepository } from './repositories/step_execution_repository/create_step_execution_repository';
+import { initializeStepExecutionDataStream } from './repositories/step_execution_repository/data_stream';
+import { createWorkflowExecutionRepository } from './repositories/workflow_execution_repository/create_workflow_execution_repository';
+import { initializeWorkflowExecutionDataStream } from './repositories/workflow_execution_repository/data_stream';
 import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
@@ -46,7 +56,7 @@ import type {
   WorkflowsExecutionEnginePluginStart,
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
-import { generateExecutionTaskScope } from './utils';
+import { generateExecutionTaskScope, parseDuration } from './utils';
 import { buildWorkflowContext } from './workflow_context_manager/build_workflow_context';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import { WorkflowEventLoggerService } from './workflow_event_logger';
@@ -55,7 +65,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
-import { createIndexes } from '../common';
+import { createIndexes, WORKFLOWS_EXECUTION_STATE_INDEX } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -99,6 +109,8 @@ export class WorkflowsExecutionEnginePlugin
     this.coreSetup = core;
 
     initializeLogsRepositoryDataStream(core.dataStreams);
+    initializeStepExecutionDataStream(core.dataStreams);
+    initializeWorkflowExecutionDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -266,6 +278,79 @@ export class WorkflowsExecutionEnginePlugin
       },
     });
     plugins.taskManager.registerTaskDefinitions({
+      'workflow:migrate-executions': {
+        title: 'Migrate Workflow Executions to History',
+        description:
+          'Copies terminal workflow and step executions older than 1 day from hot storage (execution state) to cold storage (history data streams)',
+        timeout: '10m',
+        maxAttempts: 3,
+        createTaskRunner: () => {
+          return {
+            run: async () => {
+              try {
+                logger.debug('Migrating workflow/step executions to history');
+                const [coreStart] = await core.getStartServices();
+                const workflowExecutionRepository = await createWorkflowExecutionRepository(
+                  coreStart.dataStreams,
+                  coreStart.elasticsearch.client.asInternalUser,
+                  logger
+                );
+                const stepExecutionRepository = await createStepExecutionRepository(
+                  coreStart.dataStreams,
+                  coreStart.elasticsearch.client.asInternalUser
+                );
+                const executionStateRepository = new ExecutionStateRepository(
+                  coreStart.elasticsearch.client.asInternalUser
+                );
+                const now = new Date();
+
+                const [workflowsMigration, stepsMigration] = await Promise.all([
+                  workflowExecutionRepository
+                    .reindexCompletedWorkflowExecutionsFrom({
+                      sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                      olderThan: now,
+                    })
+                    .then((response) => ({ response, duration: Date.now() - now.getTime() })),
+                  stepExecutionRepository
+                    .reindexCompletedStepExecutionsFrom({
+                      sourceIndex: WORKFLOWS_EXECUTION_STATE_INDEX,
+                      olderThan: now,
+                    })
+                    .then((response) => ({ response, duration: Date.now() - now.getTime() })),
+                ]);
+
+                const intervalMs = parseDuration(config.executionHistory.lifecycleInterval);
+                // Cleanup threshold is 2x the interval to ensure all data is migrated before cleanup
+                const cleanupOlderThan = new Date(now.getTime() - intervalMs * 2);
+
+                const nowDelete = Date.now();
+                await executionStateRepository.deleteTerminalExecutions(cleanupOlderThan);
+
+                coreStart.elasticsearch.client.asInternalUser.index({
+                  index: '.workflows-migrate-executions-observability',
+                  body: {
+                    type: 'workflow:migrate-executions',
+                    '@timestamp': now.toISOString(),
+                    duration: Date.now() - now.getTime(),
+                    workflowExecutionDuration: workflowsMigration.duration,
+                    stepExecutionDuration: stepsMigration.duration,
+                    deleteDuration: Date.now() - nowDelete,
+                    totalWorkflows: workflowsMigration.response.total,
+                    totalSteps: stepsMigration.response.total,
+                  },
+                });
+                logger.debug('Completed workflow/step execution migration and cleanup');
+              } catch (error) {
+                logger.error(`Error during workflow/step execution migration: ${error}`);
+                throw error;
+              }
+            },
+          };
+        },
+      },
+    });
+
+    plugins.taskManager.registerTaskDefinitions({
       'workflow:scheduled': {
         title: 'Scheduled Workflow Execution',
         description: 'Executes workflows on a scheduled basis',
@@ -334,7 +419,7 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const executionStateRepository = new ExecutionStateRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
@@ -349,7 +434,7 @@ export class WorkflowsExecutionEnginePlugin
                 const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
                   workflow,
                   spaceId,
-                  workflowExecutionRepository,
+                  executionStateRepository,
                   taskInstance,
                   logger
                 );
@@ -409,6 +494,7 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 executedBy,
                 triggeredBy: 'scheduled',
+                type: 'workflow',
                 // Store queue delay metrics for observability (only if enabled in config)
                 ...(this.config.collectQueueMetrics
                   ? {
@@ -433,11 +519,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              // Use refresh: 'wait_for' to ensure the execution is immediately searchable
-              // for deduplication checks by subsequent scheduled tasks
-              await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-                refresh: 'wait_for',
-              });
+              await executionStateRepository.bulkUpsert([workflowExecution]);
 
               // Check concurrency limits and apply collision strategy if needed
               const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
@@ -489,13 +571,33 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
+    const executionStateRepository = new ExecutionStateRepository(
       coreStart.elasticsearch.client.asInternalUser
     );
-    this.concurrencyManager = new ConcurrencyManager(
-      workflowTaskManager,
-      workflowExecutionRepository
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    const workflowExecutionRepositoryPromise = createWorkflowExecutionRepository(
+      coreStart.dataStreams,
+      internalEsClient,
+      this.logger
     );
+    const stepExecutionRepositoryPromise = createStepExecutionRepository(
+      coreStart.dataStreams,
+      internalEsClient
+    );
+    this.concurrencyManager = new ConcurrencyManager(workflowTaskManager, executionStateRepository);
+
+    plugins.taskManager
+      .ensureScheduled({
+        id: 'workflow:migrate-executions',
+        taskType: 'workflow:migrate-executions',
+        schedule: { interval: this.config.executionHistory.lifecycleInterval },
+        params: {},
+        state: {},
+        scope: ['workflows'],
+      })
+      .catch((err: Error) => {
+        this.logger.error(`Failed to schedule execution migration task: ${err.message}`);
+      });
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -513,7 +615,7 @@ export class WorkflowsExecutionEnginePlugin
       request: KibanaRequest
     ): Promise<{
       workflowExecution: Partial<EsWorkflowExecution>;
-      repository: WorkflowExecutionRepository;
+      repository: ExecutionStateRepository;
     }> => {
       await this.initialize(coreStart);
       const workflowCreatedAt = new Date();
@@ -524,11 +626,14 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const workflowRunId = generateUuid();
       const workflowExecution: Partial<EsWorkflowExecution> = {
-        id: generateUuid(),
+        id: workflowRunId,
+        workflowRunId,
         spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
+        type: 'workflow',
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
         context,
@@ -548,9 +653,9 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      await executionStateRepository.bulkUpsert([workflowExecution]);
 
-      return { workflowExecution, repository: workflowExecutionRepository };
+      return { workflowExecution, repository: executionStateRepository };
     };
 
     // Helper function to create a task instance
@@ -717,6 +822,7 @@ export class WorkflowsExecutionEnginePlugin
         triggeredBy,
       };
 
+      const workflowExecutionRepository = await workflowExecutionRepositoryPromise;
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       const taskInstance = {
@@ -755,10 +861,12 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
-      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowExecutionId,
-        spaceId
+      const result = await executionStateRepository.getWorkflowExecutions(
+        new Set([workflowExecutionId]),
+        spaceId,
+        ['id', 'status']
       );
+      const workflowExecution = result[workflowExecutionId];
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -773,13 +881,15 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
-      });
+      await executionStateRepository.bulkUpdate([
+        {
+          id: workflowExecution.id,
+          cancelRequested: true,
+          cancellationReason: 'Cancelled by user',
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system', // TODO: set user if available
+        },
+      ]);
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
@@ -795,6 +905,26 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      getWorkflowExecution: getWorkflowExecutionFn(
+        executionStateRepository,
+        workflowExecutionRepositoryPromise
+      ),
+      searchWorkflowExecutions: searchWorkflowExecutionsFn(
+        coreStart.elasticsearch.client.asInternalUser
+      ),
+      getStepExecution: getStepExecutionFn(
+        executionStateRepository,
+        stepExecutionRepositoryPromise
+      ),
+      getStepExecutions: getStepExecutionsFn(
+        executionStateRepository,
+        stepExecutionRepositoryPromise
+      ),
+      getExecutionHistoryStats: getExecutionHistoryStatsFn(workflowExecutionRepositoryPromise),
+      getRecentExecutionsForWorkflows: getRecentExecutionsForWorkflowsFn(
+        coreStart.elasticsearch.client.asInternalUser,
+        this.logger
+      ),
     };
   }
 
