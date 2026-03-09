@@ -114,6 +114,15 @@ describe('WaterfallFlyout', () => {
 
       expect(screen.getByRole('heading', { name: 'Custom Title' })).toBeInTheDocument();
     });
+
+    it('should apply the provided flyout data-test-subj', () => {
+      render(<WaterfallFlyout {...defaultProps} dataTestSubj="traceWaterfallDocumentFlyout" />);
+
+      expect(screen.getByTestId('traceWaterfallDocumentFlyout')).toHaveAttribute(
+        'data-test-subj',
+        'traceWaterfallDocumentFlyout'
+      );
+    });
   });
 
   describe('close behavior', () => {
