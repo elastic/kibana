@@ -48,6 +48,14 @@ export interface NotificationPolicySavedObjectServiceContract {
     version: string;
   }): Promise<{ id: string; version?: string }>;
   delete(params: { id: string }): Promise<void>;
+  find(params: { page: number; perPage: number }): Promise<{
+    saved_objects: Array<{
+      id: string;
+      attributes: NotificationPolicySavedObjectAttributes;
+      version?: string;
+    }>;
+    total: number;
+  }>;
 }
 
 @injectable()
@@ -152,5 +160,15 @@ export class NotificationPolicySavedObjectService
 
   public async delete({ id }: { id: string }): Promise<void> {
     await this.client.delete(NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, id);
+  }
+
+  public async find({ page, perPage }: { page: number; perPage: number }) {
+    return this.client.find<NotificationPolicySavedObjectAttributes>({
+      type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+      page,
+      perPage,
+      sortField: 'updatedAt',
+      sortOrder: 'desc',
+    });
   }
 }

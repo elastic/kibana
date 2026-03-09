@@ -51,17 +51,18 @@ export const mountAlertingV2App = ({
   container: Container;
 }): AppUnmount => {
   const { element, history } = params;
+
   const queryClient = new QueryClient();
 
   ReactDOM.render(
     <Context.Provider value={container}>
-      <I18nProvider>
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <I18nProvider>
           <Router history={history}>
             <App />
           </Router>
-        </QueryClientProvider>
-      </I18nProvider>
+        </I18nProvider>
+      </QueryClientProvider>
     </Context.Provider>,
     element
   );

@@ -16,19 +16,16 @@ import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_r
 import { TransitionStrategyToken } from '../lib/director/strategies/types';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
 import { DispatcherServiceInternalToken } from '../lib/dispatcher/tokens';
+import { NotificationPolicyClient } from '../lib/notification_policy_client';
+import { RulesClient } from '../lib/rules_client';
+import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import {
   NotificationPolicySavedObjectServiceInternalToken,
   NotificationPolicySavedObjectServiceScopedToken,
 } from '../lib/services/notification_policy_saved_object_service/tokens';
-import {
-  RulesSavedObjectServiceInternalToken,
-  RulesSavedObjectServiceScopedToken,
-} from '../lib/services/rules_saved_object_service/tokens';
-import { NotificationPolicyClient } from '../lib/notification_policy_client';
-import { RulesClient } from '../lib/rules_client';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
-import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
-import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
@@ -38,6 +35,10 @@ import { ResourceManager } from '../lib/services/resource_service/resource_manag
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
+import {
+  RulesSavedObjectServiceInternalToken,
+  RulesSavedObjectServiceScopedToken,
+} from '../lib/services/rules_saved_object_service/tokens';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
@@ -56,6 +57,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RulesClient).toSelf().inRequestScope();
   bind(NotificationPolicyClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
+  bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();
   bind(RetryServiceToken).toService(AlertingRetryService);
 

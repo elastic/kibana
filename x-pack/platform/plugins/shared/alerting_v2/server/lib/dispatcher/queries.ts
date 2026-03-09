@@ -38,6 +38,8 @@ export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
       | LIMIT 10000`.toRequest();
 };
 
+const PAIR_SEPARATOR = '::';
+
 export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]): EsqlRequest => {
   const minLastEventTimestamp =
     alertEpisodes.reduce<string | undefined>((min, ep) => {
@@ -50,13 +52,14 @@ export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]):
       return min === undefined || normalizedTimestamp < min ? normalizedTimestamp : min;
     }, undefined) ?? new Date(0).toISOString();
 
-  let whereClause = esql.exp`FALSE`;
-  for (const alertEpisode of alertEpisodes) {
-    whereClause = esql.exp`${whereClause} OR (rule_id == ${alertEpisode.rule_id} AND group_hash == ${alertEpisode.group_hash})`;
-  }
+  const uniquePairKeys = [
+    ...new Set(alertEpisodes.map((ep) => `${ep.rule_id}${PAIR_SEPARATOR}${ep.group_hash}`)),
+  ];
+  const pairValues = uniquePairKeys.map((key) => esql.str(key));
 
   return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-      | WHERE ${whereClause}
+      | EVAL _pair_key = CONCAT(rule_id, ${PAIR_SEPARATOR}, group_hash)
+      | WHERE _pair_key IN (${pairValues})
       | WHERE action_type IN ("ack", "unack", "deactivate", "activate", "snooze", "unsnooze")
       | WHERE action_type != "snooze" OR expiry > ${minLastEventTimestamp}::datetime
       | INLINE STATS

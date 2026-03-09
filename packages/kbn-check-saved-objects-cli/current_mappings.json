@@ -344,6 +344,20 @@
             "type": "keyword"
           }
         }
+      },
+      "auth": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "binary"
+          },
+          "createdByUser": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },

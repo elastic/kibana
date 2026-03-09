@@ -91,6 +91,10 @@
     "updatedBy"
   ],
   "alerting_notification_policy": [
+    "auth",
+    "auth.apiKey",
+    "auth.createdByUser",
+    "auth.owner",
     "createdAt",
     "createdBy",
     "description",

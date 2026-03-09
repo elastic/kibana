@@ -16,6 +16,10 @@ export interface NotificationPolicyResponse {
   matcher?: string;
   group_by?: string[];
   throttle?: { interval: string };
+  auth: {
+    owner: string;
+    createdByUser: boolean;
+  };
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;

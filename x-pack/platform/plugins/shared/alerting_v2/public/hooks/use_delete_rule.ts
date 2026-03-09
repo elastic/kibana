@@ -5,39 +5,34 @@
  * 2.0.
  */
 
-import { CoreStart, useService } from '@kbn/core-di-browser';
-import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
+import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 
-export function useDeleteRule() {
+export const useDeleteRule = () => {
   const rulesApi = useService(RulesApi);
-  const notifications = useService(CoreStart('notifications'));
+  const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  return useMutation(
-    ['deleteRule'],
-    ({ id }: { id: string }) => {
-      return rulesApi.deleteRule(id);
+  return useMutation({
+    mutationKey: ruleKeys.delete(),
+    mutationFn: (id: string) => rulesApi.deleteRule(id),
+    onSuccess: () => {
+      toasts.addSuccess(
+        i18n.translate('xpack.alertingV2.hooks.useDeleteRule.successMessage', {
+          defaultMessage: 'Rule deleted successfully',
+        })
+      );
+      queryClient.invalidateQueries(ruleKeys.lists());
     },
-    {
-      onError: (error) => {
-        notifications?.toasts.addError(error as Error, {
-          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDeleteError', {
-            defaultMessage: 'Unable to delete rule',
-          }),
-        });
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
-        queryClient.invalidateQueries({ queryKey: ruleKeys.details(), exact: false });
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDeleteSuccess', {
-            defaultMessage: 'Rule deleted',
-          }),
-        });
-      },
-    }
-  );
-}
+    onError: () => {
+      toasts.addDanger(
+        i18n.translate('xpack.alertingV2.hooks.useDeleteRule.errorMessage', {
+          defaultMessage: 'Failed to delete rule',
+        })
+      );
+    },
+  });
+};

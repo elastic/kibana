@@ -5,32 +5,39 @@
  * 2.0.
  */
 
-import agent from 'elastic-apm-node';
+import { SpanStatusCode } from '@opentelemetry/api';
 import { ApmMiddleware } from './apm_middleware';
 import { createRuleExecutionMiddlewareContext } from './test_utils';
 import { collectStreamResults, createPipelineStream, createRulePipelineState } from '../test_utils';
+import { getDefaultTracer } from '@kbn/default-tracer';
 
-jest.mock('elastic-apm-node', () => ({
-  startSpan: jest.fn(),
+const mockSpan = {
+  setStatus: jest.fn(),
+  recordException: jest.fn(),
+  end: jest.fn(),
+  isRecording: jest.fn().mockReturnValue(true),
+};
+
+const mockStartSpan = jest.fn(() => mockSpan);
+
+jest.mock('@kbn/default-tracer', () => ({
+  getDefaultTracer: jest.fn(() => ({
+    startSpan: mockStartSpan,
+  })),
 }));
 
-const agentMock = agent as jest.Mocked<typeof agent>;
+const getDefaultTracerMock = getDefaultTracer as jest.MockedFunction<typeof getDefaultTracer>;
 
 describe('ApmMiddleware', () => {
   let middleware: ApmMiddleware;
-  let mockSpan: { addLabels: jest.Mock; outcome: string | undefined; end: jest.Mock };
 
   beforeEach(() => {
     middleware = new ApmMiddleware();
-    mockSpan = { addLabels: jest.fn(), outcome: undefined, end: jest.fn() };
-    agentMock.startSpan.mockReturnValue(mockSpan as never);
-  });
-
-  afterEach(() => {
     jest.clearAllMocks();
+    mockSpan.isRecording.mockReturnValue(true);
   });
 
-  it('wraps the stream in an APM span and sets success outcome', async () => {
+  it('wraps the stream in an OpenTelemetry span and sets success status', async () => {
     const state = createRulePipelineState();
     const context = createRuleExecutionMiddlewareContext();
     const next = jest.fn().mockReturnValue(createPipelineStream([state]));
@@ -40,13 +47,14 @@ describe('ApmMiddleware', () => {
     );
 
     expect(results).toEqual([{ type: 'continue', state }]);
-    expect(agentMock.startSpan).toHaveBeenCalledWith('rule_executor:test_step', 'rule_executor');
-    expect(mockSpan.addLabels).toHaveBeenCalledWith({ plugin: 'alerting_v2' });
-    expect(mockSpan.outcome).toBe('success');
+    expect(mockStartSpan).toHaveBeenCalledWith('rule_executor:test_step', {
+      attributes: { plugin: 'alerting_v2' },
+    });
+    expect(mockSpan.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
     expect(mockSpan.end).toHaveBeenCalledTimes(1);
   });
 
-  it('sets failure outcome and ends span when stream throws', async () => {
+  it('sets error status and ends span when stream throws', async () => {
     const context = createRuleExecutionMiddlewareContext();
     const error = new Error('stream error');
 
@@ -60,7 +68,11 @@ describe('ApmMiddleware', () => {
       collectStreamResults(middleware.execute(context, next, createPipelineStream()))
     ).rejects.toThrow('stream error');
 
-    expect(mockSpan.outcome).toBe('failure');
+    expect(mockSpan.recordException).toHaveBeenCalledWith(error);
+    expect(mockSpan.setStatus).toHaveBeenCalledWith({
+      code: SpanStatusCode.ERROR,
+      message: 'stream error',
+    });
     expect(mockSpan.end).toHaveBeenCalledTimes(1);
   });
 
@@ -75,12 +87,12 @@ describe('ApmMiddleware', () => {
     );
 
     expect(results).toHaveLength(2);
-    expect(mockSpan.outcome).toBe('success');
+    expect(mockSpan.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
     expect(mockSpan.end).toHaveBeenCalledTimes(1);
   });
 
-  it('handles null span gracefully when agent is not started', async () => {
-    agentMock.startSpan.mockReturnValue(null as never);
+  it('handles undefined tracer gracefully when tracer is not available', async () => {
+    getDefaultTracerMock.mockReturnValueOnce(undefined as never);
 
     const state = createRulePipelineState();
     const context = createRuleExecutionMiddlewareContext();
@@ -91,7 +103,6 @@ describe('ApmMiddleware', () => {
     );
 
     expect(results).toEqual([{ type: 'continue', state }]);
-    expect(mockSpan.addLabels).not.toHaveBeenCalled();
     expect(mockSpan.end).not.toHaveBeenCalled();
   });
 });

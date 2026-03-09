@@ -7,3 +7,4 @@
 
 export { RuleDetailsFieldGroup } from './rule_details_field_group';
 export { RuleExecutionFieldGroup } from './rule_execution_field_group';
+export { StateTransitionFieldGroup } from './state_transition_field_group';

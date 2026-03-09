@@ -27,6 +27,7 @@ export const ScheduleField: React.FC = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.scheduleLabel', {
             defaultMessage: 'Schedule',
           })}
+          fullWidth
           helpText={
             <>
               {i18n.translate('xpack.alertingV2.ruleForm.scheduleHelpText', {

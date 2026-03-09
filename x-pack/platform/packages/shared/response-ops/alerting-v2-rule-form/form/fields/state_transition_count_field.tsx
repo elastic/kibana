@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useEffect } from 'react';
+import { EuiFieldNumber } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Controller, useFormContext } from 'react-hook-form';
+import type { FormValues } from '../types';
+import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
+
+const MAX_PENDING_COUNT = 1000;
+const DEFAULT_PENDING_COUNT = 2;
+
+interface StateTransitionCountFieldProps {
+  prependLabel?: string;
+}
+
+export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps> = ({
+  prependLabel,
+}) => {
+  const { control, getValues, setValue } = useFormContext<FormValues>();
+
+  useEffect(() => {
+    const currentCount = getValues('stateTransition.pendingCount');
+    if (currentCount == null) {
+      setValue('stateTransition.pendingCount', DEFAULT_PENDING_COUNT);
+    }
+  }, [getValues, setValue]);
+
+  const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (INVALID_NUMBER_KEYS.includes(e.key)) {
+      e.preventDefault();
+    }
+  }, []);
+
+  return (
+    <Controller
+      name="stateTransition.pendingCount"
+      control={control}
+      rules={{
+        required: i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countRequiredError', {
+          defaultMessage: 'Consecutive breaches is required.',
+        }),
+        min: 1,
+        max: MAX_PENDING_COUNT,
+        validate: (value) => {
+          if (value != null && !Number.isInteger(value)) {
+            return i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countIntegerError', {
+              defaultMessage: 'Must be a whole number.',
+            });
+          }
+          return true;
+        },
+      }}
+      render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
+        <EuiFieldNumber
+          value={value ?? DEFAULT_PENDING_COUNT}
+          onChange={(e) => {
+            const parsedValue = parsePositiveIntegerInput(e.target.value);
+            if (parsedValue != null && parsedValue <= MAX_PENDING_COUNT) {
+              onChange(parsedValue);
+            }
+          }}
+          onKeyDown={onKeyDown}
+          min={1}
+          max={MAX_PENDING_COUNT}
+          step={1}
+          isInvalid={!!error}
+          data-test-subj="stateTransitionCountInput"
+          inputRef={ref}
+          fullWidth
+          prepend={prependLabel ? [prependLabel] : undefined}
+        />
+      )}
+    />
+  );
+};

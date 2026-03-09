@@ -27,10 +27,12 @@ export const TagsField: React.FC = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.labelsLabel', {
               defaultMessage: 'Labels',
             })}
+            fullWidth
             isInvalid={!!error}
             error={error?.message}
           >
             <EuiComboBox
+              fullWidth
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}

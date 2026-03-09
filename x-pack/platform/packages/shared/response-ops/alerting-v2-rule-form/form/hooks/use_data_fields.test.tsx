@@ -13,7 +13,6 @@ import { createQueryClientWrapper } from '../../test_utils';
 import { useDataFields } from './use_data_fields';
 
 jest.mock('@kbn/esql-utils');
-jest.mock('../../flyout/utils');
 
 const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
 

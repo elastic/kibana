@@ -7,7 +7,7 @@
 
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { UserService } from '../services/user_service/user_service';
-import type { CreateAlertActionBody } from '../../routes/schemas/alert_action_schema';
+import type { CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createStorageService } from '../services/storage_service/storage_service.mock';
 import { createUserProfile, createUserService } from '../services/user_service/user_service.mock';

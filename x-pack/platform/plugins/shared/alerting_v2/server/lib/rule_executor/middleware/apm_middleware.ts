@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import agent from 'elastic-apm-node';
+import { SpanStatusCode } from '@opentelemetry/api';
+import { getDefaultTracer } from '@kbn/default-tracer';
 import { injectable } from 'inversify';
 import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
 import type { PipelineStateStream } from '../types';
 import { APP_ID } from '../../constants';
 
 /**
- * Middleware that wraps each step's stream processing in an APM span for tracing.
+ * Middleware that wraps each step's stream processing in an OpenTelemetry span for tracing.
  *
  * The span stays open for the entire duration of the step's stream,
  * capturing both success and failure outcomes.
@@ -27,22 +28,28 @@ export class ApmMiddleware implements RuleExecutionMiddleware {
     input: PipelineStateStream
   ): PipelineStateStream {
     const stream = next(input);
+    const tracer = getDefaultTracer();
 
     return (async function* () {
-      const span = agent.startSpan(`rule_executor:${ctx.step.name}`, 'rule_executor') ?? undefined;
-      span?.addLabels({ plugin: APP_ID });
+      const span = tracer?.startSpan(`rule_executor:${ctx.step.name}`, {
+        attributes: { plugin: APP_ID },
+      });
 
       try {
         for await (const result of stream) {
           yield result;
         }
 
-        if (span) {
-          span.outcome = 'success';
+        if (span?.isRecording()) {
+          span.setStatus({ code: SpanStatusCode.OK });
         }
       } catch (error) {
-        if (span) {
-          span.outcome = 'failure';
+        if (span?.isRecording()) {
+          span.recordException(error as Error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error instanceof Error ? error.message : String(error),
+          });
         }
 
         throw error;

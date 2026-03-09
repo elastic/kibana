@@ -15,6 +15,11 @@ const mockAttrs: NotificationPolicySavedObjectAttributes = {
   name: 'test-policy',
   description: 'A test notification policy',
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
+  auth: {
+    apiKey: 'test-api-key',
+    owner: 'test-user',
+    createdByUser: false,
+  },
   createdBy: 'elastic',
   updatedBy: 'elastic',
   createdAt: '2025-01-01T00:00:00Z',
