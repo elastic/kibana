@@ -33,23 +33,31 @@ export interface PerformanceState {
 }
 
 let isFirstDashboardLoadOfSession = true;
-let wasBackgrounded = false;
+let wasHiddenDuringLoad = false;
 let visibilityCleanup: (() => void) | null = null;
 
+/**
+ * Dashboards can be backgrounded while loading (e.g. switching browser tabs), which pauses requestAnimationFrame calls and, hence,
+ * the dashboard-loaded event. This can artificially inflate the load time metrics for both the dashboard as a whole and the visualizations.
+ *
+ * To account for this, we track if the dashboard was backgrounded at any point during loading and include that in our
+ * telemetry. We also want to avoid tracking visibility changes across multiple dashboard loads, so we set up a new listener
+ * on each load and clean it up when it's no longer needed.
+ */
 export const startDashboardVisibilityTracking = (): void => {
   // Clean up any existing listener and reset flag
   stopDashboardVisibilityTracking();
-  wasBackgrounded = false;
+  wasHiddenDuringLoad = false;
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
-      wasBackgrounded = true;
+      wasHiddenDuringLoad = true;
     }
   };
 
   // If tab is already hidden when tracking starts, set flag
   if (document.visibilityState === 'hidden') {
-    wasBackgrounded = true;
+    wasHiddenDuringLoad = true;
   }
 
   document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -187,8 +195,8 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
-    key5: 'was_backgrounded',
-    value5: wasBackgrounded ? 1 : 0,
+    key5: 'was_hidden_during_load',
+    value5: wasHiddenDuringLoad ? 1 : 0,
     key8: 'mean_panel_prerender',
     value8: meanPanelPrerender,
     key9: 'mean_panel_rendering',

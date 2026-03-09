@@ -128,6 +128,11 @@ export const defaultConfig: ScoutServerConfig = {
       `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/newsfeed')}`,
       // otel mock service
       `--plugin-path=${join(REPO_ROOT, '/src/platform/test/common/plugins/otel_metrics')}`,
+      // analytics ftr helpers
+      `--plugin-path=${join(
+        REPO_ROOT,
+        '/src/platform/test/analytics/plugins/analytics_ftr_helpers'
+      )}`,
       `--newsfeed.service.urlRoot=${kbnUrl}`,
       `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/kibana/v{VERSION}.json`,
       `--logging.appenders.deprecation=${JSON.stringify({
