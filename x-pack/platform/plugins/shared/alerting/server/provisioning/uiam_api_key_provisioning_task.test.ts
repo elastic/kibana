@@ -9,12 +9,15 @@ import { of, Subject } from 'rxjs';
 import { loggingSystemMock, coreMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   UiamApiKeyProvisioningTask,
   API_KEY_PROVISIONING_TASK_ID,
   API_KEY_PROVISIONING_TASK_TYPE,
   PROVISION_UIAM_API_KEYS_FLAG,
   TAGS,
+  API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
+  GET_RULES_BATCH_SIZE,
 } from './uiam_api_key_provisioning_task';
 import { emptyState } from './uiam_api_key_provisioning_task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -32,13 +35,21 @@ function createMockCore(uiamConvert: jest.Mock): {
   coreSetup: CoreSetup;
   coreStart: CoreStart;
   savedObjectsClient: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  encryptedSavedObjectsClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
 } {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const savedObjectsClient = savedObjectsRepositoryMock.create();
+  const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
-  coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart]);
+  const plugins = {
+    encryptedSavedObjects: {
+      getClient: jest.fn().mockReturnValue(encryptedSavedObjectsClient),
+    },
+  };
+  coreSetup.getStartServices = jest.fn().mockResolvedValue([coreStart, plugins]);
 
+  coreStart.savedObjects.getUnsafeInternalClient = jest.fn().mockReturnValue(savedObjectsClient);
   coreStart.savedObjects.createInternalRepository = jest.fn().mockReturnValue(savedObjectsClient);
 
   const uiam = coreStart.security?.authc?.apiKeys?.uiam as
@@ -49,17 +60,44 @@ function createMockCore(uiamConvert: jest.Mock): {
     uiam.convert = uiamConvert;
   }
 
-  return { coreSetup, coreStart, savedObjectsClient };
+  return { coreSetup, coreStart, savedObjectsClient, encryptedSavedObjectsClient };
+}
+
+/** Set up the ESO PIT finder to yield the given saved_objects (rules) when find() is iterated */
+function mockPitFinderRules(
+  encryptedSavedObjectsClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>,
+  savedObjects: Array<{
+    id: string;
+    type: string;
+    attributes: Record<string, unknown>;
+    version?: string;
+  }>,
+  /** Total hit count; if greater than savedObjects.length, task will reschedule for more batches */
+  total?: number
+) {
+  (
+    encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+  ).mockResolvedValue({
+    close: jest.fn(),
+    async *find() {
+      yield {
+        saved_objects: savedObjects,
+        total: total ?? savedObjects.length,
+      };
+    },
+  });
 }
 
 function createRuleSavedObject(overrides: {
   id: string;
-  attributes: { apiKey?: string; apiKeyCreatedByUser?: boolean };
+  attributes: { apiKey?: string; apiKeyCreatedByUser?: boolean; uiamApiKey?: string };
+  version?: string;
 }) {
   return {
     id: overrides.id,
     type: RULE_SAVED_OBJECT_TYPE,
     attributes: overrides.attributes,
+    version: overrides.version,
     score: 1,
     references: [],
   };
@@ -193,7 +231,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(ensureScheduled).toHaveBeenCalledWith({
         id: API_KEY_PROVISIONING_TASK_ID,
         taskType: API_KEY_PROVISIONING_TASK_TYPE,
-        schedule: { interval: '1h' },
+        schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
         state: emptyState,
         params: {},
       });
@@ -273,14 +311,10 @@ describe('UiamApiKeyProvisioningTask', () => {
   describe('runTask', () => {
     it('increments state.runs and returns no runAt when no rules to process', async () => {
       const uiamConvert = jest.fn().mockResolvedValueOnce({ results: [] });
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 0,
-        per_page: 500,
-        page: 1,
-        saved_objects: [],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, []);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -302,6 +336,65 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
+    it('returns runAt 1m from now when response.total indicates more batches to process', async () => {
+      const batchSize = GET_RULES_BATCH_SIZE;
+      const rules = Array.from({ length: batchSize }, (_, i) =>
+        createRuleSavedObject({
+          id: `rule-${i}`,
+          attributes: { apiKey: `es-api-key-${i}`, apiKeyCreatedByUser: false },
+          version: '1',
+        })
+      );
+      const uiamConvert = jest.fn().mockResolvedValue({
+        results: Array.from({ length: batchSize }, (_, i) =>
+          createConvertSuccessResult({ key: `uiam-key-${i}`, id: `essu_${i}` })
+        ),
+      } as ConvertUiamAPIKeysResponse);
+
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+      mockPitFinderRules(encryptedSavedObjectsClient, rules, batchSize + 1);
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: rules.map((r) => ({
+          id: r.id,
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: {},
+          references: [],
+          version: r.version,
+          error: undefined,
+        })),
+      });
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+      const beforeRun = Date.now();
+      const result = await runner.run();
+      const afterRun = Date.now();
+
+      expect(result).toHaveProperty('state', { runs: 1 });
+      expect(result).toHaveProperty('runAt');
+      const runAt = (result as { runAt?: Date }).runAt!;
+      expect(runAt.getTime()).toBeGreaterThanOrEqual(beforeRun + 60000 - 1000);
+      expect(runAt.getTime()).toBeLessThanOrEqual(afterRun + 60000 + 1000);
+      expect(uiamConvert).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
+        `Wrote provisioning status: 0 skipped rules, 0 failed conversions, ${batchSize} completed and 0 failed updates.`,
+        { tags: TAGS }
+      );
+    });
+
     it('calls uiam.convert with rule apiKeys and updates rules when convert succeeds', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [
@@ -311,27 +404,27 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 3,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-1',
-            attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
-          }),
-          createRuleSavedObject({
-            id: 'rule-2',
-            attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
-          }),
-          createRuleSavedObject({
-            id: 'rule-3',
-            attributes: { apiKey: 'es-api-key-3', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      const rules = [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'rule-2',
+          attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'rule-3',
+          attributes: { apiKey: 'es-api-key-3', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ];
+      mockPitFinderRules(encryptedSavedObjectsClient, rules);
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -379,22 +472,35 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).toHaveBeenCalledTimes(1);
       expect(uiamConvert).toHaveBeenCalledWith(['es-api-key-1', 'es-api-key-2', 'es-api-key-3']);
+      // uiamApiKey is stored as base64(id:key) per task implementation
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
             id: 'rule-1',
-            attributes: { uiamApiKey: 'uiam-key-1' },
+            attributes: expect.objectContaining({
+              uiamApiKey: Buffer.from('essu_0:uiam-key-1').toString('base64'),
+            }),
+            version: '1',
+            mergeAttributes: false,
           }),
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
             id: 'rule-2',
-            attributes: { uiamApiKey: 'uiam-key-2' },
+            attributes: expect.objectContaining({
+              uiamApiKey: Buffer.from('essu_1:uiam-key-2').toString('base64'),
+            }),
+            version: '1',
+            mergeAttributes: false,
           }),
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
             id: 'rule-3',
-            attributes: { uiamApiKey: 'uiam-key-3' },
+            attributes: expect.objectContaining({
+              uiamApiKey: Buffer.from('essu_2:uiam-key-3').toString('base64'),
+            }),
+            version: '1',
+            mergeAttributes: false,
           }),
         ])
       );
@@ -430,6 +536,10 @@ describe('UiamApiKeyProvisioningTask', () => {
         ]),
         { overwrite: true }
       );
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 0 skipped rules, 0 failed conversions, 3 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
     });
 
     it('records provisioning status for failed conversions and updates only rules that succeeded', async () => {
@@ -441,27 +551,26 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       } as ConvertUiamAPIKeysResponse);
 
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 3,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-2',
-            attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
-          }),
-          createRuleSavedObject({
-            id: 'rule-3',
-            attributes: { apiKey: 'es-api-key-3', apiKeyCreatedByUser: false },
-          }),
-          createRuleSavedObject({
-            id: 'rule-4',
-            attributes: { apiKey: 'es-api-key-4', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-2',
+          attributes: { apiKey: 'es-api-key-2', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'rule-3',
+          attributes: { apiKey: 'es-api-key-3', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'rule-4',
+          attributes: { apiKey: 'es-api-key-4', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -492,12 +601,17 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).toHaveBeenCalledWith(['es-api-key-2', 'es-api-key-3', 'es-api-key-4']);
+      // uiamApiKey is stored as base64(id:key) per task implementation
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             type: RULE_SAVED_OBJECT_TYPE,
             id: 'rule-2',
-            attributes: { uiamApiKey: 'uiam-key-2' },
+            attributes: expect.objectContaining({
+              uiamApiKey: Buffer.from('essu_0:uiam-key-2').toString('base64'),
+            }),
+            version: '1',
+            mergeAttributes: false,
           }),
         ])
       );
@@ -535,23 +649,23 @@ describe('UiamApiKeyProvisioningTask', () => {
         ]),
         { overwrite: true }
       );
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 0 skipped rules, 2 failed conversions, 1 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
     });
 
     it('skips rules with no apiKey and writes SKIPPED status', async () => {
       const uiamConvert = jest.fn();
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-no-key',
-            attributes: { apiKey: undefined, apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-no-key',
+          attributes: { apiKey: undefined, apiKeyCreatedByUser: false },
+        }),
+      ]);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -582,23 +696,23 @@ describe('UiamApiKeyProvisioningTask', () => {
         ]),
         { overwrite: true }
       );
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 1 skipped rules, 0 failed conversions, 0 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
     });
 
     it('skips rules with apiKeyCreatedByUser true and writes SKIPPED status', async () => {
       const uiamConvert = jest.fn();
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-user-key',
-            attributes: { apiKey: 'user-es-key', apiKeyCreatedByUser: true },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-user-key',
+          attributes: { apiKey: 'user-es-key', apiKeyCreatedByUser: true },
+        }),
+      ]);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -628,26 +742,78 @@ describe('UiamApiKeyProvisioningTask', () => {
         ]),
         { overwrite: true }
       );
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 1 skipped rules, 0 failed conversions, 0 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
     });
 
-    it('returns runAt when hasMoreToUpdate is true', async () => {
+    it('skips rules that already have uiamApiKey and writes SKIPPED status', async () => {
+      const uiamConvert = jest.fn();
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-has-uiam',
+          attributes: {
+            apiKey: 'es-key',
+            apiKeyCreatedByUser: false,
+            uiamApiKey: 'existing-uiam-key',
+          },
+        }),
+      ]);
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+      const result = await runner.run();
+
+      expect(result).toEqual({ state: { runs: 1 } });
+      expect(uiamConvert).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: 'rule-has-uiam',
+            attributes: expect.objectContaining({
+              status: UiamApiKeyProvisioningStatus.SKIPPED,
+              message: 'The rule already has a UIAM API key',
+            }),
+          }),
+        ]),
+        { overwrite: true }
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 1 skipped rules, 0 failed conversions, 0 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
+    });
+
+    it('processes one batch of rules and increments state', async () => {
       const uiamConvert = jest.fn().mockResolvedValue({
         results: [createConvertSuccessResult({ key: 'uiam-1' })],
       });
 
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 600,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-1',
-            attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -676,26 +842,24 @@ describe('UiamApiKeyProvisioningTask', () => {
       });
       const result = await runner.run();
 
-      expect(result.state).toEqual({ runs: 1 });
-      expect((result as { runAt?: Date }).runAt).toBeDefined();
-      expect((result as { runAt?: Date }).runAt!.getTime()).toBeGreaterThan(Date.now());
+      expect(result).toEqual({ state: { runs: 1 } });
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 0 skipped rules, 0 failed conversions, 1 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
     });
 
     it('throws when uiam.convert throws', async () => {
       const uiamConvert = jest.fn().mockRejectedValue(new Error('UIAM unavailable'));
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, encryptedSavedObjectsClient } = createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-1',
-            attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+        }),
+      ]);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -718,23 +882,18 @@ describe('UiamApiKeyProvisioningTask', () => {
     });
 
     it('throws when uiam.convert is not available', async () => {
-      const { coreSetup, coreStart, savedObjectsClient } = createMockCore(jest.fn());
+      const { coreSetup, coreStart, encryptedSavedObjectsClient } = createMockCore(jest.fn());
       const uiam = coreStart.security?.authc?.apiKeys?.uiam as unknown as
         | { convert?: jest.Mock }
         | undefined;
       if (uiam) uiam.convert = undefined;
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-1',
-            attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+        }),
+      ]);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -750,27 +909,19 @@ describe('UiamApiKeyProvisioningTask', () => {
       });
 
       await expect(runner.run()).rejects.toThrow('UIAM convert API is not available');
-      expect(logger.error).toHaveBeenCalledWith(
-        'Error converting API keys: UIAM convert API is not available',
-        expect.any(Object)
-      );
+      // Task fast-fails in runTask before convert; no convertApiKeys error logging
     });
 
     it('throws when uiam.convert returns null (license not enabled)', async () => {
       const uiamConvert = jest.fn().mockResolvedValue(null);
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, encryptedSavedObjectsClient } = createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-1',
-            attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+        }),
+      ]);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -795,11 +946,31 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(uiamConvert).toHaveBeenCalledWith(['es-1']);
     });
 
-    it('throws when savedObjectsClient.find throws', async () => {
-      const uiamConvert = jest.fn();
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+    it('throws when convert result count does not match input count', async () => {
+      const uiamConvert = jest.fn().mockResolvedValue({
+        results: [
+          createConvertSuccessResult({ key: 'uiam-1' }),
+          createConvertSuccessResult({ key: 'uiam-2' }),
+        ],
+      } as ConvertUiamAPIKeysResponse);
 
-      savedObjectsClient.find.mockRejectedValue(new Error('SO find failed'));
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-1', apiKeyCreatedByUser: false },
+        }),
+        createRuleSavedObject({
+          id: 'rule-2',
+          attributes: { apiKey: 'es-2', apiKeyCreatedByUser: false },
+        }),
+        createRuleSavedObject({
+          id: 'rule-3',
+          attributes: { apiKey: 'es-3', apiKeyCreatedByUser: false },
+        }),
+      ]);
 
       const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
       const taskManager = { registerTaskDefinitions: jest.fn() };
@@ -814,9 +985,41 @@ describe('UiamApiKeyProvisioningTask', () => {
         taskInstance: createTaskInstance({ runs: 0 }),
       });
 
-      await expect(runner.run()).rejects.toThrow('SO find failed');
+      await expect(runner.run()).rejects.toThrow(
+        'Number of converted API keys does not match the number of API keys to convert'
+      );
       expect(logger.error).toHaveBeenCalledWith(
-        'Error getting API keys to convert: SO find failed',
+        'Error converting API keys: Number of converted API keys does not match the number of API keys to convert',
+        expect.any(Object)
+      );
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('throws when createPointInTimeFinderDecryptedAsInternalUser throws', async () => {
+      const uiamConvert = jest.fn();
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      (
+        encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser as jest.Mock
+      ).mockRejectedValue(new Error('PIT finder failed'));
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+
+      await expect(runner.run()).rejects.toThrow('PIT finder failed');
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error getting API keys to convert: PIT finder failed',
         expect.any(Object)
       );
       expect(uiamConvert).not.toHaveBeenCalled();
@@ -829,19 +1032,16 @@ describe('UiamApiKeyProvisioningTask', () => {
         results: [createConvertSuccessResult({ key: 'uiam-key-1' })],
       });
 
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 1,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'rule-1',
-            attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-1',
+          attributes: { apiKey: 'es-api-key-1', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
 
       savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('bulkUpdate failed'));
 
@@ -875,23 +1075,21 @@ describe('UiamApiKeyProvisioningTask', () => {
         ],
       });
 
-      const { coreSetup, savedObjectsClient } = createMockCore(uiamConvert);
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
 
-      savedObjectsClient.find.mockResolvedValue({
-        total: 2,
-        per_page: 500,
-        page: 1,
-        saved_objects: [
-          createRuleSavedObject({
-            id: 'r1',
-            attributes: { apiKey: 'es-a', apiKeyCreatedByUser: false },
-          }),
-          createRuleSavedObject({
-            id: 'r2',
-            attributes: { apiKey: 'es-b', apiKeyCreatedByUser: false },
-          }),
-        ],
-      });
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'r1',
+          attributes: { apiKey: 'es-a', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'r2',
+          attributes: { apiKey: 'es-b', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
 
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -922,9 +1120,17 @@ describe('UiamApiKeyProvisioningTask', () => {
 
       expect(result).toEqual({ state: { runs: 1 } });
       expect(uiamConvert).toHaveBeenCalledWith(['es-a', 'es-b']);
+      // uiamApiKey is stored as base64(id:key) per task implementation
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         expect.arrayContaining([
-          expect.objectContaining({ id: 'r1', attributes: { uiamApiKey: 'uiam-a' } }),
+          expect.objectContaining({
+            id: 'r1',
+            attributes: expect.objectContaining({
+              uiamApiKey: Buffer.from('essu_0:uiam-a').toString('base64'),
+            }),
+            version: '1',
+            mergeAttributes: false,
+          }),
         ])
       );
       const bulkCreateCalls = savedObjectsClient.bulkCreate.mock.calls[0][0] as Array<{
@@ -934,6 +1140,10 @@ describe('UiamApiKeyProvisioningTask', () => {
       const statuses = bulkCreateCalls.map((c) => ({ id: c.id, status: c.attributes.status }));
       expect(statuses).toContainEqual({ id: 'r1', status: UiamApiKeyProvisioningStatus.COMPLETED });
       expect(statuses).toContainEqual({ id: 'r2', status: UiamApiKeyProvisioningStatus.FAILED });
+      expect(logger.info).toHaveBeenCalledWith(
+        'Wrote provisioning status: 0 skipped rules, 1 failed conversions, 1 completed and 0 failed updates.',
+        { tags: TAGS }
+      );
     });
   });
 });

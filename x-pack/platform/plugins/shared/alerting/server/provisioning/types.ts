@@ -6,6 +6,7 @@
  */
 
 import type { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import type { RawRule } from '../types';
 
 export interface ProvisioningStatusDocs {
   type: typeof UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE;
@@ -21,21 +22,29 @@ export interface ProvisioningStatusDocs {
 
 export interface ApiKeyToConvert {
   ruleId: string;
-  apiKey: string;
+  /** Full decrypted rule attributes (includes apiKey); required for ESO-safe full rule update when persisting uiamApiKey */
+  attributes: RawRule;
+  /** Rule's primary namespace for rulesClient.bulkEdit (space-scoped) */
+  version?: string;
 }
 
 export interface UiamApiKeyByRuleId {
   ruleId: string;
   uiamApiKey: string;
+  /** Full decrypted rule attributes; required for ESO-safe full rule update */
+  attributes: RawRule;
+  /** Rule's primary namespace for rulesClient.bulkEdit (space-scoped) */
+  version?: string;
 }
 
 export interface GetApiKeysToConvertResult {
   apiKeysToConvert: Array<ApiKeyToConvert>;
   provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs>;
-  hasMoreToUpdate: boolean;
+  /** True when response.total exceeds the first batch, so more rules may be provisioned on a later run */
+  hasMoreToProvision: boolean;
 }
 
 export interface ConvertApiKeysResult {
-  apiKeysByRuleId: Array<UiamApiKeyByRuleId>;
+  rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId>;
   provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs>;
 }

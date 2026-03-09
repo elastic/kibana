@@ -55,5 +55,5 @@ export const getExcludeRulesFilter = async (
     page += 1;
   }
   if (ruleIds.size === 0) return undefined;
-  return nodeTypes.function.buildNode('not', [convertRuleIdsToKueryNode(Array.from(ruleIds))]);
+  return nodeTypes.function.buildNode('not', convertRuleIdsToKueryNode(Array.from(ruleIds)));
 };

@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Logger,
-  CoreSetup,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsClientContract,
-  CoreStart,
-} from '@kbn/core/server';
+import type { Logger, CoreSetup, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -19,21 +13,25 @@ import type {
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { RawRule } from '../types';
 import {
   RULE_SAVED_OBJECT_TYPE,
   UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
-import {
-  UiamApiKeyProvisioningStatus,
-  UiamApiKeyProvisioningEntityType,
-} from '../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
+import { UiamApiKeyProvisioningStatus } from '../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import {
   stateSchemaByVersion,
   emptyState,
   type LatestTaskStateSchema,
 } from './uiam_api_key_provisioning_task_state';
 import { getExcludeRulesFilter } from './lib/get_exclude_rules_filter';
+import {
+  createSkippedRuleStatus,
+  createFailedConversionStatus,
+  createStatusFromBulkUpdateResult,
+} from './lib/provisioning_status_helpers';
+import { buildRuleUpdatesForUiam } from './lib/build_rule_updates_for_uiam';
 import type {
   ProvisioningStatusDocs,
   ApiKeyToConvert,
@@ -44,10 +42,11 @@ import type {
 import type { AlertingPluginsStart } from '../plugin';
 
 export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
-const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
-const RUN_AT_INTERVAL = 60000;
+export const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
 const TASK_TIMEOUT = '5m';
-const GET_RULES_BATCH_SIZE = 500;
+export const GET_RULES_BATCH_SIZE = 300;
+/** Delay before the next run when more batches are pending (1 minute) */
+const RESCHEDULE_DELAY_MS = 60000;
 
 export const API_KEY_PROVISIONING_TASK_ID = 'api_key_provisioning';
 export const API_KEY_PROVISIONING_TASK_TYPE = `alerting:${API_KEY_PROVISIONING_TASK_ID}`;
@@ -114,47 +113,52 @@ export class UiamApiKeyProvisioningTask {
       return;
     }
 
-    const applyFlag = async (enabled: boolean) => {
-      if (enabled && this.isTaskScheduled !== true) {
-        try {
-          await taskManager.ensureScheduled({
-            id: API_KEY_PROVISIONING_TASK_ID,
-            taskType: API_KEY_PROVISIONING_TASK_TYPE,
-            schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
-            state: emptyState,
-            params: {},
-          });
-          this.isTaskScheduled = true;
-          this.logger.info(
-            `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} scheduled`,
-            { tags: TAGS }
-          );
-        } catch (e) {
-          this.logger.error(
-            `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`,
-            { tags: TAGS }
-          );
-        }
-      } else if (!enabled && this.isTaskScheduled === true) {
-        try {
-          await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
-          this.isTaskScheduled = false;
-          this.logger.info(
-            `${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} removed`,
-            { tags: TAGS }
-          );
-        } catch (e) {
-          this.logger.error(
-            `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${e.message}`,
-            { tags: TAGS }
-          );
-        }
-      }
-    };
-
     core.featureFlags.getBooleanValue$(PROVISION_UIAM_API_KEYS_FLAG, false).subscribe((enabled) => {
-      applyFlag(enabled).catch(() => {});
+      this.applyProvisioningFlag(enabled, taskManager).catch(() => {});
     });
+  };
+
+  private applyProvisioningFlag = async (
+    enabled: boolean,
+    taskManager: TaskManagerStartContract
+  ): Promise<void> => {
+    if (enabled && this.isTaskScheduled !== true) {
+      try {
+        await taskManager.ensureScheduled({
+          id: API_KEY_PROVISIONING_TASK_ID,
+          taskType: API_KEY_PROVISIONING_TASK_TYPE,
+          schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
+          state: emptyState,
+          params: {},
+        });
+        this.isTaskScheduled = true;
+        this.logger.info(
+          `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} scheduled`,
+          { tags: TAGS }
+        );
+      } catch (e) {
+        const message = e.message ?? String(e);
+        this.logger.error(
+          `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${message}`,
+          { tags: TAGS }
+        );
+      }
+    } else if (!enabled && this.isTaskScheduled === true) {
+      try {
+        await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
+        this.isTaskScheduled = false;
+        this.logger.info(
+          `${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} removed`,
+          { tags: TAGS }
+        );
+      } catch (e) {
+        const message = e.message ?? String(e);
+        this.logger.error(
+          `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${message}`,
+          { tags: TAGS }
+        );
+      }
+    }
   };
 
   private runTask = async (
@@ -162,110 +166,157 @@ export class UiamApiKeyProvisioningTask {
     core: CoreSetup<AlertingPluginsStart>
   ): Promise<{ state: LatestTaskStateSchema; runAt?: Date; error?: Error }> => {
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
+    const [coreStart, plugins] = await core.getStartServices();
+    const uiamConvert = coreStart.security?.authc?.apiKeys?.uiam?.convert;
+    if (typeof uiamConvert !== 'function') {
+      throw new Error('UIAM convert API is not available');
+    }
 
-    const [coreStart] = await core.getStartServices();
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+    });
+    const unsafeSavedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+    });
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
-      RULE_SAVED_OBJECT_TYPE,
       UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
     ]);
 
-    const { apiKeysToConvert, hasMoreToUpdate, provisioningStatusForSkippedRules } =
-      await this.getApiKeysToConvert(savedObjectsClient);
+    const { apiKeysToConvert, provisioningStatusForSkippedRules, hasMoreToProvision } =
+      await this.getApiKeysToConvert(savedObjectsClient, encryptedSavedObjectsClient);
 
-    const { apiKeysByRuleId, provisioningStatusForFailedConversions } = await this.convertApiKeys(
-      apiKeysToConvert,
-      coreStart
-    );
+    const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
+      await this.convertApiKeys(apiKeysToConvert, uiamConvert);
 
     const provisioningStatusFromUpdate = await this.updateRules(
-      apiKeysByRuleId,
+      rulesWithUiamApiKeys,
+      unsafeSavedObjectsClient
+    );
+
+    await this.updateProvisioningStatus(
+      provisioningStatusForSkippedRules,
+      provisioningStatusForFailedConversions,
+      provisioningStatusFromUpdate,
       savedObjectsClient
     );
 
-    const provisioningStatus = [
+    const nextState = { runs: state.runs + 1 };
+    if (hasMoreToProvision) {
+      return {
+        state: nextState,
+        runAt: new Date(Date.now() + RESCHEDULE_DELAY_MS),
+      };
+    }
+    return { state: nextState };
+  };
+
+  private updateProvisioningStatus = async (
+    provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs>,
+    provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs>,
+    provisioningStatusFromUpdate: Array<ProvisioningStatusDocs>,
+    savedObjectsClient: SavedObjectsClientContract
+  ): Promise<void> => {
+    const all = [
       ...provisioningStatusForSkippedRules,
       ...provisioningStatusForFailedConversions,
       ...provisioningStatusFromUpdate,
     ];
-
-    await this.updateProvisioningStatus(provisioningStatus, savedObjectsClient);
-
-    return {
-      state: { runs: state.runs + 1 },
-      ...(hasMoreToUpdate ? { runAt: new Date(Date.now() + RUN_AT_INTERVAL) } : {}),
-    };
-  };
-
-  private updateProvisioningStatus = async (
-    provisioningStatus: Array<ProvisioningStatusDocs>,
-    savedObjectsClient: SavedObjectsClientContract
-  ): Promise<void> => {
-    if (provisioningStatus.length === 0) {
+    if (all.length === 0) {
       return;
     }
     try {
-      await savedObjectsClient.bulkCreate(provisioningStatus, { overwrite: true });
+      await savedObjectsClient.bulkCreate(all, { overwrite: true });
+      const updateCompleted = provisioningStatusFromUpdate.filter(
+        (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.COMPLETED
+      ).length;
+      const updateFailed = provisioningStatusFromUpdate.filter(
+        (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.FAILED
+      ).length;
+      const skipped = provisioningStatusForSkippedRules.length;
+      const failedConversions = provisioningStatusForFailedConversions.length;
+      this.logger.info(
+        `Wrote provisioning status: ${skipped} skipped rules, ${failedConversions} failed conversions, ${updateCompleted} completed and ${updateFailed} failed updates.`,
+        { tags: TAGS }
+      );
     } catch (e) {
-      this.logger.error(`Error writing provisioning status: ${e.message}`, { tags: TAGS });
+      const message = e.message ?? String(e);
+      this.logger.error(`Error writing provisioning status: ${message}`, {
+        error: { stack_trace: e.stack, tags: TAGS },
+      });
     }
   };
 
   private getApiKeysToConvert = async (
-    savedObjectsClient: SavedObjectsClientContract
+    savedObjectsClient: SavedObjectsClientContract,
+    encryptedSavedObjectsClient: EncryptedSavedObjectsClient
   ): Promise<GetApiKeysToConvertResult> => {
     try {
       const excludeRulesFilter = await getExcludeRulesFilter(savedObjectsClient);
-      const rulesResponse = await savedObjectsClient.find<RawRule>({
-        type: RULE_SAVED_OBJECT_TYPE,
-        perPage: GET_RULES_BATCH_SIZE,
-        namespaces: ['*'],
-        ...(excludeRulesFilter ? { filter: excludeRulesFilter } : {}),
-      });
+      const rulesFinder =
+        await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
+          type: RULE_SAVED_OBJECT_TYPE,
+          perPage: GET_RULES_BATCH_SIZE,
+          namespaces: ['*'],
+          ...(excludeRulesFilter ? { filter: excludeRulesFilter } : {}),
+        });
+
       const provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs> = [];
       const apiKeysToConvert: Array<ApiKeyToConvert> = [];
-      for (const rule of rulesResponse.saved_objects) {
-        const {
-          id,
-          attributes: { apiKey, apiKeyCreatedByUser },
-        } = rule;
-        if (!apiKey) {
-          provisioningStatusForSkippedRules.push({
-            type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-            id,
-            attributes: {
-              '@timestamp': new Date().toISOString(),
-              entityId: id,
-              entityType: UiamApiKeyProvisioningEntityType.RULE,
-              status: UiamApiKeyProvisioningStatus.SKIPPED,
-              message: 'The rule has no API key',
-            },
-          });
-          continue;
+      let hasMoreToProvision = false;
+
+      try {
+        const findIterator = rulesFinder.find();
+        const firstBatch = await findIterator.next();
+        if (!firstBatch.done && firstBatch.value?.saved_objects) {
+          const response = firstBatch.value;
+          hasMoreToProvision = response.total > response.saved_objects.length;
+          for (const rule of response.saved_objects) {
+            const { id } = rule;
+            const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
+
+            if (!apiKey) {
+              provisioningStatusForSkippedRules.push(
+                createSkippedRuleStatus(id, 'The rule has no API key')
+              );
+              continue;
+            }
+            if (uiamApiKey) {
+              // this may happen if provision status update fails after adding the UIAM API key
+              provisioningStatusForSkippedRules.push(
+                createSkippedRuleStatus(id, 'The rule already has a UIAM API key')
+              );
+              continue;
+            }
+            if (apiKeyCreatedByUser === true) {
+              provisioningStatusForSkippedRules.push(
+                createSkippedRuleStatus(id, 'The API key was created by the user')
+              );
+            } else {
+              apiKeysToConvert.push({
+                ruleId: id,
+                attributes: rule.attributes,
+                version: rule.version,
+              });
+            }
+          }
         }
-        if (apiKeyCreatedByUser === true) {
-          provisioningStatusForSkippedRules.push({
-            type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-            id,
-            attributes: {
-              '@timestamp': new Date().toISOString(),
-              entityId: id,
-              entityType: UiamApiKeyProvisioningEntityType.RULE,
-              status: UiamApiKeyProvisioningStatus.SKIPPED,
-              message: 'The API key was created by the user',
-            },
-          });
-        } else {
-          apiKeysToConvert.push({ ruleId: id, apiKey });
-        }
+      } finally {
+        await rulesFinder.close();
       }
-      const hasMoreToUpdate = rulesResponse.total > rulesResponse.saved_objects.length;
+
+      this.logger.info(
+        `Found ${apiKeysToConvert.length} API keys to convert. ${provisioningStatusForSkippedRules.length} rules skipped. Has more to provision: ${hasMoreToProvision}.`,
+        { tags: TAGS }
+      );
+
       return {
         apiKeysToConvert,
         provisioningStatusForSkippedRules,
-        hasMoreToUpdate,
+        hasMoreToProvision,
       };
     } catch (error) {
-      this.logger.error(`Error getting API keys to convert: ${error.message}`, {
+      const message = error.message ?? String(error);
+      this.logger.error(`Error getting API keys to convert: ${message}`, {
         error: { stack_trace: error.stack, tags: TAGS },
       });
       throw error;
@@ -274,53 +325,61 @@ export class UiamApiKeyProvisioningTask {
 
   private convertApiKeys = async (
     apiKeysToConvert: Array<ApiKeyToConvert>,
-    coreStart: CoreStart
+    uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>
   ): Promise<ConvertApiKeysResult> => {
     if (apiKeysToConvert.length === 0) {
       return {
-        apiKeysByRuleId: [],
+        rulesWithUiamApiKeys: [],
         provisioningStatusForFailedConversions: [],
       };
     }
 
-    const keys = apiKeysToConvert.map(({ apiKey }) => apiKey);
+    const keys = apiKeysToConvert.map(({ attributes }) => attributes.apiKey!);
 
     try {
-      const uiamConvert = coreStart.security?.authc?.apiKeys?.uiam?.convert;
-      if (typeof uiamConvert !== 'function') {
-        throw new Error('UIAM convert API is not available');
-      }
-      const convertResponse: ConvertUiamAPIKeysResponse | null = await uiamConvert(keys);
+      const convertResponse = await uiamConvert(keys);
       if (convertResponse === null) {
         throw new Error('License required for the UIAM convert API is not enabled');
       }
 
-      const apiKeysByRuleId: Array<UiamApiKeyByRuleId> = [];
+      if (convertResponse.results.length !== apiKeysToConvert.length) {
+        throw new Error(
+          'Number of converted API keys does not match the number of API keys to convert'
+        );
+      }
+
+      const rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId> = [];
       const provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs> = [];
 
       for (let i = 0; i < convertResponse.results.length && i < apiKeysToConvert.length; i++) {
         const item = convertResponse.results[i];
-        const { ruleId } = apiKeysToConvert[i];
+        const { ruleId, attributes, version } = apiKeysToConvert[i];
         if (item.status === 'success') {
-          apiKeysByRuleId.push({ ruleId, uiamApiKey: item.key });
-        } else if (item.status === 'failed') {
-          provisioningStatusForFailedConversions.push({
-            type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-            id: ruleId,
-            attributes: {
-              '@timestamp': new Date().toISOString(),
-              entityId: ruleId,
-              entityType: UiamApiKeyProvisioningEntityType.RULE,
-              status: UiamApiKeyProvisioningStatus.FAILED,
-              message: `Error generating UIAM API key for the rule with ID ${ruleId}: ${item.message}`,
-            },
+          rulesWithUiamApiKeys.push({
+            ruleId,
+            uiamApiKey: Buffer.from(`${item.id}:${item.key}`).toString('base64'),
+            attributes,
+            version,
           });
+        } else if (item.status === 'failed') {
+          provisioningStatusForFailedConversions.push(
+            createFailedConversionStatus(
+              ruleId,
+              `Error generating UIAM API key for the rule with ID ${ruleId}: ${item.message}`
+            )
+          );
         }
       }
 
-      return { apiKeysByRuleId, provisioningStatusForFailedConversions };
+      this.logger.info(
+        `Successfully converted ${rulesWithUiamApiKeys.length} API keys. ${provisioningStatusForFailedConversions.length} conversions failed.`,
+        { tags: TAGS }
+      );
+
+      return { rulesWithUiamApiKeys, provisioningStatusForFailedConversions };
     } catch (error) {
-      this.logger.error(`Error converting API keys: ${error.message}`, {
+      const message = error.message ?? String(error);
+      this.logger.error(`Error converting API keys: ${message}`, {
         error: { stack_trace: error.stack, tags: TAGS },
       });
       throw error;
@@ -328,39 +387,19 @@ export class UiamApiKeyProvisioningTask {
   };
 
   private updateRules = async (
-    apiKeysByRuleId: Array<UiamApiKeyByRuleId>,
-    savedObjectsClient: SavedObjectsClientContract
+    rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId>,
+    unsafeSavedObjectsClient: SavedObjectsClientContract
   ): Promise<Array<ProvisioningStatusDocs>> => {
-    if (apiKeysByRuleId.length === 0) {
+    if (rulesWithUiamApiKeys.length === 0) {
       return [];
     }
-    const ruleUpdates: Array<SavedObjectsBulkUpdateObject<RawRule>> = apiKeysByRuleId.map(
-      ({ ruleId, uiamApiKey }) => ({
-        type: RULE_SAVED_OBJECT_TYPE,
-        id: ruleId,
-        attributes: { uiamApiKey } as Partial<RawRule>,
-        // TODO DO we need to add the namespace here?
-      })
-    );
+    const ruleUpdates = buildRuleUpdatesForUiam(rulesWithUiamApiKeys);
     try {
-      const bulkRuleUpdateResponse = await savedObjectsClient.bulkUpdate(ruleUpdates);
-      return bulkRuleUpdateResponse.saved_objects.map((so) => ({
-        type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-        id: so.id,
-        attributes: {
-          '@timestamp': new Date().toISOString(),
-          entityId: so.id,
-          entityType: UiamApiKeyProvisioningEntityType.RULE,
-          status: so.error
-            ? UiamApiKeyProvisioningStatus.FAILED
-            : UiamApiKeyProvisioningStatus.COMPLETED,
-          ...(so.error
-            ? { message: `Error bulk updating the rule with ID ${so.id}: ${so.error.message}` }
-            : {}),
-        },
-      }));
+      const bulkRuleUpdateResponse = await unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
+      return bulkRuleUpdateResponse.saved_objects.map(createStatusFromBulkUpdateResult);
     } catch (error) {
-      this.logger.error(`Error bulk updating rules with UIAM API keys: ${error.message}`, {
+      const message = error.message ?? String(error);
+      this.logger.error(`Error bulk updating rules with UIAM API keys: ${message}`, {
         error: { stack_trace: error.stack, tags: TAGS },
       });
       throw error;
