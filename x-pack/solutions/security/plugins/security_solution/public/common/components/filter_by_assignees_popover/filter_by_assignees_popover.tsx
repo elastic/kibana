@@ -58,6 +58,7 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
     const button = useMemo(
       () => (
         <EuiToolTip
+          display="block"
           position="bottom"
           content={
             upsellingMessage ??
