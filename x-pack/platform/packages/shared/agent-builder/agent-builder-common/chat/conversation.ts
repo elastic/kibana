@@ -228,6 +228,11 @@ export interface RoundModelUsageStats {
    * Model identifier from the provider response, if available.
    */
   model?: string;
+  /**
+   * Estimated total context window size (in tokens) after this round completed.
+   * Includes previous rounds + current round. Uses a heuristic (~4 chars/token).
+   */
+  estimated_context_tokens?: number;
 }
 
 /**

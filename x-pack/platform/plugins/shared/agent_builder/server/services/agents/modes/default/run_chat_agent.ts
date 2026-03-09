@@ -165,12 +165,19 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
 
-  // Create unified result transformer for tool result optimization
+  const estimatedContextTokens = estimateConversationTokens(processedConversation);
+  const compactionEnabled = estimatedContextTokens > CONTEXT_TOKEN_BUDGET;
+
+  logger.debug(
+    `Context estimate: ~${estimatedContextTokens} tokens, compaction ${compactionEnabled ? 'enabled' : 'disabled'}`
+  );
+
   const resultTransformer = createResultTransformer({
     toolRegistry,
     toolManager,
     filestore,
     filestoreEnabled: experimentalFeatures.filestore,
+    compactionEnabled,
   });
 
   const promptFactory = createPromptFactory({
@@ -248,6 +255,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
+      estimatedPreviousContextTokens: estimatedContextTokens,
     }),
     evictInternalEvents(),
     shareReplay()
@@ -319,4 +327,10 @@ const getRecursionLimit = (cycleLimit: number): number => {
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
   // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
   return cycleLimit * 2 + 8;
+};
+
+const CONTEXT_TOKEN_BUDGET = 100_000;
+
+const estimateConversationTokens = (conversation: ProcessedConversation): number => {
+  return Math.ceil(JSON.stringify(conversation.previousRounds).length / 4);
 };

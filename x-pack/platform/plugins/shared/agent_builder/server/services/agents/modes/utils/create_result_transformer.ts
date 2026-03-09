@@ -99,6 +99,12 @@ export interface CreateResultTransformerOptions {
    * Defaults to FILE_REFERENCE_TOKEN_THRESHOLD.
    */
   tokenThreshold?: number;
+  /**
+   * Whether file reference compaction is active.
+   * When false, Step 2 (file reference substitution) is skipped even if filestore is enabled.
+   * Defaults to true for backward compatibility.
+   */
+  compactionEnabled?: boolean;
 }
 
 /**
@@ -115,6 +121,7 @@ export const createResultTransformer = ({
   filestore,
   filestoreEnabled,
   tokenThreshold = FILE_REFERENCE_TOKEN_THRESHOLD,
+  compactionEnabled = true,
 }: CreateResultTransformerOptions): ToolCallResultTransformer => {
   return async (toolCall: ToolCallWithResult): Promise<ToolResult[]> => {
     // Skip if no results or all already cleaned
@@ -128,8 +135,8 @@ export const createResultTransformer = ({
       return summarized.map(markResultAsCleaned);
     }
 
-    // Step 2: Apply file reference substitution if enabled
-    if (filestoreEnabled) {
+    // Step 2: Apply file reference substitution if enabled and compaction is active
+    if (filestoreEnabled && compactionEnabled) {
       const transformed = await Promise.all(
         toolCall.results.map((result) =>
           tryFilestoreSubstitution({
