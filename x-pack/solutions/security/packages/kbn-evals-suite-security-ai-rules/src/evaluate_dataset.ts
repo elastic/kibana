@@ -533,7 +533,16 @@ export function createEvaluateDataset({
               return { error: taskResult.error || 'No rule returned from agent' };
             }
 
-            succeeded++;
+            if (expected?.category === 'negative') {
+              // Negative-case prompts should not produce rules.
+              otherFailures++;
+              otherFailureReasons.push(truncate('Generated a rule for a negative-case prompt'));
+              log.warning(
+                '[Task] Negative case: model generated a rule (unexpected; rejection evaluator will fail)'
+              );
+            } else {
+              succeeded++;
+            }
             log.info(SEP);
             log.success(`Generated rule: "${taskResult.generatedRule.name}"`);
             log.info(JSON.stringify(taskResult.generatedRule, null, 2));
