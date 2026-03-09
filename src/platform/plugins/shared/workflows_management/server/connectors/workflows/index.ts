@@ -220,7 +220,13 @@ export function getWorkflowsConnectorAdapter(): ConnectorAdapter<
             workflowId: params?.subActionParams?.workflowId || 'unknown',
             spaceId,
             summaryMode: params?.subActionParams?.summaryMode ?? true,
-            alertStates: params?.subActionParams?.alertStates,
+            alertStates: params?.subActionParams?.alertStates
+              ? {
+                  new: params.subActionParams.alertStates.new !== false,
+                  ongoing: params.subActionParams.alertStates.ongoing === true,
+                  recovered: params.subActionParams.alertStates.recovered === true,
+                }
+              : undefined,
           },
         };
       }
