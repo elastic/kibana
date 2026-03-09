@@ -3062,6 +3062,126 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/agent_builder/plugins:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        List all installed plugins.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins
+      parameters: []
+      responses: {}
+      summary: List plugins
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/plugins/{pluginId}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Delete an installed plugin by ID. This action cannot be undone.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: delete-agent-builder-plugins-pluginid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Delete a plugin
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/{pluginId}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Get a specific plugin by ID.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+      operationId: get-agent-builder-plugins-pluginid
+      parameters:
+        - description: The unique identifier of the plugin.
+          in: path
+          name: pluginId
+          required: true
+          schema:
+            type: string
+      responses: {}
+      summary: Get a plugin by id
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/agent_builder/plugins/install:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/plugins/install</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Install a plugin from a GitHub URL or a direct zip URL.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+      operationId: post-agent-builder-plugins-install
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                plugin_name:
+                  description: Optional name override for the plugin. Defaults to the manifest name.
+                  type: string
+                url:
+                  description: URL to install the plugin from (GitHub URL or direct zip URL).
+                  type: string
+              required:
+                - url
+      responses: {}
+      summary: Install a plugin
+      tags:
+        - agent builder
+      x-state: Technical Preview
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/skills:
     get:
       description: |-
