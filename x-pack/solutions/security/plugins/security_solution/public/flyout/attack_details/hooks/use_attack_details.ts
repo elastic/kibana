@@ -85,6 +85,8 @@ export const useAttackDetails = ({
     skip: !attackId,
   });
 
+  // build AttackDiscoveryAlert from raw _source using shared document-API-internal transform
+  // returns null when source/attackId missing or transform throws
   const attackDiscovery = useMemo(() => {
     const source = searchHit?._source;
     if (!source || !attackId) {

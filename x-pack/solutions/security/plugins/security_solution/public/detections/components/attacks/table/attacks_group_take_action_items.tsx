@@ -29,6 +29,7 @@ interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
   /** Optional callback to close the containing popover menu */
   closePopover?: () => void;
+  /** Optional callback to run after an action is successfully taken */
   onActionSuccess?: () => void;
   /** Optional size for the context menu for flyout */
   size?: 's' | 'm';
