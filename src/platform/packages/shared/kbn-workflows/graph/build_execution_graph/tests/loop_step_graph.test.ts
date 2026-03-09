@@ -142,9 +142,7 @@ describe('convertToWorkflowGraph', () => {
         timeout: '60s',
       });
 
-      const iterationTimeoutNode = executionGraph.node(
-        'enterTimeoutZone_iteration_foreachStep'
-      );
+      const iterationTimeoutNode = executionGraph.node('enterTimeoutZone_iteration_foreachStep');
       expect(iterationTimeoutNode).toEqual({
         id: 'enterTimeoutZone_iteration_foreachStep',
         type: 'enter-timeout-zone',
