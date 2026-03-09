@@ -41,7 +41,10 @@ const SYNC_INDICATOR_WIDTH = '3px';
 const SYNCED_CLASS = 'esqlNlSyncIndicatorSynced';
 const OUT_OF_SYNC_CLASS = 'esqlNlSyncIndicatorOutOfSync';
 const HINT_CLASS = 'esqlNlGhostHint';
+const WAND_CLASS = 'esqlNlMagicWand';
 const COMMAND_KEY = isMac ? '\u2318' : 'Ctrl';
+
+const WAND_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="FILL_COLOR"><path d="M12.1 1.3a1 1 0 011.4 0l1.2 1.2a1 1 0 010 1.4L6.5 12.1 3 13l.9-3.5L12.1 1.3zm-.7 2.7l1.6 1.6.6-.6-1.6-1.6-.6.6z"/><path d="M4.5 0c.27 1.62.63 1.98 2.25 2.25-1.62.27-1.98.63-2.25 2.25-.27-1.62-.63-1.98-2.25-2.25C3.87.27 4.23-.09 4.5 0z"/></svg>`;
 
 /**
  * Extracts consecutive leading `//` comment lines from the editor model.
@@ -93,12 +96,17 @@ export const useNLToEsql = ({
   const syncStateRef = useRef<NLSyncState | null>(null);
   const decorationIdsRef = useRef<string[]>([]);
   const hintDecorationIdsRef = useRef<string[]>([]);
+  const wandDecorationIdsRef = useRef<string[]>([]);
   const isGeneratingRef = useRef(false);
 
   const isEnabledRef = useRef(isEnabled);
   isEnabledRef.current = isEnabled;
   const onQuerySubmitRef = useRef(onQuerySubmit);
   onQuerySubmitRef.current = onQuerySubmit;
+
+  const wandSvgEncoded = encodeURIComponent(
+    WAND_ICON_SVG.replaceAll('FILL_COLOR', euiTheme.colors.text)
+  );
 
   const nlSyncDecorationStyle = css`
     .${SYNCED_CLASS} {
@@ -116,6 +124,18 @@ export const useNLToEsql = ({
       color: ${euiTheme.colors.textSubdued};
       font-style: italic;
       opacity: 0.6;
+    }
+    .${WAND_CLASS} {
+      background-image: url('data:image/svg+xml,${wandSvgEncoded}');
+      background-size: 18px 18px;
+      background-repeat: no-repeat;
+      background-position: center;
+      width: 20px !important;
+      cursor: pointer;
+      opacity: 0.8;
+    }
+    .${WAND_CLASS}:hover {
+      opacity: 1;
     }
   `;
 
@@ -171,6 +191,61 @@ export const useNLToEsql = ({
     [editorModel]
   );
 
+  const updateWandDecoration = useCallback(
+    (show: boolean) => {
+      const model = editorModel.current;
+      if (!model) return;
+
+      if (!show) {
+        wandDecorationIdsRef.current = model.deltaDecorations(wandDecorationIdsRef.current, []);
+        return;
+      }
+
+      wandDecorationIdsRef.current = model.deltaDecorations(wandDecorationIdsRef.current, [
+        {
+          range: new monaco.Range(1, 1, 1, 1),
+          options: {
+            isWholeLine: true,
+            linesDecorationsClassName: WAND_CLASS,
+          },
+        },
+      ]);
+    },
+    [editorModel]
+  );
+
+  const handleWandClick = useCallback(
+    (e: monaco.editor.IEditorMouseEvent): boolean => {
+      if (!isEnabledRef.current) return false;
+      if (e.target.type !== monaco.editor.MouseTargetType.GUTTER_LINE_DECORATIONS) return false;
+      if (e.target.position?.lineNumber !== 1) return false;
+
+      const model = editorModel.current;
+      const editor = editorRef.current;
+      if (!model || !editor) return false;
+
+      const { commentLineCount } = extractLeadingComment(model);
+      if (commentLineCount > 0) return false;
+
+      e.event.preventDefault();
+      e.event.stopPropagation();
+
+      const placeholder = `// Describe your query in plain language.`;
+      editor.executeEdits('nl-to-esql-wand', [
+        {
+          range: new monaco.Range(1, 1, 1, 1),
+          text: placeholder + '\n',
+        },
+      ]);
+
+      const selection = new monaco.Selection(1, 4, 1, placeholder.length + 1);
+      editor.setSelection(selection);
+      editor.focus();
+      return true;
+    },
+    [editorModel, editorRef]
+  );
+
   const updateNlSyncDecorations = useCallback(() => {
     if (!isEnabledRef.current) return;
 
@@ -185,8 +260,11 @@ export const useNLToEsql = ({
       syncStateRef.current = null;
       updateDecorations(0, null);
       updateHintDecoration(false, 0);
+      updateWandDecoration(true);
       return;
     }
+
+    updateWandDecoration(false);
 
     const cursorLine = editor.getPosition()?.lineNumber ?? 0;
     const cursorOnComment = cursorLine >= 1 && cursorLine <= commentLineCount;
@@ -204,7 +282,7 @@ export const useNLToEsql = ({
     const status = commentChanged || queryChanged ? NLSyncStatus.OutOfSync : NLSyncStatus.Synced;
 
     updateDecorations(commentLineCount, status);
-  }, [editorModel, editorRef, updateDecorations, updateHintDecoration]);
+  }, [editorModel, editorRef, updateDecorations, updateHintDecoration, updateWandDecoration]);
 
   const generateFromComment = useCallback(async () => {
     if (!isEnabledRef.current || isGeneratingRef.current) return;
@@ -295,5 +373,6 @@ export const useNLToEsql = ({
     generateFromComment,
     nlSyncDecorationStyle,
     updateNlSyncDecorations,
+    handleWandClick,
   };
 };

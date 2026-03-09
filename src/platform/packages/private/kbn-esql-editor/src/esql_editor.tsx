@@ -772,14 +772,15 @@ const ESQLEditorInternal = function ESQLEditor({
     suppressSuggestionsRef,
   });
 
-  const { generateFromComment, nlSyncDecorationStyle, updateNlSyncDecorations } = useNLToEsql({
-    editorRef,
-    editorModel,
-    http: core.http,
-    notifications: core.notifications,
-    onQuerySubmit,
-    isEnabled: isNlToEsqlEnabled,
-  });
+  const { generateFromComment, nlSyncDecorationStyle, updateNlSyncDecorations, handleWandClick } =
+    useNLToEsql({
+      editorRef,
+      editorModel,
+      http: core.http,
+      notifications: core.notifications,
+      onQuerySubmit,
+      isEnabled: isNlToEsqlEnabled,
+    });
 
   const generateFromCommentRef = useRef(generateFromComment);
   generateFromCommentRef.current = generateFromComment;
@@ -1291,7 +1292,8 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   editor.onMouseDown((e) => {
-                    if (enableResourceBrowser) {
+                    const wandHandled = handleWandClick(e);
+                    if (!wandHandled && enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
                     }
                   });
