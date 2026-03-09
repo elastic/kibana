@@ -20,8 +20,7 @@
       "host.ip",
       "event.dataset",
       "event.action",
-      "event.category",
-      "event.module"
+      "event.category"
     ]
   },
   "allow_lazy_open": true,

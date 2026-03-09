@@ -1,5 +1,5 @@
 {
-  "description": "Security: Linux - Looks for unusual destination port activity that could indicate command-and-control, persistence mechanism, or data exfiltration activity.",
+  "description": "Security: Linux - Looks for sudo activity from an unusual user context. Unusual unique user identifier context changes can be due to privilege escalation.",
   "groups": [
     "security",
     "linux"
@@ -8,19 +8,19 @@
     "bucket_span": "15m",
     "detectors": [
       {
-        "detector_description": "Detects rare destination ports.",
+        "detector_description": "Detects rare usernames.",
         "function": "rare",
-        "by_field_name": "destination.port",
+        "by_field_name": "user.name",
         "detector_index": 0
       }
     ],
     "influencers": [
-      "host.entity.id_computed",
-      "host.name",
       "process.name",
-      "user.entity.id_computed",
+      "host.name",
+      "host.id",
+      "process.args",
       "user.name",
-      "destination.ip"
+      "event.module"
     ]
   },
   "allow_lazy_open": true,
@@ -32,7 +32,7 @@
   },
   "custom_settings": {
     "created_by": "ml-module-security-linux-v3",
-    "security_app_display_name": "Unusual Linux Network Port Activity",
+    "security_app_display_name": "Unusual Sudo Activity",
     "managed": true,
     "job_revision": 4
   }

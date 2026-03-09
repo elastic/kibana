@@ -50,132 +50,132 @@
   },
   "jobs": [
     {
-      "id": "v3_linux_anomalous_network_port_activity_euid",
-      "file": "v3_linux_anomalous_network_port_activity_euid.json"
+      "id": "v3_linux_anomalous_network_port_activity_ea",
+      "file": "v3_linux_anomalous_network_port_activity_ea.json"
     },
     {
-      "id": "v3_linux_network_configuration_discovery_euid",
-      "file": "v3_linux_network_configuration_discovery_euid.json"
+      "id": "v3_linux_network_configuration_discovery_ea",
+      "file": "v3_linux_network_configuration_discovery_ea.json"
     },
     {
-      "id": "v3_linux_network_connection_discovery_euid",
-      "file": "v3_linux_network_connection_discovery_euid.json"
+      "id": "v3_linux_network_connection_discovery_ea",
+      "file": "v3_linux_network_connection_discovery_ea.json"
     },
     {
-      "id": "v3_linux_rare_sudo_user_euid",
-      "file": "v3_linux_rare_sudo_user_euid.json"
+      "id": "v3_linux_rare_sudo_user_ea",
+      "file": "v3_linux_rare_sudo_user_ea.json"
     },
     {
-      "id": "v3_linux_rare_user_compiler_euid",
-      "file": "v3_linux_rare_user_compiler_euid.json"
+      "id": "v3_linux_rare_user_compiler_ea",
+      "file": "v3_linux_rare_user_compiler_ea.json"
     },
     {
-      "id": "v3_linux_system_information_discovery_euid",
-      "file": "v3_linux_system_information_discovery_euid.json"
+      "id": "v3_linux_system_information_discovery_ea",
+      "file": "v3_linux_system_information_discovery_ea.json"
     },
     {
-      "id": "v3_linux_system_process_discovery_euid",
-      "file": "v3_linux_system_process_discovery_euid.json"
+      "id": "v3_linux_system_process_discovery_ea",
+      "file": "v3_linux_system_process_discovery_ea.json"
     },
     {
-      "id": "v3_linux_system_user_discovery_euid",
-      "file": "v3_linux_system_user_discovery_euid.json"
+      "id": "v3_linux_system_user_discovery_ea",
+      "file": "v3_linux_system_user_discovery_ea.json"
     },
     {
-      "id": "v3_linux_anomalous_process_all_hosts_euid",
-      "file": "v3_linux_anomalous_process_all_hosts_euid.json"
+      "id": "v3_linux_anomalous_process_all_hosts_ea",
+      "file": "v3_linux_anomalous_process_all_hosts_ea.json"
     },
     {
-      "id": "v3_linux_anomalous_user_name_euid",
-      "file": "v3_linux_anomalous_user_name_euid.json"
+      "id": "v3_linux_anomalous_user_name_ea",
+      "file": "v3_linux_anomalous_user_name_ea.json"
     },
     {
-      "id": "v3_linux_rare_metadata_process_euid",
-      "file": "v3_linux_rare_metadata_process_euid.json"
+      "id": "v3_linux_rare_metadata_process_ea",
+      "file": "v3_linux_rare_metadata_process_ea.json"
     },
     {
-      "id": "v3_linux_rare_metadata_user_euid",
-      "file": "v3_linux_rare_metadata_user_euid.json"
+      "id": "v3_linux_rare_metadata_user_ea",
+      "file": "v3_linux_rare_metadata_user_ea.json"
     },
     {
-      "id": "v3_rare_process_by_host_linux_euid",
-      "file": "v3_rare_process_by_host_linux_euid.json"
+      "id": "v3_rare_process_by_host_linux_ea",
+      "file": "v3_rare_process_by_host_linux_ea.json"
     },
     {
-      "id": "v3_linux_anomalous_network_activity_euid",
-      "file": "v3_linux_anomalous_network_activity_euid.json"
+      "id": "v3_linux_anomalous_network_activity_ea",
+      "file": "v3_linux_anomalous_network_activity_ea.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-v3_linux_anomalous_network_port_activity_euid",
-      "file": "datafeed_v3_linux_anomalous_network_port_activity_euid.json",
-      "job_id": "v3_linux_anomalous_network_port_activity_euid"
+      "id": "datafeed-v3_linux_anomalous_network_port_activity_ea",
+      "file": "datafeed_v3_linux_anomalous_network_port_activity_ea.json",
+      "job_id": "v3_linux_anomalous_network_port_activity_ea"
     },
     {
-      "id": "datafeed-v3_linux_network_configuration_discovery_euid",
-      "file": "datafeed_v3_linux_network_configuration_discovery_euid.json",
-      "job_id": "v3_linux_network_configuration_discovery_euid"
+      "id": "datafeed-v3_linux_network_configuration_discovery_ea",
+      "file": "datafeed_v3_linux_network_configuration_discovery_ea.json",
+      "job_id": "v3_linux_network_configuration_discovery_ea"
     },
     {
-      "id": "datafeed-v3_linux_network_connection_discovery_euid",
-      "file": "datafeed_v3_linux_network_connection_discovery_euid.json",
-      "job_id": "v3_linux_network_connection_discovery_euid"
+      "id": "datafeed-v3_linux_network_connection_discovery_ea",
+      "file": "datafeed_v3_linux_network_connection_discovery_ea.json",
+      "job_id": "v3_linux_network_connection_discovery_ea"
     },
     {
-      "id": "datafeed-v3_linux_rare_sudo_user_euid",
-      "file": "datafeed_v3_linux_rare_sudo_user_euid.json",
-      "job_id": "v3_linux_rare_sudo_user_euid"
+      "id": "datafeed-v3_linux_rare_sudo_user_ea",
+      "file": "datafeed_v3_linux_rare_sudo_user_ea.json",
+      "job_id": "v3_linux_rare_sudo_user_ea"
     },
     {
-      "id": "datafeed-v3_linux_rare_user_compiler_euid",
-      "file": "datafeed_v3_linux_rare_user_compiler_euid.json",
-      "job_id": "v3_linux_rare_user_compiler_euid"
+      "id": "datafeed-v3_linux_rare_user_compiler_ea",
+      "file": "datafeed_v3_linux_rare_user_compiler_ea.json",
+      "job_id": "v3_linux_rare_user_compiler_ea"
     },
     {
-      "id": "datafeed-v3_linux_system_information_discovery_euid",
-      "file": "datafeed_v3_linux_system_information_discovery_euid.json",
-      "job_id": "v3_linux_system_information_discovery_euid"
+      "id": "datafeed-v3_linux_system_information_discovery_ea",
+      "file": "datafeed_v3_linux_system_information_discovery_ea.json",
+      "job_id": "v3_linux_system_information_discovery_ea"
     },
     {
-      "id": "datafeed-v3_linux_system_process_discovery_euid",
-      "file": "datafeed_v3_linux_system_process_discovery_euid.json",
-      "job_id": "v3_linux_system_process_discovery_euid"
+      "id": "datafeed-v3_linux_system_process_discovery_ea",
+      "file": "datafeed_v3_linux_system_process_discovery_ea.json",
+      "job_id": "v3_linux_system_process_discovery_ea"
     },
     {
-      "id": "datafeed-v3_linux_system_user_discovery_euid",
-      "file": "datafeed_v3_linux_system_user_discovery_euid.json",
-      "job_id": "v3_linux_system_user_discovery_euid"
+      "id": "datafeed-v3_linux_system_user_discovery_ea",
+      "file": "datafeed_v3_linux_system_user_discovery_ea.json",
+      "job_id": "v3_linux_system_user_discovery_ea"
     },
     {
-      "id": "datafeed-v3_linux_anomalous_process_all_hosts_euid",
-      "file": "datafeed_v3_linux_anomalous_process_all_hosts_euid.json",
-      "job_id": "v3_linux_anomalous_process_all_hosts_euid"
+      "id": "datafeed-v3_linux_anomalous_process_all_hosts_ea",
+      "file": "datafeed_v3_linux_anomalous_process_all_hosts_ea.json",
+      "job_id": "v3_linux_anomalous_process_all_hosts_ea"
     },
     {
-      "id": "datafeed-v3_linux_anomalous_user_name_euid",
-      "file": "datafeed_v3_linux_anomalous_user_name_euid.json",
-      "job_id": "v3_linux_anomalous_user_name_euid"
+      "id": "datafeed-v3_linux_anomalous_user_name_ea",
+      "file": "datafeed_v3_linux_anomalous_user_name_ea.json",
+      "job_id": "v3_linux_anomalous_user_name_ea"
     },
     {
-      "id": "datafeed-v3_linux_rare_metadata_process_euid",
-      "file": "datafeed_v3_linux_rare_metadata_process_euid.json",
-      "job_id": "v3_linux_rare_metadata_process_euid"
+      "id": "datafeed-v3_linux_rare_metadata_process_ea",
+      "file": "datafeed_v3_linux_rare_metadata_process_ea.json",
+      "job_id": "v3_linux_rare_metadata_process_ea"
     },
     {
-      "id": "datafeed-v3_linux_rare_metadata_user_euid",
-      "file": "datafeed_v3_linux_rare_metadata_user_euid.json",
-      "job_id": "v3_linux_rare_metadata_user_euid"
+      "id": "datafeed-v3_linux_rare_metadata_user_ea",
+      "file": "datafeed_v3_linux_rare_metadata_user_ea.json",
+      "job_id": "v3_linux_rare_metadata_user_ea"
     },
     {
-      "id": "datafeed-v3_rare_process_by_host_linux_euid",
-      "file": "datafeed_v3_rare_process_by_host_linux_euid.json",
-      "job_id": "v3_rare_process_by_host_linux_euid"
+      "id": "datafeed-v3_rare_process_by_host_linux_ea",
+      "file": "datafeed_v3_rare_process_by_host_linux_ea.json",
+      "job_id": "v3_rare_process_by_host_linux_ea"
     },
     {
-      "id": "datafeed-v3_linux_anomalous_network_activity_euid",
-      "file": "datafeed_v3_linux_anomalous_network_activity_euid.json",
-      "job_id": "v3_linux_anomalous_network_activity_euid"
+      "id": "datafeed-v3_linux_anomalous_network_activity_ea",
+      "file": "datafeed_v3_linux_anomalous_network_activity_ea.json",
+      "job_id": "v3_linux_anomalous_network_activity_ea"
     }
   ],
   "tags": [

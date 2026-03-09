@@ -1,5 +1,5 @@
 {
-  "description": "Security: Linux - Looks for commands related to system network configuration discovery from an unusual unique user identifier context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system network configuration discovery to increase their understanding of connected networks and hosts. This information may be used to shape follow-up behaviors such as lateral movement or additional discovery.",
+  "description": "Security: Linux - Looks for commands related to system network configuration discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used by a threat actor to engage in system network configuration discovery to increase their understanding of connected networks and hosts. This information may be used to shape follow-up behaviors such as lateral movement or additional discovery.",
   "groups": [
     "security",
     "linux"
@@ -10,17 +10,17 @@
       {
         "detector_description": "Detects rare usernames.",
         "function": "rare",
-        "by_field_name": "user.entity.id_computed",
+        "by_field_name": "user.name",
         "detector_index": 0
       }
     ],
     "influencers": [
       "process.name",
-      "host.entity.id_computed",
       "host.name",
+      "host.id",
       "process.args",
-      "user.entity.id_computed",
-      "user.name"
+      "user.name",
+      "event.module"
     ]
   },
   "allow_lazy_open": true,

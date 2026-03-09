@@ -1,5 +1,5 @@
 {
-  "job_id": "v3_linux_rare_sudo_user_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -10,11 +10,6 @@
         {
           "term": {
             "event.type": "start"
-          }
-        },
-        {
-          "term": {
-            "process.name": "sudo"
           }
         }
       ],
@@ -64,6 +59,32 @@
               }
             ]
           }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "term": {
+                  "process.name": "netstat"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "ss"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "route"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "showmount"
+                }
+              }
+            ]
+          }
         }
       ],
       "must_not": {
@@ -81,18 +102,6 @@
             "winlogbeat"
           ]
         }
-      }
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
-    },
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
       }
     }
   }

@@ -1,5 +1,5 @@
 {
-  "job_id": "v3_rare_process_by_host_linux_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -7,11 +7,6 @@
   "query": {
     "bool": {
       "filter": [
-        {
-          "term": {
-            "event.category": "process"
-          }
-        },
         {
           "term": {
             "event.type": "start"
@@ -64,36 +59,34 @@
               }
             ]
           }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "term": {
+                  "process.name": "compile"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "gcc"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "make"
+                }
+              },
+              {
+                "term": {
+                  "process.name": "yasm"
+                }
+              }
+            ]
+          }
         }
-      ],
-      "must_not": {
-        "terms": {
-          "process.name": [
-            "elastic-agent.exe",
-            "elastic-agent",
-            "metricbeat.exe",
-            "metricbeat",
-            "filebeat.exe",
-            "filebeat",
-            "packetbeat.exe",
-            "packetbeat",
-            "winlogbeat.exe",
-            "winlogbeat"
-          ]
-        }
-      }
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
-    },
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
-      }
+      ]
     }
   }
 }

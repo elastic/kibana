@@ -1,5 +1,5 @@
 {
-  "job_id": "v3_linux_system_process_discovery_euid",
+  "job_id": "JOB_ID",
   "indices": [
     "INDEX_PATTERN_NAME"
   ],
@@ -7,6 +7,11 @@
   "query": {
     "bool": {
       "filter": [
+        {
+          "term": {
+            "event.category": "network"
+          }
+        },
         {
           "term": {
             "event.type": "start"
@@ -59,36 +64,57 @@
               }
             ]
           }
-        },
+        }
+      ],
+      "must_not": [
         {
           "bool": {
             "should": [
               {
                 "term": {
-                  "process.name": "ps"
+                  "destination.ip": "127.0.0.1"
                 }
               },
               {
                 "term": {
-                  "process.name": "top"
+                  "destination.ip": "127.0.0.53"
+                }
+              },
+              {
+                "term": {
+                  "destination.ip": "::"
+                }
+              },
+              {
+                "term": {
+                  "destination.ip": "::1"
+                }
+              },
+              {
+                "term": {
+                  "user.name": "jenkins"
                 }
               }
             ]
           }
+        },
+        {
+          "terms": {
+            "process.name": [
+              "elastic-agent.exe",
+              "elastic-agent",
+              "metricbeat.exe",
+              "metricbeat",
+              "filebeat.exe",
+              "filebeat",
+              "packetbeat.exe",
+              "packetbeat",
+              "winlogbeat.exe",
+              "winlogbeat"
+            ]
+          }
         }
       ]
-    }
-  },
-  "script_fields": {
-    "user.entity.id_computed": {
-      "script": {
-        "id": "euid_user_entity"
-      }
-    },
-    "host.entity.id_computed": {
-      "script": {
-        "id": "euid_host_entity"
-      }
     }
   }
 }
