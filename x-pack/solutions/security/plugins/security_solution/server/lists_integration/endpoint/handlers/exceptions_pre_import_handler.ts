@@ -121,6 +121,7 @@ export const getExceptionsPreImportHandler = (
     }
 
     // --- Below are operations to prepare the imported data ---
+    await addOwnerSpaceIdTagToItems(data, endpointAppContext, request);
     addImportedCommentToItems(data);
     addImportedTagToItems(data);
 
@@ -304,6 +305,29 @@ const addImportedTagToItems = (data: PromiseFromStreams): void => {
   for (const item of data.items) {
     if (!(item instanceof Error)) {
       item.tags = [...(item.tags ?? []), IMPORTED_ARTIFACT_TAG];
+    }
+  }
+};
+
+const addOwnerSpaceIdTagToItems = async (
+  data: PromiseFromStreams,
+  endpointAppContext: EndpointAppContextService,
+  request: KibanaRequest | undefined
+): Promise<void> => {
+  if (!request) {
+    throw new EndpointArtifactExceptionValidationError(
+      'Unable to determine space id. Missing HTTP Request object',
+      500
+    );
+  }
+
+  const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+
+  for (const item of data.items) {
+    if (!(item instanceof Error)) {
+      if (!hasArtifactOwnerSpaceId(item)) {
+        item.tags = [...(item.tags ?? []), buildSpaceOwnerIdTag(spaceId)];
+      }
     }
   }
 };

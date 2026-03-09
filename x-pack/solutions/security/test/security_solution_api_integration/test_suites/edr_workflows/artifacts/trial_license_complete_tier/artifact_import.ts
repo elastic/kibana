@@ -1029,6 +1029,28 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 });
               }
 
+              it(`should add owner space ID tag to ${artifact.name}`, async () => {
+                await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                  .post(`${EXCEPTION_LIST_URL}/_import`)
+                  .set('kbn-xsrf', 'true')
+                  .on('error', createSupertestErrorLogger(log))
+                  .attach(
+                    'file',
+                    buildImportBuffer(artifact.listId, [
+                      {
+                        item_id: 'imported-artifact',
+                        tags: [],
+                      },
+                    ]),
+                    'import_data.ndjson'
+                  )
+                  .expect(200);
+
+                const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                expect(items.length).toEqual(1);
+                expect(items[0].tags).toContain(CURRENT_SPACE_OWNER_TAG);
+              });
+
               if (artifact.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) {
                 it('should not import Endpoint exceptions without global artifact privilege, as they have been global', async () => {
                   await supertest[artifact.listId].all
