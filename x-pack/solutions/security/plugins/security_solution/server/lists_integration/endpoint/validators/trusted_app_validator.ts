@@ -225,7 +225,7 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
 
     await this.validatePreImportItems(items, async (item) => {
-      await this.validateCreateOwnerSpaceIds(item);
+      await this.validateImportOwnerSpaceIds(item);
       await this.validateCanCreateGlobalArtifacts(item);
       await this.removeInvalidPolicyIds(item);
     });

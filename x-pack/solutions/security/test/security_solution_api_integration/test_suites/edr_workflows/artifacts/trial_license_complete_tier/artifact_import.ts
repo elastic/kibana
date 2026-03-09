@@ -450,8 +450,66 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   ]);
                 });
 
-                // todo do we need this? create API allows this, but import could block it
-                it('should not import per-policy artifacts to other space if not visible in current space', async () => {});
+                it('should not import per-policy artifacts to other space if not visible in current space', async () => {
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'visible-in-current-space',
+                          tags: [OTHER_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
+                        },
+                        {
+                          item_id: 'not-visible-in-current-space-because-unassigned',
+                          tags: [OTHER_SPACE_OWNER_TAG],
+                        },
+                        {
+                          item_id: 'not-visible-in-current-space-because-assigned-only-there',
+                          tags: [
+                            OTHER_SPACE_OWNER_TAG,
+                            buildPerPolicyTag(fleetEndpointPolicyOtherSpace.packagePolicy.id),
+                          ],
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [
+                        {
+                          error: {
+                            message:
+                              'EndpointArtifactError: Endpoint authorization failure. Cannot import artifact that is not visible in the current space',
+                            status_code: 403,
+                          },
+                          item_id: 'not-visible-in-current-space-because-unassigned',
+                          list_id: artifact.listId,
+                        },
+                        {
+                          error: {
+                            message:
+                              'EndpointArtifactError: Endpoint authorization failure. Cannot import artifact that is not visible in the current space',
+                            status_code: 403,
+                          },
+                          item_id: 'not-visible-in-current-space-because-assigned-only-there',
+                          list_id: artifact.listId,
+                        },
+                      ],
+                      success: false,
+                      success_count: 2,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: false,
+                      success_count_exception_list_items: 1,
+                    } as ImportExceptionsResponseSchema);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+
+                  expect(items.length).toEqual(1);
+                });
               });
 
               describe('when data is invalid', () => {
