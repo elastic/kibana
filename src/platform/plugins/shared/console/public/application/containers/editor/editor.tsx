@@ -119,7 +119,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
       <EuiResizableContainer
         css={styles.fullHeightPanel}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
-        onPanelWidthChange={(sizes) => panelStorage.current.setPanelSize(sizes)}
+        onPanelWidthChange={(sizes) => panelStorage.current?.setPanelSize(sizes)}
         data-test-subj="consoleEditorContainer"
       >
         {(EuiResizablePanel, EuiResizableButton) => (
