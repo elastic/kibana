@@ -194,7 +194,7 @@ function getESServerlessOptions(
     throw new Error(`Unsupported serverless projectType: ${projectType}`);
   }
 
-  const csp: boolean = config.get('esServerlessOptions.csp', false);
+  const cps: boolean = config.get('esServerlessOptions.cps', false);
 
   const commonOptions = {
     projectType,
@@ -206,7 +206,7 @@ function getESServerlessOptions(
       hostname: config.get('servers.kibana.hostname'),
       port: config.get('servers.kibana.port'),
     }),
-    ...(csp && config.get('servers.linkedElasticsearch.port')
+    ...(cps && config.get('servers.linkedElasticsearch.port')
       ? {
           linkedProject: {
             projectId: MOCK_IDP_UIAM_PROJECT_ID2,

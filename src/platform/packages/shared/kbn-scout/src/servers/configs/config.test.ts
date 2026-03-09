@@ -189,7 +189,7 @@ describe('Config.getScoutTestConfig', () => {
     expect(scoutConfig).toEqual(expectedConfig);
   });
 
-  it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=security' in UIAM+CSP mode`, async () => {
+  it(`should return a properly structured 'ScoutTestConfig' object for 'serverless=security' in UIAM+CPS mode`, async () => {
     const config = new Config({
       serverless: true,
       servers: {
@@ -222,7 +222,7 @@ describe('Config.getScoutTestConfig', () => {
         serverArgs: [],
         ssl: true,
       },
-      esServerlessOptions: { uiam: true, csp: true },
+      esServerlessOptions: { uiam: true, cps: true },
       kbnTestServer: {
         buildArgs: [],
         env: {},
@@ -250,7 +250,7 @@ describe('Config.getScoutTestConfig', () => {
     expect(scoutConfig.hosts.elasticsearch).toBe('https://localhost:9220');
   });
 
-  it(`should not include linkedProject when CSP is not enabled`, async () => {
+  it(`should not include linkedProject when CPS is not enabled`, async () => {
     const config = new Config({
       serverless: true,
       servers: {

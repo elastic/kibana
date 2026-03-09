@@ -28,6 +28,6 @@ export const servers: ScoutServerConfig = {
   },
   esServerlessOptions: {
     uiam: true,
-    csp: true,
+    cps: true,
   },
 };

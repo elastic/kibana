@@ -30,8 +30,8 @@ export const linkedEsFixtures = coreWorkerFixtures.extend<
     ({ config, log }, use) => {
       if (!config.serverless || !config.linkedProject) {
         throw new Error(
-          'linkedProject fixture is only available in serverless mode with CSP enabled. ' +
-            'Use --serverConfigSet csp_local to start servers with a linked cluster.'
+          'linkedProject fixture is only available in serverless mode with CPS enabled. ' +
+            'Use --serverConfigSet cps_local to start servers with a linked cluster.'
         );
       }
 

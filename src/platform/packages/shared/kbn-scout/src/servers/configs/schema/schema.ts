@@ -70,7 +70,7 @@ export const schema = Joi.object()
         elasticsearch: urlPartsSchema({
           requiredKeys: ['port'],
         }),
-        // Only applicable for serverless CSP configs (cross-project search)
+        // Only applicable for serverless CPS configs (cross-project search)
         linkedElasticsearch: urlPartsSchema(),
         fleetserver: urlPartsSchema(),
       })
@@ -99,7 +99,7 @@ export const schema = Joi.object()
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
         uiam: Joi.boolean().default(false),
-        csp: Joi.boolean().default(false),
+        cps: Joi.boolean().default(false),
       })
       .default(),
 

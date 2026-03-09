@@ -121,7 +121,7 @@ The `fixtures/scope` directory contains core Scout capabilities required for tes
 - `kbnClient`
 - `esArchiver`
 - `samlAuth`
-- `linkedProject` (CSP only -- provides `esClient` and `esArchiver` for the linked cluster)
+- `linkedProject` (CPS only -- provides `esClient` and `esArchiver` for the linked cluster)
 
 ```ts
 test.beforeAll(async ({ kbnClient }) => {
@@ -340,17 +340,18 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 
 This command is useful for manual testing or running tests via an IDE.
 
-#### Cross Project Search (CSP) Support
+#### Cross Project Search (CPS) Support
 
 Scout supports testing Cross Project Search by starting a second ("linked") Elasticsearch cluster alongside the origin. The linked cluster runs on a separate port, shares the same UIAM identity provider as the origin, and is intended exclusively for **reading data from** -- it has no Kibana instance.
 
-To start servers with CSP enabled, use the `csp_local` server config set:
+To start servers with CPS enabled, use the `cps_local` server config set:
 
 ```bash
-node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet csp_local
+node scripts/scout start-server --arch serverless --domain security_complete --serverConfigSet cps_local
 ```
 
 This starts:
+
 - **Origin ES cluster** (3 nodes, port `9220`) with UIAM
 - **Linked ES cluster** (3 nodes, port `9230`) connected to the same UIAM
 - **Kibana** (port `5620`)
@@ -377,6 +378,7 @@ test('query across projects', async ({ linkedProject, page }) => {
 ```
 
 The `linkedProject` fixture provides:
+
 - `esArchiver` -- data-only archiver that rejects `.kibana*` indices (use `kbnArchiver` for saved objects)
 - `esClient` -- Elasticsearch client connected to the linked cluster
 
