@@ -24,7 +24,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_sidebar'));
+    loadTestFile(require.resolve('./_sidebar_part1'));
+    loadTestFile(require.resolve('./_sidebar_part2'));
     loadTestFile(require.resolve('./_unsaved_changes_notification_indicator'));
   });
 }
