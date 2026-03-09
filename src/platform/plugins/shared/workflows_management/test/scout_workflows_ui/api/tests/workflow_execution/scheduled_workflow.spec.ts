@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
-import { apiTest } from '../../fixtures';
-import { waitForConditionOrThrow } from '../../fixtures/utils/wait_for_condition';
-import type { WorkflowsApiService } from '../../fixtures/workflows_api_service';
+import type { WorkflowsApiService } from '../../../common/apis/workflows';
+import { waitForConditionOrThrow } from '../../../common/utils/wait_for_condition';
+import { spaceTest } from '../../fixtures';
 
 const SCHEDULED_WORKFLOW_INTERVAL_SECONDS = 10;
 
@@ -53,26 +52,26 @@ steps:
 `;
 
 // FLAKY: https://github.com/elastic/security-team/issues/16272
-apiTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
-  let adminApiCredentials: RoleApiCredentials;
+spaceTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgnostic }, () => {
   let workflowsApi: WorkflowsApiService;
+  let spaceId: string;
   let workflowId: string;
 
-  apiTest.beforeAll(async ({ requestAuth, getWorkflowsApi }) => {
-    apiTest.setTimeout(60_000);
-    adminApiCredentials = await requestAuth.getApiKey('admin');
-    workflowsApi = await getWorkflowsApi(adminApiCredentials);
+  spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.setTimeout(60_000);
+    workflowsApi = apiServices.workflowsApi;
+    spaceId = scoutSpace.id;
 
-    const created = await workflowsApi.create(SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML);
+    const created = await workflowsApi.create(spaceId, SHORT_RUNNING_SCHEDULED_WORKFLOW_YAML);
     workflowId = created.id;
   });
 
-  apiTest.afterAll(async () => {
-    await workflowsApi.deleteAllCreatedWorkflows();
+  spaceTest.afterAll(async () => {
+    await workflowsApi.deleteAll(spaceId);
   });
 
-  apiTest('enabling a scheduled workflow triggers executions automatically', async () => {
-    await workflowsApi.update(workflowId, { enabled: true });
+  spaceTest('enabling a scheduled workflow triggers executions automatically', async () => {
+    await workflowsApi.update(spaceId, workflowId, { enabled: true });
 
     const { results } = await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
@@ -104,8 +103,8 @@ apiTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgno
     }
   });
 
-  apiTest('disabling a scheduled workflow stops new executions from firing', async () => {
-    await workflowsApi.update(workflowId, { enabled: true });
+  spaceTest('disabling a scheduled workflow stops new executions from firing', async () => {
+    await workflowsApi.update(spaceId, workflowId, { enabled: true });
 
     await waitForConditionOrThrow({
       action: () => workflowsApi.getExecutions(workflowId),
@@ -115,7 +114,7 @@ apiTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgno
       errorMessage: 'No executions appeared after enabling the workflow',
     });
 
-    await workflowsApi.update(workflowId, { enabled: false });
+    await workflowsApi.update(spaceId, workflowId, { enabled: false });
 
     const { results: beforeDisable } = await workflowsApi.getExecutions(workflowId);
     const countBeforeDisable = beforeDisable.length;
@@ -131,13 +130,14 @@ apiTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgno
     }).toBeLessThan(2);
   });
 
-  apiTest(
+  spaceTest(
     'scheduled executions do not overlap when a previous run is still in progress',
     async () => {
       // Each execution takes ~7s (two 3s waits + console step), scheduled every 5s.
       // If the scheduler is reentrant, it must wait for the previous run to finish
       // before starting the next one, so consecutive starts should be >5s apart.
       const createdLongRunningWorkflow = await workflowsApi.create(
+        spaceId,
         LONG_RUNNING_SCHEDULED_WORKFLOW_YAML
       );
 
@@ -152,7 +152,7 @@ apiTest.describe.skip('Scheduled workflow execution', { tag: tags.deploymentAgno
             r.filter((e) => e.status === ExecutionStatus.COMPLETED).length
           }`,
       });
-      await workflowsApi.update(createdLongRunningWorkflow.id, { enabled: false });
+      await workflowsApi.update(spaceId, createdLongRunningWorkflow.id, { enabled: false });
       const { results } = await workflowsApi.getExecutions(createdLongRunningWorkflow.id);
 
       // Wait for every execution to reach a terminal state
