@@ -1988,6 +1988,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_enabled": {
         "index": false,
         "type": "keyword"
@@ -2002,6 +2005,10 @@
         "type": "keyword"
       },
       "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "package_agent_version_conditions": {
         "index": false,
         "type": "flattened"
       },
@@ -2153,6 +2160,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
@@ -2414,6 +2424,9 @@
       "keep_monitoring_alive": {
         "type": "boolean"
       },
+      "min_agent_version": {
+        "type": "keyword"
+      },
       "monitoring_diagnostics": {
         "index": false,
         "type": "flattened"
@@ -2440,6 +2453,10 @@
         "type": "keyword"
       },
       "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "package_agent_version_conditions": {
         "index": false,
         "type": "flattened"
       },
@@ -2773,6 +2790,9 @@
             "type": "keyword"
           }
         }
+      },
+      "package_agent_version_condition": {
+        "type": "keyword"
       },
       "policy_id": {
         "type": "keyword"
