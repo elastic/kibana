@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { get } from 'lodash';
 import { css } from '@emotion/react';
 
 import {
@@ -24,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Phase } from '../../../../../../../common/types';
 import { ToggleField, useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
+import { getPhaseEnabled } from '../../../lib';
 import type { FormInternal } from '../../../types';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { UseField, useFormErrorsContext, usePhaseTimings } from '../../../form';
@@ -52,8 +52,7 @@ export const PhaseTitle: FunctionComponent<Props> = ({ phase }) => {
   const isHotPhase = phase === 'hot';
   const isDeletePhase = phase === 'delete';
   const { setDeletePhaseEnabled } = usePhaseTimings();
-  // hot phase is always enabled unless it's editing a policy that doesn't have a hot phase
-  const enabled = (isHotPhase && isHotPhaseRequired) || Boolean(get(formData, enabledPath));
+  const enabled = getPhaseEnabled({ phase, formData, isHotPhaseRequired });
 
   const { errors } = useFormErrorsContext();
   const hasErrors = Object.keys(errors[phase]).length > 0;

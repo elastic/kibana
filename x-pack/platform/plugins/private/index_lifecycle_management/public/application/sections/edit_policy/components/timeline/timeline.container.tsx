@@ -10,7 +10,7 @@ import React from 'react';
 
 import { useFormData } from '../../../../../shared_imports';
 
-import { formDataToAbsoluteTimings } from '../../lib';
+import { formDataToAbsoluteTimings, getPhaseEnabled } from '../../lib';
 
 import { useConfiguration } from '../../form';
 
@@ -24,7 +24,7 @@ export const Timeline: FunctionComponent = () => {
   const { isHotPhaseRequired } = useEditPolicyContext();
   const timings = formDataToAbsoluteTimings(formData);
   const { isUsingRollover } = useConfiguration();
-  const showHotPhase = isHotPhaseRequired ? true : Boolean(formData._meta?.hot?.enabled);
+  const showHotPhase = getPhaseEnabled({ phase: 'hot', formData, isHotPhaseRequired });
   return (
     <ViewComponent
       hotPhaseMinAge={timings.hot.min_age}

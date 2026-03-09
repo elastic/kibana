@@ -21,12 +21,12 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Phase as PhaseType } from '../../../../../../../common/types';
 import { useFormData } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
+import { getPhaseEnabled } from '../../../lib';
 import type { FormInternal } from '../../../types';
 import { useEditPolicyContext } from '../../../edit_policy_context';
 import { PhaseIcon } from '../../phase_icon';
@@ -66,14 +66,8 @@ export const Phase: FunctionComponent<Props> = ({ children, topLevelSettings, ph
     watch: [enabledPath],
   });
 
-  const isHotPhase = phase === 'hot';
   const isDeletePhase = phase === 'delete';
-  // hot phase is always enabled unless it's editing a policy that doesn't have a hot phase
-  const enabled = isHotPhase
-    ? isHotPhaseRequired
-      ? true
-      : Boolean(get(formData, enabledPath))
-    : Boolean(get(formData, enabledPath));
+  const enabled = getPhaseEnabled({ phase, formData, isHotPhaseRequired });
 
   // delete phase is hidden when disabled
   if (isDeletePhase && !enabled) {
