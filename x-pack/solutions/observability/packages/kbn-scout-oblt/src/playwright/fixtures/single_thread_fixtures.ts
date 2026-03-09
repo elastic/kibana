@@ -13,7 +13,10 @@ import { ObltApiServicesFixture, ObltTestFixtures, ObltWorkerFixtures } from './
 import { profilingSetupFixture } from './worker/profiling/profiling_setup_fixture';
 import { sloDataFixture } from './worker';
 
-const baseFixture = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
+/**
+ * Should be used for the test spec files executed seqentially.
+ */
+export const test = base.extend<ObltTestFixtures, ObltWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
