@@ -69,7 +69,7 @@ All persisted documents follow the same schema (see below).
     - `ignoreFields` a nested key/value map of fields to ignore in the diff calculation,
     - `maskFields` a nested key/value map of “sensitive” fields to mask instead of storing data in plain form,
     - `diffDocCalculation` a diff function `(opts) => ChangeTrackingDiff`; when omitted, a default diff is used.
-    - `refresh` an optional indicator to force ES shard refresh after changes (affects perfomance)
+    - `refresh` an optional indicator to force ES shard refresh after changes (affects performance)
 
 - **`getHistory(objectType, objectId, opts?)`**
   - Returns a promise with `{ startDate?, total, items }`.

@@ -31,21 +31,21 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export enum SecurityRuleChangeTrackingAction {
-  ruleInstall = 'rule-install',
-  ruleDuplicate = 'rule-duplicate',
-  ruleUpgrade = 'rule-upgrade',
-  ruleImport = 'rule-import',
-  ruleRestore = 'rule-restore',
+  ruleInstall = 'rule_install',
+  ruleDuplicate = 'rule_duplicate',
+  ruleUpgrade = 'rule_upgrade',
+  ruleImport = 'rule_import',
+  ruleRestore = 'rule_restore',
 }
 
 export enum RuleChangeTrackingAction {
-  ruleCreate = 'rule-create',
-  ruleUpdate = 'rule-update',
-  ruleEnable = 'rule-enable',
-  ruleDisable = 'rule-disable',
-  ruleSnooze = 'rule-snooze',
-  ruleUnsnooze = 'rule-unsnooze',
-  ruleDelete = 'rule-delete',
+  ruleCreate = 'rule_create',
+  ruleUpdate = 'rule_update',
+  ruleEnable = 'rule_enable',
+  ruleDisable = 'rule_disable',
+  ruleSnooze = 'rule_snooze',
+  ruleUnsnooze = 'rule_unsnooze',
+  ruleDelete = 'rule_delete',
 }
 
 export type ChangeTrackingAction = RuleChangeTrackingAction | SecurityRuleChangeTrackingAction;

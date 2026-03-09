@@ -150,7 +150,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * Log a bulk change for one or more objects.
    * @param changes - The changes to objects that were affected.
    * @param opts - The options for the bulk change.
-   * @param opts.action - The action performed (`rule-create`, `rule-update`, `rule-delete`, etc.)
+   * @param opts.action - The action performed (`rule_create`, `rule_update`, `rule_delete`, etc.)
    * @param opts.username - Current login name for the user who performed the change.
    * @param opts.userProfileId - Optional user profile ID (auth realm). See Elastic User Profiles.
    * @param opts.spaceId - The ID of the space that the change belongs to.

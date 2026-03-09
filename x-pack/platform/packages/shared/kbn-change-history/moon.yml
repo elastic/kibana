@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/tooling-log'
   - '@kbn/test'
+  - '@kbn/object-utils'
 tags:
   - shared-common
   - package
