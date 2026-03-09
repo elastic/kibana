@@ -175,7 +175,7 @@ export function fromAPItoLensState(
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: Object.keys(adHocDataViews).length ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

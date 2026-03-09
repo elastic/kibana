@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty, EuiButtonIcon, EuiPageHeaderSection, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiPageHeaderSection,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -45,14 +51,16 @@ export const ConversationsHistoryButton: React.FC = () => {
   const showButtonIcon = hasActiveConversation;
 
   const button = showButtonIcon ? (
-    <EuiButtonIcon
-      iconType="clockCounter"
-      color="text"
-      aria-label={isPopoverOpen ? labels.close : labels.open}
-      onClick={togglePopover}
-      display="empty"
-      data-test-subj="agentBuilderConversationsHistoryToggleBtn"
-    />
+    <EuiToolTip position="top" content={<p>{labels.conversations}</p>}>
+      <EuiButtonIcon
+        iconType="clockCounter"
+        color="text"
+        aria-label={isPopoverOpen ? labels.close : labels.open}
+        onClick={togglePopover}
+        display="empty"
+        data-test-subj="agentBuilderConversationsHistoryToggleBtn"
+      />
+    </EuiToolTip>
   ) : (
     <EuiButtonEmpty
       iconType="clockCounter"

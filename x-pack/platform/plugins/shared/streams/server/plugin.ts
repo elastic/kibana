@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { StreamsConfig } from '../common/config';
@@ -42,11 +43,12 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
-import { SystemService } from './lib/streams/system/system_service';
+import { InsightService } from './lib/significant_events/insights/client/insight_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -109,7 +111,7 @@ export class StreamsPlugin
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
-    const systemService = new SystemService(core, this.logger);
+    const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
@@ -123,14 +125,14 @@ export class StreamsPlugin
         [coreStart, pluginsStart],
         attachmentClient,
         featureClient,
-        systemClient,
+        insightClient,
         contentClient,
         queryClient,
       ] = await Promise.all([
         core.getStartServices(),
         attachmentService.getClientWithRequest({ request }),
         featureService.getClientWithRequest({ request }),
-        systemService.getClientWithRequest({ request }),
+        insightService.getInternalClient(),
         contentService.getClient(),
         queryService.getClientWithRequest({ request }),
       ]);
@@ -154,8 +156,8 @@ export class StreamsPlugin
         request,
         attachmentClient,
         queryClient,
-        systemClient,
         featureClient,
+        uiSettingsClient,
       });
 
       return {
@@ -164,7 +166,7 @@ export class StreamsPlugin
         attachmentClient,
         streamsClient,
         featureClient,
-        systemClient,
+        insightClient,
         inferenceClient,
         contentClient,
         queryClient,
@@ -202,6 +204,9 @@ export class StreamsPlugin
           alerting: {
             rule: {
               all: alertingFeatures,
+              enable: alertingFeatures,
+              manual_run: alertingFeatures,
+              manage_rule_settings: alertingFeatures,
             },
             alert: {
               all: alertingFeatures,
@@ -268,6 +273,24 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
+
+    const soClient = core.savedObjects.getUnsafeInternalClient();
+    const startupUiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+
+    startupUiSettingsClient
+      .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS)
+      .then((isWiredStreamViewsEnabled) =>
+        backfillWiredStreamViews({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+          isWiredStreamViewsEnabled,
+        })
+      )
+      .catch((err: Error) => {
+        this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
+          error: err,
+        });
+      });
 
     return {};
   }

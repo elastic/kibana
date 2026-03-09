@@ -167,7 +167,7 @@ export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWitho
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: Object.keys(adHocDataViews).length ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

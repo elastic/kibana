@@ -6,7 +6,7 @@
  */
 
 import type { EsqlToolConfig } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export function createSchemaFromParams(params: EsqlToolConfig['params']): z.ZodObject<any> {
   const schemaFields: Record<string, z.ZodTypeAny> = {};

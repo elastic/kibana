@@ -7,13 +7,9 @@
 
  {{> disclaimer}}
 
-import type { ZodTypeDef } from '@kbn/zod';
-{{#if config.experimentallyImportZodV4}}
+import type { ZodTypeDef } from '@kbn/zod/v4';
 import { z } from '@kbn/zod/v4';
-{{else}}
-import { z } from '@kbn/zod';
-{{/if}}
-import { requiredOptional, isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
+import { requiredOptional, isValidDateMath, isNonEmptyString, ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 {{#each imports}}
 import {

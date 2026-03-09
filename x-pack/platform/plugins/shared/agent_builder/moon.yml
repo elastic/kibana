@@ -112,6 +112,8 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/deeplinks-data-sources'
   - '@kbn/evals-plugin'
+  - '@kbn/usage-api-plugin'
+  - '@kbn/es-query'
 tags:
   - plugin
   - prod

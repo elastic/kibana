@@ -182,7 +182,10 @@ export const getSuggestions = async (
     const attrs = getLensAttributesFromSuggestion({
       filters: [],
       query,
-      suggestion: firstSuggestion,
+      suggestion: {
+        ...firstSuggestion,
+        title: '',
+      },
       dataView,
     }) as TypedLensSerializedState['attributes'];
     return {

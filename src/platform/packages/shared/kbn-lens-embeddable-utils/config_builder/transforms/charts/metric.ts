@@ -616,7 +616,7 @@ export function fromAPItoLensState(config: MetricState): MetricAttributesWithout
       datasourceStates: layers,
       internalReferences,
       visualization,
-      adHocDataViews: Object.keys(adHocDataViews).length ? adHocDataViews : {},
+      adHocDataViews,
     },
   };
 }

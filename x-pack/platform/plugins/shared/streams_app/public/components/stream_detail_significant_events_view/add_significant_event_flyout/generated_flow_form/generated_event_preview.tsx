@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { StreamQuery, Streams } from '@kbn/streams-schema';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,18 +21,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
+import { StreamsESQLEditor, validatePrefix } from '../../../esql_query_editor';
 import { validateQuery } from '../common/validate_query';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { SeveritySelector } from '../common/severity_selector';
-import { ConditionPanel } from '../../../data_management/shared/condition_display';
+import { getValidPrefixes } from '../common/get_valid_prefixes';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQuery;
   onSave: (query: StreamQuery) => void;
-  dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
 }
@@ -43,14 +41,18 @@ export function GeneratedEventPreview({
   isEditing,
   setIsEditing,
   onSave,
-  dataViews,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
 
   const [query, setQuery] = useState<StreamQuery>(initialQuery);
 
-  const [touched, setTouched] = useState({ title: false, kql: false });
+  const [touched, setTouched] = useState({ title: false, esql: false });
   const validation = validateQuery(query);
+  const prefix = useMemo(() => getValidPrefixes(definition), [definition]);
+  const prefixValidation = useMemo(
+    () => validatePrefix(query.esql.query, prefix),
+    [query.esql.query, prefix]
+  );
 
   return (
     <div
@@ -88,7 +90,7 @@ export function GeneratedEventPreview({
                         setQuery(initialQuery);
                         setTouched({
                           title: false,
-                          kql: false,
+                          esql: false,
                         });
                       }}
                       data-test-subj="significant_events_generated_event_cancel_button"
@@ -103,13 +105,17 @@ export function GeneratedEventPreview({
                     <EuiButton
                       size="s"
                       iconType="save"
-                      disabled={validation.title.isInvalid || validation.kql.isInvalid}
+                      disabled={
+                        validation.title.isInvalid ||
+                        validation.esql.isInvalid ||
+                        !prefixValidation.isValid
+                      }
                       onClick={() => {
                         setIsEditing(false);
                         onSave(query);
                         setTouched({
                           title: false,
-                          kql: false,
+                          esql: false,
                         });
                       }}
                       data-test-subj="significant_events_generated_event_save_button"
@@ -176,65 +182,19 @@ export function GeneratedEventPreview({
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          label={
-            <EuiFormLabel>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldQueryLabel',
-                { defaultMessage: 'Query' }
-              )}
-            </EuiFormLabel>
-          }
-          {...(touched.kql && { ...validation.kql })}
-        >
-          <UncontrolledStreamsAppSearchBar
-            query={
-              query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
-            }
-            onQueryChange={() => {
-              setTouched((prev) => ({ ...prev, kql: true }));
-            }}
-            onQuerySubmit={(next) => {
-              setQuery({
-                ...query,
-                kql: {
-                  query: typeof next.query?.query === 'string' ? next.query.query : '',
-                },
-              });
-              setTouched((prev) => ({ ...prev, kql: true }));
-            }}
-            showQueryInput
-            showSubmitButton={false}
-            isDisabled={!isEditing}
-            placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.queryPlaceholder',
-              { defaultMessage: 'Enter query' }
-            )}
-            indexPatterns={dataViews}
-            submitOnBlur
-          />
-        </EuiFormRow>
-
-        {query.feature?.filter && (
-          <EuiFormRow
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldAdditionalFilterLabel',
-                  { defaultMessage: 'Additional filter' }
-                )}
-              </EuiFormLabel>
-            }
-            helpText={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.additionalFilterHelpText',
-              {
-                defaultMessage: 'This filter was inherited from a system and cannot be modified.',
-              }
-            )}
-          >
-            <ConditionPanel condition={query.feature.filter} />
-          </EuiFormRow>
-        )}
+        <StreamsESQLEditor
+          query={{ esql: query.esql.query }}
+          isDisabled={!isEditing}
+          onTextLangQueryChange={(newQuery) => {
+            setTouched((prev) => ({ ...prev, esql: true }));
+            setQuery({ ...query, esql: { query: newQuery.esql } });
+          }}
+          onTextLangQuerySubmit={async (newQuery) => {
+            setTouched((prev) => ({ ...prev, esql: true }));
+            setQuery({ ...query, esql: { query: newQuery?.esql ?? '' } });
+          }}
+          prefix={prefix}
+        />
       </EuiForm>
 
       <EuiHorizontalRule margin="m" />
@@ -242,7 +202,7 @@ export function GeneratedEventPreview({
       <PreviewDataSparkPlot
         definition={definition}
         query={query}
-        isQueryValid={!validation.kql.isInvalid}
+        isQueryValid={!validation.esql.isInvalid && prefixValidation.isValid}
       />
     </div>
   );
