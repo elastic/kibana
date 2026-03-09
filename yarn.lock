@@ -13761,12 +13761,12 @@
   resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-2.1.3.tgz#0b03d737ff28fad10eb884e0c6cedd5ffdc4ba0a"
   integrity sha512-1xGPhoSGY1CPmXLCBcjVZSQinFjL26vlR8ZqprsBWiFyED4JacJJ9zHhh5aaUXqbY9B37mKQ73nlydVAXmr1+g==
 
-"@types/chrome-remote-interface@0.31.14":
-  version "0.31.14"
-  resolved "https://registry.yarnpkg.com/@types/chrome-remote-interface/-/chrome-remote-interface-0.31.14.tgz#173842a9a8e9995d5111ce209aa883fc90cedd96"
-  integrity sha512-H9hTcLu1y+Ms6GDPXXeGhgxaOSD69yEo674vjJw5EeW1tTwYo8fEkf7A9nWlnO6ArJsS7c41iZeX6mRDQ1LhEw==
+"@types/chrome-remote-interface@0.33.0":
+  version "0.33.0"
+  resolved "https://registry.yarnpkg.com/@types/chrome-remote-interface/-/chrome-remote-interface-0.33.0.tgz#52bad36ce80a38b775b0161edd2539f96d56fd54"
+  integrity sha512-c+VcrTFcgvpwbAF/MgWIuVzagzOSX6hDuZEwkRW3Bk1yu/xMlAh5G4ogYpQGtW7fVydVGSQ9WD/mEwqQehu73w==
   dependencies:
-    devtools-protocol "0.0.927104"
+    devtools-protocol "0.0.1173815"
 
 "@types/chromedriver@81.0.5":
   version "81.0.5"
@@ -17617,10 +17617,10 @@ chrome-launcher@^1.2.1:
     is-wsl "^2.2.0"
     lighthouse-logger "^2.0.1"
 
-chrome-remote-interface@0.33.3:
-  version "0.33.3"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.33.3.tgz#d8b4339f487b460a9461af7355bda98054e8e1a4"
-  integrity sha512-zNnn0prUL86Teru6UCAZ1yU1XeXljHl3gj7OrfPcarEfU62OUU4IujDPdTDW3dAWwRqN3ZMG/Chhkh2gPL/wiw==
+chrome-remote-interface@0.34.0:
+  version "0.34.0"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.34.0.tgz#ed1384127a13eb6e971285533983a9b464388528"
+  integrity sha512-rTTcTZ3zemx8I+nvBii7d8BAF0Ms8LLEroypfvwwZOwSpyNGLE28nStXyCA6VwGp2YSQfmCrQH21F/E+oBFvMw==
   dependencies:
     commander "2.11.x"
     ws "^7.2.0"
@@ -19797,6 +19797,11 @@ detective@^5.0.2:
     defined "^1.0.0"
     minimist "^1.1.1"
 
+devtools-protocol@0.0.1173815:
+  version "0.0.1173815"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1173815.tgz#0e28dd1ebf796c174bf04d7028e9cd47f1cbb037"
+  integrity sha512-CmsjkudmgCMeae8FSJB4GV8COZwOk6dJKyE9HS2F/ih/sA8uTdbPKHg5F7DsrOYLEET/QKK00LJCU4YoyG+uHg==
+
 devtools-protocol@0.0.1527314:
   version "0.0.1527314"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1527314.tgz#7f6e4824ceb04ab6e175b4cc544fa6af7e95ec1b"
@@ -19811,11 +19816,6 @@ devtools-protocol@0.0.1566079:
   version "0.0.1566079"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1566079.tgz#28049eed025a25cf3aea964f6c6bd517796c44ac"
   integrity sha512-MJfAEA1UfVhSs7fbSQOG4czavUp1ajfg6prlAN0+cmfa2zNjaIbvq8VneP7do1WAQQIvgNJWSMeP6UyI90gIlQ==
-
-devtools-protocol@0.0.927104:
-  version "0.0.927104"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
-  integrity sha512-5jfffjSuTOv0Lz53wTNNTcCUV8rv7d82AhYcapj28bC2B5tDxEZzVb7k51cNxZP2KHw24QE+sW7ZuSeD9NfMpA==
 
 dezalgo@^1.0.0, dezalgo@^1.0.4:
   version "1.0.4"
