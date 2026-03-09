@@ -8,6 +8,9 @@
  */
 
 import type { KbnClient } from '@kbn/scout';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { waitForConditionOrThrow } from '../utils/wait_for_condition';
 
 export interface WorkflowDetailDto {
   id: string;
@@ -27,6 +30,11 @@ export interface BulkCreateResult {
   failed: Array<{ index: number; error: string }>;
 }
 
+interface GetWorkflowExecutionOptions {
+  includeInput?: boolean;
+  includeOutput?: boolean;
+}
+
 export interface WorkflowsApiService {
   /** POST /api/workflows — create a single workflow from YAML. */
   create: (spaceId: string, yaml: string) => Promise<WorkflowDetailDto>;
@@ -42,6 +50,20 @@ export interface WorkflowsApiService {
   bulkDelete: (spaceId: string, ids: string[]) => Promise<void>;
   /** POST /api/workflows/search + DELETE — delete all workflows in a space. */
   deleteAll: (spaceId: string) => Promise<void>;
+  run: (id: string, inputs: Record<string, unknown>) => Promise<{ workflowExecutionId: string }>;
+  getExecution(
+    workflowExecutionId: string,
+    options?: GetWorkflowExecutionOptions
+  ): Promise<WorkflowExecutionDto | undefined>;
+  waitForTermination({
+    workflowExecutionId,
+  }: {
+    workflowExecutionId: string;
+  }): Promise<WorkflowExecutionDto | undefined>;
+  getExecutions(
+    workflowId: string,
+    options: { size?: number; page?: number }
+  ): Promise<{ results: WorkflowExecutionDto[]; total: number; page: number }>;
 }
 
 export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiService => {
@@ -102,6 +124,53 @@ export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiServic
           body: { ids: workflowIds },
         });
       }
+    },
+    run: async (id, inputs): Promise<{ workflowExecutionId: string }> => {
+      const response = await kbnClient.request<{ workflowExecutionId: string }>({
+        method: 'POST',
+        path: `/s/workflows/${id}/run`,
+        body: { inputs },
+      });
+      return response.data;
+    },
+    getExecution: async (
+      workflowExecutionId,
+      options = {}
+    ): Promise<WorkflowExecutionDto | undefined> => {
+      const { includeInput = false, includeOutput = false } = options;
+      const response = await kbnClient.request<WorkflowExecutionDto>({
+        method: 'GET',
+        path: `/s/workflowExecutions/${workflowExecutionId}?includeInput=${includeInput}&includeOutput=${includeOutput}`,
+      });
+      return response.data;
+    },
+    getExecutions: async (
+      workflowId,
+      options
+    ): Promise<{ results: WorkflowExecutionDto[]; total: number; page: number }> => {
+      const { size = 100, page = 1 } = options;
+      const response = await kbnClient.request<{
+        results: WorkflowExecutionDto[];
+        total: number;
+        page: number;
+      }>({
+        method: 'GET',
+        path: `/s/workflowExecutions?workflowId=${workflowId}&size=${size}&page=${page}`,
+      });
+      return response.data;
+    },
+    waitForTermination: async ({
+      workflowExecutionId,
+    }: {
+      workflowExecutionId: string;
+    }): Promise<WorkflowExecutionDto | undefined> => {
+      return waitForConditionOrThrow({
+        action: () => this.getExecution(workflowExecutionId),
+        condition: (execution) => !!execution && isTerminalStatus(execution.status ?? ''),
+        interval: 1000,
+        timeout: 20_000,
+        errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
+      });
     },
   };
 };
