@@ -58,11 +58,12 @@ async function updateWithOCC(
   }
 
   let scopedQueryWithGeneratedValue = scope?.alerting;
+  const indexPattern = getAlertsDataViewBase();
   try {
     if (scope?.alerting) {
       const dsl = JSON.stringify(
         buildEsQuery(
-          getAlertsDataViewBase(),
+          indexPattern,
           [{ query: scope.alerting.kql, language: 'kuery' }],
           scope.alerting.filters as Filter[],
           esQueryConfig
