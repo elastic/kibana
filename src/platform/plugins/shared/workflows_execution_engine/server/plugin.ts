@@ -186,9 +186,8 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                 });
               } finally {
-                await this.releaseSlotAndPromote(workflowRunId, spaceId, fakeRequest).catch(
-                  (err) =>
-                    this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
+                await this.releaseSlotAndPromote(workflowRunId, spaceId, fakeRequest).catch((err) =>
+                  this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
                 );
               }
             },
@@ -270,9 +269,8 @@ export class WorkflowsExecutionEnginePlugin
                   meteringService: this.meteringService,
                 });
               } finally {
-                await this.releaseSlotAndPromote(workflowRunId, spaceId, fakeRequest).catch(
-                  (err) =>
-                    this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
+                await this.releaseSlotAndPromote(workflowRunId, spaceId, fakeRequest).catch((err) =>
+                  this.logger.error(`Promotion failed after execution ${workflowRunId}: ${err}`)
                 );
               }
             },
@@ -993,8 +991,7 @@ export class WorkflowsExecutionEnginePlugin
       return canProceed;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      const strategy =
-        workflowExecution.workflowDefinition?.settings?.concurrency?.strategy;
+      const strategy = workflowExecution.workflowDefinition?.settings?.concurrency?.strategy;
 
       if (strategy === 'queue' && workflowExecution.id) {
         // Queue strategy must not bypass the limit on error — queue the execution
