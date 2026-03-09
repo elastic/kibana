@@ -6,7 +6,6 @@
  */
 
 import styled, { css } from 'styled-components';
-import { i18n } from '@kbn/i18n';
 
 /**
  * UTILITY BAR
