@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import {
   EuiAccordion,
   EuiBadge,
@@ -79,6 +79,7 @@ const SECTION_TO_NAV_ID: Record<string, string> = {
 
 export const IngestHubPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
+  const history = useHistory();
   const { section: routeSection } = useParams<{ section?: string }>();
   const initialNavId =
     (routeSection && SECTION_TO_NAV_ID[routeSection]) || routeSection || 'get-started';
@@ -1210,7 +1211,7 @@ export const IngestHubPage: React.FC = () => {
   };
 
   const renderGetStartedView = () => (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
       <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
         {renderSectionPageHeader(
           rocketImg,
@@ -1219,159 +1220,132 @@ export const IngestHubPage: React.FC = () => {
         )}
       </div>
       <EuiHorizontalRule margin="none" css={dividerStyle} />
-      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+      <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ height: 40 }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <EuiAccordion
-            id="step1-data"
-            initialIsOpen
-            arrowDisplay="left"
-            borders="none"
-            buttonElement="div"
-            buttonProps={{ paddingSize: 's' as const }}
-            paddingSize="s"
-            css={accordionCss}
-            buttonContent={
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="none"
-                responsive={false}
-                wrap={false}
-                css={css`
-                  gap: 16px;
-                `}
-              >
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
-                      <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
-                        <EuiIcon type="addDataApp" size="m" />
-                      </span>
-                      Get started adding your data
-                    </h3>
-                  </EuiTitle>
-                  <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-                    <p>Browse integrations or migrate from another platform.</p>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
+        <EuiTitle size="s">
+          <h3>Get started adding your data</h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+          <p>Connect your data sources or migrate from another platform to start monitoring your infrastructure.</p>
+        </EuiText>
+        <div style={{ height: 16 }} />
+        <EuiTabs
+          css={css`
+            box-shadow: none;
+            border-bottom: none;
+          `}
+        >
+          <EuiTab
+            isSelected={step1Tab === 'integrations'}
+            onClick={() => setStep1Tab('integrations')}
           >
-            <div style={{ height: 16 }} />
-            <EuiTabs
-              css={css`
-                box-shadow: none;
-                border-bottom: none;
-              `}
-            >
-              <EuiTab
-                isSelected={step1Tab === 'integrations'}
-                onClick={() => setStep1Tab('integrations')}
-              >
-                Browse integrations
-              </EuiTab>
-              <EuiTab
-                isSelected={step1Tab === 'migration'}
-                onClick={() => setStep1Tab('migration')}
-              >
-                Platform migration
-              </EuiTab>
-            </EuiTabs>
-            <EuiHorizontalRule margin="none" css={dividerStyle} />
-            <div style={{ height: 24 }} />
-            {step1Tab === 'integrations' && (
-              <>
-                {SECTIONS.map((section, idx) => {
-                  const categoryMap: Record<string, string> = {
-                    Cloud: 'Cloud',
-                    Containers: 'Containers',
-                    Host: 'Operating Systems',
-                    Applications: 'Application',
-                  };
-                  const integrationCategory = categoryMap[section.title] || section.title;
-                  return (
-                    <React.Fragment key={section.title}>
-                      {idx > 0 && <div style={{ height: 80 }} />}
-                      {renderSectionWithViewAll(section, () => {
-                        setActiveNavId('integrations');
+            Recommended
+          </EuiTab>
+          <EuiTab
+            isSelected={step1Tab === 'migration'}
+            onClick={() => setStep1Tab('migration')}
+          >
+            Platform migration
+          </EuiTab>
+        </EuiTabs>
+        <EuiHorizontalRule margin="none" css={dividerStyle} />
+        <div style={{ height: 24 }} />
+        {step1Tab === 'integrations' && (
+          <>
+            {SECTIONS.map((section, idx) => {
+              const categoryMap: Record<string, string> = {
+                Cloud: 'Cloud',
+                Containers: 'Containers',
+                Host: 'Operating Systems',
+                Applications: 'Application',
+              };
+              const integrationCategory = categoryMap[section.title] || section.title;
+              return (
+                <React.Fragment key={section.title}>
+                  {idx > 0 && <div style={{ height: 40 }} />}
+                  <EuiTitle size="xs">
+                    <h3>{section.title}</h3>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued">
+                    <p style={{ margin: 0, display: 'inline' }}>{section.description}.{' '}</p>
+                    <EuiButtonEmpty
+                      size="s"
+                      flush="left"
+                      iconType="arrowRight"
+                      iconSide="right"
+                      style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
+                      css={css`
+                        & .euiButtonEmpty__content {
+                          gap: 0;
+                        }
+                      `}
+                      onClick={() => {
+                        history.push('/ingest-hub/integrations');
                         setIntegrationsTab('all');
                         setSelectedCategory(`integration:${integrationCategory}`);
                         setIntegrationsSearch(`category:${integrationCategory}`);
-                      })}
-                    </React.Fragment>
-                  );
-                })}
-                {SAAS_TILES.length > 0 && (
-                  <>
-                    <div style={{ height: 80 }} />
-                    <EuiTitle
-                      size="xs"
-                      css={css`
-                        color: ${euiTheme.colors.textHeading};
-                      `}
-                    >
-                      <h2>SaaS Products</h2>
-                    </EuiTitle>
-                    <EuiText size="s" color="subdued" style={{ marginTop: 0 }}>
-                      <p style={{ margin: 0, display: 'inline' }}>
-                        Monitor your cloud resources without installing an agent.{' '}
-                      </p>
-                      <EuiButtonEmpty
-                        data-test-subj="observabilityOnboardingRenderGetStartedViewViewAllSaaSProductsButton"
-                        size="s"
-                        flush="left"
-                        iconType="arrowRight"
-                        iconSide="right"
-                        style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
-                        css={css`
-                          & .euiButtonEmpty__content {
-                            gap: 0;
-                          }
-                        `}
-                        onClick={() => {
-                          setActiveNavId('integrations');
-                          setIntegrationsTab('all');
-                          setSetupOptions((prev) =>
-                            prev.map((o) => ({
-                              ...o,
-                              checked: o.label === 'Agentless' ? ('on' as const) : undefined,
-                            }))
-                          );
-                        }}
-                      >
-                        View all SaaS Products
-                      </EuiButtonEmpty>
-                    </EuiText>
-                    <div style={{ height: 12 }} />
-                    <div
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: `repeat(${SAAS_TILES.length}, 1fr)`,
-                        gap: 12,
-                        alignItems: 'center',
                       }}
                     >
-                      {SAAS_TILES.map((tile) => (
-                        <IntegrationCard
-                          key={tile.id}
-                          name={tile.name}
-                          description={tile.description}
-                          logoDomain={tile.logoDomain}
-                          logoUrl={tile.logoUrl}
-                          centerAlign
-                          onClick={() => setFlyoutTile(tile)}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
+                      View all
+                    </EuiButtonEmpty>
+                  </EuiText>
+                  <div style={{ height: 12 }} />
+                  {renderCompactGrid(section.tiles)}
+                </React.Fragment>
+              );
+            })}
+            {SAAS_TILES.length > 0 && (
+              <>
+                <div style={{ height: 40 }} />
+                <EuiTitle size="xs">
+                  <h3>SaaS Products</h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                  <p style={{ margin: 0, display: 'inline' }}>Monitor your cloud resources without installing an agent.{' '}</p>
+                  <EuiButtonEmpty
+                    size="s"
+                    flush="left"
+                    iconType="arrowRight"
+                    iconSide="right"
+                    style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
+                    css={css`
+                      & .euiButtonEmpty__content {
+                        gap: 0;
+                      }
+                    `}
+                    onClick={() => {
+                      history.push('/ingest-hub/integrations');
+                      setIntegrationsTab('all');
+                      setSetupOptions((prev) =>
+                        prev.map((o) => ({
+                          ...o,
+                          checked: o.label === 'Agentless' ? ('on' as const) : undefined,
+                        }))
+                      );
+                    }}
+                  >
+                    View all
+                  </EuiButtonEmpty>
+                </EuiText>
+                <div style={{ height: 12 }} />
+                {renderCompactGrid(SAAS_TILES)}
               </>
             )}
-            {step1Tab === 'migration' && (
-              <div style={{ padding: '40px 0' }}>{renderPlatformMigrationContent()}</div>
-            )}
-          </EuiAccordion>
+          </>
+        )}
+        {step1Tab === 'migration' && (
+          <div style={{ padding: '40px 0' }}>{renderPlatformMigrationContent()}</div>
+        )}
 
+        <div style={{ height: 96 }} />
+        <EuiTitle size="s">
+          <h3>Get more from your data</h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+          <p>Once you have data flowing in, unlock powerful capabilities like Streams, Dashboards, Alerts, and SLOs to analyze, visualize, and monitor your infrastructure.</p>
+        </EuiText>
+        <div style={{ height: 32 }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
           <EuiAccordion
             id="step2-streams"
             arrowDisplay="left"
@@ -1553,7 +1527,7 @@ export const IngestHubPage: React.FC = () => {
                       <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
                         <EuiIcon type="watchesApp" size="m" />
                       </span>
-                      Get notified when issues occur with alerts
+                      Get notified when issues occur with Alerts
                     </h3>
                   </EuiTitle>
                   <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
@@ -1686,9 +1660,7 @@ export const IngestHubPage: React.FC = () => {
           </EuiAccordion>
         </div>
 
-        <div style={{ height: 80 }} />
-
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" style={{ marginTop: 'auto', paddingTop: 80, marginBottom: 64 }}>
           <EuiFlexItem>
             <EuiPanel
               data-test-subj="observabilityOnboardingGetStartedDemoEnvironmentCard"
@@ -1758,9 +1730,8 @@ export const IngestHubPage: React.FC = () => {
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <div style={{ height: 40 }} />
       </div>
-    </>
+    </div>
   );
 
   const renderApiEndpointView = () => (
