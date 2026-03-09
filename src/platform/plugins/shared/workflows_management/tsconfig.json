@@ -15,7 +15,8 @@
     "server/**/*.json"
   ],
   "kbn_references": [
-    "@kbn/core","@kbn/eval-kql",
+    "@kbn/core",
+    "@kbn/eval-kql",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
