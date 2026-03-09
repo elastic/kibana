@@ -24,6 +24,7 @@ export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
   CLOUD_SHELL_URL: 'cloud_shell_url',
   CLOUD_FORMATION_CLOUD_CONNECTORS: 'cloud_formation_cloud_connectors_template',
   ARM_TEMPLATE_CLOUD_CONNECTORS: 'arm_template_cloud_connectors_url',
+  CLOUD_SHELL_URL_CLOUD_CONNECTORS: 'cloud_shell_url_cloud_connectors',
 };
 
 export const ProviderAccountTypeInputNames: Record<

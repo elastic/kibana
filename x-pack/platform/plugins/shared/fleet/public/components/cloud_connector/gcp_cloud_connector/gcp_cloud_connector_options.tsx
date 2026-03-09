@@ -118,6 +118,7 @@ export const getGcpCloudConnectorsCredentialsFormOptions = (
       id: GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
       label: GCP_CLOUD_CONNECTOR_FIELD_LABELS.gcp_credentials_cloud_connector_id,
       type: 'text' as const,
+      isSecret: true,
       dataTestSubj: GCP_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
       value: inputVars[GCP_CLOUD_CONNECTOR_FIELD_NAMES.GCP_CREDENTIALS_CLOUD_CONNECTOR_ID].value,
       tooltip:

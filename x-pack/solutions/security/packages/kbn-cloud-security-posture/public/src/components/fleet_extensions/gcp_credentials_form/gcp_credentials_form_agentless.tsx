@@ -174,6 +174,12 @@ export const GcpCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_SHELL_URL
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
+  const cloudShellCloudConnectorsUrl = getTemplateUrlFromPackageInfo(
+    packageInfo,
+    templateName ?? '',
+    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_SHELL_URL_CLOUD_CONNECTORS
+  );
+
   const commandText = `gcloud config set project <PROJECT_ID> && ${
     isOrganization ? `ORG_ID=<ORG_ID_VALUE> ` : ``
   }./deploy_service_account.sh`;
@@ -231,6 +237,8 @@ export const GcpCredentialsFormAgentless = ({
             cloudProvider="gcp"
             templateName={templateName}
             isEditPage={isEditPage}
+            accountType={accountType}
+            iacTemplateUrl={cloudShellCloudConnectorsUrl}
           />
         </Suspense>
       ) : (
