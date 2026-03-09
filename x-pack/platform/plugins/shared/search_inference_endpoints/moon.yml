@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/cloud-connect-plugin'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
