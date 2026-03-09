@@ -13,7 +13,11 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import { TestProviders } from '../../../../common/mock';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { TABLE_SECTION_TEST_ID, ATTACKS_TABLE_SORT_STORAGE_KEY, TableSection } from './table_section';
+import {
+  TABLE_SECTION_TEST_ID,
+  ATTACKS_TABLE_SORT_STORAGE_KEY,
+  TableSection,
+} from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
 import { useGetDefaultGroupTitleRenderers } from '../../../hooks/attacks/use_get_default_group_title_renderers';
