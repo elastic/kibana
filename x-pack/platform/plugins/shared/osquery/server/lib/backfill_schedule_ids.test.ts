@@ -82,12 +82,13 @@ describe('backfillScheduleIds', () => {
 
     const logger = createMockLogger();
 
-    await backfillScheduleIds({
+    const result = await backfillScheduleIds({
       coreStart: core,
       osqueryContext: createMockOsqueryContext(),
       logger: logger as unknown as Parameters<typeof backfillScheduleIds>[0]['logger'],
     });
 
+    expect(result).toEqual({ hadFailures: false });
     expect(logger.debug).toHaveBeenCalledWith(
       'backfillScheduleIds: all packs already have schedule_id values'
     );
@@ -218,27 +219,65 @@ describe('backfillScheduleIds', () => {
 
     const logger = createMockLogger();
 
-    await backfillScheduleIds({
+    const result = await backfillScheduleIds({
       coreStart: core,
       osqueryContext: createMockOsqueryContext(),
       logger: logger as unknown as Parameters<typeof backfillScheduleIds>[0]['logger'],
     });
 
+    expect(result).toEqual({ hadFailures: true });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('failed to backfill pack pack-1')
     );
+    expect(logger.warn).toHaveBeenCalledWith(
+      'backfillScheduleIds: backfill finished with partial failures, will retry'
+    );
+  });
+
+  test('returns hadFailures false on full success', async () => {
+    const scopedClient = createMockScopedClient();
+    const { core } = createMockCoreStart(
+      {
+        saved_objects: [
+          {
+            id: 'pack-1',
+            namespaces: ['default'],
+            references: [],
+            attributes: {
+              name: 'ok-pack',
+              enabled: false,
+              queries: [{ id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1' }],
+            },
+          },
+        ],
+        total: 1,
+      },
+      scopedClient
+    );
+
+    const logger = createMockLogger();
+
+    const result = await backfillScheduleIds({
+      coreStart: core,
+      osqueryContext: createMockOsqueryContext(),
+      logger: logger as unknown as Parameters<typeof backfillScheduleIds>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    expect(logger.info).toHaveBeenCalledWith('backfillScheduleIds: backfill complete');
   });
 
   test('returns early when no packs exist', async () => {
     const { core } = createMockCoreStart({ saved_objects: [], total: 0 });
     const logger = createMockLogger();
 
-    await backfillScheduleIds({
+    const result = await backfillScheduleIds({
       coreStart: core,
       osqueryContext: createMockOsqueryContext(),
       logger: logger as unknown as Parameters<typeof backfillScheduleIds>[0]['logger'],
     });
 
+    expect(result).toEqual({ hadFailures: false });
     expect(logger.debug).toHaveBeenCalledWith(
       'backfillScheduleIds: all packs already have schedule_id values'
     );

@@ -117,15 +117,22 @@ describe('buildScheduledResponsesQuery', () => {
   });
 
   describe('space_id filter', () => {
-    test('always includes term filter on space_id', () => {
+    test('uses should clause for default space to include docs without space_id', () => {
       const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
 
-      expect(filters).toContainEqual({ term: { space_id: defaultSpaceId } });
+      expect(filters).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      });
     });
 
-    test('uses provided spaceId value', () => {
+    test('uses simple term filter for non-default space', () => {
       const result = buildScheduledResponsesQuery({ spaceId: 'security' });
       const query = result.body.query as Record<string, unknown>;
       const filters = (query.bool as Record<string, unknown>).filter as unknown[];
@@ -215,7 +222,14 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(filters).toHaveLength(2);
       expect(filters).toContainEqual({ exists: { field: 'schedule_id' } });
-      expect(filters).toContainEqual({ term: { space_id: defaultSpaceId } });
+      expect(filters).toContainEqual({
+        bool: {
+          should: [
+            { term: { space_id: 'default' } },
+            { bool: { must_not: { exists: { field: 'space_id' } } } },
+          ],
+        },
+      });
     });
   });
 

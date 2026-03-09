@@ -28,10 +28,20 @@ export const buildScheduledResponsesQuery = ({
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
-  const filters: estypes.QueryDslQueryContainer[] = [
-    { exists: { field: 'schedule_id' } },
-    { term: { space_id: spaceId } },
-  ];
+  const filters: estypes.QueryDslQueryContainer[] = [{ exists: { field: 'schedule_id' } }];
+
+  if (spaceId === 'default') {
+    filters.push({
+      bool: {
+        should: [
+          { term: { space_id: 'default' } },
+          { bool: { must_not: { exists: { field: 'space_id' } } } },
+        ],
+      },
+    });
+  } else {
+    filters.push({ term: { space_id: spaceId } });
+  }
 
   if (packIds) {
     if (packIds.length === 0) {

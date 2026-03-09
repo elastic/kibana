@@ -25,7 +25,12 @@ import {
   getInternalSavedObjectsClient,
   getInternalSavedObjectsClientForSpaceId,
 } from '../utils/get_internal_saved_object_client';
-import { convertSOQueriesToPackConfig, policyHasPack, makePackKey } from '../routes/pack/utils';
+import {
+  convertSOQueriesToPackConfig,
+  policyHasPack,
+  makePackKey,
+  removePackFromPolicy,
+} from '../routes/pack/utils';
 
 /**
  * One-time migration that assigns stable `schedule_id` + `start_date` to every
@@ -36,11 +41,13 @@ export const backfillScheduleIds = async ({
   coreStart,
   osqueryContext,
   logger,
+  abortController,
 }: {
   coreStart: CoreStart;
   osqueryContext: OsqueryAppContextService;
   logger: Logger;
-}): Promise<void> => {
+  abortController?: AbortController;
+}): Promise<{ hadFailures: boolean }> => {
   const internalClient = await getInternalSavedObjectsClient(coreStart);
 
   const allPacks = await internalClient.find<PackSavedObject>({
@@ -56,7 +63,7 @@ export const backfillScheduleIds = async ({
   if (!packsToBackfill.length) {
     logger.debug('backfillScheduleIds: all packs already have schedule_id values');
 
-    return;
+    return { hadFailures: false };
   }
 
   logger.info(`backfillScheduleIds: ${packsToBackfill.length} pack(s) need schedule_id backfill`);
@@ -64,8 +71,15 @@ export const backfillScheduleIds = async ({
   const packagePolicyService = osqueryContext.getPackagePolicyService();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   const now = moment().toISOString();
+  let hadFailures = false;
 
   for (const packSO of packsToBackfill) {
+    if (abortController?.signal.aborted) {
+      logger.info('backfillScheduleIds: aborted by task manager, will retry remaining packs');
+
+      return { hadFailures: true };
+    }
+
     try {
       const spaceId = packSO.namespaces?.[0] ?? 'default';
       const spaceClient = getInternalSavedObjectsClientForSpaceId(coreStart, spaceId);
@@ -105,6 +119,7 @@ export const backfillScheduleIds = async ({
                 pp.id,
                 produce<PackagePolicy>(pp, (draft) => {
                   unset(draft, 'id');
+                  removePackFromPolicy(draft, packSO.attributes.name, spaceId);
                   set(draft, `${packPath}.pack_id`, packSO.id);
                   set(
                     draft,
@@ -127,9 +142,16 @@ export const backfillScheduleIds = async ({
         logger.debug(`backfillScheduleIds: version conflict for pack ${packSO.id}, skipping`);
       } else {
         logger.warn(`backfillScheduleIds: failed to backfill pack ${packSO.id}: ${error.message}`);
+        hadFailures = true;
       }
     }
   }
 
-  logger.info('backfillScheduleIds: backfill complete');
+  if (hadFailures) {
+    logger.warn('backfillScheduleIds: backfill finished with partial failures, will retry');
+  } else {
+    logger.info('backfillScheduleIds: backfill complete');
+  }
+
+  return { hadFailures };
 };

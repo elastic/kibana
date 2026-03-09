@@ -116,7 +116,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
         title: 'Backfill schedule IDs for osquery pack queries',
         timeout: '5m',
         maxAttempts: 3,
-        createTaskRunner: ({ taskInstance }) => ({
+        createTaskRunner: ({ taskInstance, abortController }) => ({
           run: async () => {
             if (taskInstance.state?.completed) {
               this.logger.debug('backfillScheduleIds task: already completed, skipping');
@@ -128,13 +128,14 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
               throw new Error('Core not started');
             }
 
-            await backfillScheduleIds({
+            const { hadFailures } = await backfillScheduleIds({
               coreStart: this.coreStart,
               osqueryContext: this.osqueryAppContextService,
               logger: this.logger,
+              abortController,
             });
 
-            return { state: { completed: true } };
+            return { state: { completed: !hadFailures } };
           },
         }),
       },
