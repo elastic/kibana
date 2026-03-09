@@ -50,13 +50,13 @@ describe('Links content management transform utils', () => {
     it('treats missing order as 0 and preserves original array order for ties', () => {
       const result = savedObjectToItem(
         makeSavedObject([
-          { id: 'first', type: EXTERNAL_LINK_TYPE, destination: 'https://first.co' },
           {
             id: 'second',
             type: EXTERNAL_LINK_TYPE,
             destination: 'https://second.co',
             order: 1,
           },
+          { id: 'first', type: EXTERNAL_LINK_TYPE, destination: 'https://first.co' },
         ])
       );
 
