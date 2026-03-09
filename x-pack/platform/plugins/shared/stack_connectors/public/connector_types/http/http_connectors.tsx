@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   CardRadioGroupField,
@@ -148,6 +148,15 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
       {hasProxy && (
         <>
           <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.PROXY_OVERRIDE_CALLOUT}
+            data-test-subj="httpProxyOverrideCallout"
+            announceOnMount
+          />
+          <EuiSpacer size="m" />
           <UseField
             path="config.proxyUrl"
             config={{

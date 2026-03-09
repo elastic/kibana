@@ -111,6 +111,14 @@ export const PROXY_AUTH_BASIC = i18n.translate(
   { defaultMessage: 'Basic authentication' }
 );
 
+export const PROXY_OVERRIDE_CALLOUT = i18n.translate(
+  'xpack.stackConnectors.components.http.proxyOverrideCallout',
+  {
+    defaultMessage:
+      'These settings override any global proxy settings defined in your Kibana configuration, for requests made by this connector.',
+  }
+);
+
 export const PROXY_VERIFICATION_MODE_NONE = i18n.translate(
   'xpack.stackConnectors.components.http.proxyVerificationModeNoneLabel',
   { defaultMessage: 'None' }

@@ -62,7 +62,15 @@ describe('getCustomAgents', () => {
   });
 
   test('uses provided proxySettings override instead of global config', () => {
-    configurationUtilities.getProxySettings.mockReturnValue(undefined);
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxySSLSettings: {
+        verificationMode: 'none',
+      },
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+
     const connectorProxySettings = {
       proxyUrl: 'http://connector-proxy:3128',
       proxyBypassHosts: undefined,

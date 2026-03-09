@@ -117,14 +117,16 @@ export function getCustomAgents(opts: GetCustomAgentsOpts): GetCustomAgentsRespo
     }
   }
 
-  logger.debug(`Creating proxy agents for proxy: ${proxySettings.proxyUrl}`);
   let proxyUrl: URL;
   try {
     proxyUrl = new URL(proxySettings.proxyUrl);
   } catch (err) {
-    logger.warn(`invalid proxy URL "${proxySettings.proxyUrl}" ignored`);
+    logger.warn(`Invalid proxy URL. Ignoring proxy settings.`);
     return defaultAgents;
   }
+
+  // Avoid logging the full proxy URL in the logs, it may contain sensitive information
+  logger.debug(`Creating proxy agents for proxy: ${proxyUrl.hostname}:${proxyUrl.port}`);
 
   const proxyNodeSSLOptions = getNodeSSLOptions(
     logger,
