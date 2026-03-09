@@ -16,6 +16,7 @@ enabled:
   - x-pack/platform/test/serverless/api_integration/configs/search/config.group2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.examples.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.saved_objects_management.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.saved_objects_management_2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.context_awareness_2.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.config_compat_mode.ts
@@ -52,5 +53,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group30.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group31.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group32.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group33.ts
+  - x-pack/platform/test/serverless/functional/configs/search/config.group34.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.1.ts
   - x-pack/platform/test/agent_builder_api_integration/configs/config.serverless.2.ts

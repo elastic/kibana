@@ -28,6 +28,7 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.examples.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.saved_objects_management.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.saved_objects_management_2.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.context_awareness_2.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.config_compat_mode.ts
@@ -63,6 +64,8 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group30.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group31.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group32.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.group33.ts
+  - x-pack/platform/test/serverless/functional/configs/observability/config.group34.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.logs_essentials.group1.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.telemetry.ts

@@ -47,6 +47,7 @@ enabled:
   - x-pack/solutions/observability/test/functional/apps/infra/config.ts
   - x-pack/solutions/observability/test/functional/apps/infra/config.2.ts
   - x-pack/solutions/observability/test/functional/config.firefox.ts
+  - x-pack/solutions/observability/test/functional/config.firefox.2.ts
   # stateful configs that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.2.ts
