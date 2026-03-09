@@ -6,7 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  UnknownAttachment,
+  ScreenContextAttachmentData,
+} from '@kbn/agent-builder-common/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
@@ -18,6 +21,7 @@ interface InlineAttachmentWithActionsProps {
   attachmentsService: AttachmentsService;
   isSidebar: boolean;
   conversationId: string;
+  screenContext?: ScreenContextAttachmentData;
 }
 
 /**
@@ -28,6 +32,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   attachmentsService,
   isSidebar,
   conversationId,
+  screenContext,
 }) => {
   const { openCanvas: openCanvasContext, canvasState } = useCanvasContext();
   const { conversationActions } = useConversationContext();
@@ -77,7 +82,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar })}
+        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar, screenContext })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

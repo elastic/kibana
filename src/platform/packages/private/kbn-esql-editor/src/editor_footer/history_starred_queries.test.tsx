@@ -259,6 +259,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -277,6 +278,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -296,6 +298,7 @@ describe('Starred and History queries components', () => {
             containerWidth={1024}
             isSpaceReduced={true}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -314,6 +317,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -337,6 +341,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={1024}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={200}
             starredQueriesService={null}
           />
@@ -355,6 +360,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -373,6 +379,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -423,6 +430,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -458,6 +466,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -488,6 +497,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -521,6 +531,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={createMockStarredQueriesService()}
           />
@@ -546,6 +557,7 @@ describe('Starred and History queries components', () => {
             containerCSS={{}}
             containerWidth={800}
             onUpdateAndSubmit={jest.fn()}
+            onClose={jest.fn()}
             height={400}
             starredQueriesService={null}
           />
