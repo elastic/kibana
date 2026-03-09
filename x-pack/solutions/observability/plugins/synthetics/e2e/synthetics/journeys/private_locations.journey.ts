@@ -6,7 +6,7 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { waitForLoadingToFinish } from '@kbn/ux-plugin/e2e/journeys/utils';
+import { waitForLoadingToFinish } from '../../page_objects/utils';
 import { SyntheticsServices } from './services/synthetics_services';
 import { byTestId } from '../../helpers/utils';
 import { addTestMonitor, cleanPrivateLocations, cleanTestMonitors } from './services/add_monitor';
