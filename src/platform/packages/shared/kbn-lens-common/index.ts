@@ -209,7 +209,6 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,

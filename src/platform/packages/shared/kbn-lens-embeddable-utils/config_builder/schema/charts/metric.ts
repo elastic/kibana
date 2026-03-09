@@ -190,16 +190,6 @@ const metricStatePrimaryMetricOptionsSchema = {
       meta: { description: 'Position of the primary metric value (top or bottom)' },
     })
   ),
-  /**
-   * Font weight for title and subtitle. Possible values:
-   * - 'bold': Bold font weight
-   * - 'normal': Normal font weight
-   */
-  title_weight: schema.maybe(
-    schema.oneOf([schema.literal('bold'), schema.literal('normal')], {
-      meta: { description: 'Font weight for title and subtitle' },
-    })
-  ),
 };
 
 const metricStateSecondaryMetricOptionsSchema = {

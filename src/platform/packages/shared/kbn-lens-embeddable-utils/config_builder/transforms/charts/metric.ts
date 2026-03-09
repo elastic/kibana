@@ -143,7 +143,6 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
         }
       : {}),
     ...(primaryMetric.position ? { primaryPosition: primaryMetric.position } : {}),
-    ...(primaryMetric.title_weight ? { titleWeight: primaryMetric.title_weight } : {}),
     ...(primaryMetric.icon
       ? {
           icon: primaryMetric.icon.name,
@@ -413,10 +412,6 @@ function enrichConfigurationWithVisualizationProperties(
 
     if (visualization.primaryPosition) {
       primaryMetric.position = visualization.primaryPosition;
-    }
-
-    if (visualization.titleWeight) {
-      primaryMetric.title_weight = visualization.titleWeight;
     }
   }
 

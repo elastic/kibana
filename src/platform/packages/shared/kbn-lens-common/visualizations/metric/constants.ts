@@ -36,7 +36,6 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
   iconAlign: 'right',
   valueFontMode: 'default',
   primaryPosition: 'bottom',
-  titleWeight: 'bold',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
 };
@@ -44,14 +43,12 @@ export const LENS_METRIC_STATE_DEFAULTS: MetricStateDefaults = {
 export const LENS_METRIC_LAYOUT_BY_POSITION: Record<'bottom' | 'top', MetricLayoutWithDefault> = {
   bottom: {
     titlesTextAlign: 'left',
-    titleWeight: 'bold',
     primaryAlign: 'right',
     iconAlign: 'right',
     secondaryAlign: 'right',
   },
   top: {
     titlesTextAlign: 'left',
-    titleWeight: 'normal',
     primaryAlign: 'left',
     iconAlign: 'right',
     secondaryAlign: 'left',

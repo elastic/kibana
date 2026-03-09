@@ -12,6 +12,7 @@ import type { LensAttributes } from '../../../../server/content_management/v1';
  * Cleanup metric properties
  * - Move `valuesTextAlign` to `primaryAlign` and `secondaryAlign`
  * - Move `secondaryPrefix` to `secondaryLabel`
+ * - Remove `titleWeight` (font weight is no longer configurable)
  */
 export function metricMigrations(attributes: LensAttributes): LensAttributes {
   if (!attributes.state || attributes.visualizationType !== 'lnsMetric') {
@@ -35,7 +36,7 @@ export function metricMigrations(attributes: LensAttributes): LensAttributes {
 export const getUpdatedMetricState = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {
-  const { secondaryPrefix, valuesTextAlign, ...restState } = state;
+  const { secondaryPrefix, valuesTextAlign, titleWeight, ...restState } = state;
   let newState = { ...restState };
 
   if (valuesTextAlign) {

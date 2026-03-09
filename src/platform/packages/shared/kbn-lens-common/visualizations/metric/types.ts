@@ -30,8 +30,6 @@ export type SecondaryTrend =
       baselineValue: number | 'primary';
     };
 
-type TitleFontWeightString = Extract<TitleFontWeight, string>;
-
 export interface MetricVisualizationState {
   layerId: string;
   layerType: LensLayerType;
@@ -62,7 +60,11 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  titleWeight?: TitleFontWeightString;
+  /**
+   * legacy state property
+   * @deprecated
+   */
+  titleWeight?: MetricStyle['titleWeight'];
   primaryPosition?: MetricStyle['valuePosition'];
   secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   color?: string;
@@ -93,7 +95,6 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'iconAlign'
   | 'valueFontMode'
   | 'primaryPosition'
-  | 'titleWeight'
   | 'secondaryLabelPosition'
   | 'applyColorTo'
 >;
@@ -101,13 +102,11 @@ export type MetricStateOptinalsWithDefault = Pick<
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
 export type MetricLayoutWithDefault = Required<
-  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'titleWeight' | 'primaryAlign'>
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign'>
 > & {
   iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
-
-export type TitleFontWeight = MetricStyle['titleWeight'];
 
 export type IconPosition = MetricStyle['iconAlign'];
 

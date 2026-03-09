@@ -22,7 +22,9 @@ const palette: PaletteOutput<CustomPaletteParams> = {
 };
 
 // Remove legacy state properties as they should be removed in the initialize method
-const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign'>> = {
+const fullState: Required<
+  Omit<MetricVisualizationState, 'secondaryPrefix' | 'valuesTextAlign' | 'titleWeight'>
+> = {
   layerId: 'first',
   layerType: 'data',
   metricAccessor: 'metric-col-id',
@@ -48,7 +50,6 @@ const fullState: Required<Omit<MetricVisualizationState, 'secondaryPrefix' | 'va
   primaryAlign: 'right',
   secondaryAlign: 'right',
   primaryPosition: 'bottom',
-  titleWeight: 'bold',
   iconAlign: 'left',
   valueFontMode: 'default',
   secondaryTrend: { type: 'none' },
@@ -265,36 +266,6 @@ describe('appearance settings', () => {
     renderComponent({ icon });
 
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
-  });
-
-  it('should set Regular titleWeight', async () => {
-    renderComponent({ titleWeight: 'bold' });
-
-    const fontWeightBtnGroup = new EuiButtonGroupTestHarness(
-      'lens-metric-appearance-title-and-subtitle-font-weight-btn'
-    );
-
-    expect(fontWeightBtnGroup.getSelected()?.textContent).toBe('Bold');
-
-    fontWeightBtnGroup.select('Regular');
-    fontWeightBtnGroup.select('Bold');
-
-    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['normal']);
-  });
-
-  it('should set Bold titleWeight', async () => {
-    renderComponent({ titleWeight: 'normal' });
-
-    const fontWeightBtnGroup = new EuiButtonGroupTestHarness(
-      'lens-metric-appearance-title-and-subtitle-font-weight-btn'
-    );
-
-    expect(fontWeightBtnGroup.getSelected()?.textContent).toBe('Regular');
-
-    fontWeightBtnGroup.select('Regular');
-    fontWeightBtnGroup.select('Bold');
-
-    expect(mockSetState.mock.calls.map(([s]) => s.titleWeight)).toEqual(['bold']);
   });
 
   it.each<[PrimaryMetricPosition, string, PrimaryMetricPosition, string]>([

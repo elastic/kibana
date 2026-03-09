@@ -56,7 +56,6 @@ export interface MetricArguments {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;

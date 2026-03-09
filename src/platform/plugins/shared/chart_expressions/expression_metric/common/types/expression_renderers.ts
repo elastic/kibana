@@ -40,7 +40,6 @@ export interface MetricVisParam {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
   primaryPosition: MetricStyle['valuePosition'];
   maxCols: number;
   minTiles?: number;
