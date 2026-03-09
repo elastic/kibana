@@ -481,6 +481,45 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    acceptUpgrade: {
+                      value: { action: 'accept', target_version: '2.0.0' },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: { success: true },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: { message: 'Bad Request' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: ReviewUpgradeRequestSchema,
           response: {
