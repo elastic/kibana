@@ -493,9 +493,14 @@ export const staticConnectors: BaseConnectorContract[] = [
       fetcher: FetcherConfigSchema,
       ...KibanaStepMetaSchema,
     }),
-    outputSchema: z.any(),
+    outputSchema: z
+      .any()
+      .describe(
+        'JSON-parsed response body, or an empty object ({}) for 204 No Content / 304 Not Modified responses'
+      ),
     description: i18n.translate('workflows.connectors.kibana.request.description', {
-      defaultMessage: 'Make a generic request to a Kibana API',
+      defaultMessage:
+        'Make a generic request to a Kibana API. APIs that return 204 No Content or 304 Not Modified produce an empty output ({}).',
     }),
   },
 ];
