@@ -158,7 +158,7 @@ import {
 } from './lib/trial_companion/services/trial_companion_milestone_service';
 import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_report/locator';
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
-
+import { registerWorkflowSteps } from './workflows/step_types';
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
@@ -691,6 +691,23 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
+
+    if (plugins.workflowsExtensions) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      core
+        .getStartServices()
+        .then(async ([coreStart]) => {
+          await registerWorkflowSteps(workflowsExtensions, coreStart);
+        })
+        .catch((error) => {
+          this.logger.error(
+            `[RegisterAlertValidationSteps] Error registering alert validation steps: ${error.message}`,
+            {
+              error: error.stack,
+            }
+          );
+        });
+    }
 
     return {
       setProductFeaturesConfigurator:
