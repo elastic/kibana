@@ -61,6 +61,8 @@ describe('getConnectorById', () => {
     const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
 
     expect(result).toEqual(expected);
+    expect(getConnectorListMock).toHaveBeenCalledTimes(1);
+    expect(getConnectorListMock).toHaveBeenCalledWith({ actions, request, esClient, logger });
   });
 
   it('returns an inference endpoint from the list', async () => {

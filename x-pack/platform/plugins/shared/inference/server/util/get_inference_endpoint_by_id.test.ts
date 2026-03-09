@@ -40,14 +40,23 @@ describe('getInferenceEndpointById', () => {
       serviceSettings: { model_id: 'gpt-4o' },
     });
 
-    expect(mockInferenceGet).toHaveBeenCalledWith({ inference_id: 'my-endpoint' });
+    expect(mockInferenceGet).toHaveBeenCalledWith(
+      { inference_id: 'my-endpoint' },
+      expect.objectContaining({ ignore: [404] })
+    );
   });
 
-  it('throws if the endpoint is not found', async () => {
+  it('throws a 404 error if the endpoint is not found', async () => {
     mockInferenceGet.mockResolvedValue({ endpoints: [] });
 
-    await expect(getInferenceEndpointById({ inferenceId: 'missing', esClient })).rejects.toThrow(
-      "Inference endpoint 'missing' not found"
+    await expect(
+      getInferenceEndpointById({ inferenceId: 'missing', esClient })
+    ).rejects.toThrow("Inference endpoint 'missing' not found");
+
+    await expect(getInferenceEndpointById({ inferenceId: 'missing', esClient })).rejects.toEqual(
+      expect.objectContaining({
+        meta: expect.objectContaining({ status: 404 }),
+      })
     );
   });
 

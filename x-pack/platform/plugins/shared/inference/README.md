@@ -53,11 +53,21 @@ resolves which pipeline to use based on the provided identifier:
 The `getConnectorList` API returns both stack connectors with the `chat_completion` task type and inference endpoints in a unified list.
 Inference endpoints have `isInferenceEndpoint: true` set on the returned `InferenceConnector` object.
 
+The `getConnectorById` API resolves both stack connectors and inference endpoints using the same unified
+IDs returned by `getConnectorList`. When the returned `InferenceConnector` has `isInferenceEndpoint: true`,
+the object represents an Elasticsearch inference endpoint rather than a Kibana stack connector. For stack
+connectors the `config` field contains the connector's configuration, while for inference endpoints it may
+be empty. If no connector or endpoint matches the given ID, a 404 `InferenceTaskRequestError` is thrown.
+
 The list of supported stack connector types:
 - `.gen-ai`: OpenAI connector
 - `.bedrock`: Bedrock Claude connector
 - `.gemini`: Vertex Gemini connector
-- `.inference`: Elastic Inference Endpoint connector
+- `.inference`: Elastic Inference Endpoint connector (Kibana connector type)
+
+Note that `.inference` refers to the Kibana stack connector type (its connector ID prefix), not to be confused
+with Elasticsearch inference endpoints. Elasticsearch inference endpoints are separate entries in the unified
+list returned by `getConnectorList` and are identified by the `isInferenceEndpoint: true` flag.
 
 ## Usage examples
 

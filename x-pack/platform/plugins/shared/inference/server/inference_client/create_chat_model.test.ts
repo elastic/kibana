@@ -102,6 +102,7 @@ describe('createChatModel', () => {
       actions,
       request,
       esClient: mockEsClient,
+      logger,
     });
   });
 

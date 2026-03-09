@@ -534,6 +534,7 @@ describe('createChatCompleteApi', () => {
 
       expect(response).toEqual({
         content: 'endpoint-chunk',
+        metadata: undefined,
         toolCalls: [],
       });
     });

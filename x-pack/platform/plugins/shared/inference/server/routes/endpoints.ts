@@ -42,7 +42,7 @@ export function registerEndpointsRoute({
       } catch (e) {
         return response.customError({
           statusCode: 500,
-          body: { message: e.message },
+          body: { message: 'message' in e ? e.message : String(e) },
         });
       }
     }

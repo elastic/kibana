@@ -49,6 +49,7 @@ describe('createClient', () => {
       const expectedResult = Symbol('expected') as any;
       createInferenceClientMock.mockReturnValue(expectedResult);
       const anonymizationRulesPromise = Promise.resolve([]);
+      const endpointIdCache = new InferenceEndpointIdCache();
 
       const result = createClient({
         request,
@@ -57,7 +58,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise,
         regexWorker,
-        endpointIdCache: new InferenceEndpointIdCache(),
+        endpointIdCache,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
@@ -70,7 +71,7 @@ describe('createClient', () => {
           esClient: mockEsClient,
           anonymizationRulesPromise,
           regexWorker,
-          endpointIdCache: expect.any(InferenceEndpointIdCache),
+          endpointIdCache,
         })
       );
 
@@ -111,6 +112,8 @@ describe('createClient', () => {
       const bindClientResult = Symbol('bindClientResult') as any;
       bindClientMock.mockReturnValue(bindClientResult);
 
+      const endpointIdCache = new InferenceEndpointIdCache();
+
       const result = createClient({
         request,
         actions,
@@ -121,7 +124,7 @@ describe('createClient', () => {
         esClient: mockEsClient,
         anonymizationRulesPromise,
         regexWorker,
-        endpointIdCache: new InferenceEndpointIdCache(),
+        endpointIdCache,
       });
 
       expect(createInferenceClientMock).toHaveBeenCalledTimes(1);
@@ -134,7 +137,7 @@ describe('createClient', () => {
           esClient: mockEsClient,
           anonymizationRulesPromise,
           regexWorker,
-          endpointIdCache: expect.any(InferenceEndpointIdCache),
+          endpointIdCache,
         })
       );
 
