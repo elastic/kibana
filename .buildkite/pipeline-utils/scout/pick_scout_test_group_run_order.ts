@@ -35,7 +35,6 @@ if (process.env.SERVERLESS_TESTS_ONLY) {
 export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
   const bk = new BuildkiteClient();
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
   if (!Fs.existsSync(scoutConfigsPath)) {
     throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
   }
@@ -79,7 +78,6 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,
             command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            cancel_on_build_failing: true,
             timeout_in_minutes: 60,
             agents,
             env: {
@@ -90,8 +88,8 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
             },
             retry: {
               automatic: [
-                { exit_status: '10', limit: 1 },
-                { exit_status: '*', limit: 3 },
+                { exit_status: '-1', limit: 3 },
+                { exit_status: '*', limit: 1 },
               ],
             },
           })

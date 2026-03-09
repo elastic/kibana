@@ -89,7 +89,7 @@ export default function ({ getService }) {
 
         expect(body).to.eql({
           name: 'test_cluster',
-          skipUnavailable: 'false', // ES issue #35671
+          skipUnavailable: false,
           seeds: [NODE_SEED],
           isConfiguredByNode: false,
           mode: 'sniff',
@@ -115,7 +115,7 @@ export default function ({ getService }) {
               connectedNodesCount: 1,
               maxConnectionsPerCluster: 3,
               initialConnectTimeout: '30s',
-              skipUnavailable: 'false', // ES issue #35671
+              skipUnavailable: false,
               isConfiguredByNode: false,
               mode: 'sniff',
               securityModel: 'certificate',

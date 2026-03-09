@@ -15,7 +15,14 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { CONNECTOR_ID, PushToServiceIncidentSchema } from '@kbn/connector-schemas/resilient';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
-jest.mock('axios');
+jest.mock('axios', () => {
+  const actual = jest.requireActual('axios');
+  return {
+    ...jest.createMockFromModule<typeof import('axios')>('axios'),
+    AxiosError: actual.AxiosError,
+    isAxiosError: actual.isAxiosError,
+  };
+});
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {

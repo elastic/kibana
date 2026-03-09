@@ -1,6 +1,5 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -13,10 +12,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_customization.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -29,10 +29,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_installation.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -45,10 +46,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_management.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -61,10 +63,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules_upgrade.sh
-    cancel_on_build_failing: true
     label: 'Serverless Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -77,10 +80,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -93,10 +97,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_customization.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Customization - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -109,10 +114,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_installation.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Installation - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -125,10 +131,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_management.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Management - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -141,10 +148,11 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules_upgrade.sh
-    cancel_on_build_failing: true
     label: 'Rule Management - Prebuilt Rules Upgrade - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
@@ -157,4 +165,6 @@ steps:
     retry:
       automatic:
         - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
           limit: 1

@@ -12,17 +12,17 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SPAN_ID } from '@kbn/apm-types';
 import { OpenSpanInDiscoverLink } from './open_span_in_discover_link';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 const MOCK_INDEX_PATTERN = 'traces-*';
 
-jest.mock('../../../../context/apm_service/use_apm_service_context');
+jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
-  typeof useApmServiceContext
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+  typeof useApmIndexSettingsContext
 >;
 const mockUseAnyOfApmParams = useAnyOfApmParams as jest.MockedFunction<any>;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
@@ -38,7 +38,7 @@ const spanId = 'test-span-id';
 
 describe('OpenSpanInDiscoverLink', () => {
   beforeEach(() => {
-    mockUseApmServiceContext.mockReturnValue({
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [
         {
           configurationName: 'transaction',
@@ -143,7 +143,7 @@ describe('OpenSpanInDiscoverLink', () => {
     mockUseAnyOfApmParams.mockReturnValue({
       query: {},
     });
-    mockUseApmServiceContext.mockReturnValue({
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [],
       indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);

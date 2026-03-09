@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogRecord } from '@kbn/logging';
@@ -90,7 +90,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
 
           // Wait for logs of the second failed attempt to be sure we're correctly incrementing retries
           expect(records.find((rec) => !!rec.message.match(messageRegexp))).toBeDefined();
@@ -108,7 +108,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           const records = logFileContent
             .split('\n')
             .filter(Boolean)
-            .map((str) => JSON5.parse(str)) as LogRecord[];
+            .map((str) => parse(str)) as LogRecord[];
 
           expect(
             records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY_SYNC -> DONE'))
