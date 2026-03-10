@@ -33,6 +33,9 @@ import { CardLogoIcon } from './ingest_hub_components';
 interface KubernetesFlyoutProps {
   logoUrl: string;
   onClose: () => void;
+  isChild?: boolean;
+  hideCloseButton?: boolean;
+  ownFocus?: boolean;
 }
 
 const HELM_REPO_COMMAND =
@@ -67,7 +70,7 @@ const COLLECTOR_OPTIONS = [
   },
 ];
 
-export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onClose }) => {
+export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onClose, isChild, hideCloseButton, ownFocus: ownFocusProp }) => {
   const { euiTheme } = useEuiTheme();
   const [selectedCollector, setSelectedCollector] = useState('new-collector');
   const [instrumentApp, setInstrumentApp] = useState(false);
@@ -248,11 +251,34 @@ export const KubernetesFlyout: React.FC<KubernetesFlyoutProps> = ({ logoUrl, onC
 
   return (
     <EuiFlyout
-      ownFocus
+      ownFocus={ownFocusProp !== undefined ? ownFocusProp : !isChild}
       onClose={onClose}
+      hideCloseButton={hideCloseButton}
       aria-labelledby="kubernetesFlyoutTitle"
+      {...(isChild
+        ? {
+            session: 'start' as const,
+            flyoutMenuProps: { title: 'Add Kubernetes', hideCloseButton },
+          }
+        : {})}
       css={css`
-        inline-size: 50vw !important;
+        inline-size: ${isChild ? '77vw' : '50vw'} !important;
+        ${isChild ? `
+          animation-duration: 0s !important;
+          transition-duration: 0s !important;
+          [class*="euiFlyoutMenu__container"] {
+            border-block-end: none !important;
+          }
+          & .euiFlyoutHeader {
+            padding: 32px !important;
+          }
+          & .euiFlyoutBody__overflowContent {
+            padding: 32px !important;
+          }
+          & .euiFlyoutFooter {
+            padding: 32px !important;
+          }
+        ` : ''}
       `}
     >
       <EuiFlyoutHeader hasBorder>

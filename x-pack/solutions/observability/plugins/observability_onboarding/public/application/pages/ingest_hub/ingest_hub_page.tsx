@@ -6,8 +6,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, useRouteMatch } from 'react-router-dom';
 import {
   EuiAccordion,
   EuiBadge,
@@ -77,9 +78,17 @@ const SECTION_TO_NAV_ID: Record<string, string> = {
   rules: 'migration-rules',
 };
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useActiveVersion, versionStore } from '../../version_switcher_widget';
+import type { IngestHubVersion } from '../../version_switcher_widget';
+
 export const IngestHubPage: React.FC = () => {
+  const { services } = useKibana();
+  const [activeVersion] = useActiveVersion();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const routeMatch = useRouteMatch<{ section?: string }>();
+  const basePath = routeMatch.path.replace('/:section?', '');
   const { section: routeSection } = useParams<{ section?: string }>();
   const initialNavId =
     (routeSection && SECTION_TO_NAV_ID[routeSection]) || routeSection || 'get-started';
@@ -125,8 +134,7 @@ export const IngestHubPage: React.FC = () => {
     { label: 'Beats', checked: undefined as 'on' | undefined },
   ]);
   const [sortOptions, setSortOptions] = useState([
-    { label: 'Recommended', checked: 'on' as 'on' | undefined },
-    { label: 'Name (A\u2013Z)', checked: undefined as 'on' | undefined },
+    { label: 'Name (A\u2013Z)', checked: 'on' as 'on' | undefined },
     { label: 'Name (Z\u2013A)', checked: undefined as 'on' | undefined },
     { label: 'Recently added', checked: undefined as 'on' | undefined },
   ]);
@@ -845,7 +853,12 @@ export const IngestHubPage: React.FC = () => {
     );
   };
 
-  const renderCompactGrid = (tiles: IntegrationTile[], badge?: string, columns?: number) => (
+  const renderCompactGrid = (
+    tiles: IntegrationTile[],
+    badge?: string,
+    columns?: number,
+    onTileClick?: (tile: IntegrationTile) => void
+  ) => (
     <div
       style={{
         display: 'grid',
@@ -861,11 +874,137 @@ export const IngestHubPage: React.FC = () => {
           badge={badge}
           logoUrl={tile.logoUrl}
           logoDomain={tile.logoDomain}
-          onClick={() => setFlyoutTile(tile)}
+          onClick={() => (onTileClick ? onTileClick(tile) : setFlyoutTile(tile))}
         />
       ))}
     </div>
   );
+
+  const isStopVersion = activeVersion === 'skipUx';
+  const isStopFillVersion = activeVersion === 'blockUx';
+  const [isGetStartedFlyoutOpen, setIsGetStartedFlyoutOpen] = useState(
+    !routeSection || routeSection === 'get-started'
+  );
+  const [welcomeChildTile, setWelcomeChildTile] = useState<IntegrationTile | null>(null);
+
+  useEffect(() => {
+    if (!routeSection || routeSection === 'get-started') {
+      setIsGetStartedFlyoutOpen(true);
+      setWelcomeChildTile(null);
+    }
+  }, [activeVersion]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (activeVersion !== 'blockUx') return;
+    const appEl = document.querySelector('.kbnChromeLayoutApplication');
+    const gridRoot = appEl?.parentElement;
+    if (!gridRoot) return;
+    const originalColumns = gridRoot.style.gridTemplateColumns;
+    const originalMarginRight = (appEl as HTMLElement).style.marginRight;
+    const originalWidth = (appEl as HTMLElement).style.width;
+    const originalGridBg = gridRoot.style.background;
+    gridRoot.style.setProperty('grid-template-columns', '0px 1fr 0px', 'important');
+    gridRoot.style.setProperty('background', '#fff', 'important');
+    (appEl as HTMLElement).style.setProperty('margin-left', '24px', 'important');
+    (appEl as HTMLElement).style.setProperty('margin-right', '24px', 'important');
+    (appEl as HTMLElement).style.setProperty('width', 'calc(100% - 48px)', 'important');
+    return () => {
+      gridRoot.style.gridTemplateColumns = originalColumns;
+      gridRoot.style.background = originalGridBg;
+      (appEl as HTMLElement).style.marginRight = originalMarginRight;
+      (appEl as HTMLElement).style.width = originalWidth;
+      (appEl as HTMLElement).style.removeProperty('margin-left');
+    };
+  }, [activeVersion]);
+
+  useEffect(() => {
+    if (activeVersion === 'skipUx') {
+      services.chrome?.sideNav.setIsCollapsed(false);
+    }
+  }, [activeVersion, services.chrome]);
+
+
+  const renderAddDataRecommendedContent = () => {
+    return (
+      <>
+        {SECTIONS.map((section, idx) => {
+          const categoryMap: Record<string, string> = {
+            Cloud: 'Cloud',
+            Containers: 'Containers',
+            Host: 'Operating Systems',
+            Applications: 'Application',
+          };
+          const integrationCategory = categoryMap[section.title] || section.title;
+          return (
+            <React.Fragment key={section.title}>
+              {idx > 0 && <div style={{ height: 40 }} />}
+              <EuiTitle size="xs">
+                <h3>{section.title}</h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
+                <p style={{ margin: 0, display: 'inline' }}>{section.description}.{' '}</p>
+                <EuiButtonEmpty
+                  size="s"
+                  flush="left"
+                  iconType="arrowRight"
+                  iconSide="right"
+                  style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
+                  css={css`
+                    & .euiButtonEmpty__content {
+                      gap: 0;
+                    }
+                  `}
+                  onClick={() => {
+                    setSelectedCategory(`integration:${integrationCategory}`);
+                  }}
+                >
+                  View all
+                </EuiButtonEmpty>
+              </EuiText>
+              <div style={{ height: 12 }} />
+              {renderCompactGrid(section.tiles)}
+            </React.Fragment>
+          );
+        })}
+        {SAAS_TILES.length > 0 && (
+          <>
+            <div style={{ height: 40 }} />
+            <EuiTitle size="xs">
+              <h3>SaaS Products</h3>
+            </EuiTitle>
+            <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+              <p style={{ margin: 0, display: 'inline' }}>Monitor your cloud resources without installing an agent.{' '}</p>
+              <EuiButtonEmpty
+                size="s"
+                flush="left"
+                iconType="arrowRight"
+                iconSide="right"
+                style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
+                css={css`
+                  & .euiButtonEmpty__content {
+                    gap: 0;
+                  }
+                `}
+                onClick={() => {
+                  setSetupOptions((prev) =>
+                    prev.map((o) => ({
+                      ...o,
+                      checked: o.label === 'Agentless' ? ('on' as const) : undefined,
+                    }))
+                  );
+                }}
+              >
+                View all
+              </EuiButtonEmpty>
+            </EuiText>
+            <div style={{ height: 12 }} />
+            {renderCompactGrid(SAAS_TILES)}
+          </>
+        )}
+        <div style={{ height: 64 }} />
+      </>
+    );
+  };
 
   const renderRecommendedContent = () => {
     return (
@@ -908,14 +1047,13 @@ export const IngestHubPage: React.FC = () => {
             {renderCompactGrid(EXPAND_STACK_TILES, undefined, 3)}
           </>
         )}
+        <div style={{ height: 64 }} />
       </>
     );
   };
 
   const renderBrowseAllTab = () => {
-    const rawQ = integrationsSearch.startsWith('category:')
-      ? ''
-      : integrationsSearch.trim().toLowerCase();
+    const rawQ = integrationsSearch.trim().toLowerCase();
 
     const buildAll = (): TaggedTile[] => [
       ...unique.map((t) => ({ ...t, badge: undefined as string | undefined })),
@@ -974,7 +1112,6 @@ export const IngestHubPage: React.FC = () => {
       : byCategory;
 
     const activeSort = sortOptions.find((o) => o.checked === 'on')?.label;
-    const isRecommendedSort = activeSort === 'Recommended';
     const sorted = [...matched].sort((a, b) => {
       if (activeSort === 'Name (A\u2013Z)') return a.name.localeCompare(b.name);
       if (activeSort === 'Name (Z\u2013A)') return b.name.localeCompare(a.name);
@@ -988,9 +1125,6 @@ export const IngestHubPage: React.FC = () => {
           integrationsSearch,
           (val) => {
             setIntegrationsSearch(val);
-            if (val.trim() === '' || !val.startsWith('category:')) {
-              setSelectedCategory('all');
-            }
           },
           true,
           true
@@ -1021,12 +1155,11 @@ export const IngestHubPage: React.FC = () => {
                   items: [
                     {
                       id: 'all',
-                      name: 'All',
-                      icon: <EuiIcon type="logoElastic" size="m" color="text" />,
+                      name: 'Recommended',
+                      icon: <EuiIcon type="starFilled" size="m" />,
                       isSelected: selectedCategory === 'all',
                       onClick: () => {
                         setSelectedCategory('all');
-                        setIntegrationsSearch('');
                       },
                     },
                     {
@@ -1040,7 +1173,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === 'all-integrations',
                           onClick: () => {
                             setSelectedCategory('all-integrations');
-                            setIntegrationsSearch('category:All integrations');
                           },
                         },
                         ...INTEGRATION_CATEGORIES.map((cat) => ({
@@ -1049,7 +1181,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === `integration:${cat}`,
                           onClick: () => {
                             setSelectedCategory(`integration:${cat}`);
-                            setIntegrationsSearch(`category:${cat}`);
                           },
                         })),
                       ],
@@ -1065,7 +1196,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === 'all-packages',
                           onClick: () => {
                             setSelectedCategory('all-packages');
-                            setIntegrationsSearch('category:All input packages');
                           },
                         },
                         ...PACKAGE_CATEGORIES.map((cat) => ({
@@ -1074,7 +1204,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === `package:${cat}`,
                           onClick: () => {
                             setSelectedCategory(`package:${cat}`);
-                            setIntegrationsSearch(`category:${cat}`);
                           },
                         })),
                       ],
@@ -1090,7 +1219,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === 'all-assets',
                           onClick: () => {
                             setSelectedCategory('all-assets');
-                            setIntegrationsSearch('category:All assets');
                           },
                         },
                         ...ASSET_CATEGORIES.map((cat) => ({
@@ -1099,7 +1227,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === `asset:${cat}`,
                           onClick: () => {
                             setSelectedCategory(`asset:${cat}`);
-                            setIntegrationsSearch(`category:${cat}`);
                           },
                         })),
                       ],
@@ -1115,7 +1242,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === 'all-connectors',
                           onClick: () => {
                             setSelectedCategory('all-connectors');
-                            setIntegrationsSearch('category:All connectors');
                           },
                         },
                         ...CONNECTOR_CATEGORIES.map((cat) => ({
@@ -1124,7 +1250,6 @@ export const IngestHubPage: React.FC = () => {
                           isSelected: selectedCategory === `connector:${cat}`,
                           onClick: () => {
                             setSelectedCategory(`connector:${cat}`);
-                            setIntegrationsSearch(`category:${cat}`);
                           },
                         })),
                       ],
@@ -1176,34 +1301,34 @@ export const IngestHubPage: React.FC = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
-            {selectedCategory === 'all' && !rawQ && isRecommendedSort && (
+            {selectedCategory === 'all' && !rawQ ? (
+              renderAddDataRecommendedContent()
+            ) : (
               <>
-                {renderRecommendedContent()}
-                <div style={{ height: 56 }} />
+                <EuiTitle size="xs">
+                  <h2>All catalogue</h2>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiText size="s" color="subdued">
+                  <p>Complete catalogue of integrations, input packages, assets, and connectors.</p>
+                </EuiText>
+                <EuiSpacer size="l" />
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                  {sorted.map((tile: TaggedTile) => (
+                    <IntegrationCard
+                      key={tile.id}
+                      name={tile.name}
+                      description={tile.description}
+                      logoDomain={tile.logoDomain}
+                      logoUrl={tile.logoUrl}
+                      badge={tile.badge}
+                      onClick={() => setFlyoutTile(tile)}
+                    />
+                  ))}
+                </div>
+                {sorted.length === 0 && <EuiText color="subdued">No results found.</EuiText>}
               </>
             )}
-            <EuiTitle size="xs">
-              <h2>All catalogue</h2>
-            </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              <p>Complete catalogue of integrations, input packages, assets, and connectors.</p>
-            </EuiText>
-            <EuiSpacer size="l" />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              {sorted.map((tile: TaggedTile) => (
-                <IntegrationCard
-                  key={tile.id}
-                  name={tile.name}
-                  description={tile.description}
-                  logoDomain={tile.logoDomain}
-                  logoUrl={tile.logoUrl}
-                  badge={tile.badge}
-                  onClick={() => setFlyoutTile(tile)}
-                />
-              ))}
-            </div>
-            {sorted.length === 0 && <EuiText color="subdued">No results found.</EuiText>}
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
@@ -1222,129 +1347,192 @@ export const IngestHubPage: React.FC = () => {
       <EuiHorizontalRule margin="none" css={dividerStyle} />
       <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ height: 40 }} />
-        <EuiTitle size="s">
-          <h3>Get started adding your data</h3>
-        </EuiTitle>
-        <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-          <p>Connect your data sources or migrate from another platform to start monitoring your infrastructure.</p>
-        </EuiText>
-        <div style={{ height: 16 }} />
-        <EuiTabs
-          css={css`
-            box-shadow: none;
-            border-bottom: none;
-          `}
-        >
-          <EuiTab
-            isSelected={step1Tab === 'integrations'}
-            onClick={() => setStep1Tab('integrations')}
-          >
-            Recommended
-          </EuiTab>
-          <EuiTab
-            isSelected={step1Tab === 'migration'}
-            onClick={() => setStep1Tab('migration')}
-          >
-            Platform migration
-          </EuiTab>
-        </EuiTabs>
-        <EuiHorizontalRule margin="none" css={dividerStyle} />
-        <div style={{ height: 24 }} />
-        {step1Tab === 'integrations' && (
-          <>
-            {SECTIONS.map((section, idx) => {
-              const categoryMap: Record<string, string> = {
-                Cloud: 'Cloud',
-                Containers: 'Containers',
-                Host: 'Operating Systems',
-                Applications: 'Application',
-              };
-              const integrationCategory = categoryMap[section.title] || section.title;
-              return (
-                <React.Fragment key={section.title}>
-                  {idx > 0 && <div style={{ height: 40 }} />}
-                  <EuiTitle size="xs">
-                    <h3>{section.title}</h3>
-                  </EuiTitle>
-                  <EuiText size="s" color="subdued">
-                    <p style={{ margin: 0, display: 'inline' }}>{section.description}.{' '}</p>
-                    <EuiButtonEmpty
-                      size="s"
-                      flush="left"
-                      iconType="arrowRight"
-                      iconSide="right"
-                      style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
-                      css={css`
-                        & .euiButtonEmpty__content {
-                          gap: 0;
-                        }
-                      `}
-                      onClick={() => {
-                        history.push('/ingest-hub/integrations');
-                        setIntegrationsTab('all');
-                        setSelectedCategory(`integration:${integrationCategory}`);
-                        setIntegrationsSearch(`category:${integrationCategory}`);
-                      }}
-                    >
-                      View all
-                    </EuiButtonEmpty>
-                  </EuiText>
-                  <div style={{ height: 12 }} />
-                  {renderCompactGrid(section.tiles)}
-                </React.Fragment>
-              );
-            })}
-            {SAAS_TILES.length > 0 && (
-              <>
-                <div style={{ height: 40 }} />
-                <EuiTitle size="xs">
-                  <h3>SaaS Products</h3>
+        <EuiAccordion
+          id="step1-add-data"
+          initialIsOpen
+          arrowDisplay="left"
+          borders="none"
+          buttonElement="div"
+          buttonProps={{ paddingSize: 's' as const }}
+          paddingSize="s"
+          css={accordionCss}
+          buttonContent={
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="none"
+              responsive={false}
+              wrap={false}
+              css={css`gap: 16px;`}
+            >
+              <EuiFlexItem>
+                <EuiTitle size="s">
+                  <h3 css={css`display: flex; align-items: center; gap: 8px;`}>
+                    <span css={css`display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: ${euiTheme.colors.backgroundBaseSubdued}; flex-shrink: 0;`}>
+                      <EuiIcon type="plusInCircle" size="m" />
+                    </span>
+                    Get started adding your data
+                  </h3>
                 </EuiTitle>
-                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
-                  <p style={{ margin: 0, display: 'inline' }}>Monitor your cloud resources without installing an agent.{' '}</p>
-                  <EuiButtonEmpty
-                    size="s"
-                    flush="left"
-                    iconType="arrowRight"
-                    iconSide="right"
-                    style={{ display: 'inline-flex', verticalAlign: 'baseline' }}
-                    css={css`
-                      & .euiButtonEmpty__content {
-                        gap: 0;
-                      }
-                    `}
-                    onClick={() => {
-                      history.push('/ingest-hub/integrations');
-                      setIntegrationsTab('all');
-                      setSetupOptions((prev) =>
-                        prev.map((o) => ({
-                          ...o,
-                          checked: o.label === 'Agentless' ? ('on' as const) : undefined,
-                        }))
-                      );
-                    }}
-                  >
-                    View all
-                  </EuiButtonEmpty>
+                <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                  <p>Connect your data sources or migrate from another platform to start monitoring your infrastructure.</p>
                 </EuiText>
-                <div style={{ height: 12 }} />
-                {renderCompactGrid(SAAS_TILES)}
-              </>
-            )}
-          </>
-        )}
-        {step1Tab === 'migration' && (
-          <div style={{ padding: '40px 0' }}>{renderPlatformMigrationContent()}</div>
-        )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <EuiFlexGroup gutterSize="l" style={{ paddingTop: 16 }}>
+            <EuiFlexItem>
+              <EuiPanel
+                hasBorder
+                paddingSize="l"
+                css={css`
+                  cursor: pointer;
+                  height: 100%;
+                  transition: box-shadow 0.15s ease-in;
+                  &:hover {
+                    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+                  }
+                `}
+                onClick={() => {
+                  history.push(`${basePath}/integrations`);
+                  setIntegrationsTab('all');
+                  setSelectedCategory('all');
+                }}
+              >
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="center" responsive={false} css={css`text-align: center;`}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="package" size="xl" color="primary" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>Recommended integrations</h4>
+                    </EuiTitle>
+                    <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                      <p>Browse integrations for logs, metrics, and traces.</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel
+                hasBorder
+                paddingSize="l"
+                css={css`
+                  cursor: pointer;
+                  height: 100%;
+                  transition: box-shadow 0.15s ease-in;
+                  &:hover {
+                    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+                  }
+                `}
+                onClick={() => {
+                  history.push(`${basePath}/platform-migration`);
+                }}
+              >
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="center" responsive={false} css={css`text-align: center;`}>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <img
+                          src={`${LOGO_FALLBACK}/datadoghq/datadoghq-icon.svg`}
+                          alt="Datadog"
+                          style={{ width: 24, height: 24, objectFit: 'contain' }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <img
+                          src={`${LOGO_FALLBACK}/newrelic/newrelic-icon.svg`}
+                          alt="New Relic"
+                          style={{ width: 24, height: 24, objectFit: 'contain' }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <img
+                          src={`${LOGO_FALLBACK}/grafana/grafana-icon.svg`}
+                          alt="Grafana"
+                          style={{ width: 24, height: 24, objectFit: 'contain' }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>Platform migration</h4>
+                    </EuiTitle>
+                    <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                      <p>Migrate from Splunk, Datadog, or others.</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel
+                hasBorder
+                paddingSize="l"
+                css={css`
+                  cursor: pointer;
+                  height: 100%;
+                  transition: box-shadow 0.15s ease-in;
+                  &:hover {
+                    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+                  }
+                `}
+                onClick={() => {
+                  history.push(`${basePath}/api-endpoint`);
+                }}
+              >
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="center" responsive={false} css={css`text-align: center;`}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="endpoint" size="xl" color="primary" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>API connection</h4>
+                    </EuiTitle>
+                    <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                      <p>Send data via REST API or OpenTelemetry.</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPanel
+                hasBorder
+                paddingSize="l"
+                css={css`
+                  cursor: pointer;
+                  height: 100%;
+                  transition: box-shadow 0.15s ease-in;
+                  &:hover {
+                    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+                  }
+                `}
+                onClick={() => {
+                  /* TODO: navigate to demo environment */
+                }}
+              >
+                <EuiFlexGroup direction="column" gutterSize="s" alignItems="center" responsive={false} css={css`text-align: center;`}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="play" size="xl" color="primary" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="xs">
+                      <h4>Demo environment</h4>
+                    </EuiTitle>
+                    <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                      <p>Explore a fully loaded sample environment.</p>
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiAccordion>
 
-        <div style={{ height: 96 }} />
-        <EuiTitle size="s">
-          <h3>Get more from your data</h3>
-        </EuiTitle>
-        <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
-          <p>Once you have data flowing in, unlock powerful capabilities like Streams, Dashboards, Alerts, and SLOs to analyze, visualize, and monitor your infrastructure.</p>
-        </EuiText>
-        <div style={{ height: 32 }} />
+        <div style={{ height: 40 }} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
           <EuiAccordion
             id="step2-streams"
@@ -1663,22 +1851,6 @@ export const IngestHubPage: React.FC = () => {
         <EuiFlexGroup gutterSize="m" style={{ marginTop: 'auto', paddingTop: 80, marginBottom: 64 }}>
           <EuiFlexItem>
             <EuiPanel
-              data-test-subj="observabilityOnboardingGetStartedDemoEnvironmentCard"
-              hasBorder
-              paddingSize="m"
-              css={css`border-radius: 8px; text-align: center;`}
-            >
-              <EuiTitle size="xxs"><h4>Demo environment</h4></EuiTitle>
-              <EuiText size="s" color="subdued" css={css`margin-bottom: 4px;`}>Explore our live demo environment.</EuiText>
-              <EuiText size="xs">
-                <EuiLink href="https://demo.elastic.co" target="_blank" external>
-                  Explore demo
-                </EuiLink>
-              </EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel
               data-test-subj="observabilityOnboardingGetStartedObservabilityForumCard"
               hasBorder
               paddingSize="m"
@@ -1814,7 +1986,169 @@ export const IngestHubPage: React.FC = () => {
     </>
   );
 
+  const renderBlockUxPage = () => (
+    <>
+    <style>{`
+      .kbnChromeLayoutNavigation,
+      .kbnChromeLayoutSidebar {
+        display: none !important;
+      }
+      body {
+        background-color: #fff !important;
+      }
+    `}</style>
+    <div
+      css={css`
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: ${euiTheme.colors.backgroundBasePlain};
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+      `}
+    >
+      <div css={css`flex: 1; overflow-y: auto;`}>
+        <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              gap: 16,
+              paddingTop: 40,
+              paddingBottom: 40,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                borderRadius: 12,
+                padding: 4,
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={rocketImg}
+                alt="Welcome"
+                style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
+              />
+            </div>
+            <div>
+              <EuiTitle size="l">
+                <h2>Welcome to Elastic Observability</h2>
+              </EuiTitle>
+              <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack
+              </EuiText>
+            </div>
+          </div>
+        </div>
+        <EuiHorizontalRule margin="none" css={dividerStyle} />
+        <div css={paddedContent} style={{ maxWidth: 1440, margin: '0 auto', width: '100%' }}>
+          <div style={{ height: 32 }} />
+          <div css={css`margin-bottom: 32px;`}>
+            <EuiTitle size="s">
+              <h3>Get started adding your data</h3>
+            </EuiTitle>
+            <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+              <p>Connect your data sources to start monitoring your infrastructure.</p>
+            </EuiText>
+          </div>
+          {SECTIONS.map((section, idx) => (
+            <React.Fragment key={section.title}>
+              {idx > 0 && <div style={{ height: 40 }} />}
+              <EuiTitle size="xs">
+                <h3>{section.title}</h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued">
+                <p>{section.description}.</p>
+              </EuiText>
+              <div style={{ height: 12 }} />
+              {renderCompactGrid(section.tiles, undefined, undefined, setWelcomeChildTile)}
+            </React.Fragment>
+          ))}
+          {SAAS_TILES.length > 0 && (
+            <>
+              <div style={{ height: 40 }} />
+              <EuiTitle size="xs">
+                <h3>SaaS Products</h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                <p>Monitor your cloud resources without installing an agent.</p>
+              </EuiText>
+              <div style={{ height: 12 }} />
+              {renderCompactGrid(SAAS_TILES, undefined, undefined, setWelcomeChildTile)}
+            </>
+          )}
+          <div style={{ height: 64 }} />
+        </div>
+      </div>
+
+      {welcomeChildTile && welcomeChildTile.id === 'kubernetes' && (
+        <KubernetesFlyout
+          logoUrl={welcomeChildTile.logoUrl ?? ''}
+          onClose={() => setWelcomeChildTile(null)}
+        />
+      )}
+
+      {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && (
+        <EuiFlyout
+          ownFocus
+          onClose={() => setWelcomeChildTile(null)}
+          aria-labelledby="blockUxChildFlyoutTitle"
+          css={css`
+            inline-size: 50vw !important;
+          `}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <CardLogoIcon src={welcomeChildTile.logoUrl ?? ''} alt={`${welcomeChildTile.name} logo`} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h2 id="blockUxChildFlyoutTitle">{welcomeChildTile.name}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {welcomeChildTile.description ? (
+              <EuiText>
+                <p>{welcomeChildTile.description}</p>
+              </EuiText>
+            ) : (
+              <EuiText color="subdued">
+                <p>No additional details available for this integration.</p>
+              </EuiText>
+            )}
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill>
+                  Add {welcomeChildTile.name}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      )}
+
+      {/* Version switcher is rendered globally via plugin.tsx navControls */}
+    </div>
+    </>
+  );
+
+  if (isStopFillVersion) {
+    return renderBlockUxPage();
+  }
+
   return (
+    <>
     <EuiPageTemplate
       paddingSize="none"
       restrictWidth={false}
@@ -1901,6 +2235,191 @@ export const IngestHubPage: React.FC = () => {
           </EuiFlyoutFooter>
         </EuiFlyout>
       )}
+
+      {isGetStartedFlyoutOpen && (
+        <EuiFlyout
+          ownFocus
+          type="overlay"
+          session="start"
+          flyoutMenuProps={{ title: 'Welcome to Elastic Observability', hideCloseButton: isStopFillVersion }}
+          onClose={isStopFillVersion ? () => {} : () => setIsGetStartedFlyoutOpen(false)}
+          hideCloseButton={isStopFillVersion}
+          aria-labelledby="getStartedFlyoutTitle"
+          css={css`
+            inline-size: 77vw !important;
+            animation-duration: 0s !important;
+            transition-duration: 0s !important;
+            [class*="euiFlyoutMenu__container"] {
+              border-block-end: none !important;
+              block-size: 0 !important;
+              padding: 0 !important;
+              min-height: 0 !important;
+              overflow: hidden !important;
+            }
+            & .euiFlyoutHeader {
+              padding: 32px !important;
+            }
+            & .euiFlyoutBody__overflowContent {
+              padding: 32px !important;
+            }
+            & .euiFlyoutFooter {
+              padding: 32px !important;
+            }
+          `}
+        >
+          <EuiFlyoutHeader hasBorder>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                gap: 16,
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+                  borderRadius: 12,
+                  padding: 4,
+                  flexShrink: 0,
+                }}
+              >
+                <img
+                  src={rocketImg}
+                  alt="Welcome"
+                  style={{ width: 64, height: 64, objectFit: 'contain', display: 'block' }}
+                />
+              </div>
+              <div>
+                <EuiTitle size="l">
+                  <h2 id="getStartedFlyoutTitle">Welcome to Elastic Observability</h2>
+                </EuiTitle>
+                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                  Your starting point to ingest data, create alerts, manage SLOs, explore Streams, and get the most out of your observability stack
+                </EuiText>
+              </div>
+            </div>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <div css={css`margin-bottom: 32px;`}>
+              <EuiTitle size="s">
+                <h3>Get started adding your data</h3>
+              </EuiTitle>
+              <EuiText size="s" color="subdued" css={css`margin-top: 4px;`}>
+                <p>Connect your data sources to start monitoring your infrastructure.</p>
+              </EuiText>
+            </div>
+            {SECTIONS.map((section, idx) => (
+              <React.Fragment key={section.title}>
+                {idx > 0 && <div style={{ height: 40 }} />}
+                <EuiTitle size="xs">
+                  <h3>{section.title}</h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <p>{section.description}.</p>
+                </EuiText>
+                <div style={{ height: 12 }} />
+                {renderCompactGrid(section.tiles, undefined, undefined, setWelcomeChildTile)}
+              </React.Fragment>
+            ))}
+            {SAAS_TILES.length > 0 && (
+              <>
+                <div style={{ height: 40 }} />
+                <EuiTitle size="xs">
+                  <h3>SaaS Products</h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued" style={{ marginTop: 4 }}>
+                  <p>Monitor your cloud resources without installing an agent.</p>
+                </EuiText>
+                <div style={{ height: 12 }} />
+                {renderCompactGrid(SAAS_TILES, undefined, undefined, setWelcomeChildTile)}
+              </>
+            )}
+          </EuiFlyoutBody>
+          {isStopVersion && (
+            <EuiFlyoutFooter>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => setIsGetStartedFlyoutOpen(false)}
+                  >
+                    Skip
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlyoutFooter>
+          )}
+
+          {welcomeChildTile && welcomeChildTile.id === 'kubernetes' && (
+            <KubernetesFlyout
+              logoUrl={welcomeChildTile.logoUrl ?? ''}
+              onClose={() => setWelcomeChildTile(null)}
+              isChild
+              hideCloseButton={isStopFillVersion}
+            />
+          )}
+
+          {welcomeChildTile && welcomeChildTile.id !== 'kubernetes' && (
+            <EuiFlyout
+              onClose={() => setWelcomeChildTile(null)}
+              aria-labelledby="welcomeChildFlyoutTitle"
+              session="start"
+              flyoutMenuProps={{ title: welcomeChildTile.name }}
+              css={css`
+                inline-size: 77vw !important;
+                animation-duration: 0s !important;
+                transition-duration: 0s !important;
+                [class*="euiFlyoutMenu__container"] {
+                  border-block-end: none !important;
+                }
+                & .euiFlyoutHeader {
+                  padding: 32px !important;
+                }
+                & .euiFlyoutBody__overflowContent {
+                  padding: 32px !important;
+                }
+                & .euiFlyoutFooter {
+                  padding: 32px !important;
+                }
+              `}
+            >
+              <EuiFlyoutHeader hasBorder>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <CardLogoIcon src={welcomeChildTile.logoUrl ?? ''} alt={`${welcomeChildTile.name} logo`} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiTitle size="m">
+                      <h2 id="welcomeChildFlyoutTitle">{welcomeChildTile.name}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                {welcomeChildTile.description ? (
+                  <EuiText>
+                    <p>{welcomeChildTile.description}</p>
+                  </EuiText>
+                ) : (
+                  <EuiText color="subdued">
+                    <p>No additional details available for this integration.</p>
+                  </EuiText>
+                )}
+              </EuiFlyoutBody>
+              <EuiFlyoutFooter>
+                <EuiFlexGroup justifyContent="flexEnd" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton fill>
+                      Add {welcomeChildTile.name}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlyoutFooter>
+            </EuiFlyout>
+          )}
+        </EuiFlyout>
+      )}
     </EuiPageTemplate>
+    </>
   );
 };

@@ -185,7 +185,17 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (host: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={false}>
-            <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
+            <EuiLink
+              href={getHref('agent_details', { agentId: agent.id })}
+              title={safeMetadata(host)}
+              className={css`
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                word-break: break-all;
+              `}
+            >
               {safeMetadata(host)}
             </EuiLink>
           </EuiFlexItem>
@@ -198,7 +208,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     {
       field: AGENTS_TABLE_FIELDS.POLICY,
       sortable: true,
-      truncateText: true,
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
@@ -210,12 +219,14 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
         return (
           agentPolicy && (
-            <AgentPolicySummaryLine
-              policy={agentPolicy}
-              agent={agent}
-              showPolicyId
-              isVersionSpecific={isVersionSpecific}
-            />
+            <div css={{ maxWidth: '100%', overflow: 'hidden' }}>
+              <AgentPolicySummaryLine
+                policy={agentPolicy}
+                agent={agent}
+                showPolicyId
+                isVersionSpecific={isVersionSpecific}
+              />
+            </div>
           )
         );
       },
@@ -236,7 +247,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
-            <EuiIcon type="info" aria-hidden={true} />
+            <EuiIcon type="info" />
           </span>
         </EuiToolTip>
       ),
@@ -264,7 +275,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
-            <EuiIcon type="info" aria-hidden={true} />
+            <EuiIcon type="info" />
           </span>
         </EuiToolTip>
       ),
@@ -387,7 +398,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           if (!agent.active) {
             return 'This agent is not active';
           }
-          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+          if (agent.policy_id && agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(agent.policy_id)]?.is_managed) {
             return 'This action is not available for agents enrolled in an externally managed agent policy';
           }
           return '';
