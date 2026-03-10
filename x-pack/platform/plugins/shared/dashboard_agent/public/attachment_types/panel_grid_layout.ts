@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentPanel, DashboardSection as AgentDashboardSection } from '@kbn/dashboard-agent-common';
+import type {
+  AttachmentPanel,
+  DashboardSection as AgentDashboardSection,
+} from '@kbn/dashboard-agent-common';
 import { isGenericAttachmentPanel, isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
