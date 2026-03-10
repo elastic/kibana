@@ -7,7 +7,6 @@
 
 import { chunk } from 'lodash';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { EVENT_OUTCOME } from '../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
@@ -25,13 +24,19 @@ import { fetchDurationFieldCandidates } from './fetch_duration_field_candidates'
 import { fetchFieldValuePairs } from './fetch_field_value_pairs';
 import { fetchSignificantCorrelations } from './fetch_significant_correlations';
 import { fetchPValues } from './fetch_p_values';
+import { getEventType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const CHUNK_SIZE = 10;
 
+/** Scope of correlation analysis: transactions (incoming) or exit spans (outgoing to dependencies) */
+export type CorrelationsScope = 'transactions' | 'exitSpans';
+
 interface FetchCorrelationsParams extends CommonCorrelationsQueryParams {
   apmEventClient: APMEventClient;
   correlationType: CorrelationType;
+  /** When 'exitSpans', analysis runs on raw exit span documents (span.destination.service.resource exists). Default 'transactions'. */
+  scope?: CorrelationsScope;
   fieldCandidates?: string[];
   percentileThreshold?: number;
   durationMin?: number;
@@ -47,6 +52,7 @@ interface FetchCorrelationsParams extends CommonCorrelationsQueryParams {
 export async function fetchCorrelations({
   apmEventClient,
   correlationType,
+  scope = 'transactions',
   fieldCandidates: providedFieldCandidates,
   start,
   end,
@@ -60,15 +66,18 @@ export async function fetchCorrelations({
   config,
 }: FetchCorrelationsParams): Promise<CorrelationsResponse> {
   const chartType =
-    correlationType === CorrelationType.ERROR_RATE
+    scope === 'exitSpans'
+      ? correlationType === CorrelationType.ERROR_RATE
+        ? LatencyDistributionChartType.exitSpanFailedTransactionsCorrelations
+        : LatencyDistributionChartType.exitSpanLatencyCorrelations
+      : correlationType === CorrelationType.ERROR_RATE
       ? LatencyDistributionChartType.failedTransactionsCorrelations
       : LatencyDistributionChartType.latencyCorrelations;
 
-  // Determine if we should search metrics (only for transaction latency distribution)
-  // Note: chartType is either latencyCorrelations or failedTransactionsCorrelations,
-  // so we don't search aggregated transactions for correlations
   const searchAggregatedTransactions = false;
+  const eventType = getEventType(chartType, searchAggregatedTransactions);
 
+  // Determine if we should search metrics (only for transaction latency distribution)
   // Get overall distribution
   const overallDistribution = await getOverallLatencyDistribution({
     chartType,
@@ -118,7 +127,7 @@ export async function fetchCorrelations({
   } else {
     const candidatesResponse = await fetchDurationFieldCandidates({
       apmEventClient,
-      eventType: ProcessorEvent.transaction,
+      eventType,
       start,
       end,
       environment,
@@ -161,6 +170,7 @@ export async function fetchCorrelations({
         durationMin,
         durationMax,
         fieldCandidates: fieldCandidatesChunk,
+        chartType,
       });
 
       if (pValuesResponse.failedTransactionsCorrelations.length > 0) {
@@ -194,7 +204,7 @@ export async function fetchCorrelations({
     for (const fieldCandidateChunk of fieldCandidateChunks) {
       const fieldValuePairResponse = await fetchFieldValuePairs({
         apmEventClient,
-        eventType: ProcessorEvent.transaction,
+        eventType,
         start,
         end,
         environment,
@@ -225,6 +235,7 @@ export async function fetchCorrelations({
         durationMinOverride: durationMin,
         durationMaxOverride: durationMax,
         fieldValuePairs: fieldValuePairChunk,
+        chartType,
       });
 
       // Only include correlations that have histograms (already filtered by fetchSignificantCorrelations)

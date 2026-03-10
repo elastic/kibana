@@ -14,6 +14,8 @@ const {
   latencyCorrelations,
   failedTransactionsCorrelations,
   dependencyLatency,
+  exitSpanLatencyCorrelations,
+  exitSpanFailedTransactionsCorrelations,
 } = LatencyDistributionChartType;
 
 export function getEventType(
@@ -32,6 +34,9 @@ export function getEventType(
       return ProcessorEvent.transaction;
     case dependencyLatency:
     case spanLatency:
+      return ProcessorEvent.span;
+    case exitSpanLatencyCorrelations:
+    case exitSpanFailedTransactionsCorrelations:
       return ProcessorEvent.span;
     default:
       return ProcessorEvent.transaction;

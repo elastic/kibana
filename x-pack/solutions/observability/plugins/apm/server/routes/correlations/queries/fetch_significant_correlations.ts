@@ -42,15 +42,16 @@ export const fetchSignificantCorrelations = async ({
   durationMinOverride,
   durationMaxOverride,
   fieldValuePairs,
+  chartType = LatencyDistributionChartType.latencyCorrelations,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   durationMinOverride?: number;
   durationMaxOverride?: number;
   fieldValuePairs: FieldValuePair[];
+  chartType?: LatencyDistributionChartType;
 }): Promise<SignificantCorrelationsResponse> => {
   // Create an array of ranges [2, 4, 6, ..., 98]
   const percentileAggregationPercents = range(2, 100, 2);
-  const chartType = LatencyDistributionChartType.latencyCorrelations;
   const searchMetrics = false; // latency correlations does not search metrics documents
   const eventType = getEventType(chartType, searchMetrics);
 

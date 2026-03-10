@@ -36,13 +36,14 @@ export const fetchPValues = async ({
   durationMin,
   durationMax,
   fieldCandidates,
+  chartType = LatencyDistributionChartType.failedTransactionsCorrelations,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   durationMin?: number;
   durationMax?: number;
   fieldCandidates: string[];
+  chartType?: LatencyDistributionChartType;
 }): Promise<PValuesResponse> => {
-  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
   const searchMetrics = false; // failed transactions correlations does not search metrics documents
   const eventType = getEventType(chartType, searchMetrics);
 
@@ -72,6 +73,7 @@ export const fetchPValues = async ({
             query,
             fieldName,
             rangeSteps,
+            chartType,
           })
         )
       )

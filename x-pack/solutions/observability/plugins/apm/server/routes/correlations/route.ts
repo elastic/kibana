@@ -30,6 +30,7 @@ import type { PValuesResponse } from './queries/fetch_p_values';
 import { fetchPValues } from './queries/fetch_p_values';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { TopValuesStats } from '../../../common/correlations/field_stats_types';
+import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/correlations/constants';
 import { CorrelationEndpointType, CorrelationType } from '../../../common/correlations/types';
 import type { CorrelationsResponse } from '../../../common/correlations/types';
 import { fetchCorrelations } from './queries/fetch_correlations';
@@ -347,6 +348,8 @@ const correlationEndpointTypeRt = t.union([
   t.literal(CorrelationEndpointType.FAILED_TRANSACTION_RATE),
 ]);
 
+const scopeRt = t.union([t.literal('transactions'), t.literal('exitSpans')]);
+
 const unifiedCorrelationsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/correlations',
   params: t.type({
@@ -355,6 +358,8 @@ const unifiedCorrelationsRoute = createApmServerRoute({
         type: correlationEndpointTypeRt,
       }),
       t.partial({
+        /** When 'exitSpans', run correlations on raw exit span documents (outgoing requests to dependencies). Default 'transactions'. */
+        scope: scopeRt,
         fieldCandidates: t.array(t.string),
         durationMin: toNumberRt,
         durationMax: toNumberRt,
@@ -378,6 +383,7 @@ const unifiedCorrelationsRoute = createApmServerRoute({
     const {
       body: {
         type,
+        scope = 'transactions',
         start,
         end,
         kuery,
@@ -389,24 +395,36 @@ const unifiedCorrelationsRoute = createApmServerRoute({
       },
     } = resources.params;
 
+    const includeHistogramWithDefault = includeHistogram ?? true;
+
     const correlationType =
       type === CorrelationEndpointType.LATENCY
         ? CorrelationType.TRANSACTION_DURATION
         : CorrelationType.ERROR_RATE;
 
+    const query =
+      scope === 'exitSpans'
+        ? {
+            bool: {
+              filter: [{ exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } }],
+            },
+          }
+        : { bool: { filter: [] as object[] } };
+
     return fetchCorrelations({
       apmEventClient,
       correlationType,
+      scope,
       start,
       end,
       environment: ENVIRONMENT_ALL_VALUE,
       kuery,
-      query: { bool: { filter: [] } },
+      query,
       fieldCandidates,
       percentileThreshold,
       durationMin,
       durationMax,
-      includeHistogram,
+      includeHistogram: includeHistogramWithDefault,
     });
   },
 });
