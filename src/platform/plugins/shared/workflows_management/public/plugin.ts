@@ -88,8 +88,12 @@ export class WorkflowsPlugin
     if (isAiAgentEnabled) {
       this.agentBuilderPromise = core.plugins
         .onStart<{ agentBuilder: AgentBuilderPluginStartContract }>('agentBuilder')
-        .then(({ agentBuilder }) => {
+        .then(async ({ agentBuilder }) => {
           if (agentBuilder.found) {
+            const { registerWorkflowAttachmentRenderers } = await import(
+              './features/ai_integration'
+            );
+            registerWorkflowAttachmentRenderers(agentBuilder.contract.attachments);
             return agentBuilder.contract;
           }
           return undefined;

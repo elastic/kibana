@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -51,9 +52,7 @@ export interface AgentBuilderPluginStartContract {
       handler: (params: unknown) => void | Promise<void>;
     }>;
   }) => { flyoutRef: { close: () => void } };
-  attachments: {
-    addAttachmentType: (type: string, definition: unknown) => void;
-  };
+  attachments: AttachmentServiceStartContract;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

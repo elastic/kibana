@@ -38,3 +38,5 @@ export {
   declineProposal,
 } from './proposal_status_bridge';
 export type { ProposalStatus, ProposalRecord } from './proposal_status_bridge';
+
+export { registerWorkflowAttachmentRenderers } from './attachment_renderers';
