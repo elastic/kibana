@@ -124,7 +124,7 @@ xpack.index_management.dev.enableSemanticText: true
 xpack.searchHomepage.enabled: true
 
 # Search Inference endpoints Model Settings 
-xpack.searchInferenceEndpoints.enableModelSettings: false
+xpack.searchInferenceEndpoints.enableModelSettings: true
 
 # AI Assistant config
 xpack.observabilityAIAssistant.enabled: true
