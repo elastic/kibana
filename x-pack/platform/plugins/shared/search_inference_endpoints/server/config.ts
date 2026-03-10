@@ -20,7 +20,7 @@ const configSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     pollingIntervalMins: schema.number({ defaultValue: 15, min: 5, max: 720 }),
   }),
-  modelSettingsEnabled: schema.boolean({ defaultValue: true }),
+  enableModelSettings: schema.boolean({ defaultValue: true }),
 });
 
 export type SearchInferenceEndpointsConfig = TypeOf<typeof configSchema>;
@@ -28,7 +28,7 @@ export type SearchInferenceEndpointsConfig = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<SearchInferenceEndpointsConfig> = {
   exposeToBrowser: {
     ui: true,
-    modelSettingsEnabled: undefined,
+    enableModelSettings: true,
   },
   schema: configSchema,
 };

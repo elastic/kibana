@@ -42,6 +42,7 @@ export class SearchInferenceEndpointsPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>,
     plugins: AppPluginSetupDependencies
   ): SearchInferenceEndpointsPluginSetup {
+    console.log("this.config", this.config)
     if (!this.config.ui?.enabled) return {};
 
     registerLocators(plugins.share);
@@ -61,9 +62,10 @@ export class SearchInferenceEndpointsPlugin
         return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
       },
     });
+
     const isEnabled = isModelSettingsEnabled(core.uiSettings);
     const shouldRegisterModelSettingsApp = this.isServerless
-      ? this.config.modelSettingsEnabled && isEnabled
+      ? this.config.enableModelSettings && isEnabled
       : isEnabled;
     if (shouldRegisterModelSettingsApp) {
       this.registeredApp = plugins.management.sections.section.machineLearning.registerApp({
@@ -71,14 +73,14 @@ export class SearchInferenceEndpointsPlugin
         title: MODEL_SETTINGS_PLUGIN_TITLE,
         order: 2,
         async mount({ element, history }: ManagementAppMountParams) {
-          const { renderModelSettingsUIApp } = await import('./model_settings_application');
+          const { renderModelSettingsApp } = await import('./model_settings_application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
           };
 
-          return renderModelSettingsUIApp(coreStart, startDeps, element);
+          return renderModelSettingsApp(coreStart, startDeps, element);
         },
       });
     }

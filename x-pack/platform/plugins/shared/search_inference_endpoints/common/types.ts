@@ -15,5 +15,5 @@ export interface SearchInferenceEndpointsConfigType {
   ui: {
     enabled: boolean;
   };
-  modelSettingsEnabled: boolean;
+  enableModelSettings: boolean;
 }

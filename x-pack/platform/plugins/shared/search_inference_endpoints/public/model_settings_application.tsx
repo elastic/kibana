@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { AppPluginStartDependencies } from './types';
 
-export const renderModelSettingsUIApp = async (
+export const renderModelSettingsApp = async (
   core: CoreStart,
   services: AppPluginStartDependencies,
   element: HTMLElement
