@@ -27,6 +27,7 @@ import type {
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { getLazyCloudSecurityPosturePliAuthBlockExtension } from './cloud_security_posture/lazy_cloud_security_posture_pli_auth_block_extension';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type {
@@ -87,6 +88,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private _subPlugins?: SubPlugins;
   private _store?: SecurityAppStore;
   private _actionsRegistered?: boolean = false;
+  private _discoverFlyoutServicesPromise?: Promise<StartServices>;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
@@ -114,6 +116,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const { home, usageCollection, management, cases, share } = plugins;
     const { productFeatureKeys$ } = this.contract;
+
     if (share) {
       share.url.locators.create(new AIValueReportLocatorDefinition());
     }
@@ -265,7 +268,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     );
     cases?.attachmentFramework?.registerExternalReference(generateIndicatorAttachmentType());
 
-    this.registerDiscoverSharedFeatures(plugins);
+    this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
   }
@@ -281,6 +284,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
+    plugins.cps?.cpsManager?.registerAppAccess(APP_UI_ID, (location: string) =>
+      /security\/dashboards\//.test(location)
+        ? ProjectRoutingAccess.EDITABLE
+        : ProjectRoutingAccess.DISABLED
+    );
+
     return this.contract.getStartContract(core);
   }
 
@@ -288,7 +297,24 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.services.stop();
   }
 
-  public async registerDiscoverSharedFeatures(plugins: SetupPlugins) {
+  private getDiscoverFlyoutServices(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>
+  ): Promise<StartServices> {
+    if (!this._discoverFlyoutServicesPromise) {
+      this._discoverFlyoutServicesPromise = core
+        .getStartServices()
+        .then(([coreStart, startPlugins]) =>
+          this.services.generateServices(coreStart, startPlugins)
+        );
+    }
+
+    return this._discoverFlyoutServicesPromise;
+  }
+
+  public async registerDiscoverSharedFeatures(
+    core: CoreSetup<StartPluginsDependencies, PluginStart>,
+    plugins: SetupPlugins
+  ) {
     const { discoverShared } = plugins;
     const discoverFeatureRegistry = discoverShared.features.registry;
 
@@ -308,11 +334,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: (hit) => (
-        <React.Suspense fallback={null}>
-          <LazyAlertFlyoutOverviewTab hit={hit} />
-        </React.Suspense>
-      ),
+      render: (hit) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyAlertFlyoutOverviewTab hit={hit} servicesPromise={servicesPromise} />
+          </React.Suspense>
+        );
+      },
     };
     discoverFeatureRegistry.register(alertFlyoutOverviewTabFeature);
   }

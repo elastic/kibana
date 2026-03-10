@@ -14,46 +14,58 @@ import type { RuleDomain } from '../../rule/types';
 import type { ScheduleBackfillParam } from '../methods/schedule/types';
 import { backfillInitiator } from '../../../../common/constants';
 
+export interface TransformBackfillResult {
+  adHocRunSO: AdHocRunSO;
+  truncated: boolean;
+}
+
 export const transformBackfillParamToAdHocRun = (
   param: ScheduleBackfillParam,
   rule: RuleDomain,
   actions: DenormalizedAction[],
   spaceId: string
-): AdHocRunSO => {
-  const schedule = calculateSchedule(rule.schedule.interval, param.ranges);
+): TransformBackfillResult => {
+  const { schedule, truncated } = calculateSchedule(rule.schedule.interval, param.ranges);
   const shouldRunActions = param.runActions !== undefined ? param.runActions : true;
   const start = param.ranges[0].start;
-  const end = param.ranges[param.ranges.length - 1].end;
+  // Derive end from the actual schedule so it stays consistent when calculateSchedule truncates
+  const end =
+    schedule.length > 0
+      ? schedule[schedule.length - 1].runAt
+      : param.ranges[param.ranges.length - 1].end;
 
   return {
-    apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
-    apiKeyToUse: rule.apiKey!,
-    createdAt: new Date().toISOString(),
-    duration: rule.schedule.interval,
-    enabled: true,
-    end,
-    initiator: param.initiator ?? backfillInitiator.USER,
-    initiatorId: param.initiatorId,
-    rule: {
-      name: rule.name,
-      tags: rule.tags,
-      alertTypeId: rule.alertTypeId,
-      params: rule.params,
-      apiKeyOwner: rule.apiKeyOwner,
-      apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
-      actions: shouldRunActions ? actions : [],
-      consumer: rule.consumer,
-      enabled: rule.enabled,
-      schedule: rule.schedule,
-      createdBy: rule.createdBy,
-      updatedBy: rule.updatedBy,
-      createdAt: isString(rule.createdAt) ? rule.createdAt : rule.createdAt.toISOString(),
-      updatedAt: isString(rule.updatedAt) ? rule.updatedAt : rule.updatedAt.toISOString(),
-      revision: rule.revision,
+    adHocRunSO: {
+      apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
+      apiKeyToUse: rule.apiKey!,
+      createdAt: new Date().toISOString(),
+      duration: rule.schedule.interval,
+      enabled: true,
+      end,
+      initiator: param.initiator ?? backfillInitiator.USER,
+      initiatorId: param.initiatorId,
+      rule: {
+        name: rule.name,
+        tags: rule.tags,
+        alertTypeId: rule.alertTypeId,
+        params: rule.params,
+        apiKeyOwner: rule.apiKeyOwner,
+        apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
+        actions: shouldRunActions ? actions : [],
+        consumer: rule.consumer,
+        enabled: rule.enabled,
+        schedule: rule.schedule,
+        createdBy: rule.createdBy,
+        updatedBy: rule.updatedBy,
+        createdAt: isString(rule.createdAt) ? rule.createdAt : rule.createdAt.toISOString(),
+        updatedAt: isString(rule.updatedAt) ? rule.updatedAt : rule.updatedAt.toISOString(),
+        revision: rule.revision,
+      },
+      spaceId,
+      start,
+      status: adHocRunStatus.PENDING,
+      schedule,
     },
-    spaceId,
-    start,
-    status: adHocRunStatus.PENDING,
-    schedule,
+    truncated,
   };
 };

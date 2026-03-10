@@ -32,8 +32,8 @@ import type {
   McpToolHealthStatus,
   ValidateNamespaceResponse,
 } from '../../../common/http_api/tools';
-import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
+import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_security';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
 
@@ -57,9 +57,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { ids, force } = request.body;
@@ -142,9 +140,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.manageAgentBuilder] },
-      },
+      security: TOOLS_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const {
@@ -191,9 +187,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { namespace, connector_id: connectorId } = request.query;
@@ -259,9 +253,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
@@ -300,9 +292,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_types_info`,
       validate: false,
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
@@ -328,9 +318,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       if (!workflowsManagement) {
@@ -370,9 +358,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       if (!workflowsManagement) {
@@ -408,9 +394,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_health`,
       validate: false,
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
@@ -435,9 +419,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const { tools } = getInternalServices();
@@ -466,9 +448,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
@@ -499,9 +479,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
@@ -528,9 +506,7 @@ export function registerInternalToolsRoutes({
         }),
       },
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();
@@ -580,9 +556,7 @@ export function registerInternalToolsRoutes({
       path: `${internalApiPath}/tools/_mcp_health`,
       validate: false,
       options: { access: 'internal' },
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-      },
+      security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
       const [, pluginsStart] = await coreSetup.getStartServices();

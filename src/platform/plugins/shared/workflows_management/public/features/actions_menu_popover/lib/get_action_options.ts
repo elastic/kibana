@@ -10,11 +10,8 @@
 import type { IconType, UseEuiTheme } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { i18n } from '@kbn/i18n';
-import { isDynamicConnector } from '@kbn/workflows';
-import type {
-  ActionsMenuGroup,
-  WorkflowsExtensionsPublicPluginStart,
-} from '@kbn/workflows-extensions/public';
+import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
+import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getAllConnectors } from '../../../../common/schema';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -147,7 +144,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'database',
       },
     ],
   };
@@ -195,6 +192,17 @@ export function getActionOptions(
         iconType: 'clock',
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
+      ...(['workflow.execute', 'workflow.executeAsync'] as const)
+        .map((stepId) => getBuiltInStepDefinition(stepId))
+        .filter((def): def is NonNullable<typeof def> => def !== undefined)
+        .map((def) => ({
+          id: def.id,
+          label: def.label,
+          description: def.description,
+          iconType: 'nested' as const,
+          iconColor: euiTheme.colors.vis.euiColorVis0,
+          stability: def.stability,
+        })),
     ],
   };
   const elasticSearchGroup: ActionOptionData = {
@@ -209,12 +217,13 @@ export function getActionOptions(
     options: [],
   };
 
-  const stepGroups: Record<ActionsMenuGroup, ActionGroup> = {
-    elasticsearch: elasticSearchGroup,
-    external: externalGroup,
-    ai: aiGroup,
-    kibana: kibanaGroup,
-    data: dataTransformationGroup,
+  const stepGroups: Record<StepCategory, ActionGroup> = {
+    [StepCategory.Elasticsearch]: elasticSearchGroup,
+    [StepCategory.External]: externalGroup,
+    [StepCategory.Ai]: aiGroup,
+    [StepCategory.Kibana]: kibanaGroup,
+    [StepCategory.Data]: dataTransformationGroup,
+    [StepCategory.FlowControl]: flowControlGroup,
   };
 
   const baseTypeInstancesCount: Record<string, number> = {};
@@ -222,12 +231,13 @@ export function getActionOptions(
   for (const connector of connectors) {
     const customStepDefinition = workflowsExtensions.getStepDefinition(connector.type);
     if (customStepDefinition) {
-      const group = stepGroups[customStepDefinition.actionsMenuGroup ?? 'kibana'];
+      const group = stepGroups[customStepDefinition.category];
       group.options.push({
         id: customStepDefinition.id,
         label: customStepDefinition.label,
         description: customStepDefinition.description,
         iconType: customStepDefinition.icon ?? group.iconType,
+        stability: connector.stability,
       });
     } else if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
@@ -235,6 +245,7 @@ export function getActionOptions(
         label: connector.description || connector.type,
         description: connector.type,
         iconType: 'logoElasticsearch',
+        stability: connector.stability,
       });
     } else if (connector.type.startsWith('kibana.')) {
       kibanaGroup.options.push({
@@ -242,6 +253,7 @@ export function getActionOptions(
         label: connector.summary || connector.description || connector.type,
         description: connector.type,
         iconType: 'logoKibana',
+        stability: connector.stability,
       });
     } else if (isDynamicConnector(connector)) {
       const [baseType, subtype] = connector.type.split('.');
@@ -279,6 +291,7 @@ export function getActionOptions(
           connectorType: connector.type,
           instancesLabel: getInstancesLabel(connector.instances?.length),
           iconType,
+          stability: connector.stability,
         });
       }
     }

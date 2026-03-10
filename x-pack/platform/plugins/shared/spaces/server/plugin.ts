@@ -16,6 +16,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
@@ -46,10 +47,12 @@ export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
   cloud?: CloudSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
+  cps?: CPSServerStart;
 }
 
 /**
@@ -202,6 +205,24 @@ export class SpacesPlugin
 
     setupCapabilities(core, getSpacesService, this.log);
 
+    if (plugins.cps?.getCpsEnabled()) {
+      plugins.features.registerElasticsearchFeature({
+        id: 'project_routing',
+        privileges: [
+          {
+            requiredClusterPrivileges: ['cluster:admin/project_routing/put'],
+            ui: ['manage_space_default'],
+          },
+          {
+            requiredClusterPrivileges: ['cluster:monitor/project_routing/get'],
+            // This will become read_project_routing after it is created in ES
+            // requiredClusterPrivileges: ['read_project_routing'],
+            ui: ['read_space_default'],
+          },
+        ],
+      });
+    }
+
     if (plugins.usageCollection) {
       const getIndexForType = (type: string) =>
         core.getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType(type));
@@ -227,7 +248,7 @@ export class SpacesPlugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    const spacesClientStart = this.spacesClientService.start(core, plugins.features);
+    const spacesClientStart = this.spacesClientService.start(core, plugins.features, plugins.cps);
 
     this.spacesServiceStart = this.spacesService.start({
       basePath: core.http.basePath,

@@ -44,7 +44,5 @@ export const registerSolutionNavigation = async (
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree), {
-    dataTestSubj: 'securitySolutionSideNav',
-  });
+  services.serverless.initNavigation('security', Rx.of(navigationTree));
 };

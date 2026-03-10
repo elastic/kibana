@@ -39,7 +39,6 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
           request
         );
         const space = await osqueryContext.service.getActiveSpace(request);
-
         const agentService = osqueryContext.service.getAgentService();
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();

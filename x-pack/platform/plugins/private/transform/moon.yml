@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/scout'
   - '@kbn/core-http-common'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

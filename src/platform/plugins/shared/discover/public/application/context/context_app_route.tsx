@@ -88,9 +88,7 @@ export function ContextAppRoute() {
       scopedProfilesManager={scopedProfilesManager}
       scopedEBTManager={scopedEbtManager}
     >
-      <rootProfileState.AppWrapper>
-        <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
-      </rootProfileState.AppWrapper>
+      <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />
     </ScopedServicesProvider>
   );
 }

@@ -23,8 +23,18 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { validateWorkflowForExecution } from './connectors/workflows/validate_workflow_for_execution';
+import {
+  resolveMatchingWorkflowSubscriptions,
+  type ResolveMatchingWorkflowSubscriptionsParams,
+} from './event_driven/resolve_workflow_subscriptions';
+import { createTriggerEventHandler } from './event_driven/trigger_event_handler';
 import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
+import {
+  initializeTriggerEventsClient,
+  initializeTriggerEventsDataStream,
+  type TriggerEventsDataStreamClient,
+} from './trigger_events_log';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -53,6 +63,7 @@ export class WorkflowsPlugin
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
+  private triggerEventsClient: TriggerEventsDataStreamClient | null = null;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -65,6 +76,8 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Setup');
 
     registerUISettings(core, plugins);
+
+    initializeTriggerEventsDataStream(core.dataStreams);
 
     // Register workflows connector if actions plugin is available
     if (plugins.actions) {
@@ -157,6 +170,23 @@ export class WorkflowsPlugin
       throw new Error('Spaces service not initialized');
     }
 
+    if (!this.api) {
+      throw new Error('Workflows management API not initialized');
+    }
+    const api = this.api;
+    const resolveMatchingWorkflowSubscriptionsFn = (
+      params: ResolveMatchingWorkflowSubscriptionsParams
+    ) => resolveMatchingWorkflowSubscriptions(params, { api, logger: this.logger });
+
+    const triggerEventHandler = createTriggerEventHandler({
+      api: this.api,
+      logger: this.logger,
+      getTriggerEventsClient: () => this.triggerEventsClient,
+      resolveMatchingWorkflowSubscriptions: resolveMatchingWorkflowSubscriptionsFn,
+    });
+
+    plugins.workflowsExtensions.registerTriggerEventHandler(triggerEventHandler);
+
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
 
@@ -170,6 +200,8 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+
+    void this.initializeTriggerEventsClient(core);
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 
@@ -190,6 +222,18 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Started');
 
     return {};
+  }
+
+  private async initializeTriggerEventsClient(core: CoreStart): Promise<void> {
+    try {
+      this.triggerEventsClient = await initializeTriggerEventsClient(core.dataStreams);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to initialize trigger events data stream client: ${
+          error instanceof Error ? error.message : String(error)
+        }. Event audit logging will be skipped.`
+      );
+    }
   }
 
   public stop() {}

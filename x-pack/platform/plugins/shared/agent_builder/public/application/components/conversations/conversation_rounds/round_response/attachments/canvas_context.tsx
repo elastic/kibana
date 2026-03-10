@@ -17,6 +17,7 @@ interface CanvasContextValue {
   canvasState: CanvasState | null;
   openCanvas: (attachment: UnknownAttachment, isSidebar: boolean) => void;
   closeCanvas: () => void;
+  setCanvasAttachmentOrigin: (origin: unknown) => void;
 }
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -36,9 +37,19 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
     setCanvasState(null);
   }, []);
 
+  const setCanvasAttachmentOrigin = useCallback((origin: unknown) => {
+    setCanvasState((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        attachment: { ...prev.attachment, origin },
+      };
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ canvasState, openCanvas, closeCanvas }),
-    [canvasState, openCanvas, closeCanvas]
+    () => ({ canvasState, openCanvas, closeCanvas, setCanvasAttachmentOrigin }),
+    [canvasState, openCanvas, closeCanvas, setCanvasAttachmentOrigin]
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
