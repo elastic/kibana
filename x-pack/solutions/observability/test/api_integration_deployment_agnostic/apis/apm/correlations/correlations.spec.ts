@@ -183,6 +183,38 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(correlation?.ksTest).to.be(1.9848961005439386e-12);
         expect(correlation?.histogram?.length).to.be(101);
       });
+
+      it('returns only correlations and field candidates when includeHistogram is omitted', async () => {
+        const unifiedResponse = await apmApiClient.readUser({
+          endpoint: 'POST /internal/apm/correlations',
+          params: {
+            body: {
+              start: '2020',
+              end: '2021',
+              kuery: '',
+              type: CorrelationEndpointType.LATENCY,
+              percentileThreshold: 95,
+            },
+          },
+        });
+
+        expect(unifiedResponse.status).to.eql(
+          200,
+          `Expected status to be '200', got '${unifiedResponse.status}'`
+        );
+
+        const response = unifiedResponse.body as CorrelationsResponse;
+
+        expect(response.fieldCandidates.length).to.be.greaterThan(0);
+        expect(response.correlations.length).to.be.greaterThan(0);
+        expect(response.percentileThresholdValue).to.be(undefined);
+        expect(response.overallHistogram).to.be(undefined);
+        expect(response.errorHistogram).to.be(undefined);
+        expect(response.totalDocCount).to.eql(
+          1244,
+          `Expected 1244 total doc count, got ${response.totalDocCount}.`
+        );
+      });
     });
 
     describe('failureRate with data', () => {
