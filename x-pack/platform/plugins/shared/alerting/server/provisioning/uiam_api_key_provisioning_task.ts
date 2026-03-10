@@ -34,6 +34,7 @@ import {
   createStatusFromBulkUpdateResult,
 } from './lib/provisioning_status_helpers';
 import { buildRuleUpdatesForUiam } from './lib/build_rule_updates_for_uiam';
+import { getErrorMessage } from './lib/error_utils';
 import type {
   ProvisioningStatusDocs,
   ApiKeyToConvert,
@@ -139,9 +140,8 @@ export class UiamApiKeyProvisioningTask {
           { tags: TAGS }
         );
       } catch (e) {
-        const message = e.message ?? String(e);
         this.logger.error(
-          `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${message}`,
+          `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${getErrorMessage(e)}`,
           { tags: TAGS }
         );
       }
@@ -154,9 +154,8 @@ export class UiamApiKeyProvisioningTask {
           { tags: TAGS }
         );
       } catch (e) {
-        const message = e.message ?? String(e);
         this.logger.error(
-          `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${message}`,
+          `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${getErrorMessage(e)}`,
           { tags: TAGS }
         );
       }
@@ -243,9 +242,8 @@ export class UiamApiKeyProvisioningTask {
         { tags: TAGS }
       );
     } catch (e) {
-      const message = e.message ?? String(e);
-      this.logger.error(`Error writing provisioning status: ${message}`, {
-        error: { stack_trace: e.stack, tags: TAGS },
+      this.logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
+        error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
       });
     }
   };
@@ -319,9 +317,8 @@ export class UiamApiKeyProvisioningTask {
         hasMoreToProvision,
       };
     } catch (error) {
-      const message = error.message ?? String(error);
-      this.logger.error(`Error getting API keys to convert: ${message}`, {
-        error: { stack_trace: error.stack, tags: TAGS },
+      this.logger.error(`Error getting API keys to convert: ${getErrorMessage(error)}`, {
+        error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
       throw error;
     }
@@ -382,9 +379,8 @@ export class UiamApiKeyProvisioningTask {
 
       return { rulesWithUiamApiKeys, provisioningStatusForFailedConversions };
     } catch (error) {
-      const message = error.message ?? String(error);
-      this.logger.error(`Error converting API keys: ${message}`, {
-        error: { stack_trace: error.stack, tags: TAGS },
+      this.logger.error(`Error converting API keys: ${getErrorMessage(error)}`, {
+        error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
       throw error;
     }
@@ -428,9 +424,8 @@ export class UiamApiKeyProvisioningTask {
 
       return statusDocs;
     } catch (error) {
-      const message = error.message ?? String(error);
-      this.logger.error(`Error bulk updating rules with UIAM API keys: ${message}`, {
-        error: { stack_trace: error.stack, tags: TAGS },
+      this.logger.error(`Error bulk updating rules with UIAM API keys: ${getErrorMessage(error)}`, {
+        error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
       const orphanedUiamApiKeys = rulesWithUiamApiKeys.map((r) => r.uiamApiKey);
       await bulkMarkApiKeysForInvalidation(
