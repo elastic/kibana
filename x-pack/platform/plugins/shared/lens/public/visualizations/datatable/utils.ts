@@ -13,7 +13,12 @@ import type {
   PaletteOutput,
   PaletteRegistry,
 } from '@kbn/coloring';
-import { applyPaletteParams, CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
+import {
+  applyPaletteParams,
+  CUSTOM_PALETTE,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  hasPaletteStops,
+} from '@kbn/coloring';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { defaultPaletteParams, findMinMaxByColumnId } from '../../shared_components';
@@ -35,7 +40,7 @@ export function hasIncompatibleColorConfig({
   palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>;
   colorMapping?: ColorMapping.Config | string;
 }): boolean {
-  const isValueBasedPalette = Boolean(palette?.params?.stops?.length);
+  const isValueBasedPalette = hasPaletteStops(palette);
   const hasColorMappingOnNumeric = !colorByTerms && colorMapping != null;
   // To avoid warnings on current SOs with both palette and color mapping defined, we need to check if the palette is value based and if the color mapping is not defined.
   const hasValuePaletteOnBucket = colorByTerms && isValueBasedPalette && !colorMapping;

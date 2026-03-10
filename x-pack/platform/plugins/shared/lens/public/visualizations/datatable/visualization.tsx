@@ -18,6 +18,7 @@ import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   getFallbackDataBounds,
   getOverridePaletteStops,
+  hasPaletteStops,
 } from '@kbn/coloring';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -174,7 +175,7 @@ export const getDatatableVisualization = ({
         }
 
         if (showColorByTerms && newColumn.palette) {
-          const isValueBasedPalette = Boolean(newColumn.palette?.params?.stops?.length);
+          const isValueBasedPalette = hasPaletteStops(newColumn.palette);
           if (isValueBasedPalette || newColumn.colorMapping) {
             delete newColumn.palette;
             if (!newColumn.colorMapping) {
@@ -188,7 +189,7 @@ export const getDatatableVisualization = ({
         // - legacy color by terms palettes without stops (used categorically): compute stops, keep palette name
         const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
         if (paletteEntry && !showColorByTerms) {
-          const hasStops = Boolean(newColumn.palette?.params?.stops?.length);
+          const hasStops = hasPaletteStops(newColumn.palette);
           if (!paletteEntry.canDynamicColoring || !hasStops) {
             const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
             const palette = getColorByValuePalette(

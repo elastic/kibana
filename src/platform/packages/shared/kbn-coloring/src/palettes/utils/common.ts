@@ -249,3 +249,7 @@ export function getOverridePaletteStops<T extends PaletteOutput<CustomPalettePar
     color: colors[i],
   }));
 }
+
+export const hasPaletteStops = (
+  palette?: PaletteOutput<{ stops?: ColorStop[] | number[] }>
+): boolean => Boolean(palette?.params?.stops?.length);
