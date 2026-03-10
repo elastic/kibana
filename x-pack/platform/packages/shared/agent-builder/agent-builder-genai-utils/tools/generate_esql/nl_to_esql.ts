@@ -75,6 +75,11 @@ export interface GenerateEsqlOptions {
    * Maximum row limit to use in generated ES|QL queries.
    */
   rowLimit?: number;
+  /**
+   * Optional time range used to supply named parameters (?_tstart, ?_tend)
+   * when executing the generated query for validation.
+   */
+  timeRange?: { from: string; to: string };
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -87,6 +92,7 @@ export const generateEsql = async ({
   additionalContext,
   maxRetries = 3,
   rowLimit,
+  timeRange,
   model,
   esClient,
   logger,
@@ -141,6 +147,7 @@ export const generateEsql = async ({
             additionalInstructions,
             additionalContext,
             rowLimit,
+            timeRange,
           },
           {
             recursionLimit: 25,

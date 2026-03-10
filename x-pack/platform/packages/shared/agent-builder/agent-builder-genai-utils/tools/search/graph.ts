@@ -26,6 +26,7 @@ const StateAnnotation = Annotation.Root({
   targetPattern: Annotation<string | undefined>(),
   rowLimit: Annotation<number | undefined>(),
   customInstructions: Annotation<string | undefined>(),
+  timeRange: Annotation<{ from: string; to: string } | undefined>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -63,6 +64,7 @@ export const createSearchToolGraph = ({
       logger,
       rowLimit: state.rowLimit,
       customInstructions: state.customInstructions,
+      timeRange: state.timeRange,
     });
     return [relevanceTool, nlSearchTool];
   };

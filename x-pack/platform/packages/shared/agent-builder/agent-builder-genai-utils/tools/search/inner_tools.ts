@@ -99,6 +99,7 @@ export const createNaturalLanguageSearchTool = ({
   logger,
   rowLimit,
   customInstructions,
+  timeRange,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -106,6 +107,7 @@ export const createNaturalLanguageSearchTool = ({
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
+  timeRange?: { from: string; to: string };
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -123,6 +125,7 @@ export const createNaturalLanguageSearchTool = ({
             logger,
             rowLimit,
             customInstructions,
+            timeRange,
           });
 
           const results: ToolResult[] = response.esqlData
@@ -142,6 +145,7 @@ export const createNaturalLanguageSearchTool = ({
                     query: response.generatedQuery,
                     columns: response.esqlData.columns,
                     values: response.esqlData.values,
+                    time_range: timeRange,
                   },
                 },
               ]

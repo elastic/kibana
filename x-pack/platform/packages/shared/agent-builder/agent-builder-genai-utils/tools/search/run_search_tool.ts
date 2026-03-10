@@ -18,6 +18,7 @@ export const runSearchTool = async ({
   index,
   rowLimit,
   customInstructions,
+  timeRange,
   model,
   esClient,
   logger,
@@ -27,6 +28,7 @@ export const runSearchTool = async ({
   index?: string;
   rowLimit?: number;
   customInstructions?: string;
+  timeRange?: { from: string; to: string };
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -53,6 +55,7 @@ export const runSearchTool = async ({
           targetPattern: index,
           rowLimit,
           customInstructions,
+          timeRange,
         },
         { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
       );

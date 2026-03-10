@@ -7,13 +7,23 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import { executeEsql, buildTimeRangeParams } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+import { getTimeRangeFromScreenContext } from './screen_context_utils';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
+  time_range: z
+    .object({
+      from: z.string().describe('Start of the time range, e.g. "now-24h" or "2026-01-01T00:00:00Z"'),
+      to: z.string().describe('End of the time range, e.g. "now" or "2026-01-31T23:59:59Z"'),
+    })
+    .optional()
+    .describe(
+      '(optional) Time range to use for named parameters ?_tstart and ?_tend. If not provided, falls back to the time range from the screen context.'
+    ),
 });
 
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
@@ -30,10 +40,18 @@ You **must** get the query from one of two sources before calling this tool:
 2.  A verbatim query provided directly by the user.
 
 Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
+If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+
+If the query contains named parameters for time range (\`?_tstart\` and \`?_tend\`), provide the \`time_range\` parameter or ensure a screen context with a time range is attached.`,
     schema: executeEsqlToolSchema,
-    handler: async ({ query: esqlQuery }, { esClient }) => {
-      const result = await executeEsql({ query: esqlQuery, esClient: esClient.asCurrentUser });
+    handler: async ({ query: esqlQuery, time_range: timeRange }, { esClient, attachments }) => {
+      const resolvedTimeRange = timeRange ?? getTimeRangeFromScreenContext(attachments);
+
+      const result = await executeEsql({
+        query: esqlQuery,
+        params: buildTimeRangeParams(resolvedTimeRange),
+        esClient: esClient.asCurrentUser,
+      });
 
       return {
         results: [
@@ -51,6 +69,7 @@ If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.`,
               query: esqlQuery,
               columns: result.columns,
               values: result.values,
+              time_range: resolvedTimeRange,
             },
           },
         ],

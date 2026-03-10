@@ -83,6 +83,8 @@ export interface EsqlResultsData {
   query: string;
   columns: EsqlEsqlColumnInfo[];
   values: FieldValue[][];
+  /** Optional time range used for named parameters ?_tstart and ?_tend */
+  time_range?: { from: string; to: string };
 }
 
 export type EsqlResults = ToolResultMixin<ToolResultType.esqlResults>;

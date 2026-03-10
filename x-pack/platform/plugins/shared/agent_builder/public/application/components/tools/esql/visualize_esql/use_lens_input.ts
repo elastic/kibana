@@ -23,6 +23,7 @@ interface Params {
   lens: LensPublicStart;
   esqlColumns: EsqlResults['data']['columns'] | undefined;
   preferredChartType?: ChartType;
+  timeRange?: { from: string; to: string };
 }
 
 interface ReturnValue {
@@ -38,6 +39,7 @@ export function useLensInput({
   lens,
   esqlColumns,
   preferredChartType,
+  timeRange,
 }: Params): ReturnValue {
   const [lensInput, setLensInput] = useState<TypedLensByValueInput>();
 
@@ -90,7 +92,7 @@ export function useLensInput({
           suggestion,
           dataView: dataViewAsync.value,
         }) as TypedLensByValueInput['attributes'];
-        setLensInput({ attributes, id: uuidv4() });
+        setLensInput({ attributes, id: uuidv4(), timeRange });
       }
     }
   }, [
@@ -100,6 +102,7 @@ export function useLensInput({
     columns,
     esqlQuery,
     preferredChartType,
+    timeRange,
     error,
   ]);
 
