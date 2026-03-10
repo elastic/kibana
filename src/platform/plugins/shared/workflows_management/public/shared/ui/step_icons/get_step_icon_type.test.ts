@@ -38,10 +38,13 @@ describe('getStepIconType', () => {
     ['refresh', 'enter-while'],
     ['tokenNumber', 'foreach-iteration'],
     ['tokenNumber', 'while-iteration'],
+<<<<<<< HEAD
     ['controls', 'flow.break'],
     ['controls', 'flow.continue'],
     ['controls', 'flow-break'],
     ['controls', 'flow-continue'],
+=======
+>>>>>>> 8df89e7662c35022013f4642650f9a958c0ccd15
     ['email', 'email'],
     ['logoSlack', 'slack'],
     ['logoSlack', 'slack_api'],
