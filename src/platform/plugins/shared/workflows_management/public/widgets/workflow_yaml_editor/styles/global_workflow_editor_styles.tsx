@@ -21,7 +21,7 @@ export const GlobalWorkflowEditorStyles = () => {
       styles={[
         getBaseTypeIconsStyles(euiThemeContext),
         getMonacoWorkflowOverridesStyles(euiThemeContext),
-        getProposedChangesStyles(),
+        getProposedChangesStyles(euiThemeContext),
       ]}
     />
   );
