@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../../types';
 
-import confluenceCloudIcon from './confluence_cloud.svg';
+import confluenceCloudIcon from './confluence_cloud.png';
 
 export default (props: ConnectorIconProps) => {
   return <EuiIcon type={confluenceCloudIcon} {...props} />;
