@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
-import { useHttp } from '../../../../common/lib/kibana';
+import { useHttp } from '../../../common/lib/kibana';
 
 interface EntityResponse {
   id: string;
