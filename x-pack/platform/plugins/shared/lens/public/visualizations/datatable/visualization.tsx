@@ -151,6 +151,7 @@ export const getDatatableVisualization = ({
         .map((p) => [p.id, p])
     );
 
+    // Normalize column color configuration when the underlying column type changes
     const columns = state.columns.map((column) => {
       const newColumn = { ...column };
       const accessor = newColumn.columnId;
@@ -159,46 +160,50 @@ export const getDatatableVisualization = ({
 
       const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
 
-      // Only handle transitions when color config exists and column is colorable
-      if ((newColumn.palette || newColumn.colorMapping) && (isNumeric || isBucketable)) {
-        const showColorByTerms = isBucketable;
+      const isColorable = isNumeric || isBucketable;
 
-        if (!showColorByTerms && newColumn.colorMapping) {
-          delete newColumn.colorMapping;
-          if (!newColumn.palette) {
-            const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
-            newColumn.palette = getColorByValuePalette(
-              paletteService,
-              dataBounds ?? getFallbackDataBounds()
-            );
+      // If there is no color config or the column is not colorable, return the column as is
+      if ((!newColumn.palette && !newColumn.colorMapping) || !isColorable) {
+        return newColumn;
+      }
+
+      const showColorByTerms = isBucketable;
+
+      // Numeric column carrying term-based colorMapping → switch to value-based palette
+      if (!showColorByTerms && newColumn.colorMapping) {
+        delete newColumn.colorMapping;
+        if (!newColumn.palette) {
+          const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
+          newColumn.palette = getColorByValuePalette(
+            paletteService,
+            dataBounds ?? getFallbackDataBounds()
+          );
+        }
+      }
+
+      // Bucket column carrying value-based palette → switch to term-based colorMapping
+      if (showColorByTerms && newColumn.palette) {
+        const isValueBasedPalette = hasPaletteStops(newColumn.palette);
+        if (isValueBasedPalette || newColumn.colorMapping) {
+          delete newColumn.palette;
+          if (!newColumn.colorMapping) {
+            newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
           }
         }
+      }
 
-        if (showColorByTerms && newColumn.palette) {
-          const isValueBasedPalette = hasPaletteStops(newColumn.palette);
-          if (isValueBasedPalette || newColumn.colorMapping) {
-            delete newColumn.palette;
-            if (!newColumn.colorMapping) {
-              newColumn.colorMapping = DEFAULT_COLOR_MAPPING_CONFIG;
-            }
-          }
-        }
-
-        // Handle palettes incompatible with numeric coloring:
-        // - categorical-only palettes (canDynamicColoring=false): replace with default
-        // - legacy color by terms palettes without stops (used categorically): compute stops, keep palette name
-        const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
-        if (paletteEntry && !showColorByTerms) {
-          const hasStops = hasPaletteStops(newColumn.palette);
-          if (!paletteEntry.canDynamicColoring || !hasStops) {
-            const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
-            const palette = getColorByValuePalette(
-              paletteService,
-              dataBounds ?? getFallbackDataBounds(),
-              paletteEntry.canDynamicColoring ? newColumn.palette : undefined
-            );
-            return { ...newColumn, palette };
-          }
+      // Numeric column with categorical-only palette (canDynamicColoring=false) or stop-less palette (was used categorically) → recompute proper stops
+      const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
+      if (paletteEntry && !showColorByTerms) {
+        const hasStops = hasPaletteStops(newColumn.palette);
+        if (!paletteEntry.canDynamicColoring || !hasStops) {
+          const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
+          const palette = getColorByValuePalette(
+            paletteService,
+            dataBounds ?? getFallbackDataBounds(),
+            paletteEntry.canDynamicColoring ? newColumn.palette : undefined
+          );
+          return { ...newColumn, palette };
         }
       }
 
