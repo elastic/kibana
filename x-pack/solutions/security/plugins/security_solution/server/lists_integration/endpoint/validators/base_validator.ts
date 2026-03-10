@@ -201,7 +201,7 @@ export class BaseValidator {
     currentItem?: ExceptionListItemSchema
   ): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      const spaceId = await this.getActiveSpaceId();
+      const spaceId = this.getActiveSpaceId();
       const { packagePolicy, savedObjects } =
         this.endpointAppContext.getInternalFleetServices(spaceId);
       const policyIds = getPolicyIdsFromArtifact(item);
@@ -298,7 +298,7 @@ export class BaseValidator {
       }
 
       const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
-      const activeSpaceId = await this.getActiveSpaceId();
+      const activeSpaceId = this.getActiveSpaceId();
 
       if (ownerSpaceIds.some((spaceId) => spaceId !== activeSpaceId)) {
         throw new EndpointArtifactExceptionValidationError(
@@ -312,7 +312,7 @@ export class BaseValidator {
   protected async validateImportOwnerSpaceIds(item: ExceptionItemLikeOptions): Promise<void> {
     if (item.tags && item.tags.length > 0) {
       const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
-      const activeSpaceId = await this.getActiveSpaceId();
+      const activeSpaceId = this.getActiveSpaceId();
 
       if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
         await this.validateSpacesAreAccessible(ownerSpaceIds);
@@ -389,7 +389,7 @@ export class BaseValidator {
     return !isEqual(getArtifactOwnerSpaceIds(updatedItem), getArtifactOwnerSpaceIds(currentItem));
   }
 
-  protected async getActiveSpaceId(): Promise<string> {
+  protected getActiveSpaceId(): string {
     if (!this.request) {
       throw new EndpointArtifactExceptionValidationError(
         'Unable to determine space id. Missing HTTP Request object',
@@ -397,7 +397,7 @@ export class BaseValidator {
       );
     }
 
-    return (await this.endpointAppContext.getActiveSpace(this.request)).id;
+    return this.endpointAppContext.getActiveSpaceId(this.request);
   }
 
   protected async getAccessibleSpaceIds(): Promise<string[]> {
@@ -443,7 +443,7 @@ export class BaseValidator {
     const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
 
     // Per-space items can only be managed from one of the `ownerSpaceId`'s
-    if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+    if (!itemOwnerSpaces.includes(this.getActiveSpaceId())) {
       throw new EndpointArtifactExceptionValidationError(
         ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
         403
@@ -470,7 +470,7 @@ export class BaseValidator {
     const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
 
     // Per-space items can only be deleted from one of the `ownerSpaceId`'s
-    if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+    if (!itemOwnerSpaces.includes(this.getActiveSpaceId())) {
       throw new EndpointArtifactExceptionValidationError(
         ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE(itemOwnerSpaces),
         403
@@ -491,7 +491,7 @@ export class BaseValidator {
       return;
     }
 
-    const activeSpaceId = await this.getActiveSpaceId();
+    const activeSpaceId = this.getActiveSpaceId();
     const ownerSpaceIds = getArtifactOwnerSpaceIds(currentSavedItem);
     const policyIds = getPolicyIdsFromArtifact(currentSavedItem);
 

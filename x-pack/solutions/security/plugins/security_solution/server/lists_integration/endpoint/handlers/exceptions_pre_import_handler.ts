@@ -245,7 +245,7 @@ const deleteExistingItemsForOverwrite = async ({
 
   // Delete items from the list API if overwrite is true, to simulate the overwrite behaviour,
   // as we disabled the overwrite query param on the list API level to avoid conflict issue.
-  const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+  const spaceId = endpointAppContext.getActiveSpaceId(request);
 
   const canManageGlobalArtifacts = (await endpointAppContext.getEndpointAuthz(request))
     .canManageGlobalArtifacts;
@@ -331,7 +331,7 @@ const addOwnerSpaceIdTagToItems = async (
     );
   }
 
-  const spaceId = (await endpointAppContext.getActiveSpace(request)).id;
+  const spaceId = endpointAppContext.getActiveSpaceId(request);
 
   for (const item of data.items) {
     if (!(item instanceof Error)) {
