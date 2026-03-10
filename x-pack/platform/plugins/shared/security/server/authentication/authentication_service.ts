@@ -19,6 +19,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type {
@@ -72,6 +73,7 @@ interface AuthenticationServiceStartParams {
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
   buildFlavor?: BuildFlavor;
+  userActivity: UserActivityServiceStart;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -354,6 +356,7 @@ export class AuthenticationService {
     customLogoutURL,
     buildFlavor = 'traditional',
     uiam,
+    userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -406,6 +409,7 @@ export class AuthenticationService {
       isElasticCloudDeployment,
       customLogoutURL,
       uiam,
+      userActivity,
     }));
 
     return {

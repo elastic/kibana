@@ -109,6 +109,7 @@ function getMockOptions({
     userProfileService: userProfileServiceMock.createStart(),
     isElasticCloudDeployment: jest.fn().mockReturnValue(false),
     customLogoutURL,
+    userActivity: { trackUserAction: jest.fn() },
   };
 }
 
