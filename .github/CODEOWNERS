@@ -1000,7 +1000,6 @@ x-pack/solutions/observability/plugins/observability_streams_wrapper @elastic/st
 x-pack/platform/plugins/shared/streams @simianhacker @flash1293 @dgieselaar
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
-x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
 x-pack/packages/kbn-synthetics-private-location @elastic/obs-ux-management-team
 x-pack/platform/plugins/private/task_manager_dependencies @elastic/response-ops
