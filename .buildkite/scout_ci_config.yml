@@ -18,6 +18,7 @@ plugins:
     - dashboard
     - uptime
     - ux
+
   disabled:
 
 packages:
