@@ -99,11 +99,10 @@ export function createGetLogsTool({
       - histogram: time-series buckets [{bucket, count, group?}]. Controlled by bucketSize (bucket width) and groupBy (adds a "group" field to each bucket).
       - totalCount: total number of matching logs.
       - samples: the most recent log documents, controlled by limit (max count) and fields (which fields to include).
-      - categories: top message patterns by frequency (max 30), each with a pattern string, count, and one sample document. The sample includes the same fields controlled by the fields parameter. Use the number of categories to gauge noise diversity — fewer than 20 patterns means the dataset is focused enough to review.
+      - categories: top message patterns by frequency. This provides a quick overview of the most common log patterns.
       - topValues: top 10 values for fixed key fields: log.level, service.name, service.environment, host.name, agent.name, error.exception.type, kubernetes.namespace, kubernetes.node.name, kubernetes.pod.name, kubernetes.container.name. Not affected by groupBy or fields. Use these exact values when building kqlFilter or choosing a groupBy field — do not guess field values.
 
       When NOT to use:
-      - For detailed log pattern grouping with samples and exception analysis, use get_log_groups
       - For log rate spike/dip correlation analysis, use run_log_rate_analysis
       - For metrics or traces, use the dedicated metric/trace tools`
     ),

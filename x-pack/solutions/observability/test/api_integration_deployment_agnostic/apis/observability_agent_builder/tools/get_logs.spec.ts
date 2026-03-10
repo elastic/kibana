@@ -92,13 +92,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       ]);
     });
 
-    it('returns expected category patterns', async () => {
+    it('returns expected category patterns with type', async () => {
       const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
       });
 
-      const categoryPatterns = results[0].data.categories.map((c) => c.pattern).sort();
+      const { categories } = results[0].data;
+
+      const categoryPatterns = categories.map((c) => c.pattern).sort();
       expect(categoryPatterns).to.eql([
         'CRON Running scheduled cleanup task',
         'Connection pool exhausted cannot acquire connection within Active Idle',
@@ -117,6 +119,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'Timeout calling inventory-service after POST /api/inventory/validate-stock',
         'filter kubernetes kubernetes.0 Merged new pod metadata',
       ]);
+
+      for (const category of categories) {
+        expect(category.type).to.be('log');
+      }
     });
 
     it('returns expected topValues', async () => {
@@ -128,7 +134,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const values = getTopValueValues(results[0].data.topValues);
 
       expect(Object.keys(values).sort()).to.eql([
-        'container.name',
         'host.name',
         'kubernetes.namespace',
         'kubernetes.pod.name',
@@ -191,7 +196,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const groups = [...new Set(results[0].data.histogram.map((b) => b.group))].sort();
+      const groups = [
+        ...new Set(results[0].data.histogram.flatMap((b) => (b.groups ?? []).map((e) => e.group))),
+      ].sort();
       expect(groups).to.eql(['error', 'info', 'warn']);
     });
 

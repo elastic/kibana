@@ -6,14 +6,16 @@
  */
 
 import { calculateAuto } from '@kbn/calculate-auto';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ESQLSearchResponse } from '@kbn/es-types';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { groupBy, mapValues, orderBy, sortBy, sumBy } from 'lodash';
+import { orderBy, uniq } from 'lodash';
 import moment from 'moment';
+import { ERROR_EXC_MESSAGE } from '@kbn/apm-types';
 import { computeSamplingProbability } from '../../utils/compute_sampling_probability';
 import { timeRangeFilter, kqlFilter as kqlFilterToDsl } from '../../utils/dsl_filters';
+import type { TypedSearch } from '../../utils/get_typed_search';
 import { getTypedSearch } from '../../utils/get_typed_search';
+import { getTotalHits } from '../../utils/get_total_hits';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { parseDatemath } from '../../utils/time';
 import { FACET_FIELDS, MAX_FIELD_VALUE_LENGTH } from './constants';
@@ -35,39 +37,32 @@ interface GetLogsParams {
   fields: string[];
 }
 
-interface HistogramBucket {
-  bucket: string;
-  count: number;
-  group?: string;
-}
-
-interface LogSample {
-  _id?: string;
-  _index?: string;
-  [key: string]: unknown;
-}
-
-interface LogCategory {
-  pattern: string;
-  count: number;
-  sample: LogSample;
-}
-
-interface TopValueEntry {
-  value: string;
-  count: number;
-}
-
 export interface GetLogsResult {
-  histogram: HistogramBucket[];
+  histogram: Array<{
+    bucket: string;
+    count: number;
+    entries?: Array<{ count: number; group: string }>;
+  }>;
   totalCount: number;
-  samples: LogSample[];
-  categories: LogCategory[];
-  topValues: Record<string, TopValueEntry[]>;
+  samples: Array<{ _id?: string; _index?: string; [key: string]: unknown }>;
+  categories: Array<{
+    type: 'log' | 'exception';
+    pattern: string;
+    count: number;
+    sample: { _id?: string; _index?: string; [key: string]: unknown };
+  }>;
+  topValues: Record<string, Array<{ value: string; count: number }>>;
 }
 
-const MAX_CATEGORIES = 30;
-const CATEGORIZATION_SAMPLE_SIZE = 10_000;
+const EMPTY_RESULT: GetLogsResult = {
+  histogram: [],
+  totalCount: 0,
+  samples: [],
+  categories: [],
+  topValues: {},
+};
+
+const MAX_GROUP_BY_VALUES = 10;
 
 export async function getLogsHandler({
   esClient,
@@ -84,323 +79,220 @@ export async function getLogsHandler({
     throw new Error(`Invalid date range: start="${start}", end="${end}"`);
   }
 
-  const query = buildEsqlQuery({
-    startIso: new Date(startMs).toISOString(),
-    endIso: new Date(endMs).toISOString(),
+  const searchClient = getTypedSearch(esClient);
+  const baseFilter = [
+    ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
+    ...kqlFilterToDsl(kqlFilter),
+  ];
+
+  const countResponse = await searchClient({
     index,
-    kqlFilter,
-    limit,
-    bucketSize,
-    groupBy: groupByField,
+    size: 0,
+    track_total_hits: true,
+    query: { bool: { filter: baseFilter } },
   });
 
-  const result = (await esClient.esql.query({
-    query,
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  const totalCount = getTotalHits(countResponse);
 
-  const { histogram, totalCount, samples } = parseForkedResult(result, groupByField, fields);
-
-  const { categories, topValues } = await getCategoriesAndTopValues({
-    esClient,
-    index,
-    startMs,
-    endMs,
-    kqlFilter,
-    totalCount,
-    fields,
-  });
-
-  return { histogram, totalCount, samples, categories, topValues };
-}
-
-function buildEsqlQuery({
-  startIso,
-  endIso,
-  index,
-  kqlFilter,
-  limit,
-  bucketSize,
-  groupBy: groupByField,
-}: {
-  startIso: string;
-  endIso: string;
-  index: string;
-  kqlFilter?: string;
-  limit: number;
-  bucketSize: string;
-  groupBy?: string;
-}): string {
-  if (!isValidIndexPattern(index)) {
-    throw new Error(`Invalid index pattern: "${index}"`);
-  }
-
-  if (!isValidBucketSize(bucketSize)) {
-    throw new Error(`Invalid bucket size: "${bucketSize}"`);
-  }
-
-  const histogramByClause = groupByField
-    ? `bucket = BUCKET(@timestamp, ${bucketSize}), ${sanitazeESQLInput(groupByField)}`
-    : `bucket = BUCKET(@timestamp, ${bucketSize})`;
-
-  const filterClause = kqlFilter ? `| WHERE KQL("""${kqlFilter}""")` : '';
-
-  return [
-    `FROM ${index} METADATA _id, _index`,
-    `| WHERE @timestamp >= TO_DATETIME("${startIso}") AND @timestamp <= TO_DATETIME("${endIso}")`,
-    filterClause,
-    `| FORK`,
-    `  (STATS count = COUNT(*) BY ${histogramByClause} | SORT bucket)`,
-    `  (STATS total = COUNT(*))`,
-    `  (SORT @timestamp DESC | LIMIT ${limit})`,
-  ]
-    .filter(Boolean)
-    .join('\n');
-}
-
-// ES|QL FORK produces three result sets identified by a `_fork` column.
-// These constants map those IDs to their semantic meaning.
-const FORK_ID_HISTOGRAM = 'fork1';
-const FORK_ID_TOTAL_COUNT = 'fork2';
-const FORK_ID_SAMPLES = 'fork3';
-
-type ForkedResult = Omit<GetLogsResult, 'categories' | 'topValues'>;
-
-const EMPTY_FORKED_RESULT: ForkedResult = { histogram: [], totalCount: 0, samples: [] };
-
-function parseForkedResult(
-  result: ESQLSearchResponse,
-  groupByField: string | undefined,
-  fields: string[]
-): ForkedResult {
-  if (!result.columns?.length || !result.values?.length) {
-    return EMPTY_FORKED_RESULT;
-  }
-
-  const forkColumnIndex = result.columns.findIndex((column) => column.name === '_fork');
-  if (forkColumnIndex < 0) {
-    return EMPTY_FORKED_RESULT;
-  }
-
-  const resultsByForkId = splitResultByForkId(result, forkColumnIndex);
-
-  const histogram = parseHistogram(resultsByForkId[FORK_ID_HISTOGRAM], groupByField);
-  const totalCount = parseTotalCount(resultsByForkId[FORK_ID_TOTAL_COUNT]);
-  const samples = parseSamples(resultsByForkId[FORK_ID_SAMPLES], fields);
-
-  return { histogram, totalCount, samples };
-}
-
-const MAX_GROUP_BY_VALUES = 10;
-
-function parseHistogram(
-  fork: ESQLSearchResponse | undefined,
-  groupByField?: string
-): HistogramBucket[] {
-  if (!fork?.values.length) {
-    return [];
-  }
-
-  const countColumnIndex = fork.columns.findIndex((column) => column.name === 'count');
-  const bucketColumnIndex = fork.columns.findIndex((column) => column.name === 'bucket');
-  const groupByColumnIndex = groupByField
-    ? fork.columns.findIndex((column) => column.name === groupByField)
-    : -1;
-
-  if (countColumnIndex < 0 || bucketColumnIndex < 0) {
-    return [];
-  }
-
-  if (groupByColumnIndex < 0) {
-    return fork.values.map((row) => ({
-      bucket: String(row[bucketColumnIndex] ?? ''),
-      count: Number(row[countColumnIndex]) || 0,
-    }));
-  }
-
-  const topGroupByValues = getTopGroupByValues(fork.values, countColumnIndex, groupByColumnIndex);
-
-  const topEntries = fork.values
-    .filter((row) => topGroupByValues.has(String(row[groupByColumnIndex] ?? 'unknown')))
-    .map((row) => ({
-      bucket: String(row[bucketColumnIndex] ?? ''),
-      count: Number(row[countColumnIndex]) || 0,
-      group: String(row[groupByColumnIndex] ?? 'unknown'),
-    }));
-
-  const otherRows = fork.values.filter(
-    (row) => !topGroupByValues.has(String(row[groupByColumnIndex] ?? 'unknown'))
-  );
-  const otherByBucket = groupBy(otherRows, (row) => String(row[bucketColumnIndex] ?? ''));
-  const otherEntries = Object.entries(otherByBucket).map(([bucket, rows]) => ({
-    bucket,
-    count: sumBy(rows, (row) => Number(row[countColumnIndex]) || 0),
-    group: '_other' as const,
-  }));
-
-  return sortBy([...topEntries, ...otherEntries], 'bucket');
-}
-
-function getTopGroupByValues(
-  rows: unknown[][],
-  countColumnIndex: number,
-  groupByColumnIndex: number
-): Set<string> {
-  const grouped = groupBy(rows, (row) => String(row[groupByColumnIndex] ?? 'unknown'));
-  const totalsByValue = mapValues(grouped, (groupRows) =>
-    sumBy(groupRows, (row) => Number(row[countColumnIndex]) || 0)
-  );
-
-  return new Set(
-    orderBy(Object.entries(totalsByValue), ([, total]) => total, 'desc')
-      .slice(0, MAX_GROUP_BY_VALUES)
-      .map(([key]) => key)
-  );
-}
-
-function parseTotalCount(fork: ESQLSearchResponse | undefined): number {
-  if (!fork?.values.length) {
-    return 0;
-  }
-  const totalColumnIndex = fork.columns.findIndex((column) => column.name === 'total');
-  if (totalColumnIndex < 0) {
-    return 0;
-  }
-  return Number(fork.values[0][totalColumnIndex]) || 0;
-}
-
-const ALWAYS_INCLUDED_FIELDS = ['_id', '_index', '@timestamp'];
-
-function parseSamples(fork: ESQLSearchResponse | undefined, fields: string[]): LogSample[] {
-  if (!fork?.values.length) {
-    return [];
-  }
-
-  const fieldsToInclude = new Set([...ALWAYS_INCLUDED_FIELDS, ...fields]);
-
-  return fork.values.map((row) =>
-    Object.fromEntries(
-      fork.columns
-        .map((col, i) => [col.name, row[i]] as const)
-        .filter(([name, value]) => value != null && fieldsToInclude.has(name))
-        .map(([name, value]) => [name, truncateFieldValue(value)])
-    )
-  );
-}
-
-function splitResultByForkId(
-  result: ESQLSearchResponse,
-  forkColumnIndex: number
-): Record<string, ESQLSearchResponse> {
-  const columnsWithoutFork = result.columns.filter((_, i) => i !== forkColumnIndex);
-  const grouped = groupBy(result.values, (row) => String(row[forkColumnIndex] ?? 'unknown'));
-  return mapValues(grouped, (rows) => ({
-    columns: columnsWithoutFork,
-    values: rows.map((row) => row.filter((_, i) => i !== forkColumnIndex)),
-  }));
-}
-
-async function getCategoriesAndTopValues({
-  esClient,
-  index,
-  startMs,
-  endMs,
-  kqlFilter,
-  totalCount,
-  fields,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-  startMs: number;
-  endMs: number;
-  kqlFilter?: string;
-  totalCount: number;
-  fields: string[];
-}): Promise<{ categories: LogCategory[]; topValues: Record<string, TopValueEntry[]> }> {
   if (totalCount === 0) {
-    return { categories: [], topValues: {} };
+    return EMPTY_RESULT;
   }
 
   const samplingProbability = computeSamplingProbability({
     totalHits: totalCount,
-    targetSampleSize: CATEGORIZATION_SAMPLE_SIZE,
+    targetSampleSize: 10_000,
   });
 
-  const sampleFields = [...new Set([...ALWAYS_INCLUDED_FIELDS, ...fields])];
+  const sampleFields = uniq(['@timestamp', ...fields]);
 
-  const search = getTypedSearch(esClient);
+  const response = await searchLogs(searchClient, {
+    index,
+    limit,
+    sampleFields,
+    bucketSize,
+    groupByField,
+    samplingProbability,
+    baseFilter,
+  });
+
+  const histogram = parseHistogram(response);
+  const samples = parseSamples(response);
+  const categories = parseCategories(response);
+  const topValues = parseTopValues(response);
+
+  return { histogram, totalCount, samples, categories, topValues };
+}
+
+async function searchLogs(
+  searchClient: TypedSearch,
+  params: {
+    index: string;
+    limit: number;
+    sampleFields: string[];
+    bucketSize: string;
+    groupByField?: string;
+    samplingProbability: number;
+    baseFilter: QueryDslQueryContainer[];
+  }
+) {
+  const { index, limit, sampleFields, bucketSize, groupByField, samplingProbability, baseFilter } =
+    params;
+
+  const categorizeTextAgg = (field: string) => ({
+    categorize_text: {
+      field,
+      size: 30,
+      min_doc_count: 1,
+    },
+    aggs: {
+      sample: {
+        top_hits: {
+          size: 1,
+          _source: false,
+          fields: sampleFields,
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
+        },
+      },
+    },
+  });
 
   const topValueAggs = Object.fromEntries(
     FACET_FIELDS.map((field) => [field, { terms: { field, size: 10 } }])
   );
 
-  const response = await search({
+  const histogramAgg = groupByField
+    ? {
+        date_histogram: {
+          field: '@timestamp' as const,
+          fixed_interval: bucketSize,
+          min_doc_count: 0,
+        },
+        aggs: {
+          groups: { terms: { field: groupByField, size: MAX_GROUP_BY_VALUES } },
+        },
+      }
+    : {
+        date_histogram: {
+          field: '@timestamp' as const,
+          fixed_interval: bucketSize,
+          min_doc_count: 0,
+        },
+      };
+
+  return searchClient({
     index,
-    size: 0,
+    size: limit,
     track_total_hits: false,
-    query: {
-      bool: {
-        filter: [
-          ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
-          ...kqlFilterToDsl(kqlFilter),
-          { exists: { field: 'message' } },
-        ],
-      },
-    },
+    _source: false,
+    fields: sampleFields,
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
+    query: { bool: { filter: baseFilter } },
     aggregations: {
+      histogram: histogramAgg,
       sampler: {
         random_sampler: { probability: samplingProbability, seed: 1 },
         aggs: {
-          categories: {
-            categorize_text: {
-              field: 'message',
-              size: MAX_CATEGORIES,
-              min_doc_count: 1,
+          logCategories: {
+            filter: { exists: { field: 'message' } },
+            aggs: {
+              patterns: categorizeTextAgg('message'),
+            },
+          },
+          exceptionCategories: {
+            filter: {
+              bool: {
+                must: [{ exists: { field: ERROR_EXC_MESSAGE } }],
+                must_not: [{ exists: { field: 'message' } }],
+              },
             },
             aggs: {
-              hit: {
-                top_hits: {
-                  size: 1,
-                  _source: false,
-                  fields: sampleFields,
-                  sort: [{ '@timestamp': { order: 'desc' as const } }],
-                },
-              },
+              patterns: categorizeTextAgg(ERROR_EXC_MESSAGE),
             },
           },
         },
       },
-      ...topValueAggs,
+      ...(topValueAggs as {}),
     },
   });
+}
 
-  const categoryBuckets = response.aggregations?.sampler?.categories?.buckets ?? [];
-  const categories = categoryBuckets.map((bucket) => {
-    const hit = bucket.hit?.hits?.hits?.[0];
-    const hitFields = hit
-      ? Object.fromEntries(
-          Object.entries(unwrapEsFields(hit.fields))
-            .filter(([, value]) => value != null)
-            .map(([name, value]) => [name, truncateFieldValue(value)])
-        )
-      : {};
+type LogSearchResponse = Awaited<ReturnType<typeof searchLogs>>;
 
-    return {
-      pattern: bucket.key,
-      count: bucket.doc_count,
-      sample: {
-        _id: hit?._id,
-        _index: hit?._index,
-        ...hitFields,
-      },
-    };
+function parseHistogram(response: LogSearchResponse) {
+  const buckets = response.aggregations?.histogram?.buckets ?? [];
+
+  return buckets.flatMap((b) => {
+    const groupBuckets = b.groups?.buckets ?? [];
+
+    if (!groupBuckets.length) {
+      return [{ bucket: b.key_as_string, count: b.doc_count }];
+    }
+
+    const entries = groupBuckets.map((gb) => ({
+      bucket: b.key_as_string,
+      count: gb.doc_count,
+      group: String(gb.key),
+    }));
+
+    const sumOther = b.groups?.sum_other_doc_count ?? 0;
+    if (sumOther > 0) {
+      entries.push({ bucket: b.key_as_string, count: sumOther, group: '_other' });
+    }
+
+    return entries;
   });
+}
 
+function parseSamples(response: LogSearchResponse) {
+  return (response.hits?.hits ?? []).map((hit) => {
+    const hitFields = Object.fromEntries(
+      Object.entries(unwrapEsFields(hit.fields))
+        .filter(([, value]) => value != null)
+        .map(([name, value]) => [name, truncateFieldValue(value)])
+    );
+    return { _id: hit._id, _index: hit._index, ...hitFields };
+  });
+}
+
+function parseCategories(response: LogSearchResponse) {
+  const sampler = response.aggregations?.sampler;
+
+  const parseBuckets = (
+    buckets: typeof logBuckets,
+    type: GetLogsResult['categories'][number]['type']
+  ) =>
+    buckets.map((bucket) => {
+      const hit = bucket.sample?.hits?.hits?.[0];
+      const hitFields = Object.fromEntries(
+        Object.entries(unwrapEsFields(hit.fields))
+          .filter(([, value]) => value != null)
+          .map(([name, value]) => [name, truncateFieldValue(value)])
+      );
+
+      return {
+        type,
+        pattern: bucket.key,
+        count: bucket.doc_count,
+        sample: { _id: hit?._id, _index: hit?._index, ...hitFields },
+      };
+    });
+
+  const logBuckets = sampler?.logCategories?.patterns?.buckets ?? [];
+  const exceptionBuckets = sampler?.exceptionCategories?.patterns?.buckets ?? [];
+
+  return orderBy(
+    [...parseBuckets(logBuckets, 'log'), ...parseBuckets(exceptionBuckets, 'exception')],
+    'count',
+    'desc'
+  );
+}
+
+function parseTopValues(response: LogSearchResponse) {
   const aggs = response.aggregations as
     | Record<string, { buckets: Array<{ key: string; doc_count: number }> }>
     | undefined;
 
-  const topValues: Record<string, TopValueEntry[]> = {};
+  const topValues: GetLogsResult['topValues'] = {};
   for (const field of FACET_FIELDS) {
     const termsBuckets = aggs?.[field]?.buckets ?? [];
     if (termsBuckets.length > 0) {
@@ -411,18 +303,7 @@ async function getCategoriesAndTopValues({
     }
   }
 
-  return { categories, topValues };
-}
-
-const SAFE_INDEX_PATTERN = /^[a-zA-Z0-9_.*,:\-]+$/;
-function isValidIndexPattern(index: string): boolean {
-  return SAFE_INDEX_PATTERN.test(index);
-}
-
-const SAFE_BUCKET_SIZE =
-  /^\d+(milliseconds?|ms|seconds?|s|minutes?|m|hours?|h|days?|d|weeks?|w|months?|mo|quarters?|q|years?|y)$/i;
-function isValidBucketSize(bucketSize: string): boolean {
-  return SAFE_BUCKET_SIZE.test(bucketSize);
+  return topValues;
 }
 
 function truncateFieldValue(value: unknown): unknown {

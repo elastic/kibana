@@ -8,14 +8,12 @@
 import dedent from 'dedent';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '../../tools/get_logs/constants';
-import { OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID } from '../../tools/get_log_groups/tool';
 import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '../../tools/run_log_rate_analysis/tool';
 import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../../tools/get_index_info/tool';
 import { getKqlInstructions } from '../../agent/register_observability_agent';
 
 const LOG_SEARCH_TOOL_IDS = [
   OBSERVABILITY_GET_LOGS_TOOL_ID,
-  OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
 ];
@@ -48,11 +46,12 @@ function buildLogSearchSkillContent(): string {
     ### Phase 1: Initial Peek
     ALWAYS start here. Call \`get_logs\` with groupBy="log.level".
     If the user mentions a specific service, host, or container, scope the query with a kqlFilter (e.g. \`service.name: "cart-service"\`). Otherwise, use no kqlFilter.
-    Read four things:
+    Read five things:
     - **totalCount**: How many logs match? This is an indicator of noise.
     - **histogram**: Is there a spike or dip? Note the timestamp if so. This is an indicator of a root cause.
     - **samples**: What do the logs look like? Health checks? Real errors? Cron noise?
-    - **categories**: How many distinct message patterns exist? Fewer than 20 patterns means the dataset is focused enough to review directly.
+    - **categories**: How many distinct message patterns exist? Fewer than 20 patterns means the dataset is focused enough to review directly. Check the \`type\` field — categories with type "exception" reveal OTel exception patterns (categorized by error.exception.message) that are separate from regular log messages.
+    - **topValues**: Which services, log levels, hosts, namespaces, etc. exist? Use these exact values when building KQL filters — do not guess keyword field values.
 
     Decision:
     - categories has fewer than 20 patterns → skip to Answer (focused enough to review samples directly)
@@ -61,24 +60,20 @@ function buildLogSearchSkillContent(): string {
     - Otherwise → Phase 3 (moderate volume, start filtering directly)
 
     NOTE: OTel exception events (e.g. gRPC errors, uncaught exceptions) do NOT have \`log.level\`.
-    They appear as "unknown" in the breakdown. If you see a large "unknown" bucket but few or no
-    error-level logs, call \`get_logs\` with kqlFilter="error.exception.message: *" to
-    check for hidden exceptions. Also use groupBy="service.name" to see which services
-    produced them.
+    They appear as "unknown" in the histogram breakdown. If you see a large "unknown" bucket but few or no
+    error-level logs, check the categories for entries with type "exception". You can also call \`get_logs\` with
+    kqlFilter="error.exception.message: *" and groupBy="service.name" to see which services produced them.
 
     ### Phase 2: Analyze at Scale
-    Use analytical tools on the full (large) dataset to guide your filtering strategy.
+    Only use this phase when the histogram shows a clear spike or dip.
 
-    **If the histogram shows a spike or dip** → call \`run_log_rate_analysis\`:
-      - baseline: a normal period BEFORE the spike
-      - deviation: the period DURING the spike
-      - The result shows which field values (services, error types, hosts) are correlated with the change.
-
-    **If there are many logs but no clear spike** → call \`get_log_groups\`:
-      - Uses the same time range from Phase 1.
-      - Common patterns are likely noise, rare patterns may be the root cause.
+    Call \`run_log_rate_analysis\`:
+    - baseline: a normal period BEFORE the spike
+    - deviation: the period DURING the spike
+    - The result shows which field values (services, error types, hosts) are correlated with the change.
 
     Use insights from this phase to make informed filters in Phase 3.
+    If there is no spike, skip this phase — categories from Phase 1 already provide pattern analysis.
 
     ### Phase 3: Noise Reduction (The Funnel)
     The dataset is too large to review manually. Call \`get_logs\` repeatedly to narrow it down using two strategies:
@@ -89,9 +84,9 @@ function buildLogSearchSkillContent(): string {
       Keep accumulating NOT clauses — never drop previous ones.
 
     **Strategy B — Focus on signal** (use once you spot the relevant service/pattern): Switch to a positive filter to zoom in.
-      Example: \`service.name: "<value_from_histogram>" AND log.level: "<value_from_histogram>"\`
+      Example: \`service.name: "checkout" AND log.level: "error"\`
       You may replace the entire kqlFilter when zooming into a specific service or pattern.
-      IMPORTANT: Use the exact values from the histogram breakdown — keyword fields like \`log.level\` are case-sensitive.
+      IMPORTANT: Use the exact values from topValues — keyword fields like \`log.level\` are case-sensitive.
       If you're unsure of exact field values, use \`get_index_info\` with operation="get-field-values" to discover them.
 
     Continue until:
@@ -104,11 +99,6 @@ function buildLogSearchSkillContent(): string {
     - Use groupBy (e.g. "log.level" or "service.name") to understand the shape of the data.
     - Check **categories** after each call — when patterns drop below 20, the remaining logs are focused enough to review.
     - You MUST call get_logs at least 3 times before moving on.
-
-    ### Phase 4: Verify (Cross-check)
-    Before answering, call \`get_log_groups\` **without a kqlFilter** (use the same time range) to get a broad view of all log patterns and exceptions.
-    Review the results for error patterns you may have missed — especially \`spanException\` groups that don't appear in \`log.level\` filtering.
-    If you discover a more significant error pattern than what you found in Phase 3, investigate it before answering.
 
     ### Answer
     Provide your findings:
@@ -123,10 +113,9 @@ function buildLogSearchSkillContent(): string {
     2. When excluding noise (Strategy A), accumulate NOT clauses. When zooming into a specific service or pattern (Strategy B), you may replace the filter entirely.
     3. Call \`get_logs\` at least 3 times before providing your answer.
     4. If totalCount > 10,000 or categories shows 20+ patterns after filtering, you have too much noise. Keep filtering.
-    5. Before answering, ALWAYS run Phase 4 (Verify) — call \`get_log_groups\` without filters to check for error patterns you may have missed. Only then provide your answer.
-    6. Before each tool call, explain what you see and why you're taking the next action.
-    7. If a tool call returns an error, try a different approach. Do not retry the same failing call more than once.
-    8. If \`run_log_rate_analysis\` fails or returns no results, continue with \`get_logs\` alone.
+    5. Before each tool call, explain what you see and why you're taking the next action.
+    6. If a tool call returns an error, try a different approach. Do not retry the same failing call more than once.
+    7. If \`run_log_rate_analysis\` fails or returns no results, continue with \`get_logs\` alone.
 
     ${getKqlInstructions()}
 
@@ -135,15 +124,9 @@ function buildLogSearchSkillContent(): string {
     OpenTelemetry exception events are structurally different from regular logs:
     - They have \`error.exception.message\` and optionally \`error.exception.type\` — but NO \`log.level\` or \`message\`.
     - They appear as "unknown" in \`log.level\` breakdowns and are invisible to \`log.level\`-based KQL filters.
-
-    To find them with \`get_logs\`:
-    - Filter: \`error.exception.message: *\` (finds all documents with an exception message)
-    - Breakdown: groupBy="service.name" to see which services have exceptions
-
-    To analyze them with \`get_log_groups\`:
-    - \`get_log_groups\` automatically categorizes exceptions into \`spanException\` and \`logException\` groups.
-    - Each group includes \`error.exception.message\`, \`error.exception.type\`, and optionally \`error.stack_trace\`.
-    - This is the most effective tool for discovering and understanding exception patterns.
+    - \`get_logs\` automatically categorizes them separately: categories with type "exception" are grouped by \`error.exception.message\`.
+    - You can also filter them explicitly: \`error.exception.message: *\` finds all documents with an exception message.
+    - Use groupBy="service.name" to see which services produced exceptions.
 
     ## Tips
 
@@ -164,8 +147,8 @@ function buildLogSearchSkillContent(): string {
 
     User: "Why are there errors in the checkout service?"
 
-    **Phase 1**: get_logs(start="now-1h", end="now")
-    → totalCount: 42,000. Categories: 28 patterns (too many — noisy). Histogram shows spike at 14:05-14:10. Samples dominated by "GET /health" and fluent-bit noise.
+    **Phase 1**: get_logs(start="now-1h", end="now", groupBy="log.level")
+    → totalCount: 42,000. Categories: 28 patterns (too many — noisy). topValues shows service.name: ["checkout", "payment", "load-balancer", ...], log.level: ["info", "error", "warn"]. Histogram shows spike at 14:05-14:10. Samples dominated by "GET /health" and fluent-bit noise.
 
     **Phase 2**: run_log_rate_analysis(start="2026-02-25T13:50:00Z", end="2026-02-25T14:15:00Z")
     → Significant items: service.name="checkout" (p=0.001), error.message="OOMKilled" (p=0.003). Checkout is correlated with the spike.
@@ -173,9 +156,9 @@ function buildLogSearchSkillContent(): string {
     **Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z", groupBy="log.level")
     → totalCount: 320. Categories: 12 patterns (focused). Histogram shows errors concentrated at 14:07. Samples show OOMKilled events.
 
-    **Phase 3**: get_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (ERROR OR WARN)", start="2026-02-25T14:05:00Z", end="2026-02-25T14:10:00Z", bucketSize="1m")
+    **Phase 3**: get_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (error OR warn)", start="2026-02-25T14:05:00Z", end="2026-02-25T14:10:00Z", bucketSize="1m")
     → totalCount: 89. Categories: 5 patterns. OOMKilled in checkout at 14:07, followed by connection timeouts in payment-service.
-    (Note: "ERROR" and "WARN" are the exact values observed in the Phase 1 histogram breakdown.)
+    (Note: "error" and "warn" are the exact values from topValues in Phase 1.)
 
     **Answer**: Checkout service OOMKilled at 14:07, causing cascading timeouts in payment-service.
 
@@ -184,19 +167,13 @@ function buildLogSearchSkillContent(): string {
     User: "Something is wrong with our microservices"
 
     **Phase 1**: get_logs(start="now-30m", end="now", groupBy="log.level")
-    → totalCount: 15,000. Breakdown: INFO=12,000, unknown=2,800, WARN=200. No clear spike. The large "unknown" bucket is suspicious — few error-level logs but many unknowns.
-
-    **Phase 1 (follow-up)**: get_logs(start="now-30m", end="now", kqlFilter="error.exception.message: *", groupBy="service.name")
-    → totalCount: 180. Breakdown: frontend=120, checkout=55, payment=5. Samples show error.exception.message: "rpc error: code = Unavailable" in checkout and "Error: request failed" in frontend.
+    → totalCount: 15,000. Histogram breakdown: info=12,000, unknown=2,800, warn=200. No clear spike. The large "unknown" bucket is suspicious. Categories include 3 entries with type "exception": "rpc error: code = Unavailable" (55), "Error: request failed" (120), "timeout exceeded" (5).
 
     **Phase 3**: get_logs(kqlFilter="error.exception.message: * AND service.name: \\"checkout\\"", start="now-30m", end="now")
     → totalCount: 55. All samples show gRPC "Unavailable" errors calling the payment service.
 
     **Phase 3**: get_logs(kqlFilter="error.exception.message: * AND service.name: \\"frontend\\"", start="now-30m", end="now")
     → totalCount: 120. Frontend errors: "Error: request to checkout failed", cascading from checkout failures.
-
-    **Phase 4**: get_log_groups(start="now-30m", end="now")
-    → spanException group: checkout → "rpc error: code = Unavailable desc = connection refused" (55 occurrences). logException group: frontend → "Error: request failed with status 500" (120 occurrences). Confirms checkout→payment is the origin.
 
     **Answer**: Payment service is unreachable, causing gRPC "Unavailable" errors in checkout (55 exceptions) which cascade as HTTP 500s to the frontend (120 exceptions).
   `);
