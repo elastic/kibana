@@ -413,7 +413,7 @@ function applyOnFailure(
 ): WorkflowGraphType {
   let graph = innerGraph;
 
-  if (onFailureConfiguration?.retry) {
+  if (onFailureConfiguration.retry) {
     graph = createRetry(stepId, graph, onFailureConfiguration.retry);
   }
 
