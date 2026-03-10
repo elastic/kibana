@@ -57,7 +57,10 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
+import { useGhostLineHint } from './use_ghost_line_hint';
+import { useCommentToEsql } from './comment_to_esql';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -769,6 +772,26 @@ const ESQLEditorInternal = function ESQLEditor({
   });
 
   const {
+    commentToEsqlStyle,
+    generateFromComment: onGenerateFromComment,
+    isReviewActiveRef,
+  } = useCommentToEsql({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+  });
+
+  const onGenerateFromCommentRef = useRef(onGenerateFromComment);
+  onGenerateFromCommentRef.current = onGenerateFromComment;
+
+  const { ghostLineHintStyle, setupGhostLineHint } = useGhostLineHint({
+    editorRef,
+    editorModel,
+    isReviewActiveRef,
+  });
+
+  const {
     isFieldsBrowserOpen,
     setIsFieldsBrowserOpen,
     browserPopoverPosition: fieldsBrowserPosition,
@@ -1143,6 +1166,8 @@ const ESQLEditorInternal = function ESQLEditor({
         styles={css`
           ${lookupIndexBadgeStyle}
           ${sourcesBadgeStyle}
+          ${ghostLineHintStyle}
+          ${commentToEsqlStyle}
         `}
       />
       {Boolean(editorIsInline) && !hideRunQueryButton ? (
@@ -1207,6 +1232,11 @@ const ESQLEditorInternal = function ESQLEditor({
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
+                placeholder={i18n.translate('esqlEditor.placeholder', {
+                  defaultMessage:
+                    "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
+                  values: { commandKey: isMac ? '⌘' : 'Ctrl' },
+                })}
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}
@@ -1252,13 +1282,20 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
+                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery, () =>
+                    onGenerateFromCommentRef.current()
+                  );
+
+                  const ghostHintDisposables = setupGhostLineHint(editor);
 
                   // Store disposables for cleanup
                   const currentEditor = editorRef.current;
                   if (currentEditor) {
                     if (!editorCommandDisposables.current.has(currentEditor)) {
-                      editorCommandDisposables.current.set(currentEditor, commandDisposables);
+                      editorCommandDisposables.current.set(currentEditor, [
+                        ...commandDisposables,
+                        ...ghostHintDisposables,
+                      ]);
                     }
                   }
 

@@ -86,7 +86,15 @@ const resolveConnectorId = async ({
   return undefined;
 };
 
-const buildSystemPrompt = (sourceNames: string[], fieldsContext?: string): string => {
+const buildSystemPrompt = (
+  sourceNames: string[],
+  fieldsContext?: string,
+  currentQuery?: string
+): string => {
+  if (currentQuery) {
+    return buildSurgicalPrompt(sourceNames, fieldsContext, currentQuery);
+  }
+
   let prompt = `Produce the ES|QL query fenced by the esql tag. Don't explain it.
 
 <AvailableSources>
@@ -102,6 +110,39 @@ Use these exact source names in the FROM clause. Do not invent source names.
 The relevant source has the following fields (name: type):
 ${fieldsContext}
 Use these exact field names in the query.
+</FieldsContext>`;
+  }
+
+  return prompt;
+};
+
+const buildSurgicalPrompt = (
+  sourceNames: string[],
+  fieldsContext: string | undefined,
+  currentQuery: string
+): string => {
+  let prompt = `You are an ES|QL expert. The user has an existing ES|QL query.
+The target comment line is marked with >>> and <<< delimiters in the query below.
+That comment is a natural-language instruction describing what ES|QL code should replace it.
+Other comment lines (without >>> <<<) are regular documentation comments — ignore them as instructions.
+
+Your task: output ONLY the ES|QL pipe(s) that should replace the marked comment. Do not output the full query.
+Fence the replacement code with the esql tag. Do not explain it.
+Do not include any code that is already in the query.
+
+<CurrentQuery>
+${currentQuery}
+</CurrentQuery>
+
+<AvailableSources>
+${sourceNames.join(', ')}
+</AvailableSources>`;
+
+  if (fieldsContext) {
+    prompt += `
+
+<FieldsContext>
+${fieldsContext}
 </FieldsContext>`;
   }
 
@@ -125,6 +166,7 @@ export const registerNLtoESQLRoute = (
         body: schema.object({
           query: schema.string(),
           sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+          currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
         }),
       },
       security: {
@@ -137,7 +179,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { query, sources } = request.body;
+        const { query, sources, currentQuery } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -174,7 +216,7 @@ export const registerNLtoESQLRoute = (
             input: query,
             functionCalling: 'auto',
             logger,
-            system: buildSystemPrompt(sourceNames, fieldsContext),
+            system: buildSystemPrompt(sourceNames, fieldsContext, currentQuery),
           })
         );
 
