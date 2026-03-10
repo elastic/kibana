@@ -168,7 +168,7 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       path: `${publicApiPath}/plugins/install`,
       security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
-      summary: 'Install a plugin from a GitHub URL or zip URL.',
+      summary: 'Install a plugin',
       description:
         'Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.',
       options: {
