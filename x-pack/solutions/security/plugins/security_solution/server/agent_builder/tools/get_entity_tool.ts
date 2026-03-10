@@ -15,8 +15,8 @@ import {
   getLatestEntitiesIndexName,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../common';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getRiskScoreTimeSeriesIndex } from '../../../common/entity_analytics/risk_engine/indices';
@@ -198,7 +198,8 @@ const findEntityById = async ({
 
 export const getEntityTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  logger: Logger,
+  experimentalFeatures: ExperimentalFeatures
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_GET_ENTITY_TOOL_ID,
@@ -208,17 +209,15 @@ export const getEntityTool = (
     tags: ['security', 'entity-store', 'entity-analytics'],
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId, uiSettings }: ToolAvailabilityContext) => {
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
         try {
           const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
           if (availability.status === 'available') {
-            // Tool is only available if entity store V2 is enabled in this space
-            const isEntityStoreV2Enabled = await uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
             if (!isEntityStoreV2Enabled) {
               return {
                 status: 'unavailable',
-                reason:
-                  'Entity Store V2 is not enabled. Enable it via the "securitySolution:entityStoreEnableV2" setting.',
+                reason: 'Entity Store V2 is not enabled.',
               };
             }
 

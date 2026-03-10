@@ -8,7 +8,6 @@
 import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
@@ -16,6 +15,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
+import type { ExperimentalFeatures } from '../../../common';
 import { searchEntitiesTool } from './search_entities_tool';
 
 jest.mock('../utils/get_agent_builder_resource_availability', () => ({
@@ -27,7 +27,10 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 }));
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockUiSettingsClient = uiSettingsServiceMock.createClient();
+
+const mockExperimentalFeatures = {
+  entityAnalyticsEntityStoreV2: true,
+} as ExperimentalFeatures;
 
 const EXPECTED_KEEP_CLAUSE =
   'KEEP @timestamp, entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.risk.calculated_level, asset.criticality, entity.source, entity.lifecycle.first_seen, entity.lifecycle.last_activity, entity.attributes.watchlists, entity.attributes.managed, entity.attributes.mfa_enabled, entity.attributes.asset, entity.behaviors.rule_names, entity.behaviors.anomaly_job_ids';
@@ -42,7 +45,7 @@ const mockSingleEntityResponse = () =>
 
 describe('searchEntitiesTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = searchEntitiesTool(mockCore, mockLogger);
+  const tool = searchEntitiesTool(mockCore, mockLogger, mockExperimentalFeatures);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -50,7 +53,6 @@ describe('searchEntitiesTool', () => {
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
-    mockUiSettingsClient.get.mockResolvedValue(true);
   });
 
   describe('schema', () => {
@@ -188,17 +190,20 @@ describe('searchEntitiesTool', () => {
       });
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
     });
 
-    it('returns unavailable when entity store v2 is disabled', async () => {
-      mockUiSettingsClient.get.mockResolvedValueOnce(false);
+    it('returns unavailable when entity store v2 experimental feature is disabled', async () => {
+      const disabledTool = searchEntitiesTool(mockCore, mockLogger, {
+        ...mockExperimentalFeatures,
+        entityAnalyticsEntityStoreV2: false,
+      });
 
-      const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+      const result = await disabledTool.availability!.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
@@ -209,7 +214,7 @@ describe('searchEntitiesTool', () => {
       mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(false);
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
@@ -220,7 +225,7 @@ describe('searchEntitiesTool', () => {
       mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(true);
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('available');
@@ -235,7 +240,7 @@ describe('searchEntitiesTool', () => {
       );
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');

@@ -27,10 +27,10 @@ export const registerTools = async (
   experimentalFeatures: ExperimentalFeatures
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
-  agentBuilder.tools.register(getEntityTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
-  agentBuilder.tools.register(searchEntitiesTool(core, logger));
+  agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
 };

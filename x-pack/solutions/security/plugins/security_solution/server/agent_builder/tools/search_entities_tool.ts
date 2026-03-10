@@ -15,11 +15,11 @@ import {
   getLatestEntitiesIndexName,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import {
   IdentifierType,
   EntityRiskLevels,
 } from '../../../common/api/entity_analytics/common/common.gen';
+import type { ExperimentalFeatures } from '../../../common';
 import { AssetCriticalityLevel } from '../../../common/api/entity_analytics/asset_criticality/common.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
@@ -365,7 +365,8 @@ const buildQuery = (
 
 export const searchEntitiesTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger
+  logger: Logger,
+  experimentalFeatures: ExperimentalFeatures
 ): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SECURITY_SEARCH_ENTITIES_TOOL_ID,
@@ -378,16 +379,15 @@ export const searchEntitiesTool = (
     schema,
     availability: {
       cacheMode: 'space',
-      handler: async ({ request, spaceId, uiSettings }: ToolAvailabilityContext) => {
+      handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
         try {
           const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
           if (availability.status === 'available') {
-            const isEntityStoreV2Enabled = await uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+            const isEntityStoreV2Enabled = experimentalFeatures.entityAnalyticsEntityStoreV2;
             if (!isEntityStoreV2Enabled) {
               return {
                 status: 'unavailable',
-                reason:
-                  'Entity Store V2 is not enabled. Enable it via the "securitySolution:entityStoreEnableV2" setting.',
+                reason: 'Entity Store V2 is not enabled.',
               };
             }
 

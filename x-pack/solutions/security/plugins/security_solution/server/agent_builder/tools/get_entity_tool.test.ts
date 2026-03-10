@@ -8,7 +8,6 @@
 import { ToolResultType, type ErrorResult, type EsqlResults } from '@kbn/agent-builder-common';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import {
   createToolAvailabilityContext,
@@ -16,6 +15,7 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../__mocks__/test_helpers';
+import type { ExperimentalFeatures } from '../../../common';
 import { getEntityTool } from './get_entity_tool';
 
 jest.mock('../utils/get_agent_builder_resource_availability', () => ({
@@ -27,11 +27,14 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 }));
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as jest.Mock;
-const mockUiSettingsClient = uiSettingsServiceMock.createClient();
+
+const mockExperimentalFeatures = {
+  entityAnalyticsEntityStoreV2: true,
+} as ExperimentalFeatures;
 
 describe('getEntityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
-  const tool = getEntityTool(mockCore, mockLogger);
+  const tool = getEntityTool(mockCore, mockLogger, mockExperimentalFeatures);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,7 +42,6 @@ describe('getEntityTool', () => {
     mockGetAgentBuilderResourceAvailability.mockResolvedValue({
       status: 'available',
     });
-    mockUiSettingsClient.get.mockResolvedValue(true);
   });
 
   describe('schema', () => {
@@ -66,17 +68,20 @@ describe('getEntityTool', () => {
       });
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
     });
 
-    it('returns unavailable when entity store v2 is disabled', async () => {
-      mockUiSettingsClient.get.mockResolvedValueOnce(false);
+    it('returns unavailable when entity store v2 experimental feature is disabled', async () => {
+      const disabledTool = getEntityTool(mockCore, mockLogger, {
+        ...mockExperimentalFeatures,
+        entityAnalyticsEntityStoreV2: false,
+      });
 
-      const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+      const result = await disabledTool.availability!.handler(
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
@@ -87,7 +92,7 @@ describe('getEntityTool', () => {
       mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(false);
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('unavailable');
@@ -98,7 +103,7 @@ describe('getEntityTool', () => {
       mockEsClient.asInternalUser.indices.exists.mockResolvedValueOnce(true);
 
       const result = await tool.availability!.handler(
-        createToolAvailabilityContext(mockRequest, 'default', mockUiSettingsClient)
+        createToolAvailabilityContext(mockRequest, 'default')
       );
 
       expect(result.status).toBe('available');
