@@ -98,41 +98,43 @@ export class SearchInferenceEndpointsPlugin
       },
     });
 
-    plugins.features.registerKibanaFeature({
-      id: MODEL_SETTINGS_PLUGIN_ID,
-      minimumLicense: 'enterprise',
-      name: MODEL_SETTINGS_PLUGIN_NAME,
-      order: 2,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      app: [],
-      catalogue: [],
-      management: {
-        ml: [MODEL_SETTINGS_APP_ID],
-      },
-      privileges: {
-        all: {
-          app: [],
-          api: [],
-          catalogue: [],
-          management: {
-            ml: [MODEL_SETTINGS_APP_ID],
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
+    if (this.config.enableModelSettings) {
+      plugins.features.registerKibanaFeature({
+        id: MODEL_SETTINGS_PLUGIN_ID,
+        minimumLicense: 'enterprise',
+        name: MODEL_SETTINGS_PLUGIN_NAME,
+        order: 2,
+        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+        app: [],
+        catalogue: [],
+        management: {
+          ml: [MODEL_SETTINGS_APP_ID],
         },
-        read: {
-          disabled: true,
-          savedObject: {
-            all: [],
-            read: [],
+        privileges: {
+          all: {
+            app: [],
+            api: [],
+            catalogue: [],
+            management: {
+              ml: [MODEL_SETTINGS_APP_ID],
+            },
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
           },
-          ui: [],
+          read: {
+            disabled: true,
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
         },
-      },
-    });
+      });
+    }
 
     return {};
   }
