@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn_rate/constants';
-export const ADD_BURN_RATE_ACTION_ID = 'CREATE_SLO_BURN_RATE_EMBEDDABLE';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+
+export const SLO_BURN_RATE_EMBEDDABLE_ID = 'SLO_BURN_RATE_EMBEDDABLE';
+export const SLO_BURN_RATE_SUPPORTED_TRIGGERS = [ON_OPEN_PANEL_MENU];
