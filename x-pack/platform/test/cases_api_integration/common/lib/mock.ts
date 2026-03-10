@@ -201,7 +201,7 @@ export const getCaseWithoutCommentsResp = (
   req: CasePostRequest = postCaseReq
 ): Partial<Case> => {
   const { comments, ...caseWithoutComments } = postCaseResp(id, req);
-  return { comments: [], ...caseWithoutComments };
+  return caseWithoutComments;
 };
 
 interface CommentRequestWithID {
