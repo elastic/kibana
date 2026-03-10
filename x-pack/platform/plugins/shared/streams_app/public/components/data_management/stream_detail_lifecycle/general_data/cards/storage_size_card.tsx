@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIconTip, formatNumber } from '@elastic/eui';
+import { EuiIconTip, EuiLoadingSpinner, EuiText, formatNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BaseMetricCard } from '../../common/base_metric_card';
@@ -18,11 +18,74 @@ export const StorageSizeCard = ({
   hasMonitorPrivileges,
   stats,
   statsError,
+  isTimeSeriesMode = false,
+  timeSeriesCountLoading = false,
+  timeSeriesCountError,
 }: {
   hasMonitorPrivileges: boolean;
   stats?: DataStreamStats;
   statsError?: Error;
+  isTimeSeriesMode?: boolean;
+  timeSeriesCountLoading?: boolean;
+  timeSeriesCountError?: Error;
 }) => {
+  const totalDocs =
+    statsError || !stats || stats.totalDocs === undefined
+      ? '-'
+      : formatNumber(stats.totalDocs, '0,0');
+  const docsText = i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
+    defaultMessage: '{totalDocs} documents',
+    values: { totalDocs },
+  });
+
+  const timeSeriesCount =
+    statsError || !stats || stats.timeSeriesCount === undefined
+      ? '-'
+      : formatNumber(stats.timeSeriesCount, '0,0');
+
+  let subtitle: React.ReactNode | null = null;
+
+  if (hasMonitorPrivileges) {
+    if (!isTimeSeriesMode) {
+      subtitle = docsText;
+    } else if (typeof stats?.timeSeriesCount === 'number') {
+      subtitle = i18n.translate(
+        'xpack.streams.streamDetailLifecycle.storageSize.docsAndTimeSeries',
+        {
+          defaultMessage: '{totalDocs} documents · {timeSeriesCount} time series',
+          values: {
+            totalDocs,
+            timeSeriesCount,
+          },
+        }
+      );
+    } else if (timeSeriesCountLoading) {
+      subtitle = (
+        <span>
+          {docsText} · <EuiLoadingSpinner size="s" />{' '}
+          {i18n.translate(
+            'xpack.streams.streamDetailLifecycle.storageSize.timeSeriesCountLoading',
+            {
+              defaultMessage: 'Loading time series count',
+            }
+          )}
+        </span>
+      );
+    } else if (timeSeriesCountError) {
+      subtitle = (
+        <span>
+          {docsText} ·{' '}
+          <EuiText color="warning" size="s" style={{ display: 'inline' }}>
+            {i18n.translate(
+              'xpack.streams.streamDetailLifecycle.storageSize.timeSeriesCountUnavailable',
+              { defaultMessage: 'Failed to fetch time series count' }
+            )}
+          </EuiText>
+        </span>
+      );
+    }
+  }
+
   const metric = [
     {
       data: (
@@ -38,31 +101,7 @@ export const StorageSizeCard = ({
             : formatBytes(stats.sizeBytes)}
         </PrivilegesWarningIconWrapper>
       ),
-      subtitle: hasMonitorPrivileges
-        ? typeof stats?.timeSeriesCount === 'number'
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docsAndTimeSeries', {
-              defaultMessage: '{totalDocs} documents · {timeSeriesCount} time series',
-              values: {
-                totalDocs:
-                  statsError || !stats || stats.totalDocs === undefined
-                    ? '-'
-                    : formatNumber(stats.totalDocs, '0,0'),
-                timeSeriesCount:
-                  statsError || !stats || stats.timeSeriesCount === undefined
-                    ? '-'
-                    : formatNumber(stats.timeSeriesCount, '0,0'),
-              },
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.storageSize.docs', {
-              defaultMessage: '{totalDocs} documents',
-              values: {
-                totalDocs:
-                  statsError || !stats || stats.totalDocs === undefined
-                    ? '-'
-                    : formatNumber(stats.totalDocs, '0,0'),
-              },
-            })
-        : null,
+      subtitle,
       'data-test-subj': 'storageSize',
     },
   ];

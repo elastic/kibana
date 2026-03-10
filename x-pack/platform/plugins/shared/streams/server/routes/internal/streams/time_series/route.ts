@@ -37,49 +37,61 @@ export const getTimeSeriesCountRoute = createServerRoute({
       return { timeSeriesCount: null };
     }
 
-    const dataStream = privileges.view_index_metadata
-      ? await streamsClient.getDataStream(name).catch(() => null)
-      : null;
+    // Without metadata privileges we can't reliably decide if the stream is backed
+    // by a TSDS and therefore can't compute a meaningful time series count.
+    if (!privileges.view_index_metadata) {
+      return { timeSeriesCount: null };
+    }
+
+    const dataStream = await streamsClient.getDataStream(name).catch(() => null);
+    if (!dataStream) {
+      return { timeSeriesCount: null };
+    }
 
     // If we can resolve the data stream and it is not in time_series mode, there is
     // no meaningful time series count.
-    if (dataStream && dataStream.index_mode !== 'time_series') {
+    if (dataStream.index_mode !== 'time_series') {
       return { timeSeriesCount: null };
     }
 
-    try {
-      const tsCommand = BasicPrettyPrinter.print(
-        Builder.expression.query([
-          Builder.command({
-            name: 'ts',
-            args: [Builder.expression.source.index(name)],
-          }),
-        ])
-      );
+    const esqlQuery = BasicPrettyPrinter.print(
+      Builder.expression.query([
+        Builder.command({
+          name: 'ts',
+          args: [Builder.expression.source.index(name)],
+        }),
+        Builder.command({
+          name: 'ts_info',
+          args: [],
+        }),
+        Builder.command({
+          name: 'stats',
+          args: [
+            Builder.expression.func.binary('=', [
+              Builder.expression.column('time_series_count'),
+              Builder.expression.func.call('COUNT', [Builder.expression.column('*')]),
+            ]),
+          ],
+        }),
+      ])
+    );
 
-      // TS_INFO returns one row per time series. Use STATS to avoid transferring
-      // the full result set.
-      const esqlQuery = `
-${tsCommand}
-| TS_INFO
-| STATS time_series_count = COUNT(*)
-      `.trim();
+    const response = await scopedClusterClient.asCurrentUser.esql.query({
+      query: esqlQuery,
+      drop_null_columns: true,
+    });
 
-      const response = await scopedClusterClient.asCurrentUser.esql.query({
-        query: esqlQuery,
-        drop_null_columns: true,
-      });
-
-      const countCol = response.columns.findIndex((col) => col.name === 'time_series_count');
-      const countValue = countCol === -1 ? undefined : response.values[0]?.[countCol];
-      const count = typeof countValue === 'number' ? countValue : Number(countValue);
-
-      return { timeSeriesCount: Number.isFinite(count) ? count : null };
-    } catch (error) {
-      // The time series count is additional metadata; avoid failing the whole
-      // request if it can't be computed (e.g. missing index, permissions, etc).
-      return { timeSeriesCount: null };
+    const countCol = response.columns.findIndex((col) => col.name === 'time_series_count');
+    if (countCol === -1) {
+      throw new Error('Unexpected ES|QL response: missing [time_series_count] column');
     }
+
+    const countValue = response.values[0]?.[countCol];
+    if (typeof countValue !== 'number') {
+      throw new Error('Unexpected ES|QL response: [time_series_count] is not a number');
+    }
+
+    return { timeSeriesCount: countValue };
   },
 });
 

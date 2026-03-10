@@ -12,6 +12,7 @@ import {
   type FailureStoreStatsResponse,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { TimeState } from '@kbn/es-query';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import type { CalculatedStats } from '../helpers/get_calculated_stats';
@@ -53,17 +54,11 @@ export const useDataStreamStats = ({
   const statsFetch = useStreamsAppFetch(
     async ({ signal }) => {
       const client = await dataStreamsClient;
-      const shouldFetchTimeSeriesCount =
-        // If the stream detail API tells us the index mode and it's not time_series,
-        // skip the request entirely. If we don't know the index mode, fall back to
-        // attempting the count request and let the server decide.
-        definition.index_mode === undefined || definition.index_mode === 'time_series';
       const [
         {
           dataStreamsStats: [dsStats],
         },
         failureStore,
-        timeSeriesCountResponse,
       ] = await Promise.all([
         client.getDataStreamsStats({
           datasetQuery: definition.stream.name,
@@ -76,27 +71,11 @@ export const useDataStreamStats = ({
             path: { name: definition.stream.name },
           },
         }),
-
-        shouldFetchTimeSeriesCount
-          ? streamsRepositoryClient
-              .fetch('GET /internal/streams/{name}/time_series/_count', {
-                signal,
-                params: {
-                  path: { name: definition.stream.name },
-                },
-              })
-              .catch(() => ({ timeSeriesCount: null }))
-          : Promise.resolve({ timeSeriesCount: null }),
       ]);
 
       if (!dsStats || !dsStats.creationDate) {
         return undefined;
       }
-
-      const timeSeriesCount =
-        typeof timeSeriesCountResponse?.timeSeriesCount === 'number'
-          ? timeSeriesCountResponse.timeSeriesCount
-          : undefined;
 
       const [dsAggregations, fsAggregations] = await Promise.all([
         getAggregations({ definition, timeState, core, search, signal }),
@@ -114,7 +93,6 @@ export const useDataStreamStats = ({
         ds: {
           stats: {
             ...dsStats,
-            ...(timeSeriesCount !== undefined ? { timeSeriesCount } : {}),
             sizeBytes: dsSizeWithoutFs,
             size: formatBytes(dsSizeWithoutFs),
             ...getCalculatedStats({
@@ -155,10 +133,64 @@ export const useDataStreamStats = ({
     }
   );
 
+  // Only fetch time series count if the index mode is time_series
+  const shouldFetchTimeSeriesCount = definition.index_mode === 'time_series';
+
+  const timeSeriesCountFetch = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (!shouldFetchTimeSeriesCount) {
+        return undefined;
+      }
+
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/time_series/_count', {
+        signal,
+        params: {
+          path: { name: definition.stream.name },
+        },
+      });
+    },
+    [streamsRepositoryClient, definition.stream.name, shouldFetchTimeSeriesCount],
+    {
+      withTimeRange: false,
+      withRefresh: false,
+      clearValueOnNext: true,
+      unsetValueOnError: true,
+      disableToastOnError: true,
+    }
+  );
+
+  const timeSeriesCount =
+    typeof timeSeriesCountFetch.value?.timeSeriesCount === 'number'
+      ? timeSeriesCountFetch.value.timeSeriesCount
+      : undefined;
+
+  const stats = statsFetch.value
+    ? {
+        ...statsFetch.value,
+        ds: {
+          ...statsFetch.value.ds,
+          stats: {
+            ...statsFetch.value.ds.stats,
+            ...(timeSeriesCount !== undefined ? { timeSeriesCount } : {}),
+          },
+        },
+      }
+    : undefined;
+
+  const timeSeriesCountError =
+    timeSeriesCountFetch.error && !isRequestAbortedError(timeSeriesCountFetch.error)
+      ? timeSeriesCountFetch.error
+      : undefined;
+
   return {
-    stats: statsFetch.value,
+    stats,
     isLoading: statsFetch.loading,
-    refresh: statsFetch.refresh,
+    refresh: () => {
+      statsFetch.refresh();
+      timeSeriesCountFetch.refresh();
+    },
     error: statsFetch.error,
+    timeSeriesCountLoading: shouldFetchTimeSeriesCount && timeSeriesCountFetch.loading,
+    timeSeriesCountError,
   };
 };
