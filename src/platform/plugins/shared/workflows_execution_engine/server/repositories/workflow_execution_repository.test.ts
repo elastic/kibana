@@ -10,6 +10,16 @@
 import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../common/workflow_executions_index';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
+
+const TEST_BACKING_INDEX = '.workflows-executions-000001';
+
+const createEncodedId = () =>
+  generateEncodedWorkflowExecutionId({
+    indexName: TEST_BACKING_INDEX,
+    indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  });
 
 describe('WorkflowExecutionRepository', () => {
   let repository: WorkflowExecutionRepository;
@@ -56,7 +66,8 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should respect space isolation when getting workflow execution by ID', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      const encodedId = createEncodedId();
+      const workflowExecution = { id: encodedId, workflowId: 'test-workflow', spaceId: 'space1' };
       await repository.createWorkflowExecution(workflowExecution);
 
       expect(esClient.index).toHaveBeenCalledWith(
@@ -69,50 +80,53 @@ describe('WorkflowExecutionRepository', () => {
 
       // Mock get to return a document with different spaceId
       esClient.get.mockResolvedValueOnce({
-        _source: { id: '1', workflowId: 'test-workflow', spaceId: 'space1' },
+        _source: { id: encodedId, workflowId: 'test-workflow', spaceId: 'space1' },
       });
 
       // Should return null when spaceId doesn't match
-      const result = await repository.getWorkflowExecutionById('1', 'space2');
+      const result = await repository.getWorkflowExecutionById(encodedId, 'space2');
 
       expect(esClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+        index: TEST_BACKING_INDEX,
+        id: encodedId,
       });
       expect(result).toBeNull();
     });
 
     it('should return document when spaceId matches', async () => {
-      const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };
+      const encodedId = createEncodedId();
+      const workflowExecution = { id: encodedId, workflowId: 'test-workflow', spaceId: 'space1' };
       esClient.get.mockResolvedValueOnce({
         _source: workflowExecution,
       });
 
-      const result = await repository.getWorkflowExecutionById('1', 'space1');
+      const result = await repository.getWorkflowExecutionById(encodedId, 'space1');
 
       expect(esClient.get).toHaveBeenCalledWith({
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        id: '1',
+        index: TEST_BACKING_INDEX,
+        id: encodedId,
       });
       expect(result).toEqual(workflowExecution);
     });
 
     it('should return null when document is not found', async () => {
+      const encodedId = createEncodedId();
       const notFoundError = new Error('Not Found');
       (notFoundError as any).meta = { statusCode: 404 };
       esClient.get.mockRejectedValueOnce(notFoundError);
 
-      const result = await repository.getWorkflowExecutionById('non-existent', 'space1');
+      const result = await repository.getWorkflowExecutionById(encodedId, 'space1');
 
       expect(result).toBeNull();
     });
 
     it('should throw error for non-404 errors', async () => {
+      const encodedId = createEncodedId();
       const serverError = new Error('Internal Server Error');
       (serverError as any).meta = { statusCode: 500 };
       esClient.get.mockRejectedValueOnce(serverError);
 
-      await expect(repository.getWorkflowExecutionById('1', 'space1')).rejects.toThrow(
+      await expect(repository.getWorkflowExecutionById(encodedId, 'space1')).rejects.toThrow(
         'Internal Server Error'
       );
     });
