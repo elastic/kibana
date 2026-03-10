@@ -6,7 +6,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -73,11 +72,6 @@ interface State {
 }
 
 export class RemoteClusterTable extends Component<Props, State> {
-  static propTypes = {
-    clusters: PropTypes.array,
-    openDetailPanel: PropTypes.func.isRequired,
-  };
-
   static defaultProps = {
     clusters: [],
   };
