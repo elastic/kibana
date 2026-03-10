@@ -29,7 +29,9 @@ const SCHEMA_SEARCH_BASE = schema.object({
   }),
   sort: schema.oneOf(
     [
-      schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),
+      schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 }), {
+        maxSize: MAX_SAVED_SEARCH_COLUMNS,
+      }),
       schema.arrayOf(schema.string(), { maxSize: 2 }),
     ],
     { defaultValue: [] }
