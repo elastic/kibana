@@ -89,90 +89,109 @@ describe('useAssistantAvailability', () => {
     });
   });
 
-  it('returns hasAgentBuilderManagePrivilege when manageAgents and advanced settings save are true', () => {
-    mockUseLicense.mockReturnValue({
+  describe('hasAgentBuilderManagePrivilege capability mapping', () => {
+    const enterpriseLicense = {
       isEnterprise: jest.fn().mockReturnValue(true),
-    } as unknown as LicenseService);
+    } as unknown as LicenseService;
 
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            [ASSISTANT_FEATURE_ID]: {
-              'ai-assistant': true,
-              updateAIAssistantAnonymization: true,
-              manageGlobalKnowledgeBaseAIAssistant: true,
+    const agentBuilderPrivilegeCases = [
+      {
+        scenario: 'manageAgents is true and advanced settings save is true',
+        agentBuilderCapabilities: { show: true, [uiPrivileges.manageAgents]: true },
+        advancedSettingsSave: true,
+        expected: true,
+      },
+      {
+        scenario: 'legacy showManagement is true and advanced settings save is true',
+        agentBuilderCapabilities: { show: true, showManagement: true },
+        advancedSettingsSave: true,
+        expected: true,
+      },
+      {
+        scenario: 'manageAgents false and showManagement true with advanced settings save true',
+        agentBuilderCapabilities: {
+          show: true,
+          [uiPrivileges.manageAgents]: false,
+          showManagement: true,
+        },
+        advancedSettingsSave: true,
+        expected: true,
+      },
+      {
+        scenario: 'manageAgents and showManagement are false with advanced settings save true',
+        agentBuilderCapabilities: {
+          show: true,
+          [uiPrivileges.manageAgents]: false,
+          showManagement: false,
+        },
+        advancedSettingsSave: true,
+        expected: false,
+      },
+      {
+        scenario: 'agentBuilder capabilities are missing with advanced settings save true',
+        agentBuilderCapabilities: undefined,
+        advancedSettingsSave: true,
+        expected: false,
+      },
+      {
+        scenario: 'manageAgents is true but advanced settings save is false',
+        agentBuilderCapabilities: { show: true, [uiPrivileges.manageAgents]: true },
+        advancedSettingsSave: false,
+        expected: false,
+      },
+      {
+        scenario: 'legacy showManagement is true but advanced settings save is false',
+        agentBuilderCapabilities: { show: true, showManagement: true },
+        advancedSettingsSave: false,
+        expected: false,
+      },
+    ] as const;
+
+    it.each(agentBuilderPrivilegeCases)(
+      'returns hasAgentBuilderManagePrivilege as $expected when $scenario',
+      ({ agentBuilderCapabilities, advancedSettingsSave, expected }) => {
+        mockUseLicense.mockReturnValue(enterpriseLicense);
+
+        const maybeAgentBuilderCapabilities =
+          agentBuilderCapabilities != null
+            ? { [AGENTBUILDER_FEATURE_ID]: agentBuilderCapabilities }
+            : {};
+
+        mockUseKibana.mockReturnValue({
+          services: {
+            application: {
+              capabilities: {
+                [ASSISTANT_FEATURE_ID]: {
+                  'ai-assistant': true,
+                  updateAIAssistantAnonymization: true,
+                  manageGlobalKnowledgeBaseAIAssistant: true,
+                },
+                [SECURITY_FEATURE_ID]: {
+                  configurations: true,
+                },
+                ...maybeAgentBuilderCapabilities,
+                advancedSettings: {
+                  save: advancedSettingsSave,
+                },
+                actions: {
+                  show: true,
+                  execute: true,
+                  save: true,
+                  delete: true,
+                },
+              },
             },
-            [SECURITY_FEATURE_ID]: {
-              configurations: true,
-            },
-            [AGENTBUILDER_FEATURE_ID]: {
-              show: true,
-              [uiPrivileges.manageAgents]: true,
-            },
-            advancedSettings: {
-              save: true,
-            },
-            actions: {
-              show: true,
-              execute: true,
-              save: true,
-              delete: true,
+            featureFlags: {
+              getBooleanValue: jest.fn().mockReturnValue(true),
             },
           },
-        },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
+        } as unknown as ReturnType<typeof useKibana>);
 
-    const { result } = renderHook(() => useAssistantAvailability());
+        const { result } = renderHook(() => useAssistantAvailability());
 
-    expect(result.current.hasAgentBuilderManagePrivilege).toBe(true);
-  });
-
-  it('returns hasAgentBuilderManagePrivilege when legacy showManagement and advanced settings save are true', () => {
-    mockUseLicense.mockReturnValue({
-      isEnterprise: jest.fn().mockReturnValue(true),
-    } as unknown as LicenseService);
-
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          capabilities: {
-            [ASSISTANT_FEATURE_ID]: {
-              'ai-assistant': true,
-              updateAIAssistantAnonymization: true,
-              manageGlobalKnowledgeBaseAIAssistant: true,
-            },
-            [SECURITY_FEATURE_ID]: {
-              configurations: true,
-            },
-            [AGENTBUILDER_FEATURE_ID]: {
-              show: true,
-              showManagement: true,
-            },
-            advancedSettings: {
-              save: true,
-            },
-            actions: {
-              show: true,
-              execute: true,
-              save: true,
-              delete: true,
-            },
-          },
-        },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(true),
-        },
-      },
-    } as unknown as ReturnType<typeof useKibana>);
-
-    const { result } = renderHook(() => useAssistantAvailability());
-
-    expect(result.current.hasAgentBuilderManagePrivilege).toBe(true);
+        expect(result.current.hasAgentBuilderManagePrivilege).toBe(expected);
+      }
+    );
   });
 
   it('returns correct values when all privileges are available but assistant his hidden', () => {
