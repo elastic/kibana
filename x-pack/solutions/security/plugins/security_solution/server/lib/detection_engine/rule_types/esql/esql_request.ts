@@ -68,7 +68,7 @@ export const performEsqlRequest = async ({
 }): Promise<EsqlTable> => {
   let pollInterval = 10 * 1000; // Poll every 10 seconds
   let pollCount = 0;
-  let queryId: string = '';
+  let queryId: string | undefined;
 
   try {
     loggedRequests?.push({
@@ -82,10 +82,7 @@ export const performEsqlRequest = async ({
       ...requestQueryParams,
     });
     setLatestRequestDuration(asyncSearchStarted, loggedRequests);
-
-    if (asyncEsqlResponse.id) {
-      queryId = asyncEsqlResponse.id;
-    }
+    queryId = asyncEsqlResponse.id;
 
     if (!asyncEsqlResponse.is_running) {
       return asyncEsqlResponse as EsqlTable;
