@@ -36,7 +36,7 @@ export function assertLicensesValid({
     const isValidLicenseForPackage = (license: string) => {
       const perPackageOverride =
         perPackageOverrides[`${pkg.name}@${pkg.version}`] || // Pinned version
-        perPackageOverrides[`${pkg.name}`] || // Any version of the package
+        (pkg.name.startsWith('@elastic/') && perPackageOverrides[`${pkg.name}`]) || // Any version for @elastic scoped packages
         [];
       return perPackageOverride.includes(license);
     };
