@@ -162,11 +162,10 @@ export const getDatatableVisualization = ({
       if ((newColumn.palette || newColumn.colorMapping) && (isNumeric || isBucketable)) {
         const showColorByTerms = isBucketable;
 
-        const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
-
         if (!showColorByTerms && newColumn.colorMapping) {
           delete newColumn.colorMapping;
           if (!newColumn.palette) {
+            const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
             newColumn.palette = getColorByValuePalette(
               paletteService,
               dataBounds ?? getFallbackDataBounds()
@@ -187,8 +186,12 @@ export const getDatatableVisualization = ({
         // Handle palettes that don't support dynamic coloring (categorical-only palettes)
         // Replace them with default color-by-value palette
         const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
-        if (paletteEntry && !showColorByTerms && !paletteEntry.canDynamicColoring && dataBounds) {
-          const palette = getColorByValuePalette(paletteService, dataBounds);
+        if (paletteEntry && !showColorByTerms && !paletteEntry.canDynamicColoring) {
+          const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
+          const palette = getColorByValuePalette(
+            paletteService,
+            dataBounds ?? getFallbackDataBounds()
+          );
           return { ...newColumn, palette };
         }
       }
