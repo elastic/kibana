@@ -59,8 +59,7 @@ describe('createSkillInvocationEvaluator', () => {
 
     const calledQuery = (mockEsClient.esql.query as jest.Mock).mock.calls[0][0].query;
     expect(calledQuery).toContain(`trace.id == "${VALID_TRACE_ID}"`);
-    expect(calledQuery).toContain('total_tool_spans = COUNT(*)');
-    expect(calledQuery).toContain('COUNT(');
+    expect(calledQuery).toContain('attributes.elastic.inference.span.kind == "TOOL"');
     expect(calledQuery).toContain('attributes.gen_ai.tool.name == "filestore.read"');
     expect(calledQuery).toContain('*/data-exploration/SKILL.md*');
   });
@@ -125,7 +124,7 @@ describe('createSkillInvocationEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
-  it('should retry until tool spans are visible in the trace data', async () => {
+  it('should retry until spans are visible in the trace data', async () => {
     const evaluator = createSkillInvocationEvaluator({
       traceEsClient: mockEsClient,
       log: mockLog,
@@ -145,7 +144,7 @@ describe('createSkillInvocationEvaluator', () => {
           { name: 'total_tool_spans', type: 'long' },
           { name: 'skill_invoked', type: 'long' },
         ],
-        values: [[3, 1]],
+        values: [[50, 1]],
       });
 
     const promise = evaluateWith(evaluator, VALID_TRACE_ID);
@@ -184,7 +183,7 @@ describe('createSkillInvocationEvaluator', () => {
     expect(result.label).toBe('unavailable');
   });
 
-  it('should not match a different skill name in the path', async () => {
+  it('should return 0 when tool spans exist but skill was not among them', async () => {
     const evaluator = createSkillInvocationEvaluator({
       traceEsClient: mockEsClient,
       log: mockLog,
@@ -196,11 +195,21 @@ describe('createSkillInvocationEvaluator', () => {
         { name: 'total_tool_spans', type: 'long' },
         { name: 'skill_invoked', type: 'long' },
       ],
-      values: [[1, 0]],
+      values: [[15, 0]],
     });
 
     const result = await evaluateWith(evaluator, VALID_TRACE_ID);
 
     expect(result.score).toBe(0);
+  });
+
+  it('should throw for invalid skill names', () => {
+    expect(() =>
+      createSkillInvocationEvaluator({
+        traceEsClient: mockEsClient,
+        log: mockLog,
+        skillName: 'bad"; DROP TABLE',
+      })
+    ).toThrow(/Invalid skillName/);
   });
 });

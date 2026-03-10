@@ -10,6 +10,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
 import { createTraceBasedEvaluator } from './factory';
 
+const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
+
 export function createSkillInvocationEvaluator({
   traceEsClient,
   log,
@@ -19,6 +21,12 @@ export function createSkillInvocationEvaluator({
   log: ToolingLog;
   skillName: string;
 }): Evaluator {
+  if (!VALID_SKILL_NAME.test(skillName)) {
+    throw new Error(
+      `Invalid skillName: "${skillName}" - only alphanumeric characters, hyphens, and underscores are allowed`
+    );
+  }
+
   return createTraceBasedEvaluator({
     traceEsClient,
     log,
@@ -26,9 +34,14 @@ export function createSkillInvocationEvaluator({
       name: `Skill Invoked (${skillName})`,
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
-  AND attributes.elastic.inference.span.kind == "TOOL"
 | STATS
-  total_tool_spans = COUNT(*),
+  total_tool_spans = COUNT(
+    CASE(
+      attributes.elastic.inference.span.kind == "TOOL",
+      1,
+      NULL
+    )
+  ),
   skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
