@@ -48,6 +48,7 @@ plugins:
 packages:
   enabled:
     - kbn-streamlang-tests
+    - user-storage
   disabled:
     # Scout's own tests are executed first to validate the Scout framework
     # (see .buildkite/scripts/steps/test/scout/test_run_builder.sh). Excluded here

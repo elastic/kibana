@@ -9482,6 +9482,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/user-storage-test-plugin@link:src/core/packages/user-storage/test/plugins/user_storage_test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/utility-types-jest@link:src/platform/packages/shared/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
