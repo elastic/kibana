@@ -31,7 +31,8 @@ const savedQueryResponseSchema = () =>
   schema.object({
     id: schema.string(),
     attributes: SAVED_QUERY_ATTRS_CONFIG,
-    namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+    // codeql[js/kibana/unbounded-array-in-schema] THis is a response schema
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 
 const access = 'internal';
@@ -253,7 +254,8 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
               body: () =>
                 schema.object({
                   total: schema.number(),
-                  savedQueries: schema.arrayOf(savedQueryResponseSchema(), { maxSize: 10000 }),
+                  // codeql[js/kibana/unbounded-array-in-schema] THis is a response schema
+                  savedQueries: schema.arrayOf(savedQueryResponseSchema()),
                 }),
             },
           },
