@@ -22,12 +22,21 @@ export interface InferenceFeatureRegistryContract {
   register: (feature: InferenceFeatureConfig) => void;
 }
 
+export interface InferenceFeatureRegistryReadContract {
+  getAll: () => InferenceFeatureConfig[];
+  get: (featureId: string) => InferenceFeatureConfig | undefined;
+}
+
+export type InferenceFeatureRegistryStartContract = InferenceFeatureRegistryContract &
+  InferenceFeatureRegistryReadContract;
+
 export interface SearchInferenceEndpointsPluginSetup {
   features: InferenceFeatureRegistryContract;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchInferenceEndpointsPluginStart {}
+export interface SearchInferenceEndpointsPluginStart {
+  features: InferenceFeatureRegistryStartContract;
+}
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
   actions: ActionsPluginStartContract;

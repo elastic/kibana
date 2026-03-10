@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
-import { deepFreeze } from '@kbn/std';
 import type { SearchInferenceEndpointsConfig } from './config';
 import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
@@ -95,11 +94,11 @@ export class SearchInferenceEndpointsPlugin
       },
     });
 
-    return deepFreeze({
+    return {
       features: {
         register: this.featureRegistry.register.bind(this.featureRegistry),
       },
-    });
+    };
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
@@ -116,9 +115,13 @@ export class SearchInferenceEndpointsPlugin
       this.dynamicConnectorsPoller.start();
     }
 
-    this.featureRegistry.lockRegistration();
-    this.featureRegistry.validateFeatures();
-    return {};
+    return {
+      features: {
+        register: this.featureRegistry.register.bind(this.featureRegistry),
+        getAll: this.featureRegistry.getAll.bind(this.featureRegistry),
+        get: this.featureRegistry.get.bind(this.featureRegistry),
+      },
+    };
   }
 
   public stop() {

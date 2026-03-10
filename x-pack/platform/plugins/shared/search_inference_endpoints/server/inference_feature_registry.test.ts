@@ -30,20 +30,20 @@ describe('InferenceFeatureRegistry', () => {
     it('registers a minimal valid feature and stores it correctly', () => {
       const feature = createValidFeature();
       registry.register(feature);
-      registry.lockRegistration();
 
       const stored = registry.get(feature.featureId);
       expect(stored).toEqual(feature);
     });
 
     it('registers a feature with all optional fields and stores them correctly', () => {
+      registry.register(createValidFeature({ featureId: 'parent' }));
       const feature = createValidFeature({
+        featureId: 'child',
         parentFeatureId: 'parent',
         maxNumberOfEndpoints: 3,
         recommendedEndpoints: ['endpoint1', 'endpoint2'],
       });
       registry.register(feature);
-      registry.lockRegistration();
 
       const stored = registry.get(feature.featureId);
       expect(stored).toEqual(feature);
@@ -52,7 +52,6 @@ describe('InferenceFeatureRegistry', () => {
     it('rejects invalid features and does not store them', () => {
       expect(() => registry.register(createValidFeature({ featureId: '' }))).toThrow('featureId');
 
-      registry.lockRegistration();
       expect(registry.getAll()).toHaveLength(0);
     });
 
@@ -66,54 +65,35 @@ describe('InferenceFeatureRegistry', () => {
       registry.register(createValidFeature());
       expect(() => registry.register(createValidFeature())).toThrow('already registered');
 
-      registry.lockRegistration();
       expect(registry.getAll()).toHaveLength(1);
     });
 
-    it('rejects registration after lock', () => {
-      registry.lockRegistration();
-      expect(() => registry.register(createValidFeature())).toThrow('locked');
-      expect(registry.getAll()).toHaveLength(0);
-    });
-  });
-
-  describe('locking', () => {
-    it('lockRegistration() prevents further registration', () => {
-      registry.lockRegistration();
-      expect(() => registry.register(createValidFeature())).toThrow('locked');
-    });
-
-    it('calling lockRegistration() twice does not throw', () => {
-      registry.lockRegistration();
-      expect(() => registry.lockRegistration()).not.toThrow();
-    });
-  });
-
-  describe('validateFeatures', () => {
-    it('throws if called before lock', () => {
-      expect(() => registry.validateFeatures()).toThrow('not locked');
-    });
-
-    it('passes with valid features', () => {
-      registry.register(createValidFeature({ featureId: 'parent' }));
-      registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }));
-      registry.lockRegistration();
-      expect(() => registry.validateFeatures()).not.toThrow();
-    });
-
     it('rejects parentFeatureId referencing non-existent feature', () => {
-      registry.register(createValidFeature({ parentFeatureId: 'missing' }));
-      registry.lockRegistration();
-      expect(() => registry.validateFeatures()).toThrow('parentFeatureId');
+      expect(() => registry.register(createValidFeature({ parentFeatureId: 'missing' }))).toThrow(
+        'parentFeatureId'
+      );
+    });
+
+    it('accepts child after parent is registered', () => {
+      registry.register(createValidFeature({ featureId: 'parent' }));
+      expect(() =>
+        registry.register(createValidFeature({ featureId: 'child', parentFeatureId: 'parent' }))
+      ).not.toThrow();
+    });
+
+    it('allows registration at any time', () => {
+      registry.register(createValidFeature({ featureId: 'a' }));
+      expect(registry.getAll()).toHaveLength(1);
+
+      registry.register(createValidFeature({ featureId: 'b' }));
+      expect(registry.getAll()).toHaveLength(2);
     });
   });
 
   describe('retrieval', () => {
-    it('getAll() returns all registered features after lock', () => {
+    it('getAll() returns all registered features', () => {
       registry.register(createValidFeature({ featureId: 'a' }));
       registry.register(createValidFeature({ featureId: 'b' }));
-      registry.lockRegistration();
-      registry.validateFeatures();
       const all = registry.getAll();
       expect(all).toHaveLength(2);
       expect(all.map((f) => f.featureId)).toEqual(expect.arrayContaining(['a', 'b']));
@@ -121,8 +101,6 @@ describe('InferenceFeatureRegistry', () => {
 
     it('returns new array references on successive getAll() calls', () => {
       registry.register(createValidFeature({ featureId: 'a' }));
-      registry.lockRegistration();
-      registry.validateFeatures();
       const first = registry.getAll();
       const second = registry.getAll();
       expect(first).toEqual(second);
@@ -133,24 +111,15 @@ describe('InferenceFeatureRegistry', () => {
       registry.register(createValidFeature({ featureId: 'a' }));
       registry.register(createValidFeature({ featureId: 'b' }));
       registry.register(createValidFeature({ featureId: 'c' }));
-      registry.lockRegistration();
-      registry.validateFeatures();
       expect(registry.get('b')).toEqual(expect.objectContaining({ featureId: 'b' }));
     });
 
     it('get(featureId) returns undefined for unknown ID', () => {
-      registry.lockRegistration();
-      registry.validateFeatures();
       expect(registry.get('unknown')).toBeUndefined();
     });
 
-    const preLockedMethods = [
-      { name: 'getAll()', fn: (r: InferenceFeatureRegistry) => r.getAll() },
-      { name: 'get()', fn: (r: InferenceFeatureRegistry) => r.get('a') },
-    ];
-
-    it.each(preLockedMethods)('$name throws if called before lock', ({ fn }) => {
-      expect(() => fn(registry)).toThrow('not locked');
+    it('getAll() returns empty array when no features registered', () => {
+      expect(registry.getAll()).toEqual([]);
     });
   });
 });
