@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '../types';
@@ -15,8 +15,8 @@ import { useRuleFormServices } from '../contexts';
 
 export const GroupFieldSelect: React.FC = () => {
   const { data } = useRuleFormServices();
-  const { control, setValue, getValues, watch } = useFormContext<FormValues>();
-  const query = watch('evaluation.query.base');
+  const { control, setValue, getValues } = useFormContext<FormValues>();
+  const query = useWatch({ name: 'evaluation.query.base', control });
   const groupByRowId = 'ruleV2FormGroupByField';
 
   // When columns change, filter out any invalid selections
@@ -58,13 +58,12 @@ export const GroupFieldSelect: React.FC = () => {
             label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
               defaultMessage: 'Group Fields',
             })}
-            fullWidth
             isInvalid={!!error}
             error={error?.message}
+            fullWidth
           >
             <EuiComboBox
               id={groupByRowId}
-              fullWidth
               options={options}
               selectedOptions={selectedOptions}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}
@@ -74,6 +73,7 @@ export const GroupFieldSelect: React.FC = () => {
               isClearable={true}
               isInvalid={!!error}
               isLoading={isLoading}
+              fullWidth
             />
           </EuiFormRow>
         );

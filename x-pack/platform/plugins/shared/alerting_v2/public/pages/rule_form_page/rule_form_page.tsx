@@ -5,86 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiLoadingSpinner,
-  EuiPageHeader,
-  EuiSpacer,
-} from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiCallOut, EuiLoadingSpinner, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLCallbacks } from '@kbn/esql-types';
-import { getESQLSources, getEsqlColumns } from '@kbn/esql-utils';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { dump, load } from 'js-yaml';
 import { useParams } from 'react-router-dom';
-import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-schemas';
-import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
+import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useCreateRule } from '../../hooks/use_create_rule';
 import { useUpdateRule } from '../../hooks/use_update_rule';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 
-const DEFAULT_RULE_YAML = `kind: alert
-
-metadata:
-  name: Example rule
-
-time_field: "@timestamp"
-
-schedule:
-  every: 1m
-  lookback: 5m
-
-evaluation:
-  query:
-    base: |
-      FROM logs-*
-      | LIMIT 1
-    condition: "WHERE true"`;
-
-const DEFAULT_RULE_VALUES: CreateRuleData = {
-  kind: 'alert',
-  metadata: {
-    name: 'Example rule',
-  },
-  time_field: '@timestamp',
-  schedule: { every: '1m', lookback: '5m' },
-  evaluation: {
-    query: {
-      base: 'FROM logs-*\n| LIMIT 1',
-      condition: 'WHERE true',
-    },
-  },
-};
-
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-};
-
-const parseYaml = (value: string): Record<string, unknown> | null => {
-  try {
-    const result = load(value);
-    if (!result || typeof result !== 'object' || Array.isArray(result)) {
-      return null;
-    }
-    return result as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-};
+const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
 export const RuleFormPage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
@@ -126,124 +62,46 @@ const EditRuleFormPageContent = ({ ruleId }: { ruleId: string }) => {
     return null;
   }
 
-  const rulePayload: CreateRuleData = {
-    kind: rule.kind ?? DEFAULT_RULE_VALUES.kind,
-    metadata: {
-      name: rule.metadata?.name ?? DEFAULT_RULE_VALUES.metadata.name,
-      owner: rule.metadata?.owner,
-      labels: rule.metadata?.labels,
-    },
-    time_field: rule.time_field ?? DEFAULT_RULE_VALUES.time_field,
-    schedule: {
-      every: rule.schedule?.every ?? DEFAULT_RULE_VALUES.schedule.every,
-      lookback: rule.schedule?.lookback ?? DEFAULT_RULE_VALUES.schedule.lookback,
-    },
-    evaluation: {
-      query: {
-        base: rule.evaluation?.query?.base ?? DEFAULT_RULE_VALUES.evaluation.query.base,
-        ...(rule.evaluation?.query?.condition != null
-          ? { condition: rule.evaluation.query.condition }
-          : {}),
-      },
-    },
-    recovery_policy: rule.recovery_policy,
-    state_transition: rule.state_transition,
-    grouping: rule.grouping,
-    no_data: rule.no_data,
-    notification_policies: rule.notification_policies,
-  };
+  const initialQuery = rule.evaluation?.query?.base ?? DEFAULT_QUERY;
 
-  const initialYaml = dump(rulePayload, { lineWidth: 120, noRefs: true });
-
-  return <RuleFormPageContent ruleId={ruleId} initialYaml={initialYaml} />;
+  return <RuleFormPageContent ruleId={ruleId} initialQuery={initialQuery} />;
 };
 
 interface RuleFormPageContentProps {
   ruleId?: string;
-  initialYaml?: string;
+  initialQuery?: string;
 }
 
-const RuleFormPageContent = ({ ruleId, initialYaml }: RuleFormPageContentProps) => {
+const RuleFormPageContent = ({ ruleId, initialQuery }: RuleFormPageContentProps) => {
   const isEditing = Boolean(ruleId);
   const http = useService(CoreStart('http'));
+  const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
   const { navigateToUrl } = application;
   const { basePath } = http;
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
-
-  const createRuleMutation = useCreateRule();
-  const updateRuleMutation = useUpdateRule();
-
-  const [yaml, setYaml] = useState(initialYaml ?? DEFAULT_RULE_YAML);
-  const [validationError, setValidationError] = useState<React.ReactNode | null>(null);
-  const [validationErrorTitle, setValidationErrorTitle] = useState<React.ReactNode | null>(null);
+  const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
 
   useBreadcrumbs(isEditing ? 'edit' : 'create');
 
-  const parsedDoc = useMemo(() => parseYaml(yaml), [yaml]);
-  const isSubmitting = createRuleMutation.isLoading || updateRuleMutation.isLoading;
-
-  const esqlCallbacks = useMemo<ESQLCallbacks>(
+  const ruleFormServices = useMemo(
     () => ({
-      getSources: async () => getESQLSources({ application, http }, undefined),
-      getColumnsFor: async ({ query }: { query?: string } | undefined = {}) =>
-        getEsqlColumns({ esqlQuery: query, search: data.search.search }),
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
     }),
-    [application, http, data.search.search]
+    [http, data, dataViews, notifications, application]
   );
 
-  const onSave = async () => {
-    setValidationError(null);
-    setValidationErrorTitle(null);
-
-    if (!parsedDoc) {
-      setValidationErrorTitle(
-        <FormattedMessage
-          id="xpack.alertingV2.createRule.invalidYamlTitle"
-          defaultMessage="Invalid YAML"
-        />
-      );
-      setValidationError(
-        <FormattedMessage
-          id="xpack.alertingV2.createRule.invalidYaml"
-          defaultMessage="YAML must define an object with rule fields."
-        />
-      );
-      return;
-    }
-
-    const validated = createRuleDataSchema.safeParse(parsedDoc);
-    if (!validated.success) {
-      setValidationErrorTitle(
-        <FormattedMessage
-          id="xpack.alertingV2.createRule.validationTitle"
-          defaultMessage="Rule validation failed"
-        />
-      );
-      setValidationError(validated.error.message);
-      return;
-    }
-
-    if (isEditing && ruleId) {
-      updateRuleMutation.mutate(
-        { id: ruleId, payload: validated.data },
-        { onSuccess: () => navigateToUrl(basePath.prepend(paths.ruleList)) }
-      );
-    } else {
-      createRuleMutation.mutate(validated.data, {
-        onSuccess: () => navigateToUrl(basePath.prepend(paths.ruleList)),
-      });
-    }
+  const onSuccess = () => {
+    navigateToUrl(basePath.prepend(paths.ruleList));
   };
 
-  const mutationError = createRuleMutation.error ?? updateRuleMutation.error;
-  const displayError = validationError ?? (mutationError ? getErrorMessage(mutationError) : null);
-  const displayErrorTitle = validationErrorTitle ?? (
-    <FormattedMessage
-      id="xpack.alertingV2.createRule.saveErrorTitle"
-      defaultMessage="Failed to save rule"
-    />
-  );
+  const onCancel = () => {
+    navigateToUrl(basePath.prepend(paths.ruleList));
+  };
 
   return (
     <>
@@ -263,73 +121,28 @@ const RuleFormPageContent = ({ ruleId, initialYaml }: RuleFormPageContentProps) 
         }
       />
       <EuiSpacer size="m" />
-      <EuiForm component="form" fullWidth>
-        {displayError ? (
-          <>
-            <EuiCallOut title={displayErrorTitle} color="danger" iconType="error" announceOnMount>
-              {displayError}
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        ) : null}
-        <EuiFormRow
-          label={
+      <StandaloneRuleForm
+        query={initialQuery ?? DEFAULT_QUERY}
+        services={ruleFormServices}
+        includeYaml
+        isDisabled={false}
+        includeSubmission
+        onSuccess={onSuccess}
+        onCancel={onCancel}
+        submitLabel={
+          isEditing ? (
             <FormattedMessage
-              id="xpack.alertingV2.createRule.yamlLabel"
-              defaultMessage="Rule definition (YAML)"
+              id="xpack.alertingV2.createRule.saveLabel"
+              defaultMessage="Save changes"
             />
-          }
-          fullWidth
-          helpText={
+          ) : (
             <FormattedMessage
-              id="xpack.alertingV2.createRule.yamlHelpText"
-              defaultMessage="Paste the rule payload as YAML. ES|QL autocomplete is available within the query field."
+              id="xpack.alertingV2.createRule.submitLabel"
+              defaultMessage="Create rule"
             />
-          }
-        >
-          <YamlRuleEditor
-            value={yaml}
-            onChange={setYaml}
-            esqlCallbacks={esqlCallbacks}
-            isReadOnly={isSubmitting}
-            dataTestSubj="alertingV2CreateRuleYaml"
-          />
-        </EuiFormRow>
-        <EuiSpacer />
-        <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onSave}
-              isLoading={isSubmitting}
-              fill
-              data-test-subj="alertingV2CreateRuleSubmit"
-            >
-              {isEditing ? (
-                <FormattedMessage
-                  id="xpack.alertingV2.createRule.saveLabel"
-                  defaultMessage="Save changes"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.alertingV2.createRule.submitLabel"
-                  defaultMessage="Create rule"
-                />
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={() => navigateToUrl(basePath.prepend(paths.ruleList))}
-              data-test-subj="cancelCreateRule"
-            >
-              <FormattedMessage
-                id="xpack.alertingV2.createRule.cancelLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiForm>
+          )
+        }
+      />
     </>
   );
 };

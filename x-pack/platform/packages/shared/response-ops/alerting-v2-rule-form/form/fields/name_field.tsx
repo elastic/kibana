@@ -31,9 +31,9 @@ export const NameField: React.FC = () => {
           label={i18n.translate('xpack.alertingV2.ruleForm.nameLabel', {
             defaultMessage: 'Name',
           })}
-          fullWidth
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <EuiFieldText {...field} inputRef={ref} isInvalid={!!error} fullWidth />
         </EuiFormRow>

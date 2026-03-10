@@ -6,7 +6,17 @@
  */
 
 // Pre-composed flyouts (lazy loaded) - recommended for most use cases
-export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout, RULE_FORM_ID } from './flyout';
+export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
+
+// Lazy components (without Suspense wrapper) - for consumers who need full control
+export {
+  LazyDynamicRuleFormFlyout,
+  LazyStandaloneRuleFormFlyout,
+  LazyRuleFormFlyout,
+} from './flyout';
+
+// Constants
+export { RULE_FORM_ID } from './form/constants';
 
 // Form components (lazy loaded) - for embedding in custom forms
 export { DynamicRuleForm, StandaloneRuleForm } from './form';
