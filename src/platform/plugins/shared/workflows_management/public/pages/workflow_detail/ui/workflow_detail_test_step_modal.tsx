@@ -19,6 +19,7 @@ import {
   selectExecution,
   selectReplayStepExecutionId,
   selectTestStepModalOpenStepId,
+  selectWorkflowGraph,
   selectWorkflowId,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
@@ -45,6 +46,21 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
   const replayStepExecutionId = useSelector(selectReplayStepExecutionId);
   const execution = useSelector(selectExecution);
   const editorYaml = useSelector(selectEditorYaml) ?? '';
+  const workflowGraph = useSelector(selectWorkflowGraph);
+
+  const workflowGraphForStep = useMemo((): WorkflowGraph | null => {
+    if (!testStepModalOpenStepId) return null;
+    if (replayStepExecutionId != null && execution?.workflowDefinition) {
+      const fullGraph = WorkflowGraph.fromWorkflowDefinition(execution.workflowDefinition);
+      return fullGraph.getStepGraph(testStepModalOpenStepId);
+    }
+    return workflowGraph ? workflowGraph.getStepGraph(testStepModalOpenStepId) : null;
+  }, [
+    testStepModalOpenStepId,
+    replayStepExecutionId,
+    execution?.workflowDefinition,
+    workflowGraph,
+  ]);
 
   const contextOverride = useMemo((): ContextOverrideData | null => {
     if (!testStepModalOpenStepId) {
@@ -52,8 +68,8 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
     }
     if (replayStepExecutionId != null && execution?.workflowDefinition) {
       const workflowDefinition = execution.workflowDefinition;
-      const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
-      const stepSubGraph = workflowGraph.getStepGraph(testStepModalOpenStepId);
+      const executionWorkflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+      const stepSubGraph = executionWorkflowGraph.getStepGraph(testStepModalOpenStepId);
       if (!spaceId) {
         return null;
       }
@@ -128,6 +144,7 @@ export const WorkflowDetailTestStepModal = React.memo(() => {
       initialWorkflowRunId={execution?.id}
       initialTab={replayStepExecutionId ? 'historical' : undefined}
       stepId={testStepModalOpenStepId}
+      workflowGraph={workflowGraphForStep ?? undefined}
     />
   );
 });

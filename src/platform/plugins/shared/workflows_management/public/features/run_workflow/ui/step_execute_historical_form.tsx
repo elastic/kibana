@@ -23,11 +23,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
+import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
 import { useWorkflowStepExecutions } from '../../../entities/workflows/model/use_workflow_step_executions';
 import { selectWorkflowId } from '../../../entities/workflows/store';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { buildContextOverrideFromExecution } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 import { useStepExecution } from '../../workflow_execution_detail/model/use_step_execution';
 
@@ -47,6 +50,8 @@ export interface StepExecuteHistoricalFormProps {
   stepId: string;
   /** JSON Schema for the step inputs */
   contextJsonSchema?: z.core.JSONSchema.BaseSchema;
+  /** Workflow graph for the step (subgraph) used to reconstruct context override from execution data */
+  workflowGraph?: WorkflowGraph;
 }
 
 export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormProps>(
@@ -59,6 +64,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     initialWorkflowRunId,
     stepId,
     contextJsonSchema,
+    workflowGraph,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(
@@ -84,6 +90,15 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
       workflowRunIdForFetch,
       selectedStepExecutionId ?? undefined,
       selectedItem?.status
+    );
+
+    const { data: workflowExecution, isLoading: isLoadingWorkflowExecution } = useWorkflowExecution(
+      {
+        executionId: workflowRunIdForFetch || null,
+        enabled: !!selectedStepExecutionId && !!workflowRunIdForFetch,
+        includeInput: true,
+        includeOutput: true,
+      }
     );
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
@@ -159,21 +174,22 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     }, [initialStepExecutionId]);
 
     useEffect(() => {
-      if (!selectedStepExecutionId || isLoadingStepExecution) {
+      if (!selectedStepExecutionId || isLoadingStepExecution || isLoadingWorkflowExecution) {
         setErrors(NOT_READY_SENTINEL);
       }
-    }, [selectedStepExecutionId, isLoadingStepExecution, setErrors]);
+    }, [selectedStepExecutionId, isLoadingStepExecution, isLoadingWorkflowExecution, setErrors]);
 
     useEffect(() => {
-      if (selectedStepExecution?.input !== undefined) {
-        const input =
-          typeof selectedStepExecution.input === 'object' && selectedStepExecution.input !== null
-            ? selectedStepExecution.input
-            : { value: selectedStepExecution.input };
-        setValue(JSON.stringify(input, null, 2));
+      if (selectedStepExecution && workflowExecution && workflowGraph) {
+        const override = buildContextOverrideFromExecution(
+          workflowGraph,
+          workflowExecution,
+          selectedStepExecution
+        );
+        setValue(JSON.stringify(override.stepContext, null, 2));
         setErrors(null);
       }
-    }, [selectedStepExecution, setValue, setErrors]);
+    }, [selectedStepExecution, workflowExecution, workflowGraph, setValue, setErrors]);
 
     const handleExecutionChange = useCallback((selected: EuiComboBoxOptionOption<string>[]) => {
       const id = selected.length > 0 && selected[0].value ? String(selected[0].value) : null;
@@ -259,7 +275,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
               </EuiFlexItem>
             )}
             <EuiFlexItem>
-              <EuiFormRow label={translations.stepInputLabel} fullWidth>
+              <EuiFormRow label={translations.contextOverrideLabel} fullWidth>
                 <CodeEditor
                   languageId="json"
                   value={value}
@@ -300,7 +316,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
             </EuiFlexItem>
           </>
         )}
-        {selectedStepExecutionId && isLoadingStepExecution && (
+        {selectedStepExecutionId && (isLoadingStepExecution || isLoadingWorkflowExecution) && (
           <EuiFlexItem>
             <EuiText size="s" color="subdued">
               {translations.loadingExecution}
@@ -339,6 +355,9 @@ const translations = {
   ),
   stepInputLabel: i18n.translate('workflows.testStepModal.stepInputLabel', {
     defaultMessage: 'Step input',
+  }),
+  contextOverrideLabel: i18n.translate('workflows.testStepModal.contextOverrideLabel', {
+    defaultMessage: 'Context override',
   }),
   loadingExecution: i18n.translate('workflows.testStepModal.loadingExecution', {
     defaultMessage: 'Loading step execution…',

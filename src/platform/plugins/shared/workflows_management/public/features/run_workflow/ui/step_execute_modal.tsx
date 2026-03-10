@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
 import { StepExecuteManualForm } from './step_execute_manual_form';
@@ -60,6 +61,7 @@ export interface StepExecuteModalProps {
   initialWorkflowRunId?: string;
   initialTab?: StepInputTab;
   stepId: string;
+  workflowGraph?: WorkflowGraph;
 }
 
 export const StepExecuteModal = React.memo<StepExecuteModalProps>(
@@ -71,6 +73,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
     initialWorkflowRunId,
     initialTab,
     stepId,
+    workflowGraph,
   }) => {
     useWorkflowsMonacoTheme();
     const { euiTheme } = useEuiTheme();
@@ -123,7 +126,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
 
     const handleSubmit = useCallback(() => {
       if (onSubmit) {
-        onSubmit({ stepInputs: { inputs: stepInputs } });
+        onSubmit({ stepInputs });
       }
     }, [onSubmit, stepInputs]);
 
@@ -235,6 +238,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                   initialWorkflowRunId={initialWorkflowRunId ?? undefined}
                   stepId={stepId}
                   contextJsonSchema={contextJsonSchema}
+                  workflowGraph={workflowGraph}
                 />
               )}
             </EuiFlexItem>
