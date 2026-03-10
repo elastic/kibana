@@ -32,7 +32,6 @@ const MAIN_ENTITY_ID_FIELD = 'entity.id';
 const ENTITY_NAME_FIELD = 'entity.name';
 const ENTITY_TYPE_FIELD = 'entity.type';
 const TIMESTAMP_FIELD = '@timestamp';
-const EVENT_KIND_FIELD = 'event.kind';
 
 const METADATA_FIELDS = ['_index'];
 
@@ -50,7 +49,6 @@ const CCS_FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
   MAIN_ENTITY_ID_FIELD,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  EVENT_KIND_FIELD,
 ];
 
 /** ESQL WHERE clause fragment after LOOKUP JOIN when entity definition has postAggFilter; otherwise empty. */
@@ -237,11 +235,7 @@ export function buildCcsLogsExtractionEsqlQuery({
     `| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}
     | STATS
       ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
-      ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),` +
-    // Get existing event.kind or fallback to asset
-    // so we follow ecs standards (and make sure we pass the filters)
-    `
-      ${EVENT_KIND_FIELD} = COALESCE(LAST(${EVENT_KIND_FIELD}, ${TIMESTAMP_FIELD}), "asset"),
+      ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
       ${aggregationStats(fields, false)}
       BY ${MAIN_ENTITY_ID_FIELD}` +
     `

@@ -13,7 +13,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
-      event.kind = COALESCE(LAST(event.kind, @timestamp), \\"asset\\"),
       entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
  host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
  host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL,
@@ -165,8 +164,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entit
  entity.relationships.resolution.risk.calculated_score_norm,
  @timestamp,
  entity.id,
- entity.EngineMetadata.FirstSeenLogInPage,
- event.kind
+ entity.EngineMetadata.FirstSeenLogInPage
     | LIMIT 5000"
 `;
 
@@ -188,7 +186,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
-      event.kind = COALESCE(LAST(event.kind, @timestamp), \\"asset\\"),
       entity.name = LAST(TO_STRING(user.name), @timestamp) WHERE user.name IS NOT NULL,
  event.module = MV_DEDUPE(TOP(TO_STRING(event.module), 10)) WHERE event.module IS NOT NULL,
  data_stream.dataset = MV_DEDUPE(TOP(TO_STRING(data_stream.dataset), 50)) WHERE data_stream.dataset IS NOT NULL,
@@ -310,8 +307,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates expected query with paginatio
  host.name,
  @timestamp,
  entity.id,
- entity.EngineMetadata.FirstSeenLogInPage,
- event.kind
+ entity.EngineMetadata.FirstSeenLogInPage
     | LIMIT 10000"
 `;
 
@@ -328,7 +324,6 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`]
     | STATS
       @timestamp = MAX(@timestamp),
       entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
-      event.kind = COALESCE(LAST(event.kind, @timestamp), \\"asset\\"),
       entity.name = LAST(TO_STRING(host.name), @timestamp) WHERE host.name IS NOT NULL,
  host.entity.id = FIRST(TO_STRING(host.entity.id), @timestamp) WHERE host.entity.id IS NOT NULL,
  host.name = MV_DEDUPE(TOP(TO_STRING(host.name), 10)) WHERE host.name IS NOT NULL,
@@ -480,8 +475,7 @@ exports[`buildCcsLogsExtractionEsqlQuery generates query without LOOKUP JOIN 1`]
  entity.relationships.resolution.risk.calculated_score_norm,
  @timestamp,
  entity.id,
- entity.EngineMetadata.FirstSeenLogInPage,
- event.kind
+ entity.EngineMetadata.FirstSeenLogInPage
     | LIMIT 10000"
 `;
 
