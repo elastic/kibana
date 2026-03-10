@@ -168,7 +168,7 @@ describe('Stack Connectors Plugin', () => {
         })
       );
 
-      // Spec Connector Types registered
+      // Spec Connector Types registered (includes MCP from connector-specs all_specs)
       specConnectorTypes.forEach((spec, index) => {
         expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
           builtInConnectorTypesCount + index + 1,
@@ -179,8 +179,8 @@ describe('Stack Connectors Plugin', () => {
         );
       });
 
-      // SubAction Connectors
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(15);
+      // SubAction Connectors (MCP is now v2 spec, so 14 not 15)
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -254,19 +254,12 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         11,
         expect.objectContaining({
-          id: '.mcp',
-          name: 'MCP',
-        })
-      );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        12,
-        expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        13,
+        12,
         expect.objectContaining({
           id: '.crowdstrike',
           name: 'CrowdStrike',
