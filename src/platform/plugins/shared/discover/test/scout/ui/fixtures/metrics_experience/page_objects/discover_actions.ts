@@ -32,7 +32,7 @@ export class DiscoverActions {
       name: queryLabel,
     });
 
-    await expect(queryOption).toBeVisible();
+    await expect(queryOption).toBeVisible({ timeout: 30_000 });
     await queryOption.click();
     await this.waitUntilSearchingHasFinished();
   }

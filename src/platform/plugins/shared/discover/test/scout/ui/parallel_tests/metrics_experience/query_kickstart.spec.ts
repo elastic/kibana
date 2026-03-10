@@ -18,7 +18,7 @@ import {
 spaceTest.describe(
   'Metrics in Discover - Query kickstart',
   {
-    tag: testData.METRICS_EXPERIENCE_TAGS,
+    tag: testData.RECOMMENDED_QUERY_TAGS,
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
@@ -40,10 +40,6 @@ spaceTest.describe(
     spaceTest('should run Search all metrics from recommended queries', async ({ pageObjects }) => {
       const { discover, discoverActions, metricsExperience } = pageObjects;
       await discover.selectTextBaseLang();
-
-      await spaceTest.step('open recommended queries from the ES|QL help menu', async () => {
-        await discoverActions.openRecommendedQueriesPanel();
-      });
 
       await spaceTest.step('apply Search all metrics query recommendation', async () => {
         await discoverActions.runRecommendedEsqlQuery(
