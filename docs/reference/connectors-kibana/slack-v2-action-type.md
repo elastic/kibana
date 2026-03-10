@@ -2,8 +2,6 @@
 navigation_title: "Slack (v2)"
 type: reference
 description: "Use the Slack (v2) connector to search messages, resolve channel IDs, and send messages to Slack channels using the Slack Web API."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/slack-v2-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview

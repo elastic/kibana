@@ -2,8 +2,6 @@
 navigation_title: "ServiceNow"
 type: reference
 description: "Use the ServiceNow connector for federated search across incidents, knowledge articles, change requests, and other ServiceNow tables."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/servicenow-search-action-type.html
 applies_to:
   stack: preview 9.4
   serverless: preview
