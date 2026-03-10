@@ -114,12 +114,11 @@ export interface IClusterClient {
    *
    * @param request - The incoming {@link ScopeableRequest | request} whose credentials are used
    *   to authenticate Elasticsearch calls.
-   * @param opts - Optional {@link AsScopedOptions | options} to configure CPS routing behavior.
-   *   Defaults to `'origin-only'` when not specified.
+   * @param opts - {@link AsScopedOptions | Options} to configure CPS routing behavior.
    */
   asScoped(
     request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
+    opts: OriginOnlyRouting | AllProjectsRouting
   ): IScopedClusterClient;
 }
 

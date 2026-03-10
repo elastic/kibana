@@ -51,7 +51,7 @@ beforeAll(async () => {
   const request = httpServerMock.createKibanaRequest();
   soClient = coreStart.savedObjects.getScopedClient(request);
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
-  searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
+  searchSourceStart = await dataStartMock.search.searchSource.asScoped(request, { projectRouting: 'origin-only' });
 
   mockServices = {
     searchSourceStart,

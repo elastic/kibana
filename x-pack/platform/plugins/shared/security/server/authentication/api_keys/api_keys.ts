@@ -160,7 +160,13 @@ export class APIKeys implements NativeAPIKeysType {
       return null;
     }
     const { type, expiration, name, metadata } = createParams;
-    const scopedClusterClient = this.clusterClient.asScoped(request);
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    const scopedClusterClient = this.clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
     this.logger.debug('Trying to create an API key');
 
@@ -215,7 +221,13 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     const { type, id, metadata } = updateParams;
-    const scopedClusterClient = this.clusterClient.asScoped(request);
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    const scopedClusterClient = this.clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
     this.logger.debug('Trying to edit an API key');
 
@@ -338,7 +350,13 @@ export class APIKeys implements NativeAPIKeysType {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
+      // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+      //   Review and choose one of the following options:
+      //   A) Still unsure? Leave this comment as-is.
+      //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+      //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+      //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+      result = await this.clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser.security.invalidateApiKey({
         ids: params.ids,
       });
       this.logger.debug(
@@ -398,7 +416,13 @@ export class APIKeys implements NativeAPIKeysType {
 
     this.logger.debug(`Trying to validate an API key`);
     try {
-      await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
+      // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+      //   Review and choose one of the following options:
+      //   A) Still unsure? Leave this comment as-is.
+      //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+      //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+      //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+      await this.clusterClient.asScoped(fakeRequest, { projectRouting: 'origin-only' }).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
       return true;
     } catch (e) {

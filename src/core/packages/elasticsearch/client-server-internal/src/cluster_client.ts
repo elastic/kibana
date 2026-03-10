@@ -124,9 +124,9 @@ export class ClusterClient implements ICustomClusterClient {
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
   asScoped(
     request: ScopeableRequest,
-    opts?: OriginOnlyRouting | AllProjectsRouting
+    opts: OriginOnlyRouting | AllProjectsRouting
   ): IScopedClusterClient;
-  asScoped(request: ScopeableRequest, opts: AsScopedOptions = { projectRouting: 'origin-only' }) {
+  asScoped(request: ScopeableRequest, opts: AsScopedOptions) {
     const createScopedClient = () => {
       const scopedHeaders = this.getScopedHeaders(request);
       const { projectRouting } = opts;

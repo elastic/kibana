@@ -203,7 +203,7 @@ describe('ClusterClient', () => {
 
       expect(scopedClient.child).not.toHaveBeenCalled();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
       expect(scopedClient.child).not.toHaveBeenCalled();
 
@@ -231,7 +231,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
@@ -262,7 +262,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -291,7 +291,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       client = scopedClusterClient.asCurrentUser;
 
       expect(createTransportMock).toHaveBeenCalledTimes(1);
@@ -405,8 +405,8 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const scopedClusterClient1 = clusterClient.asScoped(request);
-      const scopedClusterClient2 = clusterClient.asScoped(request);
+      const scopedClusterClient1 = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
+      const scopedClusterClient2 = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
       // trigger client instantiation via getter
       client = scopedClusterClient1.asCurrentUser;
@@ -440,7 +440,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -472,7 +472,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -513,7 +513,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -551,7 +551,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -589,7 +589,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -627,7 +627,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -667,7 +667,7 @@ describe('ClusterClient', () => {
         headers: { foo: 'request' },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -705,7 +705,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -741,7 +741,7 @@ describe('ClusterClient', () => {
         headers: { [headerKey]: 'foo' },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -783,7 +783,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -820,7 +820,7 @@ describe('ClusterClient', () => {
         },
       };
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -856,7 +856,7 @@ describe('ClusterClient', () => {
         },
       };
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -888,7 +888,7 @@ describe('ClusterClient', () => {
         headers: { [AUTHORIZATION_HEADER]: 'Bearer override' },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -929,7 +929,7 @@ describe('ClusterClient', () => {
         headers: { [AUTHORIZATION_HEADER]: 'Bearer override' },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -967,7 +967,7 @@ describe('ClusterClient', () => {
         headers: { [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(fakeRequest);
+      const scopedClusterClient = clusterClient.asScoped(fakeRequest, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asCurrentUser;
 
@@ -999,7 +999,7 @@ describe('ClusterClient', () => {
 
       expect(internalClient.child).not.toHaveBeenCalled();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
       expect(internalClient.child).not.toHaveBeenCalled();
 
@@ -1026,7 +1026,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest();
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
@@ -1060,7 +1060,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
@@ -1099,7 +1099,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       expect(() => {
         client = scopedClusterClient.asSecondaryAuthUser;
@@ -1131,7 +1131,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({});
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
@@ -1171,7 +1171,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
@@ -1209,7 +1209,7 @@ describe('ClusterClient', () => {
         },
       };
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
@@ -1245,7 +1245,7 @@ describe('ClusterClient', () => {
         },
       });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
@@ -1282,7 +1282,7 @@ describe('ClusterClient', () => {
         },
       };
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
 
       expect(() => {
         // trigger client instantiation via getter
@@ -1308,7 +1308,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({ headers: { foo: 'bar' } });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 
@@ -1346,7 +1346,7 @@ describe('ClusterClient', () => {
       });
       const request = httpServerMock.createKibanaRequest({ headers: { foo: 'bar' } });
 
-      const scopedClusterClient = clusterClient.asScoped(request);
+      const scopedClusterClient = clusterClient.asScoped(request, { projectRouting: 'origin-only' });
       // trigger client instantiation via getter
       client = scopedClusterClient.asSecondaryAuthUser;
 

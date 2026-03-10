@@ -156,7 +156,7 @@ describe('http service', () => {
         const { createCookieSessionStorageFactory, createRouter, registerAuth, auth } = http;
         const sessionStorageFactory = await createCookieSessionStorageFactory(cookieOptions);
         registerAuth((req, res, toolkit) => {
-          sessionStorageFactory.asScoped(req).set({ value: user });
+          sessionStorageFactory.asScoped(req, { projectRouting: 'origin-only' }).set({ value: user });
           return toolkit.authenticated({ state: user });
         });
 
@@ -264,7 +264,7 @@ describe('http service', () => {
       router.get(
         { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
         async (context, req, res) => {
-          await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          await elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asInternalUser.ping();
           return res.ok();
         }
       );
@@ -303,7 +303,7 @@ describe('http service', () => {
       router.get(
         { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
         async (context, req, res) => {
-          await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          await elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asInternalUser.ping();
           return res.ok();
         }
       );
@@ -345,7 +345,7 @@ describe('http service', () => {
         async (context, req, res) => {
           try {
             const result = await elasticsearch.client
-              .asScoped(req)
+              .asScoped(req, { projectRouting: 'origin-only' })
               .asInternalUser.ping({}, { meta: true });
             return res.ok({
               body: result,

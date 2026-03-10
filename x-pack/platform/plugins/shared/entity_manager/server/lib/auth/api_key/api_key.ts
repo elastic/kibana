@@ -37,12 +37,18 @@ export const checkIfEntityDiscoveryAPIKeyIsValid = async (
   if (!isValid) return false;
 
   // this fake kibana request is how you get an API key-scoped client...
+  // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+  //   Review and choose one of the following options:
+  //   A) Still unsure? Leave this comment as-is.
+  //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+  //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+  //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
   const esClient = server.core.elasticsearch.client.asScoped(
     getFakeKibanaRequest({
       id: apiKey.id,
       api_key: apiKey.apiKey,
     })
-  ).asCurrentUser;
+  , { projectRouting: 'origin-only' }).asCurrentUser;
 
   server.logger.debug('validating API key has runtime privileges for entity discovery');
 

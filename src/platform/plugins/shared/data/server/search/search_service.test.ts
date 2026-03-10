@@ -137,7 +137,7 @@ describe('Search service', () => {
         searchPluginStart.asScoped(request);
 
         expect(asScopedSpy).toHaveBeenCalledTimes(1);
-        expect(asScopedSpy).toHaveBeenCalledWith(request);
+        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'origin-only' });
       });
 
       it('calls elasticsearch.client.asScoped with request and projectRouting: "space" when opts.projectRouting is "space"', () => {

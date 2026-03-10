@@ -44,7 +44,7 @@ export class ElasticsearchClientXPack implements Plugin {
       async (context, req, res) => {
         const [coreStart] = await core.getStartServices();
         const body = await coreStart.elasticsearch.client
-          .asScoped(req)
+          .asScoped(req, { projectRouting: 'origin-only' })
           .asCurrentUser.security.getUser();
         return res.ok({ body });
       }

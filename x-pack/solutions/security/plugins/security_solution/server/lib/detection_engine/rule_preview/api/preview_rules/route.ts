@@ -118,7 +118,13 @@ export const previewRulesRoute = (
         try {
           const [, { data, security: securityService, share, dataViews }] =
             await getStartServices();
-          const searchSourceClient = await data.search.searchSource.asScoped(request);
+          // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+          //   Review and choose one of the following options:
+          //   A) Still unsure? Leave this comment as-is.
+          //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+          //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+          //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+          const searchSourceClient = await data.search.searchSource.asScoped(request, { projectRouting: 'origin-only' });
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
           const actionsClient = (await context.actions).getActionsClient();
@@ -290,7 +296,13 @@ export const previewRulesRoute = (
                   getDataViews: async () => dataViewsService,
                   share,
                   getAsyncSearchClient: (strategy) => {
-                    const client = data.search.asScoped(request);
+                    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+                    //   Review and choose one of the following options:
+                    //   A) Still unsure? Leave this comment as-is.
+                    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+                    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+                    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+                    const client = data.search.asScoped(request, { projectRouting: 'origin-only' });
                     return wrapAsyncSearchClient({
                       rule: {
                         name: rule.name,

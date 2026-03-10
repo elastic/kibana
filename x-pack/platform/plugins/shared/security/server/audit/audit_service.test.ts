@@ -203,7 +203,7 @@ describe('#asScoped', () => {
       },
     });
 
-    await auditSetup.asScoped(request).log({
+    await auditSetup.asScoped(request, { projectRouting: 'origin-only' }).log({
       message: 'MESSAGE',
       event: { action: 'ACTION' },
       http: { request: { method: 'GET' } },
@@ -240,7 +240,7 @@ describe('#asScoped', () => {
     };
     const request = kibanaRequestFactory(fakeRawRequest);
 
-    await auditSetup.asScoped(request).log({
+    await auditSetup.asScoped(request, { projectRouting: 'origin-only' }).log({
       message: 'MESSAGE',
       event: { action: 'ACTION' },
     });
@@ -298,7 +298,7 @@ describe('#asScoped', () => {
       },
     });
 
-    await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
+    await auditSetup.asScoped(request, { projectRouting: 'origin-only' }).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
     expect(logger.info).not.toHaveBeenCalled();
     audit.stop();
   });
@@ -333,7 +333,7 @@ describe('#asScoped', () => {
       },
     });
 
-    await auditSetup.asScoped(request).log(undefined);
+    await auditSetup.asScoped(request, { projectRouting: 'origin-only' }).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
     audit.stop();
   });
@@ -364,7 +364,7 @@ describe('#asScoped', () => {
       },
     });
 
-    await auditSetup.asScoped(request).log({
+    await auditSetup.asScoped(request, { projectRouting: 'origin-only' }).log({
       message: 'MESSAGE',
       event: { action: 'ACTION' },
       http: { request: { method: 'GET' } },

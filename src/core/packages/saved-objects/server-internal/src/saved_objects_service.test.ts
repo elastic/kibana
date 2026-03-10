@@ -697,7 +697,9 @@ describe('SavedObjectsService', () => {
           const req = httpServerMock.createKibanaRequest();
           createScopedRepository(req);
 
-          expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req);
+          expect(coreStart.elasticsearch.client.asScoped).toHaveBeenCalledWith(req, {
+            projectRouting: 'origin-only',
+          });
 
           const [[, , , , , includedHiddenTypes]] = (
             SavedObjectsRepository.createRepository as jest.Mocked<any>

@@ -35,7 +35,7 @@ export class DataSearchTestPlugin
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
         // Just make sure `asScoped` can be called
-        await data.search.searchSource.asScoped(req);
+        await data.search.searchSource.asScoped(req, { projectRouting: 'origin-only' });
         return res.ok();
       }
     );
@@ -53,7 +53,7 @@ export class DataSearchTestPlugin
       },
       async (context, req, res) => {
         const [, { data }] = await core.getStartServices();
-        const service = await data.search.searchSource.asScoped(req);
+        const service = await data.search.searchSource.asScoped(req, { projectRouting: 'origin-only' });
         const searchSource = service.createEmpty();
         return res.ok({ body: searchSource.serialize() });
       }
@@ -74,8 +74,8 @@ export class DataSearchTestPlugin
       },
       async (context, req, res) => {
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
-        const service = await data.search.searchSource.asScoped(req);
-        const clusterClient = elasticsearch.client.asScoped(req).asCurrentUser;
+        const service = await data.search.searchSource.asScoped(req, { projectRouting: 'origin-only' });
+        const clusterClient = elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asCurrentUser;
         const savedObjectsClient = savedObjects.getScopedClient(req);
 
         // Since the index pattern ID can change on each test run, we need

@@ -182,7 +182,13 @@ export class InferencePlugin
           }
           return this.regexWorker!;
         })(),
-        esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
+        // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+        //   Review and choose one of the following options:
+        //   A) Still unsure? Leave this comment as-is.
+        //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+        //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+        //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+        esClient: core.elasticsearch.client.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {

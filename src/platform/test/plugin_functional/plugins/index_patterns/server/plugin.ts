@@ -45,7 +45,7 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser,
+          elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asCurrentUser,
           req
         );
         const ids = await service.createAndSave(req.body);
@@ -69,7 +69,7 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser,
+          elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asCurrentUser,
           req
         );
         const ids = await service.getIds(true);
@@ -98,7 +98,7 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser,
+          elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asCurrentUser,
           req
         );
         const ip = await service.get(id);
@@ -127,7 +127,7 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser,
+          elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asCurrentUser,
           req
         );
         const ip = await service.get(id);
@@ -157,7 +157,7 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser,
+          elasticsearch.client.asScoped(req, { projectRouting: 'origin-only' }).asCurrentUser,
           req
         );
         await service.delete(id);

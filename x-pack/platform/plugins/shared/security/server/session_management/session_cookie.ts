@@ -109,7 +109,13 @@ export class SessionCookie {
    * @param request Request instance to get session value for.
    */
   async get(request: KibanaRequest) {
-    const sessionStorage = (await this.cookieSessionValueStorage).asScoped(request);
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    const sessionStorage = (await this.cookieSessionValueStorage).asScoped(request, { projectRouting: 'origin-only' });
     const sessionValue = await sessionStorage.get();
 
     // If we detect that cookie session value is in incompatible format, then we should clear such
@@ -134,7 +140,13 @@ export class SessionCookie {
     options?: SessionStorageSetOptions
   ) {
     (await this.cookieSessionValueStorage)
-      .asScoped(request)
+      // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+      //   Review and choose one of the following options:
+      //   A) Still unsure? Leave this comment as-is.
+      //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+      //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+      //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+      .asScoped(request, { projectRouting: 'origin-only' })
       .set({ ...sessionValue, path: this.serverBasePath }, options);
   }
 
@@ -143,7 +155,13 @@ export class SessionCookie {
    * @param request Request instance to clear session value for.
    */
   async clear(request: KibanaRequest) {
-    (await this.cookieSessionValueStorage).asScoped(request).clear();
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    (await this.cookieSessionValueStorage).asScoped(request, { projectRouting: 'origin-only' }).clear();
   }
 
   /**

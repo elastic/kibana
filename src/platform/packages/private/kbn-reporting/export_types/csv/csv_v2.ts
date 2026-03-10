@@ -113,7 +113,13 @@ export class CsvV2ExportType extends ExportType<
     const uiSettings = await this.getUiSettingsClient(request, logger);
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
     const { data: dataPluginStart, discover: discoverPluginStart } = this.startDeps;
-    const data = dataPluginStart.search.asScoped(request);
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    const data = dataPluginStart.search.asScoped(request, { projectRouting: 'origin-only' });
 
     const { locatorParams } = job;
     const { params } = locatorParams[0];
@@ -133,7 +139,13 @@ export class CsvV2ExportType extends ExportType<
       const columns = params.columns as string[] | undefined;
       const timeFieldName = await locatorClient.timeFieldNameFromLocator(params);
       const filters = await locatorClient.filtersFromLocator(params);
-      const es = this.startDeps.esClient.asScoped(request);
+      // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+      //   Review and choose one of the following options:
+      //   A) Still unsure? Leave this comment as-is.
+      //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+      //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+      //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+      const es = this.startDeps.esClient.asScoped(request, { projectRouting: 'origin-only' });
 
       const clients = { uiSettings, data, es };
 
@@ -159,8 +171,20 @@ export class CsvV2ExportType extends ExportType<
     const columns = await locatorClient.columnsFromLocator(params);
     const searchSource = await locatorClient.searchSourceFromLocator(params);
 
-    const es = this.startDeps.esClient.asScoped(request);
-    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    const es = this.startDeps.esClient.asScoped(request, { projectRouting: 'origin-only' });
+    // TODO [CPS routing]: this client currently preserves the existing "origin-only" behavior.
+    //   Review and choose one of the following options:
+    //   A) Still unsure? Leave this comment as-is.
+    //   B) Confirmed origin-only is correct? Replace this TODO with a concise explanation of why.
+    //   C) Want to use current space’s NPRE (Named Project Routing Expression)? Change 'origin-only' to 'space' and remove this comment.
+    //      Note: 'space' requires the request passed to asScoped() to carry a `url: URL` property.
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request, { projectRouting: 'origin-only' });
 
     const clients = { uiSettings, data, es };
     const dependencies = { searchSourceStart, fieldFormatsRegistry };

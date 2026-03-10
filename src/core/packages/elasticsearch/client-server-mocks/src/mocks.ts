@@ -9,7 +9,12 @@
 
 import type { Client, TransportResult, TransportRequestOptions } from '@elastic/elasticsearch';
 import type { PublicKeys } from '@kbn/utility-types';
-import type { ElasticsearchClient, ICustomClusterClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ICustomClusterClient,
+  AsScopedOptions,
+  ScopeableRequest,
+} from '@kbn/core-elasticsearch-server';
 import { PRODUCT_RESPONSE_HEADER } from '@kbn/core-elasticsearch-client-server-internal';
 import { lazyObject } from '@kbn/lazy-object';
 
@@ -320,7 +325,18 @@ const createScopedClusterClientMock = () => {
 
 export interface ClusterClientMock {
   asInternalUser: ElasticsearchClientMock;
-  asScoped: jest.MockedFunction<() => ScopedClusterClientMock>;
+  /**
+   * Note: parameters are optional here to allow the common test pattern of calling
+   * `.asScoped()` without arguments when chaining into the mock's return value
+   * (e.g. `mockClusterClient.asScoped().asCurrentUser`). Production code enforces
+   * mandatory parameters via the `IClusterClient` interface.
+   *
+   * @param request - The request to scope the client to.
+   * @param opts - CPS routing options.
+   */
+  asScoped: jest.MockedFunction<
+    (request?: ScopeableRequest, opts?: AsScopedOptions) => ScopedClusterClientMock
+  >;
 }
 
 const createClusterClientMock = () => {

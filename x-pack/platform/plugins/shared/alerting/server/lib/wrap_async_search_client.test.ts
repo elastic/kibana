@@ -33,7 +33,7 @@ const fakeRequest = {
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
 describe('wrapScopedClusterClient', () => {
-  const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest);
+  const client = dataPluginMock.createStartContract().search.asScoped(fakeRequest, { projectRouting: 'origin-only' });
 
   beforeAll(() => {
     jest.useFakeTimers({ legacyFakeTimers: true });
