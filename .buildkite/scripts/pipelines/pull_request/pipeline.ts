@@ -28,11 +28,7 @@ import { emitPipeline, getAgentImageConfig } from '#pipeline-utils';
     key: jest-checkpoint-repro
     command: |-
       .buildkite/scripts/bootstrap.sh
-      node ./scripts/jest_all
-      --configs=".buildkite/scripts/pipelines/pull_request/jest_retry_repro/pass/jest.config.js,.buildkite/scripts/pipelines/pull_request/jest_retry_repro/fail/jest.config.js"
-      --coverage=false
-      --passWithNoTests
-      --maxParallel=1
+      node ./scripts/jest_all --configs=".buildkite/scripts/pipelines/pull_request/jest_retry_repro/pass/jest.config.js,.buildkite/scripts/pipelines/pull_request/jest_retry_repro/fail/jest.config.js" --coverage=false --passWithNoTests --maxParallel=1
     agents:
       machineType: n2d-standard-4
       preemptible: true
