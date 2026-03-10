@@ -10,12 +10,16 @@ import {
   type CoreStart,
   type Plugin,
   type PluginInitializerContext,
+  type AppUpdater,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import { BehaviorSubject } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp } from './register';
+import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
 import {
   AgentBuilderAccessChecker,
@@ -26,6 +30,7 @@ import {
   DocLinksService,
   NavigationService,
   ToolsService,
+  SkillsService,
   EventsService,
   type AgentBuilderInternalService,
 } from './services';
@@ -49,6 +54,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 
 export class AgentBuilderPlugin
   implements
@@ -69,7 +75,9 @@ export class AgentBuilderPlugin
   private sidebarCallbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
+    addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -93,6 +101,7 @@ export class AgentBuilderPlugin
         }
         return this.internalServices;
       },
+      appUpdater$: this.appUpdater$,
     });
 
     registerAnalytics({ analytics: core.analytics });
@@ -120,13 +129,28 @@ export class AgentBuilderPlugin
     const { licensing, inference } = startDependencies;
 
     const agentService = new AgentService({ http });
-    const attachmentsService = new AttachmentsService();
+    const attachmentsService = new AttachmentsService({ http });
+
+    attachmentsService.addAttachmentType(
+      'visualization',
+      createVisualizationAttachmentDefinition({ startDependencies })
+    );
+
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
+    const skillsService = new SkillsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
+
+    const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
+      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+      false
+    );
+    if (isExperimentalFeaturesEnabled) {
+      enableSkillsDeepLink(this.appUpdater$);
+    }
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
@@ -142,6 +166,7 @@ export class AgentBuilderPlugin
       docLinksService,
       navigationService,
       toolsService,
+      skillsService,
       startDependencies,
       accessChecker,
       eventsService,
@@ -196,6 +221,11 @@ export class AgentBuilderPlugin
       attachments: createPublicAttachmentContract({ attachmentsService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      addAttachment: (attachment: AttachmentInput) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
       setConversationFlyoutActiveConfig: (config: EmbeddableConversationProps) => {
         // Set config until sidebar is next opened
         this.conversationActiveConfig = config;

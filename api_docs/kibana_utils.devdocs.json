@@ -7312,7 +7312,7 @@
         "label": "url",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7332,7 +7332,7 @@
               "<string>"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7429,7 +7429,7 @@
               "(val: string, pctEncodeSpaces?: boolean) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7474,7 +7474,7 @@
               "(params: string, key: string, value?: string | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7519,6 +7519,38 @@
                 "path": "src/platform/plugins/shared/kibana_utils/common/url/encode_uri_query.ts",
                 "lineNumber": 58,
                 "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.url.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.url.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/platform/plugins/shared/kibana_utils/common/url/validate_url.ts",
+                "lineNumber": 17,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -8245,7 +8277,7 @@
         "label": "url",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8265,7 +8297,7 @@
               "<string>"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8362,7 +8394,7 @@
               "(val: string, pctEncodeSpaces?: boolean) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8407,7 +8439,7 @@
               "(params: string, key: string, value?: string | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8452,6 +8484,38 @@
                 "path": "src/platform/plugins/shared/kibana_utils/common/url/encode_uri_query.ts",
                 "lineNumber": 58,
                 "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.url.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-server.url.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/platform/plugins/shared/kibana_utils/common/url/validate_url.ts",
+                "lineNumber": 17,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -12710,7 +12774,7 @@
         "label": "url",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12730,7 +12794,7 @@
               "<string>"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12827,7 +12891,7 @@
               "(val: string, pctEncodeSpaces?: boolean) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12872,7 +12936,7 @@
               "(params: string, key: string, value?: string | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12917,6 +12981,38 @@
                 "path": "src/platform/plugins/shared/kibana_utils/common/url/encode_uri_query.ts",
                 "lineNumber": 58,
                 "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.url.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.url.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/platform/plugins/shared/kibana_utils/common/url/validate_url.ts",
+                "lineNumber": 17,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }

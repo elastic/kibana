@@ -50,4 +50,5 @@ export interface InternalCoreStart {
   pricing: PricingServiceStart;
   injection: InternalCoreDiServiceStart;
   dataStreams: DataStreamsStart;
+  _plugins?: Map<string, any>;
 }

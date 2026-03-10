@@ -49,7 +49,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getAnalysisType.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -63,7 +63,7 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -92,7 +92,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getDefaultPredictionFieldName.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -106,7 +106,7 @@
             "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -135,7 +135,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getDependentVar.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -149,7 +149,7 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -178,7 +178,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getNumTopClasses.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -192,7 +192,7 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -221,7 +221,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getNumTopFeatureImportanceValues.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -235,7 +235,7 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -264,7 +264,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getPredictionFieldName.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -278,7 +278,7 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -307,7 +307,7 @@
           {
             "parentPluginId": "@kbn/ml-data-frame-analytics-utils",
             "id": "def-common.getTrainingPercent.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "analysis",
             "description": [
@@ -321,7 +321,7 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2444,7 +2444,13 @@
           "\nAlias of estypes.MlDataframeAnalysisContainer"
         ],
         "signature": [
-          "MlDataframeAnalysisContainer"
+          "({ classification?: ",
+          "MlDataframeAnalysisClassification",
+          " | undefined; } & { outlier_detection?: undefined; regression?: undefined; }) | ({ outlier_detection?: ",
+          "MlDataframeAnalysisOutlierDetection",
+          " | undefined; } & { classification?: undefined; regression?: undefined; }) | ({ regression?: ",
+          "MlDataframeAnalysisRegression",
+          " | undefined; } & { classification?: undefined; outlier_detection?: undefined; }) | undefined"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
         "lineNumber": 139,
@@ -2463,7 +2469,7 @@
           "\nUnion type of DFA anlaysis config types"
         ],
         "signature": [
-          "\"outlier_detection\" | \"regression\" | \"classification\""
+          "\"classification\" | \"outlier_detection\" | \"regression\""
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
         "lineNumber": 209,
@@ -2668,7 +2674,17 @@
           "\nAlias for estypes.MlDataframeAnalysisFeatureProcessor"
         ],
         "signature": [
-          "MlDataframeAnalysisFeatureProcessor"
+          "({ frequency_encoding?: ",
+          "MlDataframeAnalysisFeatureProcessorFrequencyEncoding",
+          " | undefined; } & { multi_encoding?: undefined; n_gram_encoding?: undefined; one_hot_encoding?: undefined; target_mean_encoding?: undefined; }) | ({ multi_encoding?: ",
+          "MlDataframeAnalysisFeatureProcessorMultiEncoding",
+          " | undefined; } & { frequency_encoding?: undefined; n_gram_encoding?: undefined; one_hot_encoding?: undefined; target_mean_encoding?: undefined; }) | ({ n_gram_encoding?: ",
+          "MlDataframeAnalysisFeatureProcessorNGramEncoding",
+          " | undefined; } & { frequency_encoding?: undefined; multi_encoding?: undefined; one_hot_encoding?: undefined; target_mean_encoding?: undefined; }) | ({ one_hot_encoding?: ",
+          "MlDataframeAnalysisFeatureProcessorOneHotEncoding",
+          " | undefined; } & { frequency_encoding?: undefined; multi_encoding?: undefined; n_gram_encoding?: undefined; target_mean_encoding?: undefined; }) | ({ target_mean_encoding?: ",
+          "MlDataframeAnalysisFeatureProcessorTargetMeanEncoding",
+          " | undefined; } & { frequency_encoding?: undefined; multi_encoding?: undefined; n_gram_encoding?: undefined; one_hot_encoding?: undefined; }) | undefined"
         ],
         "path": "x-pack/platform/packages/private/ml/data_frame_analytics_utils/src/types.ts",
         "lineNumber": 422,

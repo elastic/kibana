@@ -14,8 +14,10 @@ import { useTraceExplorerSamples } from '../../../hooks/use_trace_explorer_sampl
 import { ResettingHeightRetainer } from '../../shared/height_retainer/resetting_height_container';
 import { push, replace } from '../../shared/links/url_helpers';
 import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetcher';
+import { useUnifiedWaterfallFetcher } from '../transaction_details/use_unified_waterfall_fetcher';
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import type { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
+import { isPending } from '../../../hooks/use_fetcher';
 
 export function TraceExplorerWaterfall() {
   const history = useHistory();
@@ -56,8 +58,27 @@ export function TraceExplorerWaterfall() {
     end,
   });
 
+  const unifiedWaterfallFetchResult = useUnifiedWaterfallFetcher({
+    start,
+    end,
+    traceId,
+    entryTransactionId: transactionId,
+  });
+
+  const serviceName = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.entryTransaction?.service.name
+    : waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name;
+
+  const activeStatus = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.status
+    : waterfallFetchResult.status;
+
+  const traceDocsTotal = waterfallFetchResult.useUnified
+    ? unifiedWaterfallFetchResult.traceItems.length
+    : waterfallFetchResult.waterfall.traceDocsTotal;
+
   useEffect(() => {
-    if (waterfallFetchResult.status === FETCH_STATUS.SUCCESS) {
+    if (activeStatus === FETCH_STATUS.SUCCESS) {
       onPageReady({
         meta: {
           rangeFrom,
@@ -65,11 +86,11 @@ export function TraceExplorerWaterfall() {
         },
         customMetrics: {
           key1: 'traceDocsTotal',
-          value1: waterfallFetchResult.waterfall.traceDocsTotal,
+          value1: traceDocsTotal,
         },
       });
     }
-  }, [waterfallFetchResult, onPageReady, rangeFrom, rangeTo]);
+  }, [activeStatus, traceDocsTotal, onPageReady, rangeFrom, rangeTo]);
 
   const onSampleClick = useCallback(
     (sample: any) => {
@@ -106,9 +127,10 @@ export function TraceExplorerWaterfall() {
     [history]
   );
 
-  const isWaterfallLoading =
-    waterfallFetchResult.status === FETCH_STATUS.LOADING &&
-    !waterfallFetchResult.waterfall.entryWaterfallTransaction;
+  const isWaterfallLoading = waterfallFetchResult.useUnified
+    ? isPending(unifiedWaterfallFetchResult.status) && !unifiedWaterfallFetchResult.entryTransaction
+    : isPending(waterfallFetchResult.status) &&
+      !waterfallFetchResult.waterfall.entryWaterfallTransaction;
 
   return (
     <ResettingHeightRetainer reset={!isWaterfallLoading}>
@@ -122,9 +144,12 @@ export function TraceExplorerWaterfall() {
         onTabClick={onTabClick}
         detailTab={detailTab}
         waterfallItemId={waterfallItemId}
-        serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
+        serviceName={serviceName}
         showCriticalPath={showCriticalPath}
         onShowCriticalPathChange={onShowCriticalPathChange}
+        useUnified={waterfallFetchResult.useUnified}
+        unifiedWaterfallFetchResult={unifiedWaterfallFetchResult}
+        entryTransactionId={transactionId}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
         traceId={traceId}

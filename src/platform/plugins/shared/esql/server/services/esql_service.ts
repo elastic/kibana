@@ -57,12 +57,14 @@ export class EsqlService {
       mode,
     })) as ResolveIndexResponse;
 
+    const mappedMode = this.getIndexSourceType(mode);
+
     sources.indices?.forEach((index) => {
-      indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
+      indices.push({ name: index.name, mode: mappedMode, aliases: index.aliases ?? [] });
     });
 
     sources.data_streams?.forEach((dataStream) => {
-      indices.push({ name: dataStream.name, mode, aliases: dataStream.aliases ?? [] });
+      indices.push({ name: dataStream.name, mode: mappedMode, aliases: dataStream.aliases ?? [] });
     });
 
     const crossClusterCommonIndices = remoteClusters

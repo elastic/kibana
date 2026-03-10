@@ -163,7 +163,7 @@ run(
           ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
         ],
         env: {
-          NODE_OPTIONS: '--max-old-space-size=10240',
+          NODE_OPTIONS: '--max-old-space-size=12288',
         },
         cwd: REPO_ROOT,
         wait: true,

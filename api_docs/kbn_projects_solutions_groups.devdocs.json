@@ -374,7 +374,7 @@
           "\nThe groups to which a module can belong.\n'common' is the default for uncategorised modules."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\" | \"common\""
+          "\"search\" | \"security\" | \"common\" | \"observability\" | \"workplaceai\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "lineNumber": 27,

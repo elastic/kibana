@@ -26,7 +26,7 @@ export const NoPrivilegePrompt: React.FC<NoPrivilegePromptProps> = ({ variant })
     <EuiButtonEmpty
       href={docLinksService.agentBuilder}
       target="_blank"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
     >
       <FormattedMessage

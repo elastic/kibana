@@ -37,6 +37,9 @@
     "@kbn/react-kibana-mount",
     "@kbn/agent-builder-common",
     "@kbn/scout",
+    "@kbn/workflows",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-plugin",
   ],
   "exclude": ["target/**/*"]
 }

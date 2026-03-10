@@ -8,17 +8,35 @@ This page shows the **minimum setup** to add Scout tests to a plugin/package. Fo
 
 ## Guided setup with the Scout CLI [scout-setup-cli]
 
-Generate a working scaffold (folders, configs, and sample tests):
+:::::::::::{stepper}
+
+::::::::::{step} Generate a working scaffold
+
+Generate a working scaffold (folders, configs, and sample tests) by following the guided setup:
 
 ```bash
 node scripts/scout.js generate
 ```
 
-Then, [enable your plugin or package](#enable-scout-tests-in-ci) in the CI.
+This command will also automatically enable your plugin or package's Scout tests in the CI by updating the `.buildkite/scout_ci_config.yml` file.
+
+::::::::::
+
+::::::::::{step} Write and run tests
+
+Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or [API tests](./write-api-tests.md).
+
+::::::::::
+
+::::::::::
+
+:::::::::::
 
 ## Manual setup [scout-setup-manual]
 
-### 1. Create the folder layout [scout-setup-folders]
+:::::::::{stepper}
+
+::::::::{step} Create the folder layout
 
 Create `test/scout`:
 
@@ -31,9 +49,17 @@ your-plugin/
         └── common/  # shared code (optional)
 ```
 
-### 2. Add Playwright config(s) [scout-setup-config]
+::::::::
 
-Create `playwright.config.ts` under `test/scout/ui` and/or `test/scout/api`:
+::::::::{step} Create Playwright config(s)
+
+Create a config under `test/scout/ui` and/or `test/scout/api`.
+
+::::::::{tab-set}
+
+:::::::{tab-item} Standard config (sequential test runs)
+
+Create `playwright.config.ts`:
 
 ```ts
 import { createPlaywrightConfig } from '@kbn/scout';
@@ -44,12 +70,16 @@ export default createPlaywrightConfig({
 ```
 
 ::::::{important}
-Name the file exactly `playwright.config.ts` so Scout tooling can discover it.
+Use the conventional name `playwright.config.ts` so Scout tooling can discover the config.
 ::::::
 
 Then create the `tests/` directory next to the config.
 
-### 3. (Optional) Add a parallel UI config [scout-setup-parallel-config]
+If many files share one-time setup (archives/ingest/settings), add a [global setup hook](./global-setup-hook.md).
+
+:::::::
+
+:::::::{tab-item} Parallel config (parallel test runs)
 
 If your UI suites can be isolated, add `parallel.playwright.config.ts` under `test/scout/ui` and point it at `parallel_tests/`:
 
@@ -63,27 +93,44 @@ export default createPlaywrightConfig({
 ```
 
 ::::::{important}
-Name the file exactly `parallel.playwright.config.ts` so Scout tooling can discover it.
+Use the conventional name `parallel.playwright.config.ts` so Scout tooling can discover the config.
 ::::::
 
-See [Parallelism](./parallelism.md) and [Global setup hook](./global-setup-hook.md) for recommended parallel patterns.
+Then create the `parallel_tests/` directory next to the config. For parallel suites, prefer defining test suites and test cases using `spaceTest` so each worker runs in an isolated Space (see [Parallelism](./parallelism.md)).
 
-### 4. Enable tests in CI
+If many files share one-time setup (archives/ingest/settings), add a [global setup hook](./global-setup-hook.md).
 
-Finally, [enable Scout test runs in the CI](#enable-scout-tests-in-ci) for your plugin or package.
+:::::::
 
-## Enable Scout tests in CI [enable-scout-tests-in-ci]
+::::::::
 
-To enable Scout CI for your plugin/package, add it to `.buildkite/scout_ci_config.yml`:
+::::::::
+
+::::::::{step} Enable Scout runs in CI
+
+Ensure your plugin or package is listed in `.buildkite/scout_ci_config.yml` so Scout tests run in CI. If not already in the list, add **one line** under the appropriate `enabled` list:
+
+- **Plugins**: Add `- <plugin_name>` under `plugins.enabled`. The name is the path segment(s) after `plugins/` (the plugin folder name, or a slash-separated path for nested plugins).
+- **Packages**: Add `- <package_name>` under `packages.enabled`. The name is the folder name after `packages/`.
 
 ```yaml
 plugins:
   enabled:
-    - <your_plugin_name>
+    - <plugin_name>
   disabled:
 
 packages:
   enabled:
-    - <your_package_name>
+    - <package_name>
   disabled:
 ```
+
+::::::::
+
+::::::::::{step} Write and run tests
+
+Tweak the new Playwright config(s) and [write UI tests](./write-ui-tests.md) or [API tests](./write-api-tests.md).
+
+::::::::::
+
+:::::::::

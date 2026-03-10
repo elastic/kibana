@@ -6,21 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { PublishesESQLVariable } from '@kbn/esql-types';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type {
-  HasEditCapabilities,
-  PublishesDataLoading,
-  TitlesApi,
-} from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { PublishesESQLVariable } from '@kbn/esql-types';
+import type { HasEditCapabilities, PublishesDataLoading } from '@kbn/presentation-publishing';
 import type { OptionsListComponentState } from '../data_controls/options_list_control/types';
 
 export type ESQLControlApi = DefaultEmbeddableApi<OptionsListESQLControlState> &
   PublishesESQLVariable &
   HasEditCapabilities &
-  TitlesApi &
   PublishesDataLoading;
 
 type HideExcludeUnusedState = Pick<OptionsListComponentState, 'exclude'>;

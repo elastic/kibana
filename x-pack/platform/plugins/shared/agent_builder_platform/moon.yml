@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/agent-builder-server'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/agent-builder-genai-utils'
-  - '@kbn/core-elasticsearch-server'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
   - '@kbn/management-settings-ids'

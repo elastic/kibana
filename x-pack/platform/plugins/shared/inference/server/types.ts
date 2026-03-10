@@ -18,15 +18,21 @@ import type {
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
+import type {
+  AnonymizationPluginStart,
+  AnonymizationPluginSetup,
+} from '@kbn/anonymization-plugin/server';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface InferenceSetupDependencies {
   actions: ActionsPluginSetup;
+  anonymization?: AnonymizationPluginSetup;
 }
 
 export interface InferenceStartDependencies {
   actions: ActionsPluginStart;
+  anonymization?: AnonymizationPluginStart;
 }
 
 /**

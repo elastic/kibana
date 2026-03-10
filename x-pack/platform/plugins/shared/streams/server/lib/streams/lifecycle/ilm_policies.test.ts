@@ -7,6 +7,15 @@
 
 import { buildPolicyUsage, normalizeIlmPhases } from './ilm_policies';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object';
+
+const getActions = (phase: unknown): Record<string, unknown> | undefined => {
+  if (!isRecord(phase)) return undefined;
+  const actions = phase.actions;
+  return isRecord(actions) ? actions : undefined;
+};
+
 describe('lifecycle helpers', () => {
   describe('buildPolicyUsage', () => {
     it('derives data streams from backing indices', () => {
@@ -67,17 +76,40 @@ describe('lifecycle helpers', () => {
       expect(normalizeIlmPhases(undefined)).toEqual({});
     });
 
-    it('drops undefined phases', () => {
+    it('normalizes ES ILM phases into Streams ILM phases', () => {
       const normalized = normalizeIlmPhases({
-        hot: { actions: { rollover: { max_age: '1d' } } },
-        warm: { min_age: '2d' },
+        hot: {
+          actions: {
+            rollover: { max_age: '1d' },
+            set_priority: { priority: 100 },
+          },
+        },
+        warm: {
+          min_age: '2d',
+          actions: { readonly: {} },
+        },
         frozen: undefined,
       } as unknown as Parameters<typeof normalizeIlmPhases>[0]);
 
-      expect(normalized).toEqual({
-        hot: { actions: { rollover: { max_age: '1d' } } },
-        warm: { min_age: '2d' },
+      expect(normalized.hot).toMatchObject({
+        name: 'hot',
+        size_in_bytes: 0,
+        rollover: { max_age: '1d' },
       });
+      expect(getActions(normalized.hot)).toEqual({
+        rollover: { max_age: '1d' },
+        set_priority: { priority: 100 },
+      });
+
+      expect(normalized.warm).toMatchObject({
+        name: 'warm',
+        size_in_bytes: 0,
+        min_age: '2d',
+        readonly: true,
+      });
+      expect(getActions(normalized.warm)).toEqual({ readonly: {} });
+
+      expect(normalized.frozen).toBeUndefined();
     });
   });
 });
