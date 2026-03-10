@@ -166,14 +166,13 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('added mw to  previously added integration', async () => {
+    it('added mw to previously added integration', async () => {
       const apiResponse = await supertestAPI.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
       );
 
       const packagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newBrowserMonitorId + '-' + loc.id + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newBrowserMonitorId + '-' + loc.id
       );
 
       expect(packagePolicy.policy_id).eql(testFleetPolicyID);
