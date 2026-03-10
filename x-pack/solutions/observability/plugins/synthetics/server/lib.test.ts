@@ -93,6 +93,7 @@ describe('SyntheticsEsClient', () => {
   describe('search', () => {
     it('should call baseESClient.search with correct parameters', async () => {
       const mockSearchParams = {
+        ignore_unavailable: true,
         body: {
           query: {
             match_all: {},
@@ -128,6 +129,7 @@ describe('SyntheticsEsClient', () => {
 
     it('should throw an error if baseESClient.search throws an error', async () => {
       const mockSearchParams = {
+        ignore_unavailable: true,
         body: {
           query: {
             match_all: {},
@@ -152,6 +154,7 @@ describe('SyntheticsEsClient', () => {
     it('should call baseESClient.count with correct parameters', async () => {
       const mockCountParams = {
         index: 'example',
+        ignore_unavailable: true,
       };
 
       const result = await syntheticsEsClient.count(mockCountParams);
@@ -173,6 +176,7 @@ describe('SyntheticsEsClient', () => {
 
     it('should throw an error if baseESClient.count throws an error', async () => {
       const mockCountParams = {
+        ignore_unavailable: true,
         index: 'example',
       };
       const mockError = new Error('Count error');

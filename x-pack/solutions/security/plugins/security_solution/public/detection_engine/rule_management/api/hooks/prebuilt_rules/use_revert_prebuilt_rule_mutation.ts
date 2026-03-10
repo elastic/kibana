@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { HTTPError } from '../../../../../../common/detection_engine/types';
 import type {
   RevertPrebuiltRulesResponseBody,
@@ -21,6 +21,7 @@ import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_p
 import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
 import { cappedExponentialBackoff } from './capped_exponential_backoff';
 import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './use_fetch_prebuilt_rule_base_version_query';
+import { useInvalidateFetchRuleByIdQuery } from '../use_fetch_rule_by_id_query';
 
 export const REVERT_PREBUILT_RULE_KEY = ['POST', REVERT_PREBUILT_RULES_URL];
 
@@ -39,6 +40,7 @@ export const useRevertPrebuiltRuleMutation = (
   const invalidateRuleStatus = useInvalidateFetchPrebuiltRulesStatusQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
+  const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
 
   return useMutation<RevertPrebuiltRulesResponseBody, HTTPError, RevertPrebuiltRulesRequest>(
     (args: RevertPrebuiltRulesRequest) => {
@@ -55,6 +57,7 @@ export const useRevertPrebuiltRuleMutation = (
         invalidateFetchPrebuiltRulesUpgradeReview();
         invalidateRuleStatus();
         invalidateFetchCoverageOverviewQuery();
+        invalidateFetchRuleByIdQuery();
         invalidateFetchPrebuiltRuleBaseVerison();
 
         if (options?.onSettled) {

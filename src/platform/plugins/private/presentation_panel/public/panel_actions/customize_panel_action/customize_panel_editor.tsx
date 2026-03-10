@@ -99,7 +99,13 @@ export const CustomizePanelEditor = ({
   const dateFormat = useMemo(() => core.uiSettings.get<string>(UI_SETTINGS.DATE_FORMAT), []);
 
   const save = () => {
-    if (panelTitle !== api.title$?.value) api.setTitle?.(panelTitle);
+    // If the panel title matches the default title, we set api.title to undefined to indicate there's no custom title.
+    // This ensures the panel stays in sync with the centrally saved object's title and reflects any updates to its title.
+    if (panelTitle === api?.defaultTitle$?.value) {
+      api.setTitle?.(undefined);
+    } else if (panelTitle !== api.title$?.value) {
+      api.setTitle?.(panelTitle);
+    }
     if (hideTitle !== api.hideTitle$?.value) api.setHideTitle?.(hideTitle);
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);
 

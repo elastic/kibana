@@ -84,7 +84,7 @@ export const DstEventGenerator: FC<Props> = ({ addEvents, setTimezone, isDisable
 
           <EuiCallOut
             color="primary"
-            iconType="iInCircle"
+            iconType="info"
             size="s"
             title={
               <FormattedMessage

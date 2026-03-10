@@ -64,7 +64,7 @@ describe('Secondary metric', () => {
       });
       // Test id is the last resource here as the element will be empty
       const el = screen.getByTestId('metric-secondary-element');
-      expect(el).toContainHTML('');
+      expect(el.textContent).toBe('');
     });
   });
 

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrService } from '@kbn/test-suites-xpack/functional/ftr_provider_context';
+import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {

@@ -470,6 +470,38 @@ describe('AgentActivityFlyout', () => {
     );
   });
 
+  it('should render agent activity for in progress policy reassign', () => {
+    const mockActionStatuses = [
+      {
+        actionId: 'action7',
+        nbAgentsActionCreated: 1,
+        nbAgentsAck: 0,
+        type: 'POLICY_REASSIGN',
+        nbAgentsActioned: 1,
+        status: 'IN_PROGRESS',
+        expiration: '2099-09-16T10:00:00.000Z',
+        newPolicyId: 'Policy1',
+        creationTime: '2022-09-15T10:00:00.000Z',
+        nbAgentsFailed: 0,
+      },
+    ];
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: false,
+    });
+    const result = testRenderer.render(component());
+
+    expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
+      'Reassigning 1 agent to Policy 1'
+    );
+    expect(
+      result.container
+        .querySelector('[data-test-subj="statusDescription"]')!
+        .textContent?.replace(/\s/g, '')
+    ).toContain('Started on Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
+  });
+
   it('should render agent activity for unknown action', () => {
     const mockActionStatuses = [
       {

@@ -38,6 +38,15 @@ import { DEFAULT_TASK_TYPE } from '../constants';
 import { Config, ConfigEntryView } from '../types/types';
 import { TaskTypeOption } from '../utils/helpers';
 
+const taskTypeConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
+      isBlocking: true,
+    },
+  ],
+};
+
 // Custom trigger button CSS
 const buttonCss = css`
   &:hover {
@@ -92,17 +101,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             />
           </EuiText>
           <EuiSpacer size="m" />
-          <UseField
-            path="config.taskType"
-            config={{
-              validations: [
-                {
-                  validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
-                  isBlocking: true,
-                },
-              ],
-            }}
-          >
+          <UseField path="config.taskType" config={taskTypeConfig}>
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

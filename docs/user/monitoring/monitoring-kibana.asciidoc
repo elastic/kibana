@@ -95,7 +95,7 @@ ability to access your monitoring data. It also prevents monitoring activities
 from impacting the performance of your production cluster.
 
 If {security-features} are enabled on the production cluster, use an HTTPS
-URL such as `https://<your_production_cluster>:9200` in this setting.
+URL such as `<PRODUCTION_CLUSTER_URL>:9200` in this setting.
 ===============================
 
 --

@@ -108,6 +108,7 @@ describe('useConversation', () => {
 
   describe('without initial messages and a conversation id', () => {
     beforeEach(() => {
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -133,6 +134,7 @@ describe('useConversation', () => {
 
   describe('with initial messages', () => {
     beforeEach(() => {
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -183,6 +185,7 @@ describe('useConversation', () => {
         ],
       });
 
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -231,6 +234,7 @@ describe('useConversation', () => {
     beforeEach(async () => {
       mockService.callApi.mockRejectedValueOnce(new Error('failed to load'));
 
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -302,6 +306,7 @@ describe('useConversation', () => {
 
       onConversationUpdate = jest.fn();
 
+      // @ts-expect-error upgrade typescript v5.9.3
       hookResult = renderHook(useConversation, {
         initialProps: {
           chatService: mockChatService,
@@ -441,6 +446,7 @@ describe('useConversation', () => {
         });
 
         await act(async () => {
+          // @ts-expect-error upgrade typescript v5.9.3
           hookResult = renderHook(useConversation, {
             initialProps: {
               chatService: mockChatService,

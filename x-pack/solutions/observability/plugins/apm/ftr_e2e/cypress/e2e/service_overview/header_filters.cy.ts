@@ -102,6 +102,7 @@ describe('Service overview - header filters', () => {
       cy.loginAsViewerUser();
     });
     it('filters by transaction.name', () => {
+      cy.intercept('/internal/kibana/suggestions/values/*').as('getSuggestions');
       cy.visitKibana(
         url.format({
           pathname: '/app/apm/services/opbeans-java/overview',
@@ -113,6 +114,7 @@ describe('Service overview - header filters', () => {
       cy.contains('transaction.name');
       cy.getByTestSubj('autocompleteSuggestion-field-transaction.name-').click();
       cy.getByTestSubj('apmUnifiedSearchBar').type(':');
+      cy.wait('@getSuggestions');
       cy.getByTestSubj('autoCompleteSuggestionText').should('have.length', 1);
       cy.getByTestSubj(
         Cypress.$.escapeSelector('autocompleteSuggestion-value-"GET-/api/product"-')

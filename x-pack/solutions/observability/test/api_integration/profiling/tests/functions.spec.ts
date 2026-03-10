@@ -21,16 +21,12 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const supertest = getService('supertest');
   const bettertest = getBettertest(supertest);
   const es = getService('es');
+  const esVersion = getService('esVersion');
 
   const start = new Date('2023-03-17T01:00:00.000Z').getTime();
   const end = new Date('2023-03-17T01:05:00.000Z').getTime();
 
   registry.when('Functions api', { config: 'cloud' }, () => {
-    before(async () => {
-      await setupProfiling(bettertest, log);
-      await loadProfilingData(es, log);
-    });
-
     describe('With data', () => {
       let functions: TopNFunctions;
       before(async () => {
@@ -51,13 +47,27 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
         functions = response.body as TopNFunctions;
       });
 
-      it(`returns correct result`, async () => {
-        expect(functions.TopN.length).to.equal(5);
-        expect(functions.TotalCount).to.equal(3599);
-        expect(functions.selfCPU).to.equal(397);
-        expect(functions.totalCPU).to.equal(399);
+      // Test for ES versions < 9.1
+      // Use conditional it/it.skip to prevent snapshot overwriting
+      (esVersion.matchRange('<9.1.0') ? it : it.skip)('returns correct result', async () => {
+        expect(functions.TopN.length).to.equal(12669);
+        expect(functions.TotalCount).to.equal(112962);
+        expect(functions.selfCPU).to.equal(3599);
+        expect(functions.totalCPU).to.equal(112962);
         expectSnapshot(functions).toMatch();
       });
+
+      // Test for ES versions >= 9.1
+      (esVersion.matchRange('>=9.1.0') ? it : it.skip)(
+        'returns correct result (ES 9.1+)',
+        async () => {
+          expect(functions.TopN.length).to.equal(7047);
+          expect(functions.TotalCount).to.equal(80555);
+          expect(functions.selfCPU).to.equal(3534);
+          expect(functions.totalCPU).to.equal(80555);
+          expectSnapshot(functions).toMatch();
+        }
+      );
     });
   });
 }

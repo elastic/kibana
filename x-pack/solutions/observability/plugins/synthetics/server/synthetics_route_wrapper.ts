@@ -66,7 +66,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
       try {
-        const res = await syntheticsRoute.handler({
+        const data = {
           syntheticsEsClient,
           savedObjectsClient,
           context,
@@ -76,7 +76,10 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           spaceId,
           syntheticsMonitorClient,
           monitorConfigRepository,
-        });
+        };
+
+        const res = await server.fleet.runWithCache(() => syntheticsRoute.handler(data));
+
         if (isKibanaResponse(res)) {
           return res;
         }
@@ -105,6 +108,9 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
           },
         });
       } catch (e) {
+        if (isKibanaResponse(e)) {
+          return e;
+        }
         if (e.statusCode === 403) {
           const privileges = await checkIndicesReadPrivileges(syntheticsEsClient);
           if (!privileges.has_all_requested) {

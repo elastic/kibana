@@ -25,8 +25,8 @@ import { getLogRateAnalysisTypeForCounts } from '../get_log_rate_analysis_type_f
 import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
 
 import { fetchIndexInfo } from './fetch_index_info';
-import { fetchSignificantCategories } from './fetch_significant_categories';
 import { fetchSignificantTermPValues } from './fetch_significant_term_p_values';
+import { fetchSignificantCategories } from './fetch_significant_categories';
 
 const MAX_CONCURRENT_QUERIES = 5;
 const CHUNK_SIZE = 50;
@@ -105,13 +105,22 @@ export async function fetchLogRateAnalysisForAlert({
         },
       })
   );
-  const { textFieldCandidates, keywordFieldCandidates } = indexInfo;
+
+  const { keywordFieldCandidates, textFieldCandidates } = indexInfo;
 
   const logRateAnalysisType = getLogRateAnalysisTypeForCounts({
     baselineCount: indexInfo.baselineTotalDocCount,
     deviationCount: indexInfo.deviationTotalDocCount,
     windowParameters,
   });
+
+  // Return early if there are no field candidates.
+  if (keywordFieldCandidates.length === 0 && textFieldCandidates.length === 0) {
+    return {
+      logRateAnalysisType,
+      significantItems: [],
+    };
+  }
 
   // Just in case the log rate analysis type is 'dip', we need to swap
   // the window parameters for the analysis.

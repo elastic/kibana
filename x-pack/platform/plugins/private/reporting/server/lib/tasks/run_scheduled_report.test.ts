@@ -337,6 +337,7 @@ describe('Run Scheduled Report Task', () => {
         kibana_name: 'kibana',
         kibana_id: 'instance-uuid',
         started_at: expect.any(String),
+        space_id: 'default',
         timeout: 120000,
         max_attempts: 1,
         process_expiration: expect.any(String),
@@ -588,7 +589,8 @@ describe('Run Scheduled Report Task', () => {
 
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Error sending notification for scheduled report: The report is larger than the 10MB limit.'
+        'Error sending notification for scheduled report: The report is larger than the 10MB limit.',
+        { tags: [savedReport._id] }
       );
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 11534336 },
@@ -619,7 +621,8 @@ describe('Run Scheduled Report Task', () => {
 
       expect(emailNotificationService.notify).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Error sending notification for scheduled report: Reporting notification service has not been initialized.'
+        'Error sending notification for scheduled report: Reporting notification service has not been initialized.',
+        { tags: [savedReport._id] }
       );
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 2097152 },
@@ -671,7 +674,8 @@ describe('Run Scheduled Report Task', () => {
         reporting: mockReporting,
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        'Error sending notification for scheduled report: This is a test error!'
+        'Error sending notification for scheduled report: This is a test error!',
+        { tags: [savedReport._id] }
       );
       expect(reportStore.setReportWarning).toHaveBeenCalledWith(savedReport, {
         output: { content_type: 'application/pdf', size: 2097152 },

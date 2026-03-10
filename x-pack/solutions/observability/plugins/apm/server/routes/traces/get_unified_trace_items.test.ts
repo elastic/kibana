@@ -45,7 +45,7 @@ describe('getErrorCountByDocId', () => {
       apmErrors: [{ parent: { id: undefined } }],
       unprocessedOtelErrors: [{ id: undefined }],
       totalErrors: 0,
-    } as UnifiedTraceErrors;
+    } as unknown as UnifiedTraceErrors;
 
     expect(getErrorCountByDocId(unifiedTraceErrors)).toEqual({});
   });

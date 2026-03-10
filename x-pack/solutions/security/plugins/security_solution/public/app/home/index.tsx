@@ -39,11 +39,15 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { pathname } = useLocation();
-  const sourcererScope = getScopeFromPath(pathname);
-  const { browserFields: oldBrowserFields } = useInitSourcerer(sourcererScope);
-  const { browserFields: experimentalBrowserFields } = useBrowserFields(sourcererScope);
+  const { browserFields: oldBrowserFields } = useInitSourcerer(getScopeFromPath(pathname, false));
+  const { browserFields: experimentalBrowserFields } = useBrowserFields(
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
 
-  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), sourcererScope);
+  useRestoreDataViewManagerStateFromURL(
+    useInitDataViewManager(),
+    getScopeFromPath(pathname, newDataViewPickerEnabled)
+  );
 
   useUrlState();
   useUpdateBrowserTitle();

@@ -87,7 +87,7 @@ interface ConnectorStepProps {
 
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications, triggersActionsUi } = useKibana().services;
+  const { http, notifications, triggersActionsUi, settings } = useKibana().services;
   const { setConnector, completeStep } = useActions();
 
   const [connectors, setConnectors] = useState<AIConnector[]>();
@@ -103,7 +103,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
     isLoading,
     data: aiConnectors,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled });
+  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled, settings });
 
   useEffect(() => {
     if (aiConnectors != null) {
@@ -167,7 +167,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
         <EuiFlexGroup direction="row" gutterSize="xs" alignItems="flexStart">
           <EuiFlexItem grow={false} css={{ margin: euiTheme.size.xxs }}>
             <EuiText size="xs" color="subdued">
-              <EuiIcon type="iInCircle" size="s" className="eui-alignTop" />
+              <EuiIcon type="info" size="s" className="eui-alignTop" />
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>

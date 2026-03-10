@@ -41,11 +41,13 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     chrome,
     productDocBase,
     elasticAssistantSharedState,
+    settings,
   } = useKibana().services;
 
   const inferenceEnabled = useInferenceEnabled();
 
   const basePath = useBasePath();
+  const { isVisible } = useIsNavControlVisible();
   const assistantAvailability = useAssistantAvailability();
 
   const assistantTelemetry = useAssistantTelemetry();
@@ -105,6 +107,7 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
     userProfileService: userProfile,
     chrome,
     getUrlForApp,
+    settings,
   });
 
   useEffect(() => {
@@ -112,8 +115,6 @@ export function AssistantProvider({ children }: { children: React.ReactElement }
       assistantContextValue
     );
   }, [assistantContextValue, elasticAssistantSharedState.assistantContextValue]);
-
-  const { isVisible } = useIsNavControlVisible();
 
   if (!isVisible) {
     return null;

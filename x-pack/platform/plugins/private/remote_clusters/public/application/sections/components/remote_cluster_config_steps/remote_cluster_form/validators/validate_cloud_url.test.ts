@@ -41,7 +41,7 @@ describe('Cloud remote address', () => {
       expect(actual).toBe(false);
     });
 
-    it('false when proxy address is the same as server name', () => {
+    it('false when proxy address is the same as server name (hostname)', () => {
       const actual = isCloudAdvancedOptionsEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:9400',
@@ -50,10 +50,46 @@ describe('Cloud remote address', () => {
       });
       expect(actual).toBe(false);
     });
-    it('true when proxy address is not the same as server name', () => {
+    it('false when proxy address is the same as server name (IPv4)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '1.1.1.1:9400',
+        serverName: '1.1.1.1',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(false);
+    });
+    it('false when proxy address is the same as server name (IPv6)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '[2001:db8::1]:1234',
+        serverName: '[2001:db8::1]',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(false);
+    });
+    it('true when proxy address is not the same as server name (hostname)', () => {
       const actual = isCloudAdvancedOptionsEnabled({
         name: 'test',
         proxyAddress: 'some-proxy:9400',
+        serverName: 'some-server-name',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(true);
+    });
+    it('true when proxy address is not the same as server name (IPv4)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '1.1.1.1:9400',
+        serverName: 'some-server-name',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
+      });
+      expect(actual).toBe(true);
+    });
+    it('true when proxy address is not the same as server name (IPv6)', () => {
+      const actual = isCloudAdvancedOptionsEnabled({
+        name: 'test',
+        proxyAddress: '[2001:db8::1]:1234',
         serverName: 'some-server-name',
         securityModel: SECURITY_MODEL.CERTIFICATE,
       });
@@ -71,27 +107,57 @@ describe('Cloud remote address', () => {
     });
   });
   describe('conversion from cloud remote address', () => {
-    it('empty url to empty proxy connection values', () => {
+    it('converts empty url to empty proxy connection values', () => {
       const actual = convertCloudRemoteAddressToProxyConnection('');
       expect(actual).toEqual({ proxyAddress: '', serverName: '' });
     });
 
-    it('url with protocol and port to proxy connection values', () => {
+    it('converts url with protocol and port to proxy connection values (IPv4)', () => {
+      const actual = convertCloudRemoteAddressToProxyConnection('http://192.168.1.1:1234');
+      expect(actual).toEqual({ proxyAddress: '192.168.1.1:1234', serverName: '192.168.1.1' });
+    });
+
+    it('converts url with protocol and port to proxy connection values (IPv6)', () => {
+      const actual = convertCloudRemoteAddressToProxyConnection('http://[2001:db8::1]:1234');
+      expect(actual).toEqual({ proxyAddress: '[2001:db8::1]:1234', serverName: '[2001:db8::1]' });
+    });
+
+    it('converts url with protocol and port to proxy connection values (hostname)', () => {
       const actual = convertCloudRemoteAddressToProxyConnection('http://test.com:1234');
       expect(actual).toEqual({ proxyAddress: 'test.com:1234', serverName: 'test.com' });
     });
 
-    it('url with protocol and no port to proxy connection values', () => {
+    it('converts url with protocol and no port to proxy connection values (IPv4)', () => {
+      const actual = convertCloudRemoteAddressToProxyConnection('http://192.168.1.1');
+      expect(actual).toEqual({ proxyAddress: '192.168.1.1:9400', serverName: '192.168.1.1' });
+    });
+
+    it('converts url with protocol and no port to proxy connection values (IPv6)', () => {
+      const actual = convertCloudRemoteAddressToProxyConnection('http://[2001:db8::1]');
+      expect(actual).toEqual({ proxyAddress: '[2001:db8::1]:9400', serverName: '[2001:db8::1]' });
+    });
+
+    it('converts url with protocol and no port to proxy connection values (hostname)', () => {
       const actual = convertCloudRemoteAddressToProxyConnection('http://test.com');
       expect(actual).toEqual({ proxyAddress: 'test.com:9400', serverName: 'test.com' });
     });
 
-    it('url with no protocol to proxy connection values', () => {
+    it('converts url with no protocol to proxy connection values (IPv4)', () => {
+      const actual = convertCloudRemoteAddressToProxyConnection('192.168.1.1');
+      expect(actual).toEqual({ proxyAddress: '192.168.1.1:9400', serverName: '192.168.1.1' });
+    });
+
+    it('converts url with no protocol to proxy connection values (IPv6)', () => {
+      const actual = convertCloudRemoteAddressToProxyConnection('2001:db8::1');
+      expect(actual).toEqual({ proxyAddress: '2001:db8::1:9400', serverName: '2001:db8::1' });
+    });
+
+    it('converts url with no protocol to proxy connection values (hostname)', () => {
       const actual = convertCloudRemoteAddressToProxyConnection('test.com');
       expect(actual).toEqual({ proxyAddress: 'test.com:9400', serverName: 'test.com' });
     });
 
-    it('invalid url to empty proxy connection values', () => {
+    it('converts invalid url to empty proxy connection values', () => {
       const actual = convertCloudRemoteAddressToProxyConnection('invalid%url');
       expect(actual).toEqual({ proxyAddress: '', serverName: '' });
     });

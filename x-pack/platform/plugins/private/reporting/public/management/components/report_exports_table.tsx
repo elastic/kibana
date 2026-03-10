@@ -17,8 +17,10 @@ import {
   EuiIconTip,
   EuiLink,
   EuiSpacer,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
@@ -35,6 +37,7 @@ type TableColumn = EuiBasicTableColumn<Job>;
 
 interface State {
   page: number;
+  perPage?: number;
   total: number;
   jobs: Job[];
   selectedJobs: Job[];
@@ -56,6 +59,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
 
     this.state = {
       page: 0,
+      perPage: 50,
       total: 0,
       jobs: [],
       selectedJobs: [],
@@ -157,9 +161,9 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
     );
   };
 
-  private onTableChange = ({ page }: { page: { index: number } }) => {
-    const { index: pageIndex } = page;
-    this.setState(() => ({ page: pageIndex }), this.fetchJobs);
+  private onTableChange = ({ page }: { page: { index: number; size: number } }) => {
+    const { index: pageIndex, size: perPage } = page;
+    this.setState(() => ({ page: pageIndex, perPage }), this.fetchJobs);
   };
 
   private fetchJobs = async () => {
@@ -171,7 +175,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
     let jobs: Job[];
     let total: number;
     try {
-      jobs = await this.props.apiClient.list(this.state.page);
+      jobs = await this.props.apiClient.list(this.state.page, this.state.perPage);
       total = await this.props.apiClient.total();
 
       this.isInitialJobsFetch = false;
@@ -260,7 +264,10 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
         width: tableColumnWidths.title,
         render: (objectTitle: string, job) => {
           return (
-            <div data-test-subj="reportingListItemObjectTitle">
+            <div
+              data-test-subj="reportingListItemObjectTitle"
+              css={({ euiTheme }: UseEuiTheme) => css({ paddingTop: euiTheme.size.s })}
+            >
               <EuiLink
                 data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
@@ -395,13 +402,19 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             ),
             'data-test-subj': 'reportViewInfoLink',
             type: 'icon',
-            icon: 'iInCircle',
+            icon: 'info',
             onClick: (job) => this.setState({ selectedJob: job }),
           },
           {
-            name: i18n.translate('xpack.reporting.exports.table.openInKibanaAppLabel', {
-              defaultMessage: 'Open Dashboard',
-            }),
+            name: (job) =>
+              i18n.translate('xpack.reporting.schedules.table.openDashboard.title', {
+                defaultMessage: 'Open in {objectType}',
+                values: {
+                  objectType: job.objectType
+                    ? getDisplayNameFromObjectType(job.objectType)
+                    : 'Kibana',
+                },
+              }),
             'data-test-subj': 'reportOpenInKibanaApp',
             description: i18n.translate(
               'xpack.reporting.exports.table.openInKibanaAppDescription',
@@ -424,7 +437,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
 
     const pagination = {
       pageIndex: this.state.page,
-      pageSize: 10,
+      pageSize: this.state.perPage,
       totalItemCount: this.state.total,
       showPerPageOptions: true,
     };

@@ -50,6 +50,7 @@ import type {
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import { Logger } from '@kbn/logging';
+import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
@@ -137,8 +138,8 @@ export class ChromeService {
         )
       )
     );
-    this.isVisible$ = combineLatest([appHidden$, this.isForceHidden$]).pipe(
-      map(([appHidden, forceHidden]) => !appHidden && !forceHidden),
+    this.isVisible$ = combineLatest([appHidden$, this.isForceHidden$, isPrinting$]).pipe(
+      map(([appHidden, forceHidden, isPrinting]) => !appHidden && !forceHidden && !isPrinting),
       takeUntil(this.stop$)
     );
   }

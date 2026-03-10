@@ -10,7 +10,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ApplicationStart } from '@kbn/core/public';
-import { NotificationsSetup, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';
+import { NotificationsStart, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -39,7 +39,7 @@ export interface AppServices {
   documentation: DocumentationService;
   api: ApiService;
   fileReader: FileReaderService;
-  notifications: NotificationsSetup;
+  notifications: NotificationsStart;
   history: ManagementAppMountParams['history'];
   uiSettings: IUiSettingsClient;
   settings: SettingsStart;

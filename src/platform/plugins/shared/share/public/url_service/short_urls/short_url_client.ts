@@ -88,7 +88,9 @@ export class BrowserShortUrlClient implements IShortUrlClient {
             ...inputParams.params,
             timeRange: {
               from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
-              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
+              to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string, {
+                roundUp: true,
+              }),
             },
           },
         };

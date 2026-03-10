@@ -40,8 +40,10 @@ export class LlmTasksPlugin
   start(core: CoreStart, startDependencies: PluginStartDependencies): LlmTasksPluginStart {
     const { inference, productDocBase } = startDependencies;
     return {
-      retrieveDocumentationAvailable: async () => {
-        const docBaseStatus = await startDependencies.productDocBase.management.getStatus();
+      retrieveDocumentationAvailable: async (options: { inferenceId: string }) => {
+        const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
+          inferenceId: options.inferenceId,
+        });
         return docBaseStatus.status === 'installed';
       },
       retrieveDocumentation: (options) => {

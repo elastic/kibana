@@ -10,7 +10,7 @@ import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../constants';
 
-const osTypeBasedOnAgentType = (data?: Ecs) => {
+export const osTypeBasedOnAgentType = (data?: Ecs) => {
   if (data?.agent?.type?.includes('endpoint')) {
     return (data?.host?.os?.name || ['windows']).map((name) => name.toLowerCase());
   } else {

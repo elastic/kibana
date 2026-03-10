@@ -28,7 +28,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
       <EuiCallOut
         color="warning"
         data-test-subj="importSavedObjectsConflictsWarning"
-        iconType="help"
+        iconType="question"
         title={
           <Memo(MemoizedFormattedMessage)
             defaultMessage="Data Views Conflicts"

@@ -21,8 +21,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = pageObjects.findings.latestFindingsTable;
+
       await findings.navigateToLatestFindingsPage();
-      await findings.waitForPluginInitialized();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('Findings - Querying data', () => {
@@ -41,9 +42,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           searchQuery:
             'cloud.provider : "aws" and cloud.region : "eu-west-3" and result.evaluation : "failed"  and rule.tags : "CIS 5.4"',
           provider: 'aws',
-          expectedRowsCount: 3,
-          expectedGroupCount: '1 cloud account',
-          expectedUnitCount: '3 findings',
+          expectedRowsCount: 4,
+          expectedGroupCount: '2 cloud accounts',
+          expectedUnitCount: '4 findings',
         },
         {
           searchQuery:

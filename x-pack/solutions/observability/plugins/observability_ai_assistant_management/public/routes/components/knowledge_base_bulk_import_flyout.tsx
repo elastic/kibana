@@ -167,6 +167,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
           )}
           onChange={onChange}
           accept=".ndjson"
+          data-test-subj="knowledgeBaseBulkImportFilePicker"
         />
       </EuiFlyoutBody>
 
@@ -189,6 +190,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
               data-test-subj="knowledgeBaseBulkImportFlyoutSaveButton"
               fill
               isLoading={isLoading}
+              disabled={files.length === 0}
               onClick={handleSubmitNewEntryClick}
             >
               {i18n.translate(

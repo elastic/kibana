@@ -653,7 +653,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            {!isLoading && !error && panels[0].items?.length && (
+            {!isLoading && !error && !!panels[0].items?.length && (
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={button}

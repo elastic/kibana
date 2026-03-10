@@ -40,6 +40,7 @@ export const getPatternRollupStub = (
               managed: true,
               policy: pattern,
               phase,
+              skip: true,
             },
           ];
         })

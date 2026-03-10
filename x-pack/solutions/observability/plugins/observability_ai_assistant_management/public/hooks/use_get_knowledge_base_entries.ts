@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
@@ -26,6 +26,7 @@ export function useGetKnowledgeBaseEntries({
   const observabilityAIAssistantApi = observabilityAIAssistant.service.callApi;
 
   const { isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery({
+    networkMode: 'always',
     queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES, query, sortBy, sortDirection],
     queryFn: async ({ signal }) => {
       if (!signal) {

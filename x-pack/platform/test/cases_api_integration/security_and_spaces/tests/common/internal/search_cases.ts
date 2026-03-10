@@ -32,7 +32,6 @@ import {
   obsSec,
 } from '../../../../common/lib/authentication/users';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -866,14 +865,14 @@ export default ({ getService }: FtrProviderContext): void => {
       describe('range queries', () => {
         before(async () => {
           await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_various_dates.json',
             { space: 'space1' }
           );
         });
 
         after(async () => {
           await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.2.0/cases_various_dates.json',
             { space: 'space1' }
           );
           await deleteAllCaseItems(es);

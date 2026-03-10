@@ -59,7 +59,7 @@ const iconMap: Record<string, string> = {
   token_count: 'tokenTokenCount',
   unsigned_long: 'tokenNumber',
 };
-const defaultToken = 'questionInCircle';
+const defaultToken = 'question';
 
 export const ResultField: React.FC<ResultFieldProps> = ({
   iconType,
@@ -81,6 +81,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs" justifyContent="center">
           <EuiFlexItem grow={false}>
             <EuiPopover
+              closePopover={() => setIsPopoverOpen(false)}
               button={
                 <EuiButtonIcon
                   onClick={() => setIsPopoverOpen(!isPopoverOpen)}

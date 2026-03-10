@@ -10,7 +10,6 @@
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { PLUGIN_FEATURE, PLUGIN_ID } from '../common/constants';
 import { guideStateSavedObjectsType, pluginStateSavedObjectsType } from './saved_objects';
 
@@ -20,7 +19,6 @@ export const GUIDED_ONBOARDING_FEATURE: KibanaFeatureConfig = {
     defaultMessage: 'Setup guides',
   }),
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
   privileges: {
     all: {

@@ -41,7 +41,7 @@ open target/coverage/jest/index.html
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
+The API tests are located in [`x-pack/solutions/observability/test/apm_api_integration/`](/x-pack/solutions/observability/test/apm_api_integration/).
 
 #### Start server and run test (single process)
 
@@ -93,7 +93,7 @@ node x-pack/solutions/observability/plugins/apm/scripts/test/api --runner --basi
 | --inspect    | Add --inspect-brk flag to the ftr for debugging |
 | --times      | Repeat the test n number of times               |
 
-Deployment-agnostic tests are located in [`x-pack/test/deployment_agnostic/apis/observability/apm/index.ts`](../../../../../test/api_integration/deployment_agnostic/apis/observability/apm/index.ts).
+Deployment-agnostic tests are located in [`x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/apm/index.ts`](../../../test/api_integration_deployment_agnostic/apis/apm/index.ts).
 
 #### Start server and run test (single process)
 
@@ -175,13 +175,13 @@ Accessibility tests are added on the e2e with `checkA11y()`, they will run toget
 
 ```sh
 # Start server
-node scripts/functional_tests_server --config x-pack/test/functional/apps/apm/config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/functional/apps/apm/config.ts
 
 # Run tests
-node scripts/functional_test_runner --config x-pack/test/functional/apps/apm/config.ts --grep='APM specs'
+node scripts/functional_test_runner --config x-pack/solutions/observability/test/functional/apps/apm/config.ts --grep='APM specs'
 ```
 
-APM tests are located in `x-pack/test/functional/apps/apm`.
+APM tests are located in `x-pack/solutions/observability/test/functional/apps/apm`.
 For debugging access Elasticsearch on http://localhost:9220` (elastic/changeme)
 diff --git a/x-pack/solutions/observability/plugins/apm/scripts/test/README.md b/x-pack/solutions/observability/plugins/apm/scripts/test/README.md
 

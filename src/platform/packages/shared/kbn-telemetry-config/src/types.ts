@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { TracingConfig } from '@kbn/tracing-config';
 
 /**
  * Configuration for OpenTelemetry
@@ -19,19 +20,4 @@ export interface TelemetryConfig {
    * Whether telemetry collection is enabled.
    */
   enabled?: boolean;
-}
-
-/**
- * Configuration for OpenTelemetry tracing
- */
-export interface TracingConfig {
-  /**
-   * Whether OpenTelemetry tracing is enabled.
-   */
-  enabled?: boolean;
-  /**
-   * At which rate spans get sampled if a sampling decision
-   * needs to be made. Should be between 0-1.
-   */
-  sample_rate: number;
 }

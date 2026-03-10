@@ -6,7 +6,7 @@
  */
 import type { BulkFillGapsByRuleIdsParams } from './types';
 import { BulkFillGapsScheduleResult, BulkGapsFillStep } from './types';
-import { processAllGapsInTimeRange } from '../../../../lib/rule_gaps/process_all_gaps_in_time_range';
+import { processAllRuleGaps } from '../../../../lib/rule_gaps/process_all_rule_gaps';
 import type { Gap } from '../../../../lib/rule_gaps/gap';
 import type { BulkGapFillError } from './utils';
 import { logProcessedAsAuditEvent, toBulkGapFillError } from './utils';
@@ -36,7 +36,7 @@ export const batchBackfillRuleGaps = async (
   const eventLogClient = await context.getEventLogClient();
 
   try {
-    const processingResults = await processAllGapsInTimeRange({
+    const processingResults = await processAllRuleGaps({
       ruleId: rule.id,
       start,
       end,

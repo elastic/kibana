@@ -15,6 +15,7 @@ import type {
   TinesWebhooksActionResponseSchema,
   TinesWebhooksActionParamsSchema,
   TinesWebhookObjectSchema,
+  TinesWebhookActionConfigSchema,
   TinesStoryObjectSchema,
 } from './schema';
 
@@ -27,4 +28,5 @@ export type TinesStoryObject = TypeOf<typeof TinesStoryObjectSchema>;
 export type TinesStoriesActionResponse = TypeOf<typeof TinesStoriesActionResponseSchema>;
 export type TinesWebhooksActionParams = TypeOf<typeof TinesWebhooksActionParamsSchema>;
 export type TinesWebhooksActionResponse = TypeOf<typeof TinesWebhooksActionResponseSchema>;
+export type TinesWebhookActionConfig = TypeOf<typeof TinesWebhookActionConfigSchema>;
 export type TinesWebhookObject = TypeOf<typeof TinesWebhookObjectSchema>;

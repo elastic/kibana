@@ -24,6 +24,7 @@ export function registerContextFunction({
   client,
   functions,
   resources,
+  scopes,
   isKnowledgeBaseReady,
 }: FunctionRegistrationParameters & { isKnowledgeBaseReady: boolean }) {
   functions.registerFunction(
@@ -33,8 +34,12 @@ export function registerContextFunction({
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
       visibility: FunctionVisibility.Internal,
     },
-    async ({ messages, screenContexts, chat }, signal) => {
-      const { analytics } = await resources.plugins.core.start();
+    async ({ connectorId, messages, screenContexts, chat }, signal) => {
+      const { request, plugins } = resources;
+      const { analytics } = await plugins.core.start();
+      const actionsClient = await (
+        await plugins.actions.start()
+      ).getActionsClientWithRequest(request);
 
       async function getContext() {
         const screenDescription = compact(
@@ -61,6 +66,11 @@ export function registerContextFunction({
           return { content };
         }
 
+        const connector = await actionsClient.get({
+          id: connectorId,
+          throwIfSystemAction: true,
+        });
+
         const { llmScores, relevantDocuments, suggestions } = await recallAndScore({
           recall: client.recall,
           chat,
@@ -69,6 +79,8 @@ export function registerContextFunction({
           messages: removeContextToolRequest(messages),
           signal,
           analytics,
+          scopes,
+          connector,
         });
 
         return {

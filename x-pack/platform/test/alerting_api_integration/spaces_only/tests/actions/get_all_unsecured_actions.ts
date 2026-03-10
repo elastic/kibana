@@ -10,7 +10,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 
-// eslint-disable-next-line import/no-default-export
 export default function createUnsecuredActionTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');

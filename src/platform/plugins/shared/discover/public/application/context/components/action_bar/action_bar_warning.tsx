@@ -18,7 +18,7 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
       <EuiCallOut
         color="primary"
         data-test-subj="predecessorsWarningMsg"
-        iconType="iInCircle"
+        iconType="info"
         title={
           docCount === 0 ? (
             <FormattedMessage
@@ -42,7 +42,7 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
     <EuiCallOut
       color="primary"
       data-test-subj="successorsWarningMsg"
-      iconType="iInCircle"
+      iconType="info"
       title={
         docCount === 0 ? (
           <FormattedMessage

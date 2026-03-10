@@ -127,6 +127,8 @@ export class RequestContextFactory implements IRequestContextFactory {
     return {
       core: coreContext,
 
+      getAnalytics: () => core.analytics,
+
       getServerBasePath: () => core.http.basePath.serverBasePath,
 
       getEndpointAuthz: async (): Promise<Immutable<EndpointAuthz>> => {
@@ -137,6 +139,8 @@ export class RequestContextFactory implements IRequestContextFactory {
 
         return endpointAuthz;
       },
+
+      getEndpointService: () => endpointAppContextService,
 
       getConfig: () => config,
 
@@ -274,6 +278,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
+        });
+      }),
+      getMlAuthz: memoize(() => {
+        return buildMlAuthz({
+          license: licensing.license,
+          ml: plugins.ml,
+          request,
+          savedObjectsClient: coreContext.savedObjects.client,
         });
       }),
     };

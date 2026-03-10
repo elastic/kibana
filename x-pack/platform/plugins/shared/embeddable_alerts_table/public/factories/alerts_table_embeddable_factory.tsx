@@ -18,7 +18,7 @@ import {
   useFetchContext,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';

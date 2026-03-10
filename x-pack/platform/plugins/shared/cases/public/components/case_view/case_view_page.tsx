@@ -98,7 +98,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           }
           title={caseData.title}
-          incrementalId={caseData.incrementalId}
         >
           <CaseActionBar
             caseData={caseData}

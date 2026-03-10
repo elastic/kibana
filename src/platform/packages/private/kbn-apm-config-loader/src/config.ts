@@ -21,6 +21,7 @@ import type { ApmConfigSchema } from './apm_config';
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
 const DEFAULT_CONFIG: AgentConfigOptions = {
   active: true,
+  captureHeaders: false,
   contextPropagationOnly: true,
   environment: 'development',
   globalLabels: {},
@@ -47,7 +48,6 @@ export const CENTRALIZED_SERVICE_BASE_CONFIG: AgentConfigOptions | RUMAgentConfi
 const CENTRALIZED_SERVICE_DIST_CONFIG: AgentConfigOptions = {
   breakdownMetrics: false,
   captureBody: 'off',
-  captureHeaders: false,
   metricsInterval: '120s',
   transactionSampleRate: 0.1,
 };

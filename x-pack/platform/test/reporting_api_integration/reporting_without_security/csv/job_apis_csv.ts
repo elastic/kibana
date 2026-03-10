@@ -22,7 +22,6 @@ const apiResponseFields = [
   'status',
 ];
 
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertestNoAuth = getService('supertestWithoutAuth');
@@ -51,12 +50,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Job Listing APIs', () => {
     before(async () => {
       await reportingAPI.initLogs();
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     after(async () => {
       await reportingAPI.teardownLogs();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     afterEach(async () => {

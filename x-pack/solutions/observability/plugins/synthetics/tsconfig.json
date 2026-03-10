@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,6 +9,7 @@
     "scripts/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -82,7 +83,6 @@
     "@kbn/securitysolution-io-ts-types",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/serverless",
-    "@kbn/repo-info",
     "@kbn/index-management-plugin",
     "@kbn/license-management-plugin",
     "@kbn/react-kibana-mount",
@@ -115,8 +115,11 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/core-lifecycle-server",
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/observability-synthetics-test-data",
     "@kbn/charts-plugin",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/react-query",
+    "@kbn/scout-oblt"
   ],
   "exclude": ["target/**/*"]
 }

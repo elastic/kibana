@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './connector_definition';
+export type * from './connector_definition';
 export * from './connectors';
-export * from './connectors_api';
-export * from './connector_stats';
+export type * from './connectors_api';
+export type * from './connector_stats';
 export * from './native_connectors';
-export * from './optimistic_concurrency';
-export * from './pagination';
-export * from './cron_editor';
+export type * from './optimistic_concurrency';
+export type * from './pagination';
+export type * from './cron_editor';
 export * from './indices';

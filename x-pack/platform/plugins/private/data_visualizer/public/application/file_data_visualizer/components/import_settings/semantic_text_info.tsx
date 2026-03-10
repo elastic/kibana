@@ -30,7 +30,7 @@ export const SemanticTextInfo: FC<Props> = ({ results }) => {
           />
         }
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
       >
         <FormattedMessage
           id="xpack.dataVisualizer.semanticTextInfo.body"

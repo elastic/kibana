@@ -35,7 +35,8 @@ import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 export type OnLlmResponse = (
   content: string,
   traceData?: Message['traceData'],
-  isError?: boolean
+  isError?: boolean,
+  refusal?: string
 ) => Promise<void>;
 
 export interface AssistantDataClients {
@@ -61,7 +62,7 @@ export interface AgentExecutorParams<T extends boolean> {
   llmType?: string;
   isOssModel?: boolean;
   inference: InferenceServerStart;
-  inferenceChatModelEnabled?: boolean;
+  inferenceChatModelDisabled?: boolean;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;

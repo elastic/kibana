@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -36,5 +36,6 @@
   ],
   "exclude": [
     "target/**/*",
+    "public/management_section/objects_table/saved_objects_table_pseudo.tsx"
   ]
 }

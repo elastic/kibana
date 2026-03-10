@@ -26,7 +26,8 @@ import { InputAreaPopover } from './components/input_area_popover';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
-
+import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
+import { detectAndPreProcessPastedCommand } from './lib/utils';
 const CommandInputContainer = styled.div`
   background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
   border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
@@ -86,6 +87,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   useInputHints();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
+  const commands = useWithCommandList();
   const { rightOfCursorText, leftOfCursorText, fullTextEntered, enteredCommand, parsedInput } =
     useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
@@ -161,6 +163,18 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         return;
       }
 
+      // Handle any input value by pre-processing selector arguments (paste, history, etc.)
+      let processedValue = value;
+      let extractedArgState: Record<string, Array<{ value: string; valueText: string }>> = {};
+
+      if (value) {
+        const preProcessResult = detectAndPreProcessPastedCommand(value, commands);
+        if (preProcessResult.hasSelectorArguments) {
+          processedValue = preProcessResult.cleanedCommand;
+          extractedArgState = preProcessResult.extractedArgState;
+        }
+      }
+
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
@@ -177,7 +191,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             prevEnteredCommand
           );
 
-          inputText.addValue(value ?? '', selection);
+          inputText.addValue(processedValue ?? '', selection);
 
           switch (keyCode) {
             // BACKSPACE
@@ -224,12 +238,15 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
           return {
             leftOfCursorText: inputText.getLeftOfCursorText(),
             rightOfCursorText: inputText.getRightOfCursorText(),
-            argState: inputText.getArgState(),
+            argState: {
+              ...inputText.getArgState(),
+              ...extractedArgState,
+            },
           };
         },
       });
     },
-    [dispatch]
+    [commands, dispatch]
   );
 
   // Execute the command if one was ENTER'd.

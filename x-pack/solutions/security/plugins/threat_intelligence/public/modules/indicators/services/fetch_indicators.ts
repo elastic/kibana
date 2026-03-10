@@ -62,7 +62,7 @@ export const createFetchIndicators =
 
     const searchRequestBody = {
       size: pagination.pageSize,
-      from: pagination.pageIndex,
+      from: pagination.pageIndex * pagination.pageSize,
       fields: [{ field: '*', include_unmapped: true } as const],
       sort: sorting.map(({ id, direction }) => ({ [id]: direction })),
       ...sharedParams,

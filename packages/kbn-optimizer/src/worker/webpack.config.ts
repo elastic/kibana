@@ -118,10 +118,7 @@ export function getWebpackConfig(
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary dependencies
-      noParse: [
-        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
-      ],
+      noParse: [/[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/],
 
       rules: [
         {
@@ -293,7 +290,6 @@ export function getWebpackConfig(
           worker.repoRoot,
           'src/core/public/styles/core_app/images'
         ),
-        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$':
           worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',

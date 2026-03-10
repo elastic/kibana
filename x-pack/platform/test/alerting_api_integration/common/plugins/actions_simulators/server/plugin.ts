@@ -16,7 +16,6 @@ import type {
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
 import type { ActionType } from '@kbn/actions-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -66,6 +65,7 @@ export function getAllExternalServiceSimulatorPaths(): string[] {
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/users/test@/sendMail`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.MS_EXCHANGE}/1234567/oauth2/v2.0/token`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SERVICENOW}/oauth_token.do`);
+  allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/api/v1/actions/1`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.TINES}/webhook/path/secret`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.SENTINELONE}/web/api/v2.1/`);
   allPaths.push(`/api/_${NAME}/${ExternalServiceSimulator.CROWDSTRIKE}`);
@@ -128,7 +128,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'actionsSimulators',
       app: ['actions', 'kibana'],
       category: { id: 'foo', label: 'foo' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['actions', 'kibana'],

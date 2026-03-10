@@ -131,13 +131,14 @@ function TimeIntervalParamEditor({
         />{' '}
         <EuiIconTip
           position="right"
-          type="questionInCircle"
+          type="question"
           content={interval.scale <= 1 ? tooManyBucketsTooltip : tooLargeBucketsTooltip}
         />
       </strong>
     ) : null;
 
   const helpText = (
+    // @ts-expect-error upgrade typescript v5.9.3
     <>
       {scaledHelpText}
       {get(editorConfig, 'interval.help') || selectOptionHelpText}

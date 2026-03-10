@@ -153,7 +153,7 @@ export const CategoryTable: FC<Props> = ({
             {i18n.translate('xpack.aiops.logCategorization.column.tokens', {
               defaultMessage: 'Tokens',
             })}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),

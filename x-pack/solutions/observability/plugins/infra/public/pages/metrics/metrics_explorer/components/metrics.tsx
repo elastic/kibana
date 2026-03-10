@@ -106,7 +106,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, autoFocus = false }:
         >
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs" justifyContent="center" alignItems="center">
-              <EuiIcon type="iInCircle" size="s" />
+              <EuiIcon type="info" size="s" />
               <EuiText size="xs">{label}</EuiText>
             </EuiFlexGroup>
           </EuiFlexItem>

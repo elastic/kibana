@@ -37,7 +37,7 @@ describe('TelemetryManagementSectionComponent', () => {
       isScreenshotMode: false,
       reportOptInStatusChange: false,
       currentKibanaVersion: 'mock_kibana_version',
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       http: coreSetup.http,
     });
 
@@ -67,7 +67,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
@@ -118,7 +118,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
@@ -159,7 +159,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
@@ -194,7 +194,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
@@ -234,7 +234,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });
@@ -281,7 +281,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
+      notifications: coreSetup.notifications,
       currentKibanaVersion: 'mock_kibana_version',
       http: coreSetup.http,
     });

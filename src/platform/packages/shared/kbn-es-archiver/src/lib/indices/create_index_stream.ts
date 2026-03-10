@@ -33,6 +33,7 @@ interface DocRecord {
   value: estypes.IndicesIndexState & {
     index: string;
     type: string;
+    data_stream?: string;
     template?: IndicesPutIndexTemplateRequest;
   };
 }
@@ -44,6 +45,7 @@ export function createCreateIndexStream({
   docsOnly = false,
   isArchiveInExceptionList = false,
   log,
+  targetsWithoutIdGeneration = [],
 }: {
   client: Client;
   stats: Stats;
@@ -51,6 +53,7 @@ export function createCreateIndexStream({
   docsOnly?: boolean;
   isArchiveInExceptionList?: boolean;
   log: ToolingLog;
+  targetsWithoutIdGeneration?: string[];
 }) {
   const skipDocsFromIndices = new Set();
 
@@ -65,9 +68,14 @@ export function createCreateIndexStream({
   let kibanaTaskManagerIndexAlreadyCleaned = false;
 
   async function handleDoc(stream: Readable, record: DocRecord) {
-    const index = record.value.index;
+    const { index, data_stream: dataStream } = record.value;
 
-    if (skipDocsFromIndices.has(index)) {
+    // For data stream docs, the `index` field is the backing index
+    // (e.g. `.ds-synthetics-browser-default-2022.12.27-000001`) while
+    // `skipDocsFromIndices` stores the data stream name
+    // (e.g. `synthetics-browser-default`). Check both so that
+    // `skipExisting` correctly skips docs for existing data streams.
+    if (skipDocsFromIndices.has(index) || (dataStream && skipDocsFromIndices.has(dataStream))) {
       return;
     }
 
@@ -110,6 +118,7 @@ export function createCreateIndexStream({
         }
       );
       stats.createdDataStream(dataStream, template.name, { template });
+      targetsWithoutIdGeneration.push(dataStream);
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
         throw err;
@@ -188,6 +197,9 @@ export function createCreateIndexStream({
         }
 
         stats.createdIndex(index, { settings });
+        if (settings?.index?.mode === 'time_series') {
+          targetsWithoutIdGeneration.push(index);
+        }
       } catch (err) {
         if (
           err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&

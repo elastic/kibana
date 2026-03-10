@@ -89,8 +89,9 @@ export const MigrateDocumentsStepTitle: React.FunctionComponent<{
     default: {
       return (
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.inProgress.reindexingDocumentsStepTitle"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.reindexingChecklist.notStarted.reindexingDocumentsStepTitle"
           defaultMessage="{resolutionType, select, reindex {Reindex data stream} readonly {Set data stream to read-only} other {Unknown action}}"
+          values={{ resolutionType }}
         />
       );
     }

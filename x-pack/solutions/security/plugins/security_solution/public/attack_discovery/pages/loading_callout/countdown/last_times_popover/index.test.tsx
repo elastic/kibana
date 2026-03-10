@@ -6,7 +6,7 @@
  */
 
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
-import { render, screen } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import React from 'react';
 
 import { LastTimesPopover } from '.';
@@ -42,6 +42,7 @@ describe('LastTimesPopover', () => {
       </TestProviders>
     );
   });
+  afterEach(cleanup);
 
   it('renders average time calculated message', () => {
     const averageTimeIsCalculated = screen.getByTestId('averageTimeIsCalculated');
@@ -62,5 +63,45 @@ describe('LastTimesPopover', () => {
     ];
 
     generationTimings.forEach((timing, i) => expect(timing).toHaveTextContent(expectedDates[i]));
+  });
+
+  it('renders the average time calculated message with successfulGenerations', () => {
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: true,
+    });
+    render(
+      <TestProviders>
+        <LastTimesPopover connectorIntervals={connectorIntervals} successfulGenerations={5} />
+      </TestProviders>
+    );
+    const averageTimeIsCalculated = screen.getAllByTestId('averageTimeIsCalculated');
+
+    expect(
+      averageTimeIsCalculated.some(
+        (el) =>
+          el.textContent ===
+          'Remaining time is based on the average speed of the last 5 times the same connector generated results.'
+      )
+    ).toBe(true);
+  });
+
+  it('renders the average time calculated message with zero when successfulGenerations is undefined', () => {
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: true,
+    });
+    render(
+      <TestProviders>
+        <LastTimesPopover connectorIntervals={connectorIntervals} />
+      </TestProviders>
+    );
+    const averageTimeIsCalculated = screen.getAllByTestId('averageTimeIsCalculated');
+
+    expect(
+      averageTimeIsCalculated.some(
+        (el) =>
+          el.textContent ===
+          'Remaining time is based on the average speed of the last 0 times the same connector generated results.'
+      )
+    ).toBe(true);
   });
 });

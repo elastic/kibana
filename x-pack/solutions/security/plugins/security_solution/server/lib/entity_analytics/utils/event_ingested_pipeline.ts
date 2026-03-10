@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsClient, type ElasticsearchClient } from '@kbn/core/server';
+import {
+  SavedObjectsClient,
+  type ElasticsearchClient,
+  type SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { EntityAnalyticsMigrationsParams } from '../migrations';
 import { getAllSpaceConfigurations } from '../risk_engine/utils/saved_object_configuration';
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';

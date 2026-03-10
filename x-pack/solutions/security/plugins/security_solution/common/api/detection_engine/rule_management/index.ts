@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './bulk_actions/bulk_actions_types';
+export type * from './bulk_actions/bulk_actions_types';
 export * from './bulk_actions/bulk_actions_route.gen';
 export * from './bulk_crud/bulk_create_rules/bulk_create_rules_route.gen';
 export * from './bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';

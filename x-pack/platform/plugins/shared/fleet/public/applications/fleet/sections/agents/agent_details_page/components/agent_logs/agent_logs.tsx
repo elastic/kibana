@@ -34,6 +34,7 @@ import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
 import { ViewLogsButton, getFormattedRange } from './view_logs_button';
+import { SelectLogLevel } from './select_log_level';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -69,7 +70,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
       <EuiCallOut
         size="m"
         color="primary"
-        iconType="iInCircle"
+        iconType="info"
         title={
           <FormattedMessage
             id="xpack.fleet.agentLogs.logDisabledCallOutTitle"
@@ -327,6 +328,12 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               />
             ) : null}
           </EuiPanel>
+          <EuiFlexItem grow={false}>
+            <SelectLogLevel
+              agent={agent}
+              agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
+            />
+          </EuiFlexItem>
         </EuiFlexItem>
       </WrapperFlexGroup>
     );

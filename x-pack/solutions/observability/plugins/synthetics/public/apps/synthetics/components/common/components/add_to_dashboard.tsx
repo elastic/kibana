@@ -59,7 +59,7 @@ export const useAddToDashboard = ({
   const { embeddable } = useKibana<ClientPluginsStart>().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId }) => {
+    async ({ dashboardId }) => {
       const stateTransfer = embeddable.getStateTransfer();
 
       const state = {
@@ -96,10 +96,12 @@ export const useAddToDashboard = ({
 
 export const AddToDashboard = ({
   type,
+  isLoading,
   asButton = false,
 }: {
   type: typeof SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE | typeof SYNTHETICS_MONITORS_EMBEDDABLE;
   asButton?: boolean;
+  isLoading?: boolean;
 }) => {
   const { view } = useSelector(selectOverviewState);
 
@@ -127,6 +129,7 @@ export const AddToDashboard = ({
           data-test-subj="syntheticsEmbeddablePanelWrapperButton"
           iconType="dashboardApp"
           onClick={() => setDashboardAttachmentReady(true)}
+          isLoading={isLoading}
         >
           {i18n.translate('xpack.synthetics.embeddablePanelWrapper.shareButtonLabel', {
             defaultMessage: 'Add to dashboard',
@@ -146,6 +149,7 @@ export const AddToDashboard = ({
                   defaultMessage: 'Add to dashboard',
                 }
               )}
+              isLoading={isLoading}
             />
           }
           isOpen={isPopoverOpen}

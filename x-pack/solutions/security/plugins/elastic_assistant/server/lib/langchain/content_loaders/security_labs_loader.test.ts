@@ -43,6 +43,6 @@ describe('security_labs_loader', () => {
   it('getSecurityLabsDocsCount returns correct count', async () => {
     const result = await getSecurityLabsDocsCount({ logger: loggerMock.create() });
 
-    expect(result).toBe(168); // Update this when new Security Labs articles are added
+    expect(result).toBe(191); // Update this when new Security Labs articles are added
   });
 });

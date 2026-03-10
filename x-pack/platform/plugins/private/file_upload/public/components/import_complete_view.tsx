@@ -167,7 +167,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             defaultMessage: 'File upload complete with failures',
           })}
           color="warning"
-          iconType="help"
+          iconType="question"
           data-test-subj={STATUS_CALLOUT_DATA_TEST_SUBJ}
         >
           <p>

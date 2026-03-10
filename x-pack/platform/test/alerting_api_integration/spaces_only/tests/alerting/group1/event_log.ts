@@ -33,7 +33,6 @@ const InstanceActions = new Set<string | undefined>([
   'untracked-instance',
 ]);
 
-// eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');

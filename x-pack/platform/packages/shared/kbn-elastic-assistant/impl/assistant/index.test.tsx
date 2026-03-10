@@ -13,7 +13,7 @@ import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
-import { UseQueryResult } from '@tanstack/react-query';
+import { UseQueryResult } from '@kbn/react-query';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
@@ -22,7 +22,20 @@ import { TestProviders } from '../mock/test_providers/test_providers';
 import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
-import { AIConnector } from '../connectorland/connector_selector';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { welcomeConvo } from '../mock/conversation';
+import { ConnectorSetup } from '../connectorland/connector_setup';
+import {
+  CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY,
+  DEFAULT_KNOWLEDGE_BASE_SETTINGS,
+  KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
+  SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
+  STREAMING_LOCAL_STORAGE_KEY,
+} from '../assistant_context/constants';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -31,6 +44,7 @@ jest.mock('react-use/lib/useSessionStorage');
 
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
+jest.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 
 jest.mock('./use_conversation');
 const apiConfig = { connectorId: '123' };
@@ -99,6 +113,15 @@ const mockUseConversation = {
   setApiConfig: jest.fn().mockResolvedValue({}),
 };
 
+const mockAnonymizationFields: FetchAnonymizationFields = {
+  refetch: jest.fn(),
+  data: { page: 1, perPage: 20, total: 0, data: [] },
+  isFetching: false,
+  isError: false,
+  isLoading: false,
+  isFetched: true,
+};
+
 const refetchResults = jest.fn();
 const defaultFetchUserConversations = {
   data: mockData,
@@ -138,6 +161,7 @@ describe('Assistant', () => {
         actionTypeId: '.gen-ai',
       },
     ];
+
     jest.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
       isFetchedAfterMount: true,
@@ -147,11 +171,24 @@ describe('Assistant', () => {
     jest
       .mocked(useFetchCurrentUserConversations)
       .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
-    jest
-      .mocked(useLocalStorage)
-      .mockReturnValue([mockData.welcome_id, persistToLocalStorage] as unknown as ReturnType<
-        typeof useLocalStorage
-      >);
+
+    jest.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
+
+    const localStorageDefaults: Array<[string, unknown]> = [
+      [LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY, mockData.welcome_id],
+      [LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY, mockData.welcome_id.id],
+      [SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY, false],
+      [CONTENT_REFERENCES_VISIBLE_LOCAL_STORAGE_KEY, true],
+      [STREAMING_LOCAL_STORAGE_KEY, true],
+      [KNOWLEDGE_BASE_LOCAL_STORAGE_KEY, DEFAULT_KNOWLEDGE_BASE_SETTINGS],
+    ];
+
+    jest.mocked(useLocalStorage).mockImplementation((key, initialValue) => {
+      const match = localStorageDefaults.find(([storageKey]) => key.includes(storageKey));
+      const value = match ? match[1] : initialValue;
+      return [value, persistToLocalStorage] as unknown as ReturnType<typeof useLocalStorage>;
+    });
+
     jest
       .mocked(useSessionStorage)
       .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
@@ -264,6 +301,75 @@ describe('Assistant', () => {
 
       expect(persistToLocalStorage).toHaveBeenCalled();
       expect(persistToLocalStorage).toHaveBeenLastCalledWith({ id: mockData.welcome_id.id });
+    });
+  });
+
+  describe('when no connectors exist and user can create them', () => {
+    it('enables header controls while chat stays disabled', async () => {
+      jest.mocked(ConnectorSetup).mockImplementation(() => <div />);
+      const noConnectorConversation = {
+        ...welcomeConvo,
+        id: 'welcome_id',
+        title: welcomeConvo.title,
+        category: welcomeConvo.category,
+        messages: welcomeConvo.messages,
+        replacements: welcomeConvo.replacements,
+        createdAt: welcomeConvo.createdAt,
+        apiConfig: { ...welcomeConvo.apiConfig, connectorId: '' },
+        isConversationOwner: true,
+      };
+
+      const noConnectorData = {
+        welcome_id: noConnectorConversation,
+      };
+
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isFetched: true,
+        isFetchedAfterMount: true,
+        data: [],
+      } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        ...defaultFetchUserConversations,
+        data: noConnectorData,
+      } as unknown as FetchCurrentUserConversations);
+
+      render(
+        <TestProviders>
+          <Assistant
+            lastConversation={{ id: 'welcome_id' }}
+            chatHistoryVisible={true}
+            setChatHistoryVisible={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const addConnectorButton = await screen.findByTestId('addNewConnectorButton');
+      await waitFor(() => expect(addConnectorButton).toBeEnabled());
+      expect(screen.getByTestId('chat-context-menu')).toBeEnabled();
+      expect(screen.getByTestId('prompt-textarea')).toBeDisabled();
+    });
+  });
+
+  describe('when connectors exist', () => {
+    it('shows the connector selector instead of add button', async () => {
+      const connectors: unknown[] = [
+        {
+          id: 'connector-1',
+          name: 'OpenAI connector',
+          actionTypeId: '.gen-ai',
+        },
+      ];
+      jest.mocked(useLoadConnectors).mockReturnValue({
+        isFetched: true,
+        isFetchedAfterMount: true,
+        data: connectors,
+      } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
+
+      await renderAssistant();
+
+      expect(screen.queryByTestId('addNewConnectorButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('connector-selector')).toBeEnabled();
     });
   });
 

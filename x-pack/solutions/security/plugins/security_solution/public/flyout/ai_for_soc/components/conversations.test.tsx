@@ -29,7 +29,7 @@ describe('Conversations', () => {
     (useAssistantContext as jest.Mock).mockReturnValue({
       euiTheme: { colors: { textPrimary: '#000' } },
       http: {},
-      assistantAvailability: { isAssistantEnabled: true },
+      assistantAvailability: { isAssistantEnabled: true, isAssistantVisible: true },
       showAssistantOverlay: mockShowAssistantOverlay,
     });
   });

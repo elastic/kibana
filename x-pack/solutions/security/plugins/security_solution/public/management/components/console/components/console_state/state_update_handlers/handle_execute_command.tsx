@@ -74,6 +74,7 @@ const updateStateWithNewCommandHistoryItem = (
     payload: {
       command: newHistoryItem.command.input,
       display: newHistoryItem.command.inputDisplay,
+      argState: newHistoryItem.command.argState ?? {},
     },
   });
 
@@ -161,6 +162,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     input: parsedInput.input,
     inputDisplay: fullInputText,
     args: parsedInput,
+    argState: enteredCommand?.argState,
     commandDefinition,
   };
   const requiredArgs = getRequiredArguments(commandDefinition.args);

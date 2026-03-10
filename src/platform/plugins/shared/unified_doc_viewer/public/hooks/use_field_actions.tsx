@@ -12,9 +12,11 @@ import createContainer from 'constate';
 import { copyToClipboard, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { FieldMapping } from '@kbn/unified-doc-viewer/src/services/types';
 
 interface WithFieldParam {
   field: string;
+  mapping?: FieldMapping;
 }
 
 interface WithValueParam {
@@ -45,8 +47,10 @@ const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFi
     () => ({
       addColumn: onAddColumn,
       addFilterExist: ({ field }: WithFieldParam) => filter && filter('_exists_', field, '+'),
-      addFilterIn: ({ field, value }: TFieldActionParams) => filter && filter(field, value, '+'),
-      addFilterOut: ({ field, value }: TFieldActionParams) => filter && filter(field, value, '-'),
+      addFilterIn: ({ field, value, mapping }: TFieldActionParams) =>
+        filter && filter(mapping ?? field, value, '+'),
+      addFilterOut: ({ field, value, mapping }: TFieldActionParams) =>
+        filter && filter(mapping ?? field, value, '-'),
       copyToClipboard,
       removeColumn: onRemoveColumn,
       toggleFieldColumn: ({ field }: WithFieldParam) => {
@@ -71,6 +75,7 @@ export const [FieldActionsProvider, useFieldActionsContext] = createContainer(us
 export const useUIFieldActions = ({
   field,
   value,
+  mapping,
   formattedValue,
 }: TFieldActionParams): TFieldAction[] => {
   const actions = useFieldActionsContext();
@@ -81,13 +86,13 @@ export const useUIFieldActions = ({
         id: 'addFilterInAction',
         iconType: 'plusInCircle',
         label: filterForValueLabel,
-        onClick: () => actions.addFilterIn({ field, value }),
+        onClick: () => actions.addFilterIn({ field, value, mapping }),
       },
       {
         id: 'addFilterOutremoveFromFilterAction',
         iconType: 'minusInCircle',
         label: filterOutValueLabel,
-        onClick: () => actions.addFilterOut({ field, value }),
+        onClick: () => actions.addFilterOut({ field, value, mapping }),
       },
       {
         id: 'addFilterExistAction',
@@ -108,7 +113,7 @@ export const useUIFieldActions = ({
         onClick: () => actions.copyToClipboard(formattedValue ?? (value as string)),
       },
     ],
-    [actions, field, formattedValue, value]
+    [actions, field, mapping, formattedValue, value]
   );
 };
 

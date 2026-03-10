@@ -622,6 +622,7 @@ export interface InstallFailedAttempt {
 
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_PRECHECK = 'install_precheck',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   INSTALL_ML_MODEL = 'install_ml_model',
@@ -749,6 +750,13 @@ export interface IndexTemplate {
   composed_of: string[];
   ignore_missing_component_templates?: string[];
   _meta: object;
+
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
 }
 
 export interface ESAssetMetadata {

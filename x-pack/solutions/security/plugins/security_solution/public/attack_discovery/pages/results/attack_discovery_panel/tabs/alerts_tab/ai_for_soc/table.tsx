@@ -11,6 +11,8 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
+import { useBrowserFields } from '../../../../../../../data_view_manager/hooks/use_browser_fields';
+import { DataViewManagerScopeName } from '../../../../../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -24,7 +26,6 @@ import {
   TOOLBAR_VISIBILITY,
 } from '../../../../../../../detections/components/alert_summary/table/table';
 import { ActionsCell } from '../../../../../../../detections/components/alert_summary/table/actions_cell';
-import { getDataViewStateFromIndexFields } from '../../../../../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../../../../../common/lib/kibana';
 import { CellValue } from '../../../../../../../detections/components/alert_summary/table/render_cell';
 import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
@@ -84,12 +85,7 @@ export const Table = memo(({ dataView, id, packages, query, ruleResponse }: Tabl
     [application, cases, data, fieldFormats, http, licensing, notifications, settings]
   );
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
-  const { browserFields } = useMemo(
-    () => getDataViewStateFromIndexFields('', dataViewSpec.fields),
-    [dataViewSpec.fields]
-  );
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
 
   const additionalContext: AdditionalTableContext = useMemo(
     () => ({

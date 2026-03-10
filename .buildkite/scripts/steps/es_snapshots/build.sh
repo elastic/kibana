@@ -35,11 +35,19 @@ export BUILD_URL=""
 export JOB_NAME=""
 export NODE_NAME=""
 
-# Reads the ES_BUILD_JAVA env var out of .ci/java-versions.properties and exports it
-export "$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | xargs)"
+export JAVA_VERSION="$(grep '^ES_BUILD_JAVA' .ci/java-versions.properties | sed 's/ES_BUILD_JAVA=openjdk//')"
+if [[ -z "$JAVA_VERSION" ]]; then
+  echo "No ES_BUILD_JAVA version found."
+  exit 1
+fi
 
-export PATH="$HOME/.java/$ES_BUILD_JAVA/bin:$PATH"
-export JAVA_HOME="$HOME/.java/$ES_BUILD_JAVA"
+export JAVA_HOME=$(update-alternatives --list java | grep "java-$JAVA_VERSION-openjdk" | sed 's#/bin/java$##')
+if [[ -z "$JAVA_HOME" ]]; then
+  echo "No compatible JDK found.  Ensure openjdk-$JAVA_VERSION is installed."
+  exit 1
+fi
+
+export PATH="$JAVA_HOME/bin:$PATH"
 export DOCKER_BUILDKIT=1
 
 # The Elasticsearch Dockerfile needs to be built with root privileges, but Docker on our servers is running using a non-root user

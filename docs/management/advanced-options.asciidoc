@@ -218,6 +218,9 @@ truncation.
 [[enableESQL]]`enableESQL`::
 This setting enables ES|QL in Kibana.
 
+[[aiAssistant:preferredAIAssistantType]]`aiAssistant:preferredAIAssistantType`::
+This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other Kibana applications (for example, Discover, Dashboards, and Stack Management pages), or nowhere.
+
 [float]
 [[presentation-labs]]
 ==== Presentation Labs
@@ -398,6 +401,9 @@ value is 10000.
 ==== Observability
 
 [horizontal]
+[[observability-log-sources]]`observability:logSources`::
+Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs-*-*, logs-*, filebeat-*` by default.
+
 [[apm-enable-service-overview]]`apm:enableServiceOverview`::
 When enabled, displays the *Overview* tab for services in *APM*.
 
@@ -462,6 +468,12 @@ If you have an Azure Enterprise Agreement with Microsoft, enter your discount ra
 
 [[observability-profiling-cost-per-vcpu-per-hour]]`observability:profilingCostPervCPUPerHour`::
 Default Hourly Cost per CPU Core for machines not on AWS or Azure.
+
+[[gen-ai-settings-default-ai-connector]]`genAiSettings:defaultAIConnector`::
+Sets the default AI connector to power the AI Assistant and AI-driven features in Elastic. Select a generative AI connector from your available pre-configured or custom connectors. The default value is `NO_DEFAULT_CONNECTOR`. When no connector is selected, Elastic uses the Elastic Managed LLM connector when available, or the last used custom connector.
+
+[[gen-ai-settings-default-ai-connector-only]]`genAiSettings:defaultAIConnectorOnly`::
+When enabled, only the default AI connector selected in `genAiSettings:defaultAIConnector` is shown to users of this space. This restricts users from selecting other available connectors. The default value is `false`.
 
 [float]
 [[kibana-reporting-settings]]

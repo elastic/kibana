@@ -9,6 +9,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -21,6 +22,7 @@ import type { DiscoverStateContainer } from '../../state_management/discover_sta
 import { getTopNavBadges } from './get_top_nav_badges';
 import { useTopNavLinks } from './use_top_nav_links';
 import { useRuntimeState } from '../../state_management/redux';
+import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   stateContainer,
@@ -33,6 +35,7 @@ export const useDiscoverTopNav = ({
   const hasUnsavedChanges = Boolean(
     hasSavedSearchChanges && stateContainer.savedSearchState.getId()
   );
+  const isMobile = useIsWithinBreakpoints(['xs']);
 
   const topNavBadges = useMemo(
     () =>
@@ -41,8 +44,9 @@ export const useDiscoverTopNav = ({
         services,
         hasUnsavedChanges,
         topNavCustomization,
+        isMobile,
       }),
-    [stateContainer, services, hasUnsavedChanges, topNavCustomization]
+    [stateContainer, services, hasUnsavedChanges, topNavCustomization, isMobile]
   );
   const savedSearchId = useSavedSearch().id;
   const savedSearchHasChanged = useSavedSearchHasChanged();
@@ -54,6 +58,7 @@ export const useDiscoverTopNav = ({
     inspector: services.inspector,
     stateContainer,
   });
+  const hasShareIntegration = useHasShareIntegration(services);
 
   const topNavMenu = useTopNavLinks({
     dataView,
@@ -64,6 +69,7 @@ export const useDiscoverTopNav = ({
     adHocDataViews,
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
+    hasShareIntegration,
   });
 
   return {

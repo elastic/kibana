@@ -219,6 +219,9 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -247,11 +250,20 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -368,6 +380,9 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -620,11 +635,20 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -1103,6 +1127,9 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -1131,11 +1158,20 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -1252,6 +1288,9 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -1504,11 +1543,20 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -2047,6 +2095,9 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -2075,11 +2126,20 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -2196,6 +2256,9 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -2448,11 +2511,20 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -2993,6 +3065,9 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -3021,11 +3096,20 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -3142,6 +3226,9 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -3394,11 +3481,20 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -3877,6 +3973,9 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -3905,11 +4004,20 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -4026,6 +4134,9 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -4278,11 +4389,20 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -4716,6 +4836,9 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
               "areaSeriesStyle": Object {
                 "area": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "opacity": 0.3,
                   "visible": true,
                 },
@@ -4744,11 +4867,20 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,
@@ -4865,6 +4997,9 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               },
               "bubbleSeriesStyle": Object {
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 2,
@@ -5117,11 +5252,20 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   "visible": "auto",
                 },
                 "line": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
+                  "focused": Object {
+                    "strokeWidth": 1,
+                  },
                   "opacity": 1,
                   "strokeWidth": 2,
                   "visible": true,
                 },
                 "point": Object {
+                  "dimmed": Object {
+                    "opacity": 0.25,
+                  },
                   "fill": "__use__series__color__",
                   "opacity": 1,
                   "radius": 3,

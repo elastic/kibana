@@ -14,12 +14,12 @@ import {
   CARD_TEST_ID,
   IntegrationSection,
 } from './integration_section';
-import { useIntegrationsLastActivity } from '../../../hooks/alert_summary/use_integrations_last_activity';
+import { useIntegrationLastAlertIngested } from '../../../hooks/alert_summary/use_integration_last_alert_ingested';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
 jest.mock('../../../hooks/alert_summary/use_navigate_to_integrations_page');
-jest.mock('../../../hooks/alert_summary/use_integrations_last_activity');
+jest.mock('../../../hooks/alert_summary/use_integration_last_alert_ingested');
 jest.mock('@kbn/kibana-react-plugin/public');
 
 const packages: PackageListItem[] = [
@@ -62,9 +62,9 @@ describe('<IntegrationSection />', () => {
 
   it('should render a card for each integration ', () => {
     (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(jest.fn());
-    (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue({
       isLoading: true,
-      lastActivities: {},
+      lastAlertIngested: {},
     });
 
     const { getByTestId } = render(<IntegrationSection packages={packages} />);
@@ -76,7 +76,7 @@ describe('<IntegrationSection />', () => {
   it('should navigate to the fleet page when clicking on the add integrations button', () => {
     const navigateToIntegrationsPage = jest.fn();
     (useNavigateToIntegrationsPage as jest.Mock).mockReturnValue(navigateToIntegrationsPage);
-    (useIntegrationsLastActivity as jest.Mock).mockReturnValue([]);
+    (useIntegrationLastAlertIngested as jest.Mock).mockReturnValue([]);
 
     const { getByTestId } = render(<IntegrationSection packages={[]} />);
 

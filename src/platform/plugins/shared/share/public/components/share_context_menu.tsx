@@ -17,8 +17,13 @@ import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
 import { UrlPanelContent } from './url_panel_content';
-import { ShareMenuItemLegacy, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import type {
+  ShareMenuItemLegacy,
+  ShareContextMenuPanelItem,
+  UrlParamExtension,
+  ShareableUrlLocatorParams,
+} from '../types';
+import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
 export interface ShareContextMenuProps {
@@ -30,7 +35,7 @@ export interface ShareContextMenuProps {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
-    params: any;
+    params: ShareableUrlLocatorParams;
   };
   shareMenuItems: ShareMenuItemLegacy[];
   sharingData: any;

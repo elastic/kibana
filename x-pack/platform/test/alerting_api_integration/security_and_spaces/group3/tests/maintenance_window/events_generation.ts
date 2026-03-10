@@ -12,7 +12,6 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import type { TaskManagerDoc } from '../../../../common/lib';
 import { ObjectRemover } from '../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function eventsGenerationTaskTests({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');

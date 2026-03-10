@@ -14,6 +14,7 @@ import {
   DataStreamRolloverResponse,
   DataStreamSettings,
   DataStreamStat,
+  DatasetTypesPrivileges,
   DatasetUserPrivileges,
   DegradedFieldAnalysis,
   DegradedFieldResponse,
@@ -28,7 +29,7 @@ import { createDatasetQualityServerRoute } from '../create_datasets_quality_serv
 import { checkAndLoadIntegration } from './check_and_load_integration';
 import { failedDocsRouteRepository } from './failed_docs/routes';
 import { getDataStreamDetails } from './get_data_stream_details';
-import { getDataStreams } from './get_data_streams';
+import { getDataStreams, getDatasetTypesPrivileges } from './get_data_streams';
 import { getDataStreamsMeteringStats } from './get_data_streams_metering_stats';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getAggregatedDatasetPaginatedResults } from './get_dataset_aggregated_paginated_results';
@@ -40,6 +41,41 @@ import { getDegradedFields } from './get_degraded_fields';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { updateFieldLimit } from './update_field_limit';
 import { getDataStreamsCreationDate } from './get_data_streams_creation_date';
+
+const datasetTypesPrivilegesRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/types_privileges',
+  params: t.type({
+    query: t.type({ types: typesRt }),
+  }),
+  options: {
+    tags: [],
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  async handler(resources): Promise<{
+    datasetTypesPrivileges: DatasetTypesPrivileges;
+  }> {
+    const { context, params } = resources;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const { datasetsPrivilages } = await getDatasetTypesPrivileges({
+      esClient,
+      ...params.query,
+    });
+
+    return {
+      datasetTypesPrivileges: datasetsPrivilages,
+    };
+  },
+});
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -288,11 +324,21 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    return await getDegradedFields({
-      esClient,
-      dataStream,
-      ...params.query,
-    });
+    try {
+      return await getDegradedFields({
+        esClient,
+        dataStream,
+        ...params.query,
+      });
+    } catch (e) {
+      if (e.body?.error?.type === 'index_closed_exception') {
+        return {
+          degradedFields: [],
+        };
+      }
+
+      throw e;
+    }
   },
 });
 
@@ -547,6 +593,7 @@ const rolloverDataStream = createDatasetQualityServerRoute({
 });
 
 export const dataStreamsRouteRepository = {
+  ...datasetTypesPrivilegesRoute,
   ...statsRoute,
   ...degradedDocsRoute,
   ...totalDocsRoute,

@@ -117,7 +117,7 @@ const SchemaFieldDetails: React.FC<{ schemaField: SchemaField }> = ({ schemaFiel
       <EuiFlexGroup direction="column" gutterSize="l">
         {notInAllIndices && (
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             title={
               <FormattedMessage
                 id="xpack.enterpriseSearch.searchApplications.searchApplication.schema.fieldIndices.notInAllIndices.title"
@@ -463,7 +463,7 @@ export const SearchApplicationSchema: React.FC = () => {
               />
             }
             color="danger"
-            iconType="iInCircle"
+            iconType="info"
           >
             <p>
               {i18n.translate(

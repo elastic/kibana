@@ -7,7 +7,11 @@
 
 import * as t from 'io-ts';
 
-const healthStatusSchema = t.union([t.literal('healthy'), t.literal('unhealthy')]);
+const healthStatusSchema = t.union([
+  t.literal('healthy'),
+  t.literal('unhealthy'),
+  t.literal('missing'),
+]);
 const stateSchema = t.union([
   t.literal('no_data'),
   t.literal('indexing'),

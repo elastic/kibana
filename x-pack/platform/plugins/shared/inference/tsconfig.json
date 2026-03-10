@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -42,6 +42,8 @@
     "@kbn/ml-is-defined",
     "@kbn/sse-utils-client",
     "@kbn/zod",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/core-ui-settings-common",
+    "@kbn/setup-node-env"
   ]
 }

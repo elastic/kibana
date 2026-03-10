@@ -52,6 +52,9 @@ export const retriever = (specService: SpecDefinitionsService) => {
           },
         ],
       },
+      query: '',
+      fields: [],
+      normalizer: { __one_of: ['minmax', 'l2_norm', 'none'] },
     },
     rescorer: {
       __template: {
@@ -91,6 +94,8 @@ export const retriever = (specService: SpecDefinitionsService) => {
       },
       rank_constant: 60,
       rank_window_size: 100,
+      query: '',
+      fields: [],
     },
     rule: {
       __template: {
@@ -109,7 +114,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       __template: {
         retriever: {},
         ids: [],
-        match_criteria: {},
       },
       retriever: {
         __scope_link: '.',
@@ -117,7 +121,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       // Only one of 'ids' or 'docs' should be used at a time
       ids: [],
       docs: [],
-      match_criteria: {},
       rank_window_size: 10,
     },
     standard: {

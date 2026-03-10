@@ -135,5 +135,5 @@ test('uses the provided logger', async () => {
     stream,
   });
 
-  expect(logSpy).toHaveBeenCalledWith('execute-job:cool-job-id');
+  expect(logSpy).toHaveBeenCalledWith('execute-job');
 });

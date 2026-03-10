@@ -24,11 +24,13 @@ import { SolutionsViewBadge } from './solutions_view_badge';
  */
 export const getTopNavBadges = ({
   hasUnsavedChanges,
+  isMobile,
   stateContainer,
   services,
   topNavCustomization,
 }: {
   hasUnsavedChanges: boolean | undefined;
+  isMobile: boolean;
   stateContainer: DiscoverStateContainer;
   services: DiscoverServices;
   topNavCustomization: TopNavCustomization | undefined;
@@ -46,7 +48,7 @@ export const getTopNavBadges = ({
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
 
-  if (services.spaces) {
+  if (services.spaces && !isMobile) {
     entries.push({
       badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
         defaultMessage: 'Check out context-aware Discover',

@@ -35,9 +35,19 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('logSummaryBetween', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+  describe('logSummaryBetween', function () {
+    this.onlyEsVersion('8.19');
+
+    before(() =>
+      esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      )
+    );
+    after(() =>
+      esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      )
+    );
 
     it('should return empty and non-empty consecutive buckets', async () => {
       const startTimestamp = EARLIEST_TIME_WITH_DATA;

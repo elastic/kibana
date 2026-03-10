@@ -19,7 +19,6 @@ import { MAX_ADDITIONAL_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/commo
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function serviceNowITSMTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');

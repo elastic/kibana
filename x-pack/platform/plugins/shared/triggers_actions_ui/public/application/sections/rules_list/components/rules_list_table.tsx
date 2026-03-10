@@ -10,6 +10,10 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import {
+  getRuleDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
+import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +37,8 @@ import {
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
+
+import { getRouterLinkProps } from '@kbn/router-utils';
 
 import {
   SELECT_ALL_RULES,
@@ -163,6 +169,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
       index,
       actionsCount: rule.actions.length,
       ruleType: ruleTypeIndex.get(rule.ruleTypeId)?.name ?? rule.ruleTypeId,
+      autoRecoverAlerts: ruleTypeIndex.get(rule.ruleTypeId)?.autoRecoverAlerts,
       isEditable:
         hasAllPrivilege(rule.consumer, ruleTypeIndex.get(rule.ruleTypeId)) &&
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
@@ -182,6 +189,20 @@ const ruleSidebarActionCss = css`
     opacity: 1; /* 2 */
   }
 `;
+
+const LAST_RUN_CONTENT = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
+  {
+    defaultMessage: 'Start time of the last run.',
+  }
+);
+
+const SNOOZE_RULE_NOTIFICATIONS = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+  {
+    defaultMessage: 'Snooze notifications for a rule.',
+  }
+);
 
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
@@ -282,7 +303,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           )}
           size="s"
           color="subdued"
-          type="questionInCircle"
+          type="question"
           className="eui-alignTop"
         />
         <PercentileSelectablePopover
@@ -331,6 +352,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           rule={rule}
           onRuleChanged={onRuleChanged}
           isEditable={rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)}
+          autoRecoverAlerts={rule.autoRecoverAlerts}
         />
       );
     },
@@ -389,13 +411,20 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = `${triggersActionsRoute}${getRuleDetailsRoute(rule.id)}`;
+
+          const linkProps = getRouterLinkProps({
+            href: pathToRuleDetails,
+            onClick: () => onRuleClick(rule),
+          });
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} {...linkProps}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
@@ -411,7 +440,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                             }
                           `}
                           data-test-subj="ruleDisabledByLicenseTooltip"
-                          type="questionInCircle"
+                          type="question"
                           content={checkEnabledResult.message}
                           position="right"
                         />
@@ -468,16 +497,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
             &nbsp;
             <EuiIconTip
               data-test-subj="rulesTableCell-lastExecutionDateTooltip"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.lastRunTitleTooltip',
-                {
-                  defaultMessage: 'Start time of the last run.',
-                }
-              )}
+              content={LAST_RUN_CONTENT}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
+              aria-label={LAST_RUN_CONTENT}
             />
           </span>
         ),
@@ -520,20 +545,16 @@ export const RulesListTable = (props: RulesListTableProps) => {
             &nbsp;
             <EuiIconTip
               data-test-subj="rulesTableCell-notifyTooltip"
-              content={i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
-                {
-                  defaultMessage: 'Snooze notifications for a rule.',
-                }
-              )}
+              content={SNOOZE_RULE_NOTIFICATIONS}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
+              aria-label={SNOOZE_RULE_NOTIFICATIONS}
             />
           </span>
         ),
-        width: '14%',
+        width: '100px',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
           if (!rule.enabled) {
@@ -644,7 +665,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>
@@ -726,7 +747,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
               )}
               size="s"
               color="subdued"
-              type="questionInCircle"
+              type="question"
               className="eui-alignTop"
             />
           </span>

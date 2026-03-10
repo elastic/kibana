@@ -239,28 +239,25 @@ export class StatusRuleExecutor {
   }
 
   getRange = (maxPeriod: number) => {
-    let from = this.previousStartedAt
-      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
-      : 'now-2m';
+    const { numberOfChecks, useLatestChecks, timeWindow } = getConditionType(this.params.condition);
 
-    const condition = this.params.condition;
-    if (condition && 'numberOfChecks' in condition?.window) {
-      const numberOfChecks = condition.window.numberOfChecks;
-      from = moment()
+    if (useLatestChecks) {
+      const from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
         .subtract(5, 'minutes')
         .toISOString();
-    } else if (condition && 'time' in condition.window) {
-      const time = condition.window.time;
-      const { unit, size } = time;
-
-      from = moment().subtract(size, unit).toISOString();
+      this.debug(
+        `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
+      );
+      return { from, to: 'now' };
     }
 
+    // `timeWindow` is guaranteed to be defined here.
+    const { unit, size } = timeWindow;
+    const from = moment().subtract(size, unit).toISOString();
     this.debug(
       `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
     );
-
     return { from, to: 'now' };
   };
 
@@ -333,7 +330,9 @@ export class StatusRuleExecutor {
         alertId,
         monitorSummary,
         statusConfig: configs[0],
-        locationNames: configs.map(({ locationId, ping }) => ping?.observer.geo.name || locationId),
+        locationNames: configs.map(
+          ({ locationId, latestPing }) => latestPing?.observer.geo.name || locationId
+        ),
         locationIds: configs.map(({ locationId }) => locationId),
       });
     }
@@ -384,8 +383,8 @@ export class StatusRuleExecutor {
             statusConfig,
             downThreshold,
             useLatestChecks,
-            locationNames: [statusConfig.ping.observer.geo?.name!],
-            locationIds: [statusConfig.ping.observer.name!],
+            locationNames: [statusConfig.latestPing.observer.geo?.name!],
+            locationIds: [statusConfig.latestPing.observer.name!],
           });
         }
       });
@@ -412,8 +411,8 @@ export class StatusRuleExecutor {
             statusConfig: configs[0],
             downThreshold,
             useLatestChecks,
-            locationNames: configs.map((c) => c.ping.observer.geo?.name!),
-            locationIds: configs.map((c) => c.ping.observer.name!),
+            locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
+            locationIds: configs.map((c) => c.latestPing.observer.name!),
           });
         }
       }
@@ -421,7 +420,7 @@ export class StatusRuleExecutor {
   };
 
   getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
-    const { ping, configId, locationId, checks } = statusConfig;
+    const { latestPing: ping, configId, locationId, checks } = statusConfig;
 
     return getMonitorSummary({
       monitorInfo: ping,
@@ -451,11 +450,11 @@ export class StatusRuleExecutor {
 
   getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
-    const { ping, configId, checks } = sampleConfig;
+    const { latestPing: ping, configId, checks } = sampleConfig;
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       reason: 'down',
-      locationId: statusConfigs.map((c) => c.ping.observer.name!),
+      locationId: statusConfigs.map((c) => c.latestPing.observer.name!),
       configId,
       dateFormat: this.dateFormat!,
       tz: this.tz!,
@@ -470,7 +469,7 @@ export class StatusRuleExecutor {
     });
     if (statusConfigs.length > 1) {
       baseSummary.locationNames = statusConfigs
-        .map((c) => c.ping.observer.geo?.name!)
+        .map((c) => c.latestPing.observer.geo?.name!)
         .join(` ${AND_LABEL} `);
     }
 

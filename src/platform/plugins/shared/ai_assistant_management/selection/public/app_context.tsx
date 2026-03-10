@@ -20,6 +20,7 @@ interface ContextValue extends StartDependencies {
   navigateToApp: CoreStart['application']['navigateToApp'];
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
+  securityAIAssistantEnabled: boolean;
 }
 
 const AppContext = createContext<ContextValue>(null as any);

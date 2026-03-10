@@ -31,7 +31,7 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
             key="documentation-button"
             target="_blank"
             href={docLinks.alerting.maintenanceWindows}
-            iconType="help"
+            iconType="question"
           >
             {i18n.EMPTY_PROMPT_DOCUMENTATION}
           </EuiButtonEmpty>,

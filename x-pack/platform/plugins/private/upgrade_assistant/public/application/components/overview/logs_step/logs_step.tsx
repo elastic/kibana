@@ -199,7 +199,7 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
 
         {privilegesMissing.cluster && (
           <EuiCallOut
-            iconType="help"
+            iconType="question"
             color="warning"
             title={i18nTexts.missingClusterPrivilegesTitle}
             data-test-subj="missingClusterPrivilegesCallout"
@@ -212,7 +212,7 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
 
         {privilegesMissing.index && (
           <EuiCallOut
-            iconType="help"
+            iconType="question"
             color="warning"
             title={i18nTexts.missingIndexPrivilegesTitle}
             data-test-subj="missingIndexPrivilegesCallout"

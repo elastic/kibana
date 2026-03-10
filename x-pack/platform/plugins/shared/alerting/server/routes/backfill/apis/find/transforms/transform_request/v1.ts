@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable @typescript-eslint/naming-convention */
 
 import type { FindBackfillRequestQueryV1 } from '../../../../../../../common/routes/backfill/apis/find';
 import type { FindBackfillParams } from '../../../../../../application/backfill/methods/find/types';

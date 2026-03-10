@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -34,9 +34,13 @@
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-http-server-utils",
+    "@kbn/licensing-plugin",
     "@kbn/rrule",
     "@kbn/logging-mocks",
     "@kbn/spaces-utils",
+    "@kbn/es-errors",
+    "@kbn/core-execution-context-server-mocks",
+    "@kbn/core-execution-context-common",
   ],
   "exclude": ["target/**/*"]
 }

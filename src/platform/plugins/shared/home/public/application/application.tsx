@@ -51,6 +51,7 @@ export const renderApp = async (
         >
           <KibanaContextProvider services={{ ...coreStart }}>
             <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
+              {/* @ts-expect-error upgrade typescript v5.9.3 */}
               <HomeApp directories={directories} solutions={solutions} />
             </SampleDataTabKibanaProvider>
           </KibanaContextProvider>

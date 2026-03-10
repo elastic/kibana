@@ -33,12 +33,16 @@ export interface EsConversationSchema {
   messages?: Array<{
     '@timestamp': string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;
     trace_data?: {
       transaction_id?: string;
       trace_id?: string;
+    };
+    metadata?: {
+      content_references?: unknown;
     };
   }>;
   api_config?: {
@@ -67,6 +71,7 @@ export interface CreateMessageSchema {
   messages?: Array<{
     '@timestamp': string;
     content: string;
+    refusal?: string;
     reader?: Reader;
     role: MessageRole;
     is_error?: boolean;

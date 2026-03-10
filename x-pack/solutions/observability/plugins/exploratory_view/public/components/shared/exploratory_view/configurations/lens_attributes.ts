@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { type ExistsFilter, type Query, isExistsFilter } from '@kbn/es-query';
+import { type ExistsFilter, type Query, type Filter, isExistsFilter } from '@kbn/es-query';
 import {
   AvgIndexPatternColumn,
   CardinalityIndexPatternColumn,
@@ -22,7 +22,6 @@ import {
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
   MinIndexPatternColumn,
-  OperationMetadata,
   OperationType,
   PercentileIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -41,6 +40,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -77,7 +77,6 @@ export function buildNumberColumn(sourceField: string) {
     sourceField,
     dataType: 'number' as DataType,
     isBucketed: false,
-    scale: 'ratio' as OperationMetadata['scale'],
   };
 }
 
@@ -169,17 +168,20 @@ export class LensAttributes {
   globalFilter?: { query: string; language: string };
   reportType: string;
   lensFormulaHelper?: FormulaPublicApi;
+  dslFilters?: QueryDslQueryContainer[];
 
   constructor(
     layerConfigs: LayerConfig[],
     reportType: string,
-    lensFormulaHelper?: FormulaPublicApi
+    lensFormulaHelper?: FormulaPublicApi,
+    dslFilters?: QueryDslQueryContainer[]
   ) {
     this.layers = {};
     this.seriesReferenceLines = {};
     this.reportType = reportType;
     this.lensFormulaHelper = lensFormulaHelper;
     this.isMultiSeries = layerConfigs.length > 1;
+    this.dslFilters = dslFilters;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
       if (operationType && reportType !== ReportTypes.SINGLE_METRIC) {
@@ -262,7 +264,6 @@ export class LensAttributes {
       label: labels[sourceField],
       dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         orderBy,
@@ -277,7 +278,6 @@ export class LensAttributes {
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
-                scale: 'ratio',
                 sourceField: '___records___',
               },
             }
@@ -297,7 +297,6 @@ export class LensAttributes {
       dataType: 'number',
       operationType: 'range',
       isBucketed: true,
-      scale: 'interval',
       params: {
         type: 'histogram',
         ranges: [{ from: 0, to: 1000, label: '' }],
@@ -317,7 +316,6 @@ export class LensAttributes {
       label: label ?? 'Filters',
       dataType: 'string',
       operationType: 'filters',
-      scale: 'ordinal',
       isBucketed: true,
       params: {
         filters: paramFilters,
@@ -491,7 +489,6 @@ export class LensAttributes {
       label: '@timestamp',
       operationType: 'date_histogram',
       params: { interval: 'auto', includeEmptyRows: true },
-      scale: 'interval',
     };
   }
 
@@ -502,7 +499,6 @@ export class LensAttributes {
       label: 'Top values of ' + label || sourceField,
       dataType: 'string',
       isBucketed: true,
-      scale: 'ordinal',
       params: {
         size: 10,
         orderBy: {
@@ -860,7 +856,6 @@ export class LensAttributes {
       label: label || 'Count of records',
       customLabel: true,
       operationType: 'count',
-      scale: 'ratio',
       sourceField: RECORDS_FIELD,
       filter: columnFilter,
       ...(timeScale ? { timeScale } : {}),
@@ -1267,6 +1262,31 @@ export class LensAttributes {
     return { internalReferences, adHocDataViews };
   }
 
+  getFilters(): Filter[] {
+    const { internalReferences } = this.getReferences();
+
+    const dslFilters = this.dslFilters;
+    if (!dslFilters) {
+      return [];
+    }
+    return dslFilters.map((filter) => {
+      return {
+        meta: {
+          index: internalReferences?.[0].id,
+          type: 'query_string',
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'query',
+        },
+        $state: {
+          store: 'appState',
+        },
+        query: filter,
+      } as Filter;
+    });
+  }
+
   getJSON(
     visualizationType: 'lnsXY' | 'lnsLegacyMetric' | 'lnsHeatmap' = 'lnsXY',
     lastRefresh?: number
@@ -1290,7 +1310,7 @@ export class LensAttributes {
         },
         visualization: this.visualization,
         query: query || { query: '', language: 'kuery' },
-        filters: [],
+        filters: this.getFilters(),
       },
     };
   }

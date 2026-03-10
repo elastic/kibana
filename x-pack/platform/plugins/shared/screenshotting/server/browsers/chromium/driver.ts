@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Headers, Logger } from '@kbn/core/server';
-import {
-  KBN_SCREENSHOT_MODE_HEADER,
-  ScreenshotModePluginSetup,
-} from '@kbn/screenshot-mode-plugin/server';
-import { ConfigType } from '@kbn/screenshotting-server';
+import type { Headers, Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/server';
+import type { ConfigType } from '@kbn/screenshotting-server';
+import type { CDPSession } from 'puppeteer';
 import { truncate } from 'lodash';
 import open from 'opn';
 import { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';
@@ -389,7 +388,6 @@ export class HeadlessChromiumDriver {
           errorReason: 'Aborted',
           requestId,
         });
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);
@@ -414,7 +412,9 @@ export class HeadlessChromiumDriver {
             headers,
           });
         } catch (err) {
-          logger.error(`Failed to complete a request using headers: ${err.message}`);
+          logger.error(`Failed to complete a request using headers: ${err.message}`, {
+            error: { stack_trace: err.stack },
+          });
         }
       } else {
         const loggedUrl = isData ? this.truncateUrl(interceptedUrl) : interceptedUrl;
@@ -422,7 +422,9 @@ export class HeadlessChromiumDriver {
         try {
           await client.send('Fetch.continueRequest', { requestId });
         } catch (err) {
-          logger.error(`Failed to complete a request: ${err.message}`);
+          logger.error(`Failed to complete a request: ${err.message}`, {
+            error: { stack_trace: err.stack },
+          });
         }
       }
 
@@ -441,7 +443,6 @@ export class HeadlessChromiumDriver {
       }
 
       if (!allowed || !this.allowRequest(interceptedUrl)) {
-        void this.page.browser().close();
         const error = getDisallowedOutgoingUrlError(interceptedUrl);
         this.screenshottingErrorSubject.next(error);
         logger.error(error);

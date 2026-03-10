@@ -25,7 +25,7 @@ import {
 } from '../components/alerts_data_grid.test';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { getJsDomPerformanceFix, testQueryClientConfig } from '../utils/test';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 
 const columns = [

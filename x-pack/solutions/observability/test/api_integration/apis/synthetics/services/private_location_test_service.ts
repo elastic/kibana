@@ -12,9 +12,11 @@ import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,
 } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { omit } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.1.1';
+export const INSTALLED_VERSION = '1.4.2';
 
 export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
@@ -53,7 +55,11 @@ export class PrivateLocationTestService {
       .expect(200);
   }
 
-  async addPrivateLocation({ policyId, label }: { policyId?: string; label?: string } = {}) {
+  async createPrivateLocation({
+    policyId,
+    label,
+    spaceId,
+  }: { policyId?: string; label?: string; spaceId?: string } = {}) {
     let agentPolicyId = policyId;
 
     if (!agentPolicyId) {
@@ -68,6 +74,7 @@ export class PrivateLocationTestService {
         lat: 0,
         lon: 0,
       },
+      ...(spaceId ? { spaces: [spaceId] } : {}),
     };
 
     const response = await this.supertest
@@ -78,6 +85,10 @@ export class PrivateLocationTestService {
     expect(response.status).to.be(200);
 
     const { isInvalid, ...loc } = response.body;
+
+    if (spaceId) {
+      return omit(loc, ['spaces']);
+    }
 
     return loc;
   }
@@ -120,5 +131,23 @@ export class PrivateLocationTestService {
       .get(SYNTHETICS_API_URLS.PRIVATE_LOCATIONS)
       .set('kbn-xsrf', 'true')
       .expect(200);
+  }
+
+  async getPackagePolicy({
+    monitorId,
+    locId,
+    spaceId = 'default',
+  }: {
+    monitorId: string;
+    locId: string;
+    spaceId?: string;
+  }) {
+    const apiResponse = await this.supertest.get(
+      '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+    );
+
+    return apiResponse.body.items.find(
+      (pkgPolicy: PackagePolicy) => pkgPolicy.id === `${monitorId}-${locId}-${spaceId}`
+    );
   }
 }

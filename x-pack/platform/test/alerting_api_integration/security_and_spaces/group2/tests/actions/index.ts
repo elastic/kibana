@@ -8,7 +8,6 @@
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
-// eslint-disable-next-line import/no-default-export
 export default function connectorsTests({ loadTestFile, getService }: FtrProviderContext) {
   describe('Connectors', () => {
     before(async () => {

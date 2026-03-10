@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './fill_gap_by_id';
+export type * from './fill_gap_by_id';

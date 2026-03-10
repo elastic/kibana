@@ -92,6 +92,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
         errors:
           type: array

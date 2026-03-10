@@ -1,0 +1,49 @@
+{
+  "lastModified": "2026-02-12T22:59:53.118Z",
+  "sha1": "2663c2ed42375a421add847931cbb5d5df02e487",
+  "tests": [
+    {
+      "id": "3cc9409cebf2cef-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "47b65e37e90cb72-c36c58dbd044c62",
+      "title": "Classic Streams full flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/classic.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "288b5b4ed9b1996-c95d5913e0efb8b",
+      "title": "Wired Streams full flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/wired.spec.ts",
+        "line": 28,
+        "column": 9
+      }
+    }
+  ]
+}

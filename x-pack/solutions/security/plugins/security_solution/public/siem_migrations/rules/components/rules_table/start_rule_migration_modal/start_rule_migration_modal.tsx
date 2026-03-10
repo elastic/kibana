@@ -27,16 +27,14 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import type { ConnectorSelectorProps } from '@kbn/security-solution-connectors';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import type { ReactNode } from 'react-markdown';
 import { useAIConnectors } from '../../../../../common/hooks/use_ai_connectors';
-import { getConnectorDescription } from '../../../../../common/utils/connectors/get_connector_description';
 import { useKibana } from '../../../../../common/lib/kibana';
-import * as i18n from '../translations';
-import type { RuleMigrationSettings } from '../../../types';
 import { OnboardingCardId, OnboardingTopicId } from '../../../../../onboarding/constants';
 import { useGetSecuritySolutionLinkProps } from '../../../../../common/components/links';
+import * as i18n from '../translations';
+import type { RuleMigrationSettings } from '../../../types';
 
 interface StartRuleMigrationModalProps {
   /** default settings that needs to be selected in the modal */
@@ -59,10 +57,7 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
   }) {
     const { connectorId, skipPrebuiltRulesMatching } = defaultSettings;
 
-    const {
-      triggersActionsUi: { actionTypeRegistry },
-      siemMigrations,
-    } = useKibana().services;
+    const { siemMigrations, settings } = useKibana().services;
 
     const { aiConnectors, isLoading } = useAIConnectors();
 
@@ -75,20 +70,6 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
     );
 
     const modalTitleId = useGeneratedHtmlId();
-
-    const connectorOptions: ConnectorSelectorProps['connectors'] = useMemo(() => {
-      return aiConnectors.map((connector) => {
-        const connectorDescription = getConnectorDescription({
-          connector,
-          actionTypeRegistry,
-        });
-        return {
-          id: connector.id,
-          name: connector.name,
-          description: connectorDescription,
-        };
-      });
-    }, [actionTypeRegistry, aiConnectors]);
 
     const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
@@ -169,12 +150,13 @@ export const StartRuleMigrationModal: FC<StartRuleMigrationModalProps> = React.m
                 aria-required={true}
               >
                 <ConnectorSelector
-                  connectors={connectorOptions}
+                  connectors={aiConnectors}
                   selectedId={selectedConnectorId}
                   onChange={setSelectedConnectorId}
                   isInvalid={!selectedConnectorId}
                   isLoading={isLoading}
                   mode={'combobox'}
+                  settings={settings}
                 />
               </EuiFormRow>
               <EuiFormRow>

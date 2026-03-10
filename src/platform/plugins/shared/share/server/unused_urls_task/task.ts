@@ -176,6 +176,10 @@ export const scheduleUnusedUrlsCleanupTask = async ({
 
     const taskInstance = getDeleteUnusedUrlTaskInstance(checkInterval);
     await taskManager.ensureScheduled(taskInstance);
+    // TODO: Workaround for interval not updating on change until https://github.com/elastic/kibana/issues/222089 is resolved.
+    await taskManager.bulkUpdateSchedules([TASK_ID], {
+      interval: durationToSeconds(checkInterval),
+    });
   } catch (e) {
     throw new Error(e.message || 'Failed to schedule unused URLs cleanup task');
   }

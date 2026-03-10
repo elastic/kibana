@@ -30,6 +30,7 @@ export const createBatchedFunction = <Func extends Fn, BatchEntry>(
   });
 
   const fn: Func = ((...args) => {
+    // @ts-expect-error typescript upgrade v5.4.5
     const [result, batchEntry] = onCall(...args);
     buffer.write(batchEntry);
     return result;

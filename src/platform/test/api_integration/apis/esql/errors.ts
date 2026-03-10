@@ -145,7 +145,11 @@ export default function ({ getService }: FtrProviderContext) {
     }
   }
 
-  describe('error messages', () => {
+  describe('error messages', function () {
+    // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
+    // These versions are not expected to work together.
+    this.onlyEsVersion('8.19 || 9.1 - 9.3');
+
     const config = readSetupFromESQLPackage();
     const { queryToErrors, indexes, policies } = parseConfig(config);
 

@@ -43,15 +43,25 @@ const MigrationCompleteStep: React.FunctionComponent<Omit<Props, 'close'>> = ({
     <>
       <EuiSpacer size="m" />
       <p data-test-subj="dataStreamMigrationCompletedDescription">
-        <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.migration.completeStep.changesDescription"
-          defaultMessage="Success! {count, plural, =0 {backing indices} =1 {# backing index} other {# backing indices}} from {dataStreamName} successfully {resolutionType, select, reindex {reindexed} readonly {set to read-only} other {migrated}}."
-          values={{
-            count: meta?.indicesRequiringUpgradeCount || 0,
-            resolutionType,
-            dataStreamName: dataStreamName && <EuiCode>{dataStreamName}</EuiCode>,
-          }}
-        />
+        {resolutionType === 'delete' ? (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.migration.completeStep.changesDescription"
+            defaultMessage="Success! Data stream {dataStreamName} successfully deleted."
+            values={{
+              dataStreamName: dataStreamName && <EuiCode>{dataStreamName}</EuiCode>,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.migration.completeStep.changesDescription"
+            defaultMessage="Success! {count, plural, =0 {backing indices} =1 {# backing index} other {# backing indices}} from {dataStreamName} successfully {resolutionType, select, reindex {reindexed} readonly {set to read-only} other {migrated}}."
+            values={{
+              count: meta?.indicesRequiringUpgradeCount || 0,
+              resolutionType,
+              dataStreamName: dataStreamName && <EuiCode>{dataStreamName}</EuiCode>,
+            }}
+          />
+        )}
       </p>
     </>
   );
@@ -109,10 +119,11 @@ export const MigrationCompletedModalStep: React.FunctionComponent<Props> = ({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="readonlyDataStreamModalTitle" size="m">
+        <EuiModalHeaderTitle data-test-subj="dataStreamModalTitle" size="m">
           <FormattedMessage
-            id="xpack.upgradeAssistant.dataStream.modal.completedStep.readonly.title"
-            defaultMessage="Setting data stream to read-only completed"
+            id="xpack.upgradeAssistant.dataStream.modal.completedStep.title"
+            defaultMessage="{resolutionType, select, delete {Deleting data stream completed} other {Setting data stream to read-only completed}}"
+            values={{ resolutionType }}
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>

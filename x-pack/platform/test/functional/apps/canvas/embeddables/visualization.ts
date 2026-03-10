@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/canvas/lens'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/lens'
       );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'

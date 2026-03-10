@@ -39,7 +39,6 @@ export const exceptionItemToCreateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): CreateExceptionListItemSchemaWithNonNullProps => {
   const {
-    /* eslint-disable @typescript-eslint/naming-convention */
     description,
     entries,
     expire_time,
@@ -52,7 +51,6 @@ export const exceptionItemToCreateExceptionItem = (
     namespace_type,
     os_types,
     tags,
-    /* eslint-enable @typescript-eslint/naming-convention */
   } = exceptionItem;
 
   return {
@@ -74,7 +72,6 @@ export const exceptionItemToCreateExceptionItem = (
 const exceptionItemToUpdateExceptionItem = (
   exceptionItem: ExceptionListItemSchema
 ): UpdateExceptionListItemSchemaWithNonNullProps => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { id, item_id, _version } = exceptionItem;
   const { list_id: _, ...updateAttributes } = exceptionItemToCreateExceptionItem(exceptionItem);
 

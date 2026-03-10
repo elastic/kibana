@@ -12,7 +12,7 @@ import type { CloudDefendPage, CloudDefendPageNavigationItem } from '../common/n
 import { CloudDefendSecuritySolutionContext } from '../types';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
-import { QueryClientProviderProps } from '@tanstack/react-query';
+import { QueryClientProviderProps } from '@kbn/react-query';
 
 jest.mock('../pages/policies', () => ({
   Policies: () => <div data-test-subj="Policies">Policies</div>,

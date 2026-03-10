@@ -2387,6 +2387,27 @@ Object {
       ],
       "type": "string",
     },
+    "region": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
   },
   "type": "object",
 }
@@ -5579,7 +5600,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5588,6 +5620,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -5604,7 +5644,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5613,6 +5664,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -5739,7 +5798,18 @@ Object {
             "error": [Function],
             "presence": "optional",
           },
+          "metas": Array [
+            Object {
+              "x-oas-max-length": 512,
+            },
+          ],
           "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
             Object {
               "args": Object {
                 "method": [Function],
@@ -5748,6 +5818,14 @@ Object {
             },
           ],
           "type": "string",
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 100,
+          },
+          "name": "max",
         },
       ],
       "type": "array",
@@ -7079,7 +7157,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "gemini-1.5-pro-002",
+        "default": "gemini-2.5-pro",
         "error": [Function],
         "presence": "optional",
       },
@@ -38540,34 +38618,6 @@ Object {
           ],
           "type": "string",
         },
-        "path": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "secret": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "storyId": Object {
           "flags": Object {
             "error": [Function],
@@ -38580,6 +38630,11 @@ Object {
           "x-oas-optional": true,
         },
       ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": true,
+        },
+      },
       "type": "object",
     },
     "webhookUrl": Object {
@@ -38659,34 +38714,6 @@ Object {
           ],
           "type": "string",
         },
-        "path": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
-        "secret": Object {
-          "flags": Object {
-            "error": [Function],
-          },
-          "rules": Array [
-            Object {
-              "args": Object {
-                "method": [Function],
-              },
-              "name": "custom",
-            },
-          ],
-          "type": "string",
-        },
         "storyId": Object {
           "flags": Object {
             "error": [Function],
@@ -38699,6 +38726,11 @@ Object {
           "x-oas-optional": true,
         },
       ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": true,
+        },
+      },
       "type": "object",
     },
     "webhookUrl": Object {

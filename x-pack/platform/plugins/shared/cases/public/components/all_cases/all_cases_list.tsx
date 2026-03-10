@@ -46,7 +46,7 @@ export interface AllCasesListProps {
 
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
-    const { owner, permissions, settings } = useCasesContext();
+    const { owner, permissions } = useCasesContext();
 
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
     const isLoading = useIsLoadingCases();
@@ -141,7 +141,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       onRowClick,
       disableActions: selectedCases.length > 0,
       selectedColumns,
-      settings,
     });
 
     const pagination = useMemo(
@@ -184,24 +183,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       filterOptions
     );
 
+    const cssStyling = useMemo(
+      () =>
+        isLoading || isLoadingCases || isLoadingColumns
+          ? css`
+              top: ${euiTheme.size.xxs};
+              border-radius: ${euiTheme.border.radius};
+              z-index: ${euiTheme.levels.header};
+            `
+          : css`
+              display: none;
+            `,
+      [isLoading, isLoadingCases, isLoadingColumns, euiTheme]
+    );
+
     return (
       <>
-        <EuiProgress
-          size="xs"
-          color="accent"
-          className="essentialAnimation"
-          css={
-            isLoading || isLoadingCases || isLoadingColumns
-              ? css`
-                  top: ${euiTheme.size.xxs};
-                  border-radius: ${euiTheme.border.radius};
-                  z-index: ${euiTheme.levels.header};
-                `
-              : css`
-                  display: none;
-                `
-          }
-        />
+        <EuiProgress size="xs" color="accent" className="essentialAnimation" css={cssStyling} />
 
         {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters

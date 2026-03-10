@@ -33,8 +33,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
-  const logsSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
+  const ecommerceSOPath =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
+  const logsSOPath = 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/logs';
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
@@ -65,23 +66,23 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       concurrency: 1,
     }
   ) => {
-    await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce', {
+    await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce', {
       performance,
     });
     await kibanaServer.importExport.load(ecommerceSOPath);
   };
   const teardownEcommerce = async () => {
-    await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+    await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
     await kibanaServer.importExport.unload(ecommerceSOPath);
   };
 
   const initLogs = async () => {
-    await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+    await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     await kibanaServer.importExport.load(logsSOPath);
   };
   const teardownLogs = async () => {
     await kibanaServer.importExport.unload(logsSOPath);
-    await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+    await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
   };
 
   const createDataAnalystRole = async () => {
@@ -182,6 +183,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       password: REPORTING_USER_PASSWORD,
       roles: [REPORTING_ROLE],
       full_name: 'Reporting User',
+      email: 'reportinguser@example.com',
     });
   };
 
@@ -203,14 +205,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username: string,
     password: string,
     job: JobParamsPDFV2,
-    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    startedAt?: string
   ) => {
     const jobParams = rison.encode(job);
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
     return await supertestWithoutAuth
       .post(`/internal/reporting/schedule/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule });
+      .send({ jobParams, schedule: scheduleToUse });
   };
   const generatePng = async (
     username: string,
@@ -230,14 +236,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     username: string,
     password: string,
     job: JobParamsPNGV2,
-    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    startedAt?: string
   ) => {
     const jobParams = rison.encode(job);
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
     return await supertestWithoutAuth
       .post(`/internal/reporting/schedule/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule });
+      .send({ jobParams, schedule: scheduleToUse });
   };
   const generateCsv = async (
     job: JobParamsCSV,
@@ -257,15 +267,18 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     job: JobParamsCSV,
     username = 'elastic',
     password = process.env.TEST_KIBANA_PASS || 'changeme',
-    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } }
+    schedule: RruleSchedule = { rrule: { freq: 1, interval: 1, tzid: 'UTC' } },
+    startedAt?: string
   ) => {
     const jobParams = rison.encode(job);
-
+    const scheduleToUse = startedAt
+      ? { rrule: { ...schedule.rrule, dtstart: startedAt } }
+      : schedule;
     return await supertestWithoutAuth
       .post(`/internal/reporting/schedule/csv_searchsource`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
-      .send({ jobParams, schedule });
+      .send({ jobParams, schedule: scheduleToUse });
   };
 
   const listScheduledReports = async (

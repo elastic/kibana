@@ -16,8 +16,8 @@ import {
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { clearOverviewStatusState } from '../../../state/overview_status';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { Space } from '@kbn/spaces-plugin/common';
 import {
   selectOverviewState,
   setOverviewPageStateAction,
@@ -26,6 +26,8 @@ import {
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 
 export const ShowAllSpaces: React.FC = () => {
+  const { space } = useKibanaSpace();
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -37,18 +39,19 @@ export const ShowAllSpaces: React.FC = () => {
           </span>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SelectablePopover />
-      </EuiFlexItem>
+      {space && (
+        <EuiFlexItem>
+          <SelectablePopover space={space} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
 
-const SelectablePopover = () => {
+const SelectablePopover = ({ space }: { space: Space }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { space } = useKibanaSpace();
-  const [showFromAllSpacesVal, setShowFromAllSpacesVal] = useSessionStorage(
-    'SyntheticsShowFromAllSpaces',
+  const [showFromAllSpacesVal, setShowFromAllSpacesVal] = useLocalStorage(
+    'SyntheticsShowFromAllSpaces' + space.id,
     false
   );
   const dispatch = useDispatch();
@@ -74,7 +77,6 @@ const SelectablePopover = () => {
 
   const updateState = (val: boolean) => {
     setShowFromAllSpacesVal(val);
-    dispatch(clearOverviewStatusState());
     dispatch(
       setOverviewPageStateAction({
         showFromAllSpaces: val,
@@ -96,7 +98,7 @@ const SelectablePopover = () => {
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       size="xs"
     >
-      {showFromAllSpaces ? ALL_SPACES_LABEL : space?.name || space?.id}
+      {showFromAllSpaces ? ALL_SPACES_LABEL : space.name || space.id}
     </EuiButtonEmpty>
   );
   return (
@@ -116,7 +118,7 @@ const SelectablePopover = () => {
             title: SHOW_MONITORS_FROM,
             items: [
               {
-                name: `${CURRENT_SPACE_LABEL} - ${space?.name || space?.id}`,
+                name: `${CURRENT_SPACE_LABEL} - ${space.name || space.id}`,
                 onClick: () => {
                   updateState(false);
                 },

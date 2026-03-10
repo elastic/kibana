@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
@@ -55,6 +55,7 @@ interface Props {
   setListParams: (listParams: SnapshotListParams) => void;
   totalItemCount: number;
   isLoading: boolean;
+  error?: ReactNode;
 }
 
 export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
@@ -67,6 +68,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
     setListParams,
     totalItemCount,
     isLoading,
+    error,
   } = props;
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
@@ -324,33 +326,37 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
         onSnapshotDeleted={onSnapshotDeleted}
         repositories={repositories}
       />
-      <EuiBasicTable
-        items={snapshots}
-        itemId="uuid"
-        columns={columns}
-        sorting={sorting}
-        onChange={(criteria: Criteria<SnapshotDetails>) => {
-          const { page: { index, size } = {}, sort: { field, direction } = {} } = criteria;
+      {error ? (
+        error
+      ) : (
+        <EuiBasicTable
+          items={snapshots}
+          itemId={(item) => `${item?.uuid}-${item?.repository}`}
+          columns={columns}
+          sorting={sorting}
+          onChange={(criteria: Criteria<SnapshotDetails>) => {
+            const { page: { index, size } = {}, sort: { field, direction } = {} } = criteria;
 
-          setListParams({
-            ...listParams,
-            sortField: (field as SortField) ?? listParams.sortField,
-            sortDirection: (direction as SortDirection) ?? listParams.sortDirection,
-            pageIndex: index ?? listParams.pageIndex,
-            pageSize: size ?? listParams.pageSize,
-          });
-        }}
-        loading={isLoading}
-        selection={selection}
-        pagination={pagination}
-        rowProps={() => ({
-          'data-test-subj': 'row',
-        })}
-        cellProps={() => ({
-          'data-test-subj': 'cell',
-        })}
-        data-test-subj="snapshotTable"
-      />
+            setListParams({
+              ...listParams,
+              sortField: (field as SortField) ?? listParams.sortField,
+              sortDirection: (direction as SortDirection) ?? listParams.sortDirection,
+              pageIndex: index ?? listParams.pageIndex,
+              pageSize: size ?? listParams.pageSize,
+            });
+          }}
+          loading={isLoading}
+          selection={selection}
+          pagination={pagination}
+          rowProps={() => ({
+            'data-test-subj': 'row',
+          })}
+          cellProps={() => ({
+            'data-test-subj': 'cell',
+          })}
+          data-test-subj="snapshotTable"
+        />
+      )}
     </>
   );
 };

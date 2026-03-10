@@ -92,7 +92,7 @@ export function getLogStreamEmbeddableFactory(services: Services) {
               theme$={services.coreStart.theme.theme$}
             >
               <EuiThemeProvider darkMode={darkMode}>
-                <div style={{ width: '100%', position: 'relative' }}>
+                <div data-shared-item="" style={{ width: '100%', position: 'relative' }}>
                   <LogStream
                     logView={{ type: 'log-view-reference', logViewId: 'default' }}
                     startTimestamp={startTimestamp}
@@ -127,7 +127,7 @@ const DeprecationCallout = () => {
   return (
     <EuiCallOut
       color="warning"
-      iconType="help"
+      iconType="question"
       onDismiss={() => setDismissed(true)}
       css={{
         position: 'absolute',

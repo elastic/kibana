@@ -341,10 +341,8 @@ export function registerTransactionDurationRuleType({
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-        const ruleParamsOfRecoveredAlert = alertHits?.[
-          ALERT_RULE_PARAMETERS
-        ] as TransactionDurationRuleTypeParams;
-        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const ruleParamsOfRecoveredAlert = alertHits?.[ALERT_RULE_PARAMETERS];
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert?.groupBy ?? [];
         const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
           ApmRuleType.TransactionDuration,
           groupByFieldsOfRecoveredAlert

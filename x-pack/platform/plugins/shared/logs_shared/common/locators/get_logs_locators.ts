@@ -15,10 +15,10 @@ import { TRACE_LOGS_LOCATOR_ID } from './trace_logs_locator';
 
 export const getLogsLocatorsFromUrlService = (urlService: UrlService) => {
   const discoverLogsLocator =
-    urlService.locators.get<DiscoverLogsLocatorParams>(DISCOVER_LOGS_LOCATOR_ID)!;
-  const logsLocator = urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;
-  const nodeLogsLocator = urlService.locators.get<NodeLogsLocatorParams>(NODE_LOGS_LOCATOR_ID)!;
-  const traceLogsLocator = urlService.locators.get<TraceLogsLocatorParams>(TRACE_LOGS_LOCATOR_ID)!;
+    urlService.locators.get<DiscoverLogsLocatorParams>(DISCOVER_LOGS_LOCATOR_ID);
+  const logsLocator = urlService.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
+  const nodeLogsLocator = urlService.locators.get<NodeLogsLocatorParams>(NODE_LOGS_LOCATOR_ID);
+  const traceLogsLocator = urlService.locators.get<TraceLogsLocatorParams>(TRACE_LOGS_LOCATOR_ID);
 
   return {
     discoverLogsLocator,

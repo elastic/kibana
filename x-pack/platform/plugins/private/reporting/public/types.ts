@@ -54,21 +54,43 @@ export interface JobSummarySet {
 export type ReportTypeId = 'pngV2' | 'printablePdfV2' | 'csv_searchsource' | 'csv_v2';
 
 export interface ScheduledReport {
+  /**
+   * The title of the report, used for the filename and in the UI
+   */
   title: string;
+  /**
+   * The type of report to generate, e.g. 'pngV2', 'printablePdfV2', 'csv_searchsource'
+   */
   reportTypeId: ReportTypeId;
+  /**
+   * PDF-specific option
+   * TODO move this to a more specific interface
+   */
   optimizedForPrinting?: boolean;
+  /**
+   * The date when the report should be first generated
+   */
+  startDate: string;
+  /**
+   * The timezone associated with the dates
+   */
+  timezone: string;
+  /**
+   * Whether the report should be generated on a recurring schedule
+   */
   recurring: boolean;
+  /**
+   * If recurring, the schedule for generating the report
+   */
   recurringSchedule: RecurringSchedule;
+  /**
+   * Boolean indicating whether the report should be sent by email
+   */
   sendByEmail: boolean;
+  /**
+   * List of email addresses to send the report to (`to` field in the email)
+   */
   emailRecipients: string[];
-  /**
-   * @internal Still unsupported by the schedule API
-   */
-  startDate?: string;
-  /**
-   * @internal Still unsupported by the schedule API
-   */
-  timezone?: string;
 }
 
 export interface ReportTypeData {

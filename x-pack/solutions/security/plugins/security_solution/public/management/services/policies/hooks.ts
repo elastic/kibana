@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { BulkGetAgentPoliciesResponse } from '@kbn/fleet-plugin/common';
-import { type GetInfoResponse } from '@kbn/fleet-plugin/common';
+import { type GetInfoResponse, type BulkGetAgentPoliciesResponse } from '@kbn/fleet-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY } from '../../../../common/endpoint/constants';

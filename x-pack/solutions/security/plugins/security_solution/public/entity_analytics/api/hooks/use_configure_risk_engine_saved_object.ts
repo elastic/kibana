@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import type { TaskManagerUnavailableResponse } from '../../../../common/api/entity_analytics/common';
 import { useEntityAnalyticsRoutes } from '../api';
 import type { ConfigureRiskEngineSavedObjectResponse } from '../../../../common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';

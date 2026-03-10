@@ -22,7 +22,7 @@ export const TopProcessesTooltip = React.memo(() => {
         defaultMessage: 'More info',
       })}
       iconSize="m"
-      icon="iInCircle"
+      icon="info"
       data-test-subj="infraAssetDetailsProcessesPopoverButton"
     >
       <EuiText size="xs" style={{ width: 300 }}>

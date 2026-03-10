@@ -162,12 +162,19 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
             <EuiFlexGroup direction="column" gutterSize="xs">
               {entries(filteredTypes).map(([_type, parts], index) => {
                 const type = _type as KibanaAssetType;
+                // For transforms, count unique transform modules since multiple files can belong to the same transform
+                // For all other asset types, count all parts
+                const assetCount =
+                  _type === 'transform'
+                    ? new Set(parts.map((part) => part.file)).size
+                    : parts.length;
+
                 return (
                   <EuiFlexItem key={`item-${index}`}>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="spaceBetween">
                       <EuiFlexItem grow={false}>{AssetTitleMap[type]}</EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiNotificationBadge color="subdued">{parts.length}</EuiNotificationBadge>
+                        <EuiNotificationBadge color="subdued">{assetCount}</EuiNotificationBadge>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

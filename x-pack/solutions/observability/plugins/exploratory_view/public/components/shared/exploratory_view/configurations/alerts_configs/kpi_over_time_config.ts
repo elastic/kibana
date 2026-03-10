@@ -27,7 +27,6 @@ export function getAlertsKPIConfig({ spaceId }: ConfigProps): SeriesConfig {
       dataType: 'date',
       operationType: 'date_histogram',
       isBucketed: true,
-      scale: 'interval',
       sourceField: REPORT_METRIC_TIMESTAMP,
     },
     yAxisColumns: [

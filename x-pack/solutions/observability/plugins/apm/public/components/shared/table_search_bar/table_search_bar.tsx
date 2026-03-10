@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { debounce } from 'lodash';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
   placeholder: string;
   searchQuery: string;
+  isLoading?: boolean;
   onChangeSearchQuery: (value: string) => void;
   techPreview?: boolean;
 }
@@ -20,8 +22,14 @@ export function TableSearchBar({
   placeholder,
   searchQuery,
   onChangeSearchQuery,
+  isLoading,
   techPreview = false,
 }: Props) {
+  const debouncedSearchQuery = useMemo(
+    () => debounce(onChangeSearchQuery, 500),
+    [onChangeSearchQuery]
+  );
+
   return (
     <EuiFlexGroup gutterSize="s">
       {techPreview ? (
@@ -39,9 +47,10 @@ export function TableSearchBar({
           data-test-subj="tableSearchInput"
           placeholder={placeholder}
           fullWidth={true}
-          value={searchQuery}
+          defaultValue={searchQuery}
+          isLoading={isLoading}
           onChange={(e) => {
-            onChangeSearchQuery(e.target.value);
+            debouncedSearchQuery(e.target.value);
           }}
         />
       </EuiFlexItem>
@@ -58,10 +67,11 @@ export function getItemsFilteredBySearchQuery<T, P extends keyof T>({
   fieldsToSearch: P[];
   searchQuery: string;
 }) {
+  const query = searchQuery.toLowerCase();
   return items.filter((item) => {
     return fieldsToSearch.some((field) => {
       const fieldValue = item[field] as unknown as string | undefined;
-      return fieldValue?.toLowerCase().includes(searchQuery.toLowerCase());
+      return fieldValue?.toLowerCase().includes(query);
     });
   });
 }

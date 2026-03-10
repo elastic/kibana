@@ -6,7 +6,7 @@
  */
 
 import React, { type ComponentProps, memo } from 'react';
-import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { GetTableProp } from './types';
 import { DatetimeSchemaCellRenderer } from './datetime_schema_cell_renderer';
 import { BasicCellRenderer } from './basic_cell_renderer';
@@ -31,6 +31,11 @@ export type CellValueProps = Pick<
    */
   | 'packages'
   /**
+   * Result from the useQuery to fetch all rules.
+   * This comes from the additionalContext property on the table.
+   */
+  | 'ruleResponse'
+  /**
    * Type of field used to drive how we render the value in the BasicCellRenderer.
    * This comes from EuiDataGrid.
    */
@@ -46,20 +51,28 @@ export type CellValueProps = Pick<
  *  - datetime
  * Finally it renders the rest as basic strings.
  */
-export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueProps) => {
-  let component;
+export const CellValue = memo(
+  ({ alert, columnId, packages, ruleResponse, schema }: CellValueProps) => {
+    let component;
 
-  if (columnId === ALERT_RULE_PARAMETERS) {
-    component = <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />;
-  } else if (columnId === ALERT_SEVERITY) {
-    component = <KibanaAlertSeverityCellRenderer alert={alert} />;
-  } else if (schema === DATETIME_SCHEMA) {
-    component = <DatetimeSchemaCellRenderer alert={alert} field={columnId} />;
-  } else {
-    component = <BasicCellRenderer alert={alert} field={columnId} />;
+    if (columnId === 'signal.rule.rule_id') {
+      component = (
+        <KibanaAlertRelatedIntegrationsCellRenderer
+          alert={alert}
+          packages={packages}
+          rules={ruleResponse.rules}
+        />
+      );
+    } else if (columnId === ALERT_SEVERITY) {
+      component = <KibanaAlertSeverityCellRenderer alert={alert} />;
+    } else if (schema === DATETIME_SCHEMA) {
+      component = <DatetimeSchemaCellRenderer alert={alert} field={columnId} />;
+    } else {
+      component = <BasicCellRenderer alert={alert} field={columnId} />;
+    }
+
+    return <>{component}</>;
   }
-
-  return <>{component}</>;
-});
+);
 
 CellValue.displayName = 'CellValue';

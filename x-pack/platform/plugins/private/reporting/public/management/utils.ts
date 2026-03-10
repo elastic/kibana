@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { capitalize } from 'lodash';
 import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { Job } from '@kbn/reporting-public';
@@ -47,9 +48,9 @@ export const guessAppIconTypeFromObjectType = (type: string): IconType => {
 export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
     case 'search':
-      return 'discover session';
+      return 'Discover';
     default:
-      return type;
+      return capitalize(type);
   }
 };
 
@@ -64,10 +65,6 @@ const isCustomRrule = (rRule: Rrule) => {
   const freq = rRule.freq;
   // interval is greater than 1
   if (rRule.interval && rRule.interval > 1) {
-    return true;
-  }
-  // frequency is daily and no weekdays are selected
-  if (freq && freq === Frequency.DAILY && !rRule.byweekday) {
     return true;
   }
   // frequency is weekly and there are multiple weekdays selected
@@ -125,8 +122,10 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
   return {
     title,
     recurringSchedule,
+    // TODO dtstart should be required
+    startDate: rRule.dtstart!,
     reportTypeId: report.jobtype as ScheduledReport['reportTypeId'],
-    timezone: schedule.rrule.tzid,
+    timezone: rRule.tzid,
     recurring: true,
     sendByEmail: Boolean(notification?.email),
     emailRecipients: [...(notification?.email?.to || [])],

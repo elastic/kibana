@@ -133,14 +133,23 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
 
     const handleValuesChange = useCallback(
       (newOptions: EuiComboBoxOptionOption[]): void => {
-        const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
-        handleError(undefined);
-        handleSpacesWarning(newValue);
-        setShowSpacesWarning(false);
+        const isCustomSearchQuery =
+          newOptions.length > 0 && searchQuery && searchQuery !== newOptions[0].label;
 
-        onChange(newValue ?? '');
+        handleError(undefined);
+        setShowSpacesWarning(false);
+        setSearchQuery('');
+
+        if (isCustomSearchQuery) {
+          handleSpacesWarning(searchQuery);
+          onChange(searchQuery);
+        } else {
+          const [newValue] = newOptions.map(({ label }) => optionsMemo[labels.indexOf(label)]);
+          handleSpacesWarning(newValue);
+          onChange(newValue ?? '');
+        }
       },
-      [handleError, handleSpacesWarning, labels, onChange, optionsMemo]
+      [handleError, handleSpacesWarning, labels, onChange, optionsMemo, searchQuery]
     );
 
     const handleSearchChange = useCallback(
@@ -150,7 +159,6 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           handleError(err);
           handleWarning(warning);
           if (!err) handleSpacesWarning(searchVal);
-
           setSearchQuery(searchVal);
         }
       },

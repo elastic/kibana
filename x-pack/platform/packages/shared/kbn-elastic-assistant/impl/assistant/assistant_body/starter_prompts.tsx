@@ -6,21 +6,14 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { PromptItemArray } from '@kbn/elastic-assistant-common/impl/schemas/security_ai_prompts/common_attributes.gen';
 import { useAssistantContext, useFindPrompts } from '../../..';
 
 interface Props {
   connectorId?: string;
+  compressed?: boolean;
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 const starterPromptClassName = css`
@@ -65,9 +58,14 @@ export const promptGroups = [
   },
 ];
 
-export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) => {
+export const StarterPrompts: React.FC<Props> = ({
+  compressed = false,
+  connectorId,
+  setUserPrompt,
+}) => {
   const {
     assistantAvailability: { isAssistantEnabled },
+    assistantTelemetry,
     http,
     toasts,
   } = useAssistantContext();
@@ -93,11 +91,21 @@ export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) 
     return formatPromptGroups(actualPrompts);
   }, [actualPrompts]);
 
-  const onSelectPrompt = useCallback(
-    (prompt: string) => {
-      setUserPrompt(prompt);
+  const trackPrompt = useCallback(
+    (promptTitle: string) => {
+      assistantTelemetry?.reportAssistantStarterPrompt({
+        promptTitle,
+      });
     },
-    [setUserPrompt]
+    [assistantTelemetry]
+  );
+
+  const onSelectPrompt = useCallback(
+    (prompt: string, title: string) => {
+      setUserPrompt(prompt);
+      trackPrompt(title);
+    },
+    [setUserPrompt, trackPrompt]
   );
 
   return (
@@ -105,20 +113,20 @@ export const StarterPrompts: React.FC<Props> = ({ connectorId, setUserPrompt }) 
       {fetchedPromptGroups.map(({ description, title, icon, prompt }) => (
         <EuiFlexItem key={prompt} className={starterPromptClassName}>
           <EuiPanel
-            paddingSize="m"
+            paddingSize={compressed ? 's' : 'm'}
             hasShadow={false}
             hasBorder
             data-test-subj={prompt}
-            onClick={() => onSelectPrompt(prompt)}
+            onClick={() => onSelectPrompt(prompt, title)}
             className={starterPromptInnerClassName}
           >
             <EuiSpacer size="s" />
-            <EuiIcon type={icon} size="xl" />
+            <EuiIcon type={icon} size={compressed ? 'm' : 'xl'} />
             <EuiSpacer size="s" />
-            <EuiTitle size="xs">
-              <h2>{title}</h2>
-            </EuiTitle>
-            <EuiText size="s">{description}</EuiText>
+            <EuiText size={compressed ? 'xs' : 's'}>
+              <h3>{title}</h3>
+              <p>{description}</p>
+            </EuiText>
           </EuiPanel>
         </EuiFlexItem>
       ))}

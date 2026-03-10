@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { API_VERSIONS, ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';
 import type {
   GetAttackDiscoveryGenerationsRequestQuery,
   GetAttackDiscoveryGenerationsResponse,
 } from '@kbn/elastic-assistant-common';
 
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import * as i18n from './translations';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
+
+type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 interface Props extends GetAttackDiscoveryGenerationsRequestQuery {
   http: HttpSetup;
@@ -46,6 +46,7 @@ export const useGetAttackDiscoveryGenerations = ({
   start,
   refetchOnWindowFocus = false,
 }: Props): UseGetAttackDiscoveryGenerations => {
+  const { addError } = useAppToasts();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const abortController = useRef(new AbortController());
 
@@ -72,6 +73,11 @@ export const useGetAttackDiscoveryGenerations = ({
     queryFn,
     {
       enabled: isAssistantEnabled && attackDiscoveryAlertsEnabled,
+      onError: (e: ServerError) => {
+        addError(e.body && e.body.message ? new Error(e.body.message) : e, {
+          title: i18n.ERROR_RETRIEVING_ATTACK_DISCOVERY_GENERATIONS,
+        });
+      },
       refetchOnWindowFocus,
     }
   );

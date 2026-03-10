@@ -73,6 +73,7 @@ describe('updateResultOnCheckCompleted', () => {
             phase_time_millis: 1675536751809,
             action: 'rollover',
             action_time_millis: 1675536751809,
+            skip: true,
             step: 'check-rollover-ready',
             step_time_millis: 1675536751809,
             phase_execution: {
@@ -93,6 +94,7 @@ describe('updateResultOnCheckCompleted', () => {
             phase_time_millis: 1675536774416,
             action: 'rollover',
             action_time_millis: 1675536774416,
+            skip: true,
             step: 'check-rollover-ready',
             step_time_millis: 1675536774416,
             phase_execution: {
@@ -175,6 +177,7 @@ describe('updateResultOnCheckCompleted', () => {
             phase_time_millis: 1675536751809,
             action: 'rollover',
             action_time_millis: 1675536751809,
+            skip: true,
             step: 'check-rollover-ready',
             step_time_millis: 1675536751809,
             phase_execution: {
@@ -195,6 +198,7 @@ describe('updateResultOnCheckCompleted', () => {
             phase_time_millis: 1675536774416,
             action: 'rollover',
             action_time_millis: 1675536774416,
+            skip: true,
             step: 'check-rollover-ready',
             step_time_millis: 1675536774416,
             phase_execution: {
@@ -272,6 +276,7 @@ describe('updateResultOnCheckCompleted', () => {
             phase_time_millis: 1675536751809,
             action: 'rollover',
             action_time_millis: 1675536751809,
+            skip: true,
             step: 'check-rollover-ready',
             step_time_millis: 1675536751809,
             phase_execution: {
@@ -292,6 +297,7 @@ describe('updateResultOnCheckCompleted', () => {
             phase_time_millis: 1675536774416,
             action: 'rollover',
             action_time_millis: 1675536774416,
+            skip: true,
             step: 'check-rollover-ready',
             step_time_millis: 1675536774416,
             phase_execution: {

@@ -37,7 +37,7 @@ export const ActionButtons: React.FunctionComponent<{
               data-test-subj={`deprecation-${dataTestSubjPrefix}-${action.resolutionType}`}
             >
               <EuiIcon
-                color="primary"
+                color={action.iconType === 'trash' ? 'danger' : 'primary'}
                 type={action.iconType}
                 size="m"
                 aria-label={action.tooltip}

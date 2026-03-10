@@ -9,7 +9,7 @@ curl \
 -XPOST \ <1>
 -u elastic \ <2>
 -H 'kbn-xsrf: true' \ <3>
-'http://0.0.0.0:5601/api/reporting/generate/csv?jobParams=...' <4>
+'<KIBANA_HOST>:5601/api/reporting/generate/csv?jobParams=...' <4>
 ---------------------------------------------------------
 
 <1> The required `POST` method.

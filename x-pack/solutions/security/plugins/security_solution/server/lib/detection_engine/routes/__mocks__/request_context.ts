@@ -8,7 +8,8 @@
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
@@ -83,6 +84,7 @@ export const createMockClients = () => {
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     getInferenceClient: jest.fn(),
     productFeaturesService: createProductFeaturesServiceMock(),
+    logger: loggerMock.create(),
   };
 };
 
@@ -135,10 +137,16 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
+    getAnalytics: jest.fn(() => analyticsServiceMock.createAnalyticsServiceSetup()),
     getServerBasePath: jest.fn(() => ''),
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
+    getEndpointService: jest.fn(() => {
+      throw new Error(
+        `getEndpointService() not mocked. Needs to be done from withing testing context (due to circular dependencies)`
+      );
+    }),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
@@ -173,6 +181,9 @@ const createSecuritySolutionRequestContextMock = (
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
+    getMlAuthz: jest.fn(() => ({
+      validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
+    })),
   };
 };
 

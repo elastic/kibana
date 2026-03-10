@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
-import type { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { BehaviorSubject, combineLatest, filter, map, merge, switchMap } from 'rxjs';
+import {
+  ESQLControlVariable,
+  ESQLControlState,
+  EsqlControlType,
+  ESQLVariableType,
+} from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { dataService } from '../../services/kibana_services';
+import { ControlGroupApi } from '../../control_group/types';
+import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -29,7 +36,16 @@ export const selectionComparators: StateComparators<
   >
 > = {
   selectedOptions: selectedOptionsComparatorFunction,
-  availableOptions: 'referenceEquality',
+  availableOptions: (a, b, lastState, currentState) => {
+    // Only compare availableOptions for static values controls; values from query fetch these at runtime
+    if (
+      lastState?.controlType === currentState?.controlType &&
+      currentState?.controlType === EsqlControlType.VALUES_FROM_QUERY
+    ) {
+      return true;
+    }
+    return deepEqual(a ?? [], b ?? []);
+  },
   variableName: 'referenceEquality',
   variableType: 'referenceEquality',
   controlType: 'referenceEquality',
@@ -37,7 +53,11 @@ export const selectionComparators: StateComparators<
   title: 'referenceEquality',
 };
 
-export function initializeESQLControlSelections(initialState: ESQLControlState) {
+export function initializeESQLControlSelections(
+  initialState: ESQLControlState,
+  controlFetch$: ReturnType<ControlGroupApi['controlFetch$']>,
+  setDataLoading: (loading: boolean) => void
+) {
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
   const hasSelections$ = new BehaviorSubject<boolean>(false); // hardcoded to false to prevent clear action from appearing.
@@ -55,6 +75,26 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     }
   }
 
+  // For Values From Query controls, update values on dashboard load/reload
+  const fetchSubscription = controlFetch$
+    .pipe(
+      filter(() => controlType$.getValue() === EsqlControlType.VALUES_FROM_QUERY),
+      switchMap(async ({ timeRange }) => {
+        setDataLoading(true);
+        return await getESQLSingleColumnValues({
+          query: esqlQuery$.getValue(),
+          search: dataService.search.search,
+          timeRange,
+        });
+      })
+    )
+    .subscribe((result) => {
+      setDataLoading(false);
+      if (getESQLSingleColumnValues.isSuccess(result)) {
+        availableOptions$.next(result.values);
+      }
+    });
+
   // derive ESQL control variable from state.
   const getEsqlVariable = () => ({
     key: variableName$.value,
@@ -64,12 +104,18 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     type: variableType$.value,
   });
   const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
-  const subscriptions = combineLatest([variableName$, variableType$, selectedOptions$]).subscribe(
-    () => esqlVariable$.next(getEsqlVariable())
-  );
+  const variableSubscriptions = combineLatest([
+    variableName$,
+    variableType$,
+    selectedOptions$,
+    availableOptions$,
+  ]).subscribe(() => esqlVariable$.next(getEsqlVariable()));
 
   return {
-    cleanup: () => subscriptions.unsubscribe(),
+    cleanup: () => {
+      variableSubscriptions.unsubscribe();
+      fetchSubscription.unsubscribe();
+    },
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
@@ -95,7 +141,9 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
     getLatestState: () => {
       return {
         selectedOptions: selectedOptions$.getValue() ?? [],
-        availableOptions: availableOptions$.getValue() ?? [],
+        ...(controlType$.getValue() === EsqlControlType.STATIC_VALUES
+          ? { availableOptions: availableOptions$.getValue() ?? [] }
+          : {}),
         variableName: variableName$.getValue() ?? '',
         variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),

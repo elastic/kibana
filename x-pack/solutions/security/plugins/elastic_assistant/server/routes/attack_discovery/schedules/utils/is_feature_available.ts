@@ -15,6 +15,6 @@ export const isFeatureAvailable = async (
 ): Promise<boolean> => {
   return context.core.featureFlags.getBooleanValue(
     ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
-    false
+    true
   );
 };

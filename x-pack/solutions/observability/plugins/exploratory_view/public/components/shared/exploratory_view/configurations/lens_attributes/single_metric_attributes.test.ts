@@ -86,7 +86,6 @@ describe('SingleMetricAttributes', () => {
                     isBucketed: false,
                     label: 'Page load time',
                     operationType: 'median',
-                    scale: 'ratio',
                     sourceField: 'transaction.duration.us',
                     params: {
                       emptyAsNull: true,
@@ -157,7 +156,6 @@ describe('SingleMetricAttributes', () => {
                     params: {
                       percentile: 99,
                     },
-                    scale: 'ratio',
                     sourceField: 'transaction.duration.us',
                   },
                 },

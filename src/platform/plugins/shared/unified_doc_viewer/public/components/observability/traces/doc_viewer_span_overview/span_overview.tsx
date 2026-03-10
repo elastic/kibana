@@ -22,10 +22,11 @@ import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
+import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { Trace } from '../components/trace';
 import { RootSpanProvider } from './hooks/use_root_span';
-import { spanFields } from './resources/fields';
+import { spanFields, allSpanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { SpanSummaryField } from './sub_components/span_summary_field';
@@ -55,6 +56,7 @@ export function SpanOverview({
   showWaterfall = true,
   showActions = true,
   dataView,
+  columnsMeta,
 }: SpanOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
@@ -64,6 +66,7 @@ export function SpanOverview({
     }),
     [dataView, fieldFormats, hit]
   );
+  const { dataViewFields } = useDataViewFields({ fields: allSpanFields, dataView, columnsMeta });
   const fieldConfigurations = useMemo(
     () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
     [formattedDoc, flattenedDoc]
@@ -110,6 +113,7 @@ export function SpanOverview({
                     <SpanSummaryField
                       key={fieldId}
                       fieldId={fieldId}
+                      fieldMapping={dataViewFields[fieldId]}
                       fieldConfiguration={fieldConfigurations[fieldId]}
                       showActions={showActions}
                     />
@@ -130,6 +134,7 @@ export function SpanOverview({
                 <EuiFlexItem>
                   <Trace
                     fields={fieldConfigurations}
+                    fieldMappings={dataViewFields}
                     traceId={flattenedDoc[TRACE_ID_FIELD]}
                     docId={flattenedDoc[SPAN_ID_FIELD]}
                     displayType="span"

@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiText } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback } from 'react';
@@ -74,7 +74,7 @@ export const PolicyArtifactsDeleteModal = React.memo<PolicyArtifactsDeleteModalP
         isLoading={isUpdateArtifactLoading}
         data-test-subj={'remove-from-policy-dialog'}
       >
-        <EuiCallOut color="warning" iconType="help">
+        <EuiCallOut color="warning" iconType="question">
           <p>{labels.deleteModalImpactInfo}</p>
         </EuiCallOut>
 

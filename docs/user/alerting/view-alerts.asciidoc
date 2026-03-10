@@ -1,5 +1,5 @@
 [[view-alerts]]
-== View alerts
+== View and manage alerts
 :frontmatter-description: View and manage alerts in the {kib} {stack-manage-app} app.
 :frontmatter-tags-products: [kibana, alerting]
 :frontmatter-tags-content-type: [how-to]
@@ -54,30 +54,81 @@ For more information about their impact on alert notifications, refer to <<maint
 
 [discrete]
 [[alert-status]]
-==== Alert statuses
+=== Alert statuses
 
-There are three common alert statuses:
+There are four common alert statuses:
 
-`active`:: The conditions for the rule are met and actions should be generated according to the notification settings.
-`recovered`:: The conditions for the rule are no longer met and recovery actions should be generated.
-`untracked`:: Actions are no longer generated. For example, you can choose to move active alerts to this state when you disable or delete rules.
+`active`::
+The conditions for the rule are met. If the rule has  <<defining-rules-actions-details, actions>>, {kib} generates notifications based on the actions' notification settings. 
 
-[NOTE]
-====
-An alert can also be in a "flapping" state when it is switching repeatedly between active and recovered states.
-This state is possible only if you have enabled alert flapping detection in *{stack-manage-app} > {rules-ui} > Settings*.
-For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping.
-For example, you can specify that the alert must change status at least 6 times in the last 10 runs.
-If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.
-====
+`flapping`::
+The alert is switching repeatedly between active and recovered states. If the rule has actions that run when the alert status changes states, those actions are suppressed while the alert is flapping.
 
+NOTE: Alert flapping is turned on by default. You can modify the criteria for changing an alert's status to the flapping state by configuring the **Alert flapping detection** settings. To do this, navigate to the **Alerts** page in the main menu, or use the {kibana-ref}/introduction.html#kibana-navigation-search[global search field]. Next, click **Manage Rules**, then **Settings** to open the global rule settings for the space. In the **Alert flapping detection** section, modify the rules' look back window and threshold for alert status changes. For example, you can specify that the alert must change its status at least 6 times in the last 10 runs for it to become a flapping alert. 
+
+`recovered`::
+The conditions for the rule are no longer met. If the rule has  <<defining-rules-actions-details, recovery actions>>, {kib} generates notifications based on the actions' notification settings. Recovery actions only run if the rule's conditions aren't met during the current rule execution, but were in the previous one. 
++
+An active alert changes to recovered if the conditions for the rule that generated it are no longer met. 
++
+A flapping alert changes to recovered when the rule's conditions are unmet for a specific number of consecutive runs. This number is determined by the **Alert status change threshold** setting, which you can configure under the **Alert flapping detection** settings.
++    
+For example, if the threshold requires an alert to change status at least 6 times in the last 10 runs to be considered flapping, then to recover, the rule's conditions must remain unmet for 6 consecutive runs. If the rule's conditions are met at any point during this recovery period, the count of consecutive unmet runs will reset, requiring the alert to remain unmet for an additional 6 consecutive runs to finally be reported as recovered.
++
+Once a flapping alert is recovered, it cannot be changed to flapping again. Only new alerts with repeated status changes are candidates for the flapping status. 
+
+`untracked`::
+The rule is disabled, or you've marked the alert as untracked. To mark the alert as untracked, go to the **Alerts** table, click the actions icon (…) to expand the **More actions** menu, and click **Mark as untracked**. When an alert is marked as untracked, actions are no longer generated and the alert's status can no longer be changed. You can choose to move active alerts to this state when you disable or delete rules.
 
 [discrete]
 [[mute-alerts]]
 === Mute alerts
 
-If an alert is active or flapping, you can mute it to temporarily suppress future actions.
-In both *{stack-manage-app} > Alerts* and *{rules-ui}*, you can open the action menu (…) for the appropriate alert and select *Mute*.
-To permanently suppress actions for an alert, open the actions menu and select *Mark as untracked*.
+If an alert is active or flapping, you can mute it to temporarily suppress future actions. In *{stack-manage-app} > Alerts*, open the action menu (…) for the appropriate alert, then select **Mute**. While muted, the alert's status will continue to update but rule actions won't run. All future alerts with the same alert ID will also be muted.
+
+To permanently suppress an alert's actions, open the actions menu for the appropriate alert, then select *Mark as untracked*. In this case, the alert's status is no longer updated and actions are no longer run. These changes are only applied to the alert that you untracked and cannot be reverted. Future alerts with the same alert ID are unaffected.
 
 To affect the behavior of the rule rather than individual alerts, check out <<controlling-rules>>.
+
+[discrete]
+[[clean-up-alerts]]
+=== Clean up alerts 
+
+Manage the size of alert indices in your space by clearing out alerts that are older or infrequently accessed. You can do this by running an alert cleanup task, which deletes alerts according to the criteria that you define.
+
+NOTE: The alert cleanup task permanently deletes alerts in your `.alert-*` indices. Make sure to take regular snapshots of your cluster to back up your alert data in case you ever need to restore it.
+
+[discrete]
+[[clean-up-alerts-reqs]]
+==== Prerequisites
+
+* To run the alert cleanup task, your role must have `All` privileges for the **Alert deletion feature**. When setting your role's Kibana privileges, go to **Management > Rule Settings**, enable **Customize sub-feature privileges**, then select `All` for the **Alert deletion** feature.
+* Alerts in your space must be older than a day. The minimum threshold for the alert cleanup task is one day.  
+
+[discrete]
+[[run-alert-clean-up-task]]
+==== Run the alert cleanup task
+
+preview::[]
+
+Remove old or rarely-accessed alerts in your space by running an alert cleanup task, which deletes alerts according to the criteria that you define. Alerts that are attached to cases are not deleted. 
+
+. Open the **Rules** page by going to **Stack Management > Alerts and Insights > Rules** in the main menu or using the global search field.
+. Click **Settings** to open the settings for all rules in the space.
+. In the **Clean up alert history** section, click **Clean up**.
+. Define criteria for the alert cleanup task. You can choose to delete alerts that are active or inactive and meet a certain age.
++
+TIP: At the bottom of the modal, you can find a preview of the number of alerts that will be deleted according to the criteria that you define.
++
+
+** **Active alerts**: Choose to delete alerts that haven't had their status changed since they were initially generated and are older than the threshold that you specify. 
++
+For example, if you specify two years as the threshold, the cleanup task will delete alerts that were generated more than two years ago and have never had their status changed.  
++
+** **Inactive alerts**: Choose to delete alerts that have had their statuses changed since they were initially created and are older than the threshold that you specify. Inactive alerts have had their status changed to recovered, closed, acknowledged, or untracked. 
++
+For example, if you specify two years, the cleanup task will delete alerts that have had their status changed to recovered, closed, acknowledged, or untracked more than two years ago.
+
+. Enter **Delete** to verify that you want to run the alert cleanup task, then click **Run cleanup task**.  
+
+A message confirming that the alert cleanup task has started running appears. This information is also provided at the top of the alert cleanup modal in the **Last cleanup task: details** field. Note the field doesn't display in the modal until an alert cleanup task is run.

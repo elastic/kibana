@@ -10,7 +10,7 @@
 import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
-import { hasNoParams } from '../../formatters/formatting_utils';
+import { hasNoParams } from '../../formatters/param_utils';
 import { formatLocation } from '../../../../common/utils/location_formatter';
 import {
   BrowserFields,
@@ -103,6 +103,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.LABELS]: monitor.fields || defaultFields[ConfigKey.LABELS],
     [ConfigKey.MAINTENANCE_WINDOWS]:
       monitor.maintenanceWindows || defaultFields[ConfigKey.MAINTENANCE_WINDOWS],
+    [ConfigKey.KIBANA_SPACES]: monitor.spaces || defaultFields[ConfigKey.KIBANA_SPACES],
     ...(monitor[ConfigKey.APM_SERVICE_NAME] && {
       [ConfigKey.APM_SERVICE_NAME]: monitor[ConfigKey.APM_SERVICE_NAME],
     }),
@@ -501,6 +502,7 @@ export const normalizeYamlConfig = (data: NormalizedProjectProps['monitor']) => 
     content: _content,
     id: _id,
     retestOnFailure: _retestOnFailure,
+    maintenanceWindows: _maintenanceWindows,
     ...yamlConfig
   } = flattenedConfig;
   const unsupportedKeys = Object.keys(yamlConfig).filter((key) => !supportedKeys.includes(key));

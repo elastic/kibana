@@ -143,7 +143,7 @@ export class RemoteClusterTable extends Component {
                   data-test-subj="remoteClustersTableListClusterDefinedByNodeTooltip"
                 >
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={
                       <FormattedMessage

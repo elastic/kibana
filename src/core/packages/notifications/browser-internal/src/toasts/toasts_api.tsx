@@ -78,7 +78,7 @@ export class ToastsApi implements IToasts {
     this.startDeps = startDeps;
   }
 
-  /** Observable of the toast messages to show to the user. */
+  /** Observable of the toast messages queued to be shown to the user. */
   public get$() {
     return this.toasts$.asObservable();
   }
@@ -124,7 +124,7 @@ export class ToastsApi implements IToasts {
   public addInfo(toastOrTitle: ToastInput, options?: ToastOptions) {
     return this.add({
       color: 'primary',
-      iconType: 'iInCircle',
+      iconType: 'info',
       ...normalizeToast(toastOrTitle),
       ...options,
     });

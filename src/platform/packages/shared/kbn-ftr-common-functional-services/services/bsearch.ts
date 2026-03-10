@@ -30,7 +30,7 @@ const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>>
 
 /**
  * Function copied from here:
- * x-pack/test/rule_registry/common/lib/authentication/spaces.ts
+ * x-pack/platform/test/rule_registry/common/lib/authentication/spaces.ts
  * @param spaceId The space id we want to utilize
  */
 const getSpaceUrlPrefix = (spaceId?: string): string => {

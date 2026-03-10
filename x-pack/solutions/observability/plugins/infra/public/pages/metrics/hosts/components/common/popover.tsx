@@ -26,7 +26,7 @@ export const Popover = ({ children }: { children: React.ReactNode }) => {
       panelPaddingSize="s"
       button={
         <button onClick={onButtonClick} data-test-subj="hostsViewTableColumnPopoverButton">
-          <EuiIcon type="questionInCircle" />
+          <EuiIcon type="question" />
         </button>
       }
       isOpen={isPopoverOpen}

@@ -77,9 +77,11 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/_explain', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/bm_classification'
+      );
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -98,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
           ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).to.have.property('field_selection');
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           const { memory_estimation, field_selection } = body;
           const fieldObject = field_selection[0];
           expect(memory_estimation).to.have.property('expected_memory_with_disk');

@@ -118,6 +118,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             : []),
           '--xpack.ruleRegistry.write.enabled=true',
           '--xpack.ruleRegistry.write.cache.enabled=false',
+          '--xpack.cases.analytics.index.enabled=true',
         ],
       },
     };

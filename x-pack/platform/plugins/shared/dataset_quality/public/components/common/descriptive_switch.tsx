@@ -36,7 +36,7 @@ export const DescriptiveSwitch = ({
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiText size="xs">{label}</EuiText>
         <EuiToolTip position="bottom" content={tooltipText}>
-          <EuiIcon tabIndex={0} type="questionInCircle" size="s" />
+          <EuiIcon tabIndex={0} type="question" size="s" />
         </EuiToolTip>
       </EuiFlexGroup>
     </EuiFlexGroup>

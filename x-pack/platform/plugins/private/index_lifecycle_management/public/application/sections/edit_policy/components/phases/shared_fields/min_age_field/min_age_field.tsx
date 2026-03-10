@@ -108,7 +108,7 @@ export const MinAgeField: FunctionComponent<Props> = ({ phase }): React.ReactEle
                             {/* This element is rendered for testing purposes only */}
                             <div data-test-subj={`${phase}-rolloverMinAgeInputIconTip`} />
                             <EuiIconTip
-                              type="iInCircle"
+                              type="info"
                               aria-label={i18nTexts.editPolicy.rolloverToolTipDescription}
                               content={i18nTexts.editPolicy.rolloverToolTipDescription}
                             />

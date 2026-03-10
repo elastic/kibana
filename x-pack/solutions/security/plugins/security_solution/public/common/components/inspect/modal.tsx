@@ -165,7 +165,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="index-pattern-title">
             {i18n.INDEX_PATTERN}{' '}
-            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="info" />
           </span>
         ),
         description: (
@@ -193,7 +193,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="query-time-title">
             {i18n.QUERY_TIME}{' '}
-            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="info" />
           </span>
         ),
         description: (
@@ -210,7 +210,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="request-timestamp-title">
             {i18n.REQUEST_TIMESTAMP}{' '}
-            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="info" />
           </span>
         ),
         description: (

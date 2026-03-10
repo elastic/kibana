@@ -314,6 +314,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         connectorUsageCollector
       );
 
+      // @ts-expect-error upgrade typescript v5.9.3
       return stream ? pipeStreamingResponse(response) : response.data;
     } catch (error) {
       // special error handling for PKI errors
@@ -412,7 +413,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         messages,
         model:
           rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+          ('defaultModel' in this.config
+            ? this.config.defaultModel ?? DEFAULT_OPENAI_MODEL
+            : DEFAULT_OPENAI_MODEL),
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);

@@ -360,7 +360,7 @@ export class IndexActionsContextMenu extends Component {
             }
           )}
           color="warning"
-          iconType="help"
+          iconType="question"
         >
           <p>
             <FormattedMessage
@@ -491,7 +491,8 @@ export class IndexActionsContextMenu extends Component {
         data-test-subj="indexActionsContextMenuButton"
         iconSide={iconSide}
         aria-label={i18n.translate('xpack.idxMgmt.indexActionsMenu.manageButtonAriaLabel', {
-          defaultMessage: '{selectedIndexCount, plural, one {index} other {indices} } options',
+          defaultMessage:
+            'Manage {selectedIndexCount, plural, one {index} other {{selectedIndexCount} indices}}',
           values: { selectedIndexCount },
         })}
         onClick={this.onButtonClick}

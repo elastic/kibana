@@ -6,6 +6,8 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
+import { Deanonymization } from './anonymization';
+import { Message } from './messages';
 import type { ToolCallsOf, ToolOptions } from './tools';
 
 /**
@@ -33,18 +35,20 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        * The eventual tool calls performed by the LLM.
        */
       toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+      /**
+       * Optional refusal reason returned by the model when content is filtered.
+       */
+      refusal?: string;
+      /**
+       * Optional deanonymized input messages metadata
+       */
+      deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+      /**
+       * Optional deanonymized output metadata
+       */
+      deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
     }
   >;
-// with unredactions
-export interface ChatCompletionUnredactedMessageEvent<
-  TToolOptions extends ToolOptions = ToolOptions
-> extends ChatCompletionMessageEvent<TToolOptions> {
-  unredactions: Array<{
-    entity: string;
-    class_name: string;
-    hash: string;
-  }>;
-}
 /**
  * Represent a partial tool call present in a chunk event.
  *
@@ -84,9 +88,21 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      */
     content: string;
     /**
+     * Optional refusal reason chunk.
+     */
+    refusal?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
+    /**
+     * Optional deanonymized input messages metadata
+     */
+    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
+    /**
+     * Optional deanonymized output metadata
+     */
+    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
   }
 >;
 

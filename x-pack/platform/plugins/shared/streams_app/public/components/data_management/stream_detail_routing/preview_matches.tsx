@@ -64,7 +64,7 @@ const InfoTooltip = () => {
       aria-label={i18n.translate('xpack.streams.streamRouting.previewMatchesTooltipAriaLabel', {
         defaultMessage: 'Additional information',
       })}
-      type={'questionInCircle'}
+      type={'question'}
       content={i18n.translate('xpack.streams.streamRouting.previewMatchesTooltipText', {
         defaultMessage:
           'Approximate percentage of documents matching this condition over a random sample of documents.',

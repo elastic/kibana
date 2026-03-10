@@ -1,6 +1,6 @@
 # BYTE_LENGTH
 
-This function calculates the byte length of a given string.
+Returns the byte length of a string. Since all strings are in UTF-8, a single character may use multiple bytes.
 
 ## Syntax
 
@@ -8,9 +8,9 @@ This function calculates the byte length of a given string.
 
 ### Parameters
 
-#### string
+#### `string`
 
-The text string for which the byte length is to be determined. If `null` is provided, the function will return `null`.
+String expression. If `null`, the function returns `null`.
 
 ## Examples
 
@@ -20,3 +20,5 @@ FROM airports
 | KEEP city
 | EVAL fn_length = LENGTH(city), fn_byte_length = BYTE_LENGTH(city)
 ```
+
+This example calculates both the character length and the byte length of city names in airports located in India.

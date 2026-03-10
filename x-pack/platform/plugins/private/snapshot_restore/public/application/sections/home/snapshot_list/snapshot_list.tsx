@@ -18,8 +18,12 @@ import {
   reactRouterNavigate,
   useExecutionContext,
 } from '../../../../shared_imports';
-import { BASE_PATH, UIM_SNAPSHOT_LIST_LOAD } from '../../../constants';
-import { useLoadSnapshots } from '../../../services/http';
+import {
+  BASE_PATH,
+  SNAPSHOT_REPOSITORY_EXCEPTION_ERROR,
+  UIM_SNAPSHOT_LIST_LOAD,
+} from '../../../constants';
+import { useLoadRepositories, useLoadSnapshots } from '../../../services/http';
 import { linkToRepositories } from '../../../services/navigation';
 import { useAppContext, useServices } from '../../../app_context';
 import { useDecodedParams, SnapshotListParams, DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../../lib';
@@ -45,18 +49,23 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const [listParams, setListParams] = useState<SnapshotListParams>(DEFAULT_SNAPSHOT_LIST_PARAMS);
   const {
     error,
-    isInitialRequest,
-    isLoading,
-    data: {
-      snapshots = [],
-      repositories = [],
-      policies = [],
-      errors = {},
-      total: totalSnapshotsCount,
-    },
+    isInitialRequest: isSnapshotsInitialRequest,
+    isLoading: isSnapshotsLoading,
+    data: { snapshots = [], policies = [], errors = {}, total: totalSnapshotsCount },
     resendRequest: reload,
   } = useLoadSnapshots(listParams);
+  // To make the repository filter work in the search bar (even when snapshots request fails), we need to load repositories separately.
+  // For more context see https://github.com/elastic/kibana/issues/225935
+  const {
+    isInitialRequest: isRepositoriesInitialRequest,
+    isLoading: isRepositoriesLoading,
+    data: { repositories = [] },
+  } = useLoadRepositories();
 
+  const isInitialRequest = isSnapshotsInitialRequest && isRepositoriesInitialRequest;
+  const isLoading = isSnapshotsLoading || isRepositoriesLoading;
+
+  const repositoriesNames = repositories.map((repository: { name: string }) => repository?.name);
   const { uiMetricService } = useServices();
   const { core } = useAppContext();
 
@@ -133,25 +142,32 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         </span>
       </PageLoading>
     );
-  } else if (error) {
-    content = (
-      <PageError
-        title={
-          <FormattedMessage
-            id="xpack.snapshotRestore.snapshotList.loadingSnapshotsErrorMessage"
-            defaultMessage="Error loading snapshots"
-          />
-        }
-        error={error as Error}
-      />
-    );
-  } else if (Object.keys(errors).length && repositories.length === 0) {
-    content = <RepositoryError />;
-  } else if (repositories.length === 0) {
+  } else if (!error && repositoriesNames.length === 0) {
     content = <RepositoryEmptyPrompt />;
-  } else if (totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
+  } else if (!error && totalSnapshotsCount === 0 && !listParams.searchField && !isLoading) {
     content = <SnapshotEmptyPrompt policiesCount={policies.length} />;
   } else {
+    let snapshotsLoadingError = null;
+
+    if (error) {
+      if (error?.attributes?.error?.type === SNAPSHOT_REPOSITORY_EXCEPTION_ERROR) {
+        snapshotsLoadingError = <RepositoryError errorMessage={error?.message} />;
+      } else {
+        snapshotsLoadingError = (
+          <PageError
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.loadingSnapshotsErrorMessage"
+                defaultMessage="Error loading snapshots"
+              />
+            }
+            data-test-subj="snapshotsLoadingError"
+            error={error as Error}
+          />
+        );
+      }
+    }
+
     const repositoryErrorsWarning = Object.keys(errors).length ? (
       <>
         <EuiCallOut
@@ -190,13 +206,14 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
         <SnapshotTable
           snapshots={snapshots}
-          repositories={repositories}
+          repositories={repositoriesNames}
           reload={reload}
           onSnapshotDeleted={onSnapshotDeleted}
           listParams={listParams}
           setListParams={setListParams}
           totalItemCount={totalSnapshotsCount}
           isLoading={isLoading}
+          error={snapshotsLoadingError}
         />
       </section>
     );

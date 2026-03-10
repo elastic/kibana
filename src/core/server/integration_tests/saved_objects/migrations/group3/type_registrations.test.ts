@@ -86,6 +86,8 @@ const previouslyRegisteredTypes = [
   'guided-onboarding-guide-state',
   'guided-onboarding-plugin-state',
   'index-pattern',
+  'intercept_interaction_record',
+  'intercept_trigger_record',
   'infrastructure-monitoring-log-view',
   'infrastructure-ui-source',
   'infra-custom-dashboards',

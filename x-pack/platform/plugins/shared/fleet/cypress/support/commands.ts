@@ -26,9 +26,23 @@ const axeOptions = {
   runOnly: [...AXE_OPTIONS.runOnly, 'best-practice'],
 };
 
+/**
+ * Injects axe-core into the page for accessibility testing.
+ * Uses a Cypress task to get the axe-core source from Node context,
+ * bypassing the webpack preprocessor issue with require.resolve().
+ * See: https://github.com/component-driven/cypress-axe/issues/84
+ */
+const injectAxeFromTask = () => {
+  cy.task('getAxeCoreSource', null, { log: false }).then((axeSource) => {
+    cy.window({ log: false }).then((win) => {
+      win.eval(axeSource as string);
+    });
+  });
+};
+
 export const checkA11y = ({ skipFailures }: { skipFailures: boolean }) => {
   // https://github.com/component-driven/cypress-axe#cychecka11y
-  cy.injectAxe();
+  injectAxeFromTask();
   cy.configureAxe(axeConfig);
   const context = '.kbnAppWrapper'; // Scopes a11y checks to only our app
   /**

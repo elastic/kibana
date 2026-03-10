@@ -11,6 +11,14 @@ import { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maint
 import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
 import { ParsedVars, replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
+import { hasNoParams } from './param_utils';
+
+export {
+  hasNoParams,
+  extractParamReferences,
+  valueContainsParams,
+  monitorUsesGlobalParams,
+} from './param_utils';
 
 export type FormatterFn = (
   fields: Partial<MonitorFields>,
@@ -69,12 +77,6 @@ const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, stri
   return varKeys.every((v) => !params[v]);
 };
 
-const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
-
-export const hasNoParams = (strVal: string) => {
-  return strVal.match(SHELL_PARAMS_REGEX) === null;
-};
-
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
@@ -121,4 +123,20 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
     return formatted;
   }
   return JSON.stringify(formatted);
+};
+
+function escapeTemplateLiterals(script: string): string {
+  return script.replace(/\$\{/g, '$$${');
+}
+
+export const inlineSourceFormatter: FormatterFn = (fields, key) => {
+  const value = fields[key] as string;
+  if (!value?.trim()) return value;
+
+  // Escape template literals to prevent unintended interpolation
+  return escapeTemplateLiterals(value).trim();
+};
+
+export const handleMultilineStringFormatter = (value: string) => {
+  return value.replace(/(\n+)/g, '$1\n');
 };

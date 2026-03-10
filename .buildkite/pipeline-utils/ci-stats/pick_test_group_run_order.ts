@@ -19,7 +19,7 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
-import { expandAgentQueue } from '#pipeline-utils';
+import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -118,14 +118,26 @@ interface FtrConfigsManifest {
   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
 }
 
-function getEnabledFtrConfigs(patterns?: string[]) {
+function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
   const configs: {
     enabled: Array<string | { [configPath: string]: { queue: string } }>;
     defaultQueue: string | undefined;
   } = { enabled: [], defaultQueue: undefined };
   const uniqueQueues = new Set<string>();
 
+  const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+    if (
+      mappedSolutions &&
+      !(
+        mappedSolutions.some((s) => manifestRelPath.includes(`ftr_${s}_`)) ||
+        // When applying the solution filter, still allow platform tests
+        manifestRelPath.includes('ftr_platform_') ||
+        manifestRelPath.includes('ftr_base_')
+      )
+    ) {
+      continue;
+    }
     try {
       const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
       if (!isObj(ymlData)) {
@@ -196,32 +208,6 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   }
 }
 
-/**
- * Collects environment variables from labels on the PR
- * TODO: extract this (and other functions from this big file) to a separate module
- */
-function collectEnvFromLabels() {
-  const LABEL_MAPPING: Record<string, Record<string, string>> = {
-    'ci:use-chrome-beta': {
-      USE_CHROME_BETA: 'true',
-    },
-  };
-
-  const envFromlabels: Record<string, string> = {};
-  if (!process.env.GITHUB_PR_LABELS) {
-    return envFromlabels;
-  } else {
-    const labels = process.env.GITHUB_PR_LABELS.split(',');
-    labels.forEach((label) => {
-      const env = LABEL_MAPPING[label];
-      if (env) {
-        Object.assign(envFromlabels, env);
-      }
-    });
-    return envFromlabels;
-  }
-}
-
 export async function pickTestGroupRunOrder() {
   const bk = new BuildkiteClient();
   const ciStats = new CiStatsClient();
@@ -259,6 +245,17 @@ export async function pickTestGroupRunOrder() {
         .map((t) => t.trim())
         .filter(Boolean)
     : ['unit', 'integration', 'functional'];
+
+  const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
+    ? process.env.LIMIT_SOLUTIONS.split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : undefined;
+  if (LIMIT_SOLUTIONS) {
+    const validSolutions = ['chat', 'observability', 'search', 'security'];
+    const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
+    if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
+  }
 
   const FTR_CONFIG_PATTERNS = process.env.FTR_CONFIG_PATTERNS
     ? process.env.FTR_CONFIG_PATTERNS.split(',')
@@ -298,19 +295,47 @@ export async function pickTestGroupRunOrder() {
           .filter(Boolean)
       : ['build'];
 
+  const JEST_CONFIGS_DEPS =
+    process.env.JEST_CONFIGS_DEPS !== undefined
+      ? process.env.JEST_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
+
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
     : {};
   const envFromlabels: Record<string, string> = collectEnvFromLabels();
 
-  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(FTR_CONFIG_PATTERNS);
+  const { defaultQueue, ftrConfigsByQueue } = getEnabledFtrConfigs(
+    FTR_CONFIG_PATTERNS,
+    LIMIT_SOLUTIONS
+  );
 
   const ftrConfigsIncluded = LIMIT_CONFIG_TYPE.includes('functional');
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
+  const getJestConfigGlobs = (patterns: string[]) => {
+    if (!LIMIT_SOLUTIONS) {
+      return patterns;
+    }
+
+    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
+      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
+    );
+
+    return (
+      LIMIT_SOLUTIONS.flatMap((solution: string) =>
+        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+      )
+        // When applying the solution filter, still allow platform tests
+        .concat(platformPatterns)
+    );
+  };
+
   const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(['**/jest.config.js', '!**/__fixtures__/**'], {
+    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -318,7 +343,7 @@ export async function pickTestGroupRunOrder() {
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: DISABLED_JEST_CONFIGS,
@@ -335,6 +360,7 @@ export async function pickTestGroupRunOrder() {
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    durationPercentile: 75,
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
@@ -389,6 +415,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 4,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 4,
         names: jestUnitConfigs,
       },
       {
@@ -396,6 +423,7 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         maxMin: JEST_MAX_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 2,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
@@ -404,7 +432,8 @@ export async function pickTestGroupRunOrder() {
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 1.5,
+        overheadMin: 0,
+        warmupMin: 3,
         names,
       })),
     ],
@@ -485,10 +514,8 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: {
-              ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 80,
-            },
+            agents: expandAgentQueue('n2-4-spot', 110),
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -504,9 +531,11 @@ export async function pickTestGroupRunOrder() {
             label: 'Jest Integration Tests',
             command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
             parallelism: integration.count,
-            timeout_in_minutes: 120,
+            // TODO: Reduce once we have identified the cause of random long-running tests
+            timeout_in_minutes: 75,
             key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot'),
+            agents: expandAgentQueue('n2-4-spot', 105),
+            depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
                 { exit_status: '-1', limit: 3 },
@@ -539,8 +568,8 @@ export async function pickTestGroupRunOrder() {
                 ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
                   label: title,
                   command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 90,
-                  agents: expandAgentQueue(queue),
+                  timeout_in_minutes: 120,
+                  agents: expandAgentQueue(queue, 105),
                   env: {
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
@@ -558,60 +587,6 @@ export async function pickTestGroupRunOrder() {
               ),
           }
         : [],
-    ].flat()
-  );
-}
-
-export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
-  const bk = new BuildkiteClient();
-  const envFromlabels: Record<string, string> = collectEnvFromLabels();
-
-  if (!Fs.existsSync(scoutConfigsPath)) {
-    throw new Error(`Scout configs file not found at ${scoutConfigsPath}`);
-  }
-
-  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
-  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
-
-  if (pluginsWithScoutConfigs.length === 0) {
-    // no scout configs found, nothing to need to upload steps
-    return;
-  }
-
-  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
-    title: plugin,
-    key: plugin,
-    usesParallelWorkers: rawScoutConfigs[plugin].usesParallelWorkers,
-    group: rawScoutConfigs[plugin].group,
-  }));
-
-  // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      {
-        group: 'Scout Configs',
-        key: 'scout-configs',
-        depends_on: ['build'],
-        steps: scoutGroups.map(
-          ({ title, key, group, usesParallelWorkers }): BuildkiteStep => ({
-            label: `Scout: [ ${group} / ${title} ] plugin`,
-            command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
-            timeout_in_minutes: 60,
-            agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
-            env: {
-              SCOUT_CONFIG_GROUP_KEY: key,
-              SCOUT_CONFIG_GROUP_TYPE: group,
-              ...envFromlabels,
-            },
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 1 },
-                { exit_status: '*', limit: 0 },
-              ],
-            },
-          })
-        ),
-      },
     ].flat()
   );
 }

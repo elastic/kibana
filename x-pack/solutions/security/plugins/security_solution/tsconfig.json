@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -8,24 +8,19 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts" ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
+    "emotion.d.ts"
   ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
+    "@kbn/setup-node-env",
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/files-plugin",
@@ -176,7 +171,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
@@ -258,5 +252,10 @@
     "@kbn/security-plugin-types-common",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
+    "@kbn/core-metrics-server",
+    "@kbn/ai-assistant-default-llm-setting",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/react-query",
+    "@kbn/core-elasticsearch-server-utils",
   ]
 }

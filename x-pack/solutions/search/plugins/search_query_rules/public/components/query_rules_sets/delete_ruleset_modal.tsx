@@ -76,6 +76,7 @@ export const DeleteRulesetModal = ({
       <EuiCheckbox
         id={confirmCheckboxId}
         label="This ruleset is safe to delete"
+        data-test-subj="confirmDeleteRulesetCheckbox"
         checked={checked}
         onChange={(e) => {
           setChecked(e.target.checked);

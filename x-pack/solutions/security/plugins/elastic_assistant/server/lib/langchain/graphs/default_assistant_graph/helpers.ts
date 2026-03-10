@@ -26,7 +26,7 @@ interface StreamGraphParams {
   apmTracer: APMTracer;
   assistantGraph: DefaultAssistantGraph;
   inputs: GraphInputs;
-  inferenceChatModelEnabled?: boolean;
+  inferenceChatModelDisabled?: boolean;
   isEnabledKnowledgeBase: boolean;
   logger: Logger;
   onLlmResponse?: OnLlmResponse;
@@ -54,7 +54,7 @@ export const streamGraph = async ({
   apmTracer,
   assistantGraph,
   inputs,
-  inferenceChatModelEnabled = false,
+  inferenceChatModelDisabled = false,
   isEnabledKnowledgeBase,
   logger,
   onLlmResponse,
@@ -74,7 +74,7 @@ export const streamGraph = async ({
   } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
   let didEnd = false;
-  const handleStreamEnd = (finalResponse: string, isError = false) => {
+  const handleStreamEnd = (finalResponse: string, isError = false, refusal?: string) => {
     if (didEnd) {
       return;
     }
@@ -95,7 +95,8 @@ export const streamGraph = async ({
           transactionId: streamingSpan?.transaction?.ids?.['transaction.id'],
           traceId: streamingSpan?.ids?.['trace.id'],
         },
-        isError
+        isError,
+        refusal
       ).catch(() => {});
     }
     streamEnd();
@@ -108,7 +109,7 @@ export const streamGraph = async ({
 
   // Stream is from tool calling agent or structured chat agent
   if (
-    inferenceChatModelEnabled ||
+    !inferenceChatModelDisabled ||
     inputs.isOssModel ||
     inputs?.llmType === 'bedrock' ||
     inputs?.llmType === 'gemini'
@@ -145,7 +146,11 @@ export const streamGraph = async ({
             !data.output.lc_kwargs?.tool_calls?.length &&
             !didEnd
           ) {
-            handleStreamEnd(data.output.content);
+            const refusal =
+              typeof data.output?.additional_kwargs?.refusal === 'string'
+                ? (data.output.additional_kwargs.refusal as string)
+                : undefined;
+            handleStreamEnd(data.output.content, false, refusal);
           }
         }
       }
@@ -271,8 +276,13 @@ export const invokeGraph = async ({
     });
     const output = (result.agentOutcome as AgentFinish).returnValues.output;
     const conversationId = result.conversation?.id;
+    const lastMessage = result.messages[result.messages.length - 1];
+    const refusal =
+      typeof lastMessage?.additional_kwargs?.refusal === 'string'
+        ? (lastMessage.additional_kwargs.refusal as string)
+        : undefined;
     if (onLlmResponse) {
-      await onLlmResponse(output, traceData);
+      await onLlmResponse(output, traceData, false, refusal);
     }
 
     return { output, traceData, conversationId };

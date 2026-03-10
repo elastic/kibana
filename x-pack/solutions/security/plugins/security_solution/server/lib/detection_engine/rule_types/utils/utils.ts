@@ -428,7 +428,13 @@ export const getRuleRangeTuples = async ({
         interval
       )}"`
     );
-    return { tuples, remainingGap: moment.duration(0), warningStatusMessage };
+    return {
+      tuples,
+      remainingGap: moment.duration(0),
+      warningStatusMessage,
+      originalFrom,
+      originalTo,
+    };
   }
 
   const gap = getGapBetweenRuns({
@@ -470,6 +476,8 @@ export const getRuleRangeTuples = async ({
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
     gap: gapRange,
+    originalFrom,
+    originalTo,
   };
 };
 

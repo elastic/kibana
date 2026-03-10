@@ -88,9 +88,11 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       return arr1.every((tag: string, index) => tag === arr2[index]);
     };
 
+    const description = item.description || '';
+
     return (
       item.title === form.title.value &&
-      item.description === form.description.value &&
+      description === form.description.value &&
       compareTags(itemTags, formTags)
     );
   };
@@ -148,7 +150,7 @@ export const ContentEditorFlyoutContent: FC<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle data-test-subj="flyoutTitle">
           <h2>
-            <EuiIcon type="iInCircle" css={iconCSS} size="l" />
+            <EuiIcon type="info" css={iconCSS} size="l" />
             <span>{title}</span>
           </h2>
         </EuiTitle>

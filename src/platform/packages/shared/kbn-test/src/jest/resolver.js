@@ -79,6 +79,27 @@ module.exports = (request, options) => {
     return Path.resolve(__dirname, 'mocks/react_dom_client_mock.ts');
   }
 
+  if (request === 'ts-api-utils') {
+    return resolve.sync('ts-api-utils/lib/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request === 'zod' || request === 'zod/v3') {
+    return resolve.sync('zod/v3/index.cjs', {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
+  if (request.startsWith('zod/v4/')) {
+    return resolve.sync(`zod/v4/index.cjs`, {
+      basedir: options.basedir,
+      extensions: options.extensions,
+    });
+  }
+
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

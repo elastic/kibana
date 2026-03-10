@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      const loc = await testPrivateLocations.addPrivateLocation();
+      const loc = await testPrivateLocations.createPrivateLocation();
       testPolicyId = loc.id;
     });
 

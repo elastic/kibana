@@ -8,6 +8,7 @@
  */
 
 import { type monaco } from '@kbn/monaco';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class MonacoEditorService extends FtrService {
@@ -16,9 +17,14 @@ export class MonacoEditorService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly findService = this.ctx.getService('find');
 
-  public async waitCodeEditorReady(containerTestSubjId: string) {
+  public async waitCodeEditorReady(containerTestSubjId: string): Promise<WebElementWrapper> {
     const editorContainer = await this.testSubjects.find(containerTestSubjId);
-    await editorContainer.findByCssSelector('textarea');
+    const editor = await editorContainer.findByCssSelector('textarea');
+    // Wait for the editor to be enabled
+    await this.retry.waitFor('editor enabled', async () => {
+      return (await editor.isDisplayed()) && (await editor.isEnabled());
+    });
+    return editor;
   }
 
   public async getCodeEditorValue(nthIndex: number = 0) {
@@ -51,7 +57,7 @@ export class MonacoEditorService extends FtrService {
           const editor = window.MonacoEnvironment?.monaco.editor as typeof monaco.editor;
           const textModels = editor.getModels();
 
-          if (editorIndex) {
+          if (editorIndex !== undefined && textModels[editorIndex]) {
             textModels[editorIndex].setValue(codeEditorValue);
           } else {
             // when specific model instance is unknown, update all models returned

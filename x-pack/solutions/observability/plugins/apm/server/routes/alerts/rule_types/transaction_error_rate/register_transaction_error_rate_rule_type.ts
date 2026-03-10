@@ -337,10 +337,8 @@ export function registerTransactionErrorRateRuleType({
         const alertUuid = recoveredAlert.alert.getUuid();
         const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
 
-        const ruleParamsOfRecoveredAlert = alertHits?.[
-          ALERT_RULE_PARAMETERS
-        ] as TransactionErrorRateRuleTypeParams;
-        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert.groupBy ?? [];
+        const ruleParamsOfRecoveredAlert = alertHits?.[ALERT_RULE_PARAMETERS];
+        const groupByFieldsOfRecoveredAlert = ruleParamsOfRecoveredAlert?.groupBy ?? [];
         const allGroupByFieldsOfRecoveredAlert = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
           groupByFieldsOfRecoveredAlert

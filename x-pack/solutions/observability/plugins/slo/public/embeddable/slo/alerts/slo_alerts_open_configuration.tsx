@@ -7,7 +7,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { Suspense, lazy } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { SLOPublicPluginsStart } from '../../..';

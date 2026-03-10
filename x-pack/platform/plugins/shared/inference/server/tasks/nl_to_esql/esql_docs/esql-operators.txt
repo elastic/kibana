@@ -1,240 +1,204 @@
+```markdown
 # ES|QL Operators
 
-This document provides an overview of the operators supported by ES|QL.
+This document provides an overview of the operators available in ES|QL, categorized into binary, unary, logical, and other operators. Each operator is accompanied by an example query to demonstrate its usage.
+
+---
 
 ## Binary Operators
 
-### Equality `==`
+Binary operators are used to compare or perform arithmetic operations between two values.
 
-The equality operator checks if the values of two operands are equal or not.
-
-Example:
-
-```esql
-FROM employees
-| WHERE emp_no == 10001
-```
-
-### Inequality `!=`
-
-The inequality operator checks if the values of two operands are equal or not.
-
-Example:
+### Equality (`==`)
+Checks if two values are equal.
 
 ```esql
 FROM employees
-| WHERE emp_no != 10001
+| WHERE first_name == "John"
 ```
 
-### Less Than `<`
+### Inequality (`!=`)
+Checks if two values are not equal.
 
-The less than operator checks if the value of the left operand is less than the value of the right operand.
+```esql
+FROM employees
+| WHERE department != "HR"
+```
 
-Example:
+### Less Than (`<`)
+Checks if a value is less than another.
 
 ```esql
 FROM employees
 | WHERE salary < 50000
 ```
 
-### Less Than or Equal To `<=`
-
-This operator checks if the value of the left operand is less than or equal to the value of the right operand.
-
-Example:
+### Less Than or Equal To (`<=`)
+Checks if a value is less than or equal to another.
 
 ```esql
 FROM employees
-| WHERE salary <= 50000
+| WHERE hire_date <= "2020-01-01"
 ```
 
-### Greater Than `>`
-
-The greater than operator checks if the value of the left operand is greater than the value of the right operand.
-
-Example:
+### Greater Than (`>`)
+Checks if a value is greater than another.
 
 ```esql
 FROM employees
-| WHERE salary > 50000
+| WHERE age > 30
 ```
 
-### Greater Than or Equal To `>=`
-
-This operator checks if the value of the left operand is greater than or equal to the value of the right operand.
-
-Example:
+### Greater Than or Equal To (`>=`)
+Checks if a value is greater than or equal to another.
 
 ```esql
 FROM employees
-| WHERE salary >= 50000
+| WHERE experience_years >= 5
 ```
 
-### Add `+`
-
-The add operator adds the values of the operands.
-
-Example:
+### Add (`+`)
+Adds two values.
 
 ```esql
 FROM employees
 | EVAL total_compensation = salary + bonus
 ```
 
-### Subtract `-`
-
-The subtract operator subtracts the right-hand operand from the left-hand operand.
-
-Example:
+### Subtract (`-`)
+Subtracts one value from another.
 
 ```esql
 FROM employees
-| EVAL remaining_salary = salary - tax
+| EVAL remaining_vacation_days = total_vacation_days - used_vacation_days
 ```
 
-### Multiply `*`
-
-The multiply operator multiplies the values of the operands.
-
-Example:
+### Multiply (`*`)
+Multiplies two values.
 
 ```esql
 FROM employees
-| EVAL yearly_salary = salary * 12
+| EVAL annual_salary = monthly_salary * 12
 ```
 
-### Divide `/`
-
-The divide operator divides the left-hand operand by the right-hand operand.
-
-Example:
+### Divide (`/`)
+Divides one value by another.
 
 ```esql
 FROM employees
-| EVAL monthly_salary = salary / 12
+| EVAL average_salary = total_salary / employee_count
 ```
 
-### Modulus `%`
-
-The modulus operator returns the remainder of the division of the left operand by the right operand.
-
-Example:
+### Modulus (`%`)
+Returns the remainder of a division.
 
 ```esql
 FROM employees
-| EVAL remainder = salary % 12
+| EVAL remainder = employee_id % 2
 ```
+
+---
 
 ## Unary Operators
 
-### Negation (`-`)
+Unary operators operate on a single operand.
 
-Example:
+### Negation (`-`)
+Negates a numeric value.
 
 ```esql
-FROM employees
-| EVAL negative_salary = -salary
+ROW value = 10
+| EVAL negative_value = -value
 ```
+
+---
 
 ## Logical Operators
 
+Logical operators are used to combine or negate conditions.
+
 ### AND
-
-Logical AND operator.
-
-Example:
+Returns `true` if both conditions are true.
 
 ```esql
 FROM employees
-| WHERE salary > 50000 AND bonus > 10000
+| WHERE age > 30 AND department == "Engineering"
 ```
 
 ### OR
-
-Logical OR operator.
-
-Example:
+Returns `true` if at least one condition is true.
 
 ```esql
 FROM employees
-| WHERE salary > 50000 OR bonus > 10000
+| WHERE department == "HR" OR department == "Finance"
 ```
 
 ### NOT
-
-Logical NOT operator.
-
-Example:
+Negates a condition.
 
 ```esql
 FROM employees
-| WHERE NOT (salary > 50000)
+| WHERE NOT still_hired
 ```
+
+---
 
 ## Other Operators
 
 ### IS NULL and IS NOT NULL
+Checks if a value is `NULL` or not.
 
-The `IS NULL` operator returns true if the value is null.
-
-Example:
-
+#### IS NULL
 ```esql
 FROM employees
-| WHERE manager IS NULL
+| WHERE birth_date IS NULL
+| KEEP first_name, last_name
 ```
 
-The `IS NOT NULL` operator returns true if the value is not null.
+#### IS NOT NULL
+```esql
+FROM employees
+| WHERE is_rehired IS NOT NULL
+| STATS COUNT(emp_no)
+```
 
-Example:
+### Cast (`::`)
+Casts a value to a specific type.
 
 ```esql
 FROM employees
-| WHERE manager IS NOT NULL
+| EVAL salary_as_string = salary::KEYWORD
 ```
 
 ### IN
-
-The `IN` operator checks if a value is within a set of values (literals, fields or expressions).
-
-Example:
-
-```esql
-FROM employees
-| WHERE department IN ("Sales", "Marketing", "HR")
-```
+Checks if a value is in a list of values.
 
 ```esql
 ROW a = 1, b = 4, c = 3
-| WHERE c-a IN (3, b / 2, a)
+| WHERE c - a IN (3, b / 2, a)
 ```
 
 ### LIKE
+Filters data based on string patterns using wildcards.
 
-Use `LIKE` to filter data based on string patterns using wildcards.
-
-The following wildcard characters are supported:
-- `*` matches zero or more characters.
-- `?` matches one character.
-
-Example:
-
+#Basic usage
 ```esql
 FROM employees
-| WHERE first_name LIKE "?b*"
-| KEEP first_name, last_name
+| WHERE first_name LIKE "J*"
+```
+
+#Escaping special characters
+```esql
+ROW message = "foo * bar"
+| WHERE message LIKE "foo \\* bar"
 ```
 
 ### RLIKE
-
-Use `RLIKE` to filter data based on string patterns using regular expressions.
-
-Example:
+Filters data based on string patterns using regular expressions.
 
 ```esql
 FROM employees
-| WHERE first_name RLIKE ".leja.*"
-| KEEP first_name, last_name
+| WHERE first_name RLIKE "J.*"
 ```
 
 ### Cast `::`

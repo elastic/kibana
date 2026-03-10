@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type { AgentlessPolicy, GlobalDataTag } from '../../../common/types';
 
 import { AgentPolicyBaseSchema } from './agent_policy';

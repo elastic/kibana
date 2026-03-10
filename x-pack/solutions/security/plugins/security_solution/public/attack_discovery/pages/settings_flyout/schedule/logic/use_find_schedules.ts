@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { ATTACK_DISCOVERY_SCHEDULES_FIND } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';

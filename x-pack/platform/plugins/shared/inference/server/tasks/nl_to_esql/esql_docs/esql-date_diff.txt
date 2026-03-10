@@ -1,6 +1,6 @@
-# DATE_DIFF
+## DATE_DIFF
 
-The DATE_DIFF function calculates the difference between two timestamps and returns the difference in multiples of the specified `unit`.
+Calculates the difference between two timestamps in multiples of a specified unit. If the start timestamp is later than the end timestamp, the result will be negative.
 
 ## Syntax
 
@@ -8,31 +8,42 @@ The DATE_DIFF function calculates the difference between two timestamps and retu
 
 ### Parameters
 
-#### unit
+#### `unit`
 
-The unit of time in which the difference will be calculated.
+The unit of time for the difference calculation.
 
-#### startTimestamp
+#### `startTimestamp`
 
-The starting timestamp for the calculation.
+A string representing the starting timestamp.
 
-#### endTimestamp
+#### `endTimestamp`
 
-The ending timestamp for the calculation.
+A string representing the ending timestamp.
 
 ## Examples
 
-The following example demonstrates how to use the DATE_DIFF function to calculate the difference between two timestamps in microseconds:
+Calculate the difference in microseconds between two timestamps:
 
 ```esql
 ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
 | EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
 ```
 
+Calculate the difference in calendar units (e.g., years) between timestamps. Only fully elapsed units are counted. To include remainders, switch to a smaller unit and perform additional calculations:
+
 ```esql
-ROW date1 = TO_DATETIME("2023-01-01T00:00:00.000Z"), date2 = TO_DATETIME("2023-12-31T23:59:59.999Z")
-| EVAL dd_days = DATE_DIFF("days", date1, date2)
+ROW end_23=TO_DATETIME("2023-12-31T23:59:59.999Z"),
+  start_24=TO_DATETIME("2024-01-01T00:00:00.000Z"),
+    end_24=TO_DATETIME("2024-12-31T23:59:59.999")
+| EVAL end23_to_start24 = DATE_DIFF("year", end_23, start_24)
+| EVAL end23_to_end24 = DATE_DIFF("year", end_23, end_24)
+| EVAL start_to_end_24 = DATE_DIFF("year", start_24, end_24)
 ```
+
+## Limitations
+
+- The function’s supported units and ES|QL’s time span literals are distinct and not interchangeable.
+- Supported abbreviations align with other established implementations but may differ from Elasticsearch’s date-time nomenclature.
 
 ## Notes
 

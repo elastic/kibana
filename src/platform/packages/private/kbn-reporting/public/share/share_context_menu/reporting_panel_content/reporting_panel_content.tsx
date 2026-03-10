@@ -136,7 +136,10 @@ class ReportingPanelContentUi extends Component<Props, State> {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
+      <EuiCopy
+        textToCopy={this.state.absoluteUrl}
+        tooltipProps={{ anchorClassName: 'eui-displayBlock' }}
+      >
         {(copy) => (
           <EuiButton
             color={isUnsaved ? 'warning' : 'primary'}

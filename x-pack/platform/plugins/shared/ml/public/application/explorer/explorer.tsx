@@ -281,6 +281,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   } = useAnomalyExplorerContext();
 
   const tableData = useObservable(anomalyTableService.tableData$, anomalyTableService.tableData);
+  const tableError = useObservable(anomalyTableService.tableError$, anomalyTableService.tableError);
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
@@ -587,6 +588,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
 
+        <EuiSpacer size="s" />
+
         <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
           <EuiFlexItem grow={false}>
             <SelectSeverity />
@@ -621,7 +624,18 @@ export const Explorer: FC<ExplorerUIProps> = ({
 
         <EuiSpacer size="m" />
 
-        {tableData ? (
+        {tableError ? (
+          <EuiCallOut
+            color="danger"
+            iconType="warning"
+            title={i18n.translate('xpack.ml.explorer.anomaliesTableErrorTitle', {
+              defaultMessage: 'An error occurred loading anomalies table data',
+            })}
+            data-test-subj="mlAnomaliesTableErrorCallout"
+          >
+            {tableError}
+          </EuiCallOut>
+        ) : tableData ? (
           <AnomaliesTable
             bounds={bounds}
             tableData={tableData}
@@ -655,7 +669,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
                   'The Top Influencers list is hidden because no influencers have been configured for the selected jobs.',
               })}
               position="right"
-              type="iInCircle"
+              type="info"
             />
           </EuiFlexItem>
           <EuiFlexItem>{mainPanelContent}</EuiFlexItem>

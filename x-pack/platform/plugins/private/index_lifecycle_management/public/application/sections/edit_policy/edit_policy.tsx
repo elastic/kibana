@@ -141,13 +141,14 @@ export const EditPolicy: React.FunctionComponent = () => {
 
     const name = getPolicyName();
     setHasSubmittedForm(true);
-    const success = await savePolicy(
-      {
-        ...policy,
-        name,
-      },
-      isNewPolicy || isClonedPolicy
-    );
+
+    const policyWithName = { ...policy, name };
+
+    if (isClonedPolicy) {
+      delete policyWithName._meta?.managed;
+    }
+
+    const success = await savePolicy(policyWithName, isNewPolicy || isClonedPolicy);
 
     if (success) {
       backToPolicyList(name);
@@ -190,7 +191,11 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
+          <EuiButtonEmpty
+            href={docLinks.links.elasticsearch.ilm}
+            target="_blank"
+            iconType="question"
+          >
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
               defaultMessage="Documentation"

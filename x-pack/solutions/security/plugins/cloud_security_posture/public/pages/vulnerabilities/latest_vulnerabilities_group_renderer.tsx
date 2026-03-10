@@ -52,9 +52,9 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
     : '';
 
   switch (selectedGroup) {
-    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_NAME)
+        renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_ID)
       ) : (
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -70,9 +70,9 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                     css={css`
                       word-break: break-all;
                     `}
-                    title={bucket.resourceId?.buckets?.[0]?.key as string}
+                    title={bucket.resourceName?.buckets?.[0]?.key as string}
                   >
-                    <strong>{bucket.key_as_string}</strong> {bucket.resourceId?.buckets?.[0]?.key}
+                    <strong>{bucket.key_as_string}</strong> {bucket.resourceName?.buckets?.[0]?.key}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -80,9 +80,9 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME)
+        renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_ID)
       ) : (
         <EuiFlexGroup alignItems="center">
           {cloudProvider && (

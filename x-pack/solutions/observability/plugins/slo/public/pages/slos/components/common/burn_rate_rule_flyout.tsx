@@ -8,7 +8,7 @@
 import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';

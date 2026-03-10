@@ -1,8 +1,6 @@
 # CATEGORIZE
 
-The `CATEGORIZE` function organizes textual data into groups of similar format.
-
-> **Note:** The `CATEGORIZE` function is currently in technical preview and may undergo changes or be removed in future releases.
+Groups text messages into categories of similarly formatted text values.
 
 ## Syntax
 
@@ -10,13 +8,15 @@ The `CATEGORIZE` function organizes textual data into groups of similar format.
 
 ### Parameters
 
-#### field
+#### `field`
 
-The expression that is to be categorized.
+Expression to categorize.
 
 ## Examples
 
-The following example demonstrates how to use `CATEGORIZE` to group server log messages into categories and then aggregate their counts.
+Categorizing server log messages
+
+Categorizes server log messages into categories and aggregates their counts.
 
 ```esql
 FROM sample_data
@@ -25,6 +25,10 @@ FROM sample_data
 
 ## Limitations
 
-- `CATEGORIZE` can't be used within other expressions
-- `CATEGORIZE` can't be used with multiple groupings
-- `CATEGORIZE` can't be used or referenced within aggregate functions
+- Cannot be used within other expressions.
+- Cannot be used with multiple groupings.
+- Cannot be used or referenced within aggregate functions.
+
+## Additional Notes
+
+- The `CATEGORIZE` function requires a platinum license.

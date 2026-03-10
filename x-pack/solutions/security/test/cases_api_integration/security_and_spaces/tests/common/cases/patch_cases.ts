@@ -42,17 +42,6 @@ import {
   getConfigurationRequest,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-  getRuleForAlertTesting,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-  getAlertsByIds,
-  createRule,
-  getQueryAlertIds,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
-import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
@@ -62,6 +51,17 @@ import {
   secOnlyRead,
   superUser,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/users';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  createRule,
+  getQueryAlertIds,
+} from '@kbn/detections-response-ftr-services';
 import { getSignalsWithES } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { duration, time_to_investigate, time_to_resolve, ...dataWithoutMetrics } = data;
         const { duration: resDuration, ...resWithoutDuration } = postCaseResp();
 
@@ -178,7 +178,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         const { time_to_investigate, time_to_resolve, ...dataWithoutMetrics } =
           removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
@@ -1691,10 +1691,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/signals/default');
         });
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/default');
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/cases/signals/default'
+          );
           await deleteAllCaseItems(es);
         });
 
@@ -1825,10 +1827,14 @@ export default ({ getService }: FtrProviderContext): void => {
         const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
+          await esArchiver.load(
+            'x-pack/platform/test/fixtures/es_archives/cases/signals/duplicate_ids'
+          );
         });
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
+          await esArchiver.unload(
+            'x-pack/platform/test/fixtures/es_archives/cases/signals/duplicate_ids'
+          );
           await deleteAllCaseItems(es);
         });
 
@@ -1950,14 +1956,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('detections rule', () => {
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
           await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
         });
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {

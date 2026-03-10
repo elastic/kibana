@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import Path from 'path';
 import type { Logger } from '@kbn/logging';
-import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { productDocInstallStatusSavedObjectTypeName } from '../common/consts';
 import type { ProductDocBaseConfig } from './config';
 import {
@@ -76,13 +75,16 @@ export class ProductDocBasePlugin
     const soClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([productDocInstallStatusSavedObjectTypeName])
     );
-    const productDocClient = new ProductDocInstallClient({ soClient });
+    const productDocClient = new ProductDocInstallClient({
+      soClient,
+      log: this.logger,
+    });
 
     const packageInstaller = new PackageInstaller({
       esClient: core.elasticsearch.client.asInternalUser,
       productDocClient,
       kibanaVersion: this.context.env.packageInfo.version,
-      artifactsFolder: Path.join(getDataPath(), 'ai-kb-artifacts'),
+      artifactsFolder: 'ai-kb-artifacts',
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger.get('package-installer'),
@@ -110,7 +112,7 @@ export class ProductDocBasePlugin
       taskManager,
     };
 
-    documentationManager.update().catch((err) => {
+    documentationManager.update({ inferenceId: defaultInferenceEndpoints.ELSER }).catch((err) => {
       this.logger.error(`Error scheduling product documentation update task: ${err.message}`);
     });
 

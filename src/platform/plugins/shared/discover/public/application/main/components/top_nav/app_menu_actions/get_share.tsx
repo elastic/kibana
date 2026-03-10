@@ -14,6 +14,7 @@ import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
@@ -24,10 +25,12 @@ export const getShareAppMenuItem = ({
   discoverParams,
   services,
   stateContainer,
+  hasIntegrations,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
+  hasIntegrations: boolean;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -58,14 +61,14 @@ export const getShareAppMenuItem = ({
     const filters = services.filterManager.getFilters();
 
     // Share -> Get links -> Snapshot
-    const params: DiscoverAppLocatorParams = {
+    const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
       ...omit(appState, 'dataSource'),
       ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
       ...(dataView?.isPersisted()
         ? { dataViewId: dataView?.id }
         : { dataViewSpec: dataView?.toMinimalSpec() }),
       filters,
-      timeRange,
+      timeRange: timeRange ?? undefined,
       refreshInterval,
     };
     const relativeUrl = locator.getRedirectUrl(params);
@@ -136,17 +139,7 @@ export const getShareAppMenuItem = ({
       },
       sharingData: {
         isTextBased: isEsqlMode,
-        locatorParams: [
-          {
-            id: locator.id,
-            params: isEsqlMode
-              ? {
-                  ...params,
-                  timeRange: timefilter.getAbsoluteTime(), // Will be used when generating CSV on server. See `filtersFromLocator`.
-                }
-              : params,
-          },
-        ],
+        locatorParams: [{ id: locator.id, params }],
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:
@@ -180,7 +173,7 @@ export const getShareAppMenuItem = ({
     },
   ];
 
-  if (Boolean(services.share?.availableIntegrations('search', 'export')?.length)) {
+  if (hasIntegrations) {
     menuItems.unshift({
       id: AppMenuActionId.export,
       type: AppMenuActionType.primary,

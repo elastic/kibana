@@ -22,7 +22,7 @@ describe('SuggestedPrompts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useAssistantContext as jest.Mock).mockReturnValue({
-      assistantAvailability: { isAssistantEnabled: true },
+      assistantAvailability: { isAssistantEnabled: true, isAssistantVisible: true },
     });
     (useAssistantOverlay as jest.Mock).mockReturnValue({
       showAssistantOverlay: mockShowAssistantOverlay,

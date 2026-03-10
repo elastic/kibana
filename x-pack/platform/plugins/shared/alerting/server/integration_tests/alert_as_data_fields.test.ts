@@ -56,6 +56,7 @@ const ruleTypes: string[] = [
   'apm.anomaly',
   'apm.error_rate',
   'apm.transaction_error_rate',
+  'attack-discovery',
   'siem.eqlRule',
   'siem.esqlRule',
   'siem.savedQueryRule',

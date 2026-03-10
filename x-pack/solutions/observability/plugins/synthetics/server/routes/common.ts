@@ -63,7 +63,7 @@ export const OverviewStatusSchema = schema.object({
 
 export type OverviewStatusQuery = TypeOf<typeof OverviewStatusSchema>;
 
-export const SEARCH_FIELDS = [
+export const MONITOR_SEARCH_FIELDS = [
   'name',
   'tags.text',
   'locations.id.text',

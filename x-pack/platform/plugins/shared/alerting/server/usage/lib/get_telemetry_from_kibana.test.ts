@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -287,7 +289,6 @@ describe('kibana index telemetry', () => {
         count_by_type: {
           '__index-threshold': 2,
           document__test__: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
           '__es-query_es_query': 0,
           '__es-query_esql_query': 3,
@@ -330,14 +331,11 @@ describe('kibana index telemetry', () => {
         },
         count_rules_snoozed: 11,
         count_rules_snoozed_by_type: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           slo__rules__burnRate: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           observability__rules__custom_threshold: 1,
         },
         count_rules_muted: 12,
         count_rules_muted_by_type: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           observability__rules__custom_threshold: 1,
         },
         count_rules_with_muted_alerts: 13,
@@ -553,7 +551,6 @@ describe('kibana index telemetry', () => {
         countByType: {
           '__index-threshold': 2,
           document__test__: 1,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
           '__es-query_es_query': 0,
           '__es-query_esql_query': 3,

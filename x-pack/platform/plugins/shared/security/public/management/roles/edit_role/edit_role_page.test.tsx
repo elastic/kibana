@@ -442,7 +442,7 @@ describe('<EditRolePage />', () => {
                 metadata: {},
                 elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
                 kibana: [],
-                _transform_error: ['kibana'],
+                _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
               },
             })}
           />
@@ -699,7 +699,7 @@ describe('<EditRolePage />', () => {
                 metadata: {},
                 elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
                 kibana: [],
-                _transform_error: ['kibana'],
+                _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
               },
             })}
           />

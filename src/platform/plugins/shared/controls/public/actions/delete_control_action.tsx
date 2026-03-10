@@ -29,7 +29,7 @@ import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/pub
 import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import { ACTION_DELETE_CONTROL } from './constants';
-import { coreServices } from '../services/kibana_services';
+import { confirmDeleteControl } from '../common';
 
 type DeleteControlActionApi = HasType &
   HasUniqueId &
@@ -83,28 +83,10 @@ export class DeleteControlAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
 
-    coreServices.overlays
-      .openConfirm(
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-        {
-          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
-            defaultMessage: 'Delete',
-          }),
-          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
-            defaultMessage: 'Cancel',
-          }),
-          title: i18n.translate('controls.controlGroup.management.delete.deleteTitle', {
-            defaultMessage: 'Delete control?',
-          }),
-          buttonColor: 'danger',
-        }
-      )
-      .then((confirmed) => {
-        if (confirmed) {
-          embeddable.parentApi.removePanel(embeddable.uuid);
-        }
-      });
+    confirmDeleteControl().then((confirmed) => {
+      if (confirmed) {
+        embeddable.parentApi.removePanel(embeddable.uuid);
+      }
+    });
   }
 }

@@ -78,7 +78,6 @@ describe('Readonly index modal', () => {
           nodeId: '9OFkjpAKS_aPzJAuEOSg7w',
           nodeName: 'MacBook-Pro.local',
           available: '25%',
-          lowDiskWatermarkSetting: '50%',
         },
       ]);
 
@@ -173,6 +172,29 @@ describe('Readonly index modal', () => {
       // Verify only mark as read-only button is available (no reindex button)
       expect(exists('startIndexReadonlyButton')).toBe(true);
       expect(exists('startReindexingButton')).toBe(false);
+    });
+  });
+
+  describe('delete', () => {
+    it('renders a modal with index confirm step for delete', async () => {
+      const { actions, find, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt({
+        deprecationType: 'reindex',
+        index: 0,
+        action: 'delete',
+      });
+
+      expect(exists('updateIndexModal')).toBe(true);
+      expect(find('updateIndexModalTitle').text()).toContain('Delete index');
+
+      expect(exists('startDeleteButton')).toBe(true);
+      expect(find('startDeleteButton').props().disabled).toBe(true);
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('bad input');
+      expect(find('startDeleteButton').props().disabled).toBe(true);
+      await actions.reindexDeprecationFlyout.fillDeleteInputText('delete');
+
+      expect(find('startDeleteButton').props().disabled).toBe(false);
     });
   });
 });

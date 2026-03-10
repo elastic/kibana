@@ -126,12 +126,15 @@ export const RuleDefinition = () => {
     if (consumer !== ALERTING_FEATURE_ID) {
       return [];
     }
+
     const selectedAvailableRuleType = availableRuleTypes.find((ruleType) => {
       return ruleType.id === selectedRuleType.id;
     });
+
     if (!selectedAvailableRuleType?.authorizedConsumers) {
       return [];
     }
+
     return getAuthorizedConsumers({
       ruleType: selectedAvailableRuleType,
       validConsumers,
@@ -297,11 +300,7 @@ export const RuleDefinition = () => {
             <EuiText size="s">
               <p>
                 {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
-                <EuiIconTip
-                  position="right"
-                  type="questionInCircle"
-                  content={SCHEDULE_TOOLTIP_TEXT}
-                />
+                <EuiIconTip position="right" type="question" content={SCHEDULE_TOOLTIP_TEXT} />
               </p>
             </EuiText>
           }
@@ -346,8 +345,9 @@ export const RuleDefinition = () => {
                       {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
                       <EuiIconTip
                         position="right"
-                        type="questionInCircle"
+                        type="question"
                         content={ALERT_DELAY_HELP_TEXT}
+                        aria-label={ALERT_DELAY_HELP_TEXT}
                       />
                     </p>
                   </EuiText>
@@ -362,14 +362,12 @@ export const RuleDefinition = () => {
                   title={<h4>{ALERT_FLAPPING_DETECTION_TITLE}</h4>}
                   description={
                     <EuiText size="s">
-                      <p>
-                        {ALERT_FLAPPING_DETECTION_DESCRIPTION}
-                        <RuleSettingsFlappingTitleTooltip
-                          isOpen={isFlappingPopoverOpen}
-                          setIsPopoverOpen={setIsFlappingPopoverOpen}
-                          anchorPosition="downCenter"
-                        />
-                      </p>
+                      <p>{ALERT_FLAPPING_DETECTION_DESCRIPTION}</p>
+                      <RuleSettingsFlappingTitleTooltip
+                        isOpen={isFlappingPopoverOpen}
+                        setIsPopoverOpen={setIsFlappingPopoverOpen}
+                        anchorPosition="downCenter"
+                      />
                     </EuiText>
                   }
                 >

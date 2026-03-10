@@ -2500,6 +2500,27 @@
       }
     }
   },
+  "intercept_interaction_record": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "intercept_trigger_record": {
+    "dynamic": false,
+    "properties": {
+      "firstRegisteredAt": {
+        "type": "date"
+      },
+      "installedOn": {
+        "type": "keyword"
+      },
+      "recurrent": {
+        "type": "boolean"
+      },
+      "triggerAfter": {
+        "type": "text"
+      }
+    }
+  },
   "inventory-view": {
     "dynamic": false,
     "properties": {}
@@ -2946,6 +2967,9 @@
       "index_name": {
         "type": "keyword"
       },
+      "inference_id": {
+        "type": "keyword"
+      },
       "installation_status": {
         "type": "keyword"
       },
@@ -3105,7 +3129,25 @@
   "security-rule": {
     "dynamic": false,
     "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "normalizer": "lowercase",
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "risk_score": {
+        "type": "float"
+      },
       "rule_id": {
+        "type": "keyword"
+      },
+      "severity": {
+        "type": "keyword"
+      },
+      "tags": {
         "type": "keyword"
       },
       "version": {

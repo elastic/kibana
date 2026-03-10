@@ -37,6 +37,7 @@ describe('ES Client - custom user-agent', () => {
 
   afterAll(async () => {
     try {
+      // @ts-expect-error upgrade typescript v5.9.3
       await kibanaServer?.shutdown();
     } catch (e) {
       // trap

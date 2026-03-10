@@ -109,15 +109,12 @@ export const mappings = (specService: SpecDefinitionsService) => {
               'freqs',
               'positions',
               'offsets',
-              // dense_vector type
+              // semantic_text type
               {
-                type: {
-                  __one_of: ['int8_hnsw', 'hnsw', 'int4_hnsw', 'flat', 'int8_flat', 'int4_flat'],
-                },
-                m: 16,
-                ef_construction: 100,
-                confidence_interval: 0,
+                dense_vector: DenseVectorIndexOptions,
               },
+              // dense_vector type
+              DenseVectorIndexOptions,
             ],
           },
           analyzer: 'standard',
@@ -288,4 +285,22 @@ export const mappings = (specService: SpecDefinitionsService) => {
       },
     },
   });
+};
+
+const DenseVectorIndexOptions = {
+  type: {
+    __one_of: [
+      'bbq_hnsw',
+      'bbq_flat',
+      'int8_hnsw',
+      'hnsw',
+      'int4_hnsw',
+      'flat',
+      'int8_flat',
+      'int4_flat',
+    ],
+  },
+  m: 16,
+  ef_construction: 100,
+  confidence_interval: 0,
 };

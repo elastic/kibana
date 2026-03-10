@@ -66,7 +66,11 @@ export class DeleteRuleModal extends Component {
 
     return (
       <React.Fragment>
-        <EuiLink color="danger" onClick={() => this.showModal()}>
+        <EuiLink
+          color="danger"
+          onClick={() => this.showModal()}
+          data-test-subj="deleteRuleModalLink"
+        >
           <FormattedMessage
             id="xpack.ml.ruleEditor.deleteRuleModal.deleteRuleLinkText"
             defaultMessage="Delete rule"

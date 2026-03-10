@@ -2030,7 +2030,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -3291,7 +3291,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "maxLength": 1000,
+                            "maxLength": 10000,
                             "type": "string"
                           }
                         },
@@ -5049,15 +5049,22 @@
             }
           },
           {
+            "description": "The fields to return in the `attributes` key of the response.",
             "in": "query",
             "name": "fields",
             "required": false,
             "schema": {
-              "items": {
-                "description": "The fields to return in the `attributes` key of the response.",
-                "type": "string"
-              },
-              "type": "array"
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -6956,6 +6963,9 @@
                               },
                               "agent_logging_to_files": {
                                 "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
+                                "nullable": true
                               }
                             },
                             "type": "object"
@@ -7958,6 +7968,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -8259,6 +8272,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -9287,6 +9303,9 @@
                                 "nullable": true
                               },
                               "agent_logging_to_files": {
+                                "nullable": true
+                              },
+                              "agent_monitoring_runtime_experimental": {
                                 "nullable": true
                               }
                             },
@@ -10556,6 +10575,9 @@
                             },
                             "agent_logging_to_files": {
                               "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
+                              "nullable": true
                             }
                           },
                           "type": "object"
@@ -11556,6 +11578,9 @@
                       },
                       "agent_logging_to_files": {
                         "nullable": true
+                      },
+                      "agent_monitoring_runtime_experimental": {
+                        "nullable": true
                       }
                     },
                     "type": "object"
@@ -11860,6 +11885,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -12818,19 +12846,41 @@
                         "additionalProperties": false,
                         "properties": {
                           "agents": {
+                            "description": "Number of agents that upgraded to this version",
                             "type": "number"
                           },
+                          "failedUpgradeActionIds": {
+                            "description": "List of action IDs related to failed upgrades",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
                           "failedUpgradeAgents": {
+                            "description": "Number of agents that failed to upgrade to this version",
+                            "type": "number"
+                          },
+                          "inProgressUpgradeActionIds": {
+                            "description": "List of action IDs related to in-progress upgrades",
+                            "items": {
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
+                          "inProgressUpgradeAgents": {
+                            "description": "Number of agents that are upgrading to this version",
                             "type": "number"
                           },
                           "version": {
+                            "description": "Agent version",
                             "type": "string"
                           }
                         },
                         "required": [
                           "version",
                           "agents",
-                          "failedUpgradeAgents"
+                          "failedUpgradeAgents",
+                          "inProgressUpgradeAgents"
                         ],
                         "type": "object"
                       },
@@ -12982,6 +13032,9 @@
                               "nullable": true
                             },
                             "agent_logging_to_files": {
+                              "nullable": true
+                            },
+                            "agent_monitoring_runtime_experimental": {
                               "nullable": true
                             }
                           },
@@ -14132,6 +14185,12 @@
                                         }
                                       },
                                       "type": "object"
+                                    },
+                                    "target_directory": {
+                                      "type": "string"
+                                    },
+                                    "timeout": {
+                                      "type": "string"
                                     }
                                   },
                                   "required": [
@@ -14184,6 +14243,15 @@
                                     "level": {
                                       "type": "string"
                                     },
+                                    "metrics": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "period": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "to_files": {
                                       "type": "boolean"
                                     }
@@ -14193,6 +14261,9 @@
                                 "monitoring": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "_runtime_experimental": {
+                                      "type": "string"
+                                    },
                                     "apm": {},
                                     "enabled": {
                                       "type": "boolean"

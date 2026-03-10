@@ -226,8 +226,11 @@ export const TransformManagement: FC = () => {
     <EuiButtonEmpty
       href={esTransform}
       target="_blank"
-      iconType="help"
+      iconType="question"
       data-test-subj="documentationLink"
+      aria-label={i18n.translate('xpack.transform.transformList.transformDocsLinkAriaLabel', {
+        defaultMessage: 'Transform documentation link',
+      })}
     >
       <FormattedMessage
         id="xpack.transform.transformList.transformDocsLinkText"

@@ -19,6 +19,7 @@ import type {
   AggregationRequest,
   EndpointFields,
   HostAggEsItem,
+  HostBucketItem,
   HostBuckets,
   HostItem,
   HostValue,
@@ -132,7 +133,8 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     : fieldName.replace(/\./g, '_');
 
   if (has(`${aggField}.buckets`, bucket)) {
-    return getFirstItem(get(`${aggField}`, bucket));
+    const buckets = get(`${aggField}.buckets`, bucket);
+    return buckets.length > 0 ? buckets.map((item: HostBucketItem) => item.key) : null;
   } else if (fieldName === 'endpoint.id') {
     return get('endpoint_id.value.buckets[0].key', bucket) || null;
   } else if (has(aggField, bucket)) {

@@ -133,6 +133,9 @@ const registerHttpRequestMockHelpers = (
   const setLoadMlUpgradeModeResponse = (response?: object, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/ml_upgrade_mode`, response, error);
 
+  const setLoadMlEnabledResponse = (response?: { mlEnabled: boolean }, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/ml_enabled`, response, error);
+
   const setSystemIndicesMigrationResponse = (response?: object, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/system_indices_migration`, response, error);
 
@@ -188,6 +191,7 @@ const registerHttpRequestMockHelpers = (
     setStartReindexingResponse,
     setReindexStatusResponse,
     setLoadMlUpgradeModeResponse,
+    setLoadMlEnabledResponse,
     setGetUpgradeStatusResponse,
     setLoadRemoteClustersResponse,
     setLoadNodeDiskSpaceResponse,

@@ -58,15 +58,10 @@ export default function apiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  function deleteJobs(jobIds: string[]) {
-    return Promise.allSettled(jobIds.map((jobId) => ml.deleteAnomalyDetectionJobES(jobId)));
-  }
-  // this will be fixed in https://github.com/elastic/kibana/issues/221458
-  registry.when.skip('Updating ML jobs to v3', { config: 'trial', archives: [] }, () => {
+  registry.when('Updating ML jobs to v3', { config: 'trial', archives: [] }, () => {
     before(async () => {
-      const res = await getJobs();
-      const jobIds = res.body.jobs.map((job: any) => job.jobId);
-      await deleteJobs(jobIds);
+      // Ensure a clean state before running the test suite
+      await ml.cleanMlIndices();
     });
 
     describe('when there are no v2 jobs', () => {
@@ -96,7 +91,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
         ).to.eql(['development', 'production']);
       });
 
-      after(() => ml.cleanMlIndices());
+      after(async () => {
+        await ml.cleanMlIndices();
+      });
     });
 
     describe('when there are both v2 and v3 jobs', () => {
@@ -105,7 +102,9 @@ export default function apiTest({ getService }: FtrProviderContext) {
         await createV3Jobs(['production']);
       });
 
-      after(() => ml.cleanMlIndices());
+      after(async () => {
+        await ml.cleanMlIndices();
+      });
 
       it('only creates new jobs for environments that did not have a v3 job', async () => {
         await callUpdateEndpoint();

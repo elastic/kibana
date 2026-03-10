@@ -78,6 +78,20 @@ export class EsqlServiceTestbed {
         },
       },
     });
+
+    // Lookup index hidden
+    await client.indices.create({
+      index: 'lookup_index3',
+      settings: {
+        'index.mode': 'lookup',
+        'index.hidden': true,
+      },
+      mappings: {
+        properties: {
+          field2: { type: 'keyword' },
+        },
+      },
+    });
   }
 
   public async setupTimeseriesIndices() {

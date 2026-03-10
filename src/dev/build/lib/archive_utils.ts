@@ -58,6 +58,7 @@ export async function createZipFile(entries: ZipEntry[], destination: string): P
 
     zipfile.outputStream
       .pipe(fs.createWriteStream(destination))
+      // @ts-expect-error upgrade typescript v5.9.3
       .on('close', resolve)
       .on('error', reject);
   });

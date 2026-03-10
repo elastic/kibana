@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -36,7 +36,8 @@
     "@kbn/search-types",
     "@kbn/response-ops-alerts-fields-browser",
     "@kbn/charts-theme",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

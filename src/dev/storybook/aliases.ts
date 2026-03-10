@@ -10,7 +10,6 @@
 export const storybookAliases = {
   ai_assistant: 'x-pack/platform/packages/shared/kbn-ai-assistant/.storybook',
   apm: 'x-pack/solutions/observability/plugins/apm/.storybook',
-  canvas: 'x-pack/platform/plugins/private/canvas/storybook',
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   chart_icons: 'src/platform/packages/shared/kbn-chart-icons/.storybook',
@@ -46,6 +45,7 @@ export const storybookAliases = {
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',
   logs_explorer: 'x-pack/solutions/observability/plugins/logs_explorer/.storybook',
   management: 'src/platform/packages/shared/kbn-management/storybook/config',
+  metrics_data_access: 'x-pack/solutions/observability/plugins/metrics_data_access/.storybook',
   observability_ai_assistant_app:
     'x-pack/solutions/observability/plugins/observability_ai_assistant_app/.storybook',
   observability_ai_assistant:

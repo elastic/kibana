@@ -64,7 +64,6 @@ import {
 } from '../../../../../common/users';
 import { createUsersAndRoles, deleteUsersAndRoles } from '../../../../../common/lib/authentication';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -1842,7 +1841,6 @@ const generateId = ({
 const removeServerGeneratedData = (
   theCase: Case
 ): Omit<Case, 'created_at' | 'updated_at' | 'version'> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_at, updated_at, version, ...restCase } = theCase;
 
   return restCase;

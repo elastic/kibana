@@ -146,7 +146,7 @@ describe('migration v2', () => {
               '..',
               'archives',
               willRunESv9
-                ? '8.18.0_so_with_multiple_namespaces.zip'
+                ? '8.19.0_so_with_multiple_namespaces.zip'
                 : '7.13.2_so_with_multiple_namespaces.zip'
             ),
           },

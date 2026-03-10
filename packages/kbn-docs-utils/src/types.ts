@@ -47,6 +47,7 @@ export enum TypeKind {
    * Maps to the typescript syntax kind `TypeReferences`. For example,
    * export type FooFn = () => string will be a TypeKind, not a FunctionKind.
    */
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   TypeKind = 'Type',
   /**
    * Uncategorized is used if a type is encountered that isn't handled.

@@ -29,7 +29,7 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
           defaultMessage="Check Requirements"
         />
       }
-      iconType="iInCircle"
+      iconType="info"
     >
       <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
         <EuiFlexItem>

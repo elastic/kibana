@@ -19,6 +19,7 @@ import {
 import { CancelLoadingState, LoadingState } from '../../../types';
 import { ApiService } from '../../../../lib/api';
 import { readOnlyExecute } from './readonly_state';
+import { deleteExecute } from './delete_state';
 
 const POLL_INTERVAL = 3000;
 
@@ -110,6 +111,7 @@ export const useMigrationStatus = ({
 
   const pollIntervalIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const readonlyState = useRef<ReturnType<typeof readOnlyExecute> | null>(null);
+  const deleteState = useRef<ReturnType<typeof deleteExecute> | null>(null);
   const isMounted = useRef(false);
 
   const clearPollInterval = useCallback(() => {
@@ -126,16 +128,25 @@ export const useMigrationStatus = ({
         if (resolutionType === 'readonly' && !readonlyState.current) {
           return;
         }
+        if (resolutionType === 'delete' && !deleteState.current) {
+          return;
+        }
 
         let data: DataStreamReindexStatusResponse | null = null;
         let error: ResponseError | null = null;
+
         if (resolutionType === 'readonly') {
           if (!readonlyState.current) {
             throw new Error('Readonly state not initialized');
           }
 
           const { value } = await readonlyState.current.next();
-
+          data = value;
+        } else if (resolutionType === 'delete') {
+          if (!deleteState.current) {
+            throw new Error('Delete state not initialized');
+          }
+          const { value } = await deleteState.current.next();
           data = value;
         } else {
           const results = await api.getDataStreamMigrationStatus(dataStreamName);
@@ -334,6 +345,20 @@ export const useMigrationStatus = ({
     });
   }, []);
 
+  const startDelete = useCallback(async () => {
+    setMigrationState((prevValue: MigrationState) => {
+      return {
+        ...prevValue,
+        resolutionType: 'delete',
+        status: DataStreamMigrationStatus.inProgress,
+        taskPercComplete: null,
+      };
+    });
+    deleteState.current = deleteExecute(dataStreamName, api);
+
+    pollingFunction('delete');
+  }, [api, dataStreamName, pollingFunction]);
+
   useEffect(() => {
     updateStatus();
   }, [updateStatus]);
@@ -359,5 +384,7 @@ export const useMigrationStatus = ({
     cancelReindex,
     startReadonly,
     cancelReadonly,
+
+    startDelete,
   };
 };

@@ -7,7 +7,7 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
@@ -38,6 +38,7 @@ export function useDeleteKnowledgeBaseEntry() {
       );
     },
     {
+      networkMode: 'always',
       onSuccess: (_data, { id, isUserInstruction }) => {
         if (isUserInstruction) {
           toasts.addSuccess(

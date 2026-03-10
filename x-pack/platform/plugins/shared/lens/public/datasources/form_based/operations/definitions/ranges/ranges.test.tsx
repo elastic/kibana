@@ -137,14 +137,12 @@ describe('ranges', () => {
   function setToHistogramMode() {
     const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'number';
-    column.scale = 'interval';
     column.params.type = MODES.Histogram;
   }
 
   function setToRangeMode() {
     const column = layer.columns.col1 as RangeIndexPatternColumn;
     column.dataType = 'string';
-    column.scale = 'ordinal';
     column.params.type = MODES.Range;
   }
 
@@ -158,7 +156,6 @@ describe('ranges', () => {
           label: sourceField,
           dataType: 'number',
           operationType: 'range',
-          scale: 'interval',
           isBucketed: true,
           sourceField,
           params: {

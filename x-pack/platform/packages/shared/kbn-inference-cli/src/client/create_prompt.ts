@@ -19,6 +19,7 @@ import { defer, from, throwError } from 'rxjs';
 import { combineSignal } from './combine_signal';
 import { InferenceCliClientOptions } from './types';
 
+// @ts-expect-error upgrade typescript v5.4.5
 export function createPrompt(options: InferenceCliClientOptions): BoundPromptAPI;
 
 export function createPrompt({ connector, kibanaClient, signal }: InferenceCliClientOptions) {

@@ -21,7 +21,7 @@ export function LabelWithTooltip({
     <EuiFlexGroup gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>{labelContent}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIconTip type="questionInCircle" content={tooltipContent} />
+        <EuiIconTip type="question" content={tooltipContent} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

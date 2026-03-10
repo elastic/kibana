@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useState } from 'react';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';

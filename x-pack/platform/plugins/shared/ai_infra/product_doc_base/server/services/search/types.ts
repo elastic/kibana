@@ -19,6 +19,8 @@ export interface DocSearchOptions {
   highlights?: number;
   /** optional list of products to filter search */
   products?: ProductName[];
+  /** optional inference ID to filter search */
+  inferenceId?: string;
 }
 
 /**

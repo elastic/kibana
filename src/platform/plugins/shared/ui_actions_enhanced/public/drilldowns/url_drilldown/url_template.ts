@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+const dateMathPlusSignRegex = /(%7C%7C[^%+]*?)\+/g; // "||+" after "||" is encoded as "%7C%7C"
 
 export async function compile(
   urlTemplate: string,
@@ -22,7 +23,8 @@ export async function compile(
   let processedUrl: string = handlebarsTemplate(context);
 
   if (doEncode) {
-    processedUrl = encodeURI(processedUrl);
+    // Replace "+" with "%2B" only if it's after a pipe "||", which means it's part of a date math expression
+    processedUrl = encodeURI(processedUrl).replace(dateMathPlusSignRegex, '$1%2B');
   }
 
   return processedUrl;

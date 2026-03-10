@@ -50,7 +50,7 @@ export function getMenuSections({
   onFilterByInstanceClick: () => void;
   metricsHref: string;
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
-  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  nodeLogsLocator?: LocatorPublic<NodeLogsLocatorParams>;
   assetDetailsLocator?: AssetDetailsLocator;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
@@ -60,13 +60,13 @@ export function getMenuSections({
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
 
-  const podLogsHref = nodeLogsLocator.getRedirectUrl({
+  const podLogsHref = nodeLogsLocator?.getRedirectUrl({
     nodeField: findInventoryFields('pod').id,
     nodeId: podId!,
     time,
   });
 
-  const containerLogsHref = nodeLogsLocator.getRedirectUrl({
+  const containerLogsHref = nodeLogsLocator?.getRedirectUrl({
     nodeField: findInventoryFields('container').id,
     nodeId: containerId!,
     time,

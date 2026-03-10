@@ -33,6 +33,7 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { SaveResult } from './show_saved_object_save_modal';
 
 export interface OnSaveProps {
   newTitle: string;
@@ -42,8 +43,21 @@ export interface OnSaveProps {
   newDescription: string;
 }
 
-interface Props {
-  onSave: (props: OnSaveProps) => void;
+export interface Reference {
+  type: string;
+  id: string;
+  name: string;
+}
+
+export interface SaveDashboardReturn {
+  id?: string;
+  error?: string;
+  references?: Reference[];
+  redirectRequired?: boolean;
+}
+
+interface Props<T = void> {
+  onSave: (props: OnSaveProps) => Promise<T>;
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
@@ -65,7 +79,7 @@ export interface SaveModalState {
   copyOnSave: boolean;
   isTitleDuplicateConfirmed: boolean;
   hasTitleDuplicate: boolean;
-  isLoading: boolean;
+  isSaving: boolean;
   visualizationDescription: string;
   hasAttemptedSubmit: boolean;
 }
@@ -76,7 +90,7 @@ const generateId = htmlIdGenerator();
  * @deprecated
  * @removeBy 8.8.0
  */
-export class SavedObjectSaveModal extends React.Component<Props, SaveModalState> {
+class SavedObjectSaveModalComponent<T = void> extends React.Component<Props<T>, SaveModalState> {
   private warning = React.createRef<HTMLDivElement>();
   private formId = generateId('form');
   private savedObjectTitleInputRef = React.createRef<HTMLInputElement>();
@@ -86,7 +100,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     copyOnSave: Boolean(this.props.initialCopyOnSave),
     isTitleDuplicateConfirmed: false,
     hasTitleDuplicate: false,
-    isLoading: false,
+    isSaving: false,
     visualizationDescription: this.props.description ? this.props.description : '',
     hasAttemptedSubmit: false,
   };
@@ -239,7 +253,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
   private onTitleDuplicate = () => {
     this.setState({
-      isLoading: false,
+      isSaving: false,
       isTitleDuplicateConfirmed: true,
       hasTitleDuplicate: true,
     });
@@ -250,22 +264,23 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   };
 
   private saveSavedObject = async () => {
-    if (this.state.isLoading) {
-      // ignore extra clicks
-      return;
-    }
+    if (this.state.isSaving) return;
 
     this.setState({
-      isLoading: true,
+      isSaving: true,
     });
 
-    await this.props.onSave({
-      newTitle: this.state.title,
-      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
-      isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
-      onTitleDuplicate: this.onTitleDuplicate,
-      newDescription: this.state.visualizationDescription,
-    });
+    try {
+      await this.props.onSave({
+        newTitle: this.state.title,
+        newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
+        isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
+        onTitleDuplicate: this.onTitleDuplicate,
+        newDescription: this.state.visualizationDescription,
+      });
+    } finally {
+      this.setState({ isSaving: false });
+    }
   };
 
   private onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -324,7 +339,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
   };
 
   private renderConfirmButton = () => {
-    const { isLoading } = this.state;
+    const { isSaving } = this.state;
 
     let confirmLabel: string | React.ReactNode = i18n.translate(
       'savedObjects.saveModal.saveButtonLabel',
@@ -341,7 +356,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       <EuiButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
-        isLoading={isLoading}
+        isLoading={isSaving}
         type="submit"
         form={this.formId}
       >
@@ -406,7 +421,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         </EuiFlexItem>
         {this.props.mustCopyOnSaveMessage && (
           <EuiFlexItem css={{ marginLeft: `-${euiThemeVars.euiSize}` }} grow={false}>
-            <EuiIconTip type="iInCircle" content={this.props.mustCopyOnSaveMessage} />
+            <EuiIconTip type="info" content={this.props.mustCopyOnSaveMessage} />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={true} />
@@ -414,3 +429,18 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     );
   };
 }
+
+/**
+ * @deprecated
+ */
+export const SavedObjectSaveModal = SavedObjectSaveModalComponent<void>;
+
+/**
+ * This is a workaround for using this directly with the `showSaveModal` method.
+ *
+ * The `showSaveModal` method wraps and calls these props from outside but this modal
+ * does not require the `SaveResult` to be returned from `onSave`.
+ *
+ * @deprecated
+ */
+export const SavedObjectSaveModalWithSaveResult = SavedObjectSaveModalComponent<SaveResult>;

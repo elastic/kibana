@@ -10,7 +10,6 @@ import { UserAtSpaceScenarios } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -245,6 +244,32 @@ export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProvider
                 message: expectedError,
               });
             }
+          });
+
+          it('rejects when rule_ids exceed maximum allowed size', async () => {
+            const maxSize = 100;
+            const tooManyRuleIds = Array.from({ length: maxSize + 1 }, (_, i) => `rule-${i}`);
+
+            const response = await supertestWithoutAuth
+              .post(
+                `${getUrlPrefix(
+                  apiOptions.spaceId
+                )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
+              )
+              .set('kbn-xsrf', 'foo')
+              .auth(apiOptions.username, apiOptions.password)
+              .send({
+                start: searchStart,
+                end: searchEnd,
+                rule_ids: tooManyRuleIds,
+              });
+
+            expect(response.statusCode).to.eql(400);
+            expect(response.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message: `[request body.rule_ids]: array size is [101], but cannot be greater than [${maxSize}]`,
+            });
           });
         });
       });

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -83,42 +84,6 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.indices.reindexPausedText',
     {
       defaultMessage: 'Reindex paused',
-    }
-  ),
-  updateCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.updateCompleteText',
-    {
-      defaultMessage: 'Update complete',
-    }
-  ),
-  updateInProgressText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.updateInProgressText',
-    {
-      defaultMessage: 'Update in progress…',
-    }
-  ),
-  unfreezeCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeCompleteText',
-    {
-      defaultMessage: 'Index is unfrozen',
-    }
-  ),
-  unfreezeInProgressText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.unfreezeInProgressText',
-    {
-      defaultMessage: 'Unfreezing index…',
-    }
-  ),
-  readOnlyCompleteText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyCompleteText',
-    {
-      defaultMessage: 'Index is set to read-only',
-    }
-  ),
-  readOnlyInProgressText: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.indices.readOnlyInProgressText',
-    {
-      defaultMessage: 'Setting index to read-only…',
     }
   ),
   recommendedActionTexts: {
@@ -207,7 +172,10 @@ const i18nTexts = {
 export const ReindexResolutionCell: React.FunctionComponent<{
   deprecation: EnrichedDeprecationInfo;
 }> = ({ deprecation }) => {
-  const { reindexState, updateIndexState } = useIndexContext();
+  const {
+    reindexState,
+    updateIndexState: { updateAction, status: updateIndexStateStatus },
+  } = useIndexContext();
   const { correctiveAction } = deprecation;
 
   const hasExistingAliases = reindexState.meta.aliases.length > 0;
@@ -257,13 +225,6 @@ export const ReindexResolutionCell: React.FunctionComponent<{
       ? getRecommendedActionForUnfreezeAction()
       : getRecommendedActionForReindexingAction();
 
-  const updateAction =
-    deprecation.correctiveAction?.type === 'unfreeze'
-      ? 'unfreeze'
-      : deprecation.correctiveAction?.type === 'reindex'
-      ? 'readOnly'
-      : 'update';
-
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -312,7 +273,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
         </EuiFlexGroup>
       );
     case ReindexStatus.failed:
-      if (updateIndexState.status !== 'complete') {
+      if (updateIndexStateStatus !== 'complete') {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -348,8 +309,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
         </EuiFlexGroup>
       );
   }
-
-  switch (updateIndexState.status) {
+  switch (updateIndexStateStatus) {
     case 'inProgress':
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -357,9 +317,11 @@ export const ReindexResolutionCell: React.FunctionComponent<{
             <EuiLoadingSpinner size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <em>{i18nTexts[`${updateAction}InProgressText`]}</em>
-            </EuiText>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.indices.updateInProgressText"
+              defaultMessage="{updateAction, select, readonly {Setting index to read-only} unfreeze {Unfreezing index} delete {Deleting index} other {Updating index}}..."
+              values={{ updateAction }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -370,7 +332,30 @@ export const ReindexResolutionCell: React.FunctionComponent<{
             <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts[`${updateAction}CompleteText`]}</EuiText>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.esDeprecations.indices.updateCompletedText"
+                defaultMessage="Index is {updateAction, select, readonly {set to read-only} unfreeze {unfrozen} delete {deleted} other {updated}}"
+                values={{ updateAction }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    case 'failed':
+      return (
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="warningFilled" color="danger" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.esDeprecations.indices.updateFailedText"
+                defaultMessage="Failed to {updateAction, select, readonly {set index to read-only} unfreeze {unfreeze index} delete {delete index} other {update index}}"
+                values={{ updateAction }}
+              />
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
@@ -386,7 +371,7 @@ export const ReindexResolutionCell: React.FunctionComponent<{
             content={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
           >
             <EuiIcon
-              type="iInCircle"
+              type="info"
               aria-label={i18nTexts.recommendedActionTexts[recommendedAction].tooltipText}
               size="s"
             />

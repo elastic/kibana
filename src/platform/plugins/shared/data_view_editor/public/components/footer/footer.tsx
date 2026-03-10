@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import {
   EuiFlyoutFooter,
@@ -18,7 +17,6 @@ import {
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 export enum SubmittingType {
   savingAsAdHoc = 'savingAsAdHoc',
@@ -78,7 +76,7 @@ export const Footer = ({
   };
 
   return (
-    <EuiFlyoutFooter css={styles.footer}>
+    <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -92,7 +90,7 @@ export const Footer = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center" wrap>
             {allowAdHoc && (
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -136,11 +134,4 @@ export const Footer = ({
       </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
-};
-
-const styles = {
-  footer: css({
-    marginLeft: -euiThemeVars.euiSizeL,
-    marginRight: -euiThemeVars.euiSizeL,
-  }),
 };

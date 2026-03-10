@@ -7,6 +7,8 @@
 
 import { DocumentationProduct } from '@kbn/product-doc-common';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server';
 import type { FunctionRegistrationParameters } from '.';
 
 export const RETRIEVE_DOCUMENTATION_NAME = 'retrieve_elastic_doc';
@@ -16,7 +18,11 @@ export async function registerDocumentationFunction({
   resources,
   pluginsStart: { llmTasks },
 }: FunctionRegistrationParameters) {
-  const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
+  const esClient = (await resources.context.core).elasticsearch.client;
+  const inferenceId =
+    (await getInferenceIdFromWriteIndex(esClient)) ?? defaultInferenceEndpoints.ELSER;
+  const isProductDocAvailable =
+    (await llmTasks.retrieveDocumentationAvailable({ inferenceId })) ?? false;
 
   if (isProductDocAvailable) {
     functions.registerInstruction(({ availableFunctionNames }) => {
@@ -41,6 +47,7 @@ export async function registerDocumentationFunction({
         properties: {
           query: {
             description: `The query to use to retrieve documentation
+            Always write the query in English, as the documentation is available only in English.
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Lens?"`,
@@ -70,6 +77,7 @@ export async function registerDocumentationFunction({
         connectorId,
         request: resources.request,
         functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
+        inferenceId,
       });
 
       return {

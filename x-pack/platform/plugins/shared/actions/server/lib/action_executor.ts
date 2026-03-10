@@ -23,7 +23,10 @@ import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/se
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
-import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
+import {
+  getGenAiTokenTracking,
+  shouldTrackGenAiToken,
+} from './token_tracking/gen_ai_token_tracking';
 import {
   validateConfig,
   validateConnector,
@@ -556,7 +559,13 @@ export class ActionExecutor {
           event.user = event.user || {};
           event.user.name = currentUser?.username;
           event.user.id = currentUser?.profile_uid;
-          event.kibana!.user_api_key = currentUser?.api_key;
+          if (currentUser?.api_key) {
+            event.kibana!.user_api_key = {
+              name: currentUser.api_key?.name,
+              id: currentUser.api_key?.id,
+            };
+          }
+
           set(
             event,
             'kibana.action.execution.usage.request_body_bytes',

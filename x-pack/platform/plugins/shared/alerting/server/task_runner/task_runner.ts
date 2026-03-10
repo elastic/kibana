@@ -76,7 +76,6 @@ import {
   clearExpiredSnoozes,
 } from './lib';
 import { isClusterBlockError } from '../lib/error_with_type';
-import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -449,11 +448,6 @@ export class TaskRunner<
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
       summaryActions: actionSchedulerResult.throttledSummaryActions,
-      trackedExecutions: getTrackedExecutions({
-        trackedExecutions: alertsClient.getTrackedExecutions(),
-        currentExecution: this.executionId,
-        limit: flappingSettings.lookBackWindow,
-      }),
     };
   }
 
@@ -681,6 +675,7 @@ export class TaskRunner<
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
     let schedule: Result<IntervalSchedule, Error>;
+    let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
 
@@ -692,6 +687,7 @@ export class TaskRunner<
     } catch (err) {
       stateWithMetrics = asErr(err);
       schedule = asErr(err);
+      shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
@@ -792,6 +788,8 @@ export class TaskRunner<
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
       ...getTaskRunError(stateWithMetrics),
+      // added this way so we don't add shouldDisableTask: false explicitly
+      ...(shouldDisableTask ? { shouldDisableTask } : {}),
     };
   }
 

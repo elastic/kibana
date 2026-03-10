@@ -14,13 +14,13 @@ import {
   PREVALENCE_DETAILS_TABLE_DOC_COUNT_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_FIELD_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_HOST_PREVALENCE_CELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_TEST_ID,
-  PREVALENCE_DETAILS_UPSELL_TEST_ID,
+  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_USER_PREVALENCE_CELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_PREVIEW_LINK_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
-  PREVALENCE_DETAILS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  PREVALENCE_DETAILS_UPSELL_TEST_ID,
 } from './test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { TestProviders } from '../../../../common/mock';
@@ -38,11 +38,13 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/components/user_privileges');
 
 const mockedTelemetry = createTelemetryServiceMock();
+const mockStorage = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
   return {
     useKibana: () => ({
       services: {
         telemetry: mockedTelemetry,
+        storage: { get: mockStorage },
       },
     }),
   };
@@ -402,5 +404,27 @@ describe('PrevalenceDetails', () => {
 
     const { getByText } = renderPrevalenceDetails();
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+  });
+
+  it('should use default interval values to fetch prevalence data', () => {
+    renderPrevalenceDetails();
+
+    expect(usePrevalence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interval: { from: 'now-30d', to: 'now' },
+      })
+    );
+  });
+
+  it('should use values from local storage to fetch prevalence data', () => {
+    mockStorage.mockReturnValue({ start: 'now-7d', end: 'now-3d' });
+
+    renderPrevalenceDetails();
+
+    expect(usePrevalence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interval: { from: 'now-7d', to: 'now-3d' },
+      })
+    );
   });
 });

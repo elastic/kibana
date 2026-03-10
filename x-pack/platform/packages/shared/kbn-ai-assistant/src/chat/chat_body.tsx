@@ -40,6 +40,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
@@ -56,7 +57,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
-import { useConversationContextMenu } from '../hooks';
+import { useConversationContextMenu, useScopes } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -128,6 +129,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
+  navigateToConnectorsManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -144,6 +146,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
+  navigateToConnectorsManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -160,6 +163,8 @@ export function ChatBody({
     aiAssistantSimulatedFunctionCalling,
     false
   );
+
+  const scopes = useScopes();
 
   const {
     conversation,
@@ -241,11 +246,15 @@ export function ChatBody({
         conversation: { id, last_updated: lastUpdated },
       };
 
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
+
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.ChatFeedback,
         payload: {
           feedback,
           conversation: conversationWithoutMessagesAndTitle,
+          connector,
+          scopes,
         },
       });
     }
@@ -292,24 +301,35 @@ export function ChatBody({
     ({ message, payload }: { message: Message; payload: ChatActionClickPayload }) => {
       setStickToBottom(true);
       switch (payload.type) {
-        case ChatActionClickType.executeEsqlQuery:
+        case ChatActionClickType.executeEsqlQuery: {
+          const now = new Date().toISOString();
           next(
-            messages.concat({
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'execute_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                  }),
-                  trigger: MessageRole.User,
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Display results for the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
-            })
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'execute_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
           );
           break;
+        }
 
         case ChatActionClickType.updateVisualization:
           const visualizeQueryResponse = message;
@@ -333,25 +353,36 @@ export function ChatBody({
             })
           );
           break;
-        case ChatActionClickType.visualizeEsqlQuery:
+        case ChatActionClickType.visualizeEsqlQuery: {
+          const now = new Date().toISOString();
           next(
-            messages.concat({
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'visualize_query',
-                  arguments: JSON.stringify({
-                    query: payload.query,
-                    intention: VisualizeESQLUserIntention.visualizeAuto,
-                  }),
-                  trigger: MessageRole.User,
+            messages.concat([
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.User,
+                  content: `Visualize the following ES|QL query:\n\n\`\`\`esql\n${payload.query}\n\`\`\``,
                 },
               },
-            })
+              {
+                '@timestamp': now,
+                message: {
+                  role: MessageRole.Assistant,
+                  content: '',
+                  function_call: {
+                    name: 'visualize_query',
+                    arguments: JSON.stringify({
+                      query: payload.query,
+                      intention: VisualizeESQLUserIntention.visualizeAuto,
+                    }),
+                    trigger: MessageRole.User,
+                  },
+                },
+              },
+            ])
           );
           break;
+        }
       }
     },
     [messages, next]
@@ -688,6 +719,7 @@ export function ChatBody({
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
           isConversationApp={!showLinkToConversationsApp}
+          navigateToConnectorsManagementApp={navigateToConnectorsManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

@@ -21,6 +21,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ImageBlock } from '@aws-sdk/client-bedrock-runtime';
 import { isDefined } from '@kbn/ml-is-defined';
 import type { DocumentType as JsonMember } from '@smithy/types';
+import type { Readable } from 'stream';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
@@ -61,7 +62,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const subActionParams = {
       system: systemMessage,
       messages: converseMessages,
-      tools: bedRockTools,
+      tools: bedRockTools?.length ? bedRockTools : undefined,
       toolChoice: toolChoiceToConverse(toolChoice),
       temperature,
       model: modelName,
@@ -69,11 +70,13 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       signal: abortSignal,
     };
 
-    return defer(() => {
-      return executor.invoke({
+    return defer(async () => {
+      const res = await executor.invoke({
         subAction: 'converseStream',
         subActionParams,
       });
+      const result = res.data as { stream: Readable };
+      return { ...res, data: result?.stream };
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
       tap((eventData) => {
@@ -104,7 +107,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  return messages.map<BedRockMessage>((message) => {
+  const converseMessages: BedRockMessage[] = messages.map((message): BedRockMessage => {
     switch (message.role) {
       case MessageRole.User:
         return {
@@ -174,4 +177,25 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
         };
     }
   });
+
+  // Combine consecutive user tool result messages into a single message. This format is required by Bedrock.
+  const combinedConverseMessages = converseMessages.reduce<BedRockMessage[]>((acc, curr) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (
+      lastMessage &&
+      lastMessage.role === 'user' &&
+      lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
+      curr.role === 'user' &&
+      curr.rawContent?.some((c) => 'toolResult' in c)
+    ) {
+      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
+    } else {
+      acc.push(curr);
+    }
+
+    return acc;
+  }, []);
+
+  return combinedConverseMessages;
 };

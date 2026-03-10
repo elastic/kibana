@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryAlert, transformInternalReplacements } from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
@@ -48,7 +48,7 @@ interface ConnectorNamesAggregation {
   }>;
 }
 
-const sumBucketAggregationHasValue = (aggregation: unknown): aggregation is HasNumericValue =>
+const aggregationHasValue = (aggregation: unknown): aggregation is HasNumericValue =>
   typeof aggregation === 'object' &&
   aggregation !== null &&
   'value' in aggregation &&
@@ -105,10 +105,7 @@ export const transformSearchResponseToAlerts = ({
         ? source[ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]
         : undefined,
       replacements: Array.isArray(source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS])
-        ? source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS]?.reduce<Record<string, string>>(
-            (acc, r) => (r.uuid != null && r.value != null ? { ...acc, [r.uuid]: r.value } : acc),
-            {}
-          )
+        ? transformInternalReplacements(source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS])
         : undefined,
       riskScore: source[ALERT_RISK_SCORE],
       summaryMarkdown: source[ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN] ?? '', // required field
@@ -126,7 +123,7 @@ export const transformSearchResponseToAlerts = ({
 
   const uniqueAlertIdsCountAggregation = response.aggregations?.unique_alert_ids_count;
 
-  const uniqueAlertIdsCount = sumBucketAggregationHasValue(uniqueAlertIdsCountAggregation)
+  const uniqueAlertIdsCount = aggregationHasValue(uniqueAlertIdsCountAggregation)
     ? uniqueAlertIdsCountAggregation.value
     : 0;
 

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -29,7 +29,12 @@
     "@kbn/core-plugins-server",
     "@kbn/product-doc-base-plugin",
     "@kbn/ml-plugin",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
+    "@kbn/inference-common",
+    "@kbn/licensing-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/ai-assistant-default-llm-setting",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

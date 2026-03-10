@@ -104,6 +104,11 @@ export const MigrationPanelTitle = React.memo<MigrationPanelTitleProps>(({ migra
             onCancel={cancelEdit}
             onSave={saveName}
             startWithEditOpen
+            editModeProps={{
+              inputProps: {
+                autoFocus: true,
+              },
+            }}
           />
         </EuiFlexItem>
       ) : (

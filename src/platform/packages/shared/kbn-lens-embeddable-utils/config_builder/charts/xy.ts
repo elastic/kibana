@@ -19,14 +19,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { XYByValueAnnotationLayerConfig } from '@kbn/lens-plugin/public/visualizations/xy/types';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
-import {
-  addLayerColumn,
-  buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
-  mapToFormula,
-} from '../utils';
-import {
+import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
+import type {
   BuildDependencies,
   LensAnnotationLayer,
   LensAttributes,
@@ -232,7 +226,7 @@ export async function buildXY(
     getValueColumns,
     dataViewsAPI
   );
-  const references = buildReferences(dataviews);
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
 
   return {
     title: config.title,
@@ -240,12 +234,11 @@ export async function buildXY(
     references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

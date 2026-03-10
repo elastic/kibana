@@ -223,6 +223,7 @@ export class PerAlertActionScheduler<
         actionParams: action.params,
         flapping: alert.getFlapping(),
         ruleUrl: ruleUrl?.absoluteUrl,
+        consecutiveMatches: alert.getActiveCount(),
       };
 
       if (alert.isAlertAsData()) {
@@ -394,7 +395,7 @@ export class PerAlertActionScheduler<
     const alertMaintenanceWindowIds = alert.getMaintenanceWindowIds();
     if (alertMaintenanceWindowIds.length !== 0) {
       this.context.logger.debug(
-        `no scheduling of summary actions "${action.id}" for rule "${
+        `no scheduling of actions "${action.id}" for alert "${alert.getId()}" from rule "${
           this.context.rule.id
         }": has active maintenance windows ${alertMaintenanceWindowIds.join(', ')}.`
       );

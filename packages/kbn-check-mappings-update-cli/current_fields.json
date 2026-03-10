@@ -753,6 +753,13 @@
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],
+  "intercept_interaction_record": [],
+  "intercept_trigger_record": [
+    "firstRegisteredAt",
+    "installedOn",
+    "recurrent",
+    "triggerAfter"
+  ],
   "inventory-view": [],
   "kql-telemetry": [],
   "legacy-url-alias": [
@@ -885,6 +892,7 @@
   ],
   "product-doc-install-status": [
     "index_name",
+    "inference_id",
     "installation_status",
     "last_installation_date",
     "product_name",
@@ -940,7 +948,11 @@
     "provider"
   ],
   "security-rule": [
+    "name",
+    "risk_score",
     "rule_id",
+    "severity",
+    "tags",
     "version"
   ],
   "security-solution-signals-migration": [

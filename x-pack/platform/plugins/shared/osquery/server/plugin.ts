@@ -112,7 +112,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       ...plugins.fleet,
       ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
       logger: this.logger,
       registerIngestCallback,
@@ -164,6 +163,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     saved_objects: data.saved_objects.map((pack) => ({
                       ...pack.attributes,
                       saved_object_id: pack.id,
+                      references: pack.references,
                     })),
                   }));
 

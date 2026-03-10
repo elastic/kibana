@@ -6,7 +6,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
-import set from 'set-value';
+import { set } from '@kbn/safer-lodash-set';
 
 import { wrapHits, type GenericBulkCreateResponse, bulkCreate } from '../factories';
 import type { Anomaly } from '../../../machine_learning';

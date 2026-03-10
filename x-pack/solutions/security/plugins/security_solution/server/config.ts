@@ -188,6 +188,22 @@ export const configSchema = schema.object({
       elserInferenceId: schema.maybe(schema.string()),
     })
   ),
+  cdn: schema.maybe(
+    schema.object({
+      url: schema.maybe(schema.string()),
+      // PEM-encoded public key used to verify the global artifact manifest signature.
+      publicKey: schema.maybe(schema.string()),
+    })
+  ),
+  telemetry: schema.maybe(
+    schema.object({
+      queryConfig: schema.object({
+        pageSize: schema.maybe(schema.number()),
+        maxResponseSize: schema.maybe(schema.number()),
+        maxCompressedResponseSize: schema.maybe(schema.number()),
+      }),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

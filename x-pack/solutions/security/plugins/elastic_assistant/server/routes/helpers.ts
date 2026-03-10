@@ -105,11 +105,13 @@ export const getPluginNameFromRequest = ({
 export const getMessageFromRawResponse = ({
   rawContent,
   metadata,
+  refusal,
   isError,
   traceData,
 }: {
   rawContent?: string;
   metadata?: MessageMetadata;
+  refusal?: string;
   traceData?: TraceData;
   isError?: boolean;
 }): Message => {
@@ -118,6 +120,7 @@ export const getMessageFromRawResponse = ({
     return {
       role: 'assistant',
       content: rawContent,
+      ...(refusal ? { refusal } : {}),
       timestamp: dateTimeString,
       metadata,
       isError,
@@ -151,6 +154,27 @@ const extractPromptFromESResult = (result: FindResponse<EsPromptsSchema>): strin
   return undefined;
 };
 
+export interface GetSystemPromptFromPromptIdParams {
+  promptId: string;
+  promptsDataClient: AIAssistantDataClient;
+}
+
+/**
+ * Fetches a system prompt by saved object id, when a request passes `promptId`.
+ */
+export const getSystemPromptFromPromptId = async ({
+  promptId,
+  promptsDataClient,
+}: GetSystemPromptFromPromptIdParams): Promise<string | undefined> => {
+  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
+    perPage: 1,
+    page: 1,
+    filter: `_id: "${promptId}"`,
+  });
+
+  return extractPromptFromESResult(result);
+};
+
 export const getSystemPromptFromUserConversation = async ({
   conversationsDataClient,
   conversationId,
@@ -164,17 +188,17 @@ export const getSystemPromptFromUserConversation = async ({
   if (!currentSystemPromptId) {
     return undefined;
   }
-  const result = await promptsDataClient.findDocuments<EsPromptsSchema>({
-    perPage: 1,
-    page: 1,
-    filter: `_id: "${currentSystemPromptId}"`,
+
+  return getSystemPromptFromPromptId({
+    promptId: currentSystemPromptId,
+    promptsDataClient,
   });
-  return extractPromptFromESResult(result);
 };
 
 export interface AppendAssistantMessageToConversationParams {
   conversationsDataClient: AIAssistantConversationsDataClient;
   messageContent: string;
+  messageRefusal?: string;
   replacements: Replacements;
   conversationId: string;
   contentReferences: ContentReferences;
@@ -184,6 +208,7 @@ export interface AppendAssistantMessageToConversationParams {
 export const appendAssistantMessageToConversation = async ({
   conversationsDataClient,
   messageContent,
+  messageRefusal,
   replacements,
   conversationId,
   contentReferences,
@@ -207,6 +232,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
+        refusal: messageRefusal,
         metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
@@ -235,7 +261,7 @@ export interface LangChainExecuteParams {
   contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
-  inferenceChatModelEnabled?: boolean;
+  inferenceChatModelDisabled?: boolean;
   isOssModel?: boolean;
   conversationId?: string;
   context: AwaitedProperties<
@@ -248,7 +274,8 @@ export interface LangChainExecuteParams {
   onLlmResponse?: (
     content: string,
     traceData?: Message['traceData'],
-    isError?: boolean
+    isError?: boolean,
+    refusal?: string
   ) => Promise<void>;
   response: KibanaResponseFactory;
   responseLanguage?: string;
@@ -266,7 +293,7 @@ export const langChainExecute = async ({
   actionTypeId,
   connectorId,
   contentReferencesStore,
-  inferenceChatModelEnabled,
+  inferenceChatModelDisabled,
   isOssModel,
   context,
   actionsClient,
@@ -293,8 +320,10 @@ export const langChainExecute = async ({
   const assistantContext = context.elasticAssistant;
   // We don't (yet) support invoking these tools interactively
   const unsupportedTools = new Set(['attack-discovery', DEFEND_INSIGHTS_TOOL_ID]);
+  const pluginNames = Array.from(new Set([pluginName, DEFAULT_PLUGIN_NAME]));
+
   const assistantTools = assistantContext
-    .getRegisteredTools(pluginName)
+    .getRegisteredTools(pluginNames)
     .filter((tool) => !unsupportedTools.has(tool.id));
 
   // get a scoped esClient for assistant memory
@@ -333,7 +362,7 @@ export const langChainExecute = async ({
     esClient,
     llmTasks,
     inference,
-    inferenceChatModelEnabled,
+    inferenceChatModelDisabled,
     isStream,
     llmType: getLlmType(actionTypeId),
     isOssModel,

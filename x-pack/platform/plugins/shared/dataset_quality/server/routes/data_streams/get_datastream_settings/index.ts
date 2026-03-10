@@ -20,7 +20,7 @@ export async function getDataStreamSettings({
   const [createdOn, [dataStreamInfo], datasetUserPrivileges] = await Promise.all([
     getDataStreamCreatedOn(esClient, dataStream),
     dataStreamService.getMatchingDataStreams(esClient, dataStream),
-    datasetQualityPrivileges.getDatasetPrivileges(esClient, dataStream),
+    datasetQualityPrivileges.getDatasetPrivileges(esClient, [dataStream]),
   ]);
 
   const integration = dataStreamInfo?._meta?.package?.name;

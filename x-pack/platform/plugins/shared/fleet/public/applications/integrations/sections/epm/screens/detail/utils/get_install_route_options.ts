@@ -12,6 +12,7 @@ import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, pagePathGetters } from '../../../../
 const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
+  'cloud_asset_inventory',
   'cloud_defend',
   'dga',
   'fleet_server',
@@ -19,6 +20,7 @@ const EXCLUDED_PACKAGES = [
   'problemchild',
   'security_detection_engine',
   'synthetics',
+  'agentless_hello_world',
 ];
 
 interface GetInstallPkgRouteOptionsParams {

@@ -142,6 +142,37 @@ export class ImportResolver {
       return this.adaptReq('src/core/server', dirname);
     }
 
+    if (req.startsWith('@modelcontextprotocol/sdk')) {
+      const relPath = req.split('@modelcontextprotocol/sdk')[1];
+      return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
+    }
+
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    // We should be able to remove this once we support cjs/esm interop.
+    if (req.startsWith('@elastic/opentelemetry-node/sdk')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
+    }
+
+    if (req.startsWith('@typescript-eslint/parser')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
+    }
+
+    // zod migration from v3 to v4
+    if (req.startsWith('zod/v4')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
+    }
+    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
+    }
+
+    if (req.startsWith('vega-lite')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-lite/build`);
+    }
+
+    if (req.startsWith('vega-tooltip')) {
+      return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||
