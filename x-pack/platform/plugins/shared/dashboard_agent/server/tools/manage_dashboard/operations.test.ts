@@ -270,8 +270,13 @@ describe('executeDashboardOperations', () => {
         },
       ],
       logger,
-      resolvePanelsFromAttachments: async () => ({
-        panels: [createLensPanel('section-routed-panel')],
+      resolvePanelsFromAttachments: async (attachmentInputs) => ({
+        panels: [
+          {
+            ...createLensPanel('section-routed-panel'),
+            grid: attachmentInputs[0].grid,
+          },
+        ],
         failures: [],
       }),
       onPanelsAdded: () => {},
