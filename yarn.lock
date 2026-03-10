@@ -2462,10 +2462,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@113.2.0":
-  version "113.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-113.2.0.tgz#2363d75ee6ad3a897e6d97ca93ac7351e16c30b6"
-  integrity sha512-XAN4WbZ28TmLcSdlmI1iq5gWa2n9xQCQFg2Ir1V2jPb32PmBESTS8Fz0FKbSbbAJbVAg+dzmopVbltHgzPZ5lw==
+"@elastic/eui@113.2.1":
+  version "113.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-113.2.1.tgz#a95695935e0167ca47d7d944154814571a00dfcc"
+  integrity sha512-8J1boGQJdc3vKfgfKU7LkPjJQJMiQAbYDEhHosXTh790ZGo8PoQWlTuVg9sZA0mVtYwzr3U1Vz9J3aXSb6o7zg==
   dependencies:
     "@elastic/eui-theme-common" "8.1.0"
     "@elastic/prismjs-esql" "^1.1.2"
