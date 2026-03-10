@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
-import { createQueryStream, deleteQueryStream } from '../../fixtures/query_stream_helpers';
+import {
+  createQueryStream,
+  createRootStreamViews,
+  deleteQueryStream,
+  deleteRootStreamViews,
+  disableQueryStreams,
+  enableQueryStreams,
+} from '../../fixtures/query_stream_helpers';
 
 const QUERY_STREAM_NAME = 'logs.ecs.test';
 const ESQL_VIEW_NAME = `$.${QUERY_STREAM_NAME}`;
@@ -18,9 +24,8 @@ const INITIAL_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
     await browserAuth.loginAsAdmin();
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
-    });
+    await enableQueryStreams(kbnClient);
+    await createRootStreamViews(esClient);
 
     await createQueryStream(
       esClient,
@@ -35,9 +40,8 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
 
   test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
     await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-    });
+    await deleteRootStreamViews(esClient);
+    await disableQueryStreams(kbnClient);
   });
 
   test("should support editing an existing query stream's ES|QL query from the partitioning tab", async ({
@@ -52,7 +56,7 @@ test.describe('Query streams - Edit query stream', { tag: tags.stateful.classic 
     await pageObjects.streams.clickQueryStreamDetailsEditQueryButton();
     const editorValue = await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
     expect(editorValue).toBe(INITIAL_ESQL_QUERY);
-    const UPDATED_ESQL_QUERY = 'FROM logs | WHERE host.name == "host-2"';
+    const UPDATED_ESQL_QUERY = 'FROM $.logs.ecs | WHERE host.name == "host-2"';
     await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
     await pageObjects.streams.clickQueryStreamFlyoutSaveButton();
     await expect(pageObjects.streams.queryStreamUpdatedSuccessToast).toBeVisible();

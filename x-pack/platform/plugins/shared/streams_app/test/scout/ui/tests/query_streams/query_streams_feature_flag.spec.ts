@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
+import { disableQueryStreams, enableQueryStreams } from '../../fixtures/query_stream_helpers';
 
 test.describe('Query streams - feature flag gating', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -17,9 +17,7 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
   });
 
   test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-    });
+    await disableQueryStreams(kbnClient);
   });
 
   test('should properly hide query streams UI when feature flag is off', async ({
@@ -27,9 +25,7 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
     pageObjects,
     kbnClient,
   }) => {
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-    });
+    await disableQueryStreams(kbnClient);
     await page.reload();
     await expect(pageObjects.streams.createQueryStreamButton).toBeHidden();
 
@@ -42,9 +38,7 @@ test.describe('Query streams - feature flag gating', { tag: tags.stateful.classi
     pageObjects,
     kbnClient,
   }) => {
-    await kbnClient.uiSettings.update({
-      [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
-    });
+    await enableQueryStreams(kbnClient);
     await page.reload();
     await expect(pageObjects.streams.createQueryStreamButton).toBeVisible();
 

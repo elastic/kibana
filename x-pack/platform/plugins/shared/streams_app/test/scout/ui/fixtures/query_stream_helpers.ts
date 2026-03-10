@@ -4,7 +4,54 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+} from '@kbn/management-settings-ids';
 import type { KbnClient, EsClient, ApiServicesFixture } from '@kbn/scout';
+
+const ROOT_STREAMS = ['logs.ecs', 'logs.otel'];
+
+export const createRootStreamViews = async (esClient: EsClient) => {
+  for (const stream of ROOT_STREAMS) {
+    await esClient.transport.request({
+      method: 'PUT',
+      path: `/_query/view/${encodeURIComponent(`$.${stream}`)}`,
+      body: { query: `FROM ${stream}` },
+    });
+  }
+};
+
+export const deleteRootStreamViews = async (esClient: EsClient) => {
+  for (const stream of ROOT_STREAMS) {
+    try {
+      await esClient.transport.request({
+        method: 'DELETE',
+        path: `/_query/view/${encodeURIComponent(`$.${stream}`)}`,
+      });
+    } catch {
+      // View may not exist
+    }
+  }
+};
+
+export const enableQueryStreams = async (kbnClient: KbnClient) => {
+  await kbnClient.uiSettings.update({
+    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+  });
+  await kbnClient.uiSettings.update({
+    [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+  });
+};
+
+export const disableQueryStreams = async (kbnClient: KbnClient) => {
+  await kbnClient.uiSettings.update({
+    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+  });
+  await kbnClient.uiSettings.update({
+    [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+  });
+};
 
 export const createQueryStream = async (
   esClient: EsClient,
