@@ -31,7 +31,7 @@ export const getConnectorById = async ({
 
   if (!match) {
     throw createInferenceRequestError(
-      `No connector or inference endpoint found for id '${connectorId}'`,
+      `No connector or inference endpoint found for ID '${connectorId}'`,
       404
     );
   }

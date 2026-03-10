@@ -31,7 +31,13 @@ export default function (providerContext: FtrProviderContext) {
           user: { username: 'elastic', password: 'elastic' } as User,
         },
       });
-      expect(response).to.be.an(BadRequestError);
+      if (response instanceof BadRequestError) {
+        expect(response.message).to.be(
+          "No connector or inference endpoint found for ID 'preconfigured-dummy'"
+        );
+      } else {
+        expect().fail('Expected BadRequestError');
+      }
     });
   });
 }

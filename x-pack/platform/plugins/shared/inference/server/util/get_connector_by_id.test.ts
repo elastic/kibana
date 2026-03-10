@@ -92,7 +92,7 @@ describe('getConnectorById', () => {
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
-    ).rejects.toThrow("No connector or inference endpoint found for id 'my-connector-id'");
+    ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
   });
 
   it('throws if the connector list is empty', async () => {
@@ -100,6 +100,6 @@ describe('getConnectorById', () => {
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })
-    ).rejects.toThrow("No connector or inference endpoint found for id 'my-connector-id'");
+    ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
   });
 });
