@@ -38,7 +38,7 @@ export const ExternalLinkOptionsEditor = ({ options, onOptionChange }: Props) =>
         <EuiSwitch
           compressed
           id="encodeUrl"
-          name="encodeUrl"
+          name="encode_url"
           label={
             <>
               {i18n.translate('links.externalUrl.encodeUrl', {
