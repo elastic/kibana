@@ -32,7 +32,7 @@ export function savedObjectToItem(
   const { references, attributes, ...rest } = savedObject;
 
   const links = injectReferences(
-    transformOrderedLinks<StoredLink[]>(attributes.links ?? []),
+    transformLegacyLinks<StoredLink[]>(attributes.links ?? []),
     savedObject.references
   );
 
@@ -56,7 +56,7 @@ export function itemToAttributes(state: LinksState): {
   attributes: StoredLinksState;
   references: Reference[];
 } {
-  const transformedLinks = transformOrderedLinks<Link[]>(state.links ?? []);
+  const transformedLinks = transformLegacyLinks<Link[]>(state.links ?? []);
   const { links, references } = extractReferences(transformedLinks ?? []);
   return {
     attributes: {
@@ -69,11 +69,11 @@ export function itemToAttributes(state: LinksState): {
 
 // 9.3.0 state stored links with an `order` property instead of deriving their
 // order from their array position
-const transformOrderedLinks = <T extends Link[] | StoredLink[]>(
-  links: Array<T[number] & { order?: number }>
+const transformLegacyLinks = <T extends Link[] | StoredLink[]>(
+  links: Array<T[number] & { order?: number; id?: string }>
 ) =>
   links
     .sort((linkA, linkB) => {
       return (linkA.order ?? 0) - (linkB.order ?? 0);
     })
-    .map(({ order, ...link }) => link) as T;
+    .map(({ order, id, ...link }) => link) as T;

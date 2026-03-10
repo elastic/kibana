@@ -102,7 +102,7 @@ export const LinksEditor = ({
       if (source && destination) {
         const newList = euiDragDropReorder(orderedLinks, source.index, destination.index).map(
           (link, i) => {
-            return { ...link, order: i };
+            return link;
           }
         );
         setOrderedLinks(newList);
