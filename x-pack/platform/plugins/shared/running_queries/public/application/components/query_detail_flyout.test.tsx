@@ -26,6 +26,7 @@ const createQuery = (overrides: Partial<RunningQuery> = {}): RunningQuery => ({
   queryType: 'DSL',
   source: 'Discover',
   startTime: Date.now() - 60_000,
+  runningTimeMs: 60_000,
   indices: 1,
   query: '{"query":{"match_all":{}}}',
   cancellable: true,
