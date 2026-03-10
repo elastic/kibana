@@ -13,17 +13,22 @@ export function transformPanelReferencesOut(
   panelReferences: SavedObjectReference[],
   panelRefName?: string
 ) {
-  // Removes the link number prefix added by the expression service
-  const basePanelRefName = panelRefName?.replace(/l\d+_/, '');
-  return basePanelRefName
+  return panelRefName
     ? panelReferences.map((ref) => {
-        return ref.name.includes(basePanelRefName) && BY_REF_TYPES.includes(ref.type)
-          ? {
-              ...ref,
-              // Embeddable transforms for BY_REF_TYPES embeddable types
-              // are looking for by-reference reference with name 'savedObjectRef'
-              name: 'savedObjectRef',
-            }
+        // Removes the link number prefix added by the expression service
+        const baseRefName = ref.name.replace(/l\d+_/, '');
+        return baseRefName === panelRefName
+          ? BY_REF_TYPES.includes(ref.type)
+            ? {
+                ...ref,
+                // Embeddable transforms for BY_REF_TYPES embeddable types
+                // are looking for by-reference reference with name 'savedObjectRef'
+                name: 'savedObjectRef',
+              }
+            : {
+                ...ref,
+                name: baseRefName,
+              }
           : ref;
       })
     : panelReferences;

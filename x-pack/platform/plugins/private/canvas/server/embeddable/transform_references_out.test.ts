@@ -8,11 +8,38 @@
 import { transformPanelReferencesOut } from './transform_references_out';
 
 describe('transformPanelReferencesOut', () => {
-  it('does not transform panel references out for non-embeddable functions', () => {
+  it('removes prefix from panel reference name for all functions', () => {
     const panelReferences = [
-      { id: 'test-id', name: 'valid-reference-name', type: 'valid-reference-type' },
+      { id: 'test-id', name: 'l0_valid-reference-name', type: 'valid-reference-type' },
     ];
-    const transformedPanelReferences = transformPanelReferencesOut(panelReferences);
+    const transformedPanelReferences = transformPanelReferencesOut(
+      panelReferences,
+      'valid-reference-name'
+    );
+    expect(transformedPanelReferences).toEqual([
+      { id: 'test-id', name: 'valid-reference-name', type: 'valid-reference-type' },
+    ]);
+
+    const panelReferences2 = [
+      { id: 'test-id', name: 'l100_valid-reference-name', type: 'valid-reference-type' },
+    ];
+    const transformedPanelReferences2 = transformPanelReferencesOut(
+      panelReferences2,
+      'valid-reference-name'
+    );
+    expect(transformedPanelReferences2).toEqual([
+      { id: 'test-id', name: 'valid-reference-name', type: 'valid-reference-type' },
+    ]);
+  });
+
+  it('does not transform panel reference if the panelRefName does not match', () => {
+    const panelReferences = [
+      { id: 'test-id', name: 'l0_valid-reference-name', type: 'valid-reference-type' },
+    ];
+    const transformedPanelReferences = transformPanelReferencesOut(
+      panelReferences,
+      'non-matching-reference-name'
+    );
     expect(transformedPanelReferences).toEqual(panelReferences);
   });
 
