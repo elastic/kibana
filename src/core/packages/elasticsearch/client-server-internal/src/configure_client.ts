@@ -10,7 +10,7 @@
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
-import { metrics, type Meter, ValueType } from '@opentelemetry/api';
+import { metrics, ValueType } from '@opentelemetry/api';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport, type OnRequestHandler } from './create_transport';
@@ -56,9 +56,7 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
-  // Instrument CPS metrics with response status
-  const meter = metrics.getMeter('kibana.elasticsearch.cps');
-  instrumentCpsMetrics({ client, meter });
+  instrumentCpsMetrics({ client });
 
   return client;
 };
@@ -68,7 +66,8 @@ export const configureClient = (
  *
  * Emits metrics after response returns so we can include http_status dimension.
  */
-function instrumentCpsMetrics({ client, meter }: { client: Client; meter: Meter }) {
+function instrumentCpsMetrics({ client }: { client: Client }) {
+  const meter = metrics.getMeter('kibana.elasticsearch.cps');
   const requestCountGlobalCounter = meter.createCounter('request.count', {
     description: 'Total count of CPS-eligible Elasticsearch API requests (global aggregations)',
     unit: 'requests',
