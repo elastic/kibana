@@ -1235,7 +1235,10 @@ export const getSavedObjectTypes = (
             },
           },
           previous_version: { type: 'keyword' },
-          pending_upgrade_review: { type: 'object', enabled: false },
+          pending_upgrade_review: {
+            dynamic: false,
+            properties: {},
+          },
         },
       },
       modelVersions: {
@@ -1292,7 +1295,10 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                pending_upgrade_review: { type: 'object', enabled: false },
+                pending_upgrade_review: {
+                  dynamic: false,
+                  properties: {},
+                },
               },
             },
           ],

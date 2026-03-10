@@ -28,6 +28,7 @@ export default function (providerContext: FtrProviderContext) {
         install_version: '1.0.0',
         install_started_at: new Date().toISOString(),
         install_source: 'registry',
+        verification_status: 'unknown',
       },
       overwrite: true,
     });
