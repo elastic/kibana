@@ -233,6 +233,51 @@ describe('buildScheduledResponsesQuery', () => {
     });
   });
 
+  describe('scheduleIds filter', () => {
+    test('adds terms filter when only scheduleIds is provided', () => {
+      const scheduleIds = ['sched-1', 'sched-2'];
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        scheduleIds,
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ terms: { schedule_id: scheduleIds } });
+    });
+
+    test('adds bool should with pack_id and schedule_id when both packIds and scheduleIds provided', () => {
+      const packIds = ['pack-1'];
+      const scheduleIds = ['sched-1'];
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        packIds,
+        scheduleIds,
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({
+        bool: {
+          should: [{ terms: { pack_id: packIds } }, { terms: { schedule_id: scheduleIds } }],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    test('adds match_none when both packIds and scheduleIds are empty', () => {
+      const result = buildScheduledResponsesQuery({
+        spaceId: defaultSpaceId,
+        packIds: [],
+        scheduleIds: [],
+      });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ match_none: {} });
+    });
+  });
+
   describe('date range filter', () => {
     test('adds timestamp range filter when both startDate and endDate are provided', () => {
       const result = buildScheduledResponsesQuery({

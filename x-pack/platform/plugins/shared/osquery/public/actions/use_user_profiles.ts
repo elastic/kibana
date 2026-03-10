@@ -10,22 +10,31 @@ import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '../common/lib/kibana';
 import type { SearchHit } from '../../common/search_strategy';
+import type { LiveHistoryRow } from '../../common/api/unified_history/types';
 
-export const useBulkGetUserProfiles = (actionItems: SearchHit[]) => {
-  const { userProfile } = useKibana().services;
+type ProfileSource = SearchHit[] | LiveHistoryRow[];
 
-  const uidList = useMemo(() => {
-    const uidSet = new Set<string>();
+const extractUids = (items: ProfileSource): string[] => {
+  const uidSet = new Set<string>();
 
-    for (const item of actionItems) {
+  for (const item of items) {
+    if ('userProfileUid' in item && item.userProfileUid) {
+      uidSet.add(item.userProfileUid);
+    } else if ('fields' in item) {
       const uid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
       if (uid) {
         uidSet.add(uid);
       }
     }
+  }
 
-    return Array.from(uidSet).sort();
-  }, [actionItems]);
+  return Array.from(uidSet).sort();
+};
+
+export const useBulkGetUserProfiles = (actionItems: ProfileSource) => {
+  const { userProfile } = useKibana().services;
+
+  const uidList = useMemo(() => extractUids(actionItems), [actionItems]);
 
   const { data: userProfiles, isLoading } = useQuery<UserProfileWithAvatar[]>(
     ['useBulkGetUserProfiles', ...uidList],
