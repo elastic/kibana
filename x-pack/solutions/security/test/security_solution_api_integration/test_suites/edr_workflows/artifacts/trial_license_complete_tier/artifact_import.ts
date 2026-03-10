@@ -1230,7 +1230,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
             describe('compatibility with artifacts exported before space awareness - when artifacts have no ownerSpaceId', () => {
               if (artifact.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id) {
-                it('should add add global artifact tag to Endpoint exceptions as they have been global', async () => {
+                it('should add global artifact tag to Endpoint exceptions as they have been global', async () => {
                   await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
                     .post(`${EXCEPTION_LIST_URL}/_import`)
                     .set('kbn-xsrf', 'true')
@@ -1250,6 +1250,37 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   const items = await fetchArtifacts(CURRENT_SPACE_ID);
                   expect(items.length).toEqual(1);
                   expect(items[0].tags).toContain(GLOBAL_ARTIFACT_TAG);
+                });
+
+                it('should not add global artifact tag to Endpoint exceptions when namespace is "single"', async () => {
+                  await endpointArtifactTestResources.createList(
+                    ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                  );
+
+                  await endpointOpsAnalystSupertest
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(
+                        artifact.listId,
+                        [
+                          {
+                            item_id: 'imported-artifact',
+                            tags: [],
+                            namespace_type: 'single',
+                          },
+                        ],
+                        'single'
+                      ),
+                      'import_data.ndjson'
+                    )
+                    .expect(200);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID, undefined, 'single');
+                  expect(items.length).toEqual(1);
+                  expect(items[0].tags).toEqual([]);
                 });
               } else {
                 it(`should not add global artifact tag to ${artifact.name}`, async () => {
@@ -1379,38 +1410,88 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
           });
         });
 
-        it('should import endpoint exceptions and add global artifact tag if missing', async () => {
-          await endpointArtifactTestResources.deleteList(
-            ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-          );
+        describe('when importing endpoint exceptions', () => {
+          let fetchArtifacts: ReturnType<typeof getFetchArtifacts>;
 
-          await endpointOpsAnalystSupertest
-            .post(`${EXCEPTION_LIST_URL}/_import`)
-            .set('kbn-xsrf', 'true')
-            .on('error', createSupertestErrorLogger(log))
-            .attach(
-              'file',
-              buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id),
-              'import_exceptions.ndjson'
-            )
-            .expect(200);
+          before(() => {
+            fetchArtifacts = getFetchArtifacts(
+              endpointOpsAnalystSupertest,
+              log,
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+            );
+          });
 
-          const items = await getFetchArtifacts(
-            endpointOpsAnalystSupertest,
-            log,
-            ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-          )(CURRENT_SPACE_ID);
+          beforeEach(async () => {
+            await endpointArtifactTestResources.deleteList(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+            );
 
-          // After import - all items should be returned on a GET `find` request.
-          expect(items.length).toEqual(3);
+            await deleteExceptionList(
+              endpointOpsAnalystSupertest,
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              'single'
+            );
+          });
 
-          for (const endpointException of items) {
-            expect(endpointException.tags).toContain(GLOBAL_ARTIFACT_TAG);
-          }
+          afterEach(async () => {
+            await endpointArtifactTestResources.deleteList(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+            );
 
-          await endpointArtifactTestResources.deleteList(
-            ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-          );
+            await deleteExceptionList(
+              endpointOpsAnalystSupertest,
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              'single'
+            );
+          });
+
+          it('should add global artifact tag if owner space ID is missing', async () => {
+            await endpointOpsAnalystSupertest
+              .post(`${EXCEPTION_LIST_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .attach(
+                'file',
+                buildImportBuffer(ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id, [
+                  { tags: [] },
+                  { tags: [] },
+                ]),
+                'import_exceptions.ndjson'
+              )
+              .expect(200);
+
+            const items = await fetchArtifacts(CURRENT_SPACE_ID);
+
+            expect(items.length).toEqual(2);
+            for (const endpointException of items) {
+              expect(endpointException.tags).toContain(GLOBAL_ARTIFACT_TAG);
+            }
+          });
+
+          it('should not add global artifact tag if namespace is "single"', async () => {
+            await endpointArtifactTestResources.createList(
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+            );
+
+            await endpointOpsAnalystSupertest
+              .post(`${EXCEPTION_LIST_URL}/_import`)
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .attach(
+                'file',
+                buildImportBuffer(
+                  ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+                  [{ namespace_type: 'single' }],
+                  'single'
+                ),
+                'import_exceptions.ndjson'
+              )
+              .expect(200);
+
+            const items = await fetchArtifacts(CURRENT_SPACE_ID, undefined, 'single');
+            expect(items.length).toEqual(1);
+            expect(items[0].tags).not.toContain(GLOBAL_ARTIFACT_TAG);
+          });
         });
       });
     }

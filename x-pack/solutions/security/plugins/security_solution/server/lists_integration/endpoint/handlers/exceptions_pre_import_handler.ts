@@ -203,6 +203,7 @@ const provideSpaceAwarenessCompatibilityForOldEndpointExceptions = (
     if (
       !(item instanceof Error) &&
       item.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id &&
+      item.namespace_type === 'agnostic' &&
       !hasArtifactOwnerSpaceId(item)
     ) {
       item.tags = item.tags ?? [];
