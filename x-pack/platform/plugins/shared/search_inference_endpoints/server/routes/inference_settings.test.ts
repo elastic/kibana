@@ -343,6 +343,38 @@ describe('Inference Settings API', () => {
           },
         });
       });
+
+      it('should accept feature_id at exactly maxLength (256)', () => {
+        mockRouter.shouldValidate({
+          body: {
+            features: [{ feature_id: 'a'.repeat(256), endpoint_ids: ['.endpoint-a'] }],
+          },
+        });
+      });
+
+      it('should reject feature_id exceeding maxLength', () => {
+        mockRouter.shouldThrow({
+          body: {
+            features: [{ feature_id: 'a'.repeat(257), endpoint_ids: ['.endpoint-a'] }],
+          },
+        });
+      });
+
+      it('should accept endpoint_id at exactly maxLength (256)', () => {
+        mockRouter.shouldValidate({
+          body: {
+            features: [{ feature_id: 'agent_builder', endpoint_ids: ['a'.repeat(256)] }],
+          },
+        });
+      });
+
+      it('should reject endpoint_id exceeding maxLength', () => {
+        mockRouter.shouldThrow({
+          body: {
+            features: [{ feature_id: 'agent_builder', endpoint_ids: ['a'.repeat(257)] }],
+          },
+        });
+      });
     });
 
     it('should reject duplicate feature_id values', async () => {
