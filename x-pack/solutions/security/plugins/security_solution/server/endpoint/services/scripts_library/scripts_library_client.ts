@@ -6,12 +6,12 @@
  */
 
 import type { FileClient } from '@kbn/files-plugin/server';
-import { createFileHashTransform, createEsFileClient } from '@kbn/files-plugin/server';
+import { createEsFileClient, createFileHashTransform } from '@kbn/files-plugin/server';
 import type {
   ElasticsearchClient,
   Logger,
-  SavedObjectsClientContract,
   SavedObject,
+  SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -94,6 +94,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     example,
     description,
     instructions,
+    fileType,
     requiresInput,
     pathToExecutable,
     tags,
@@ -112,6 +113,7 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       file_size: 0,
       file_name: '',
       file_hash_sha256: '',
+      file_type: fileType,
       requires_input: requiresInput,
       path_to_executable: pathToExecutable,
       created_by: '',
@@ -131,12 +133,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       description,
       instructions,
       requires_input: requiresInput = false,
-      path_to_executable: pathToExecutable = undefined,
+      path_to_executable: pathToExecutable,
       tags = [],
       file_id: fileId,
       file_name: fileName,
       file_size: fileSize,
       file_hash_sha256: fileHash,
+      file_type: fileType,
       created_by: createdBy,
       updated_by: updatedBy,
       created_at: createdAt,
@@ -153,12 +156,13 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       fileName,
       fileSize,
       fileHash,
+      fileType,
+      pathToExecutable: fileType === 'archive' ? pathToExecutable : undefined,
       downloadUri,
       requiresInput,
       description,
       instructions,
       example,
-      pathToExecutable,
       tags: tags as EndpointScript['tags'],
       createdBy,
       updatedBy,
@@ -365,6 +369,20 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     file: _file,
     ...scriptDefinition
   }: CreateScriptRequestBody): Promise<EndpointScript> {
+    if (scriptDefinition.fileType === 'archive' && !scriptDefinition.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".',
+        400
+      );
+    }
+
+    if (scriptDefinition.fileType === 'script' && scriptDefinition.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
+        400
+      );
+    }
+
     const logger = this.logger.get('create');
     const scriptId = uuidV4();
     const fileStream = _file as HapiReadableStream;
@@ -431,6 +449,20 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       );
     }
 
+    if (scriptUpdates.fileType === 'archive' && !scriptUpdates.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".',
+        400
+      );
+    }
+
+    if (scriptUpdates.fileType === 'script' && scriptUpdates.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
+        400
+      );
+    }
+
     if (file) {
       newFileStorage = await this.storeFile({ scriptId: id, file: file as HapiReadableStream });
 
@@ -446,6 +478,10 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
           fieldName as keyof typeof KUERY_FIELD_TO_SO_FIELD_MAP
         ] ?? fieldName) as keyof ScriptsLibrarySavedObjectAttributes;
 
+        // force path_to_executable to be empty string
+        if (fieldName === 'fileType' && value === 'script') {
+          acc.path_to_executable = '';
+        }
         // @ts-expect-error: TS2322 - caused by the fact that `scriptUpdates` is a subset of fields
         acc[soFieldName] = value;
 

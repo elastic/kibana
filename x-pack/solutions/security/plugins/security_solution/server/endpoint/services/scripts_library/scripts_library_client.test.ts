@@ -97,7 +97,34 @@ describe('scripts library client', () => {
       });
     });
 
-    it('should create a script entry (SO) with expected content', async () => {
+    it('should throw error when `fileType` is `archive` but no `pathToExecutable` is provided', async () => {
+      await expect(
+        scriptsClient.create(
+          ScriptsLibraryMock.generateCreateScriptBody({
+            fileType: 'archive',
+            pathToExecutable: undefined,
+          })
+        )
+      ).rejects.toThrow(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".'
+      );
+    });
+
+    it('should throw error when `fileType` is `script` but `pathToExecutable` is provided', async () => {
+      // mock method generates valid body with `fileType` of `script`, so we can just add `pathToExecutable` to it to create invalid request payload
+      createBodyMock = ScriptsLibraryMock.generateCreateScriptBody({ fileType: 'script' });
+      await expect(
+        scriptsClient.create({ ...createBodyMock, pathToExecutable: '/test/script.sh' })
+      ).rejects.toThrow(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".'
+      );
+    });
+
+    it('should create a `script` entry (SO) with expected content', async () => {
+      createBodyMock = ScriptsLibraryMock.generateCreateScriptBody({
+        fileType: 'script',
+        pathToExecutable: undefined,
+      });
       await scriptsClient.create(createBodyMock);
       const scriptSoId = soClientMock.create.mock.calls?.[0]?.[2]?.id;
 
@@ -113,6 +140,44 @@ describe('scripts library client', () => {
           file_id: '123',
           file_name: 'test.txt',
           file_size: 1234,
+          file_type: 'script',
+          id: scriptSoId,
+          instructions: 'just execute it',
+          name: 'script one',
+          platform: ['linux', 'macos'],
+          tags: ['dataCollection'],
+          requires_input: false,
+          created_by: 'elastic',
+          created_at: expect.any(String),
+          updated_by: 'elastic',
+          updated_at: expect.any(String),
+        },
+        { id: scriptSoId }
+      );
+    });
+
+    it('should create an `archive` script entry (SO) with expected content', async () => {
+      await scriptsClient.create(
+        ScriptsLibraryMock.generateCreateScriptBody({
+          fileType: 'archive',
+          pathToExecutable: '/test/script_one.sh',
+        })
+      );
+      const scriptSoId = soClientMock.create.mock.calls?.[0]?.[2]?.id;
+
+      expect(
+        endpointAppServicesMock.savedObjects.createInternalUnscopedSoClient().create
+      ).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        {
+          description: 'does some stuff',
+          example: 'bash -c script_one.sh',
+          path_to_executable: '/test/script_one.sh',
+          file_hash_sha256: 'e5441eb2bb',
+          file_id: '123',
+          file_name: 'test.txt',
+          file_size: 1234,
+          file_type: 'archive',
           id: scriptSoId,
           instructions: 'just execute it',
           name: 'script one',
@@ -168,6 +233,7 @@ describe('scripts library client', () => {
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
+        fileType: 'script',
         platform: ['macos', 'linux'],
         requiresInput: false,
         tags: [],
@@ -287,6 +353,7 @@ describe('scripts library client', () => {
             fileId: 'file-1-2-3',
             fileName: 'my_script.sh',
             fileSize: 12098,
+            fileType: 'script',
             pathToExecutable: undefined,
             platform: ['macos', 'linux'],
             tags: [],
@@ -448,6 +515,10 @@ describe('scripts library client', () => {
     });
 
     it('should return script record on successful update', async () => {
+      soClientMock.get.mockResolvedValue(
+        ScriptsLibraryMock.generateSavedObjectScriptEntry({ name: 'updated script' })
+      );
+
       await expect(
         scriptsClient.update({
           id: '1-2-3',
@@ -458,11 +529,12 @@ describe('scripts library client', () => {
         createdBy: 'elastic',
         downloadUri: '/api/endpoint/scripts_library/1-2-3/download',
         id: '1-2-3',
-        name: 'my script',
+        name: 'updated script',
         fileHash: 'e5441eb2bb',
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
+        fileType: 'script',
         platform: ['macos', 'linux'],
         tags: [],
         requiresInput: false,
@@ -470,6 +542,66 @@ describe('scripts library client', () => {
         updatedBy: 'elastic',
         version: 'WzgsMV0=',
       });
+    });
+
+    it('should throw error when fileType is `archive` and `pathToExecutable` is not provided', async () => {
+      await expect(() =>
+        scriptsClient.update({
+          id: '1-2-3',
+          fileType: 'archive',
+        })
+      ).rejects.toThrow(
+        `pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".`
+      );
+    });
+
+    it('should throw error when fileType is `script` and `pathToExecutable` is provided', async () => {
+      await expect(() =>
+        scriptsClient.update({
+          id: '1-2-3',
+          fileType: 'script',
+          pathToExecutable: './main.sh',
+        })
+      ).rejects.toThrow(
+        `pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".`
+      );
+    });
+
+    it('should update pathToExecutable for an archive script', async () => {
+      soClientMock.get.mockResolvedValue(
+        ScriptsLibraryMock.generateSavedObjectScriptEntry({
+          file_type: 'archive',
+          path_to_executable: '/usr/local/bin/updated_script',
+        })
+      );
+
+      await expect(
+        scriptsClient.update({
+          id: '1-2-3',
+          fileType: 'archive',
+          pathToExecutable: '/usr/local/bin/updated_script',
+        })
+      ).resolves.toMatchObject({
+        fileType: 'archive',
+        pathToExecutable: '/usr/local/bin/updated_script',
+      });
+    });
+
+    it('should clear pathToExecutable when updating fileType to script', async () => {
+      await scriptsClient.update({
+        id: '1-2-3',
+        fileType: 'script',
+      });
+
+      expect(soClientMock.update).toHaveBeenCalledWith(
+        SCRIPTS_LIBRARY_SAVED_OBJECT_TYPE,
+        '1-2-3',
+        expect.objectContaining({
+          file_type: 'script',
+          path_to_executable: '',
+        }),
+        expect.anything()
+      );
     });
   });
 
@@ -491,6 +623,7 @@ describe('scripts library client', () => {
         fileId: 'file-1-2-3',
         fileName: 'my_script.sh',
         fileSize: 12098,
+        fileType: 'script',
         id: '1-2-3',
         name: 'my script',
         platform: ['macos', 'linux'],
