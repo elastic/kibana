@@ -126,7 +126,7 @@ describe('executeDashboardOperations', () => {
         const failures = attachmentIds
           .filter((attachmentId) => attachmentId.startsWith('missing-viz'))
           .map((missingAttachmentId) => ({
-            type: 'attachment_panels',
+            type: 'attachment_panels' as const,
             identifier: missingAttachmentId,
             error: 'Attachment not found',
           }));
@@ -481,6 +481,7 @@ describe('executeDashboardOperations', () => {
     );
     expect(addedControls[1].uid).toEqual(expect.any(String));
     expect(new Set(result.dashboardData.pinnedPanels?.map(({ uid }) => uid)).size).toBe(3);
+    expect(result.failures).toEqual([]);
   });
 
   it('removes controls by uid', async () => {
@@ -517,7 +518,7 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
-  it('skips unresolved controls instead of failing the operation', async () => {
+  it('skips unresolved controls and returns control-level failures', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {
         title: 'Controls dashboard',
@@ -561,6 +562,13 @@ describe('executeDashboardOperations', () => {
           field_name: 'service.name',
         }),
       }),
+    ]);
+    expect(result.failures).toEqual([
+      {
+        type: 'control_data_view',
+        identifier: 'rangeSliderControl:bytes',
+        error: 'no selector',
+      },
     ]);
   });
 });

@@ -13,7 +13,7 @@ import type {
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
-import { upsertMarkdownPanel, type VisualizationFailure } from './utils';
+import { upsertMarkdownPanel, type DashboardOperationFailure } from './utils';
 import type { ResolveControlDataViewIdInput } from './data_view_id_resolver';
 import type { DashboardOperation, ManageControlInput } from './operation_schemas';
 
@@ -24,7 +24,7 @@ interface ExecuteDashboardOperationsParams {
   resolveControlDataViewId: (input: ResolveControlDataViewIdInput) => Promise<string>;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
-  ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
+  ) => Promise<{ panels: AttachmentPanel[]; failures: DashboardOperationFailure[] }>;
   onPanelsAdded: (panels: AttachmentPanel[]) => void;
   onPanelsRemoved: (panels: AttachmentPanel[]) => void;
 }
@@ -67,10 +67,12 @@ const resolvePinnedControlStates = async ({
   inputs: ManageControlInput[];
   logger: Logger;
   resolveControlDataViewId: ExecuteDashboardOperationsParams['resolveControlDataViewId'];
-}): Promise<DashboardPinnedPanelState[]> => {
+}): Promise<{ controls: DashboardPinnedPanelState[]; failures: DashboardOperationFailure[] }> => {
   const controls: DashboardPinnedPanelState[] = [];
+  const failures: DashboardOperationFailure[] = [];
 
   for (const input of inputs) {
+    const controlIdentifier = `${input.type}:${input.fieldName}`;
     let dataViewId: string;
     try {
       dataViewId = await resolveControlDataViewId({
@@ -81,6 +83,11 @@ const resolvePinnedControlStates = async ({
       logger.debug(
         `Skipping control "${input.type}:${input.fieldName}" because data view could not be resolved: ${errorMessage}`
       );
+      failures.push({
+        type: 'control_data_view',
+        identifier: controlIdentifier,
+        error: errorMessage,
+      });
       continue;
     }
     const config = buildControlConfig({
@@ -97,7 +104,7 @@ const resolvePinnedControlStates = async ({
     } as DashboardPinnedPanelState);
   }
 
-  return controls;
+  return { controls, failures };
 };
 
 const removePanelsFromDashboard = ({
@@ -157,10 +164,10 @@ export const executeDashboardOperations = async ({
   onPanelsRemoved,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
-  failures: VisualizationFailure[];
+  failures: DashboardOperationFailure[];
 }> => {
   let nextDashboardData = structuredClone(dashboardData);
-  const failures: VisualizationFailure[] = [];
+  const failures: DashboardOperationFailure[] = [];
 
   for (const operation of operations) {
     switch (operation.operation) {
@@ -322,11 +329,13 @@ export const executeDashboardOperations = async ({
 
       case 'add_controls': {
         const existingControls = nextDashboardData.pinnedPanels ?? [];
-        const controlsToAdd = await resolvePinnedControlStates({
-          inputs: operation.items,
-          logger,
-          resolveControlDataViewId,
-        });
+        const { controls: controlsToAdd, failures: controlFailures } =
+          await resolvePinnedControlStates({
+            inputs: operation.items,
+            logger,
+            resolveControlDataViewId,
+          });
+        failures.push(...controlFailures);
 
         nextDashboardData = {
           ...nextDashboardData,

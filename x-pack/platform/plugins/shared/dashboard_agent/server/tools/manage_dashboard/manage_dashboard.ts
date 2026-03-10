@@ -26,7 +26,7 @@ import {
   retrieveLatestVersion,
   getErrorMessage,
   resolvePanelsFromAttachments,
-  type VisualizationFailure,
+  type DashboardOperationFailure,
 } from './utils';
 import { executeDashboardOperations } from './operations';
 import { dashboardOperationSchema } from './operation_schemas';
@@ -122,7 +122,7 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           onPanelsRemoved: sendRemovedEvents,
         });
 
-        const failures: VisualizationFailure[] = operationResult.failures;
+        const failures: DashboardOperationFailure[] = operationResult.failures;
         const updatedDashboardData = operationResult.dashboardData;
 
         if (isNewDashboard && (!updatedDashboardData.title || !updatedDashboardData.description)) {

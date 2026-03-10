@@ -99,7 +99,7 @@ After a successful call, the tool returns:
 - \`data.dashboardAttachment.content.panels\`: array of \`{ type, panelId, title }\` for each panel on the dashboard.
 - \`data.dashboardAttachment.content.sections\`: ordered section list with \`sectionId\`, \`title\`, \`collapsed\`, \`grid.y\`, and section panels.
 - \`data.dashboardAttachment.content.pinnedPanels\`: ordered list of pinned controls with \`uid\`, \`type\`, and control \`config\`.
-- \`data.failures\`: array of \`{ type, identifier, error }\` for attachment resolution failures. Only present when there are failures.
+- \`data.failures\`: array of \`{ type, identifier, error }\` for partial operation failures (for example attachment resolution or control data-view resolution). Only present when there are failures.
 - \`data.version\`: the version number of the dashboard attachment, incrementing with each update.
 
 See \`./examples/tool-result-format\` for the complete result structure with examples.
@@ -374,6 +374,11 @@ Key fields to remember:
         "type": "attachment_panels",
         "identifier": "viz-missing-999",
         "error": "Attachment not found"
+      },
+      {
+        "type": "control_data_view",
+        "identifier": "rangeSliderControl:event.duration",
+        "error": "Could not resolve data view from index pattern \"metrics-*\"."
       }
     ],
     "dashboardAttachment": {
@@ -392,8 +397,9 @@ Key fields to remember:
 
 When \`failures\` is present:
 - The dashboard was still created or updated with the panels that succeeded.
-- Report each failure to the user: include \`identifier\` (the attachment that failed) and \`error\` (the reason).
-- Offer to recreate failed visualizations and retry attachment ingestion.
+- Report each failure to the user: include \`type\`, \`identifier\`, and \`error\`.
+- For \`attachment_panels\`, offer to recreate failed visualizations and retry attachment ingestion.
+- For \`control_data_view\`, suggest refining \`indexPattern\` and retrying the control add.
 
 ## Error result
 
