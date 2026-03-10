@@ -848,9 +848,8 @@ describe('TaskStore', () => {
           attributes: doc._source?.task ?? mockTask,
         }));
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const indicesRefreshSpy = jest
-        .spyOn(mockEsClient.indices, 'refresh')
+        .spyOn(esClient.indices, 'refresh')
         .mockResolvedValue({} as never);
 
       const refreshStore = new TaskStore({
@@ -858,7 +857,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer: mockSerializer,
-        esClient: mockEsClient,
+        esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -904,7 +903,7 @@ describe('TaskStore', () => {
         });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
-      mockEsClient.msearch.mockResponse({
+      childEsClient.msearch.mockResponse({
         took: 0,
         responses: [
           {
@@ -954,8 +953,7 @@ describe('TaskStore', () => {
           attributes: doc._source?.task ?? mockTask,
         }));
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.spyOn(mockEsClient.indices, 'refresh').mockResolvedValue({} as never);
+      jest.spyOn(esClient.indices, 'refresh').mockResolvedValue({} as never);
       const logger = mockLogger();
 
       const refreshStore = new TaskStore({
@@ -963,7 +961,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer: mockSerializer,
-        esClient: mockEsClient,
+        esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -1002,7 +1000,7 @@ describe('TaskStore', () => {
         });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
-      mockEsClient.msearch.mockResponse({
+      childEsClient.msearch.mockResponse({
         took: 0,
         responses: [
           {
@@ -1031,7 +1029,7 @@ describe('TaskStore', () => {
       expect(result.docs).toHaveLength(2);
       expect(result.docs[0].apiKey).toBe('decryptedKey1');
       expect(result.docs[1].apiKey).toBe('encryptedKey2');
-      expect(mockEsClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
       expect(logger.warn).toHaveBeenCalledWith(
         'Refreshing index to get recently created API keys for tasks'
       );
@@ -1053,8 +1051,7 @@ describe('TaskStore', () => {
           attributes: doc._source?.task ?? mockTask,
         }));
 
-      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      jest.spyOn(mockEsClient.indices, 'refresh').mockRejectedValue(new Error('bad refresh'));
+      jest.spyOn(esClient.indices, 'refresh').mockRejectedValue(new Error('bad refresh'));
       const logger = mockLogger();
 
       const refreshStore = new TaskStore({
@@ -1062,7 +1059,7 @@ describe('TaskStore', () => {
         index: 'tasky',
         taskManagerId: '',
         serializer: mockSerializer,
-        esClient: mockEsClient,
+        esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
@@ -1101,7 +1098,7 @@ describe('TaskStore', () => {
         });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
-      mockEsClient.msearch.mockResponse({
+      childEsClient.msearch.mockResponse({
         took: 0,
         responses: [
           {
@@ -1130,7 +1127,7 @@ describe('TaskStore', () => {
       expect(result.docs).toHaveLength(2);
       expect(result.docs[0].apiKey).toBe('decryptedKey1');
       expect(result.docs[1].apiKey).toBe('encryptedKey2');
-      expect(mockEsClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
+      expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: 'tasky' });
       expect(logger.warn).toHaveBeenCalledWith(
         'Refreshing index to get recently created API keys for tasks'
       );
