@@ -45,5 +45,29 @@ describe('Watchlist sync queries', () => {
       ]);
       expect(searchBody.runtime_mappings?.euid).toBeDefined();
     });
+
+    it('adds @timestamp range filter and latest_doc top_hits when syncMarker is set', () => {
+      const syncMarker = '2024-01-15T00:00:00Z';
+      const searchBody = buildEntitiesSearchBody('user', undefined, 100, syncMarker);
+
+      expect(searchBody.query?.bool?.must).toHaveLength(2);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
+      });
+
+      const latestDocAgg = searchBody.aggs?.entities?.aggs?.latest_doc;
+      expect(latestDocAgg).toBeDefined();
+      expect(latestDocAgg?.top_hits?.size).toBe(1);
+      expect(latestDocAgg?.top_hits?.sort).toEqual([{ '@timestamp': { order: 'desc' } }]);
+      expect(latestDocAgg?.top_hits?._source).toContain('@timestamp');
+      expect(latestDocAgg?.top_hits?._source).toContain('user.name');
+      expect(latestDocAgg?.top_hits?._source).toContain('host.name');
+    });
+
+    it('does not add latest_doc agg when syncMarker is not set', () => {
+      const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.aggs?.entities?.aggs).toBeUndefined();
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
+    });
   });
 });

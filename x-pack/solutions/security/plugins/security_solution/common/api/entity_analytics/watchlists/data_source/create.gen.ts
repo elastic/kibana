@@ -36,6 +36,7 @@ export const CreateWatchlistEntitySourceRequestBody = z
     type: EntitySourceType,
     name: z.string(),
     indexPattern: z.string().optional(),
+    integrationName: z.string().optional(),
     enabled: z.boolean().optional(),
     matchers: z.array(Matcher).optional(),
     filter: Filter.optional(),

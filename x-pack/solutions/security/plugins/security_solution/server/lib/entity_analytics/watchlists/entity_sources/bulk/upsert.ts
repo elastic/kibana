@@ -70,7 +70,7 @@ export const bulkUpsertOperationsFactory =
               params: {
                 now: new Date().toISOString(),
                 source_id: entity.sourceId,
-                source_type: 'index',
+                source_type: sourceLabel,
               },
             },
           }

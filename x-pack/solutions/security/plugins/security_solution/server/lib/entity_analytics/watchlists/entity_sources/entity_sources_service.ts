@@ -32,9 +32,14 @@ export const createEntitySourcesService = ({
     const sourceIds = await watchlistClient.getEntitySourceIds(watchlistId);
     const targetIndex = getIndexForWatchlist(watchlist.name, namespace);
 
-    const indexSyncService = createIndexSyncService({ esClient, logger, targetIndex });
+    const indexSyncService = createIndexSyncService({
+      esClient,
+      logger,
+      targetIndex,
+      descriptorClient,
+    });
 
-    await indexSyncService.plainIndexSync({ descriptorClient, sourceIds });
+    await indexSyncService.plainIndexSync({ sourceIds });
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };

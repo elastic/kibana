@@ -11,11 +11,24 @@ import { ALL_ENTITY_TYPES } from '@kbn/entity-store';
 import type { EntityType } from '@kbn/entity-store';
 import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics';
 import type { WatchlistBulkEntity } from '../../types';
+import { createWatchlistSyncMarkersService } from '../sync_markers';
+import type { MonitoringEntitySourceDescriptorClient } from '../../../../privilege_monitoring/saved_objects';
+import { isTimestampGreaterThan } from '../../../../privilege_monitoring/data_sources/sync/utils';
 import { buildEntitiesSearchBody } from './queries';
 import { applyBulkUpsert } from '../../bulk/upsert';
-import type { AfterKey, EntitiesAggregation } from './types';
+import { getEntityNameFromDoc } from './entity_utils';
+import type { AfterKey, EntityBucket, EntitiesAggregation } from './types';
 
 export type UpdateDetectionService = ReturnType<typeof createUpdateDetectionService>;
+
+const pickLaterTimestamp = (
+  current: string | undefined,
+  candidate: string | undefined
+): string | undefined => {
+  if (!candidate) return current;
+  if (!current || isTimestampGreaterThan(candidate, current)) return candidate;
+  return current;
+};
 
 const getExistingEntitiesMap = async (
   esClient: ElasticsearchClient,
@@ -44,28 +57,75 @@ const getExistingEntitiesMap = async (
   return map;
 };
 
+interface UpdateDetectionForEntityTypeResult {
+  entities: WatchlistBulkEntity[];
+  maxTimestamp?: string;
+}
+
+const bucketToEntity = (
+  bucket: EntityBucket,
+  entityType: EntityType,
+  sourceId: string,
+  existingMap: Map<string, string>,
+  useSyncMarker: boolean
+): WatchlistBulkEntity => {
+  const entity: WatchlistBulkEntity = {
+    euid: bucket.key.euid,
+    type: entityType,
+    sourceId,
+    existingEntityId: existingMap.get(bucket.key.euid),
+  };
+  if (useSyncMarker && bucket.latest_doc?.hits?.hits?.[0]) {
+    const topHit = bucket.latest_doc.hits.hits[0];
+    entity.name = getEntityNameFromDoc(
+      entityType,
+      (topHit._source ?? {}) as Parameters<typeof getEntityNameFromDoc>[1]
+    );
+  }
+  return entity;
+};
+
+const extractMaxTimestampFromBuckets = (buckets: EntityBucket[]): string | undefined => {
+  let max: string | undefined;
+  for (const bucket of buckets) {
+    const ts = bucket.latest_doc?.hits?.hits?.[0]?._source?.['@timestamp'];
+    if (typeof ts === 'string') {
+      max = max ? (isTimestampGreaterThan(ts, max) ? ts : max) : ts;
+    }
+  }
+  return max;
+};
+
 export const createUpdateDetectionService = ({
   esClient,
   logger,
   targetIndex,
+  descriptorClient,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
+  descriptorClient?: MonitoringEntitySourceDescriptorClient;
 }) => {
+  const syncMarkersService = descriptorClient
+    ? createWatchlistSyncMarkersService(descriptorClient)
+    : undefined;
+
   const updateDetectionForEntityType = async (
     source: MonitoringEntitySource,
-    entityType: EntityType
-  ): Promise<WatchlistBulkEntity[]> => {
+    entityType: EntityType,
+    syncMarker?: string
+  ): Promise<UpdateDetectionForEntityTypeResult> => {
     const pageSize = 100;
     let afterKey: AfterKey;
     let fetchMore = true;
     const allEntities: WatchlistBulkEntity[] = [];
+    let maxTimestamp: string | undefined;
 
     while (fetchMore) {
       const response = await esClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,
-        ...buildEntitiesSearchBody(entityType, afterKey, pageSize),
+        ...buildEntitiesSearchBody(entityType, afterKey, pageSize, syncMarker),
       });
 
       const agg = response.aggregations?.entities;
@@ -75,28 +135,56 @@ export const createUpdateDetectionService = ({
         const batchEuids = buckets.map((b) => b.key.euid);
         const existingMap = await getExistingEntitiesMap(esClient, targetIndex, batchEuids);
 
-        const entities: WatchlistBulkEntity[] = buckets.map((bucket) => ({
-          euid: bucket.key.euid,
-          type: entityType,
-          sourceId: source.id,
-          existingEntityId: existingMap.get(bucket.key.euid),
-        }));
+        const entities: WatchlistBulkEntity[] = buckets.map((bucket) =>
+          bucketToEntity(bucket, entityType, source.id, existingMap, Boolean(syncMarker))
+        );
         allEntities.push(...entities);
+
+        if (syncMarker) {
+          const batchMax = extractMaxTimestampFromBuckets(buckets);
+          maxTimestamp = pickLaterTimestamp(maxTimestamp, batchMax);
+        }
       }
 
       afterKey = agg?.after_key;
       fetchMore = Boolean(afterKey);
     }
 
-    return allEntities;
+    return { entities: allEntities, maxTimestamp };
   };
 
   const updateDetection = async (source: MonitoringEntitySource) => {
     const allEntities: WatchlistBulkEntity[] = [];
+    let maxProcessedTimestamp: string | undefined;
 
-    for (const entityType of ALL_ENTITY_TYPES) {
-      const entities = await updateDetectionForEntityType(source, entityType);
-      allEntities.push(...entities);
+    if (source.type === 'entity_analytics_integration') {
+      if (!syncMarkersService) {
+        logger.warn(
+          `[WatchlistSync] Skipping integration source ${source.id}: descriptorClient not available`
+        );
+        return allEntities;
+      }
+
+      const syncMarker = await syncMarkersService.getLastProcessedMarker(source);
+
+      for (const entityType of ALL_ENTITY_TYPES) {
+        const { entities, maxTimestamp } = await updateDetectionForEntityType(
+          source,
+          entityType,
+          syncMarker
+        );
+        allEntities.push(...entities);
+        maxProcessedTimestamp = pickLaterTimestamp(maxProcessedTimestamp, maxTimestamp);
+      }
+
+      if (maxProcessedTimestamp) {
+        await syncMarkersService.updateLastProcessedMarker(source, maxProcessedTimestamp);
+      }
+    } else {
+      for (const entityType of ALL_ENTITY_TYPES) {
+        const { entities } = await updateDetectionForEntityType(source, entityType);
+        allEntities.push(...entities);
+      }
     }
 
     await applyBulkUpsert({

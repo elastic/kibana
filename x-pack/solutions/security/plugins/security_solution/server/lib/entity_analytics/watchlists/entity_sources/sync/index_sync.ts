@@ -17,21 +17,22 @@ export const createIndexSyncService = ({
   esClient,
   logger,
   targetIndex,
+  descriptorClient,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   targetIndex: string;
+  descriptorClient: MonitoringEntitySourceDescriptorClient;
 }) => {
-  const updateDetectionService = createUpdateDetectionService({ esClient, logger, targetIndex });
+  const updateDetectionService = createUpdateDetectionService({
+    esClient,
+    logger,
+    targetIndex,
+    descriptorClient,
+  });
   const sourcesSyncService = createSourcesSyncService({ logger });
 
-  const plainIndexSync = async ({
-    descriptorClient,
-    sourceIds,
-  }: {
-    descriptorClient: MonitoringEntitySourceDescriptorClient;
-    sourceIds: string[];
-  }) => {
+  const plainIndexSync = async ({ sourceIds }: { sourceIds: string[] }) => {
     await sourcesSyncService.syncBySourceIds({
       descriptorClient,
       sourceIds,
