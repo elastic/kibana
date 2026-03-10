@@ -303,7 +303,7 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
     it('should delete a connector with an unsupported type', async () => {
       const { space, user } = SuperuserAtSpace1;
       await kibanaServer.importExport.load(
-        'x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/tests/actions/fixtures/unsupported_connector_type.json',
+        'x-pack/platform/test/alerting_api_integration/security_and_spaces/group11/tests/actions/fixtures/unsupported_connector_type.json',
         { space: space.id }
       );
 
