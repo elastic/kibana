@@ -242,18 +242,21 @@ export function resolveInputToConcreteFields(
   allFieldNames: string[],
   fieldNameToTypeMap: Record<string, string | undefined>
 ): ResolvedField[] {
+  const isWildcard = input.includes('*');
+  if (!isWildcard) {
+    const fieldType = fieldNameToTypeMap[input];
+    if (fieldType) {
+      return [{ field: input, fieldType, category: getFieldCategory(fieldType) }];
+    }
+    return [{ input, error: `Field "${input}" not found` }];
+  }
+
   const matchingFields = allFieldNames.filter(
     (f) => minimatch(f, input, { dot: true }) && fieldNameToTypeMap[f]
   );
 
   if (matchingFields.length === 0) {
-    const isWildcard = input.includes('*');
-    return [
-      {
-        input,
-        error: isWildcard ? `No fields match pattern "${input}"` : `Field "${input}" not found`,
-      },
-    ];
+    return [{ input, error: `No fields match pattern "${input}"` }];
   }
 
   return matchingFields.map((field) => ({
