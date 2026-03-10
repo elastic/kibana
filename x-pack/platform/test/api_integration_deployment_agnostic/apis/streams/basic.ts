@@ -10,6 +10,7 @@ import type { FieldDefinition, RoutingStatus } from '@kbn/streams-schema';
 import { Streams, emptyAssets } from '@kbn/streams-schema';
 import { MAX_PRIORITY } from '@kbn/streams-plugin/server/lib/streams/index_templates/generate_index_template';
 import type { InheritedFieldDefinition } from '@kbn/streams-schema/src/fields';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { get, omit } from 'lodash';
 import type { JsonObject } from '@kbn/utility-types';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -36,6 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
   const esClient = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const status = 'enabled' as RoutingStatus;
 
   interface Resources {
@@ -76,6 +78,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       viewerApiClient = await createStreamsRepositoryViewerClient(roleScopedSupertest);
+      if (!isServerless) {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+        });
+      }
+    });
+
+    after(async () => {
+      if (!isServerless) {
+        await kibanaServer.uiSettings.update({
+          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        });
+      }
     });
 
     describe('initially', () => {
@@ -109,6 +124,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const parsed = Streams.WiredStream.GetResponse.parse(stream);
           expect(typeof parsed.privileges.create_snapshot_repository).to.eql('boolean');
         });
+
+        // ES|QL views API is not available in serverless
+        if (!isServerless) {
+          it('creates ES|QL views for wired root streams', async () => {
+            for (const streamName of ['logs.otel', 'logs.ecs']) {
+              const response = await esClient.transport.request<{
+                views: Array<{ name: string; query: string }>;
+              }>({
+                method: 'GET',
+                path: `/_query/view/%24.${streamName}`,
+              });
+              expect(response.views).to.have.length(1);
+              expect(response.views[0].name).to.eql(`$.${streamName}`);
+              expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+            }
+          });
+        }
 
         // Elasticsearch doesn't support streams in serverless mode yet
         if (!isServerless) {
@@ -185,6 +217,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             expect(wiredStatus['logs.otel']).to.eql(false);
             expect(wiredStatus['logs.ecs']).to.eql(false);
           });
+
+          // ES|QL views API is not available in serverless
+          if (!isServerless) {
+            it('removes ES|QL views for wired root streams', async () => {
+              for (const streamName of ['logs.otel', 'logs.ecs']) {
+                await esClient.transport
+                  .request<{ views: Array<{ name: string; query: string }> }>({
+                    method: 'GET',
+                    path: `/_query/view/%24.${streamName}`,
+                  })
+                  .then(
+                    () => {
+                      throw new Error(`Expected view $.${streamName} to be deleted`);
+                    },
+                    (err: { statusCode?: number }) => {
+                      expect(err.statusCode).to.eql(404);
+                    }
+                  );
+              }
+            });
+          }
         });
       });
     });
@@ -264,6 +317,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await forkStream(apiClient, rootStream, body);
         expect(response).to.have.property('acknowledged', true);
       });
+
+      // ES|QL views API is not available in serverless
+      if (!isServerless) {
+        it(`creates ES|QL view $.${rootStream}.nginx for the forked child stream`, async () => {
+          const childStreamName = `${rootStream}.nginx`;
+          const response = await esClient.transport.request<{
+            views: Array<{ name: string; query: string }>;
+          }>({
+            method: 'GET',
+            path: `/_query/view/%24.${childStreamName}`,
+          });
+          expect(response.views).to.have.length(1);
+          expect(response.views[0].name).to.eql(`$.${childStreamName}`);
+          expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
+        });
+
+        it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
+          const response = await esClient.transport.request<{
+            views: Array<{ name: string; query: string }>;
+          }>({
+            method: 'GET',
+            path: `/_query/view/%24.${rootStream}`,
+          });
+          expect(response.views).to.have.length(1);
+          expect(response.views[0].name).to.eql(`$.${rootStream}`);
+          expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
+        });
+      }
 
       it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
         const body = {
@@ -997,24 +1078,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           priority: `${MAX_PRIORITY}` as unknown as number,
         });
 
-        await putStream(
-          apiClient,
-          index,
-          {
-            ...emptyAssets,
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                processing: { steps: [] },
-                settings: {},
-                wired: { fields: {}, routing: [] },
-                failure_store: { inherit: {} },
+        try {
+          await putStream(
+            apiClient,
+            index,
+            {
+              ...emptyAssets,
+              stream: {
+                description: '',
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: { steps: [] },
+                  settings: {},
+                  wired: { fields: {}, routing: [] },
+                  failure_store: { inherit: {} },
+                },
               },
             },
-          },
-          500
-        );
+            500
+          );
+        } finally {
+          await esClient.indices
+            .deleteIndexTemplate({ name: 'highest_priority_template' })
+            .catch(() => {});
+        }
       });
 
       it('does not allow super deeply nested streams', async () => {
