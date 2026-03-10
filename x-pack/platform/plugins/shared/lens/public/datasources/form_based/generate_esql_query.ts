@@ -8,7 +8,6 @@
 import { esql } from '@elastic/esql';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
@@ -106,6 +105,14 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
 export const T_START = '?_tstart';
 export const T_END = '?_tend';
 export const AUTO_TARGET_NUMBER_OF_BUCKETS = 75;
+/**
+ * Default date histogram interval when auto cannot be used.
+ * Both generate_esql_query and date_histogram toESQL use this when:
+ * - Date range is missing (no fromDate/toDate), or
+ * - Auto calculation returns no interval (generate_esql_query only).
+ */
+export const DEFAULT_DATE_HISTOGRAM_INTERVAL = '1h';
+const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
 
 export function generateEsqlQuery(
   esAggEntries: Array<readonly [string, GenericIndexPatternColumn]>,
@@ -138,7 +145,7 @@ export function generateEsqlQuery(
 
   if (indexPattern.timeFieldName) {
     const timeField = `${esql.col(indexPattern.timeFieldName)}`;
-    queryParts.push(`WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`);
+    queryParts.push(`WHERE ${timeField} >= ${T_START} AND ${timeField} <= ${T_END}`);
   }
 
   const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
@@ -320,30 +327,27 @@ export function generateEsqlQuery(
     let interval: number | undefined;
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
       const dateHistogramColumn = col as DateHistogramIndexPatternColumn;
-      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
-
       const cleanInterval = (i: string) => SINGLE_CHAR_INTERVAL[i] ?? i;
 
       if (dateHistogramColumn.params?.interval === 'auto') {
-        const rangeDuration = moment.duration(
-          new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime(),
-          'ms'
-        );
-        const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
-        interval = moment.duration(intervalDuration).as('ms');
+        // Same rule as date_histogram toESQL: use raw dateRange so both fall back to 1h when input is missing.
+        const hasDateRange = dateRange?.fromDate != null && dateRange?.toDate != null;
+        if (!hasDateRange) {
+          interval = DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+        } else {
+          const rangeDuration = moment.duration(
+            new Date(absDateRange.toDate).getTime() - new Date(absDateRange.fromDate).getTime(),
+            'ms'
+          );
+          const intervalDuration = calculateAuto.near(AUTO_TARGET_NUMBER_OF_BUCKETS, rangeDuration);
+          interval = intervalDuration?.as('ms') ?? DEFAULT_DATE_HISTOGRAM_INTERVAL_MS;
+        }
       } else {
-        const kibanaInterval = dateHistogramColumn.params?.interval || '1h';
+        const kibanaInterval =
+          dateHistogramColumn.params?.interval || DEFAULT_DATE_HISTOGRAM_INTERVAL;
         const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-        const duration = moment.duration(esInterval.value, esInterval.unit).as('ms');
-        interval = duration;
+        interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
       }
-
-      const kibanaInterval =
-        dateHistogramColumn.params?.interval === 'auto'
-          ? calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          : dateHistogramColumn.params?.interval || '1h';
-      const esInterval = convertIntervalToEsInterval(cleanInterval(kibanaInterval));
-      interval = moment.duration(esInterval.value, esInterval.unit).as('ms');
     }
 
     if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {

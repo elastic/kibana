@@ -45,7 +45,12 @@ import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
-import { AUTO_TARGET_NUMBER_OF_BUCKETS, T_END, T_START } from '../../generate_esql_query';
+import {
+  AUTO_TARGET_NUMBER_OF_BUCKETS,
+  DEFAULT_DATE_HISTOGRAM_INTERVAL,
+  T_END,
+  T_START,
+} from '../../generate_esql_query';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -231,7 +236,7 @@ export const dateHistogramOperation: OperationDefinition<
     }
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
-  toESQL: (column, _columnId, indexPattern, _layer, _uiSettings, _dateRange) => {
+  toESQL: (column, _columnId, indexPattern, _layer, _uiSettings, dateRange) => {
     if (column.params?.includeEmptyRows) return;
 
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
@@ -239,6 +244,15 @@ export const dateHistogramOperation: OperationDefinition<
     const esqlColumnNode = esql.col(column.sourceField);
 
     if (interval === 'auto') {
+      // Fall back to default 1h when date range is missing (same rule as generate_esql_query).
+      const hasDateRange = dateRange?.fromDate != null && dateRange?.toDate != null;
+      if (!hasDateRange) {
+        return {
+          template: `BUCKET(${esqlColumnNode}, ${mapToEsqlInterval(
+            DEFAULT_DATE_HISTOGRAM_INTERVAL
+          )})`,
+        };
+      }
       return {
         template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${T_START}, ${T_END})`,
       };
