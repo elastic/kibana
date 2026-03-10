@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { useMemo } from 'react';
+import { buildDataTableRecord, type DataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { ALERT_ANCESTORS_ID } from '../../../../../common/field_maps/field_names';
 import type { GetFieldsData } from './use_get_fields_data';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import type { SearchHit } from '../../../../../common/search_strategy';
+import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
 import { useLicense } from '../../../../common/hooks/use_license';
-import { ANCESTOR_ID } from '../constants/field_names';
 import { getField } from '../utils';
 
 export interface UseShowRelatedAlertsByAncestryParams {
@@ -18,9 +20,9 @@ export interface UseShowRelatedAlertsByAncestryParams {
    */
   getFieldsData: GetFieldsData;
   /**
-   * An object with top level fields from the ECS object
+   * The actual raw document object
    */
-  dataAsNestedObject: Ecs;
+  searchHit: SearchHit;
   /**
    * Id of the event document
    */
@@ -47,13 +49,17 @@ export interface UseShowRelatedAlertsByAncestryResult {
  */
 export const useShowRelatedAlertsByAncestry = ({
   getFieldsData,
-  dataAsNestedObject,
+  searchHit,
   eventId,
   isRulePreview,
 }: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
-  const hasProcessEntityInfo = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
+  const hit: DataTableRecord = useMemo(
+    () => buildDataTableRecord(searchHit as EsHitRecord),
+    [searchHit]
+  );
+  const hasProcessEntityInfo = useIsAnalyzerEnabled(hit);
 
-  const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
+  const ancestorId = getField(getFieldsData(ALERT_ANCESTORS_ID)) ?? '';
   const documentId = isRulePreview ? ancestorId : eventId;
 
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
