@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type * from './slos_overview.journey';
-export type * from './annotation_list.journey';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+  runGlobalSetup: true,
+});
