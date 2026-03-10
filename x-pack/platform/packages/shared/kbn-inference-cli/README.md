@@ -41,7 +41,7 @@ yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/h
 
 ## EIS
 
-You can connect your local Elasticsearch to the Elastic Inference Service (EIS) using Cloud Connect (aka. Cloud Connected Mode CCM) by running `node scripts/eis.js`. This script configures your local Elasticsearch instance to use a real EIS endpoint without needing to run EIS locally.
+You can connect your local Elasticsearch to the Elastic Inference Service (EIS) using Cloud Connect (aka. Cloud Connected Mode, CCM) by running `node scripts/eis.js`. This script configures your local Elasticsearch instance to use a real EIS endpoint without needing to run EIS locally.
 
 ### Prerequisites
 
@@ -69,4 +69,4 @@ node scripts/eis.js
 
 The script will fetch the EIS API key from Vault and register it in your local Elasticsearch instance using an internal Cloud Connect APIs.
 
-**Important**: note that the script only enables EIS. It does not go through the full Cloud Connect onboarding. The cluster will not show as connected to the Cloud Connect page in Kibana.
+**Important**: note that the script only enables EIS. It does not go through the full Cloud Connect onboarding. The cluster will not show as connected to the Cloud Connect page in Kibana. However, you should have access to all built-in EIS inference endpoints after running this script. 
