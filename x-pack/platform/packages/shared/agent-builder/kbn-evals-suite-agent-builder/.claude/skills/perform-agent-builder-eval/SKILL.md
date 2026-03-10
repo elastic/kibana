@@ -119,13 +119,23 @@ Tell the user the snapshot has been restored.
 
 ### Step 5: Launch Kibana
 
-Launch Kibana in the background using `run_in_background`:
+Use `AskUserQuestion` to ask the user whether Kibana should be started:
+
+> Should Kibana be started?
+
+Options:
+- **Yes** — Launch Kibana in the background (recommended if Kibana is not already running)
+- **No, it's already running** — Skip launching Kibana and proceed to the next step
+
+If the user selects **Yes**, launch Kibana in the background using `run_in_background`:
 
 ```bash
 yarn start --no-base-path
 ```
 
 Tell the user Kibana is starting up.
+
+If the user selects **No, it's already running**, tell the user Kibana launch was skipped and proceed to the next step.
 
 ### Step 6: Confirm Phoenix Running
 
