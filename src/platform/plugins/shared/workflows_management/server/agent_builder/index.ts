@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ExecutionError } from './errors/execution_error';
-export { loadWorkflowExampleContent } from './examples';
-export {
-  getStepExecutionsByIds,
-  getStepExecutionsByWorkflowExecution,
-} from './repositories/step_execution_repository';
+export { registerWorkflowAgentBuilderIntegration } from './register_workflow_agent_builder_integration';
