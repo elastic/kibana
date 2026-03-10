@@ -11,8 +11,10 @@ import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { entityRiskScoreTool } from './entity_risk_score_tool';
+import { getEntityTool } from './get_entity_tool';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
+import { searchEntitiesTool } from './search_entities_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
@@ -25,8 +27,10 @@ export const registerTools = async (
   experimentalFeatures: ExperimentalFeatures
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
+  agentBuilder.tools.register(getEntityTool(core, logger));
   agentBuilder.tools.register(attackDiscoverySearchTool(core, logger));
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(searchEntitiesTool(core, logger));
 };
