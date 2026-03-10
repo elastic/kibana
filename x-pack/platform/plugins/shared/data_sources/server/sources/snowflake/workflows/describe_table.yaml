@@ -1,0 +1,18 @@
+version: '1'
+name: 'sources.snowflake.describe_table'
+description: 'Get column names, types, and metadata for a Snowflake table. Use before writing queries to understand the table structure.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: table_name
+    type: string
+    required: true
+    description: 'Fully-qualified or unqualified table name (e.g. MY_DB.PUBLIC.MY_TABLE or MY_TABLE)'
+steps:
+  - name: describe-table
+    type: snowflake.describeTable
+    connector-id: <%= snowflake-stack-connector-id %>
+    with:
+      tableName: "${{inputs.table_name}}"

@@ -1,0 +1,48 @@
+version: '1'
+name: 'sources.snowflake.list'
+description: 'List Snowflake resources. Actions and inputs: listDatabases — list all accessible databases (no inputs); listSchemas — list schemas in a database (optional database); listTables — list tables in a database/schema (optional database, optional schema); listWarehouses — list all accessible warehouses (no inputs).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: list_action
+    type: choice
+    options:
+      - "listDatabases"
+      - "listSchemas"
+      - "listTables"
+      - "listWarehouses"
+    required: true
+  - name: database
+    type: string
+    required: false
+    description: 'Database name. Used by listSchemas and listTables. Uses the configured default if omitted.'
+  - name: schema
+    type: string
+    required: false
+    description: 'Schema name. Used by listTables. Uses the configured default if omitted.'
+steps:
+  - name: list-databases
+    type: snowflake.listDatabases
+    if: "${{ inputs.list_action == 'listDatabases' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with: {}
+  - name: list-schemas
+    type: snowflake.listSchemas
+    if: "${{ inputs.list_action == 'listSchemas' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with:
+      database: "${{inputs.database}}"
+  - name: list-tables
+    type: snowflake.listTables
+    if: "${{ inputs.list_action == 'listTables' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with:
+      database: "${{inputs.database}}"
+      schema: "${{inputs.schema}}"
+  - name: list-warehouses
+    type: snowflake.listWarehouses
+    if: "${{ inputs.list_action == 'listWarehouses' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with: {}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <path d="M16 2l2.5 4.33L21 2h-5zm0 28l2.5-4.33L21 30h-5zM2 16l4.33-2.5L2 11v5zm28 0l-4.33-2.5L30 11v5zM5.86 5.86l4.33 2.5L5.86 5.86zm20.28 20.28l-4.33-2.5 4.33 2.5zM5.86 26.14l2.5-4.33-2.5 4.33zm20.28-20.28l-2.5 4.33 2.5-4.33z" stroke="#29B5E8" stroke-width="0"/>
+  <path d="M16 4.5L18 8l2-3.5M16 27.5L18 24l2 3.5M4.5 16L8 14l-3.5-2M27.5 16L24 14l3.5-2" stroke="#29B5E8" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="16" cy="16" r="3" fill="#29B5E8"/>
+  <line x1="16" y1="5" x2="16" y2="13" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="16" y1="19" x2="16" y2="27" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="5" y1="16" x2="13" y2="16" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="19" y1="16" x2="27" y2="16" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="8.22" y1="8.22" x2="13.17" y2="13.17" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="18.83" y1="18.83" x2="23.78" y2="23.78" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="8.22" y1="23.78" x2="13.17" y2="18.83" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="18.83" y1="13.17" x2="23.78" y2="8.22" stroke="#29B5E8" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16" cy="5" r="1.5" fill="#29B5E8"/>
+  <circle cx="16" cy="27" r="1.5" fill="#29B5E8"/>
+  <circle cx="5" cy="16" r="1.5" fill="#29B5E8"/>
+  <circle cx="27" cy="16" r="1.5" fill="#29B5E8"/>
+  <circle cx="8.22" cy="8.22" r="1.5" fill="#29B5E8"/>
+  <circle cx="23.78" cy="23.78" r="1.5" fill="#29B5E8"/>
+  <circle cx="8.22" cy="23.78" r="1.5" fill="#29B5E8"/>
+  <circle cx="23.78" cy="8.22" r="1.5" fill="#29B5E8"/>
+</svg>

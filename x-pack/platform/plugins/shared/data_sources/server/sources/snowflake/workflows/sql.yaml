@@ -1,0 +1,72 @@
+version: '1'
+name: 'sources.snowflake.sql'
+description: 'Execute and manage Snowflake SQL statements. Actions and inputs: executeSql — run a SQL statement (statement, optional timeout, optional database, optional schema, optional warehouse, optional role); getStatementStatus — check status or fetch result partitions for a previous statement (statement_handle, optional partition); cancelStatement — cancel a running statement (statement_handle).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: sql_action
+    type: choice
+    options:
+      - "executeSql"
+      - "getStatementStatus"
+      - "cancelStatement"
+    required: true
+  - name: statement
+    type: string
+    required: false
+    description: 'SQL statement to execute. Used by executeSql.'
+  - name: timeout
+    type: number
+    required: false
+    description: 'Query timeout in seconds (default 60). Used by executeSql.'
+  - name: database
+    type: string
+    required: false
+    description: 'Override the default database. Used by executeSql.'
+  - name: schema
+    type: string
+    required: false
+    description: 'Override the default schema. Used by executeSql.'
+  - name: warehouse
+    type: string
+    required: false
+    description: 'Override the default warehouse. Used by executeSql.'
+  - name: role
+    type: string
+    required: false
+    description: 'Override the default role. Used by executeSql.'
+  - name: statement_handle
+    type: string
+    required: false
+    description: 'Statement handle from a previous executeSql call. Used by getStatementStatus and cancelStatement.'
+  - name: partition
+    type: number
+    required: false
+    description: 'Partition index for fetching large result sets. Used by getStatementStatus.'
+steps:
+  - name: execute-sql
+    type: snowflake.executeSql
+    if: "${{ inputs.sql_action == 'executeSql' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with:
+      statement: "${{inputs.statement}}"
+      timeout: ${{inputs.timeout}}
+      database: "${{inputs.database}}"
+      schema: "${{inputs.schema}}"
+      warehouse: "${{inputs.warehouse}}"
+      role: "${{inputs.role}}"
+  - name: get-statement-status
+    type: snowflake.getStatementStatus
+    if: "${{ inputs.sql_action == 'getStatementStatus' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with:
+      statementHandle: "${{inputs.statement_handle}}"
+      partition: ${{inputs.partition}}
+  - name: cancel-statement
+    type: snowflake.cancelStatement
+    if: "${{ inputs.sql_action == 'cancelStatement' }}"
+    connector-id: <%= snowflake-stack-connector-id %>
+    with:
+      statementHandle: "${{inputs.statement_handle}}"

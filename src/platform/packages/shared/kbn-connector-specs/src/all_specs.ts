@@ -28,3 +28,4 @@ export * from './specs/slack/slack';
 export * from './specs/firecrawl/firecrawl';
 export * from './specs/zoom/zoom';
 export * from './specs/zendesk/zendesk';
+export * from './specs/snowflake/snowflake';
