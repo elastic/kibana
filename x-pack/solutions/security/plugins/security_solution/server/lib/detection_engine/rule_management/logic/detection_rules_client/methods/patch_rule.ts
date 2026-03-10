@@ -74,6 +74,22 @@ export const patchRule = async ({
     rulePatch,
   });
 
+  // Zod v4 materializes some defaulted optional fields on PATCH payloads (e.g. max_signals),
+  // even when the client did not send them. Filter to fields that are both defined and
+  // actually changed so RBAC decisions are based on effective user changes.
+  const rulePatchDefinedFields: Record<string, unknown> = {};
+  let allKeysUpdateable = true;
+
+  for (const [key, value] of Object.entries(rulePatchObjWithoutIds)) {
+    if (
+      value !== undefined &&
+      (!isEqual(value, (existingRule as Record<string, unknown>)[key]) || isReadAuthEditField(key))
+    ) {
+      rulePatchDefinedFields[key] = value;
+      allKeysUpdateable = allKeysUpdateable && isReadAuthEditField(key);
+    }
+  }
+
   /**
    * RBAC logic branch
    *
