@@ -405,7 +405,7 @@ const getSuggestions = (
     filterTermsWithoutName(autocompleteSet)
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
-        if (isInsideQuotedString && usesStructuralSnippet(item)) {
+        if ((isInsideQuotedString || !context.addTemplate) && usesStructuralSnippet(item)) {
           return false;
         }
 

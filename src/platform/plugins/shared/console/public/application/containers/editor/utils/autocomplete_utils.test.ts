@@ -472,6 +472,45 @@ describe('autocomplete_utils', () => {
 
       expect(items.map((item) => item.label)).toEqual(['type']);
     });
+
+    it('filters structural suggestions when cursor is before existing content on the line', async () => {
+      const mockAutocompleteSet = [
+        { name: '{' },
+        { name: 'type' },
+      ] as unknown as AutoCompleteContext['autoCompleteSet'];
+
+      const mockEndpoint = {
+        bodyAutocompleteRootComponents: [],
+      };
+
+      mockPopulateContext.mockImplementation((...args) => {
+        const context = args[0][1];
+        context.endpoint = mockEndpoint;
+        context.autoCompleteSet = mockAutocompleteSet;
+      });
+
+      const mockModel = {
+        getLineContent: () => 'PUT /test_index',
+        getValueInRange: jest.fn((range: any) => {
+          if (range.startLineNumber === 2) {
+            return '{\n  "mappings": {\n    "properties": {\n      "integer_field": ';
+          }
+          if (range.startLineNumber === 5 && range.startColumn === 1) {
+            return '      "integer_field": ';
+          }
+          // content after cursor: existing value
+          return '"keyword"';
+        }),
+        getWordUntilPosition: () => ({ startColumn: 23, word: '' }),
+        getLineMaxColumn: () => 32,
+      } as unknown as monaco.editor.ITextModel;
+
+      const mockPosition = { lineNumber: 5, column: 23 } as monaco.Position;
+
+      const items = await getBodyCompletionItems(mockModel, mockPosition, 1, mockEditor);
+
+      expect(items.map((item) => item.label)).toEqual(['type']);
+    });
   });
 
   describe('getInsertText', () => {
