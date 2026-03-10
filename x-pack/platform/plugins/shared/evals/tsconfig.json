@@ -10,6 +10,7 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/features-plugin",
+    "@kbn/management-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/storage-adapter",
     "@kbn/es-errors",

@@ -40,6 +40,7 @@ describe('EvalsPublicPlugin', () => {
 
     plugin.setup(coreSetup, { management });
 
+    expect(coreSetup.application.register).not.toHaveBeenCalled();
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledWith(
       expect.objectContaining({
