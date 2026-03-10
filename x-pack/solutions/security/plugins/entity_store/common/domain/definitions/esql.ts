@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { LogsExtractionClient } from './logs_extraction_client';
-export { CcsLogsExtractionClient } from './ccs_logs_extraction_client';
+const RECENT_DATA_PREFIX = 'recent';
+
+/**
+ * Reference to recent data in ESQL queries
+ */
+export function recentData(dest: string) {
+  return `${RECENT_DATA_PREFIX}.${dest}`;
+}
