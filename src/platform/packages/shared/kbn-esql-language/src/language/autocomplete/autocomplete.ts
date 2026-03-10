@@ -126,7 +126,7 @@ export async function suggest(
       })
       .filter((command) => {
         // Commands with notAfterCommands are not suggested when the previous command is in that list
-        const notAfter = command.metadata?.notAfterCommands;
+        const notAfter = command.metadata?.hiddenAfterCommands;
         if (notAfter?.length && astContext.astForContext.commands.length > 0) {
           const lastCommand =
             astContext.astForContext.commands[astContext.astForContext.commands.length - 1];

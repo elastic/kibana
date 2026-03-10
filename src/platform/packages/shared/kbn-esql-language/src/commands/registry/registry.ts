@@ -97,7 +97,7 @@ export interface ICommandMetadata {
   type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   isTimeseries?: boolean; // Optional property to indicate if the command is a timeseries source command
   requiresTimeseriesSource?: boolean; // Optional property to indicate the command is only available when the source command is TS
-  notAfterCommands?: string[]; // Optional list of command names after which this command should not be suggested (e.g. METRICS_INFO not after STATS)
+  hiddenAfterCommands?: string[]; // Optional list of command names after which this command should not be suggested (e.g. METRICS_INFO not after STATS)
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)
