@@ -55,6 +55,10 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const resizerStyles = useResizerButtonStyles();
 
   const panelStorage = useMemo(() => new PanelStorage(), []);
+  const [firstPanelSize, secondPanelSize] = useMemo(
+    () => panelStorage.getPanelSize(),
+    [panelStorage]
+  );
 
   // only used to hide content
   const { currentTextObject } = useEditorReadContext();
@@ -71,8 +75,6 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   // used for showing a loading state when fetching autocomplete entities
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
-
-  const [firstPanelSize, secondPanelSize] = panelStorage.getPanelSize();
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
