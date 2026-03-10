@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import path from 'node:path';
+import { AgentVisibility } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
@@ -37,6 +39,37 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
     }
   )
 );
+
+const SKILL_SELECTION_SCHEMA = schema.arrayOf(
+  schema.object(
+    {
+      skill_ids: schema.arrayOf(
+        schema.string({
+          meta: { description: 'Skill ID to be available to the agent.' },
+        }),
+        {
+          maxSize: 100,
+          meta: { description: 'Array of skill IDs. Use "*" to select all built-in skills.' },
+        }
+      ),
+    },
+    {
+      meta: { description: 'Skill selection configuration for the agent.' },
+    }
+  ),
+  { maxSize: 100 }
+);
+
+const VISIBILITY_DISABLED_MESSAGE =
+  'The "visibility" field is disabled. Enable "agentBuilder:experimentalFeatures" to use it.';
+
+const isVisibilityBlockedByExperimentalGate = ({
+  experimentalFeaturesEnabled,
+  visibility,
+}: {
+  experimentalFeaturesEnabled: boolean;
+  visibility: AgentVisibility | undefined;
+}): boolean => !experimentalFeaturesEnabled && visibility !== undefined;
 
 export function registerAgentRoutes({
   router,
@@ -172,6 +205,21 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Optional visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
+              ),
               configuration: schema.object(
                 {
                   instructions: schema.maybe(
@@ -182,6 +230,7 @@ export function registerAgentRoutes({
                     })
                   ),
                   tools: TOOL_SELECTION_SCHEMA,
+                  skills: schema.maybe(SKILL_SELECTION_SCHEMA),
                   workflow_ids: schema.maybe(
                     schema.arrayOf(
                       schema.string({
@@ -208,6 +257,23 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
+        const { uiSettings } = await ctx.core;
+        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+
+        if (
+          isVisibilityBlockedByExperimentalGate({
+            experimentalFeaturesEnabled,
+            visibility: request.body.visibility,
+          })
+        ) {
+          return response.badRequest({
+            body: {
+              message: VISIBILITY_DISABLED_MESSAGE,
+            },
+          });
+        }
 
         try {
           const profile = await service.create(request.body);
@@ -288,6 +354,21 @@ export function registerAgentRoutes({
                   }
                 )
               ),
+              visibility: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.literal(AgentVisibility.Public),
+                    schema.literal(AgentVisibility.Shared),
+                    schema.literal(AgentVisibility.Private),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        '**Technical Preview; added in 9.4.0.** Updated visibility setting: `public` (any privileged user can read/write), `shared` (any privileged user can read, only owner can write), `private` (only owner can read/write).',
+                    },
+                  }
+                )
+              ),
               configuration: schema.maybe(
                 schema.object(
                   {
@@ -300,6 +381,7 @@ export function registerAgentRoutes({
                       })
                     ),
                     tools: schema.maybe(TOOL_SELECTION_SCHEMA),
+                    skills: schema.maybe(SKILL_SELECTION_SCHEMA),
                     workflow_ids: schema.maybe(
                       schema.arrayOf(
                         schema.string({
@@ -327,6 +409,23 @@ export function registerAgentRoutes({
       wrapHandler(async (ctx, request, response) => {
         const { agents, auditLogService } = getInternalServices();
         const service = await agents.getRegistry({ request });
+        const { uiSettings } = await ctx.core;
+        const experimentalFeaturesEnabled = await uiSettings.client.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+
+        if (
+          isVisibilityBlockedByExperimentalGate({
+            experimentalFeaturesEnabled,
+            visibility: request.body.visibility,
+          })
+        ) {
+          return response.badRequest({
+            body: {
+              message: VISIBILITY_DISABLED_MESSAGE,
+            },
+          });
+        }
 
         try {
           const profile = await service.update(request.params.id, request.body);
