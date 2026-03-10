@@ -33,5 +33,6 @@ export const metricsInfoCommand: ICommand = {
     preview: false,
     hidden: false,
     requiresTimeseriesSource: true,
+    notAfterCommands: ['stats', 'inline stats'],
   },
 };

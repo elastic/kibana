@@ -124,6 +124,19 @@ export async function suggest(
         }
         return true;
       })
+      .filter((command) => {
+        // Commands with notAfterCommands are not suggested when the previous command is in that list
+        const notAfter = command.metadata?.notAfterCommands;
+        if (notAfter?.length && astContext.astForContext.commands.length > 0) {
+          const lastCommand =
+            astContext.astForContext.commands[astContext.astForContext.commands.length - 1];
+          const lastCommandName = lastCommand?.name;
+          if (lastCommandName && notAfter.includes(lastCommandName)) {
+            return false;
+          }
+        }
+        return true;
+      })
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
