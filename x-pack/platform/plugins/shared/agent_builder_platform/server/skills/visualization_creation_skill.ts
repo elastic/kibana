@@ -44,7 +44,8 @@ Do **not** use this skill when:
 
 1. **Ensure grounded index and field context**
    - If index and fields are already known in context, continue directly.
-   - If not, explore the data first to discover the right index and validate field names. Always use real field names from the index mapping, not invented ones.
+   - If not, call \`${platformCoreTools.listIndices}\` **once without specifying a pattern** (it defaults to \`*\` and returns all available indices, aliases, and data streams). Review the full list and select the most relevant index for the user's request. **Never guess or invent index name patterns** — always retrieve the full list first and choose from it.
+   - Always use real field names from the index mapping, not invented ones.
 
 2. **Prepare visualization intent**
    - For simple requests, pass natural language directly to ${
