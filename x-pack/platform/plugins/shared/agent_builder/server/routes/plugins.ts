@@ -55,7 +55,8 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       security: AGENT_BUILDER_READ_SECURITY,
       access: 'public',
       summary: 'List plugins',
-      description: 'List all installed plugins.',
+      description:
+        'List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins).',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
@@ -167,8 +168,9 @@ export function registerPluginsRoutes({ router, getInternalServices, logger }: R
       path: `${publicApiPath}/plugins/install`,
       security: AGENT_BUILDER_WRITE_SECURITY,
       access: 'public',
-      summary: 'Install a plugin',
-      description: 'Install a plugin from a GitHub URL or a direct zip URL.',
+      summary: 'Install a plugin from a GitHub URL or zip URL.',
+      description:
+        'Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.',
       options: {
         tags: ['plugins', 'oas-tag:agent builder'],
         availability: {
