@@ -83,6 +83,7 @@ export class StreamsClient {
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
+      isWiredStreamViewsEnabled: boolean;
       isDev: boolean;
     }
   ) {}
