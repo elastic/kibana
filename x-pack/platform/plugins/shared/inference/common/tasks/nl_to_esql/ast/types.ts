@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ESQLFunction, ESQLLiteral } from '@kbn/esql-language';
+import type { ESQLFunction, ESQLLiteral } from '@elastic/esql/types';
 
 /**
  * represents a DATE_TRUNC function node.

@@ -28,6 +28,7 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowIdDecorations,
 } from './decorations';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
@@ -75,6 +76,7 @@ import {
   GenericMonacoConnectorHandler,
   HttpMonacoConnectorStepHandler,
   KibanaMonacoConnectorHandler,
+  WorkflowExecuteMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
 import { CustomMonacoStepHandler } from '../lib/monaco_connectors/custom_monaco_step_handler';
 import {
@@ -362,6 +364,9 @@ export const WorkflowYAMLEditor = ({
         });
         registerMonacoConnectorHandler(kibanaHandler);
 
+        const workflowExecuteHandler = new WorkflowExecuteMonacoConnectorHandler();
+        registerMonacoConnectorHandler(workflowExecuteHandler);
+
         const customHandler = new CustomMonacoStepHandler();
         registerMonacoConnectorHandler(customHandler);
 
@@ -440,6 +445,12 @@ export const WorkflowYAMLEditor = ({
     yamlDocument: yamlDocument || null,
     isEditorMounted,
     readOnly: isExecutionYaml,
+  });
+
+  useWorkflowIdDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
   });
 
   const updateContainerPosition = (

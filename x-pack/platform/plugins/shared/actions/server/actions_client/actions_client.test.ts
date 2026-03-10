@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -401,9 +401,10 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"param1\\": Required"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
@@ -540,9 +541,13 @@ describe('create()', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
-      oAuthRateLimit: {
-        authorize: { lookbackWindow: '1h', limit: 100 },
-        callback: { lookbackWindow: '1h', limit: 100 },
+      auth: {
+        oauth_authorization_code: {
+          rate_limits: {
+            authorize: { lookbackWindow: '1h', limit: 100 },
+            callback: { lookbackWindow: '1h', limit: 100 },
+          },
+        },
       },
     });
 
@@ -2462,9 +2467,10 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"param1\\": Required"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {

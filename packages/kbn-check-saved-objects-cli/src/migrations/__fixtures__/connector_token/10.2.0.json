@@ -1,0 +1,22 @@
+{
+  "10.1.0": [
+    {
+      "connectorId": "connector-1",
+      "tokenType": "access_token",
+      "token": "token-1",
+      "expiresAt": "2026-01-01T00:00:00.000Z",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "connectorId": "connector-1",
+      "tokenType": "access_token",
+      "token": "token-1",
+      "expiresAt": "2026-01-01T00:00:00.000Z",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    }
+  ]
+}

@@ -15,21 +15,24 @@ import { connectorModelVersions } from './connector_model_versions';
 describe('Connector Model Versions', () => {
   const version = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
 
-  const context: SavedObjectModelTransformationContext = {
-    log: {
-      get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
-    } as unknown as Logger,
-    modelVersion: 2,
-    namespaceType: 'single',
-  };
-  it('has correct structure', () => {
-    expect(version).toBeDefined();
-    expect(version.changes).toHaveLength(1);
-    expect(version.changes[0].type).toBe('data_backfill');
-    expect(version.schemas).toBeDefined();
-    expect(version.schemas?.create).toBeDefined();
-    expect(version.schemas?.forwardCompatibility).toBeDefined();
-  });
+  describe('version 2', () => {
+    const version2 = connectorModelVersions['2'] as SavedObjectsFullModelVersion;
+    const context: SavedObjectModelTransformationContext = {
+      log: {
+        get: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn() }),
+      } as unknown as Logger,
+      modelVersion: 2,
+      namespaceType: 'single',
+    };
+
+    it('has correct structure', () => {
+      expect(version2).toBeDefined();
+      expect(version2.changes).toHaveLength(1);
+      expect(version2.changes[0].type).toBe('data_backfill');
+      expect(version2.schemas).toBeDefined();
+      expect(version2.schemas?.create).toBeDefined();
+      expect(version2.schemas?.forwardCompatibility).toBeDefined();
+    });
 
   describe('backfillFn', () => {
     const backfillChange = version.changes.find((change) => change.type === 'data_backfill');

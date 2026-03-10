@@ -25,6 +25,7 @@ const previouslyRegisteredTypes = [
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
+  'anonymization-salt',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
@@ -66,6 +67,7 @@ const previouslyRegisteredTypes = [
   'privmon-api-key',
   'entity-discovery-api-key',
   'entity-engine-descriptor-v2',
+  'entity-store-global-state',
   'epm-packages',
   'epm-packages-assets',
   'event_loop_delays_daily',
@@ -123,6 +125,7 @@ const previouslyRegisteredTypes = [
   'ml-module',
   'ml-telemetry',
   'monitoring-telemetry',
+  'oauth_state',
   'observability-onboarding-state',
   'osquery-pack',
   'osquery-pack-asset',
@@ -181,6 +184,7 @@ const previouslyRegisteredTypes = [
   'url',
   'usage-counter', // added in 8.16.0: richer mappings, located in .kibana_usage_counters
   'usage-counters', // deprecated in favor of 'usage-counter'
+  'user_connector_token',
   'visualization',
   'workplace_search_telemetry',
   'gap_auto_fill_scheduler',

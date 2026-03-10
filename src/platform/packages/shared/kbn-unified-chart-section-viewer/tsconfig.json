@@ -10,7 +10,6 @@
     "@kbn/react-field",
     "@kbn/unified-histogram",
     "@kbn/shared-ux-utility",
-    "@kbn/esql-language",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
@@ -34,5 +33,6 @@
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
     "@kbn/es-query",
+    "@kbn/apm-types-shared",
   ]
 }

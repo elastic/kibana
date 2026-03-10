@@ -11,15 +11,17 @@ import bolt from './icons/bolt.svg';
 import branch from './icons/branch.svg';
 import clock from './icons/clock.svg';
 import console from './icons/console.svg';
+import database from './icons/database.svg';
 import email from './icons/email.svg';
 import flask from './icons/flask.svg';
+import glyph from './icons/glyph.svg';
 import elasticsearchLogoSvg from './icons/logo_elasticsearch.svg';
 import kibanaLogoSvg from './icons/logo_kibana.svg';
 import slackLogoSvg from './icons/logo_slack.svg';
 import plugs from './icons/plugs.svg';
 import refresh from './icons/refresh.svg';
 import sparkles from './icons/sparkles.svg';
-import tableOfContents from './icons/table_of_contents.svg';
+import union from './icons/union.svg';
 import user from './icons/user.svg';
 import warning from './icons/warning.svg';
 
@@ -31,13 +33,15 @@ export const HardcodedIcons: Record<string, string> = {
   elasticsearch: elasticsearchLogoSvg,
   kibana: kibanaLogoSvg,
   console,
-  'data.set': tableOfContents,
+  'data.set': database,
   foreach: refresh,
   if: branch,
   wait: clock,
   alert: warning,
   scheduled: clock,
   manual: user,
+  'workflow.execute': glyph,
+  'workflow.executeAsync': union,
   trigger: bolt,
   flask,
   default: plugs,

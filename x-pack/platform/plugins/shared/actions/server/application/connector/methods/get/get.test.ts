@@ -345,6 +345,39 @@ describe('get()', () => {
 
       expect(connectorFromInMemoryConnectorMock).not.toHaveBeenCalled();
     });
+
+    test('passes correct params to connectorFromInMemoryConnector', async () => {
+      const inMemoryConnector: InMemoryConnector = {
+        id: 'preconfigured-1',
+        actionTypeId: '.slack',
+        name: 'Preconfigured Slack',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+        config: {},
+        secrets: {},
+      };
+
+      connectorFromInMemoryConnectorMock.mockReturnValueOnce({
+        id: 'preconfigured-1',
+        actionTypeId: '.slack',
+        name: 'Preconfigured Slack',
+        isPreconfigured: true,
+        isSystemAction: false,
+        isDeprecated: false,
+        isConnectorTypeDeprecated: false,
+      });
+
+      await get({
+        context: { ...mockContext, inMemoryConnectors: [inMemoryConnector] },
+        id: 'preconfigured-1',
+      });
+
+      expect(connectorFromInMemoryConnectorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'preconfigured-1', inMemoryConnector, actionTypeRegistry })
+      );
+    });
   });
 
   describe('saved object connectors', () => {
