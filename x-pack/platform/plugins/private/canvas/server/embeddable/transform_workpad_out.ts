@@ -15,6 +15,7 @@ import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
 import { transformPanelReferencesOut } from './transform_references_out';
+import { getReferencesForElement } from './get_references_for_element';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -54,12 +55,7 @@ export function transformWorkpadOut(
       }
 
       // remove element ID prefix from references for the current element
-      let referencesForElement = references
-        .filter(({ name }) => name.startsWith(`${element.id}:`))
-        .map((reference) => ({
-          ...reference,
-          name: reference.name.slice(`${element.id}:`.length),
-        }));
+      let referencesForElement = getReferencesForElement(references, element.id);
 
       // use expressions service to inject references for by-reference embeddables using Canvas defined references
       const ast = fromExpression(element.expression);
