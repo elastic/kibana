@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PRIVMON_PRIVILEGE_CHECK_API } from '@kbn/security-solution-plugin/common/entity_analytics/privileged_user_monitoring/constants';
+import { WATCHLISTS_URL } from '@kbn/security-solution-plugin/common/entity_analytics/watchlists/constants';
 import { visit } from '../../../tasks/navigation';
 import { login } from '../../../tasks/login';
 import { ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -31,11 +33,26 @@ describe(
     },
   },
   () => {
+    const WATCHLISTS_LIST_URL = `${WATCHLISTS_URL}/list`;
+
     beforeEach(() => {
       login();
+      cy.intercept('GET', PRIVMON_PRIVILEGE_CHECK_API, {
+        statusCode: 200,
+        body: {
+          has_all_required: true,
+          has_read_permissions: true,
+          has_write_permissions: true,
+          privileges: {
+            elasticsearch: {
+              cluster: {},
+              index: {},
+            },
+            kibana: {},
+          },
+        },
+      }).as('watchlistsPrivileges');
     });
-
-    const WATCHLISTS_LIST_URL = '/api/entity_analytics/watchlists/list';
 
     it('renders page as expected', () => {
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
@@ -50,6 +67,7 @@ describe(
       }).as('watchlistsList');
 
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      cy.wait('@watchlistsPrivileges');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
@@ -61,6 +79,7 @@ describe(
       }).as('watchlistsList');
 
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      cy.wait('@watchlistsPrivileges');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_ERROR).should('exist');
     });
@@ -73,6 +92,7 @@ describe(
       }).as('watchlistsList');
 
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      cy.wait('@watchlistsPrivileges');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('exist');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('not.exist');
@@ -93,6 +113,7 @@ describe(
       }).as('watchlistsList');
 
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      cy.wait('@watchlistsPrivileges');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains('Test watchlist');
