@@ -141,6 +141,7 @@ describe('getLinksEmbeddableFactory', () => {
       title: 'my links',
       description: 'just a few links',
       hide_title: false,
+      hide_border: false,
       savedObjectId: '123',
     };
 
@@ -186,6 +187,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       title: 'my links',
       hide_title: true,
+      hide_border: true,
       links: getLinks(),
       layout: 'horizontal',
     };
