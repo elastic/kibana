@@ -344,6 +344,8 @@ This command is useful for manual testing or running tests via an IDE.
 
 Scout supports testing Cross Project Search by starting a second ("linked") Elasticsearch cluster alongside the origin. The linked cluster runs on a separate port, shares the same UIAM identity provider as the origin, and is intended exclusively for **reading data from** -- it has no Kibana instance.
 
+Important: When running tests locally, make sure your Docker Memory Allocation resources are set to **15 GB RAM** or above.
+
 To start servers with CPS enabled, use the `cps_local` server config set:
 
 ```bash
