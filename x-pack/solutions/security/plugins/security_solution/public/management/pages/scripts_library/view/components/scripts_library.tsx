@@ -15,7 +15,7 @@ import type {
   SortableScriptLibraryFields,
 } from '../../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
-import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useStorage, useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
@@ -38,6 +38,12 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   const getTestId = useTestIdGenerator(dataTestSubj ?? 'ScriptsLibraryPage');
   const history = useHistory();
   const toasts = useToasts();
+  const storage = useStorage();
+
+  const [showNewPageBanner, setShowNewPageBanner] = useState(
+    storage.get('securitySolution.scriptsLibrary.showNewPageBanner') ?? true
+  );
+
   const { pagination: paginationFromUrlParams } = useUrlPagination();
   const {
     kuery: kueryFromUrl,
@@ -57,10 +63,6 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     );
   }, [canWriteScriptsLibrary, showFromUrl]);
 
-  const { storage } = useKibana().services;
-  const [showNewPageBanner, setShowNewPageBanner] = useState(
-    storage.get('securitySolution.scriptsLibrary.showNewPageBanner') ?? true
-  );
   const onBannerDismiss = useCallback(() => {
     setShowNewPageBanner(false);
     storage.set('securitySolution.scriptsLibrary.showNewPageBanner', false);
@@ -236,7 +238,9 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
 
   return (
     <>
-      {showNewPageBanner && <NewPageBanner onDismiss={onBannerDismiss} />}
+      {showNewPageBanner && (
+        <NewPageBanner onDismiss={onBannerDismiss} data-test-subj={getTestId()} />
+      )}
 
       <AdministrationListPage
         data-test-subj={getTestId()}

@@ -17,16 +17,21 @@ import { EndpointScriptsGenerator } from '../../../../../../common/endpoint/data
 import { SCRIPTS_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
-import { useToasts } from '../../../../../common/lib/kibana';
+import { useToasts, useStorage } from '../../../../../common/lib/kibana';
 import { ScriptsLibrary } from './scripts_library';
 import { useGetEndpointScriptsList } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => ({
+  ...jest.requireActual('../../../../../common/lib/kibana'),
+  useToasts: jest.fn(),
+  useStorage: jest.fn(),
+}));
 jest.mock('../../../../hooks/script_library/use_get_scripts_list');
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 const useGetEndpointScriptsListMock = useGetEndpointScriptsList as jest.Mock;
+const useStorageMock = useStorage as jest.Mock;
 const useToastsMock = useToasts as jest.Mock;
 
 describe('ScriptsLibrary', () => {
@@ -36,6 +41,9 @@ describe('ScriptsLibrary', () => {
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
   let defaultMockGetScriptsResponse: ReturnType<typeof useGetEndpointScriptsListMock>;
+  let mockStorageGet: jest.Mock;
+  let mockStorageSet: jest.Mock;
+  let mockAddDanger: jest.Mock;
 
   const getScriptsListMock = (scriptsList: EndpointScript[]) => {
     (useGetEndpointScriptsListMock as jest.Mock).mockReturnValue({
@@ -62,8 +70,17 @@ describe('ScriptsLibrary', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
 
+    mockStorageGet = jest.fn().mockReturnValue(true);
+    mockStorageSet = jest.fn();
+
+    (useStorageMock as jest.Mock).mockReturnValue({
+      get: mockStorageGet,
+      set: mockStorageSet,
+    });
+
+    mockAddDanger = jest.fn();
     (useToastsMock as jest.Mock).mockReturnValue({
-      addDanger: jest.fn(),
+      addDanger: mockAddDanger,
     });
 
     defaultMockGetScriptsResponse = {
@@ -156,6 +173,71 @@ describe('ScriptsLibrary', () => {
     });
   });
 
+  describe('Page banner', () => {
+    it('should show new page banner', () => {
+      render();
+      const { getByTestId, getByText } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+
+      expect(getByText('New: Scripts library')).toBeInTheDocument();
+      expect(
+        getByText(
+          'Create and manage reusable scripts that can be run on endpoints during investigations and response.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should show a `learn more` link within the banner', () => {
+      render();
+      const { getByTestId } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+
+      const learnMoreLink = banner.querySelector('a');
+      expect(learnMoreLink).toBeInTheDocument();
+      expect(learnMoreLink?.getAttribute('href')).toContain('scripts-library');
+    });
+
+    it('should not show new page banner after it is dismissed', async () => {
+      render();
+      const { getByTestId, queryByTestId } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+
+      const dismissButton = getByTestId('euiDismissCalloutButton');
+      await userEvent.click(dismissButton);
+
+      await waitFor(() => {
+        expect(queryByTestId('test-new-page-banner')).not.toBeInTheDocument();
+      });
+
+      // Verify that the dismiss was recorded in storage
+      expect(mockStorageSet).toHaveBeenCalledWith(
+        'securitySolution.scriptsLibrary.showNewPageBanner',
+        false
+      );
+    });
+
+    it('should not show the banner when storage value is set to false (dismissed)', () => {
+      mockStorageGet.mockReturnValue(false);
+
+      render();
+      const { queryByTestId } = renderResult;
+      const banner = queryByTestId('test-new-page-banner');
+      expect(banner).not.toBeInTheDocument();
+    });
+
+    it('should show the banner when storage value is cleared', () => {
+      mockStorageSet.mockReturnValue(undefined);
+
+      render();
+      const { getByTestId } = renderResult;
+      const banner = getByTestId('test-new-page-banner');
+      expect(banner).toBeInTheDocument();
+    });
+  });
+
   describe('Interactions (with data)', () => {
     const scriptId = 'script-1';
 
@@ -179,7 +261,7 @@ describe('ScriptsLibrary', () => {
       });
 
       render();
-      expect(useToastsMock().addDanger).toHaveBeenCalledWith(
+      expect(mockAddDanger).toHaveBeenCalledWith(
         'There was an error fetching the scripts list: fetch failed!'
       );
     });

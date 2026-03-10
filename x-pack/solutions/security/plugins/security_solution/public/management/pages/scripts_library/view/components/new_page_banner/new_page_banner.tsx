@@ -38,7 +38,12 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
   const getTestId = useTestIdGenerator(dataTestSubj);
   return (
     <>
-      <EuiCallOut announceOnMount color="primary" onDismiss={onDismiss} iconType="info">
+      <EuiCallOut
+        announceOnMount
+        color="primary"
+        onDismiss={onDismiss}
+        data-test-subj={getTestId('new-page-banner')}
+      >
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
           <EuiFlexItem grow={false} alignSelf="flexStart" data-test-subj={getTestId('banner-icon')}>
             <BannerIcon />
@@ -67,7 +72,7 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
             <EuiLink
               href="https://www.elastic.co/guide/en/security/current/scripts-library.html"
               target="_blank"
-              data-test-subj={getTestId('learn-more-link')}
+              data-test-subj={getTestId('new-page-banner-learn-more-link')}
             >
               <FormattedMessage
                 id="xpack.securitySolution.management.scriptsLibrary.newPageBanner.learnMoreLink"
