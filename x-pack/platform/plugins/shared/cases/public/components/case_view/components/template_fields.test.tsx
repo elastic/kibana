@@ -123,7 +123,8 @@ describe('TemplateFields', () => {
       ...mockTemplate,
       definition: {
         name: 'Test',
-        fields: [{ name: 'unknown', control: 'UNKNOWN_CONTROL' as FieldType, type: 'keyword' }],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fields: [{ name: 'unknownField', control: 'UNKNOWN_TYPE' as any, type: 'keyword' }],
       },
     };
     mockUseGetTemplate.mockReturnValue({ data: templateWithUnknown, isLoading: false });

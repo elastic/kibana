@@ -43,6 +43,7 @@ import { useGetCaseConfiguration } from '../../../containers/configure/use_get_c
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 import { KibanaServices } from '../../../common/lib/kibana';
+import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
 
 jest.mock('./template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,

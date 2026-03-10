@@ -6,14 +6,11 @@
  */
 
 import { useCallback, useState } from 'react';
-import deepEqual from 'fast-deep-equal';
 
-import type { CaseStatuses, CaseAttributes, CaseConnector } from '../../../common/types/domain';
-import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { CaseUI, UpdateByKey, UpdateKey } from '../../containers/types';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { getTypedPayload } from '../../containers/utils';
 import type { OnUpdateFields } from './types';
+import { processFieldUpdate } from './utils';
 
 export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
   const { isLoading, mutate: updateCaseProperty } = useUpdateCase();
@@ -43,73 +40,7 @@ export const useOnUpdateField = ({ caseData }: { caseData: CaseUI }) => {
         );
       };
 
-      switch (key) {
-        case 'title':
-          const titleUpdate = getTypedPayload<string>(value);
-          if (titleUpdate.length > 0) {
-            callUpdate('title', titleUpdate);
-          }
-          break;
-        case 'connector':
-          const connector = getTypedPayload<CaseConnector>(value);
-          if (connector != null) {
-            callUpdate('connector', connector);
-          }
-          break;
-        case 'description':
-          const descriptionUpdate = getTypedPayload<string>(value);
-          if (descriptionUpdate.length > 0) {
-            callUpdate('description', descriptionUpdate);
-          }
-          break;
-        case 'tags':
-          const tagsUpdate = getTypedPayload<string[]>(value);
-          callUpdate('tags', tagsUpdate);
-          break;
-        case 'category':
-          const categoryUpdate = getTypedPayload<string>(value);
-          callUpdate('category', categoryUpdate);
-          break;
-        case 'status':
-          const statusUpdate = getTypedPayload<CaseStatuses>(value);
-          if (caseData.status !== value) {
-            callUpdate('status', statusUpdate);
-          }
-          break;
-        case 'settings':
-          const settingsUpdate = getTypedPayload<CaseAttributes['settings']>(value);
-          if (caseData.settings !== value) {
-            callUpdate('settings', settingsUpdate);
-          }
-          break;
-        case 'severity':
-          const severityUpdate = getTypedPayload<CaseAttributes['severity']>(value);
-          if (caseData.severity !== value) {
-            callUpdate('severity', severityUpdate);
-          }
-          break;
-        case 'assignees':
-          const assigneesUpdate = getTypedPayload<CaseAttributes['assignees']>(value);
-          if (!deepEqual(caseData.assignees, value)) {
-            callUpdate('assignees', assigneesUpdate);
-          }
-          break;
-        case 'customFields':
-          const customFields = getTypedPayload<CaseAttributes['customFields']>(value);
-          if (!deepEqual(caseData.customFields, value)) {
-            callUpdate('customFields', customFields);
-          }
-          break;
-        case CASE_EXTENDED_FIELDS:
-          const extendedFields = {
-            ...caseData.extendedFields,
-            ...value,
-          };
-          callUpdate(CASE_EXTENDED_FIELDS, extendedFields);
-          break;
-        default:
-          break;
-      }
+      processFieldUpdate({ key, value: value as unknown, caseData, callUpdate });
     },
     [updateCaseProperty, caseData]
   );
