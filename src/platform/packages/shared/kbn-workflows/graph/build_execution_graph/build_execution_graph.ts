@@ -16,6 +16,8 @@ import type {
   ForEachStep,
   IfStep,
   KibanaStep,
+  LoopStepProps,
+  MaxIterations,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
@@ -117,14 +119,6 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return createIfGraph(getStepId(currentStep, context), currentStep as IfStep, context);
   }
 
-  if ((currentStep as ForEachStep).type === 'foreach') {
-    return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
-  }
-
-  if ((currentStep as StepWithForeach).foreach) {
-    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
-  }
-
   if ((currentStep as TimeoutProp).timeout) {
     const step = currentStep as BaseStep & TimeoutProp;
     return handleTimeout(
@@ -134,6 +128,14 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
       visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
       context
     );
+  }
+
+  if ((currentStep as ForEachStep).type === 'foreach') {
+    return createForeachGraph(getStepId(currentStep, context), currentStep as ForEachStep, context);
+  }
+
+  if ((currentStep as StepWithForeach).foreach) {
+    return createForeachGraphForStepWithForeach(currentStep as StepWithForeach, context);
   }
 
   if ((currentStep as WaitStep).type === 'wait') {
@@ -396,31 +398,15 @@ function createIfGraphForIfStepLevel(
   return createIfGraph(generatedStepId, ifStep, context);
 }
 
-function visitOnFailure(
-  currentStep: BaseStep,
+function applyOnFailure(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
   onFailureConfiguration: WorkflowOnFailure,
   context: GraphBuildContext
 ): WorkflowGraphType {
-  const stepId = getStepId(currentStep, context);
-  const onFailureGraphNode: GraphNodeUnion = {
-    id: `onFailure_${stepId}`,
-    type: 'on-failure',
-    stepId,
-    stepType: 'on-failure',
-  };
+  let graph = innerGraph;
 
-  context.stack.push(onFailureGraphNode);
-  let graph = createStepsSequence(
-    [
-      {
-        ...currentStep,
-        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
-      } as BaseStep,
-    ],
-    context
-  );
-
-  if (onFailureConfiguration?.retry) {
+  if (onFailureConfiguration.retry) {
     graph = createRetry(stepId, graph, onFailureConfiguration.retry);
   }
 
@@ -437,9 +423,64 @@ function visitOnFailure(
     graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
-  context.stack.pop();
+  return graph;
+}
+
+function applyIterationGuardrails(
+  stepId: string,
+  innerGraph: WorkflowGraphType,
+  loopStep: LoopStepProps,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  let graph = innerGraph;
+
+  const iterationTimeout = loopStep['iteration-timeout'];
+  if (iterationTimeout) {
+    graph = handleTimeout(
+      `iteration_${stepId}`,
+      'step_level_timeout',
+      iterationTimeout,
+      graph,
+      context
+    );
+  }
+
+  const iterationOnFailure = loopStep['iteration-on-failure'];
+  if (iterationOnFailure) {
+    graph = applyOnFailure(`iteration_${stepId}`, graph, iterationOnFailure, context);
+  }
 
   return graph;
+}
+
+function visitOnFailure(
+  currentStep: BaseStep,
+  onFailureConfiguration: WorkflowOnFailure,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const onFailureGraphNode: GraphNodeUnion = {
+    id: `onFailure_${stepId}`,
+    type: 'on-failure',
+    stepId,
+    stepType: 'on-failure',
+  };
+
+  context.stack.push(onFailureGraphNode);
+  const graph = createStepsSequence(
+    [
+      {
+        ...currentStep,
+        'on-failure': undefined, // Remove 'on-failure' to avoid infinite recursion
+      } as BaseStep,
+    ],
+    context
+  );
+
+  const result = applyOnFailure(stepId, graph, onFailureConfiguration, context);
+  context.stack.pop();
+
+  return result;
 }
 
 function handleTimeout(
@@ -764,6 +805,15 @@ function insertGraphBetweenNodes(
   });
 }
 
+function normalizeMaxIterations(raw?: MaxIterations): {
+  maxIterations?: number;
+  onLimit?: 'continue' | 'fail';
+} {
+  if (raw == null) return {};
+  if (typeof raw === 'number') return { maxIterations: raw, onLimit: 'continue' };
+  return { maxIterations: raw.limit, onLimit: raw['on-limit'] };
+}
+
 function createForeachGraph(
   stepId: string,
   foreachStep: ForEachStep,
@@ -784,15 +834,19 @@ function createForeachGraph(
   };
   context.stack.push(enterForeachNode);
   graph.setNode(enterForeachNodeId, enterForeachNode);
+  const { maxIterations, onLimit } = normalizeMaxIterations(foreachStep['max-iterations']);
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
     id: exitNodeId,
     stepType: foreachStep.type,
     stepId,
     startNodeId: enterForeachNodeId,
+    maxIterations,
+    onLimit,
   };
   graph.setNode(exitNodeId, exitForeachNode);
-  const innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  let innerGraph = createStepsSequence(foreachStep.steps || [], context);
+  innerGraph = applyIterationGuardrails(stepId, innerGraph, foreachStep, context);
 
   insertGraphBetweenNodes(graph, innerGraph, enterForeachNodeId, exitNodeId);
   context.stack.pop();
