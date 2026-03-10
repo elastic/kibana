@@ -48,3 +48,27 @@ export const classifyRuleForUiamProvisioning = (
     },
   };
 };
+
+export interface ClassifyRulesResult {
+  provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs>;
+  apiKeysToConvert: Array<ApiKeyToConvert>;
+}
+
+/**
+ * Classifies a batch of rules into skipped (with status docs) and to-convert (rule payloads).
+ */
+export const classifyRulesForUiamProvisioning = (
+  rules: Array<RuleForClassification>
+): ClassifyRulesResult => {
+  const provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs> = [];
+  const apiKeysToConvert: Array<ApiKeyToConvert> = [];
+  for (const rule of rules) {
+    const result = classifyRuleForUiamProvisioning(rule);
+    if (result.action === 'skip') {
+      provisioningStatusForSkippedRules.push(result.status);
+    } else {
+      apiKeysToConvert.push(result.rule);
+    }
+  }
+  return { provisioningStatusForSkippedRules, apiKeysToConvert };
+};

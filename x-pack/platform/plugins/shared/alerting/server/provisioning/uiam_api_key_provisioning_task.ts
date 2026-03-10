@@ -13,21 +13,22 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { UiamApiKeyProvisioningStatus } from '../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import {
   stateSchemaByVersion,
   emptyState,
   type LatestTaskStateSchema,
 } from './uiam_api_key_provisioning_task_state';
 import {
-  createStatusFromBulkUpdateResult,
   createProvisioningRunContext,
-  classifyRuleForUiamProvisioning,
+  classifyRulesForUiamProvisioning,
   fetchFirstBatchOfRulesToConvert,
   getErrorMessage,
   getExcludeRulesFilter,
   buildRuleUpdatesForUiam,
   mapConvertResponseToResult,
+  prepareProvisioningStatusWrite,
+  statusDocsAndOrphanedKeysFromBulkUpdate,
+  type ProvisioningStatusWritePayload,
 } from './lib';
 import type {
   ProvisioningRunContext,
@@ -181,12 +182,14 @@ export class UiamApiKeyProvisioningTask {
     const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
       await this.convertApiKeys(apiKeysToConvert, context);
 
-    const provisioningStatusFromUpdate = await this.updateRules(rulesWithUiamApiKeys, context);
+    const provisioningStatusForUpdatedRules = await this.updateRules(rulesWithUiamApiKeys, context);
 
     await this.updateProvisioningStatus(
-      provisioningStatusForSkippedRules,
-      provisioningStatusForFailedConversions,
-      provisioningStatusFromUpdate,
+      {
+        skipped: provisioningStatusForSkippedRules,
+        failedConversions: provisioningStatusForFailedConversions,
+        updated: provisioningStatusForUpdatedRules,
+      },
       context
     );
 
@@ -201,31 +204,15 @@ export class UiamApiKeyProvisioningTask {
   };
 
   private updateProvisioningStatus = async (
-    provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs>,
-    provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs>,
-    provisioningStatusFromUpdate: Array<ProvisioningStatusDocs>,
+    payload: ProvisioningStatusWritePayload,
     context: ProvisioningRunContext
   ): Promise<void> => {
-    const all = [
-      ...provisioningStatusForSkippedRules,
-      ...provisioningStatusForFailedConversions,
-      ...provisioningStatusFromUpdate,
-    ];
-    if (all.length === 0) {
+    const { docs, counts } = prepareProvisioningStatusWrite(payload);
+    if (docs.length === 0) {
       return;
     }
     try {
-      await context.savedObjectsClient.bulkCreate(all, { overwrite: true });
-      const counts = {
-        skipped: provisioningStatusForSkippedRules.length,
-        failedConversions: provisioningStatusForFailedConversions.length,
-        completed: provisioningStatusFromUpdate.filter(
-          (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.COMPLETED
-        ).length,
-        failed: provisioningStatusFromUpdate.filter(
-          (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.FAILED
-        ).length,
-      };
+      await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
       this.logger.info(
         `Wrote provisioning status: ${counts.skipped} skipped rules, ${counts.failedConversions} failed conversions, ${counts.completed} completed and ${counts.failed} failed updates.`,
         { tags: TAGS }
@@ -247,16 +234,8 @@ export class UiamApiKeyProvisioningTask {
         { excludeRulesFilter, ruleType: RULE_SAVED_OBJECT_TYPE }
       );
 
-      const provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs> = [];
-      const apiKeysToConvert: Array<ApiKeyToConvert> = [];
-      for (const rule of rules) {
-        const result = classifyRuleForUiamProvisioning(rule);
-        if (result.action === 'skip') {
-          provisioningStatusForSkippedRules.push(result.status);
-        } else {
-          apiKeysToConvert.push(result.rule);
-        }
-      }
+      const { provisioningStatusForSkippedRules, apiKeysToConvert } =
+        classifyRulesForUiamProvisioning(rules);
 
       this.logger.info(
         `Found ${apiKeysToConvert.length} API keys to convert. ${provisioningStatusForSkippedRules.length} rules skipped. Has more to provision: ${hasMoreToProvision}.`,
@@ -328,18 +307,10 @@ export class UiamApiKeyProvisioningTask {
     try {
       const bulkRuleUpdateResponse = await context.unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
 
-      const statusDocs: Array<ProvisioningStatusDocs> = [];
-      const orphanedUiamApiKeys: string[] = [];
-
-      for (const so of bulkRuleUpdateResponse.saved_objects) {
-        statusDocs.push(createStatusFromBulkUpdateResult(so));
-        if (so.error) {
-          const uiamApiKey = rulesWithUiamApiKeys.get(so.id)?.uiamApiKey;
-          if (uiamApiKey) {
-            orphanedUiamApiKeys.push(uiamApiKey);
-          }
-        }
-      }
+      const { statusDocs, orphanedUiamApiKeys } = statusDocsAndOrphanedKeysFromBulkUpdate(
+        bulkRuleUpdateResponse.saved_objects,
+        rulesWithUiamApiKeys
+      );
 
       if (orphanedUiamApiKeys.length > 0) {
         await bulkMarkApiKeysForInvalidation(

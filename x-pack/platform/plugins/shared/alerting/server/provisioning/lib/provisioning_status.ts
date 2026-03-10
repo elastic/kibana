@@ -10,7 +10,7 @@ import {
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
-import type { ProvisioningStatusDocs } from '../types';
+import type { ProvisioningStatusDocs, UiamApiKeyByRuleId } from '../types';
 
 /**
  * Builds a provisioning status doc for a rule that was skipped (no API key, already has UIAM key, or user-created key).
@@ -56,6 +56,39 @@ export interface BulkUpdateResultItem {
   error?: { message?: string };
 }
 
+export interface ProvisioningStatusWritePayload {
+  skipped: Array<ProvisioningStatusDocs>;
+  failedConversions: Array<ProvisioningStatusDocs>;
+  updated: Array<ProvisioningStatusDocs>;
+}
+
+export interface ProvisioningStatusCounts {
+  skipped: number;
+  failedConversions: number;
+  completed: number;
+  failed: number;
+}
+
+/**
+ * Builds the flat docs array and counts for a provisioning status write.
+ * Use before bulkCreate and for logging.
+ */
+export const prepareProvisioningStatusWrite = (
+  payload: ProvisioningStatusWritePayload
+): { docs: Array<ProvisioningStatusDocs>; counts: ProvisioningStatusCounts } => {
+  const { skipped, failedConversions, updated } = payload;
+  const docs = [...skipped, ...failedConversions, ...updated];
+  const counts: ProvisioningStatusCounts = {
+    skipped: skipped.length,
+    failedConversions: failedConversions.length,
+    completed: updated.filter((d) => d.attributes.status === UiamApiKeyProvisioningStatus.COMPLETED)
+      .length,
+    failed: updated.filter((d) => d.attributes.status === UiamApiKeyProvisioningStatus.FAILED)
+      .length,
+  };
+  return { docs, counts };
+};
+
 /**
  * Builds a provisioning status doc from a single saved object result of a bulk rule update.
  */
@@ -76,3 +109,29 @@ export const createStatusFromBulkUpdateResult = (
       : {}),
   },
 });
+
+export interface StatusDocsAndOrphanedKeysResult {
+  statusDocs: Array<ProvisioningStatusDocs>;
+  orphanedUiamApiKeys: string[];
+}
+
+/**
+ * Builds status docs from bulk update results and collects UIAM API keys for rules that failed to update (orphaned).
+ */
+export const statusDocsAndOrphanedKeysFromBulkUpdate = (
+  savedObjects: Array<BulkUpdateResultItem>,
+  rulesWithUiamApiKeys: Map<string, UiamApiKeyByRuleId>
+): StatusDocsAndOrphanedKeysResult => {
+  const statusDocs: Array<ProvisioningStatusDocs> = [];
+  const orphanedUiamApiKeys: string[] = [];
+  for (const so of savedObjects) {
+    statusDocs.push(createStatusFromBulkUpdateResult(so));
+    if (so.error) {
+      const uiamApiKey = rulesWithUiamApiKeys.get(so.id)?.uiamApiKey;
+      if (uiamApiKey) {
+        orphanedUiamApiKeys.push(uiamApiKey);
+      }
+    }
+  }
+  return { statusDocs, orphanedUiamApiKeys };
+};
