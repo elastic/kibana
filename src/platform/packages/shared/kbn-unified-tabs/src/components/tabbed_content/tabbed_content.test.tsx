@@ -72,7 +72,9 @@ describe('TabbedContent', () => {
   };
 
   it('can restore all tabs from a recently closed tab set', async () => {
-    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+    const user = userEvent.setup({
+      pointerEventsCheck: 0,
+    });
     const initialItems = [{ id: 'tab1', label: 'Tab 1' }];
     const onChanged = jest.fn();
     const onEBTEvent = jest.fn();
@@ -102,7 +104,7 @@ describe('TabbedContent', () => {
 
     await user.click(screen.getByTestId('unifiedTabs_tabsBarMenuButton'));
     await user.click(screen.getByText('2 tabs'));
-    await user.click(screen.getByTestId('unifiedTabs_tabsMenu_restoreAllTabs'));
+    await user.click(await screen.findByTestId('unifiedTabs_tabsMenu_restoreAllTabs'));
 
     await waitFor(() => {
       expect(onChanged).toHaveBeenCalledWith({
@@ -117,7 +119,7 @@ describe('TabbedContent', () => {
   });
 
   it('can create a new tab and sends tabCreated EBT event', async () => {
-    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+    const user = userEvent.setup();
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -154,7 +156,7 @@ describe('TabbedContent', () => {
   });
 
   it('can close a tab and sends tabClosed EBT event', async () => {
-    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+    const user = userEvent.setup();
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -200,7 +202,7 @@ describe('TabbedContent', () => {
   });
 
   it('can duplicate a tab and sends tabDuplicated event', async () => {
-    const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+    const user = userEvent.setup();
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
       { id: 'tab2', label: 'Tab 2' },
@@ -254,11 +256,7 @@ describe('TabbedContent', () => {
   });
 
   it('correctly numbers duplicate tabs when multiple copies exist', async () => {
-    const user = userEvent.setup({
-      delay: null,
-      advanceTimers: jest.advanceTimersByTime,
-      pointerEventsCheck: 0,
-    });
+    const user = userEvent.setup();
 
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
@@ -299,7 +297,7 @@ describe('TabbedContent', () => {
   });
 
   it('correctly duplicates tabs with regex special characters in the label', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
 
     const tabWithSpecialChars = { id: 'tab1', label: 'Tab (1+2)*.?' };
     const initialItems = [tabWithSpecialChars, { id: 'tab2', label: 'Regular Tab' }];
@@ -336,7 +334,7 @@ describe('TabbedContent', () => {
   });
 
   it('can switch to a different tab and sends tabSwitched event', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
 
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
@@ -371,7 +369,7 @@ describe('TabbedContent', () => {
   });
 
   it('can close other tabs and sends tabClosedOthers event', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
 
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
@@ -417,7 +415,7 @@ describe('TabbedContent', () => {
   });
 
   it('can close tabs to the right and sends tabClosedToTheRight event', async () => {
-    const user = userEvent.setup({ delay: null, advanceTimers: jest.advanceTimersByTime });
+    const user = userEvent.setup();
 
     const initialItems = [
       { id: 'tab1', label: 'Tab 1' },
