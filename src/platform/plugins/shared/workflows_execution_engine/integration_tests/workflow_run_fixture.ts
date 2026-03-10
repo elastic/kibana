@@ -111,7 +111,9 @@ export class WorkflowRunFixture {
       status: ExecutionStatus.PENDING,
       createdAt: new Date().toISOString(),
       createdBy: 'system',
-      triggeredBy: 'system', // <-- new field for scheduled workflows
+      triggeredBy: 'system',
+      stepExecutionsIndex: '.workflows-step-executions-000001',
+      executionsIndex: '.workflows-executions-000001',
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
       'fake_workflow_execution_id',
@@ -165,7 +167,9 @@ export class WorkflowRunFixture {
       status: ExecutionStatus.PENDING,
       createdAt: new Date().toISOString(),
       createdBy: 'system',
-      triggeredBy: 'system', // <-- new field for scheduled workflows
+      triggeredBy: 'system',
+      stepExecutionsIndex: '.workflows-step-executions-000001',
+      executionsIndex: '.workflows-executions-000001',
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
       'fake_workflow_execution_id',
