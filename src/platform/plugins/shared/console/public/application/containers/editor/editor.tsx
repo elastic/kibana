@@ -79,6 +79,8 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
+  // note that the currentTextObject isn't updated, but its ok
+  // because its really just providing a createdAt date
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedUpdateLocalStorageValue = useCallback(
     debounce((newValue: string | undefined) => {
