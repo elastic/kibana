@@ -34,6 +34,50 @@ describe(
   },
   () => {
     const WATCHLISTS_LIST_URL = `${WATCHLISTS_URL}/list`;
+    const visitWatchlistsPage = () => {
+      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
+      cy.wait('@watchlistsPrivileges');
+    };
+
+    const interceptWatchlistsList = (
+      getBody: () => Array<{
+        id: string;
+        name: string;
+        description: string;
+        users: Array<{ name: string }>;
+        riskModifier: number;
+        source: string;
+        updatedAt: string;
+      }>
+    ) => {
+      cy.intercept('GET', WATCHLISTS_LIST_URL, (req) => {
+        req.reply({
+          statusCode: 200,
+          body: getBody(),
+        });
+      }).as('watchlistsList');
+    };
+
+    const buildWatchlist = (
+      overrides: Partial<{
+        id: string;
+        name: string;
+        description: string;
+        users: Array<{ name: string }>;
+        riskModifier: number;
+        source: string;
+        updatedAt: string;
+      }> = {}
+    ) => ({
+      id: 'watchlist-1',
+      name: 'Test watchlist',
+      description: 'Test watchlist description',
+      users: [{ name: 'user-1' }],
+      riskModifier: 1.5,
+      source: 'manual',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      ...overrides,
+    });
 
     beforeEach(() => {
       login();
@@ -66,8 +110,7 @@ describe(
         body: [],
       }).as('watchlistsList');
 
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.wait('@watchlistsPrivileges');
+      visitWatchlistsPage();
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
@@ -78,8 +121,7 @@ describe(
         body: { message: 'Internal Server Error' },
       }).as('watchlistsList');
 
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.wait('@watchlistsPrivileges');
+      visitWatchlistsPage();
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_ERROR).should('exist');
     });
@@ -91,8 +133,7 @@ describe(
         body: [],
       }).as('watchlistsList');
 
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.wait('@watchlistsPrivileges');
+      visitWatchlistsPage();
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('exist');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_LOADING).should('not.exist');
@@ -102,21 +143,90 @@ describe(
       cy.intercept('GET', WATCHLISTS_LIST_URL, {
         statusCode: 200,
         body: [
-          {
-            name: 'Test watchlist',
+          buildWatchlist({
             users: [{ name: 'user-1' }, { name: 'user-2' }],
             riskModifier: 50,
-            source: 'manual',
-            updatedAt: '2024-01-01T00:00:00.000Z',
-          },
+          }),
         ],
       }).as('watchlistsList');
 
-      visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.wait('@watchlistsPrivileges');
+      visitWatchlistsPage();
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains('Test watchlist');
+    });
+
+    it('creates a watchlist via the flyout', () => {
+      const watchlistName = 'CypressWatchlist';
+      const watchlistDescription = 'Watchlist created via flyout';
+      let watchlists: Array<{
+        id: string;
+        name: string;
+        description: string;
+        users: Array<{ name: string }>;
+        riskModifier: number;
+        source: string;
+        updatedAt: string;
+      }> = [];
+
+      interceptWatchlistsList(() => watchlists);
+
+      cy.intercept('POST', WATCHLISTS_URL, (req) => {
+        expect(req.body).to.include({
+          name: watchlistName,
+          description: watchlistDescription,
+        });
+        const createdWatchlist = buildWatchlist({
+          name: watchlistName,
+          description: watchlistDescription,
+          riskModifier: req.body.riskModifier ?? 1.5,
+          updatedAt: new Date().toISOString(),
+        });
+        watchlists = [createdWatchlist];
+        req.reply({ statusCode: 200, body: createdWatchlist });
+      }).as('createWatchlist');
+
+      visitWatchlistsPage();
+      cy.wait('@watchlistsList');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
+
+      cy.contains('button', 'Create').click();
+      cy.get('[data-test-subj="watchlist-flyout-header"]').should('exist');
+      cy.get('input[name="Enter Watchlist Name"]').type(watchlistName);
+      cy.get('input[name="Enter Watchlist Description"]').type(watchlistDescription);
+      cy.contains('button', 'Save').click();
+      cy.wait('@createWatchlist');
+      cy.wait('@watchlistsList');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(watchlistName);
+    });
+
+    it('deletes a watchlist via the actions menu', () => {
+      const existingWatchlist = buildWatchlist({
+        name: 'Existing Watchlist',
+        description: 'Watchlist ready for deletion',
+      });
+      let watchlists = [existingWatchlist];
+
+      interceptWatchlistsList(() => watchlists);
+
+      cy.intercept('DELETE', `${WATCHLISTS_URL}/*`, (req) => {
+        watchlists = [];
+        req.reply({ statusCode: 200, body: { deleted: true } });
+      }).as('deleteWatchlist');
+
+      visitWatchlistsPage();
+      cy.wait('@watchlistsList');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).should('exist');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(existingWatchlist.name);
+
+      cy.get('[aria-label="Watchlist actions"]').click();
+      cy.get('[data-test-subj="watchlistsManagementTableActionDelete"]').click();
+      cy.get('[data-test-subj="watchlistsDeleteConfirmationModal"]').should('exist');
+      cy.contains('button', 'Delete').click();
+      cy.wait('@deleteWatchlist');
+      cy.wait('@watchlistsList');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
   }
 );
