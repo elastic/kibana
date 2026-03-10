@@ -22,6 +22,7 @@ import * as rx from 'rxjs';
 import type { ElasticsearchClient, LogMeta, Logger } from '@kbn/core/server';
 import type {
   EqlSearchRequest,
+  Indices,
   SearchRequest,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -31,7 +32,11 @@ import {
   type CircuitBreaker,
   type CircuitBreakerResult,
 } from './health_diagnostic_circuit_breakers.types';
-import { type HealthDiagnosticQuery, QueryType } from './health_diagnostic_service.types';
+import {
+  type HealthDiagnosticQuery,
+  QueryType,
+  PermissionError,
+} from './health_diagnostic_service.types';
 import type { TelemetryLogger } from '../telemetry_logger';
 import { newTelemetryLogger, withErrorMessage } from '../helpers';
 
@@ -107,6 +112,33 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     );
   }
 
+  private async checkPermissions(index: Indices) {
+    try {
+      const resp = await this.client.indices.get({ index });
+      if (Object.entries(resp).length === 0) {
+        throw new PermissionError('Index does not exist');
+      }
+    } catch (e) {
+      throw new PermissionError(`Error accessing index: ${e}`);
+    }
+
+    try {
+      const res = await this.client.security.hasPrivileges({
+        index: [
+          {
+            names: index,
+            privileges: ['read'],
+          },
+        ],
+      });
+      if (!res.has_all_requested) {
+        throw new PermissionError('Missing read privileges');
+      }
+    } catch (e) {
+      throw new PermissionError(`Error checking privileges: ${e}`);
+    }
+  }
+
   streamDSL<T>(
     diagnosticQuery: HealthDiagnosticQuery,
     abortSignal: AbortSignal,
@@ -130,8 +162,13 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     };
 
     return from(this.indicesFor(diagnosticQuery)).pipe(
-      mergeMap((index) => from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }))),
-
+      mergeMap((index) =>
+        from(this.checkPermissions(index)).pipe(
+          mergeMap(() => {
+            return from(this.client.openPointInTime({ index, keep_alive: pitKeepAlive }));
+          })
+        )
+      ),
       map((res) => res.id),
 
       mergeMap((id) => {
@@ -164,9 +201,11 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
       }),
 
       finalize(() => {
-        this.client.closePointInTime({ id: pitId }).catch((error) => {
-          this.logger.warn('>> closePointInTime error', withErrorMessage(error));
-        });
+        if (pitId !== undefined) {
+          this.client.closePointInTime({ id: pitId }).catch((error) => {
+            this.logger.warn('>> closePointInTime error', withErrorMessage(error));
+          });
+        }
       })
     );
   }
