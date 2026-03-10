@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
-export const CUSTOM_TRIGGER_ID = 'example.custom_trigger' as const;
+export const CUSTOM_TRIGGER_ID = 'example.customTrigger' as const;
 
 /** Example categories for conditional subscription (workflows can filter with event.category). */
 export const CUSTOM_TRIGGER_CATEGORIES = ['alerts', 'notifications', 'audit', 'demo'] as const;
