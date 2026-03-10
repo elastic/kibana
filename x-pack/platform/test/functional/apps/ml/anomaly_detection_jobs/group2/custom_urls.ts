@@ -11,8 +11,8 @@ import type {
   DiscoverUrlConfig,
   DashboardUrlConfig,
   OtherUrlConfig,
-} from '../../../services/ml/job_table';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+} from '../../../../services/ml/job_table';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 // @ts-expect-error doesn't implement the full interface
 const JOB_CONFIG: Job = {

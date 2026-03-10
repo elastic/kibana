@@ -5,30 +5,44 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FieldStatsType } from '../../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const jobId = `ec_geo_1_${Date.now()}`;
+  const jobId = `ec_population_1_${Date.now()}`;
   const jobIdClone = `${jobId}_clone`;
-  const jobDescription = 'Create geo job based on the ecommerce sample dataset with 15m bucketspan';
-  const jobGroups = ['automated', 'ecommerce', 'geo'];
+  const jobDescription =
+    'Create population job based on the ecommerce sample dataset with 2h bucketspan over customer_id' +
+    ' - detectors: (Mean(products.base_price) by customer_gender), (Mean(products.quantity) by category.leyword)';
+  const jobGroups = ['automated', 'ecommerce', 'population'];
   const jobGroupsClone = [...jobGroups, 'clone'];
-  const geoField = 'geoip.location';
-  const splitField = 'customer_gender';
+  const populationField = 'customer_id';
   const detectors = [
     {
-      identifier: 'Lat long(geoip.location)',
+      identifier: 'Mean(products.base_price)',
+      splitField: 'customer_gender',
+      frontCardTitle: 'FEMALE',
+      numberOfBackCards: 1,
+    },
+    {
+      identifier: 'Mean(products.quantity)',
+      splitField: 'category.keyword',
       frontCardTitle: "Men's Clothing",
-      function: 'lat_long',
-      field_name: geoField,
       numberOfBackCards: 5,
-      splitField,
     },
   ];
-  const bucketSpan = '15m';
+  const fieldStatsEntries = [
+    {
+      fieldName: 'currency',
+      type: 'keyword' as FieldStatsType,
+      expectedValues: ['EUR'],
+    },
+  ];
+
+  const bucketSpan = '2h';
   const memoryLimit = '8mb';
 
   function getExpectedRow(expectedJobId: string, expectedJobGroups: string[]) {
@@ -48,19 +62,19 @@ export default function ({ getService }: FtrProviderContext) {
     return {
       job_id: expectedJobId,
       processed_record_count: '4,675',
-      processed_field_count: '9,350',
-      input_bytes: '504.1 KB',
-      input_field_count: '9,350',
+      processed_field_count: '23,375',
+      input_bytes: '867.7 KB',
+      input_field_count: '23,375',
       invalid_date_count: '0',
       missing_field_count: '0',
       out_of_order_timestamp_count: '0',
-      empty_bucket_count: '492',
+      empty_bucket_count: '0',
       sparse_bucket_count: '0',
-      bucket_count: '2,975',
+      bucket_count: '371',
       earliest_record_timestamp: '2023-06-12 00:04:19',
       latest_record_timestamp: '2023-07-12 23:45:36',
       input_record_count: '4,675',
-      latest_bucket_timestamp: '2023-07-12 23:45:00',
+      latest_bucket_timestamp: '2023-07-12 22:00:00',
     };
   }
 
@@ -69,18 +83,18 @@ export default function ({ getService }: FtrProviderContext) {
       job_id: expectedJobId,
       result_type: 'model_size_stats',
       model_bytes_exceeded: '0.0 B',
-      total_by_field_count: '4',
-      total_over_field_count: '0',
+      total_by_field_count: '25',
+      total_over_field_count: '92',
       total_partition_field_count: '3',
       bucket_allocation_failures_count: '0',
       memory_status: 'ok',
-      timestamp: '2023-07-12 23:30:00',
+      timestamp: '2023-07-12 20:00:00',
     };
   }
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('geo', function () {
+  describe('population', function () {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
@@ -96,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
-    it('job creation loads the geo wizard for the source data', async () => {
+    it('job creation loads the population wizard for the source data', async () => {
       await ml.testExecution.logTestStep('job creation loads the job management page');
       await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
@@ -106,13 +120,14 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation loads the job type selection page');
       await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ft_ecommerce');
 
-      await ml.testExecution.logTestStep('job creation loads the geo job wizard page');
-      await ml.jobTypeSelection.selectGeoJob();
+      await ml.testExecution.logTestStep('job creation loads the population job wizard page');
+      await ml.jobTypeSelection.selectPopulationJob();
     });
 
-    it('job creation navigates through the geo wizard and sets all needed fields', async () => {
+    it('job creation navigates through the population wizard and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job creation displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
+      await ml.commonUI.assertDatePickerDataTierOptionsVisible(true);
 
       await ml.testExecution.logTestStep('job creation sets the time range');
       await ml.jobWizardCommon.clickUseFullDataButton(
@@ -127,28 +142,53 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('job creation selects the geo field');
-      await ml.jobWizardGeo.assertGeoFieldInputExists();
-      await ml.jobWizardGeo.selectGeoField(geoField);
+      await ml.testExecution.logTestStep(
+        'job creation opens field stats flyout from population field input'
+      );
+      await ml.jobWizardPopulation.assertPopulationFieldInputExists();
+      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
+        await ml.jobWizardPopulation.assertFieldStatFlyoutContentFromPopulationFieldInputTrigger(
+          fieldName,
+          fieldType,
+          expectedValues
+        );
+      }
 
-      await ml.testExecution.logTestStep('job creation displays detector preview');
-
-      await ml.jobWizardGeo.assertDetectorPreviewExists(detectors[0].identifier);
+      await ml.testExecution.logTestStep('job creation selects the population field');
+      await ml.jobWizardPopulation.selectPopulationField(populationField);
 
       await ml.testExecution.logTestStep(
-        'job creation inputs the split field and displays split cards'
+        'job creation selects detectors and displays detector previews'
       );
+      for (const [index, detector] of detectors.entries()) {
+        await ml.jobWizardCommon.assertAggAndFieldInputExists();
+        await ml.jobWizardCommon.selectAggAndField(detector.identifier, false);
+        await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
+      }
 
-      await ml.jobWizardMultiMetric.assertSplitFieldInputExists();
-      await ml.jobWizardMultiMetric.selectSplitField(splitField);
+      await ml.testExecution.logTestStep(
+        'job creation inputs detector split fields and displays split cards'
+      );
+      for (const [index, detector] of detectors.entries()) {
+        await ml.jobWizardPopulation.assertDetectorSplitFieldInputExists(index);
+        await ml.jobWizardPopulation.selectDetectorSplitField(index, detector.splitField);
 
-      await ml.jobWizardMultiMetric.assertDetectorSplitExists(splitField);
-      await ml.jobWizardMultiMetric.assertDetectorSplitFrontCardTitle('FEMALE');
-      await ml.jobWizardMultiMetric.assertDetectorSplitNumberOfBackCards(1);
+        await ml.jobWizardPopulation.assertDetectorSplitExists(index);
+        await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
+          index,
+          detector.frontCardTitle
+        );
+        await ml.jobWizardPopulation.assertDetectorSplitNumberOfBackCards(
+          index,
+          detector.numberOfBackCards
+        );
+      }
 
       await ml.testExecution.logTestStep('job creation displays the influencer field');
       await ml.jobWizardCommon.assertInfluencerInputExists();
-      await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
+      await ml.jobWizardCommon.assertInfluencerSelection(
+        [populationField].concat(detectors.map((detector) => detector.splitField))
+      );
 
       await ml.testExecution.logTestStep('job creation inputs the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
@@ -229,15 +269,15 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('job cloning opens the existing job in the geo wizard', async () => {
+    it('job cloning opens the existing job in the population wizard', async () => {
       await ml.testExecution.logTestStep(
-        'job cloning clicks the clone action and loads the geo wizard'
+        'job cloning clicks the clone action and loads the population wizard'
       );
       await ml.jobTable.clickCloneJobAction(jobId);
-      await ml.jobTypeSelection.assertGeoJobWizardOpen();
+      await ml.jobTypeSelection.assertPopulationJobWizardOpen();
     });
 
-    it('job cloning navigates through the geo wizard, checks and sets all needed fields', async () => {
+    it('job cloning navigates through the population wizard, checks and sets all needed fields', async () => {
       await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
@@ -254,18 +294,35 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('job cloning pre-fills the geo field');
-      await ml.jobWizardGeo.assertGeoFieldInputExists();
-      await ml.jobWizardGeo.assertGeoFieldSelection([geoField]);
+      await ml.testExecution.logTestStep('job cloning pre-fills the population field');
+      await ml.jobWizardPopulation.assertPopulationFieldInputExists();
+      await ml.jobWizardPopulation.assertPopulationFieldSelection([populationField]);
 
       await ml.testExecution.logTestStep(
-        'job cloning displays the detector preview with pre-filled geo field'
+        'job cloning pre-fills detectors and shows preview with split cards'
       );
-      await ml.jobWizardGeo.assertDetectorPreviewExists(detectors[0].identifier);
+      for (const [index, detector] of detectors.entries()) {
+        await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
+
+        await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(index, [
+          detector.splitField,
+        ]);
+        await ml.jobWizardPopulation.assertDetectorSplitExists(index);
+        await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
+          index,
+          detector.frontCardTitle
+        );
+        await ml.jobWizardPopulation.assertDetectorSplitNumberOfBackCards(
+          index,
+          detector.numberOfBackCards
+        );
+      }
 
       await ml.testExecution.logTestStep('job cloning pre-fills influencers');
       await ml.jobWizardCommon.assertInfluencerInputExists();
-      await ml.jobWizardCommon.assertInfluencerSelection([splitField]);
+      await ml.jobWizardCommon.assertInfluencerSelection(
+        [populationField].concat(detectors.map((detector) => detector.splitField))
+      );
 
       await ml.testExecution.logTestStep('job cloning pre-fills the bucket span');
       await ml.jobWizardCommon.assertBucketSpanInputExists();
@@ -313,6 +370,12 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job cloning pre-fills the dedicated index switch');
       await ml.jobWizardCommon.assertDedicatedIndexSwitchExists();
       await ml.jobWizardCommon.assertDedicatedIndexSwitchCheckedState(true);
+
+      // MML during clone has changed in #61589
+      // TODO: adjust test code to reflect the new behavior
+      // await ml.testExecution.logTestStep('job cloning pre-fills the model memory limit');
+      // await ml.jobWizardCommon.assertModelMemoryLimitInputExists();
+      // await ml.jobWizardCommon.assertModelMemoryLimitValue(memoryLimit);
 
       await ml.testExecution.logTestStep('job cloning displays the validation step');
       await ml.jobWizardCommon.advanceToValidationSection();
