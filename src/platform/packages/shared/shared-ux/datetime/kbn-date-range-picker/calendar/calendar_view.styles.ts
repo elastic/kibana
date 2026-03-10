@@ -110,12 +110,18 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
     }
     
     .rdp-range_middle .rdp-day_button {
+      position: relative;
       background-color: ${euiTheme.colors.backgroundLightPrimary};
       border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.backgroundLightPrimary};
       color: ${euiTheme.colors.textPrimary};
 
-      &:hover {
+      /* We use the same layering method as EuiButton */
+      &:hover::before {
+        content: '';
+        position: absolute;
+        inset: 0;
         background-color: ${euiTheme.components.buttons.backgroundPrimaryHover};
+        pointer-events: none;
       }
     }
 
