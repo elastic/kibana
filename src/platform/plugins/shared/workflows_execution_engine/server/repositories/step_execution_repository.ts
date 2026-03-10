@@ -64,11 +64,13 @@ export class StepExecutionRepository {
    */
   public async getStepExecutionsByWorkflowExecution(
     workflowExecutionId: string,
+    stepsExecutionWriteIndex?: string,
     stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return getStepExecutionsByWorkflowExecutionShared({
       esClient: this.esClient,
-      stepsExecutionIndex: this.indexName,
+      stepsExecutionIndexAlias: this.indexName,
+      stepsExecutionIndex: stepsExecutionWriteIndex,
       workflowExecutionId,
       stepExecutionIds,
     });

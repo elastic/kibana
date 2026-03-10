@@ -71,7 +71,8 @@ export const getWorkflowExecution = async ({
 
     const stepExecutions = await getStepExecutionsByWorkflowExecution({
       esClient,
-      stepsExecutionIndex,
+      stepsExecutionIndex: doc.stepExecutionsIndex,
+      stepsExecutionIndexAlias: stepsExecutionIndex,
       workflowExecutionId,
       stepExecutionIds: doc.stepExecutionIds,
       sourceExcludes,

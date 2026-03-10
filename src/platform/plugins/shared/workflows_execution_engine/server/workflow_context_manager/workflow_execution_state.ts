@@ -121,7 +121,7 @@ export class WorkflowExecutionState {
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(
       stepDocumentsChanges,
-      this.workflowExecution.stepExecutionsWriteIndex
+      this.workflowExecution.stepExecutionsIndex
     );
   }
 

@@ -41,7 +41,8 @@ export const getStepExecutionsByIds = async (
 
 interface GetStepExecutionsByWorkflowExecutionParams {
   esClient: ElasticsearchClient;
-  stepsExecutionIndex: string;
+  stepsExecutionIndex?: string;
+  stepsExecutionIndexAlias: string;
   workflowExecutionId: string;
   stepExecutionIds?: string[];
   sourceExcludes?: string[];
@@ -54,17 +55,18 @@ interface GetStepExecutionsByWorkflowExecutionParams {
  */
 export const getStepExecutionsByWorkflowExecution = async ({
   esClient,
+  stepsExecutionIndexAlias: stepsExecutionAlias,
   stepsExecutionIndex,
   workflowExecutionId,
   stepExecutionIds,
   sourceExcludes,
 }: GetStepExecutionsByWorkflowExecutionParams): Promise<EsWorkflowStepExecution[]> => {
-  if (stepExecutionIds && stepExecutionIds.length > 0) {
+  if (stepsExecutionIndex && stepExecutionIds && stepExecutionIds.length > 0) {
     return getStepExecutionsByIds(esClient, stepsExecutionIndex, stepExecutionIds, sourceExcludes);
   }
 
   const response = await esClient.search<EsWorkflowStepExecution>({
-    index: stepsExecutionIndex,
+    index: stepsExecutionAlias,
     query: {
       match: { workflowRunId: workflowExecutionId },
     },

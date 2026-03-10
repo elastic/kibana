@@ -116,7 +116,7 @@ export interface EsWorkflowExecution {
   /** IDs of all step executions, enables O(1) mget lookup instead of search */
   stepExecutionIds?: string[];
   /** Pinned backing index for step executions — prevents cross-index splitting on rollover */
-  stepExecutionsWriteIndex?: string;
+  stepExecutionsIndex?: string;
 }
 
 export interface ProviderInput {

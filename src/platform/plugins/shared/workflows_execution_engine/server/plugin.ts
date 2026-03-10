@@ -435,7 +435,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              workflowExecution.stepExecutionsWriteIndex =
+              workflowExecution.stepExecutionsIndex =
                 await stepExecutionRepository.resolveWriteIndex();
 
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
@@ -553,7 +553,7 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
-      workflowExecution.stepExecutionsWriteIndex = await stepExecutionRepo.resolveWriteIndex();
+      workflowExecution.stepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
@@ -722,7 +722,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
-        stepExecutionsWriteIndex: await stepExecutionRepo.resolveWriteIndex(),
+        stepExecutionsIndex: await stepExecutionRepo.resolveWriteIndex(),
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
