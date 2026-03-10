@@ -89,4 +89,46 @@ describe('buildTimelineEventsAllQuery', () => {
       }
     `);
   });
+
+  it('uses dateRangeField when provided for timerange, sort, and fields', () => {
+    const query = buildTimelineEventsAllQuery({
+      factoryQueryType: TimelineEventsQueries.all,
+      fields: [],
+      defaultIndex: ['.siem-signals-default'],
+      filterQuery: '',
+      language: 'kuery',
+      dateRangeField: 'event.ingested',
+      pagination: { activePage: 0, querySize: 100 },
+      runtimeMappings: {},
+      sort: [
+        {
+          direction: Direction.asc,
+          field: 'event.ingested',
+          type: 'datetime',
+          esTypes: ['date'],
+        },
+      ],
+      timerange: {
+        from: '2024-01-01T00:00:00.000Z',
+        interval: '5m',
+        to: '2024-01-02T00:00:00.000Z',
+      },
+    });
+    expect(query.body.query.bool.filter).toContainEqual({
+      range: {
+        'event.ingested': {
+          gte: '2024-01-01T00:00:00.000Z',
+          lte: '2024-01-02T00:00:00.000Z',
+          format: 'strict_date_optional_time',
+        },
+      },
+    });
+    expect(query.body.sort).toEqual([
+      { 'event.ingested': { order: 'asc', unmapped_type: 'date' } },
+    ]);
+    expect(query.body.fields).toContainEqual({
+      field: 'event.ingested',
+      format: 'strict_date_optional_time',
+    });
+  });
 });
