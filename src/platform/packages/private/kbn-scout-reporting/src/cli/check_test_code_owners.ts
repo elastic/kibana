@@ -47,8 +47,7 @@ async function getTestFileGroups(): Promise<TestFileGroup[]> {
     getRepoFiles(JEST_TEST_PATTERNS),
   ]);
 
-  // A file can match multiple groups (e.g. a .test.ts inside an FTR test tree
-  // matches both FTR and Jest). We deduplicate so each file appears in exactly
+  // A file can match multiple groups. We deduplicate so each file appears in exactly
   // one bucket, with more-specific patterns claiming first: Scout > FTR > Jest
   const seen = new Set(scoutFiles.map((f) => f.repoRel));
   const dedup = (files: RepoPath[]): RepoPath[] =>
