@@ -183,16 +183,21 @@ export const getDatatableVisualization = ({
           }
         }
 
-        // Handle palettes that don't support dynamic coloring (categorical-only palettes)
-        // Replace them with default color-by-value palette
+        // Handle palettes incompatible with numeric coloring:
+        // - categorical-only palettes (canDynamicColoring=false): replace with default
+        // - legacy color by terms palettes without stops (used categorically): compute stops, keep palette name
         const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
-        if (paletteEntry && !showColorByTerms && !paletteEntry.canDynamicColoring) {
-          const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
-          const palette = getColorByValuePalette(
-            paletteService,
-            dataBounds ?? getFallbackDataBounds()
-          );
-          return { ...newColumn, palette };
+        if (paletteEntry && !showColorByTerms) {
+          const hasStops = Boolean(newColumn.palette?.params?.stops?.length);
+          if (!paletteEntry.canDynamicColoring || !hasStops) {
+            const dataBounds = getDataBoundsForAccessor(accessor, currentData, state.columns);
+            const palette = getColorByValuePalette(
+              paletteService,
+              dataBounds ?? getFallbackDataBounds(),
+              paletteEntry.canDynamicColoring ? newColumn.palette : undefined
+            );
+            return { ...newColumn, palette };
+          }
         }
       }
 
