@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
-import type { AppState } from '..';
+import type { SyntheticsAppState } from '../root_reducer';
 
-const getState = (appState: AppState) => appState.monitorHealth;
-export const selectMonitorHealth = createSelector(getState, (state) => state);
+export const selectMonitorHealth = (state: SyntheticsAppState) => state.monitorHealth;

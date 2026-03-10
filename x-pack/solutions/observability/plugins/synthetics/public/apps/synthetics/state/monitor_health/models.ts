@@ -11,4 +11,4 @@ export {
   type MonitorHealthStatus,
   type MonitorHealthError,
   type MonitorsHealthResponse,
-} from '../../../../../../common/runtime_types';
+} from '../../../../../common/runtime_types';
