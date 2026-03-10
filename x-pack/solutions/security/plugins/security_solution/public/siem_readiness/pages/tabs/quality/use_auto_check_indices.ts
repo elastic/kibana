@@ -23,7 +23,46 @@ import { useFormatBytes } from '../../../../common/components/formatted_bytes';
 
 const INDEX_RESULTS_QUERY_KEY = ['index-results-latest'] as const;
 const SAVE_INDEX_RESULTS_ENDPOINT = '/internal/ecs_data_quality_dashboard/results';
+const GET_INDEX_STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 const INTERNAL_API_VERSION = '1';
+
+interface MeteringStatsIndex {
+  uuid?: string;
+  name: string;
+  num_docs: number | null;
+  size_in_bytes: number | null;
+  data_stream?: string;
+}
+
+type StatsResponse = Record<string, MeteringStatsIndex>;
+
+const fetchIndexStats = async (
+  http: ReturnType<typeof useKibana>['services']['http'],
+  indexName: string,
+  abortController: AbortController
+): Promise<{ sizeInBytes: number; docsCount: number }> => {
+  try {
+    const encodedIndexName = encodeURIComponent(indexName);
+    const stats = await http.fetch<StatsResponse>(
+      `${GET_INDEX_STATS_ENDPOINT}/${encodedIndexName}`,
+      {
+        method: 'GET',
+        version: INTERNAL_API_VERSION,
+        query: { isILMAvailable: true },
+        signal: abortController.signal,
+      }
+    );
+
+    const indexStats = stats[indexName];
+    return {
+      sizeInBytes: indexStats?.size_in_bytes ?? 0,
+      docsCount: indexStats?.num_docs ?? 0,
+    };
+  } catch (error) {
+    // Return 0s if stats fetch fails - don't block the check
+    return { sizeInBytes: 0, docsCount: 0 };
+  }
+};
 
 const formatStorageResult = ({
   batchId,
@@ -177,6 +216,11 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       try {
         // Track the current save promise to wait for it before proceeding to next index
         let currentSavePromise: Promise<void> | null = null;
+        let checkResult: {
+          partitionedFieldMetadata: PartitionedFieldMetadata | null;
+          pattern: string;
+          error: string | null;
+        } | null = null;
 
         await checkIndex({
           abortController: abortController.current,
@@ -190,44 +234,50 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
           indexName,
           isCheckAll: true,
           isLastCheck,
-          onCheckCompleted: ({ partitionedFieldMetadata, pattern, error, stats }) => {
-            // Save results to backend only if check was successful
-            if (partitionedFieldMetadata && !error) {
-              // Extract actual size and docs count from stats if available
-              const sizeInBytes = stats?.total ?? 0;
-              const docsCount = stats?.docsCount ?? 0;
-
-              const storageResult = formatStorageResult({
-                batchId,
-                indexName,
-                pattern,
-                isCheckAll: true,
-                partitionedFieldMetadata,
-                sizeInBytes,
-                docsCount,
-              });
-
-              // Create and track the save promise using async/await
-              const savePromise = (async () => {
-                try {
-                  await http.fetch(SAVE_INDEX_RESULTS_ENDPOINT, {
-                    method: 'POST',
-                    version: INTERNAL_API_VERSION,
-                    body: JSON.stringify(storageResult),
-                  });
-                } catch {
-                  // Silently fail - we don't want to stop the checks
-                }
-              })();
-
-              currentSavePromise = savePromise;
-
-              // Track all save promises to ensure they all complete before query invalidation
-              allSavePromises.push(savePromise);
-            }
+          onCheckCompleted: ({ partitionedFieldMetadata, pattern, error }) => {
+            // Store check result for processing after the callback
+            checkResult = { partitionedFieldMetadata, pattern, error };
           },
           pattern: indexName, // Use index name as pattern for simplicity
         });
+
+        // Process the check result and save to backend
+        if (checkResult && checkResult.partitionedFieldMetadata && !checkResult.error) {
+          // Fetch actual stats for this index
+          const { sizeInBytes, docsCount } = await fetchIndexStats(
+            http,
+            indexName,
+            abortController.current
+          );
+
+          const storageResult = formatStorageResult({
+            batchId,
+            indexName,
+            pattern: checkResult.pattern,
+            isCheckAll: true,
+            partitionedFieldMetadata: checkResult.partitionedFieldMetadata,
+            sizeInBytes,
+            docsCount,
+          });
+
+          // Create and track the save promise using async/await
+          const savePromise = (async () => {
+            try {
+              await http.fetch(SAVE_INDEX_RESULTS_ENDPOINT, {
+                method: 'POST',
+                version: INTERNAL_API_VERSION,
+                body: JSON.stringify(storageResult),
+              });
+            } catch {
+              // Silently fail - we don't want to stop the checks
+            }
+          })();
+
+          currentSavePromise = savePromise;
+
+          // Track all save promises to ensure they all complete before query invalidation
+          allSavePromises.push(savePromise);
+        }
 
         // Wait for the current save operation to complete before moving to next index
         if (currentSavePromise && !abortController.current.signal.aborted) {
