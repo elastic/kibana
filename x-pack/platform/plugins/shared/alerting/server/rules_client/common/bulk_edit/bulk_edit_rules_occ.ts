@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import type { KueryNode } from '@kbn/es-query';
 import type {
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
@@ -190,7 +191,7 @@ async function saveBulkUpdatedRules({
   apiKeysMap: ApiKeysMap;
 }) {
   const apiKeysToInvalidate: string[] = [];
-  let result;
+  let result: SavedObjectsBulkResponse<RawRule>;
   try {
     // TODO (http-versioning): for whatever reasoning we are using SavedObjectsBulkUpdateObject
     // everywhere when it should be SavedObjectsBulkCreateObject. We need to fix it in
@@ -203,7 +204,7 @@ async function saveBulkUpdatedRules({
 
     // Track changes
     const changes = rules.reduce((acc, rule) => {
-      const updated = result.saved_objects.find((r: unknown) => r.id === rule.id);
+      const updated = result.saved_objects.find((r: { id: string }) => r.id === rule.id);
       if (updated && !updated.error) {
         const type = context.ruleTypeRegistry.get(rule.attributes.alertTypeId!);
         if (type?.trackChanges) {
@@ -220,8 +221,11 @@ async function saveBulkUpdatedRules({
       return acc;
     }, [] as RuleChange[]);
     if (context.changeTrackingService && changes.length) {
+      const user = context.getUser();
+      const username = user?.username ?? 'unknown';
       context.changeTrackingService.logBulk(changes, {
-        username: (await context.getUserName()) ?? 'unknown',
+        username,
+        userProfileId: user?.profile_uid,
         action: RuleChangeTrackingAction.ruleUpdate,
         spaceId: context.spaceId,
         data: { metadata: { bulkCount: rules.length } },

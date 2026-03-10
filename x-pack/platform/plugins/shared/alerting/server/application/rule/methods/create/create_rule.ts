@@ -138,7 +138,8 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
@@ -272,6 +273,7 @@ export async function createRule<Params extends RuleParams = never>(
     context.changeTrackingService.log(change, {
       action: options?.action ?? RuleChangeTrackingAction.ruleCreate,
       username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
       spaceId: context.spaceId,
       data: { metadata: { originalRuleId: options?.originalId } },
     });

@@ -12,6 +12,7 @@ import type {
   PluginInitializerContext,
   ISavedObjectsRepository,
   UiSettingsServiceStart,
+  AuthenticatedUser,
 } from '@kbn/core/server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -61,6 +62,7 @@ export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log
 
 export interface RulesClientContext {
   readonly logger: Logger;
+  readonly getUser: () => AuthenticatedUser | null;
   readonly getUserName: () => Promise<string | null>;
   readonly spaceId: string;
   readonly namespace?: string;

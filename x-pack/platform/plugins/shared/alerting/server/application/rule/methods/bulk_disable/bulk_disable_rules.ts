@@ -158,7 +158,8 @@ const bulkDisableRulesWithOCC = async (
   const rulesToDisable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   await withSpan(
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
@@ -268,6 +269,7 @@ const bulkDisableRulesWithOCC = async (
     await context.changeTrackingService?.logBulk(changes, {
       action: RuleChangeTrackingAction.ruleDisable,
       username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
       spaceId: context.spaceId,
       data: { metadata: { bulkCount: rulesToDisable.length } },
       refresh: 'wait_for',

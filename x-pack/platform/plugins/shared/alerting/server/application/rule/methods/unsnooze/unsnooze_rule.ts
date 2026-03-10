@@ -82,7 +82,8 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
   const newAttrs = getUnsnoozeAttributes(attributes, scheduleIds);
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -111,6 +112,7 @@ async function unsnoozeWithOCC(context: RulesClientContext, { id, scheduleIds }:
     await context.changeTrackingService.log(change, {
       action: RuleChangeTrackingAction.ruleUnsnooze,
       username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
       spaceId: context.spaceId,
       refresh: 'wait_for',
     });

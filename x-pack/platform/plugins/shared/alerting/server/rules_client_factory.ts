@@ -39,7 +39,7 @@ import {
   RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
 import type { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import type { IChangeTrackingService } from './rules_client/lib/change_tracking';
+import { type IChangeTrackingService } from './rules_client/lib/change_tracking';
 export interface RulesClientFactoryOpts {
   logger: Logger;
   taskManager: TaskManagerStartContract;
@@ -250,6 +250,8 @@ export class RulesClientFactory {
       })
       .asScopedToNamespace(spaceId);
 
+    const getUser = () => securityService.authc.getCurrentUser(request);
+
     return new RulesClient({
       spaceId,
       kibanaVersion: this.kibanaVersion,
@@ -275,9 +277,9 @@ export class RulesClientFactory {
       isServerless: this.isServerless,
       featureFlags: this.featureFlags,
 
+      getUser,
       async getUserName() {
-        const user = securityService.authc.getCurrentUser(request);
-        return user?.username ?? null;
+        return getUser()?.username ?? null;
       },
       async createAPIKey(name: string) {
         if (!securityPluginStart) {

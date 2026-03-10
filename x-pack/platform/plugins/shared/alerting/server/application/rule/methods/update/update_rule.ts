@@ -320,7 +320,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       })
     : originalRule.revision;
 
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
@@ -397,6 +398,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       context.changeTrackingService.log(change, {
         action: action ?? RuleChangeTrackingAction.ruleUpdate,
         username: username ?? 'unknown',
+        userProfileId: user?.profile_uid,
         spaceId: context.spaceId,
         data: { metadata },
       });

@@ -103,7 +103,8 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     throw Boom.badRequest(error.message);
   }
 
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
 
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -132,6 +133,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     await context.changeTrackingService.log(change, {
       action: RuleChangeTrackingAction.ruleSnooze,
       username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
       spaceId: context.spaceId,
       refresh: 'wait_for',
     });

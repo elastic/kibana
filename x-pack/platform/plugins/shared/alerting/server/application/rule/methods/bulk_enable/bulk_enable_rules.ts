@@ -179,7 +179,8 @@ const bulkEnableRulesWithOCC = async (
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
-  const username = await context.getUserName();
+  const user = context.getUser();
+  const username = user?.username ?? null;
   const rulesToClearFlapping: Array<{ id: string; ruleTypeId: string }> = [];
   let scheduleValidationError = '';
 
@@ -372,6 +373,7 @@ const bulkEnableRulesWithOCC = async (
     await context.changeTrackingService?.logBulk(changes, {
       action: RuleChangeTrackingAction.ruleEnable,
       username: username ?? 'unknown',
+      userProfileId: user?.profile_uid,
       spaceId: context.spaceId,
       data: { metadata: { bulkCount: rulesToEnable.length } },
       refresh: 'wait_for',

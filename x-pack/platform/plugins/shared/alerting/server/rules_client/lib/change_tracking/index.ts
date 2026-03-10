@@ -62,6 +62,7 @@ export interface IChangeTrackingService {
   logBulk(changes: RuleChange[], opts: LogChangeHistoryOptions): void;
   getHistory(
     module: RuleTypeSolution,
+    spaceId: string,
     ruleId: string,
     opts: GetChangeHistoryOptions
   ): Promise<GetHistoryResult>;
@@ -158,6 +159,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
 
   async getHistory(
     module: RuleTypeSolution,
+    spaceId: string,
     ruleId: string,
     opts: GetChangeHistoryOptions
   ): Promise<GetHistoryResult> {
@@ -167,6 +169,6 @@ export class ChangeTrackingService implements IChangeTrackingService {
       this.logger.error(error);
       throw error;
     }
-    return client.getHistory(RULE_SAVED_OBJECT_TYPE, ruleId, opts);
+    return client.getHistory(spaceId, RULE_SAVED_OBJECT_TYPE, ruleId, opts);
   }
 }

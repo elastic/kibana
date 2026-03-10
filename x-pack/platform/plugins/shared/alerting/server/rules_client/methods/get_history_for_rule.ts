@@ -39,6 +39,7 @@ export async function getHistoryForRule(
 ): Promise<GetRuleHistoryResult> {
   context.logger.debug(`getHistoryForRule(): getting history log for rule ${params.ruleId}`);
 
+  const { spaceId } = context;
   const { module, ruleId, changeId } = params;
   const { id, attributes } = await getRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -72,7 +73,7 @@ export async function getHistoryForRule(
     if (changeId) {
       opts.additionalFilters = [{ term: { 'event.id': changeId } }];
     }
-    const history = await context.changeTrackingService.getHistory(module, ruleId, opts);
+    const history = await context.changeTrackingService.getHistory(module, spaceId, ruleId, opts);
     const result = {
       startDate: history.startDate,
       total: history.total,
