@@ -1362,7 +1362,7 @@ describe('execute()', () => {
       Object {
         "actionId": "some-id",
         "errorSource": "user",
-        "message": "at least one entry in [to], [cc], or [bcc] is required",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
         "status": "error",
       }
     `);
@@ -1387,7 +1387,7 @@ describe('execute()', () => {
       Object {
         "actionId": "some-id",
         "errorSource": "user",
-        "message": "at least one entry in [to], [cc], or [bcc] is required",
+        "message": "At least one entry in [to], [cc], or [bcc] is required",
         "status": "error",
       }
     `);

@@ -307,7 +307,9 @@ async function executor(
     return {
       status: 'error',
       actionId,
-      message: `at least one entry in [to], [cc], or [bcc] is required`,
+      message: i18n.translate('xpack.stackConnectors.email.noRecipientsErrorMessage', {
+        defaultMessage: 'At least one entry in [to], [cc], or [bcc] is required',
+      }),
       errorSource: TaskErrorSource.USER,
     };
   }
