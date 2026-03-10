@@ -9,6 +9,7 @@
 
 import type { ESQLCommand } from '@elastic/esql/types';
 import { summary } from './summary';
+import { METRICS_INFO_COLUMNS } from './columns_after';
 
 describe('METRICS_INFO > summary', () => {
   const mockCommand = { name: 'metrics_info' } as ESQLCommand;
@@ -16,16 +17,7 @@ describe('METRICS_INFO > summary', () => {
   it('returns exactly the fixed set of metrics info columns', () => {
     const result = summary(mockCommand);
 
-    expect(result.newColumns).toEqual(
-      new Set([
-        'metric_name',
-        'data_stream',
-        'unit',
-        'metric_type',
-        'field_type',
-        'dimension_fields',
-      ])
-    );
+    expect(result.newColumns).toEqual(new Set(METRICS_INFO_COLUMNS.map((column) => column.name)));
   });
 
   it('does not return renamedColumnsPairs, metadataColumns, aggregates, or grouping', () => {

@@ -9,9 +9,9 @@
 
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLCommandSummary } from '../types';
-import { METRICS_INFO_COLUMNS } from './constants';
+import { METRICS_INFO_COLUMNS } from './columns_after';
 
 export const summary = (_command: ESQLCommand): ESQLCommandSummary => {
-  const columns = METRICS_INFO_COLUMNS.map(({ name }) => name);
-  return { newColumns: new Set(columns) };
+  const newColumns = METRICS_INFO_COLUMNS.map((column) => column.name);
+  return { newColumns: new Set(newColumns) };
 };
