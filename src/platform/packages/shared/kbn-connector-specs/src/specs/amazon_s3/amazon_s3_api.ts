@@ -10,7 +10,7 @@
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_credentials_helpers';
-import { AmazonS3BucketObjectListing, AmazonS3Bucket, AmazonS3BucketsListing, AmazonS3ObjectMetadata, AmazonS3Object } from './amazon_s3_types';
+import type { AmazonS3BucketObjectListing, AmazonS3Bucket, AmazonS3BucketsListing, AmazonS3ObjectMetadata, AmazonS3Object } from './amazon_s3_types';
 
 function createQueryString(params: Record<string, string | undefined>): string {
   const queryParams: Record<string, string> = {};

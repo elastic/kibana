@@ -17,7 +17,7 @@ import {
   listAmazonS3BucketObjects,
   listAmazonS3Buckets,
 } from './amazon_s3_api';
-import { ActionDownloadFileInput, ActionListBucketObjectsInput, ActionListBucketsInput } from './amazon_s3_types';
+import type { ActionDownloadFileInput, ActionListBucketObjectsInput, ActionListBucketsInput } from './amazon_s3_types';
 
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
