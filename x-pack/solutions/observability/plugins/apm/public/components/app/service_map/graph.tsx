@@ -73,6 +73,10 @@ interface GraphProps {
   onToggleFullscreen?: () => void;
   /** When set, shows a "View full service map" button that links to the full map (focused map only) */
   fullMapHref?: string;
+  /** When false, hides the minimap (e.g. in embeddable preview). Default true. */
+  showMinimap?: boolean;
+  /** When false, disables the node/edge detail popover (e.g. in embeddable where router is unavailable). Default true. */
+  showPopover?: boolean;
 }
 
 function GraphInner({
@@ -87,6 +91,8 @@ function GraphInner({
   isFullscreen = false,
   onToggleFullscreen,
   fullMapHref,
+  showMinimap = true,
+  showPopover = true,
 }: GraphProps) {
   const { euiTheme } = useEuiTheme();
   const { fitView } = useReactFlow();
@@ -427,18 +433,20 @@ function GraphInner({
             </ControlButton>
           )}
         </Controls>
-        <ServiceMapMinimap />
+        {showMinimap && <ServiceMapMinimap />}
       </ReactFlow>
-      <MapPopover
-        selectedNode={selectedNodeForPopover}
-        selectedEdge={selectedEdgeForPopover}
-        focusedServiceName={serviceName}
-        environment={environment}
-        kuery={kuery}
-        start={start}
-        end={end}
-        onClose={handlePopoverClose}
-      />
+      {showPopover && (
+        <MapPopover
+          selectedNode={selectedNodeForPopover}
+          selectedEdge={selectedEdgeForPopover}
+          focusedServiceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          onClose={handlePopoverClose}
+        />
+      )}
     </div>
   );
 }
