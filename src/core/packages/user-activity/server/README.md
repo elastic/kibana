@@ -27,14 +27,8 @@ core.userActivity.trackUserAction({
   event: { action: 'snooze_alerting_rule', type: 'change' },
   object: { id: 'rule-456', name: 'CPU usage threshold', type: 'rule', tags: ['production'] },
   metadata: {
-    user_input: {
-      indices: ['logs-*', 'metrics-*'],
-      time: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-02T00:00:00.000Z' },
-      global_query: 'host.name: "web-01"',
-      filters: [
-        { name: 'Environment', dslQuery: { term: { 'labels.env': 'prod' } }, enabled: true },
-      ],
-    },
+    ui_surface: 'rules_table',
+    interaction_id: 'snooze_rule_flyout',
   },
 });
 ```
@@ -119,7 +113,7 @@ Here's the current schema reference: [`docs/reference/user-activity.md`](../../.
 
 Some of the fields in the schema come from:
 
-- `trackUserAction()` params (for example `message`, `event.*`, `object.*`, `meta.*`)
+- `trackUserAction()` params (for example `message`, `event.*`, `object.*`, `metadata.*`)
 - Injected context (for example `user.*`, `session.*`, `client.*`, `kibana.space.id`, and `http.request.referrer`)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)
 

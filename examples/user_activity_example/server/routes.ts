@@ -45,12 +45,8 @@ export function registerRoutes(router: IRouter, core: CoreSetup) {
           tags: ['demo', 'user-activity'],
         },
         metadata: {
-          user_input: {
-            indices: ['logs-*'],
-            time: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-02T00:00:00.000Z' },
-            global_query: 'host.name: "web-01"',
-            filters: [{ name: 'Example filter', dslQuery: { match_all: {} }, enabled: true }],
-          },
+          some_field_1: 'some_value_1',
+          some_field_2: 'some_value_2',
         },
       });
 

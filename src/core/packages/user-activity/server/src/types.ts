@@ -83,26 +83,11 @@ export interface UserActivityUserInputTimeRange {
   end?: string;
 }
 
-/** @public */
-export interface UserActivityUserInputMetadata {
-  /** Which indices are affected by the user action. */
-  indices?: string[];
-  /** Time range selected by the user. */
-  time?: UserActivityUserInputTimeRange;
-  /** KQL/ES|QL query entered by the user in the global search field. */
-  global_query?: string;
-  /** Array of non-indexed objects describing filters configured by the user. */
-  filters?: UserActivityUserInputFilter[];
-}
-
 /**
  * Additional bucket of non-standard metadata specific to the user activity log.
- * Includes standardized optional fields (e.g. `user_input`) for normalization.
  * @public
  */
-export type UserActivityMetadata = Record<string, unknown> & {
-  user_input?: UserActivityUserInputMetadata;
-};
+export type UserActivityMetadata = Record<string, unknown>;
 
 /** @public */
 export interface TrackUserActionParams {

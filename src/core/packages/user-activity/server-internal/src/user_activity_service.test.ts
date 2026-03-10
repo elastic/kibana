@@ -93,12 +93,9 @@ describe('UserActivityService', () => {
         },
         object: { id: 'obj-meta', name: 'Object', type: 'rule', tags: [] },
         metadata: {
-          user_input: {
-            indices: ['logs-*'],
-            time: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-02T00:00:00.000Z' },
-            global_query: 'response.status_code >= 500',
-            filters: [{ name: 'Only errors', dslQuery: { match_all: {} }, enabled: true }],
-          },
+          field1: 'val1',
+          field2: 'val2',
+          num1: 1,
         },
       };
 
