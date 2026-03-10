@@ -41,6 +41,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'securitySolution:alertCloseReasons': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'securitySolution:newsFeedUrl': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
@@ -733,6 +737,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Query streams in Streams',
+    },
+  },
+  'observability:streamsEnableWiredStreamViews': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable ES|QL views for wired streams',
     },
   },
   'observability:enableDiagnosticMode': {
