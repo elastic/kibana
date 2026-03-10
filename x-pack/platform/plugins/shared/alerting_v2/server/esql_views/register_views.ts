@@ -11,6 +11,7 @@ import { ESQLViewInitializer } from '../lib/services/esql_views_service/esql_vie
 import type { EsqlViewDefinition } from '../lib/services/esql_views_service/types';
 import { getAlertEventsViewDefinition } from './alert_events';
 import { getAlertActionsViewDefinition } from './alert_actions';
+import { getAlertEpisodesViewDefinition } from './alert_episodes';
 
 export interface RegisterViewsOptions {
   esClient: ElasticsearchClient;
@@ -25,5 +26,9 @@ export function initializeESQLViews({ esClient, logger }: RegisterViewsOptions):
 }
 
 function getEsqlViewDefinitions(): EsqlViewDefinition[] {
-  return [getAlertEventsViewDefinition(), getAlertActionsViewDefinition()];
+  return [
+    getAlertEventsViewDefinition(),
+    getAlertActionsViewDefinition(),
+    getAlertEpisodesViewDefinition(),
+  ];
 }

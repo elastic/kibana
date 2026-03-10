@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import { validateEsqlQuery } from './validation';
 import { durationSchema } from './common';
+import { MAX_CONSECUTIVE_BREACHES } from './constants';
 
 /** Primitives */
 
@@ -111,7 +112,7 @@ const stateTransitionSchema = z
       .number()
       .int()
       .min(0)
-      .max(1000)
+      .max(MAX_CONSECUTIVE_BREACHES)
       .optional()
       .describe('Consecutive breaches before active.'),
     pending_timeframe: durationSchema.optional().describe('Time window for pending evaluation.'),
