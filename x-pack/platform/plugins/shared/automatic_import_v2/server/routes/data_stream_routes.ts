@@ -247,7 +247,7 @@ const getDataStreamResultsRoute = (
           const message = err instanceof Error ? err.message : String(err);
           const statusCode =
             message.includes('has not completed yet') ||
-              message.includes('failed and has no results')
+            message.includes('failed and has no results')
               ? 400
               : 500;
           return automaticImportResponse.error({ statusCode, body: err });
