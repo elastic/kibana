@@ -5824,7 +5824,67 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.eqlRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -5843,7 +5903,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -5899,12 +5958,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -5928,6 +5985,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -5953,16 +6011,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -5975,7 +6032,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -6002,50 +6058,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -6094,7 +6124,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -6103,7 +6132,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -6119,7 +6147,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -6132,7 +6159,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -6155,7 +6181,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -6165,28 +6190,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -6211,13 +6223,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -6227,7 +6236,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -6251,11 +6260,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -6286,7 +6293,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -6304,17 +6310,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -6324,7 +6323,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -6342,13 +6341,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -6369,7 +6366,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -6382,7 +6378,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -6438,6 +6433,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -6465,10 +6461,8 @@ Object {
     Object {
       "properties": Object {
         "alertSuppression": Object {
-          "additionalProperties": false,
           "properties": Object {
             "duration": Object {
-              "additionalProperties": false,
               "properties": Object {
                 "unit": Object {
                   "enum": Array [
@@ -6479,6 +6473,7 @@ Object {
                   "type": "string",
                 },
                 "value": Object {
+                  "maximum": 9007199254740991,
                   "minimum": 1,
                   "type": "integer",
                 },
@@ -6557,7 +6552,78 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.indicatorRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "items": Object {},
+      "type": "array",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -6576,7 +6642,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -6632,12 +6697,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -6661,6 +6724,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -6686,16 +6750,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -6708,7 +6771,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -6735,50 +6797,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -6827,7 +6863,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -6836,7 +6871,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -6852,7 +6886,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -6865,7 +6898,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -6888,7 +6920,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -6898,28 +6929,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -6944,13 +6962,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -6960,7 +6975,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -6984,11 +6999,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -7019,7 +7032,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -7037,17 +7049,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -7057,7 +7062,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -7075,13 +7080,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -7102,7 +7105,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -7115,7 +7117,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -7171,6 +7172,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -7198,10 +7200,8 @@ Object {
     Object {
       "properties": Object {
         "alertSuppression": Object {
-          "additionalProperties": false,
           "properties": Object {
             "duration": Object {
-              "additionalProperties": false,
               "properties": Object {
                 "unit": Object {
                   "enum": Array [
@@ -7212,6 +7212,7 @@ Object {
                   "type": "string",
                 },
                 "value": Object {
+                  "maximum": 9007199254740991,
                   "minimum": 1,
                   "type": "integer",
                 },
@@ -7244,6 +7245,7 @@ Object {
           "type": "object",
         },
         "concurrentSearches": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -7251,8 +7253,7 @@ Object {
           "type": "string",
         },
         "filters": Object {
-          "items": Object {},
-          "type": "array",
+          "$ref": "#/$defs/__schema6",
         },
         "index": Object {
           "items": Object {
@@ -7261,15 +7262,12 @@ Object {
           "type": "array",
         },
         "itemsPerSearch": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
         "language": Object {
-          "enum": Array [
-            "kuery",
-            "lucene",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema5",
         },
         "query": Object {
           "type": "string",
@@ -7278,7 +7276,7 @@ Object {
           "type": "string",
         },
         "threatFilters": Object {
-          "$ref": "#/allOf/1/properties/filters",
+          "$ref": "#/$defs/__schema6",
         },
         "threatIndex": Object {
           "items": Object {
@@ -7290,18 +7288,16 @@ Object {
           "type": "string",
         },
         "threatLanguage": Object {
-          "$ref": "#/allOf/1/properties/language",
+          "$ref": "#/$defs/__schema5",
         },
         "threatMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "entries": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "field": Object {
-                      "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                      "$ref": "#/$defs/__schema0",
                     },
                     "negate": Object {
                       "type": "boolean",
@@ -7311,7 +7307,7 @@ Object {
                       "type": "string",
                     },
                     "value": Object {
-                      "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                      "$ref": "#/$defs/__schema0",
                     },
                   },
                   "required": Array [
@@ -7356,7 +7352,67 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.mlRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -7375,7 +7431,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -7431,12 +7486,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -7460,6 +7513,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -7485,16 +7539,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -7507,7 +7560,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -7534,50 +7586,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -7626,7 +7652,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -7635,7 +7660,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -7651,7 +7675,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -7664,7 +7687,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -7687,7 +7709,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -7697,28 +7718,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -7743,13 +7751,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -7759,7 +7764,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -7783,11 +7788,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -7818,7 +7821,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -7836,17 +7838,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -7856,7 +7851,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -7874,13 +7869,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -7901,7 +7894,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -7914,7 +7906,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -7970,6 +7961,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -7997,10 +7989,8 @@ Object {
     Object {
       "properties": Object {
         "alertSuppression": Object {
-          "additionalProperties": false,
           "properties": Object {
             "duration": Object {
-              "additionalProperties": false,
               "properties": Object {
                 "unit": Object {
                   "enum": Array [
@@ -8011,6 +8001,7 @@ Object {
                   "type": "string",
                 },
                 "value": Object {
+                  "maximum": 9007199254740991,
                   "minimum": 1,
                   "type": "integer",
                 },
@@ -8043,6 +8034,7 @@ Object {
           "type": "object",
         },
         "anomalyThreshold": Object {
+          "maximum": 9007199254740991,
           "minimum": 0,
           "type": "integer",
         },
@@ -8070,7 +8062,67 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.newTermsRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -8089,7 +8141,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -8145,12 +8196,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -8174,6 +8223,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -8199,16 +8249,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -8221,7 +8270,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -8248,50 +8296,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -8340,7 +8362,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -8349,7 +8370,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -8365,7 +8385,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -8378,7 +8397,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -8401,7 +8419,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -8411,28 +8428,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -8457,13 +8461,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -8473,7 +8474,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -8497,11 +8498,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -8532,7 +8531,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -8550,17 +8548,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -8570,7 +8561,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -8588,13 +8579,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -8615,7 +8604,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -8628,7 +8616,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -8684,6 +8671,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -8711,10 +8699,8 @@ Object {
     Object {
       "properties": Object {
         "alertSuppression": Object {
-          "additionalProperties": false,
           "properties": Object {
             "duration": Object {
-              "additionalProperties": false,
               "properties": Object {
                 "unit": Object {
                   "enum": Array [
@@ -8725,6 +8711,7 @@ Object {
                   "type": "string",
                 },
                 "value": Object {
+                  "maximum": 9007199254740991,
                   "minimum": 1,
                   "type": "integer",
                 },
@@ -8840,7 +8827,138 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.queryRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema10": Object {
+      "type": "string",
+    },
+    "__schema11": Object {
+      "properties": Object {
+        "duration": Object {
+          "properties": Object {
+            "unit": Object {
+              "enum": Array [
+                "s",
+                "m",
+                "h",
+              ],
+              "type": "string",
+            },
+            "value": Object {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer",
+            },
+          },
+          "required": Array [
+            "value",
+            "unit",
+          ],
+          "type": "object",
+        },
+        "groupBy": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "type": "array",
+        },
+        "missingFieldsStrategy": Object {
+          "enum": Array [
+            "doNotSuppress",
+            "suppress",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "groupBy",
+      ],
+      "type": "object",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "__schema7": Object {
+      "type": "string",
+    },
+    "__schema8": Object {
+      "items": Object {},
+      "type": "array",
+    },
+    "__schema9": Object {
+      "type": "string",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -8859,7 +8977,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -8915,12 +9032,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -8944,6 +9059,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -8969,16 +9085,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -8991,7 +9106,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -9018,50 +9132,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -9110,7 +9198,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -9119,7 +9206,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -9135,7 +9221,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -9148,7 +9233,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -9171,7 +9255,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -9181,28 +9264,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -9227,13 +9297,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -9243,7 +9310,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -9267,11 +9334,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -9302,7 +9367,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -9320,17 +9384,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -9340,7 +9397,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -9358,13 +9415,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -9385,7 +9440,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -9398,7 +9452,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -9454,6 +9507,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -9481,79 +9535,27 @@ Object {
     Object {
       "anyOf": Array [
         Object {
-          "additionalProperties": false,
           "properties": Object {
             "alertSuppression": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "duration": Object {
-                  "additionalProperties": false,
-                  "properties": Object {
-                    "unit": Object {
-                      "enum": Array [
-                        "s",
-                        "m",
-                        "h",
-                      ],
-                      "type": "string",
-                    },
-                    "value": Object {
-                      "minimum": 1,
-                      "type": "integer",
-                    },
-                  },
-                  "required": Array [
-                    "value",
-                    "unit",
-                  ],
-                  "type": "object",
-                },
-                "groupBy": Object {
-                  "items": Object {
-                    "type": "string",
-                  },
-                  "maxItems": 3,
-                  "minItems": 1,
-                  "type": "array",
-                },
-                "missingFieldsStrategy": Object {
-                  "enum": Array [
-                    "doNotSuppress",
-                    "suppress",
-                  ],
-                  "type": "string",
-                },
-              },
-              "required": Array [
-                "groupBy",
-              ],
-              "type": "object",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "items": Object {},
-              "type": "array",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "items": Object {
-                "type": "string",
-              },
-              "type": "array",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "enum": Array [
-                "kuery",
-                "lucene",
-              ],
-              "type": "string",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "query",
@@ -9568,28 +9570,27 @@ Object {
           "type": "object",
         },
         Object {
-          "additionalProperties": false,
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/alertSuppression",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/dataViewId",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/filters",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/index",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/language",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/query",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/savedId",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "saved_query",
@@ -9611,7 +9612,138 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.savedQueryRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema10": Object {
+      "type": "string",
+    },
+    "__schema11": Object {
+      "properties": Object {
+        "duration": Object {
+          "properties": Object {
+            "unit": Object {
+              "enum": Array [
+                "s",
+                "m",
+                "h",
+              ],
+              "type": "string",
+            },
+            "value": Object {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer",
+            },
+          },
+          "required": Array [
+            "value",
+            "unit",
+          ],
+          "type": "object",
+        },
+        "groupBy": Object {
+          "items": Object {
+            "type": "string",
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "type": "array",
+        },
+        "missingFieldsStrategy": Object {
+          "enum": Array [
+            "doNotSuppress",
+            "suppress",
+          ],
+          "type": "string",
+        },
+      },
+      "required": Array [
+        "groupBy",
+      ],
+      "type": "object",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+    "__schema5": Object {
+      "enum": Array [
+        "kuery",
+        "lucene",
+      ],
+      "type": "string",
+    },
+    "__schema6": Object {
+      "items": Object {
+        "type": "string",
+      },
+      "type": "array",
+    },
+    "__schema7": Object {
+      "type": "string",
+    },
+    "__schema8": Object {
+      "items": Object {},
+      "type": "array",
+    },
+    "__schema9": Object {
+      "type": "string",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -9630,7 +9762,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -9686,12 +9817,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -9715,6 +9844,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -9740,16 +9870,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -9762,7 +9891,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -9789,50 +9917,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -9881,7 +9983,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -9890,7 +9991,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -9906,7 +10006,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -9919,7 +10018,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -9942,7 +10040,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -9952,28 +10049,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -9998,13 +10082,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -10014,7 +10095,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -10038,11 +10119,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -10073,7 +10152,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -10091,17 +10169,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -10111,7 +10182,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -10129,13 +10200,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -10156,7 +10225,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -10169,7 +10237,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -10225,6 +10292,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -10252,79 +10320,27 @@ Object {
     Object {
       "anyOf": Array [
         Object {
-          "additionalProperties": false,
           "properties": Object {
             "alertSuppression": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "duration": Object {
-                  "additionalProperties": false,
-                  "properties": Object {
-                    "unit": Object {
-                      "enum": Array [
-                        "s",
-                        "m",
-                        "h",
-                      ],
-                      "type": "string",
-                    },
-                    "value": Object {
-                      "minimum": 1,
-                      "type": "integer",
-                    },
-                  },
-                  "required": Array [
-                    "value",
-                    "unit",
-                  ],
-                  "type": "object",
-                },
-                "groupBy": Object {
-                  "items": Object {
-                    "type": "string",
-                  },
-                  "maxItems": 3,
-                  "minItems": 1,
-                  "type": "array",
-                },
-                "missingFieldsStrategy": Object {
-                  "enum": Array [
-                    "doNotSuppress",
-                    "suppress",
-                  ],
-                  "type": "string",
-                },
-              },
-              "required": Array [
-                "groupBy",
-              ],
-              "type": "object",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "items": Object {},
-              "type": "array",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "items": Object {
-                "type": "string",
-              },
-              "type": "array",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "enum": Array [
-                "kuery",
-                "lucene",
-              ],
-              "type": "string",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "type": "string",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "query",
@@ -10339,28 +10355,27 @@ Object {
           "type": "object",
         },
         Object {
-          "additionalProperties": false,
           "properties": Object {
             "alertSuppression": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/alertSuppression",
+              "$ref": "#/$defs/__schema11",
             },
             "dataViewId": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/dataViewId",
+              "$ref": "#/$defs/__schema10",
             },
             "filters": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/filters",
+              "$ref": "#/$defs/__schema8",
             },
             "index": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/index",
+              "$ref": "#/$defs/__schema6",
             },
             "language": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/language",
+              "$ref": "#/$defs/__schema5",
             },
             "query": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/query",
+              "$ref": "#/$defs/__schema7",
             },
             "savedId": Object {
-              "$ref": "#/allOf/1/anyOf/0/properties/savedId",
+              "$ref": "#/$defs/__schema9",
             },
             "type": Object {
               "const": "saved_query",
@@ -10382,7 +10397,67 @@ Object {
 
 exports[`Serverless upgrade and rollback checks detect param changes to review for: siem.thresholdRule 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": Object {
+    "__schema0": Object {
+      "minLength": 1,
+      "type": "string",
+    },
+    "__schema1": Object {
+      "maximum": 100,
+      "minimum": 0,
+      "type": "integer",
+    },
+    "__schema2": Object {
+      "enum": Array [
+        "low",
+        "medium",
+        "high",
+        "critical",
+      ],
+      "type": "string",
+    },
+    "__schema3": Object {
+      "additionalProperties": Object {
+        "properties": Object {
+          "field": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "anyOf": Array [
+              Object {
+                "type": "string",
+              },
+              Object {
+                "items": Object {
+                  "type": "string",
+                },
+                "type": "array",
+              },
+            ],
+          },
+        },
+        "type": "object",
+      },
+      "properties": Object {},
+      "type": "object",
+    },
+    "__schema4": Object {
+      "properties": Object {
+        "scriptId": Object {
+          "type": "string",
+        },
+        "scriptInput": Object {
+          "type": "string",
+        },
+        "timeout": Object {
+          "maximum": 9007199254740991,
+          "minimum": -9007199254740991,
+          "type": "integer",
+        },
+      },
+      "type": "object",
+    },
+  },
   "allOf": Array [
     Object {
       "properties": Object {
@@ -10401,7 +10476,6 @@ Object {
         },
         "exceptionsList": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "id": Object {
                 "minLength": 1,
@@ -10457,12 +10531,10 @@ Object {
         "investigationFields": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "field_names": Object {
                   "items": Object {
-                    "minLength": 1,
-                    "type": "string",
+                    "$ref": "#/$defs/__schema0",
                   },
                   "minItems": 1,
                   "type": "array",
@@ -10486,6 +10558,7 @@ Object {
         },
         "maxSignals": Object {
           "default": 100,
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -10511,16 +10584,15 @@ Object {
         },
         "relatedIntegrations": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "integration": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "package": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
               "version": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "$ref": "#/$defs/__schema0",
               },
             },
             "required": Array [
@@ -10533,7 +10605,6 @@ Object {
         },
         "requiredFields": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "ecs": Object {
                 "type": "boolean",
@@ -10560,50 +10631,24 @@ Object {
           "items": Object {
             "anyOf": Array [
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".osquery",
                     "type": "string",
                   },
                   "params": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "ecsMapping": Object {
-                        "additionalProperties": Object {
-                          "additionalProperties": false,
-                          "properties": Object {
-                            "field": Object {
-                              "type": "string",
-                            },
-                            "value": Object {
-                              "anyOf": Array [
-                                Object {
-                                  "type": "string",
-                                },
-                                Object {
-                                  "items": Object {
-                                    "type": "string",
-                                  },
-                                  "type": "array",
-                                },
-                              ],
-                            },
-                          },
-                          "type": "object",
-                        },
-                        "properties": Object {},
-                        "type": "object",
+                        "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
                         "type": "string",
                       },
                       "queries": Object {
                         "items": Object {
-                          "additionalProperties": false,
                           "properties": Object {
                             "ecs_mapping": Object {
-                              "$ref": "#/allOf/0/properties/responseActions/items/anyOf/0/properties/params/properties/ecsMapping",
+                              "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
                               "type": "string",
@@ -10652,7 +10697,6 @@ Object {
                 "type": "object",
               },
               Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "actionTypeId": Object {
                     "const": ".endpoint",
@@ -10661,7 +10705,6 @@ Object {
                   "params": Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "isolate",
@@ -10677,7 +10720,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "enum": Array [
@@ -10690,7 +10732,6 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "field": Object {
                                 "type": "string",
@@ -10713,7 +10754,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "command": Object {
                             "const": "runscript",
@@ -10723,28 +10763,15 @@ Object {
                             "type": "string",
                           },
                           "config": Object {
-                            "additionalProperties": false,
                             "properties": Object {
                               "linux": Object {
-                                "additionalProperties": false,
-                                "properties": Object {
-                                  "scriptId": Object {
-                                    "type": "string",
-                                  },
-                                  "scriptInput": Object {
-                                    "type": "string",
-                                  },
-                                  "timeout": Object {
-                                    "type": "integer",
-                                  },
-                                },
-                                "type": "object",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "macos": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                               "windows": Object {
-                                "$ref": "#/allOf/0/properties/responseActions/items/anyOf/1/properties/params/anyOf/2/properties/config/properties/linux",
+                                "$ref": "#/$defs/__schema4",
                               },
                             },
                             "type": "object",
@@ -10769,13 +10796,10 @@ Object {
           "type": "array",
         },
         "riskScore": Object {
-          "maximum": 100,
-          "minimum": 0,
-          "type": "integer",
+          "$ref": "#/$defs/__schema1",
         },
         "riskScoreMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -10785,7 +10809,7 @@ Object {
                 "type": "string",
               },
               "risk_score": Object {
-                "$ref": "#/allOf/0/properties/riskScore",
+                "$ref": "#/$defs/__schema1",
               },
               "value": Object {
                 "type": "string",
@@ -10809,11 +10833,9 @@ Object {
         "ruleSource": Object {
           "anyOf": Array [
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "customizedFields": Object {
                   "items": Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "fieldName": Object {
                         "type": "string",
@@ -10844,7 +10866,6 @@ Object {
               "type": "object",
             },
             Object {
-              "additionalProperties": false,
               "properties": Object {
                 "type": Object {
                   "const": "internal",
@@ -10862,17 +10883,10 @@ Object {
           "type": "string",
         },
         "severity": Object {
-          "enum": Array [
-            "low",
-            "medium",
-            "high",
-            "critical",
-          ],
-          "type": "string",
+          "$ref": "#/$defs/__schema2",
         },
         "severityMapping": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "field": Object {
                 "type": "string",
@@ -10882,7 +10896,7 @@ Object {
                 "type": "string",
               },
               "severity": Object {
-                "$ref": "#/allOf/0/properties/severity",
+                "$ref": "#/$defs/__schema2",
               },
               "value": Object {
                 "type": "string",
@@ -10900,13 +10914,11 @@ Object {
         },
         "threat": Object {
           "items": Object {
-            "additionalProperties": false,
             "properties": Object {
               "framework": Object {
                 "type": "string",
               },
               "tactic": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "id": Object {
                     "type": "string",
@@ -10927,7 +10939,6 @@ Object {
               },
               "technique": Object {
                 "items": Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "id": Object {
                       "type": "string",
@@ -10940,7 +10951,6 @@ Object {
                     },
                     "subtechnique": Object {
                       "items": Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "id": Object {
                             "type": "string",
@@ -10996,6 +11006,7 @@ Object {
           "type": "string",
         },
         "version": Object {
+          "maximum": 9007199254740991,
           "minimum": 1,
           "type": "integer",
         },
@@ -11023,10 +11034,8 @@ Object {
     Object {
       "properties": Object {
         "alertSuppression": Object {
-          "additionalProperties": false,
           "properties": Object {
             "duration": Object {
-              "additionalProperties": false,
               "properties": Object {
                 "unit": Object {
                   "enum": Array [
@@ -11037,6 +11046,7 @@ Object {
                   "type": "string",
                 },
                 "value": Object {
+                  "maximum": 9007199254740991,
                   "minimum": 1,
                   "type": "integer",
                 },
@@ -11080,16 +11090,15 @@ Object {
           "type": "string",
         },
         "threshold": Object {
-          "additionalProperties": false,
           "properties": Object {
             "cardinality": Object {
               "items": Object {
-                "additionalProperties": false,
                 "properties": Object {
                   "field": Object {
                     "type": "string",
                   },
                   "value": Object {
+                    "maximum": 9007199254740991,
                     "minimum": 0,
                     "type": "integer",
                   },
@@ -11109,6 +11118,7 @@ Object {
               "type": "array",
             },
             "value": Object {
+              "maximum": 9007199254740991,
               "minimum": 1,
               "type": "integer",
             },

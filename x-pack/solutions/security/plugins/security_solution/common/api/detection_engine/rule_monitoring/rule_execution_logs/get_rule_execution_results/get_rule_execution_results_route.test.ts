@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { RuleExecutionStatus } from '../../model';
 import { GetRuleExecutionResultsRequestQuery } from './get_rule_execution_results_route.gen';
 
@@ -77,20 +77,20 @@ describe('Request schema of Get rule execution results', () => {
           {
             input: 'val',
             expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'val'",
+              '0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"',
           },
           {
             input: '5',
             expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '5'",
+              '0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"',
           },
           {
             input: 5,
-            expectedErrors: 'Expected array, received number',
+            expectedErrors: 'Invalid input: expected array, received number',
           },
           {
             input: {},
-            expectedErrors: 'Expected array, received object',
+            expectedErrors: 'Invalid input: expected array, received object',
           },
         ];
 
@@ -108,18 +108,15 @@ describe('Request schema of Get rule execution results', () => {
         const cases = [
           {
             input: ['value 1', 5],
-            expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1', 1: Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received number",
+            expectedErrors: `0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded", 1: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"`,
           },
           {
             input: ['value 1', 'succeeded'],
-            expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1'",
+            expectedErrors: `0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"`,
           },
           {
             input: ['', 5, {}],
-            expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '', 1: Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received number, 2: Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received object",
+            expectedErrors: `0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded", 1: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded", 2: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"`,
           },
         ];
 
@@ -138,17 +135,17 @@ describe('Request schema of Get rule execution results', () => {
           {
             input: 'value 1,5',
             expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1', 1: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '5'",
+              '0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded", 1: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"',
           },
           {
             input: 'value 1,succeeded',
             expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received 'value 1'",
+              '0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"',
           },
           {
             input: ',5,{}',
             expectedErrors:
-              "0: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '', 1: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '5', 2: Invalid enum value. Expected 'going to run' | 'running' | 'partial failure' | 'failed' | 'succeeded', received '{}'",
+              '0: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded", 1: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded", 2: Invalid option: expected one of "going to run"|"running"|"partial failure"|"failed"|"succeeded"',
           },
         ];
 
@@ -213,7 +210,7 @@ describe('Request schema of Get rule execution results', () => {
 
         cases.forEach(({ input }) => {
           it(`${input}`, () => {
-            const expectedErrors = `Invalid enum value. Expected 'timestamp' | 'duration_ms' | 'gap_duration_s' | 'indexing_duration_ms' | 'search_duration_ms' | 'schedule_delay_ms', received '${input}'`;
+            const expectedErrors = `Invalid option: expected one of "timestamp"|"duration_ms"|"gap_duration_s"|"indexing_duration_ms"|"search_duration_ms"|"schedule_delay_ms"`;
             const result = SortFieldSchema.safeParse(input);
             expectParseError(result);
             expect(stringifyZodError(result.error)).toEqual(expectedErrors);

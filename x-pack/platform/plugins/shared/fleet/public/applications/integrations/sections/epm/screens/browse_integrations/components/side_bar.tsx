@@ -80,11 +80,13 @@ export interface Props {
 }
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
-  top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
+  @media screen and (min-width: ${(props) => props.theme.euiTheme.breakpoint.m}px) {
+    position: sticky;
+    top: var(--kbn-application--sticky-headers-offset, var(--kbn-layout--header-height, '0px'));
+    max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
+    overflow: scroll;
+  }
   padding-top: ${(props) => props.theme.euiTheme.size.m};
-  max-height: calc(100vh - var(--kbn-layout--header-height, '0px'));
-  overflow: scroll;
   padding-right: ${(props) => props.theme.euiTheme.size.l};
 `;
 

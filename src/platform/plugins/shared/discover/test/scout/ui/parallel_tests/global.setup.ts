@@ -8,13 +8,29 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
-import { TRACES, simpleTrace, richTrace } from '../fixtures/traces_experience';
+import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
-  async ({ esClient, apmSynthtraceEsClient, apiServices, config, log }) => {
+  async ({
+    esClient,
+    esArchiver,
+    apmSynthtraceEsClient,
+    logsSynthtraceEsClient,
+    apiServices,
+    config,
+    log,
+  }) => {
+    // Logstash data for flyout stability tests
+    log.debug(
+      '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+    );
+    log.debug('[setup:logstash] logstash_functional ES data ready');
+
     // Metrics Experience setup
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
@@ -37,12 +53,20 @@ globalSetupHook(
       to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
     };
 
-    const traceData: SynthtraceGenerator<ApmFields> = simpleTrace(timeRange);
-    await apmSynthtraceEsClient.index(traceData);
-    log.debug('[setup:traces] APM simple trace data indexed');
+    const { apmData, correlationIds } = richTrace(timeRange);
 
-    const { apmData: richApmData } = richTrace(timeRange);
-    await apmSynthtraceEsClient.index(richApmData);
-    log.debug('[setup:traces] APM rich trace data indexed');
+    await apmSynthtraceEsClient.index(apmData);
+    log.debug('[setup:traces] Rich APM trace data indexed');
+
+    const logData = traceCorrelatedLogs({
+      ...timeRange,
+      traceId: correlationIds.richTraceId,
+      transactionId: correlationIds.transactionId,
+      dbSpanId: correlationIds.dbSpanId,
+      processOrderSpanId: correlationIds.processOrderSpanId,
+    });
+
+    await logsSynthtraceEsClient.index(logData);
+    log.debug('[setup:traces] Correlated log data indexed');
   }
 );
