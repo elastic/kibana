@@ -55,7 +55,7 @@ describe('Default cell actions ', function () {
         Component: () => <></>,
         colIndex: 1,
         columnId: 'extension',
-      } as unknown as EuiDataGridColumnCellActionProps).props['aria-label']
+      } as unknown as EuiDataGridColumnCellActionProps)!.props['aria-label']
     ).toEqual(CopyBtn.props['aria-label']);
   });
 
@@ -80,7 +80,7 @@ describe('Default cell actions ', function () {
         Component: () => <></>,
         colIndex: 1,
         columnId: 'extension',
-      } as unknown as EuiDataGridColumnCellActionProps).props['aria-label']
+      } as unknown as EuiDataGridColumnCellActionProps)!.props['aria-label']
     ).toEqual(CopyBtn.props['aria-label']);
   });
 

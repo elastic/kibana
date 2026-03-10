@@ -14,7 +14,7 @@ import {
   EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
+  // useEuiTheme,
   EuiSpacer,
   EuiBasicTable,
   EuiText,
@@ -30,11 +30,11 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
-import type { FieldValidationResults } from '@kbn/ml-category-validator';
+// import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
+// import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
@@ -51,7 +51,7 @@ import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { useCategorizeRequest } from '../use_categorize_request';
 import type { EventRate } from '../use_categorize_request';
 import { SamplingMenu, useRandomSamplerStorage } from '../sampling_menu';
-import { useValidateFieldRequest } from '../use_validate_category_field';
+// import { useValidateFieldRequest } from '../use_validate_category_field';
 import { useActions } from '../category_table/use_actions';
 import { MiniHistogram } from '../../mini_histogram';
 import { useDocsForCategory } from './use_docs_for_category';
@@ -88,12 +88,12 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       query: { getState, filterManager },
     },
     uiSettings,
-    embeddingOrigin,
+    // embeddingOrigin,
   } = useAiopsAppContext();
 
-  const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
-    useValidateFieldRequest();
-  const { euiTheme } = useEuiTheme();
+  // const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
+  //   useValidateFieldRequest();
+  // const { euiTheme } = useEuiTheme();
   const { filters, query } = useMemo(() => getState(), [getState]);
 
   const mounted = useRef(false);
@@ -127,18 +127,18 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     docCount: number;
   } | null>(null);
 
-  const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
-    null
-  );
+  // const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
+  //   null
+  // );
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const tableState = useTableState<Category>([], 'key');
+  // const tableState = useTableState<Category>([], 'key');
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
   const cancelRequest = useCallback(() => {
-    cancelValidationRequest();
+    // cancelValidationRequest();
     cancelCategorizationRequest();
-  }, [cancelCategorizationRequest, cancelValidationRequest]);
+  }, [cancelCategorizationRequest]);
 
   useEffect(
     function cancelRequestOnLeave() {
@@ -181,7 +181,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     [dataView.id, filterManager]
   );
 
-  const { getActions, openInDiscover } = useActions(
+  const { openInDiscover } = useActions(
     dataView.id!,
     selectedField,
     selectedCategory ? [selectedCategory] : [],
@@ -210,7 +210,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
     setLoading(true);
     setData(null);
-    setFieldValidationResult(null);
+    // setFieldValidationResult(null);
 
     const timeRange = {
       from: earliest,
@@ -227,6 +227,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
         timeRange,
         searchQuery,
         runtimeMappings,
+        undefined,
         intervalMs,
         additionalFilter
       );
@@ -323,8 +324,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     randomSampler,
   ]);
 
-  const actions = getActions(true);
-  const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
+  // const actions = getActions(true);
+  // const infoIconCss = { marginTop: euiTheme.size.m, marginLeft: euiTheme.size.xxs };
 
   const docsTableColumns = useMemo(() => {
     const dateFormat = uiSettings.get('dateFormat');
@@ -408,15 +409,15 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     };
   });
 
-  const histogram2 = eventRate.map(({ key: catKey, docCount }) => {
-    const term =
-      (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
+  // const histogram2 = eventRate.map(({ key: catKey, docCount }) => {
+  //   const term =
+  //     (selectedCategory?.key && data ? data.sparkLines[selectedCategory?.key][catKey] : 0) ?? 0;
 
-    return {
-      docCount: term,
-      key: catKey,
-    };
-  });
+  //   return {
+  //     docCount: term,
+  //     key: catKey,
+  //   };
+  // });
 
   return (
     <>

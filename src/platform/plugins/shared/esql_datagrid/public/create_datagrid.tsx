@@ -60,6 +60,7 @@ export const ESQLDataGrid = (props: ESQLDataGridProps) => {
         {getWrapper(
           <DataGridLazy
             data={deps.data}
+            uiActions={deps.uiActions}
             fieldFormats={deps.fieldFormats}
             core={deps.core}
             share={deps.share}
