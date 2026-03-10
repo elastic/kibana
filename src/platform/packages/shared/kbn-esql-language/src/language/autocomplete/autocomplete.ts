@@ -125,13 +125,16 @@ export async function suggest(
         return true;
       })
       .filter((command) => {
-        // Commands with notAfterCommands are not suggested when the previous command is in that list
-        const notAfter = command.metadata?.hiddenAfterCommands;
-        if (notAfter?.length && astContext.astForContext.commands.length > 0) {
-          const lastCommand =
-            astContext.astForContext.commands[astContext.astForContext.commands.length - 1];
-          const lastCommandName = lastCommand?.name;
-          if (lastCommandName && notAfter.includes(lastCommandName)) {
+        // Commands with hiddenAfterCommands are not suggested when any command in the pipeline is in that list
+        const hiddenAfter = command.metadata?.hiddenAfterCommands;
+        if (hiddenAfter?.length && astContext.astForContext.commands.length > 0) {
+          const commandNamesInPipeline = new Set(
+            astContext.astForContext.commands.map((cmd) => cmd.name).filter(Boolean)
+          );
+          const hasHiddenCommandInPipeline = hiddenAfter.some((name) =>
+            commandNamesInPipeline.has(name)
+          );
+          if (hasHiddenCommandInPipeline) {
             return false;
           }
         }
