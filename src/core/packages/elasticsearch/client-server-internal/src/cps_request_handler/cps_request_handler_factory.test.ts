@@ -8,6 +8,7 @@
  */
 
 import type { TransportRequestParams } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL, getSpaceNPRE } from '@kbn/cps-server-utils';
 import { getRequestHandlerFactory } from './cps_request_handler_factory';
@@ -19,14 +20,33 @@ const makeSearchParams = (body?: Record<string, unknown>): TransportRequestParam
   body: body ?? {},
 });
 
+// Mock logger for all tests
+const createMockLogger = (): jest.Mocked<Logger> => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn(),
+  trace: jest.fn(),
+  fatal: jest.fn(),
+  log: jest.fn(),
+  get: jest.fn(() => createMockLogger()),
+  isLevelEnabled: jest.fn((level) => true),
+});
+
 describe('getRequestHandlerFactory', () => {
+  let mockLogger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    mockLogger = createMockLogger();
+  });
+
   describe('without request (internal user)', () => {
     it('injects PROJECT_ROUTING_ORIGIN when projectRouting is origin-only', () => {
       const factory = getRequestHandlerFactory(true);
-      const handler = factory({ projectRouting: 'origin-only' });
+      const handler = factory({ projectRouting: 'origin-only', logger: mockLogger });
       const params = makeSearchParams();
 
-      handler({ scoped: false }, params, {});
+      handler({ scoped: false }, params, {}, mockLogger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBe(PROJECT_ROUTING_ORIGIN);
     });
@@ -35,20 +55,20 @@ describe('getRequestHandlerFactory', () => {
   describe("projectRouting: 'origin-only'", () => {
     it('injects PROJECT_ROUTING_ORIGIN when CPS is enabled', () => {
       const factory = getRequestHandlerFactory(true);
-      const handler = factory({ projectRouting: 'origin-only' });
+      const handler = factory({ projectRouting: 'origin-only', logger: mockLogger });
       const params = makeSearchParams();
 
-      handler({ scoped: true }, params, {});
+      handler({ scoped: true }, params, {}, mockLogger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBe(PROJECT_ROUTING_ORIGIN);
     });
 
     it('strips project_routing when CPS is disabled', () => {
       const factory = getRequestHandlerFactory(false);
-      const handler = factory({ projectRouting: 'origin-only' });
+      const handler = factory({ projectRouting: 'origin-only', logger: mockLogger });
       const params = makeSearchParams({ project_routing: 'should-be-removed' });
 
-      handler({ scoped: true }, params, {});
+      handler({ scoped: true }, params, {}, mockLogger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
     });
@@ -57,10 +77,10 @@ describe('getRequestHandlerFactory', () => {
   describe("projectRouting: 'all'", () => {
     it('injects PROJECT_ROUTING_ALL when CPS is enabled', () => {
       const factory = getRequestHandlerFactory(true);
-      const handler = factory({ projectRouting: 'all' });
+      const handler = factory({ projectRouting: 'all', logger: mockLogger });
       const params = makeSearchParams();
 
-      handler({ scoped: true }, params, {});
+      handler({ scoped: true }, params, {}, mockLogger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBe(PROJECT_ROUTING_ALL);
     });
@@ -70,10 +90,10 @@ describe('getRequestHandlerFactory', () => {
     it('injects the space NPRE derived from a KibanaRequest', () => {
       const factory = getRequestHandlerFactory(true);
       const request = httpServerMock.createKibanaRequest({ path: '/s/my-space/app/discover' });
-      const handler = factory({ projectRouting: request });
+      const handler = factory({ projectRouting: request, logger: mockLogger });
       const params = makeSearchParams();
 
-      handler({ scoped: true }, params, {});
+      handler({ scoped: true }, params, {}, mockLogger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBe(
         getSpaceNPRE('my-space')

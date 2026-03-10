@@ -10,6 +10,7 @@
 import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { metrics, type Meter, ValueType } from '@opentelemetry/api';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport, type OnRequestHandler } from './create_transport';
@@ -42,7 +43,7 @@ export const configureClient = (
   }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
-  const KibanaTransport = createTransport({ scoped, getExecutionContext, onRequest });
+  const KibanaTransport = createTransport({ scoped, getExecutionContext, onRequest, logger });
   const client = new Client({
     ...clientOptions,
     agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),
@@ -55,5 +56,70 @@ export const configureClient = (
   const { apisToRedactInLogs = [] } = config;
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
+  // Instrument CPS metrics with response status
+  const meter = metrics.getMeter('kibana.elasticsearch.cps');
+  instrumentCpsMetrics({ client, meter });
+
   return client;
 };
+
+/**
+ * Instruments CPS metrics with HTTP response status.
+ *
+ * Emits metrics after response returns so we can include http_status dimension.
+ */
+function instrumentCpsMetrics({ client, meter }: { client: Client; meter: Meter }) {
+  const requestCountGlobalCounter = meter.createCounter('request.count', {
+    description: 'Total count of CPS-eligible Elasticsearch API requests (global aggregations)',
+    unit: 'requests',
+    valueType: ValueType.INT,
+  });
+
+  const requestsByProjectCounter = meter.createCounter('requests.by_project', {
+    description: 'Count of CPS-routed requests per project (for per-project error rate)',
+    unit: 'requests',
+    valueType: ValueType.INT,
+  });
+
+  const adoptionCounter = meter.createCounter('adoption', {
+    description: 'Count of CPS-routed requests per project and region (for adoption tracking)',
+    unit: 'requests',
+    valueType: ValueType.INT,
+  });
+
+  client.diagnostic.on('response', (error, event) => {
+    if (!event) return;
+
+    const routingContext = (event.meta.request.options?.context as any)?.cpsRoutingContext;
+    if (!routingContext) return; // Not a CPS-instrumented request
+
+    const { routingType, cpsEnabled, apiName, projectId, region } = routingContext;
+    const httpStatus = error ? getErrorStatus(error) : event.statusCode ?? 200;
+
+    // Metric 1: Global aggregations
+    requestCountGlobalCounter.add(1, {
+      routing_type: routingType,
+      api_name: apiName,
+      is_cps_enabled: String(cpsEnabled),
+      http_status: String(httpStatus),
+    });
+
+    // Metric 2: Per-project (only for CPS-routed requests)
+    if (routingType === 'injected' || routingType === 'explicit') {
+      requestsByProjectCounter.add(1, {
+        project_id: projectId,
+        http_status: String(httpStatus),
+      });
+
+      // Metric 3: Adoption (only for CPS-routed requests)
+      adoptionCounter.add(1, {
+        project_id: projectId,
+        region,
+      });
+    }
+  });
+}
+
+function getErrorStatus(error: any): number {
+  return error?.statusCode ?? error?.meta?.statusCode ?? 500;
+}

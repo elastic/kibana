@@ -181,7 +181,7 @@ describe('ClusterClient', () => {
         // the onRequest handler from the configureClientMock call arguments.
         const onRequest: OnRequestHandler = configureClientMock.mock.calls[0][1].onRequest;
         const params = makeSearchParams();
-        onRequest({} as never, params, {});
+        onRequest({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
@@ -335,7 +335,7 @@ describe('ClusterClient', () => {
         client = clusterClient.asScoped(request, { projectRouting: 'space' }).asCurrentUser;
 
         const params = makeSearchParams();
-        onRequest.get()({} as never, params, {});
+        onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe(
           'kibana_space_my-space_default'
@@ -359,7 +359,7 @@ describe('ClusterClient', () => {
         client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
 
         const params = makeSearchParams();
-        onRequest.get()({} as never, params, {});
+        onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
@@ -381,7 +381,7 @@ describe('ClusterClient', () => {
         client = clusterClient.asScoped(request, { projectRouting: 'all' }).asCurrentUser;
 
         const params = makeSearchParams();
-        onRequest.get()({} as never, params, {});
+        onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
       });
@@ -1529,7 +1529,7 @@ describe('ClusterClient', () => {
 
       const onRequest: OnRequestHandler = configureClientMock.mock.calls[0][1].onRequest;
       const params = makeSearchParamsWithRouting();
-      onRequest({} as never, params, {});
+      onRequest({} as never, params, {}, logger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
     });
@@ -1547,7 +1547,7 @@ describe('ClusterClient', () => {
 
       const onRequest: OnRequestHandler = configureClientMock.mock.calls[0][1].onRequest;
       const params = makeSearchParams();
-      onRequest({} as never, params, {});
+      onRequest({} as never, params, {}, logger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
     });
@@ -1569,7 +1569,7 @@ describe('ClusterClient', () => {
       client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
 
       const params = makeSearchParamsWithRouting();
-      onRequest.get()({} as never, params, {});
+      onRequest.get()({} as never, params, {}, logger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
     });
@@ -1591,7 +1591,7 @@ describe('ClusterClient', () => {
       client = clusterClient.asScoped(request, { projectRouting: 'origin-only' }).asCurrentUser;
 
       const params = makeSearchParams();
-      onRequest.get()({} as never, params, {});
+      onRequest.get()({} as never, params, {}, logger);
 
       expect((params.body as Record<string, unknown>).project_routing).toBeUndefined();
     });

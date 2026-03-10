@@ -11,6 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 import type { TransportRequestMetadata } from '@elastic/elasticsearch';
 import { metrics, ValueType } from '@opentelemetry/api';
+import type { Logger } from '@kbn/logging';
 import type { OnRequestHandler } from '../create_transport';
 
 // temporary type correction while @elastic/elasticsearch types fixes the actual acceptedParams type
@@ -24,26 +25,31 @@ type AcceptedParams = NonNullable<TransportRequestMetadata['acceptedParams']>;
 
 const meter = metrics.getMeter('kibana.elasticsearch.cps');
 
-const requestsTotalCounter = meter.createCounter('cps.requests.total', {
-  description: 'Total Elasticsearch requests processed by CPS handler by routing type',
-  unit: '1',
-  valueType: ValueType.INT,
-});
-
-const requestsWithoutRoutingCounter = meter.createCounter('cps.requests.without_routing', {
-  description: 'Requests without project_routing parameter while CPS enabled (bypass indicator)',
-  unit: '1',
+// Metric 4: Bypass detection with reason
+// This is the only metric created here because it's emitted synchronously in the request handler.
+// Other metrics (1-3) are emitted in the response phase and defined in configure_client.ts
+const requestWithoutRoutingCounter = meter.createCounter('request_without_routing.count', {
+  description: 'Count of Elasticsearch requests that bypassed CPS routing when CPS was enabled',
+  unit: 'requests',
   valueType: ValueType.INT,
 });
 
 /** @internal */
 export function getCpsRequestHandler(
   cpsEnabled: boolean,
-  projectRouting: string
+  projectRouting: string,
+  logger: Logger
 ): OnRequestHandler {
-  return (_ctx, params, _options) => {
+  return (_ctx, params, options, _receivedLogger) => {
+    // Use logger passed to factory closure
+    const log = logger;
     const body = isPlainObject(params.body) ? (params.body as Record<string, unknown>) : undefined;
-    const { acceptedParams, name } = params.meta ?? {};
+    const meta = params.meta ?? {};
+    const acceptedParams = ('acceptedParams' in meta ? meta.acceptedParams : undefined) as
+      | AcceptedParams
+      | undefined;
+    const name = 'name' in meta ? (meta.name as string | undefined) : undefined;
+    const request = 'request' in meta ? (meta.request as any) : undefined;
 
     let routingType: 'injected' | 'explicit' | 'stripped' | 'none';
 
@@ -79,16 +85,99 @@ export function getCpsRequestHandler(
       routingType = 'stripped';
     }
 
-    requestsTotalCounter.add(1, {
-      'cps.routing_type': routingType,
-      'cps.enabled': String(cpsEnabled),
-      'api.name': name ?? 'unknown',
-    });
+    // Store routing context in request options for response phase
+    // This allows us to correlate request routing decision with response status
+    const routingContext = {
+      routingType,
+      cpsEnabled,
+      apiName: name ?? 'unknown',
+      projectId: projectRouting,
+      region: getRegion(),
+    };
 
+    // Attach to options.context so it's available in response event
+    if (!options.context) {
+      options.context = {};
+    }
+    (options.context as any).cpsRoutingContext = routingContext;
+
+    // Log Event 1: cps.request.routed (info level)
+    // Emitted for ALL requests
+    const requestId = (options as any).id ?? (options as any).requestId ?? 'unknown';
+
+    log.info('CPS request routed', {
+      event: {
+        kind: 'metric',
+        category: ['web', 'api'],
+      },
+      cps: {
+        routing_type: routingType,
+        api_name: name ?? 'unknown',
+        is_cps_enabled: cpsEnabled,
+        project_id:
+          routingType === 'injected' || routingType === 'explicit' ? projectRouting : null,
+        region: getRegion(),
+        request_id: requestId,
+        route_path: request?.path ?? 'unknown',
+        request_path: params.path ?? 'unknown',
+      },
+      http: {
+        request: {
+          method: params.method ?? 'unknown',
+        },
+      },
+    } as any);
+
+    // Metric 4 + Log Event 2: Bypass detection
     if (cpsEnabled && routingType === 'none') {
-      requestsWithoutRoutingCounter.add(1, {
-        'api.name': name ?? 'unknown',
-      });
+      const bypassReason = determineBypassReason(params, body, acceptedParams);
+
+      // Only fire metric and warn log for CRITICAL bypasses
+      const criticalReasons = [
+        'pre_serialized_querystring',
+        'body_not_plain_object',
+        'buffer_or_stream_bulk_body',
+        'unknown',
+      ];
+
+      if (criticalReasons.includes(bypassReason)) {
+        requestWithoutRoutingCounter.add(1, {
+          api_name: (name ?? 'unknown') as string,
+          bypass_reason: bypassReason,
+        });
+
+        // Log Event 2: cps.request.bypassed (warn level)
+        log.warn('CPS routing bypassed', {
+          event: {
+            kind: 'alert',
+            category: ['web', 'security'],
+          },
+          cps: {
+            routing_type: 'none',
+            api_name: name ?? 'unknown',
+            bypass_reason: bypassReason,
+            is_cps_enabled: true,
+            project_id: null,
+            region: getRegion(),
+            request_id: requestId,
+            route_path: request?.path ?? 'unknown',
+            request_path: params.path ?? 'unknown',
+          },
+          http: {
+            request: {
+              method: params.method ?? 'unknown',
+            },
+          },
+        } as any);
+      } else {
+        // Informational bypass (e.g., api_does_not_support_routing)
+        log.debug('CPS routing not applicable', {
+          cps: {
+            api_name: name ?? 'unknown',
+            bypass_reason: bypassReason,
+          },
+        } as any);
+      }
     }
   };
 }
@@ -207,4 +296,92 @@ function stripProjectRoutingNdjsonBody(params: Parameters<OnRequestHandler>[1]):
       .join('\n');
   }
   // Buffer and ReadableStream: cannot safely parse or rewrite — skip.
+}
+
+/**
+ * Determines why a request bypassed CPS routing.
+ *
+ * Based on code audit results, there are 7 possible bypass scenarios:
+ * 1. api_does_not_support_routing - API's acceptedParams doesn't include project_routing
+ * 2. pre_serialized_querystring - Cannot inject into string querystring
+ * 3. body_not_plain_object - Request body is not a plain object
+ * 4. missing_accepted_params - Request meta.acceptedParams is undefined
+ * 5. legacy_flat_array_no_routing - Flat array acceptedParams without project_routing
+ * 6. buffer_or_stream_bulk_body - bulkBody is Buffer/ReadableStream
+ * 7. unknown - Fallback
+ */
+function determineBypassReason(
+  params: Parameters<OnRequestHandler>[1],
+  body: Record<string, unknown> | undefined,
+  acceptedParams: AcceptedParams | undefined
+): string {
+  // Scenario 4: acceptedParams missing
+  if (!acceptedParams) {
+    return 'missing_accepted_params';
+  }
+
+  // Scenario 5: Legacy flat array without project_routing
+  if (Array.isArray(acceptedParams) && !acceptedParams.includes('project_routing')) {
+    return 'legacy_flat_array_no_routing';
+  }
+
+  // Scenario 1: API doesn't support routing (structured acceptedParams)
+  if (!Array.isArray(acceptedParams)) {
+    const structured = acceptedParams as StructuredAcceptedParams;
+    if (
+      !structured.query.includes('project_routing') &&
+      !structured.body.includes('project_routing')
+    ) {
+      return 'api_does_not_support_routing';
+    }
+  }
+
+  // Scenario 2: Pre-serialized querystring
+  if (typeof params.querystring === 'string') {
+    return 'pre_serialized_querystring';
+  }
+
+  // Scenario 3: Body not plain object
+  if (params.body && !isPlainObject(params.body)) {
+    return 'body_not_plain_object';
+  }
+
+  // Scenario 6: Buffer/Stream bulk body
+  if (params.bulkBody) {
+    if (Buffer.isBuffer(params.bulkBody) || typeof params.bulkBody === 'object') {
+      // ReadableStream detection (has read method)
+      if ('read' in params.bulkBody) {
+        return 'buffer_or_stream_bulk_body';
+      }
+    }
+  }
+
+  // Scenario 7: Unknown
+  return 'unknown';
+}
+
+/**
+ * Gets the deployment region from available sources.
+ *
+ * Priority order:
+ * 1. Environment variable CLOUD_REGION
+ * 2. Kibana config server.region (if available)
+ * 3. 'unknown' fallback
+ *
+ * Note: This is a placeholder implementation. Actual region detection
+ * will depend on how region is exposed in the Kibana context.
+ */
+function getRegion(): string {
+  // Option 1: Environment variable
+  if (process.env.CLOUD_REGION) {
+    return process.env.CLOUD_REGION;
+  }
+
+  // Option 2: Global config (if exposed)
+  // TODO: Access actual Kibana config when available
+  // const region = config.get('server.region');
+  // if (region) return region;
+
+  // Fallback
+  return 'unknown';
 }
