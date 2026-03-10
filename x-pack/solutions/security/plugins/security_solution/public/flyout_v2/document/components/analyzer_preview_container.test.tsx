@@ -6,59 +6,56 @@
  */
 
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import React from 'react';
-import { DocumentDetailsContext } from '../../shared/context';
-import { mockContextValue } from '../../shared/mocks/mock_context';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { AnalyzerPreviewContainer } from './analyzer_preview_container';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { PageScope } from '../../../../data_view_manager/constants';
-import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
+import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../shared/components/test_ids';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { PageScope } from '../../../data_view_manager/constants';
 
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
-);
-jest.mock('../../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../sourcerer/containers');
-jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
+jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
+jest.mock('../../../data_view_manager/hooks/use_data_view');
+jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../sourcerer/containers');
+jest.mock('../../../data_view_manager/hooks/use_selected_patterns');
 
-const mockAnalyzerPreview = jest.fn((indices: string) => (
+const mockAnalyzerPreview = jest.fn((_props: unknown) => (
   <div data-test-subj="analyzerPreviewStub" />
 ));
 jest.mock('./analyzer_preview', () => ({
-  AnalyzerPreview: (indices: string) => mockAnalyzerPreview(indices),
+  AnalyzerPreview: (props: unknown) => mockAnalyzerPreview(props),
 }));
 
-const mockNavigateToAnalyzer = jest.fn();
-jest.mock('../../shared/hooks/use_navigate_to_analyzer', () => {
-  return { useNavigateToAnalyzer: () => ({ navigateToAnalyzer: mockNavigateToAnalyzer }) };
-});
+const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
+  ({
+    id: 'test-id',
+    raw: { _id: 'event-id' },
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
 
-jest.mock('react-router-dom', () => {
-  const actual = jest.requireActual('react-router-dom');
-  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
-});
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+const mockOnShowAnalyzer = jest.fn();
+const mockHit = createMockHit({});
 
-  return {
-    ...original,
-    useDispatch: () => jest.fn(),
-  };
-});
-
-const renderAnalyzerPreview = (context = mockContextValue) =>
+const renderAnalyzerPreview = (
+  overrides: Partial<React.ComponentProps<typeof AnalyzerPreviewContainer>> = {}
+) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={context}>
-        <AnalyzerPreviewContainer />
-      </DocumentDetailsContext.Provider>
+      <AnalyzerPreviewContainer
+        hit={mockHit}
+        onShowAnalyzer={mockOnShowAnalyzer}
+        shouldUseAncestor={false}
+        showIcon={false}
+        disableNavigation={false}
+        {...overrides}
+      />
     </TestProviders>
   );
 
@@ -66,7 +63,7 @@ describe('AnalyzerPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useSourcererDataView as jest.Mock).mockReturnValue({
       selectedPatterns: ['old-analyzer-pattern'],
@@ -79,7 +76,7 @@ describe('AnalyzerPreviewContainer', () => {
       },
     });
 
-    mockNavigateToAnalyzer.mockClear();
+    mockOnShowAnalyzer.mockClear();
     mockAnalyzerPreview.mockClear();
   });
 
@@ -87,7 +84,11 @@ describe('AnalyzerPreviewContainer', () => {
     renderAnalyzerPreview();
 
     expect(mockAnalyzerPreview).toHaveBeenCalledWith(
-      expect.objectContaining({ dataViewIndices: ['experimental-analyzer-pattern'] })
+      expect.objectContaining({
+        dataViewIndices: ['experimental-analyzer-pattern'],
+        hit: mockHit,
+        shouldUseAncestor: false,
+      })
     );
   });
 
@@ -97,6 +98,14 @@ describe('AnalyzerPreviewContainer', () => {
     renderAnalyzerPreview();
     expect(mockAnalyzerPreview).toHaveBeenCalledWith(
       expect.objectContaining({ dataViewIndices: ['old-analyzer-pattern'] })
+    );
+  });
+
+  it('should pass shouldUseAncestor to AnalyzerPreview', () => {
+    renderAnalyzerPreview({ shouldUseAncestor: true });
+
+    expect(mockAnalyzerPreview).toHaveBeenCalledWith(
+      expect.objectContaining({ shouldUseAncestor: true })
     );
   });
 
@@ -136,7 +145,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should show no-data message when analyzer is not enabled', () => {
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
 
     const { getByText, queryByTestId } = renderAnalyzerPreview();
     expect(queryByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).not.toBeInTheDocument();
@@ -147,7 +156,7 @@ describe('AnalyzerPreviewContainer', () => {
   });
 
   it('should not render a title link when analyzer is not enabled', () => {
-    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
 
     const { queryByTestId } = renderAnalyzerPreview();
     expect(
@@ -155,28 +164,18 @@ describe('AnalyzerPreviewContainer', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should open left flyout visualization tab when clicking on title', () => {
+  it('should open analyzer when clicking on the title link', () => {
     const { getByTestId } = renderAnalyzerPreview();
 
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
-    expect(mockNavigateToAnalyzer).toHaveBeenCalled();
+    expect(mockOnShowAnalyzer).toHaveBeenCalled();
   });
 
-  it('should disable link when in rule preview', () => {
-    const { queryByTestId } = renderAnalyzerPreview({
-      ...mockContextValue,
-      isRulePreview: true,
-    });
+  it('should disable title link when disableNavigation is true', () => {
+    const { queryByTestId } = renderAnalyzerPreview({ disableNavigation: true });
     expect(
       queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
     ).not.toBeInTheDocument();
-  });
-
-  it('should render link when in preview mode', () => {
-    const { getByTestId } = renderAnalyzerPreview({ ...mockContextValue, isPreviewMode: true });
-
-    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(ANALYZER_PREVIEW_TEST_ID)).click();
-    expect(mockNavigateToAnalyzer).toHaveBeenCalled();
   });
 
   it('should use the analyzer page scope hooks', () => {

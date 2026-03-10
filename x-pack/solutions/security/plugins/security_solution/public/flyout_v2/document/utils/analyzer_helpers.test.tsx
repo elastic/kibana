@@ -20,7 +20,7 @@ import {
   mockTreeNodesHasGrandchildren,
   mockTreeNodesChildHasMoreDescendants,
   mockTreeNodesMoreDescendants,
-} from '../mocks/mock_analyzer_data';
+} from '../../../flyout/document_details/right/mocks/mock_analyzer_data';
 
 const childCountLimit = 3;
 const descendantLevel = 1;
