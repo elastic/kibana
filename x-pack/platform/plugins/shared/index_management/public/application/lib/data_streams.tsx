@@ -85,14 +85,14 @@ export const getLifecycleValue = (
  * when backing indices have `prefer_ilm` enabled and an ILM policy is configured.
  * In that case, the effective retention is governed by the ILM policy.
  */
+// this was making sure ilm set and all indices are managed by ilm
 export const isIlmPreferred = (dataStream?: DataStream | null): boolean => {
-  return (
-    Boolean(dataStream?.ilmPolicyName) &&
-    // todo confirm - this is to ensure that the prefer_ilm setting has been applied and is active
-    Boolean(dataStream?.indices?.some(({ preferILM }) => preferILM))
+  return Boolean(
+    dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management'
   );
 };
 
+// are future and existing indices managed by ilm
 export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {
   return (
     dataStream?.nextGenerationManagedBy?.toLowerCase() === 'index lifecycle management' &&
