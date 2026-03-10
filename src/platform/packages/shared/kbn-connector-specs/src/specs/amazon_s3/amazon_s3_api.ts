@@ -167,17 +167,24 @@ async function parseAwsXmlResponse(
 ): Promise<Record<string, unknown>> {
   const parser = new Parser({ explicitArray: false, explicitRoot: false, ignoreAttrs: true });
 
-  let returnValue: Record<string, unknown> = {};
+  const returnValue: Record<string, unknown> = {};
 
-  let parsed = await parser.parseStringPromise(xml);
+  const parsed = await parser.parseStringPromise(xml);
   return jsObjectToRecord(parsed, collectionItems || {});
 }
 
 function urlEncodeS3ObjectKey(objectKey: string): string {
-  return encodeURIComponent(objectKey).split('/').map((segment) => encodeURIComponent(segment)).join('/');
+  return encodeURIComponent(objectKey)
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
 }
 
-function getAwsS3EndpointForBucketObject(region: string, bucketName: string, objectKey: string): string {
+function getAwsS3EndpointForBucketObject(
+  region: string,
+  bucketName: string,
+  objectKey: string
+): string {
   // Ensure each segment of the key is encoded, but slashes are preserved
   const encodedObjectKey = urlEncodeS3ObjectKey(objectKey);
   return `https://${bucketName}.s3.${region}.amazonaws.com/${encodedObjectKey}`;
@@ -204,7 +211,7 @@ export async function listAmazonS3Buckets(
 
   try {
     const rawResponse = await ctx.client.get(url);
-    const response = await parseAwsXmlResponse(rawResponse.data, { Buckets: 'Bucket' }) as Record<
+    const response = (await parseAwsXmlResponse(rawResponse.data, { Buckets: 'Bucket' })) as Record<
       string,
       unknown
     >;
@@ -251,10 +258,9 @@ export async function listAmazonS3BucketObjects(
 
   try {
     const rawResponse = await ctx.client.get(url);
-    const response = await parseAwsXmlResponse(rawResponse.data, { Contents: undefined }) as Record<
-      string,
-      unknown
-    >;
+    const response = (await parseAwsXmlResponse(rawResponse.data, {
+      Contents: undefined,
+    })) as Record<string, unknown>;
 
     return {
       bucket: bucketName,
