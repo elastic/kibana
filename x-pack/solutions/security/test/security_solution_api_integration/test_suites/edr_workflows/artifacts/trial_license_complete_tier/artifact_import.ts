@@ -29,7 +29,6 @@ import {
   buildSpaceOwnerIdTag,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import type { FeaturesPrivileges } from '@kbn/security-plugin-types-common';
-import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type {
   FindExceptionListItemsRequestQueryInput,
   FindExceptionListItemsResponse,
@@ -667,11 +666,9 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   expect(items[0].comments).toContainEqual(
                     expect.objectContaining({
                       comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n- "i-do-not-exist"\n- "me-neither"`,
+                      created_by: `${artifact.listId}_allWithGlobal`,
                     })
                   );
-
-                  const username = `${artifact.listId}_allWithGlobal`;
-                  expect(items[0].comments[0].created_by).toEqual(username);
                 });
               });
 
@@ -813,67 +810,52 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               });
 
               describe('when `overwrite` query param is `true`', () => {
-                let existingGlobalArtifactInCurrentSpace: ArtifactTestData;
-                let existingGlobalArtifactInOtherSpace: ArtifactTestData;
-                let existingPerPolicyArtifactInCurrentSpace: ArtifactTestData;
-                let existingUnassignedPerPolicyArtifactInOtherSpace: ArtifactTestData;
-                let existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace: ArtifactTestData;
-
                 beforeEach(async () => {
                   await endpointArtifactTestResources.createList(artifact.listId);
 
-                  existingGlobalArtifactInCurrentSpace =
-                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                  await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                    tags: [GLOBAL_ARTIFACT_TAG],
+                    item_id: 'existing-global-artifact-in-current-space',
+                  });
+
+                  await endpointArtifactTestResources.createArtifact(
+                    artifact.listId,
+                    {
                       tags: [GLOBAL_ARTIFACT_TAG],
-                      item_id: 'existing-global-artifact-in-current-space',
-                    });
+                      item_id: 'existing-global-artifact-in-other-space',
+                    },
+                    { spaceId: OTHER_SPACE_ID }
+                  );
 
-                  existingGlobalArtifactInOtherSpace =
-                    await endpointArtifactTestResources.createArtifact(
-                      artifact.listId,
-                      {
-                        tags: [GLOBAL_ARTIFACT_TAG],
-                        item_id: 'existing-global-artifact-in-other-space',
-                      },
-                      { spaceId: OTHER_SPACE_ID }
-                    );
+                  await endpointArtifactTestResources.createArtifact(artifact.listId, {
+                    tags: [buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id)],
+                    item_id: 'existing-per-policy-artifact-in-current-space',
+                  });
 
-                  existingPerPolicyArtifactInCurrentSpace =
-                    await endpointArtifactTestResources.createArtifact(artifact.listId, {
-                      tags: [buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id)],
-                      item_id: 'existing-per-policy-artifact-in-current-space',
-                    });
+                  await endpointArtifactTestResources.createArtifact(
+                    artifact.listId,
+                    { tags: [], item_id: 'existing-per-policy-artifact-in-other-space' },
+                    { spaceId: OTHER_SPACE_ID }
+                  );
 
-                  existingUnassignedPerPolicyArtifactInOtherSpace =
-                    await endpointArtifactTestResources.createArtifact(
-                      artifact.listId,
-                      {
-                        tags: [],
-                        item_id: 'existing-per-policy-artifact-in-other-space',
-                      },
-                      { spaceId: OTHER_SPACE_ID }
-                    );
-
-                  existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace =
-                    await endpointArtifactTestResources.createArtifact(
-                      artifact.listId,
-                      {
-                        tags: [GLOBAL_ARTIFACT_TAG], // start with global
-                        item_id:
-                          'existing-per-policy-artifact-in-other-space-visible-in-current-space',
-                      },
-                      { spaceId: OTHER_SPACE_ID }
-                    );
+                  const createdArtifact = await endpointArtifactTestResources.createArtifact(
+                    artifact.listId,
+                    {
+                      tags: [GLOBAL_ARTIFACT_TAG], // start with global
+                      item_id:
+                        'existing-per-policy-artifact-in-other-space-visible-in-current-space',
+                    },
+                    { spaceId: OTHER_SPACE_ID }
+                  );
 
                   // then update to have per-policy tags, which should make it visible in current space, and removed on import with overwrite
-                  existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace =
-                    await endpointArtifactTestResources.updateExceptionItem({
-                      ...existingPerPolicyArtifactInOtherSpaceVisibleInCurrentSpace.artifact,
-                      tags: [
-                        buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
-                        OTHER_SPACE_OWNER_TAG,
-                      ],
-                    });
+                  await endpointArtifactTestResources.updateExceptionItem({
+                    ...createdArtifact.artifact,
+                    tags: [
+                      buildPerPolicyTag(fleetEndpointPolicy.packagePolicy.id),
+                      OTHER_SPACE_OWNER_TAG,
+                    ],
+                  });
                 });
 
                 describe('when without global artifact privilege', () => {

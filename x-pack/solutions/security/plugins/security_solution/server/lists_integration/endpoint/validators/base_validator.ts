@@ -575,6 +575,7 @@ export class BaseValidator {
             os_types: item.osTypes,
             tags: item.tags,
             namespace_type: item.namespaceType,
+            comments: item.comments,
             list_id: item.listId ?? _item.list_id,
           });
         } catch (error) {
@@ -617,11 +618,14 @@ export class BaseValidator {
       if (invalidPolicyIdTags.size > 0) {
         item.tags = item.tags.filter((tag) => !invalidPolicyIdTags.has(tag));
 
-        item.comments.push({
-          comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n${invalidPolicyIds
-            .map((id) => `- "${id}"`)
-            .join('\n')}`,
-        });
+        item.comments = [
+          ...(item.comments ?? []),
+          {
+            comment: `Please check policy assignment. The following policy IDs have been removed from artifact during import:\n${invalidPolicyIds
+              .map((id) => `- "${id}"`)
+              .join('\n')}`,
+          },
+        ];
       }
     }
   }
