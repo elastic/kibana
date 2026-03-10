@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
-import { useMonitorIntegrationStatus } from '../../../common/hooks/use_monitor_integration_status';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 
 export const BulkOperations = ({
   selectedItems,
@@ -20,7 +20,7 @@ export const BulkOperations = ({
   setMonitorPendingDeletion: (val: string[]) => void;
 }) => {
   const { hasMissingIntegrations, resetMonitors, isResetting } =
-    useMonitorIntegrationStatus();
+    useMonitorIntegrationHealth();
 
   const onDeleted = () => {
     setMonitorPendingDeletion(selectedItems.map((item) => item[ConfigKey.CONFIG_ID]));

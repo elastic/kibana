@@ -23,11 +23,11 @@ export interface MonitorIntegrationStatus {
   isMissing: boolean;
 }
 
-interface UseMonitorIntegrationStatusOptions {
+interface UseMonitorIntegrationHealthOptions {
   configIds?: string[];
 }
 
-interface UseMonitorIntegrationStatusReturn {
+interface UseMonitorIntegrationHealthReturn {
   statuses: Map<string, MonitorIntegrationStatus[]>;
   loading: boolean;
   isResetting: boolean;
@@ -39,9 +39,9 @@ interface UseMonitorIntegrationStatusReturn {
   getMissingConfigIdsForLocation: (locationId: string) => string[];
 }
 
-export const useMonitorIntegrationStatus = (
-  options?: UseMonitorIntegrationStatusOptions
-): UseMonitorIntegrationStatusReturn => {
+export const useMonitorIntegrationHealth = (
+  options?: UseMonitorIntegrationHealthOptions
+): UseMonitorIntegrationHealthReturn => {
   const { configIds: explicitConfigIds } = options ?? {};
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);

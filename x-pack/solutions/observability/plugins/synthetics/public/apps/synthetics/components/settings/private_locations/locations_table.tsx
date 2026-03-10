@@ -32,7 +32,7 @@ import type { PrivateLocation } from '../../../../../../common/runtime_types';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
 import { DeleteLocation } from './delete_location';
 import { useLocationMonitors } from './hooks/use_location_monitors';
-import { useMonitorIntegrationStatus } from '../../common/hooks/use_monitor_integration_status';
+import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 import { PolicyName } from './policy_name';
 import { LOCATION_NAME_LABEL } from './location_form';
 import { setIsPrivateLocationFlyoutVisible } from '../../../state/private_locations/actions';
@@ -61,7 +61,7 @@ export const PrivateLocationsTable = ({
   const { locationMonitors, loading } = useLocationMonitors();
 
   const { getMissingCountForLocation, getMissingConfigIdsForLocation, resetMonitors, isResetting } =
-    useMonitorIntegrationStatus();
+    useMonitorIntegrationHealth();
 
   const { canSave, canManagePrivateLocations } = useSyntheticsSettingsContext();
 

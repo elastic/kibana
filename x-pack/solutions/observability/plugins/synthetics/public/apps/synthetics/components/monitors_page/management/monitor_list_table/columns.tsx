@@ -38,7 +38,7 @@ import type {
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
-import { useMonitorIntegrationStatus } from '../../../common/hooks/use_monitor_integration_status';
+import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
@@ -60,7 +60,7 @@ export function useMonitorListColumns({
   const { space } = useKibanaSpace();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
-  const { hasMissingIntegrations } = useMonitorIntegrationStatus();
+  const { hasMissingIntegrations } = useMonitorIntegrationHealth();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;

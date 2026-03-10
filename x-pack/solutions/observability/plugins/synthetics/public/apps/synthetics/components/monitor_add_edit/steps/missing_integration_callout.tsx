@@ -8,10 +8,10 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMonitorIntegrationStatus } from '../../common/hooks/use_monitor_integration_status';
+import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
 
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
-  const { hasMissingIntegrations, resetMonitor, isResetting } = useMonitorIntegrationStatus({
+  const { hasMissingIntegrations, resetMonitor, isResetting } = useMonitorIntegrationHealth({
     configIds: [configId],
   });
 
