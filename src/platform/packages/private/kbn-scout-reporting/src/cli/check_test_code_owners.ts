@@ -11,6 +11,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
+import { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } from '@kbn/scout-info';
 import type { RepoPath } from '@kbn/repo-path';
 import ignore from 'ignore';
 
@@ -20,11 +21,7 @@ const FTR_TEST_PATTERNS = [
   ':(glob)x-pack/solutions/*/test/**',
 ];
 
-const SCOUT_TEST_PATTERNS = [
-  ':(glob)src/platform/**/test/scout*/**',
-  ':(glob)x-pack/platform/**/test/scout*/**',
-  ':(glob)x-pack/solutions/**/test/scout*/**',
-];
+const SCOUT_TEST_PATTERNS = [`:(glob)${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**`];
 
 const JEST_TEST_PATTERNS = [
   ':(glob)**/*.test.ts',
