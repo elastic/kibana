@@ -42,7 +42,6 @@
     "@kbn/cloud-plugin",
     "@kbn/logging-mocks",
     "@kbn/cloud-connect-plugin",
-    "@kbn/std"
   ],
   "exclude": [
     "target/**/*"
