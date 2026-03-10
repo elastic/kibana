@@ -440,6 +440,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
       });
 
+      it('handles regex metacharacters in wildcard patterns without throwing', async () => {
+        const results = await agentBuilderApiClient.executeTool({
+          id: OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
+          params: {
+            operation: 'get-field-values',
+            index: 'metrics-*',
+            fields: ['[abc*'],
+          },
+        });
+        const data = results[0].data as unknown as FieldValuesRecordResult;
+
+        const result = data.fields['[abc*'];
+        expect(result.type).to.be('error');
+        if (result.type === 'error') {
+          expect(result.message).to.contain('No fields match pattern');
+        }
+      });
+
       it('does not return parent object fields when querying a specific field', async () => {
         // This tests that fieldCaps parent objects (from passthrough types) are filtered out
         // When querying "host.name", we should NOT get "host" as an error

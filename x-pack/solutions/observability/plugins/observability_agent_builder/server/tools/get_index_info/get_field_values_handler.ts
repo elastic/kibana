@@ -212,9 +212,15 @@ async function getTextFieldSampleValues(
   );
 }
 
+/** Escapes regex metacharacters in a string */
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /** Converts a wildcard pattern to a regex */
 function wildcardToRegex(pattern: string): RegExp {
-  return new RegExp(`^${pattern.replace(/\./g, '\\.').replace(/\*/g, '.*')}$`);
+  const escapedSegments = pattern.split('*').map(escapeRegExp);
+  return new RegExp(`^${escapedSegments.join('.*')}$`);
 }
 
 /** Determines the category for a field type */
