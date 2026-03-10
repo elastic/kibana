@@ -741,7 +741,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:16Z",
-      "event": { "kind": "asset", "module": "okta" },
+      "event": { "kind": "any-random", "category": "iam", "type": "user", "module": "okta" },
       "host": {
         "entity": {
           "id": "host-505"
@@ -763,7 +763,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:17Z",
-      "event": { "kind": "asset", "module": "azure" },
+      "event": { "kind": null, "category": "iam", "type": "creation", "module": "azure" },
       "host": {
         "id": "host-606"
       },
@@ -783,7 +783,7 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:18Z",
-      "event": { "kind": "asset", "module": "entityanalytics_ad" },
+      "event": { "category": "iam", "type": "group", "module": "entityanalytics_ad" },
       "host": {
         "name": "server-07"
       },
@@ -830,9 +830,24 @@
     "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:20Z",
-      "event": { "kind": "asset" },
+      "event": { "category": "iam", "type": "deletion" },
       "data_stream": { "dataset": "entityanalytics_okta.users" },
       "user": { "name": "okta.from.dataset" }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dset9_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:20Z",
+      "event": { "category": "iam", "type": "deletion", "outcome": "failure" },
+      "data_stream": { "dataset": "entityanalytics_okta.users" },
+      "user": { "name": "ignored-outcome-failure" }
     }
   }
 }

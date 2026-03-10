@@ -104,5 +104,5 @@ export function isEuidField(attr: EuidAttribute) {
 }
 
 export function isEuidSeparator(attr: EuidAttribute) {
-  return 'separator' in attr;
+  return 'sep' in attr;
 }
