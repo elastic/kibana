@@ -301,7 +301,18 @@ async function executor(
   const awsSesConfig = configurationUtilities.getAwsSesConfig();
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
-  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
+  const validEmails = emails.filter((email) => email.trim().length > 0);
+
+  if (validEmails.length === 0) {
+    return {
+      status: 'error',
+      actionId,
+      message: `no [to], [cc], or [bcc] entries`,
+      errorSource: TaskErrorSource.USER,
+    };
+  }
+
+  let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(validEmails);
   if (invalidEmailsMessage) {
     return { status: 'error', actionId, message: `[to/cc/bcc]: ${invalidEmailsMessage}` };
   }
