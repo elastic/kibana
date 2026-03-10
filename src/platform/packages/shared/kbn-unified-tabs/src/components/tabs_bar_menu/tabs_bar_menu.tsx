@@ -113,7 +113,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
     const closePopover = useCallback(() => {
       setIsPopoverOpen(false);
       setPreviewTabId(null);
-      setMenuOpenedAt(null);
     }, [setIsPopoverOpen]);
 
     const getTabItemContents = useCallback(
@@ -329,8 +328,6 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                 setIsPopoverOpen(isOpen);
                 if (isOpen) {
                   setMenuOpenedAt(Date.now());
-                } else {
-                  setMenuOpenedAt(null);
                 }
               }}
             />
