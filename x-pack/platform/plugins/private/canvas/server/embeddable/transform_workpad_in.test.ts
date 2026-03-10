@@ -9,7 +9,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 
 import { encode } from '../../common/lib/embeddable_dataurl';
 import { transformWorkpadIn } from './transform_workpad_in';
-import { embeddableService } from '../kibana_services';
+import { embeddableService, logger } from '../kibana_services';
 import { getDecodedConfig, makeWorkpad } from './fixtures';
 
 jest.mock('../kibana_services', () => ({
@@ -58,7 +58,7 @@ describe('transformWorkpadIn', () => {
     });
   });
 
-  it('logs warnings when transformation fails and returns the original embeddable config', () => {
+  it('logs warnings when transformation fails and returns the original embeddable config and no references', () => {
     (embeddableService.getTransforms as jest.Mock).mockReturnValue({
       transformIn: jest.fn(() => {
         throw new Error('Transform failed');
@@ -73,5 +73,7 @@ describe('transformWorkpadIn', () => {
       title: 'Test',
       savedObjectId: 'test-id',
     });
+    expect(references).toEqual([]);
+    expect(logger.warn).toHaveBeenCalledWith('Error transforming workpad in: Transform failed');
   });
 });
