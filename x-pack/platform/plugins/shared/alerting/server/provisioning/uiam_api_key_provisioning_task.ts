@@ -241,16 +241,18 @@ export class UiamApiKeyProvisioningTask {
     }
     try {
       await savedObjectsClient.bulkCreate(all, { overwrite: true });
-      const updateCompleted = provisioningStatusFromUpdate.filter(
-        (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.COMPLETED
-      ).length;
-      const updateFailed = provisioningStatusFromUpdate.filter(
-        (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.FAILED
-      ).length;
-      const skipped = provisioningStatusForSkippedRules.length;
-      const failedConversions = provisioningStatusForFailedConversions.length;
+      const counts = {
+        skipped: provisioningStatusForSkippedRules.length,
+        failedConversions: provisioningStatusForFailedConversions.length,
+        completed: provisioningStatusFromUpdate.filter(
+          (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.COMPLETED
+        ).length,
+        failed: provisioningStatusFromUpdate.filter(
+          (doc) => doc.attributes.status === UiamApiKeyProvisioningStatus.FAILED
+        ).length,
+      };
       this.logger.info(
-        `Wrote provisioning status: ${skipped} skipped rules, ${failedConversions} failed conversions, ${updateCompleted} completed and ${updateFailed} failed updates.`,
+        `Wrote provisioning status: ${counts.skipped} skipped rules, ${counts.failedConversions} failed conversions, ${counts.completed} completed and ${counts.failed} failed updates.`,
         { tags: TAGS }
       );
     } catch (e) {
