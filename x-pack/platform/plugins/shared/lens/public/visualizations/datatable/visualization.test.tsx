@@ -13,6 +13,7 @@ import { getDatatableVisualization } from './visualization';
 import {
   type Operation,
   type DataType,
+  type OperationDescriptor,
   type FramePublicAPI,
   type TableSuggestionColumn,
   type VisualizationDimensionGroupConfig,
@@ -24,8 +25,14 @@ import {
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
-import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE } from '@kbn/coloring';
+import type {
+  ColorMapping,
+  CustomPaletteParams,
+  PaletteDefinition,
+  PaletteOutput,
+  SeriesLayer,
+} from '@kbn/coloring';
+import { CUSTOM_PALETTE, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   ColumnState,
   DatatableColumnFn,
@@ -1130,6 +1137,227 @@ describe('Datatable Visualization', () => {
         ...currentState,
         paging: { enabled: true, size: 30 },
       });
+    });
+  });
+
+  describe('#onDatasourceUpdate', () => {
+    let datasource: DatasourceMock;
+    let frame: FramePublicAPI;
+
+    const baseState: DatatableVisualizationState = {
+      layerId: 'layer1',
+      layerType: LayerTypes.DATA,
+      columns: [],
+    };
+
+    const valuePalette: PaletteOutput<CustomPaletteParams> = {
+      type: 'palette',
+      name: 'default',
+      params: { stops: [{ color: 'red', stop: 50 }] },
+    };
+
+    const defaultColorMapping: ColorMapping.Config = {
+      paletteId: 'default',
+      colorMode: { type: 'categorical' },
+      assignments: [],
+      specialAssignments: [],
+    };
+
+    beforeEach(() => {
+      datasource = createMockDatasource('test');
+      frame = {
+        ...mockFrame(),
+        datasourceLayers: { layer1: datasource.publicAPIMock },
+      };
+    });
+
+    function callOnDatasourceUpdate(state: DatatableVisualizationState) {
+      return datatableVisualization.onDatasourceUpdate!(state, frame);
+    }
+
+    function mockOperation(overrides: Partial<OperationDescriptor>) {
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'number',
+        isBucketed: false,
+        label: 'label',
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+        ...overrides,
+      } satisfies OperationDescriptor);
+    }
+
+    it('returns columns unchanged when they have no color config', () => {
+      mockOperation({ dataType: 'number', isBucketed: false, label: 'Count' });
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [{ columnId: 'col1' }],
+      };
+
+      const result = callOnDatasourceUpdate(state);
+      expect(result.columns[0]).toEqual({ columnId: 'col1' });
+    });
+
+    it('returns columns unchanged when column is not colorable', () => {
+      mockOperation({
+        dataType: 'number',
+        isBucketed: false,
+        label: 'Array metric',
+        hasArraySupport: true,
+      });
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            palette: valuePalette,
+          },
+        ],
+      };
+
+      const result = callOnDatasourceUpdate(state);
+      expect(result.columns[0]).toEqual({ columnId: 'col1', palette: valuePalette });
+    });
+
+    it('strips palette and falls back to DEFAULT_COLOR_MAPPING_CONFIG for categorical column with value-based palette', () => {
+      mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            palette: valuePalette,
+          },
+        ],
+      };
+
+      const result = callOnDatasourceUpdate(state);
+      expect(result.columns[0].palette).toBeUndefined();
+      expect(result.columns[0].colorMapping).toEqual(DEFAULT_COLOR_MAPPING_CONFIG);
+    });
+
+    it('strips palette but preserves existing colorMapping for categorical column with both', () => {
+      mockOperation({ dataType: 'string', isBucketed: true, label: 'Category' });
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            palette: valuePalette,
+            colorMapping: defaultColorMapping,
+          },
+        ],
+      };
+
+      const result = callOnDatasourceUpdate(state);
+      expect(result.columns[0].palette).toBeUndefined();
+      expect(result.columns[0].colorMapping).toEqual(defaultColorMapping);
+    });
+
+    it('strips colorMapping and computes value-based palette for numeric column with colorMapping but no palette', () => {
+      mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            colorMapping: defaultColorMapping,
+          },
+        ],
+      };
+
+      const { palette, colorMapping } = callOnDatasourceUpdate(state).columns[0];
+      expect(colorMapping).toBeUndefined();
+      expect(palette).toBeDefined();
+      expect(palette?.name).toBe('positive');
+      expect(palette?.params?.stops).toBeDefined();
+      expect(palette?.params?.stops?.length).toBeGreaterThan(0);
+    });
+
+    it('strips colorMapping but keeps existing palette for numeric column with both', () => {
+      mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+
+      const paletteWithStops: PaletteOutput<CustomPaletteParams> = {
+        type: 'palette',
+        name: 'custom',
+        params: { stops: [{ color: 'green', stop: 50 }] },
+      };
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            colorMapping: defaultColorMapping,
+            palette: paletteWithStops,
+          },
+        ],
+      };
+
+      const { palette, colorMapping } = callOnDatasourceUpdate(state).columns[0];
+      expect(colorMapping).toBeUndefined();
+      expect(palette).toBeDefined();
+      expect(palette?.name).toBe('custom');
+      expect(palette?.params?.stops).toEqual(paletteWithStops.params?.stops);
+    });
+
+    it('replaces categorical-only palette with value-based palette for numeric column', () => {
+      mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            palette: { type: 'palette', name: 'mocked' }, // no canDynamicColoring
+          },
+        ],
+      };
+
+      const { palette } = callOnDatasourceUpdate(state).columns[0];
+      expect(palette).toBeDefined();
+      expect(palette?.name).toBe('positive');
+      expect(palette?.params?.stops?.length).toBeGreaterThan(0);
+    });
+
+    it('computes stops while preserving palette name for numeric column with valid palette with canDynamicColoring but no stops', () => {
+      const temperaturePalette: jest.Mocked<PaletteDefinition> = {
+        id: 'temperature',
+        title: 'Temperature',
+        canDynamicColoring: true,
+        getCategoricalColor: jest.fn((_: SeriesLayer[]) => 'orange'),
+        getCategoricalColors: jest.fn((num: number) => ['orange', 'red']),
+        toExpression: jest.fn(() => ({
+          type: 'expression',
+          chain: [
+            { type: 'function', function: 'system_palette', arguments: { name: ['temperature'] } },
+          ],
+        })),
+      };
+
+      mockServices.paletteService.getAll.mockReturnValue([
+        ...mockServices.paletteService.getAll(),
+        temperaturePalette,
+      ]);
+
+      mockOperation({ dataType: 'number', isBucketed: false, label: 'Metric' });
+      const state: DatatableVisualizationState = {
+        ...baseState,
+        columns: [
+          {
+            columnId: 'col1',
+            palette: { type: 'palette', name: 'temperature' },
+          },
+        ],
+      };
+      const { palette } = callOnDatasourceUpdate(state).columns[0];
+      expect(palette?.name).toBe('temperature');
+      expect(palette?.params?.stops).toBeDefined();
+      expect(palette?.params?.stops?.length).toBeGreaterThan(0);
     });
   });
 });
