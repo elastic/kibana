@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { DayPicker, type DateRange } from 'react-day-picker';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -32,8 +32,6 @@ interface CalendarViewProps {
 
 /**
  * Single-month calendar view backed by react-day-picker.
- * Memoized with a custom comparator to avoid re-rendering every visible
- * month when only the range object reference (not its timestamps) changes.
  */
 export const CalendarView = function CalendarView({
   year,
@@ -44,7 +42,6 @@ export const CalendarView = function CalendarView({
 }: CalendarViewProps) {
   const euiThemeContext = useEuiTheme();
   const styles = calendarViewStyles(euiThemeContext);
-  const month = useMemo(() => new Date(year, monthIndex, 1), [year, monthIndex]);
 
   return (
     <DayPicker
@@ -52,7 +49,7 @@ export const CalendarView = function CalendarView({
       disableNavigation
       hideNavigation
       mode="range"
-      month={month}
+      month={new Date(year, monthIndex, 1)}
       onSelect={setRange}
       required={false}
       selected={range}
