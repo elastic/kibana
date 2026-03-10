@@ -17,7 +17,7 @@ import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { SkillStorage } from './storage';
 import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
-import type { SkillDocument, SkillPersistedDefinition } from './types';
+import type { SkillDocument, SkillPersistedDefinition, SkillListOptions } from './types';
 
 const MAX_SKILLS_PER_SPACE = 1000;
 
@@ -26,7 +26,7 @@ const MAX_SKILLS_PER_SPACE = 1000;
  */
 export interface SkillClient {
   get(skillId: string): Promise<SkillPersistedDefinition>;
-  list(): Promise<SkillPersistedDefinition[]>;
+  list(options?: SkillListOptions): Promise<SkillPersistedDefinition[]>;
   create(request: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition>;
   update(skillId: string, updates: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition>;
   /**
@@ -76,13 +76,26 @@ class SkillClientImpl implements SkillClient {
     return fromEs(document);
   }
 
-  async list(): Promise<SkillPersistedDefinition[]> {
+  async list(options?: SkillListOptions): Promise<SkillPersistedDefinition[]> {
     const response = await this.storage.getClient().search({
       query: {
         bool: {
           filter: [createSpaceDslFilter(this.space)],
         },
       },
+      ...(options?.summaryOnly && {
+        _source: { excludes: ['content', 'referenced_content'] },
+        runtime_mappings: {
+          referenced_content_count: {
+            type: 'long' as const,
+            script: {
+              source:
+                'emit(params._source.referenced_content == null ? 0 : params._source.referenced_content.size())',
+            },
+          },
+        },
+        fields: ['referenced_content_count'],
+      }),
       size: MAX_SKILLS_PER_SPACE,
       track_total_hits: true,
     });
@@ -98,7 +111,9 @@ class SkillClientImpl implements SkillClient {
       );
     }
 
-    return response.hits.hits.map((hit) => fromEs(hit as SkillDocument));
+    return response.hits.hits.map((hit) =>
+      fromEs(hit as SkillDocument & { fields?: Record<string, unknown[]> })
+    );
   }
 
   async create(createRequest: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition> {

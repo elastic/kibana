@@ -181,6 +181,24 @@ describe('createSkillRegistry', () => {
     });
   });
 
+  describe('list with summaryOnly', () => {
+    it('forwards options to both providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1]);
+      const persistedProvider = createMockPersistedProvider([persistedSkill1]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider,
+        toolRegistry: createMockToolRegistry(),
+      });
+
+      const result = await registry.list({ summaryOnly: true });
+      expect(result).toHaveLength(2);
+
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+      expect(persistedProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+  });
+
   describe('create', () => {
     it('creates a new persisted skill', async () => {
       const persistedProvider = createMockPersistedProvider([]);

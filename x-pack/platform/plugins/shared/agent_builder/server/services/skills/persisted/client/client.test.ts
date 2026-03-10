@@ -101,7 +101,10 @@ describe('SkillClient', () => {
         name: 'My Skill',
         description: 'A skill description',
         content: 'Skill content body',
+        referenced_content: [],
         tool_ids: [],
+        plugin_id: undefined,
+        referenced_content_count: 0,
         created_at: creationDate,
         updated_at: updateDate,
       });
@@ -191,6 +194,113 @@ describe('SkillClient', () => {
           size: 1000,
         })
       );
+    });
+  });
+
+  describe('list with summaryOnly', () => {
+    const createMockSummaryDoc = (id: string, refCount: number) => ({
+      _id: `doc-${id}`,
+      _source: {
+        id,
+        name: `Skill ${id}`,
+        space: testSpace,
+        description: `Description for ${id}`,
+        tool_ids: ['tool-a'],
+        plugin_id: 'my-plugin',
+        created_at: creationDate,
+        updated_at: updateDate,
+      },
+      fields: {
+        referenced_content_count: [refCount],
+      },
+    });
+
+    it('returns skills with empty content and referenced_content_count populated', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 2 },
+          hits: [createMockSummaryDoc('skill-1', 3), createMockSummaryDoc('skill-2', 0)],
+        },
+      });
+
+      const result = await client.list({ summaryOnly: true });
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'skill-1',
+          name: 'Skill skill-1',
+          description: 'Description for skill-1',
+          tool_ids: ['tool-a'],
+          plugin_id: 'my-plugin',
+          referenced_content_count: 3,
+          content: '',
+          referenced_content: [],
+        })
+      );
+      expect(result[1].referenced_content_count).toBe(0);
+    });
+
+    it('uses _source exclusion and runtime_mappings in the search request', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      await client.list({ summaryOnly: true });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: { excludes: ['content', 'referenced_content'] },
+          runtime_mappings: expect.objectContaining({
+            referenced_content_count: expect.objectContaining({
+              type: 'long',
+            }),
+          }),
+          fields: ['referenced_content_count'],
+          track_total_hits: true,
+          size: 1000,
+        })
+      );
+    });
+
+    it('does not use _source exclusion when summaryOnly is not set', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { total: { value: 0 }, hits: [] },
+      });
+
+      await client.list();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          _source: expect.anything(),
+        })
+      );
+    });
+
+    it('falls back to referenced_content array length when fields are missing', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _id: 'doc-skill-1',
+              _source: {
+                id: 'skill-1',
+                name: 'Skill 1',
+                space: testSpace,
+                description: 'desc',
+                tool_ids: [],
+                created_at: creationDate,
+                updated_at: updateDate,
+              },
+            },
+          ],
+        },
+      });
+
+      const result = await client.list({ summaryOnly: true });
+
+      expect(result[0].referenced_content_count).toBe(0);
     });
   });
 

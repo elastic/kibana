@@ -174,6 +174,7 @@ export {
 } from './chat';
 export {
   type PublicSkillDefinition,
+  type PublicSkillSummary,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,

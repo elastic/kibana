@@ -128,6 +128,22 @@ describe('createPersistedSkillProvider', () => {
     });
   });
 
+  describe('list with summaryOnly', () => {
+    it('forwards options to skillClient.list', async () => {
+      mockClient.list.mockResolvedValue([
+        createMockPersistedSkill({ id: 'skill-1', content: '', referenced_content_count: 2 }),
+      ]);
+      const provider = createProvider();
+
+      const result = await provider.list({ summaryOnly: true });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('skill-1');
+      expect(result[0].referencedContentCount).toBe(2);
+      expect(mockClient.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+  });
+
   describe('create', () => {
     it('creates and returns converted skill', async () => {
       const created = createMockPersistedSkill({ id: 'new-skill' });
