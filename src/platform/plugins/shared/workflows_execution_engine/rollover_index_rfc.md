@@ -73,7 +73,7 @@ This architecture follows the **rollover alias** pattern -- a well-established E
 
 On plugin startup, the system ensures three Elasticsearch resources exist for each execution index (workflow executions and step executions):
 
-1. **ILM policy**: A lifecycle policy that starts with a `hot` phase for rollover based on `max_age` (configurable, default `1d`). Additional lifecycle phases for long-term retention and eventual deletion will be configured as part of the lifecycle design.
+1. **ILM policy**: A lifecycle policy with five phases -- hot, warm, cold, frozen, and delete -- that manages the full lifecycle of execution data from active writes through long-term retention to eventual deletion. The hot phase rolls over based on `max_age` (configurable, default `1d`). See the [Tiered Lifecycle Progression](#tiered-lifecycle-progression) section for the full policy and tier transition mechanics.
 2. **Index template**: Matches the index pattern (e.g., `.workflows-executions-*`), applies the ILM policy and rollover alias, and defines field mappings.
 3. **Bootstrap write index**: The initial backing index (e.g., `.workflows-executions-000001`) with the alias configured as `is_write_index: true`.
 
@@ -204,23 +204,112 @@ searchWorkflowExecutions(query, spaceId, sort, size):
 
 **Search queries**: Fan out across all backing indexes via the alias. Performance is proportional to the total number of backing indexes. The number of hot-phase backing indexes stays small (typically the current write index plus a few old indexes with long-running executions that have not yet reached fully-terminal status). Backing indexes in later lifecycle phases are retained for long-term history but may have higher read latency depending on the tier.
 
-### Automated Lifecycle Progression (TOBEDEFINED)
+### Tiered Lifecycle Progression
 
-The mechanism for advancing fully-terminal backing indexes through ILM lifecycle phases is not yet implemented. The design intent is:
+Backing indexes progress through five ILM lifecycle phases, matching the access pattern of execution data as it ages:
 
-- A periodic background task lists all backing indexes for each alias.
-- The current write index is always skipped.
-- For each old backing index still in the hot phase, the task counts non-terminal documents. If zero (all executions are terminal), the task signals ILM to advance that index to the next lifecycle phase (e.g., via the `_ilm/move` API).
-- The progression is safe because active executions have their write index pinned (they never reference old indexes) and terminal statuses are immutable.
-- Once an index leaves the hot phase, ILM manages subsequent phase transitions (and eventual deletion) automatically based on `min_age` thresholds.
+| Phase | Contents | Access Pattern |
+|-------|----------|----------------|
+| **Hot** | Non-terminal executions may be present | Frequent reads and writes (execution loop, cancel polling, UI polling) |
+| **Warm** | All executions terminal, recently settled | Read-only, moderate frequency (UI history, debugging) |
+| **Cold** | All executions terminal, aged | Infrequent reads (auditing, compliance) |
+| **Frozen** | All executions terminal, old | Very rare reads (forensic, regulatory) |
+| **Delete** | Past retention window | Removed entirely |
 
-The exact implementation (Task Manager task vs. system workflow, frequency, error handling, observability) and the specific ILM lifecycle phase configuration are to be defined.
+#### ILM Policy
+
+The ILM policy encodes this tier model. The key design choice is that the warm phase has `min_age` set to an impossibly high value (`"99999d"`), which prevents ILM from ever auto-transitioning an index to warm. Instead, the hot-to-warm transition is driven by application logic (see below). Once an index enters warm, all subsequent transitions are automatic.
+
+```json
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "actions": {
+          "rollover": { "max_age": "1d" }
+        }
+      },
+      "warm": {
+        "min_age": "99999d",
+        "actions": {
+          "forcemerge": { "max_num_segments": 1 },
+          "shrink": { "number_of_shards": 1 }
+        }
+      },
+      "cold": {
+        "min_age": "30d",
+        "actions": {}
+      },
+      "frozen": {
+        "min_age": "90d",
+        "actions": {}
+      },
+      "delete": {
+        "min_age": "180d",
+        "actions": {
+          "delete": {}
+        }
+      }
+    }
+  }
+}
+```
+
+The warm phase applies `forcemerge` (collapse to 1 segment) and `shrink` (reduce to 1 shard) to optimize fully-terminal indexes for read-only access. These actions reduce storage footprint and improve search performance on historical data. Note that `forcemerge` and `shrink` are IO-intensive operations. If many indexes transition to warm simultaneously (e.g., after a Kibana outage where the task backlog builds up), this could temporarily spike cluster IO. The lifecycle progression task processes indexes sequentially to mitigate this.
+
+#### Hot-to-Warm Transition (Application-Driven)
+
+The hot-to-warm transition requires a semantic condition that ILM cannot express natively: "all executions in the backing index are terminal." This is business logic that only the application can evaluate. The transition is driven by a **Kibana Task Manager task** that runs periodically:
+
+1. **List backing indexes**: The task calls the `_alias` API to enumerate all backing indexes for each rollover alias (workflow executions and step executions).
+2. **Skip the write index**: The current write index (identified by `is_write_index: true`) is always skipped -- it may contain active executions.
+3. **Check ILM phase**: For each non-write backing index, the task calls `GET /{index}/_ilm/explain` to determine its current ILM phase. Only indexes still in the `hot` phase are candidates.
+4. **Count non-terminal documents**: For each hot-phase candidate, the task runs a count query for documents with a non-terminal status (`status NOT IN [COMPLETED, FAILED, CANCELLED]`).
+5. **Advance to warm**: If the non-terminal count is zero, the task calls `POST /{index}/_ilm/move` to advance the index from the hot phase to the warm phase.
+
+The task runs once per day (default interval). It processes all eligible indexes per run -- the number of hot-phase non-write indexes is expected to be small. Both the workflow executions alias and the step executions alias are processed independently in the same run. Indexes are advanced sequentially (one `_ilm/move` at a time) to avoid overwhelming the cluster with concurrent forcemerge/shrink operations triggered by the warm phase.
+
+The `_ilm/move` API is a supported Elasticsearch mechanism for cases where application logic determines phase readiness. It requires specifying the current ILM step (obtained from `_ilm/explain`) and the target phase. Once the move is issued, ILM takes over and executes the warm phase actions (forcemerge, shrink). There is a benign TOCTOU race: ILM can advance the index's internal step between the `_ilm/explain` and `_ilm/move` calls. If the `current_step` no longer matches, the `_ilm/move` call returns an error. The task treats this as a no-op and retries on the next run.
+
+The progression is safe because:
+- Active executions have their write index pinned -- they never reference old backing indexes.
+- Terminal statuses are immutable -- once an execution reaches COMPLETED, FAILED, or CANCELLED, it never reverts.
+- The `min_age: "99999d"` on warm guarantees ILM will never auto-transition to warm; only the Task Manager task can trigger this transition.
+
+#### Automatic Warm-to-Cold-to-Frozen-to-Delete
+
+Once a backing index enters the warm phase, ILM handles all subsequent transitions automatically based on `min_age` thresholds. No application involvement is needed. The default thresholds are:
+
+- **Warm → Cold**: `30d` after rollover
+- **Cold → Frozen**: `90d` after rollover
+- **Frozen → Delete**: `180d` after rollover
+
+In a future feature (not part of this RFC), users will be able to configure these retention thresholds to control how long historical execution data is retained at each tier. The hot-to-warm transition is not user-configurable -- it is always driven by the execution engine's terminal-status detection logic.
+
+#### `min_age` Reference Point
+
+ILM `min_age` is calculated relative to the index rollover time (or creation time), not from the time the index entered its current phase. This has practical implications:
+
+**Example**: An index rolls over at T=0. A long-running execution delays the application-driven warm transition until T=15d. Cold is configured at `min_age: 30d`.
+
+- The index enters warm at T=15d (via `_ilm/move`)
+- The cold transition fires at T=30d (15 days after entering warm, not 30)
+- If the warm transition were delayed until T=45d, the index would transition to cold immediately upon entering warm (because 45d > 30d)
+
+This behavior is acceptable and arguably desirable: if data is old, it should be on cheaper storage regardless of when it became terminal. The `min_age` thresholds reflect the age of the data, not the age of the phase transition.
+
+#### Failure Behavior
+
+If the hot-to-warm `_ilm/move` call fails for any reason (network error, Kibana restart, Elasticsearch unavailable, transient cluster issue), the index simply remains in the hot phase. **No data is lost and no corruption occurs.** The Task Manager task retries on its next scheduled run. The worst-case impact is that a fully-terminal backing index consumes hot-tier resources longer than necessary -- a cost inefficiency, not a correctness problem.
+
+This retry-safe design means the lifecycle progression mechanism has no failure modes that require manual intervention. The system self-heals on the next successful task run.
 
 ### Failure Recovery
 
 - **ILM rollover is atomic**: Elasticsearch handles rollover internally. If the Kibana node restarts during a rollover, ILM completes or retries the operation independently. There is no application-level state to recover.
 - **Index pinning is race-free**: The backing index name is resolved from the alias metadata and stored on the execution document atomically during creation. If ILM rolls over between resolution and the first write, the document lands in whichever index ES routes it to, and that index name is what gets persisted. Subsequent writes use the persisted name.
-- **No transactional coupling**: Rollover and lifecycle progression are independent operations. ILM manages rollover; the lifecycle progression mechanism (TOBEDEFINED) manages phase transitions for fully-terminal indexes. Neither depends on the other's success. The system is always in a consistent state -- at worst, old backing indexes remain in the hot phase until the next successful progression run.
+- **No transactional coupling**: Rollover and lifecycle progression are independent operations. ILM manages rollover; the Task Manager lifecycle progression task manages phase transitions for fully-terminal indexes. Neither depends on the other's success. The system is always in a consistent state -- at worst, old backing indexes remain in the hot phase until the next successful progression run.
+- **Lifecycle progression is retry-safe**: If the `_ilm/move` call fails (network error, Kibana restart, ES unavailable), the index stays in the hot phase. The task retries on the next scheduled run. No data is lost, no inconsistency occurs. The only cost is temporarily holding a read-only index on the hot tier.
 
 ### Multi-Node Safety
 
@@ -235,6 +324,10 @@ All execution documents carry a `spaceId` field, and all queries filter by `spac
 A single configuration knob controls the rollover behavior in `kibana.yml`:
 
 - `workflowsExecutionEngine.rolloverMaxAge` (default: `'1d'`): The ILM `max_age` threshold for rollover. Controls how frequently new backing indexes are created. Lower values (e.g., `'1h'`) create more backing indexes but enable more granular lifecycle management. Higher values (e.g., `'7d'`) create fewer indexes but delay lifecycle progression of completed executions. Changes take effect on the next Kibana restart.
+
+**Tier retention thresholds** (warm-to-cold, cold-to-frozen, frozen-to-delete `min_age` values) are set in the ILM policy with sensible defaults (30d, 90d, 180d respectively). In a future feature -- separate from this RFC -- users will be able to configure these thresholds to control how long historical execution data is retained at each tier. The exact configuration surface (kibana.yml knobs, UI settings, or API) will be designed as part of that feature.
+
+**The hot-to-warm transition is not user-configurable.** It is driven entirely by the execution engine's terminal-status detection logic via the Task Manager task. This transition requires a semantic condition ("all executions in the index are terminal") that only the application can evaluate, so it is always automatic and cannot be overridden by user configuration.
 
 ## Key Changes
 
@@ -254,11 +347,20 @@ A single configuration knob controls the rollover behavior in `kibana.yml`:
 - Plain UUID execution IDs (replaced by encoded IDs carrying index routing).
 - `buildStepExecutionId()` as the direct step ID generator (replaced by `generateEncodedStepExecutionId()` which wraps it with index encoding).
 
-## Upgrade Path for Existing Deployments (TOBEDEFINED)
+## Upgrade Path for Existing Deployments
 
 Existing deployments have two flat indexes with hardcoded names (`.workflows-executions`, `.workflows-step-executions`) that share the same names as the rollover aliases. The upgrade must convert these flat indexes into aliased rollover indexes without data loss, and handle backward compatibility for pre-encoded execution IDs (plain UUIDs).
 
-The exact migration mechanism (rename-and-alias on startup, one-time migration task, or other approach), backward compatibility strategy for pre-encoded IDs, rollback safety, and upgrade process steps are to be defined.
+The leading approach is:
+
+1. **Create the first backing index** (e.g., `.workflows-executions-000001`) with the rollover alias configured as `is_write_index: true`, and apply the index template.
+2. **Reindex data** from the flat index (`.workflows-executions`) into the new backing index. This copies all existing execution documents into the rollover-managed infrastructure.
+3. **Rename the old flat index** to a legacy name (e.g., `.workflows-executions-legacy`) and keep it for a safety period before eventual deletion. This avoids the alias/index name collision (Elasticsearch does not allow an alias and an index to share the same name) and provides a rollback path if issues are discovered.
+4. **Backward compatibility for pre-encoded IDs**: Execution IDs created before the migration are plain UUIDs without an encoded index suffix. These cannot be resolved to a specific backing index via decoding. Instead, they fall back to alias-based search lookup rather than direct GET -- slower but functionally correct.
+
+The same process applies to the step executions index (`.workflows-step-executions`).
+
+This is the leading approach, not a finalized design. Details such as rollback safety, the reindex strategy (online vs. offline), the legacy index retention period, and edge cases remain to be defined during implementation.
 
 ## Observability (TODO)
 
@@ -284,12 +386,12 @@ The lifecycle progression task should provide visibility into its health and eff
 - **Long-running executions hold old indexes in the hot phase**: A workflow with a multi-hour timeout or indefinite wait steps prevents its backing index from progressing through lifecycle phases, even if all other executions in that index are terminal. In extreme cases, this could lead to hot-phase index accumulation. Monitoring the backing index count and setting maximum execution timeouts mitigates this risk.
 - **ILM dependency**: The architecture depends on ILM being enabled and functioning correctly in the Elasticsearch cluster. If ILM is disabled or misconfigured, rollover will not occur and the index will behave like a flat index (growing unboundedly). This is mitigated by the fact that ILM is a core Elasticsearch feature that is enabled by default and widely used.
 - **Separate indexes for workflows and steps**: Unlike the unified execution state index proposed in the prior RFC, this approach retains two separate indexes (one for workflow executions, one for step executions). This means two ILM policies, two rollover aliases, and two sets of backing indexes. The operational surface area is doubled compared to a unified index. However, this matches the existing index structure and avoids the migration complexity of merging two index schemas.
-- **Search latency across lifecycle phases**: Search queries via the alias fan out across backing indexes in all lifecycle phases. Indexes in later phases (e.g., cold, frozen) have higher read latency, which may affect search performance for queries spanning old execution history. Get-by-id lookups are unaffected since they target a specific backing index directly.
+- **Search latency across lifecycle phases**: Search queries via the alias fan out across backing indexes in all lifecycle phases. Indexes in later phases (e.g., cold, frozen) have higher read latency, which may affect search performance for queries spanning old execution history. Get-by-id lookups are unaffected since they target a specific backing index directly. The UI/API layer may need to account for this -- for example, with query timeouts, progressive loading of results, or documenting to users that searches spanning old execution history may have higher latency than recent-history queries.
 
 ## Risks and Open Questions
 
-- **Lifecycle progression mechanism not yet implemented (TOBEDEFINED)**: The POC validates the rollover, pinning, and encoded ID mechanics, but the mechanism that advances fully-terminal backing indexes through ILM lifecycle phases is not yet built. The design, implementation approach, lifecycle phase configuration, and operational model are to be defined.
-- **Upgrade migration not yet implemented (TOBEDEFINED)**: The migration from existing flat indexes to rollover-based aliases, including backward compatibility for pre-encoded execution IDs, is to be defined. Key concerns include the flat-index-name / alias-name collision (Elasticsearch does not allow both to share the same name) and the fallback strategy for legacy plain-UUID execution IDs.
+- **Lifecycle progression mechanism not yet implemented**: The POC validates the rollover, pinning, and encoded ID mechanics. The tier transition design (five-phase ILM policy, Task Manager task for hot-to-warm, automatic warm-to-delete progression) is specified in this RFC, but the implementation is pending.
+- **Upgrade migration not yet implemented**: The leading approach (reindex from flat index to backing index, rename flat to legacy) is sketched in this RFC, but the implementation is pending. Key open details include rollback safety, online vs. offline reindex strategy, legacy index retention period, and edge cases around concurrent writes during migration.
 - **Tuning rollover frequency**: The `rolloverMaxAge` default of `1d` is a starting point. Too aggressive (e.g., `1h`) creates many backing indexes, increasing the number of shards and the cost of alias fan-out for search queries. Too conservative (e.g., `7d`) delays lifecycle progression and lets the active index grow larger. Optimal values depend on execution volume and cluster size.
-- **Hot-phase index count under high concurrency**: If many long-running executions span multiple rollover periods, the number of hot-phase backing indexes can grow. Each hot-phase backing index consumes premium cluster resources (shard memory, file handles). Monitoring and a max-age safety net (force-close executions in indexes older than a configurable threshold) should be considered.
+- **Hot-phase index count under high concurrency**: If many long-running executions span multiple rollover periods, the number of hot-phase backing indexes can grow. Each hot-phase backing index consumes premium cluster resources (shard memory, file handles). A single stuck execution (infinite wait, bug, leaked timeout) can hold an entire backing index on the hot tier indefinitely. A separate feature (not part of this RFC) should address stuck-execution detection and forced termination to prevent this. This RFC acknowledges the risk and recommends that such a safety net be implemented as a follow-up.
 - **Mapping evolution**: Index templates apply mappings to new backing indexes automatically, but existing backing indexes are not updated when the template changes. If a new field is added to the mappings, only new backing indexes will have it indexed. Old backing indexes will store the field in `_source` (because `dynamic: false`) but it will not be searchable. This is the same constraint as data streams and requires explicit reindexing for retroactive mapping changes.
