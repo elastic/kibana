@@ -7,21 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { globalSetupHook } from '@kbn/scout';
+import { globalSetupHook, getSynthtraceClient } from '@kbn/scout';
 import { createMetricsTestIndexIfNeeded } from '../fixtures/metrics_experience';
 import { TRACES, richTrace, traceCorrelatedLogs } from '../fixtures/traces_experience';
 
 globalSetupHook(
   'Setup Discover tests data',
-  async ({
-    esClient,
-    esArchiver,
-    apmSynthtraceEsClient,
-    logsSynthtraceEsClient,
-    apiServices,
-    config,
-    log,
-  }) => {
+  async ({ esClient, esArchiver, apiServices, config, log, kbnUrl }) => {
     // Logstash data for flyout stability tests
     log.debug(
       '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
@@ -50,6 +42,19 @@ globalSetupHook(
         log.debug('[setup:traces] Fleet agents setup completed');
       }
 
+      const { apmEsClient } = await getSynthtraceClient('apmEsClient', {
+        esClient,
+        kbnUrl: kbnUrl.get(),
+        log,
+        config,
+      });
+
+      const { logsEsClient } = await getSynthtraceClient('logsEsClient', {
+        esClient,
+        log,
+        config,
+      });
+
       const timeRange = {
         from: new Date(TRACES.DEFAULT_START_TIME).getTime(),
         to: new Date(TRACES.DEFAULT_END_TIME).getTime(),
@@ -57,7 +62,7 @@ globalSetupHook(
 
       const { apmData, correlationIds } = richTrace(timeRange);
 
-      await apmSynthtraceEsClient.index(apmData);
+      await apmEsClient.index(apmData);
       log.debug('[setup:traces] Rich APM trace data indexed');
 
       const logData = traceCorrelatedLogs({
@@ -68,7 +73,7 @@ globalSetupHook(
         processOrderSpanId: correlationIds.processOrderSpanId,
       });
 
-      await logsSynthtraceEsClient.index(logData);
+      await logsEsClient.index(logData);
       log.debug('[setup:traces] Correlated log data indexed');
     }
   }
