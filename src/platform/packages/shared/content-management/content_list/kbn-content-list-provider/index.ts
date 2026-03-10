@@ -21,14 +21,21 @@ export type {
   ContentListLabels,
   ContentListCoreConfig,
   ContentListConfig,
+  ContentListServices,
 } from './src/context';
 
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
-export { useContentListSort, useContentListSearch, useContentListSelection } from './src/features';
-export { useContentListPagination } from './src/features';
 export {
+  useContentListSort,
+  useContentListSearch,
+  useContentListPagination,
+  useContentListSelection,
+  useFilterDisplay,
+  useContentListFilters,
+  useTagFilterToggle,
+  TAG_FILTER_ID,
   DeleteConfirmationModal,
   DeleteConfirmationComponent,
   useDeleteConfirmation,
@@ -52,6 +59,8 @@ export type {
   SearchConfig,
   UseContentListSearchReturn,
   UseContentListSelectionReturn,
+  FilterDisplayState,
+  UseContentListFiltersReturn,
   DeleteConfirmationModalProps,
   DeleteConfirmationComponentProps,
   UseDeleteConfirmationOptions,
@@ -59,6 +68,8 @@ export type {
 } from './src/features';
 export type {
   ActiveFilters,
+  IncludeExcludeFilter,
+  FilterCounts,
   FindItemsFn,
   FindItemsParams,
   FindItemsResult,

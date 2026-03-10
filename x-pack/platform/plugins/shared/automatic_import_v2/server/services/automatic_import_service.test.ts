@@ -168,6 +168,7 @@ describe('AutomaticImportSetupService', () => {
       expect(updateData.integration_id).toBe('integration-123');
       expect(updateData.last_updated_by).toBe('approver-user');
       expect(updateData.last_updated_at).toEqual(expect.any(String));
+      expect(updateData.status).toBe('approved');
       expect(updateData.metadata).toEqual(expect.objectContaining({ version: '0.0.1' }));
 
       // Ensure we don't pass a versionUpdate argument explicitly.

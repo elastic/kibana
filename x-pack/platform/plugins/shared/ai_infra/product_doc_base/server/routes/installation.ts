@@ -16,6 +16,7 @@ import type {
   PerformUpdateResponse,
   UninstallResponse,
   SecurityLabsInstallStatusResponse,
+  OpenAPISpecInstallStatusResponse,
 } from '../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
@@ -29,7 +30,11 @@ import type { InternalServices } from '../types';
  * Schema for resourceType parameter validation.
  */
 const resourceTypeSchema = schema.oneOf(
-  [schema.literal(ResourceTypes.productDoc), schema.literal(ResourceTypes.securityLabs)],
+  [
+    schema.literal(ResourceTypes.productDoc),
+    schema.literal(ResourceTypes.securityLabs),
+    schema.literal(ResourceTypes.openapiSpec),
+  ],
   { defaultValue: ResourceTypes.productDoc }
 );
 
@@ -80,11 +85,27 @@ export const registerInstallationRoutes = ({
           },
         });
       }
+      const openApiSpecStatus = await documentationManager.getOpenApiSpecStatus({
+        inferenceId,
+      });
+      const openApiSpecStatusResponse: OpenAPISpecInstallStatusResponse = {
+        inferenceId,
+        resourceType: ResourceTypes.openapiSpec,
+        status: openApiSpecStatus.status,
+        version: openApiSpecStatus.version,
+        latestVersion: openApiSpecStatus.latestVersion,
+        isUpdateAvailable: openApiSpecStatus.isUpdateAvailable,
+        failureReason: openApiSpecStatus.failureReason,
+      };
+      if (resourceType === ResourceTypes.openapiSpec) {
+        return res.ok({ body: openApiSpecStatusResponse });
+      }
 
       // Default: product documentation status
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
+      // installStatus[ResourceTypes.openapiSpec] = openApiSpecStatus;
       const { status: overallStatus } = await documentationManager.getStatus({
         inferenceId,
       });
@@ -95,6 +116,7 @@ export const registerInstallationRoutes = ({
           perProducts: installStatus,
           overall: overallStatus,
           resourceType: ResourceTypes.productDoc,
+          openApiStatus: openApiSpecStatusResponse,
         },
       });
     }
@@ -142,6 +164,28 @@ export const registerInstallationRoutes = ({
             installed: securityLabsStatus.status === 'installed',
             ...(securityLabsStatus.failureReason
               ? { failureReason: securityLabsStatus.failureReason }
+              : {}),
+          },
+        });
+      }
+
+      // Handle OpenAPI Spec installation
+      if (resourceType === ResourceTypes.openapiSpec) {
+        await documentationManager.installOpenApiSpec({
+          request: req,
+          wait: true,
+          inferenceId,
+        });
+
+        const openApiSpecStatus = await documentationManager.getOpenApiSpecStatus({
+          inferenceId,
+        });
+
+        return res.ok<PerformInstallResponse>({
+          body: {
+            installed: openApiSpecStatus.status === 'installed',
+            ...(openApiSpecStatus.failureReason
+              ? { failureReason: openApiSpecStatus.failureReason }
               : {}),
           },
         });
@@ -252,12 +296,25 @@ export const registerInstallationRoutes = ({
           },
         });
       }
+      if (resourceType === ResourceTypes.openapiSpec) {
+        await documentationManager.uninstallOpenAPISpec({
+          request: req,
+          wait: true,
+          inferenceId: req.body?.inferenceId,
+        });
 
+        return res.ok<UninstallResponse>({
+          body: {
+            success: true,
+          },
+        });
+      }
       // Default: product documentation uninstallation
       await documentationManager.uninstall({
         request: req,
         wait: true,
         inferenceId: req.body?.inferenceId,
+        resourceType: req.body?.resourceType,
       });
 
       return res.ok<UninstallResponse>({

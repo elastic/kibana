@@ -14,8 +14,8 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
-import { isNonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * Fields to monitor for new values.

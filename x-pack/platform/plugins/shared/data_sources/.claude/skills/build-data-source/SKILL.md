@@ -13,7 +13,7 @@ This skill orchestrates the full lifecycle of building a new Workplace AI data s
 
 Use `TaskCreate` to create all of the following tasks up front so the user can see the full plan. Set all tasks to `pending` initially.
 
-1. **Create the data source code** — "Generate connector spec, workflows, and data source YAML for $ARGUMENTS"
+1. **Create the data source code** — "Generate connector spec, workflows, data source YAML, and documentation for $ARGUMENTS"
 2. **Code review** — "Review generated data source files for correctness and completeness"
 3. **Edit based on review** — "Fix issues found during code review"
 4. **Wait for Kibana** — "Ask user to start Elasticsearch and Kibana"
@@ -22,7 +22,7 @@ Use `TaskCreate` to create all of the following tasks up front so the user can s
 7. **Chat test** — "Send a test message to the agent and observe tool calls"
 8. **Verify tool call quality** — "Analyze chat results for successful tool executions"
 9. **Iterate on quality** — "Fix code issues and re-test until quality bar is met"
-10. **Final code review** — "Final review of all generated files"
+10. **Final code review** — "Final review of all generated files and documentation"
 11. **Final chat test** — "Final end-to-end conversation to confirm everything works"
 12. **Report completion** — "Tell the user the data source is ready for manual inspection"
 
@@ -45,7 +45,7 @@ Args: $ARGUMENTS
 
 This runs in a forked context and will generate:
 - A connector specification code bundle (in `src/platform/packages/shared/kbn-connector-specs/src/specs/`)
-- Documentation for the connector (in `docs/reference/connectors-kibana/`)
+- Documentation for the connector (in `docs/reference/connectors-kibana/`), validated against Elastic docs best practices
 - A data source definition and Workflow YAML files (in `x-pack/solutions/workplace_ai/packages/data_sources/src/data_sources/`)
 
 When complete, mark task 1 as `completed`.
@@ -56,31 +56,8 @@ When complete, mark task 1 as `completed`.
 
 Mark task 2 as `in_progress`.
 
-Read all the files generated in Task 1 and review them for:
-
-### Connector Spec
-- If MCP-based: the generated spec export in `all_specs.ts` has been **removed** (MCP connectors with empty `actions: {}` crash Kibana)
-- If MCP-based: `minimumLicense` is `'enterprise'` (not `'basic'`)
-- If non-MCP: valid structure with required fields, correct auth type
-- Look at existing specs for patterns: `src/platform/packages/shared/kbn-connector-specs/src/specs/`
-
-### Workflows
-- Valid workflow YAML with correct step types
-- Proper Liquid templating syntax (no malformed `{{ }}` expressions)
-- **MCP tool names use underscores** (e.g., `tavily_search`), NOT hyphens — verify against MCP server docs or `listTools`
-- Only pass parameters that the MCP tool actually accepts (check the tool's `inputSchema` — some params in third-party docs may be outdated or unavailable via MCP)
-- Look at existing workflows for patterns in `x-pack/platform/plugins/shared/data_sources/server/sources/`
-
-### Data Source Definition
-- Correct references to the connector spec and workflows
-- `importedTools` array uses correct MCP tool names (underscores, not hyphens)
-- All workflows referenced actually exist
-- Look at existing data sources for patterns in `x-pack/platform/plugins/shared/data_sources/server/sources/`
-
-### Documentation
-- Generator scaffold docs are filled in (no remaining `TODO:` placeholders)
-- `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md` description filled in
-- `docs/reference/toc.yml` entry exists in the correct section
+Review the files generated in Task 1 using the **review-data-source** skill. Apply its checklist to the connector spec, workflows,
+data source definition, and docs. 
 
 List all issues found. If no issues are found, note that the code looks good.
 
@@ -248,17 +225,7 @@ Mark task 9 as `completed`.
 
 Mark task 10 as `in_progress`.
 
-Do one final review pass over all generated/modified files:
-- Connector spec
-- All workflow YAML files
-- Data source definition YAML
-
-Verify:
-- No leftover TODOs or placeholder values
-- Consistent naming conventions
-- Clean code with no debugging artifacts
-
-Make any final minor fixes if needed.
+Do one final review using the **review-data-source** skill. Verify no TODOs/placeholders, consistent naming, no debug artifacts. The review skill will also run docs quality checks (`docs-check-style`, `crosslink-validator`, `frontmatter-audit`, `content-type-checker`, `applies-to-tagging`) on any connector docs. Make any final minor fixes if needed.
 
 Mark task 10 as `completed`.
 
@@ -296,6 +263,7 @@ Tell the user something like the below template, listing the actual file paths t
 > - Connector spec: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/...`
 > - Workflows: `x-pack/solutions/workplace_ai/packages/workflows/src/workflows/<name>/...`
 > - Data source: `x-pack/solutions/workplace_ai/packages/data_sources/src/data_sources/<name>/...`
+> - Documentation: `docs/reference/connectors-kibana/<name>-action-type.md`
 >
 > **Kibana state:**
 > - Data source activated with ID: `<id>`

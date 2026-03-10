@@ -51,6 +51,13 @@ export interface ReplayConfig extends BaseConfig {
   concurrency?: number;
 }
 
+// Create configuration
+export interface CreateConfig extends Omit<BaseConfig, 'snapshotName'> {
+  snapshotName: string;
+  indices?: string[];
+  ignoreUnavailable?: boolean;
+}
+
 // Unified result type (ReplayResult is superset of RestoreResult)
 export interface LoadResult {
   success: boolean;
@@ -59,4 +66,11 @@ export interface LoadResult {
   errors: string[];
   reindexedIndices?: string[];
   maxTimestamp?: string;
+}
+
+export interface CreateResult {
+  success: boolean;
+  snapshotName: string;
+  indices: string[];
+  errors: string[];
 }

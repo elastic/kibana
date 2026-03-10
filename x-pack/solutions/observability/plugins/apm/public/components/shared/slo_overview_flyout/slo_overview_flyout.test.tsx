@@ -14,6 +14,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
@@ -105,6 +106,7 @@ describe('SloOverviewFlyout', () => {
             },
           },
         },
+        telemetry: mockTelemetryClient,
       },
     });
 

@@ -9,8 +9,12 @@
 
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import { registerEmitEventRoute } from './routes/emit_event';
+import type { ExampleRequestHandlerContext } from './request_context';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
+
+export type { ExampleRequestHandlerContext } from './request_context';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePluginSetup {
@@ -39,12 +43,15 @@ export class WorkflowsExtensionsExamplePlugin
     >
 {
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     plugins: WorkflowsExtensionsExamplePluginSetupDeps
   ): WorkflowsExtensionsExamplePluginSetup {
     // Register steps and triggers on setup phase
     registerStepDefinitions(plugins.workflowsExtensions);
     registerTriggers(plugins.workflowsExtensions);
+
+    const router = core.http.createRouter<ExampleRequestHandlerContext>();
+    registerEmitEventRoute(router);
 
     return {};
   }

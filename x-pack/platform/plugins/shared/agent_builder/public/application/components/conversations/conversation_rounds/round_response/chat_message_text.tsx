@@ -44,8 +44,6 @@ import {
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../../hooks/use_conversation';
 import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { CanvasProvider } from './attachments/canvas_context';
-import { CanvasFlyout } from './attachments/canvas_flyout';
 import { ExternalLinkModal } from './external_link_modal';
 
 interface Props {
@@ -215,7 +213,7 @@ export function ChatMessageText({
   ]);
 
   return (
-    <CanvasProvider>
+    <>
       <EuiText size="m" className={containerClassName}>
         <EuiMarkdownFormat
           textSize="m"
@@ -225,8 +223,7 @@ export function ChatMessageText({
           {content}
         </EuiMarkdownFormat>
       </EuiText>
-      <CanvasFlyout attachmentsService={attachmentsService} />
       <ExternalLinkModal url={pendingExternalUrl} onClose={() => setPendingExternalUrl(null)} />
-    </CanvasProvider>
+    </>
   );
 }
