@@ -16,12 +16,14 @@ import {
   EntityType,
   type ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
-import type { PaginationParams } from './logs_extraction_query_builder';
+import {
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  type PaginationParams,
+} from './query_builder_commons';
 import {
   buildCcsLogsExtractionEsqlQuery,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   extractCcsPaginationParams,
-} from './logs_extraction_query_builder';
+} from './ccs_logs_extraction_query_builder';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';

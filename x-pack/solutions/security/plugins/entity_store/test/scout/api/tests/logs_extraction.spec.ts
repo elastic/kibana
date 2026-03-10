@@ -17,7 +17,7 @@ import {
 } from '../fixtures/entity_extraction_expected';
 import { forceLogExtraction, ingestDoc, searchDocById } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {

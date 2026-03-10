@@ -13,10 +13,7 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
-import {
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  HASHED_ID_FIELD,
-} from './logs_extraction_query_builder';
+import { ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD } from './query_builder_commons';
 import { get } from 'lodash';
 
 jest.mock('../../infra/elasticsearch/esql', () => {
@@ -52,13 +49,12 @@ describe('CcsLogsExtractionClient', () => {
     const mockEsqlResponse: ESQLSearchResponse = {
       columns: [
         { name: '@timestamp', type: 'date' },
-        { name: HASHED_ID_FIELD, type: 'keyword' },
         { name: 'entity.id', type: 'keyword' },
         { name: 'event.kind', type: 'keyword' },
       ],
       values: [
-        ['2024-06-15T12:00:00.000Z', 'hash1', 'host:host-1', 'asset'],
-        ['2024-06-15T12:00:00.000Z', 'hash2', 'host:host-2', 'asset'],
+        ['2024-06-15T12:00:00.000Z', 'host:host-1', 'asset'],
+        ['2024-06-15T12:00:00.000Z', 'host:host-2', 'asset'],
       ],
     };
 
@@ -142,20 +138,17 @@ describe('CcsLogsExtractionClient', () => {
       columns: [
         { name: '@timestamp', type: 'date' },
         { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
-        { name: HASHED_ID_FIELD, type: 'keyword' },
         { name: 'entity.id', type: 'keyword' },
         { name: 'event.kind', type: 'keyword' },
       ],
       values: [
-        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'hash1', 'host:h1', 'asset'],
-        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'hash2', 'host:h2', 'asset'],
+        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'host:h1', 'asset'],
+        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'host:h2', 'asset'],
       ],
     };
     const secondPage: ESQLSearchResponse = {
       columns: firstPage.columns,
-      values: [
-        ['2024-06-15T11:00:00.000Z', '2024-06-15T11:00:00.000Z', 'hash3', 'host:h3', 'asset'],
-      ],
+      values: [['2024-06-15T11:00:00.000Z', '2024-06-15T11:00:00.000Z', 'host:h3', 'asset']],
     };
 
     mockExecuteEsqlQuery.mockResolvedValueOnce(firstPage).mockResolvedValueOnce(secondPage);
@@ -203,13 +196,12 @@ describe('CcsLogsExtractionClient', () => {
       columns: [
         { name: '@timestamp', type: 'date' },
         { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
-        { name: HASHED_ID_FIELD, type: 'keyword' },
         { name: 'entity.id', type: 'keyword' },
         { name: 'event.kind', type: 'keyword' },
       ],
       values: [
-        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'hash1', 'host:h1', 'asset'],
-        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'hash2', 'host:h2', 'asset'],
+        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'host:h1', 'asset'],
+        ['2024-06-15T10:00:00.000Z', '2024-06-15T10:00:00.000Z', 'host:h2', 'asset'],
       ],
     };
 
@@ -234,7 +226,7 @@ describe('CcsLogsExtractionClient', () => {
 
   it('should return zero count and pages when ESQL returns no rows', async () => {
     mockExecuteEsqlQuery.mockResolvedValue({
-      columns: [{ name: HASHED_ID_FIELD, type: 'keyword' }],
+      columns: [],
       values: [],
     });
 

@@ -15,11 +15,13 @@ import type {
   ManagedEntityDefinition,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
-import type { PaginationParams } from './logs_extraction_query_builder';
+import {
+  type PaginationParams,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+} from './query_builder_commons';
 import {
   buildLogsExtractionEsqlQuery,
   buildRemainingLogsCountQuery,
-  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   extractMainPaginationParams,
   HASHED_ID_FIELD,
 } from './logs_extraction_query_builder';
