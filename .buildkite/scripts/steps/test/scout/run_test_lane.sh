@@ -251,8 +251,8 @@ download_test_lane_loads
 read_load_ids
 load_passed_indices
 
-start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
 trap stop_server EXIT
+start_server "$SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS"
 
 for i in "${!LOAD_IDS[@]}"; do
   config_path="${LOAD_IDS[$i]}"
