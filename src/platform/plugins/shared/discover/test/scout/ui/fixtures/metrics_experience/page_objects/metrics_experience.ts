@@ -32,6 +32,7 @@ export class MetricsExperiencePage {
   public readonly fullscreenButton: Locator;
 
   constructor(page: ScoutPage) {
+    // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
     this.fullscreen = page.testSubj.locator('metricsGridWrapper-fullScreen');

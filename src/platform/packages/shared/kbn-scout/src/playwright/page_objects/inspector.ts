@@ -43,6 +43,11 @@ export class Inspector {
     await this.panel.waitFor({ state: 'hidden' });
   }
 
+  async getRequestTimestamp(): Promise<string> {
+    await this.panel.waitFor({ state: 'visible' });
+    return this.requestTimestamp.innerText();
+  }
+
   async switchToRequestsView() {
     await this.viewChooser.click();
     await this.requestsView.click();
