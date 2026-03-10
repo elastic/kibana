@@ -177,11 +177,20 @@ export {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
   type SkillReferencedContent,
+  type SkillSelection,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
   skillCreateRequestSchema,
   skillUpdateRequestSchema,
   validateSkillId,
   skillIdMaxLength,
+  skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
+  maxToolsPerSkill,
 } from './skills';
 export * from './telemetry';
 export {

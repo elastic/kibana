@@ -96,9 +96,11 @@ const dashboardCanvasContentStyles = {
     minHeight: 0,
     display: 'flex',
   }),
-  searchBar: css({
-    flexShrink: 0,
-  }),
+  searchBar: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexShrink: 0,
+      padding: `0 ${euiTheme.size.s}`,
+    }),
   callout: ({ euiTheme }: UseEuiTheme) =>
     css({
       marginTop: euiTheme.size.s,
@@ -230,10 +232,14 @@ export const DashboardCanvasContent = ({
       <div css={styles.searchBar}>
         <SearchBar
           appName="dashboardAgent"
+          isAutoRefreshDisabled={true}
           showQueryInput={false}
           showDatePicker={true}
           showFilterBar={false}
-          useDefaultBehaviors={true}
+          showQueryMenu={false}
+          query={undefined}
+          displayStyle="inPage"
+          disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
           onQuerySubmit={({ dateRange }) => {
             dashboardApi?.setTimeRange({ from: dateRange.from, to: dateRange.to });
