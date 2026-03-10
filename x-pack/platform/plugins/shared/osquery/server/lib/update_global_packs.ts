@@ -21,7 +21,8 @@ export const updateGlobalPacksCreateCallback = async (
   packagePolicy: NewPackagePolicy,
   packsClient: SavedObjectsClient,
   allPacks: PackSavedObject[],
-  osqueryContext: OsqueryAppContextService
+  osqueryContext: OsqueryAppContextService,
+  spaceId?: string
 ) => {
   const agentPolicyService = osqueryContext.getAgentPolicyService();
 
@@ -74,7 +75,7 @@ export const updateGlobalPacksCreateCallback = async (
       map(packsContainingShardForPolicy, (pack) => {
         set(draft, `inputs[0].config.osquery.value.packs.${pack.name}`, {
           shard: 100,
-          queries: convertSOQueriesToPackConfig(pack.queries),
+          queries: convertSOQueriesToPackConfig(pack.queries, spaceId),
         });
       });
 

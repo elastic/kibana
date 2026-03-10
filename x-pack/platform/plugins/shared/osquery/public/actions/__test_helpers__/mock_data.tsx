@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
 import type { SearchHit } from '../../../common/search_strategy';
+import type { UnifiedHistoryRow } from '../../../common/api/unified_history/types';
 
 export const defaultPermissions = {
   writeLiveQueries: true,
@@ -150,6 +151,107 @@ export const createMockPackSearchHitWithResultCounts = (
       ...(overrides?._source as Record<string, unknown>),
     },
   });
+
+export const createMockUnifiedHistoryRow = (
+  overrides?: Partial<UnifiedHistoryRow>
+): UnifiedHistoryRow => {
+  const counter = mockCounter.next();
+
+  return {
+    id: `action-${counter}`,
+    rowType: 'live',
+    timestamp: '2025-06-15T10:00:00.000Z',
+    queryText: 'SELECT * FROM uptime',
+    source: 'Live',
+    agentCount: 2,
+    successCount: 2,
+    errorCount: 0,
+    totalRows: 42,
+    userId: 'elastic',
+    userProfileUid: `uid-${counter}`,
+    actionId: `action-${counter}`,
+    agentIds: ['agent-1', 'agent-2'],
+    agentAll: false,
+    agentPlatforms: [],
+    agentPolicyIds: [],
+    ...overrides,
+  };
+};
+
+export const createMockPackUnifiedHistoryRow = (
+  overrides?: Partial<UnifiedHistoryRow>
+): UnifiedHistoryRow => {
+  const counter = mockCounter.next();
+
+  return {
+    id: `pack-action-${counter}`,
+    rowType: 'live',
+    timestamp: '2025-06-15T11:00:00.000Z',
+    queryText: 'SELECT * FROM uptime',
+    queryName: 'uptime-query',
+    source: 'Live',
+    packName: 'My Pack',
+    packId: 'pack-1',
+    agentCount: 3,
+    successCount: 3,
+    errorCount: 1,
+    totalRows: 100,
+    queriesWithResults: 3,
+    queriesTotal: 5,
+    userId: 'admin',
+    userProfileUid: `uid-${counter}`,
+    actionId: `pack-action-${counter}`,
+    agentIds: ['agent-1', 'agent-2', 'agent-3'],
+    agentAll: false,
+    agentPlatforms: [],
+    agentPolicyIds: [],
+    ...overrides,
+  };
+};
+
+export const createMockRuleHistoryRow = (
+  overrides?: Partial<UnifiedHistoryRow>
+): UnifiedHistoryRow => {
+  const counter = mockCounter.next();
+
+  return {
+    id: `rule-action-${counter}`,
+    rowType: 'live',
+    timestamp: '2025-06-15T09:00:00.000Z',
+    queryText: 'SELECT * FROM processes',
+    source: 'Rule',
+    agentCount: 1,
+    successCount: 1,
+    errorCount: 0,
+    totalRows: 10,
+    actionId: `rule-action-${counter}`,
+    ...overrides,
+  };
+};
+
+export const createMockScheduledHistoryRow = (
+  overrides?: Partial<UnifiedHistoryRow>
+): UnifiedHistoryRow => {
+  const counter = mockCounter.next();
+
+  return {
+    id: `sched-${counter}_1`,
+    rowType: 'scheduled',
+    timestamp: '2025-06-15T08:00:00.000Z',
+    queryText: 'SELECT * FROM os_version',
+    queryName: 'os-version-check',
+    source: 'Scheduled',
+    packName: 'Compliance Pack',
+    packId: 'pack-2',
+    agentCount: 5,
+    successCount: 5,
+    errorCount: 0,
+    totalRows: 5,
+    scheduleId: `sched-${counter}`,
+    executionCount: 1,
+    ...overrides,
+  };
+};
 
 export const resetMockCounter = () => {
   mockCounter.reset();

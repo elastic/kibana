@@ -29,6 +29,9 @@ import type { ConfigType } from '../../common/config';
 import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
+import { PackLookupCache } from './pack_lookup_cache';
+export type { CachedPackSO } from './pack_lookup_cache';
+export { PackLookupCache };
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -59,6 +62,7 @@ export class OsqueryAppContextService {
   private ruleRegistryService: RuleRegistryPluginStartContract | undefined;
   private fleetActionsClient: FleetActionsClientInterface | undefined;
   private spacesService: SpacesServiceStart | undefined;
+  private readonly packLookupCache = new PackLookupCache();
 
   public start(dependencies: OsqueryAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -98,6 +102,10 @@ export class OsqueryAppContextService {
 
   public getActiveSpace(httpRequest: KibanaRequest): Promise<Space> | undefined {
     return this.spacesService?.getActiveSpace(httpRequest);
+  }
+
+  public getPackLookupCache(): PackLookupCache {
+    return this.packLookupCache;
   }
 
   /**

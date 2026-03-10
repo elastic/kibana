@@ -19,9 +19,12 @@ export interface ResultsStrategyResponse extends IEsSearchResponse {
 }
 
 export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
-  actionId: string;
+  actionId?: string;
   agentId?: string;
   startDate?: string;
   sort: SortField[];
   integrationNamespaces?: string[];
+  /** When provided, filters by schedule_id + execution_count instead of action_id */
+  scheduleId?: string;
+  executionCount?: number;
 }

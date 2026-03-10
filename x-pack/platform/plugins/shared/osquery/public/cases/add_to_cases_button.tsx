@@ -27,6 +27,8 @@ export interface AddToCaseButtonProps {
   isIcon?: boolean;
   isDisabled?: boolean;
   iconProps?: Record<string, string>;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
@@ -36,6 +38,8 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   isIcon = false,
   isDisabled,
   iconProps,
+  scheduleId,
+  executionCount,
 }) => {
   const { cases } = useKibana().services;
   const ecsData = useContext(AlertAttachmentContext);
@@ -72,13 +76,28 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
           type: ExternalReferenceStorageType.elasticSearchDoc,
         },
         externalReferenceAttachmentTypeId: 'osquery',
-        externalReferenceMetadata: { actionId, agentIds, queryId },
+        externalReferenceMetadata: {
+          actionId,
+          agentIds,
+          queryId,
+          ...(scheduleId ? { scheduleId } : {}),
+          ...(executionCount != null ? { executionCount } : {}),
+        },
       },
     ];
     if (hasCasesPermissions) {
       selectCaseModal.open({ getAttachments: () => attachments });
     }
-  }, [actionId, agentIds, alertAttachments, hasCasesPermissions, queryId, selectCaseModal]);
+  }, [
+    actionId,
+    agentIds,
+    alertAttachments,
+    hasCasesPermissions,
+    queryId,
+    selectCaseModal,
+    scheduleId,
+    executionCount,
+  ]);
 
   if (isIcon) {
     return (

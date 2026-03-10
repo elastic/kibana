@@ -42,6 +42,8 @@ export const convertPackQueriesToSO = (queries) =>
           'snapshot',
           'removed',
           'timeout',
+          'schedule_id',
+          'start_date',
         ]),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
@@ -56,6 +58,8 @@ export const convertPackQueriesToSO = (queries) =>
       timeout?: number;
       snapshot?: boolean;
       removed?: boolean;
+      schedule_id?: string;
+      start_date?: string;
       ecs_mapping?: Record<string, unknown>;
     }>
   );
@@ -86,7 +90,8 @@ export const convertSOQueriesToPack = (
 
 export const convertSOQueriesToPackConfig = (
   // @ts-expect-error update types
-  queries
+  queries,
+  spaceId?: string
 ) =>
   reduce(
     queries,
@@ -103,6 +108,7 @@ export const convertSOQueriesToPackConfig = (
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...resultType,
+        ...(spaceId ? { space_id: spaceId } : {}),
       };
 
       return acc;

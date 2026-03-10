@@ -18,6 +18,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 
 export interface ActionResultsArgs {
   edges: ResultEdges;
+  total: number;
   aggregations: {
     totalRowCount: number;
     totalResponded: number;
@@ -38,6 +39,8 @@ export interface UseActionResults {
   sortField: string;
   kuery?: string;
   isLive?: boolean;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 interface ActionResultsResponse {
@@ -66,6 +69,8 @@ export const useActionResults = ({
   kuery,
   startDate,
   isLive = false,
+  scheduleId,
+  executionCount,
 }: UseActionResults) => {
   const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
@@ -78,9 +83,28 @@ export const useActionResults = ({
   }, [agentIds, activePage, limit]);
 
   return useQuery<ActionResultsResponse, Error, ActionResultsArgs>(
-    ['actionResults', { actionId, activePage, limit, direction, sortField }],
-    () =>
-      http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
+    [
+      'actionResults',
+      { actionId, activePage, limit, direction, sortField, scheduleId, executionCount },
+    ],
+    () => {
+      if (scheduleId && executionCount != null) {
+        return http.get<ActionResultsResponse>(
+          `/internal/osquery/scheduled_results/${scheduleId}/${executionCount}`,
+          {
+            version: API_VERSIONS.internal.v1,
+            query: {
+              page: activePage,
+              pageSize: limit,
+              sort: sortField,
+              sortOrder: direction,
+              ...(kuery && { kuery }),
+            },
+          }
+        );
+      }
+
+      return http.get<ActionResultsResponse>(`/api/osquery/action_results/${actionId}`, {
         version: API_VERSIONS.public.v1,
         query: {
           page: activePage,
@@ -94,7 +118,8 @@ export const useActionResults = ({
           }),
           totalAgents: agentIds?.length ?? 0,
         },
-      }),
+      });
+    },
     {
       select: (response) => {
         // Server already filtered by agentIds - build set of responded agents
@@ -117,6 +142,7 @@ export const useActionResults = ({
 
         return {
           edges: mergedEdges,
+          total: response.total,
           aggregations: response.aggregations,
           inspect: response.inspect || { dsl: [], response: [] },
         };
@@ -138,7 +164,7 @@ export const useActionResults = ({
       },
       refetchInterval: isLive ? 5000 : false,
       keepPreviousData: true,
-      enabled: !!actionId && !!agentIds?.length,
+      enabled: !!(scheduleId && executionCount != null) || (!!actionId && !!agentIds?.length),
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         setErrorToast(error, {

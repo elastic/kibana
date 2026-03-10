@@ -19,11 +19,18 @@ interface PackViewInActionProps {
     agents: string[];
   };
   actionId?: string;
+  scheduleId?: string;
+  executionCount?: number;
 }
-const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }) => {
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  scheduleId,
+  executionCount,
+}) => {
   const { action_id: actionId, interval } = item;
+  const isScheduled = !!(scheduleId && executionCount != null);
   const { data: lastResultsData } = usePackQueryLastResults({
-    actionId,
+    actionId: isScheduled ? undefined : actionId,
     interval,
   });
 
@@ -41,6 +48,8 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }
       startDate={startDate}
       endDate={endDate}
       mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
+      scheduleId={scheduleId}
+      executionCount={executionCount}
     />
   );
 };

@@ -142,6 +142,8 @@ interface PackQueriesStatusTableProps {
   expirationDate?: string;
   showResultsHeader?: boolean;
   addToTimeline?: AddToTimelineHandler;
+  scheduleId?: string;
+  executionCount?: number;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -153,6 +155,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   expirationDate,
   showResultsHeader,
   addToTimeline,
+  scheduleId,
+  executionCount,
 }) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
@@ -217,13 +221,21 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   }, []);
 
   const renderDiscoverResultsAction = useCallback(
-    (item: any) => <PackViewInDiscoverAction item={item} />,
-    []
+    (item: any) => (
+      <PackViewInDiscoverAction
+        item={item}
+        scheduleId={scheduleId}
+        executionCount={executionCount}
+      />
+    ),
+    [scheduleId, executionCount]
   );
 
   const renderLensResultsAction = useCallback(
-    (item: any) => <PackViewInLensAction item={item} />,
-    []
+    (item: any) => (
+      <PackViewInLensAction item={item} scheduleId={scheduleId} executionCount={executionCount} />
+    ),
+    [scheduleId, executionCount]
   );
 
   const getHandleErrorsToggle = useCallback(
@@ -246,6 +258,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   failedAgentsCount={item?.failed ?? 0}
                   error={item.error}
                   addToTimeline={addToTimeline}
+                  scheduleId={scheduleId}
+                  executionCount={executionCount}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -255,7 +269,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds, addToTimeline]
+    [actionId, startDate, expirationDate, agentIds, addToTimeline, scheduleId, executionCount]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -290,8 +304,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           render: (item: { action_id: string }) =>
             item.action_id && (
               <AddToTimelineButton
-                field="action_id"
-                value={item.action_id}
+                field={scheduleId ? 'schedule_id' : 'action_id'}
+                value={scheduleId ?? item.action_id}
                 isIcon={true}
                 addToTimeline={addToTimeline}
               />
@@ -306,6 +320,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                 queryId={item.action_id}
                 isIcon={true}
                 isDisabled={!item.action_id}
+                scheduleId={scheduleId}
+                executionCount={executionCount}
               />
             ),
         },
@@ -331,6 +347,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
       handleQueryFlyoutOpen,
       renderDiscoverResultsAction,
       renderLensResultsAction,
+      scheduleId,
+      executionCount,
     ]
   );
   const columns = useMemo(
@@ -415,13 +433,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   useEffect(() => {
     if (
       data?.length === 1 &&
-      agentIds?.length &&
+      (agentIds?.length || scheduleId) &&
       data?.[0].id &&
       !itemIdToExpandedRowMap[data?.[0].id]
     ) {
       getHandleErrorsToggle(data?.[0])();
     }
-  }, [agentIds?.length, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
+  }, [agentIds?.length, scheduleId, data, getHandleErrorsToggle, itemIdToExpandedRowMap]);
 
   const queryIds = useMemo(() => map(data, (query) => query.action_id), [data]);
 
