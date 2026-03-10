@@ -14,6 +14,7 @@ import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
+import { transformPanelReferencesOut } from './transform_references_out';
 
 const embeddableFunctions = ['embeddable', 'savedLens', 'savedVisualization', 'savedMap'];
 
@@ -41,26 +42,6 @@ const extractMapCenterFromAst = (
       }
     : undefined;
 };
-
-const BY_REF_TYPES = ['links', 'search', 'visualization', 'lens', 'map'];
-
-export function transformPanelReferencesOut(
-  panelReferences: SavedObjectReference[],
-  panelRefName?: string
-) {
-  return panelRefName
-    ? panelReferences.map((ref) => {
-        return ref.name === panelRefName && BY_REF_TYPES.includes(ref.type)
-          ? {
-              ...ref,
-              // Embeddable transforms for BY_REF_TYPES embeddable types
-              // are looking for by-reference reference with name 'savedObjectRef'
-              name: 'savedObjectRef',
-            }
-          : ref;
-      })
-    : panelReferences;
-}
 
 export function transformWorkpadOut(
   workpad: WorkpadAttributes,

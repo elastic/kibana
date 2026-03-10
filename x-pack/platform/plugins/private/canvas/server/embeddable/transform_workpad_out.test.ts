@@ -91,7 +91,8 @@ describe('transformWorkpadOut', () => {
         timeRange: DEFAULT_TIME_RANGE,
       })}" | render`;
       const workpad = makeWorkpad(expression);
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const references = [] as SavedObjectReference[];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
         timeRange: DEFAULT_TIME_RANGE,
@@ -130,10 +131,8 @@ describe('legacy expressions', () => {
     it('migrates savedLens to an embeddable expression with transforms applied', () => {
       const expression = 'savedLens id="savedLens.id" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'lens-id', name: 'element-id:savedLens.id', type: 'lens' },
-      ]);
+      const references = [{ id: 'lens-id', name: 'element-id:l0_savedLens.id', type: 'lens' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -150,10 +149,8 @@ describe('legacy expressions', () => {
     it('migrates savedLens with an explicit title', () => {
       const expression = 'savedLens id="savedLens.id" title="My Lens" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'lens-id', name: 'element-id:savedLens.id', type: 'lens' },
-      ]);
+      const references = [{ id: 'lens-id', name: 'element-id:l1_savedLens.id', type: 'lens' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -172,10 +169,8 @@ describe('legacy expressions', () => {
       const expression =
         'savedLens id="savedLens.id" timerange={timerange from="now-7d" to="now"} | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'lens-id', name: 'element-id:savedLens.id', type: 'lens' },
-      ]);
+      const references = [{ id: 'lens-id', name: 'element-id:l2_savedLens.id', type: 'lens' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -192,8 +187,8 @@ describe('legacy expressions', () => {
     it('migrates savedLens with an explicit saved object id without references', () => {
       const expression = 'savedLens id="lens-id" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const references = [] as SavedObjectReference[];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -212,10 +207,10 @@ describe('legacy expressions', () => {
     it('migrates savedVisualization to an embeddable expression with transforms applied', () => {
       const expression = 'savedVisualization id="savedVisualization.id" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'element-id:savedVisualization.id', type: 'visualization' },
-      ]);
+      const references = [
+        { id: 'vis-id', name: 'element-id:l0_savedVisualization.id', type: 'visualization' },
+      ];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -232,10 +227,10 @@ describe('legacy expressions', () => {
     it('migrates savedVisualization with an explicit title', () => {
       const expression = 'savedVisualization id="savedVisualization.id" title="My Viz" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'element-id:savedVisualization.id', type: 'visualization' },
-      ]);
+      const references = [
+        { id: 'vis-id', name: 'element-id:l1_savedVisualization.id', type: 'visualization' },
+      ];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -254,10 +249,10 @@ describe('legacy expressions', () => {
       const expression =
         'savedVisualization id="savedVisualization.id" timerange={timerange from="now-7d" to="now"} | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'element-id:savedVisualization.id', type: 'visualization' },
-      ]);
+      const references = [
+        { id: 'vis-id', name: 'element-id:l2_savedVisualization.id', type: 'visualization' },
+      ];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual(
@@ -273,10 +268,10 @@ describe('legacy expressions', () => {
     it('migrates savedVisualization with hideLegend=true', () => {
       const expression = 'savedVisualization id="savedVisualization.id" hideLegend=true | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'element-id:savedVisualization.id', type: 'visualization' },
-      ]);
+      const references = [
+        { id: 'vis-id', name: 'element-id:l3_savedVisualization.id', type: 'visualization' },
+      ];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -300,10 +295,10 @@ describe('legacy expressions', () => {
     it('migrates savedVisualization with an hideLegend=false', () => {
       const expression = 'savedVisualization id="savedVisualization.id" hideLegend=false | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'vis-id', name: 'element-id:savedVisualization.id', type: 'visualization' },
-      ]);
+      const references = [
+        { id: 'vis-id', name: 'element-id:l4_savedVisualization.id', type: 'visualization' },
+      ];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -320,8 +315,8 @@ describe('legacy expressions', () => {
     it('migrates savedVisualization with an explicit saved object id without references', () => {
       const expression = 'savedVisualization id="vis-id" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const references = [] as SavedObjectReference[];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -340,10 +335,8 @@ describe('legacy expressions', () => {
     it('migrates savedMap to an embeddable expression with transforms applied', () => {
       const expression = 'savedMap id="savedMap.id" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'map-id', name: 'element-id:savedMap.id', type: 'map' },
-      ]);
+      const references = [{ id: 'map-id', name: 'element-id:l0_savedMap.id', type: 'map' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -365,10 +358,8 @@ describe('legacy expressions', () => {
     it('migrates savedMap with an explicit title', () => {
       const expression = 'savedMap id="savedMap.id" title="My Map" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'map-id', name: 'element-id:savedMap.id', type: 'map' },
-      ]);
+      const references = [{ id: 'map-id', name: 'element-id:l1_savedMap.id', type: 'map' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -388,10 +379,8 @@ describe('legacy expressions', () => {
       const expression =
         'savedMap id="savedMap.id" timerange={timerange from="now-7d" to="now"} | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'map-id', name: 'element-id:savedObjectRef', type: 'map' },
-      ]);
+      const references = [{ id: 'map-id', name: 'element-id:l2_savedMap.id', type: 'map' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
         timeRange: { from: 'now-7d', to: 'now' },
@@ -413,10 +402,8 @@ describe('legacy expressions', () => {
       const expression =
         'savedMap id="savedMap.id" hideLayer="layer-id-1" hideLayer="layer-id-2" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'map-id', name: 'element-id:savedObjectRef', type: 'map' },
-      ]);
+      const references = [{ id: 'map-id', name: 'element-id:l3_savedMap.id', type: 'map' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -439,10 +426,8 @@ describe('legacy expressions', () => {
       const expression =
         'savedMap id="savedMap.id" center={mapCenter lat=37.7749 lon=-122.4194 zoom=12} | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, [
-        { id: 'map-id', name: 'element-id:savedObjectRef', type: 'map' },
-      ]);
+      const references = [{ id: 'map-id', name: 'element-id:l4_savedMap.id', type: 'map' }];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
         timeRange: DEFAULT_TIME_RANGE,
@@ -469,8 +454,8 @@ describe('legacy expressions', () => {
     it('migrates savedMap with an explicit saved object id without references', () => {
       const expression = 'savedMap id="map-id" | render';
       const workpad = makeWorkpad(expression);
-
-      const transformedWorkpad = transformWorkpadOut(workpad, []);
+      const references = [] as SavedObjectReference[];
+      const transformedWorkpad = transformWorkpadOut(workpad, references);
 
       expect(getExpressionFunctionName(transformedWorkpad)).toBe('embeddable');
       expect(getDecodedConfig(transformedWorkpad)).toEqual({
@@ -496,7 +481,8 @@ describe('legacy expressions', () => {
       savedObjectId: 'embeddable-id',
     })}" | render`;
     const workpad = makeWorkpad(expression);
-    const transformedWorkpad = transformWorkpadOut(workpad, []);
+    const references = [] as SavedObjectReference[];
+    const transformedWorkpad = transformWorkpadOut(workpad, references);
 
     expect(getDecodedConfig(transformedWorkpad)).toEqual({
       title: 'Test',
