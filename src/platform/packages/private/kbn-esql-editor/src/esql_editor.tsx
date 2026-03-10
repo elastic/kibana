@@ -28,7 +28,6 @@ import {
   getJoinIndices,
   fixESQLQueryWithVariables,
   prettifyQuery,
-  hasOnlySourceCommand,
 } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
@@ -55,7 +54,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
@@ -66,7 +64,7 @@ import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
 import { ESQLMenu } from './editor_menu';
 import { getTrimmedQuery } from './history_local_storage';
-import { useEsqlEditorActions } from './use_esql_editor_actions';
+import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import {
   EDITOR_INITIAL_HEIGHT,
   EDITOR_INITIAL_HEIGHT_INLINE_EDITING,
@@ -94,11 +92,11 @@ import {
   useInputLatencyTracking,
   useSuggestionsLatencyTracking,
   useValidationLatencyTracking,
-} from './use_latency_tracking';
+} from './hooks/use_latency_tracking';
 import { addQueriesToCache } from './history_local_storage';
 import type { getHistoryItems } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
-import { useRestorableRef, useRestorableState, withRestorableState } from './restorable_state';
+import { useRestorableState, withRestorableState } from './restorable_state';
 import {
   EsqlStarredQueriesService,
   type StarredQueryMetadata,
@@ -113,7 +111,7 @@ import {
   addEditorKeyBindings,
   addTabKeybindingRules,
 } from './custom_editor_commands';
-import { useEsqlCallbacks } from './use_esql_callbacks';
+import { useEsqlCallbacks } from './hooks/use_esql_callbacks';
 import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
 import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
 import type { EsqlLanguageDeps } from './types';
@@ -128,8 +126,6 @@ const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
-
-const VISOR_AUTO_OPEN_DISMISSED_KEY = 'esql:visorAutoOpenDismissed';
 
 // React.memo is applied inside the withRestorableState HOC (called below)
 const ESQLEditorInternal = function ESQLEditor({
@@ -157,7 +153,6 @@ const ESQLEditorInternal = function ESQLEditor({
   mergeExternalMessages,
   hideQuickSearch,
   queryStats,
-  openVisorOnSourceCommands,
   enableResourceBrowser = false,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -244,16 +239,11 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const abortControllerRef = useRef(new AbortController());
   const [isVisorOpen, setIsVisorOpen] = useRestorableState('isVisorOpen', false);
-  const [hasUserDismissedVisorAutoOpen, setHasUserDismissedVisorAutoOpen] = useLocalStorage(
-    VISOR_AUTO_OPEN_DISMISSED_KEY,
-    !openVisorOnSourceCommands
-  );
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
   const controlsContextRef = useRef(controlsContext);
   const isVisorOpenRef = useRef(isVisorOpen);
-  const hasOpenedVisorOnMount = useRestorableRef('hasOpenedVisorOnMount', false);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -263,30 +253,6 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-
-  // The visor opens automatically if:
-  // - the user has not dismissed the auto open behavior
-  // - the query contains only a source command
-  // - the visor has not been opened automatically on mount before
-  // - The openVisorOnSourceCommands prop is true
-  useEffect(() => {
-    if (
-      !hasOpenedVisorOnMount.current &&
-      !hasUserDismissedVisorAutoOpen &&
-      openVisorOnSourceCommands &&
-      code &&
-      hasOnlySourceCommand(code)
-    ) {
-      setIsVisorOpen(true);
-      hasOpenedVisorOnMount.current = true;
-    }
-  }, [
-    code,
-    hasOpenedVisorOnMount,
-    hasUserDismissedVisorAutoOpen,
-    openVisorOnSourceCommands,
-    setIsVisorOpen,
-  ]);
 
   const trimmedQuery = useMemo(() => getTrimmedQuery(code ?? ''), [code]);
 
@@ -334,9 +300,8 @@ const ESQLEditorInternal = function ESQLEditor({
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
-      setIsVisorOpen(false);
     },
-    [onTextLangQueryChange, setIsVisorOpen]
+    [onTextLangQueryChange]
   );
 
   const { onSuggestionsReady, resetSuggestionsTracking } = useSuggestionsLatencyTracking({
@@ -718,9 +683,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onVisorClosed: () => editorRef.current?.focus(),
     starredQueriesService,
     trimmedQuery,
-    hasUserDismissedVisorAutoOpen: Boolean(hasUserDismissedVisorAutoOpen),
     isVisorOpenRef,
-    setHasUserDismissedVisorAutoOpen,
     setIsHistoryOpen,
     setIsCurrentQueryStarred,
     setIsVisorOpen,
@@ -1302,13 +1265,13 @@ const ESQLEditorInternal = function ESQLEditor({
                   // Add Tab keybinding rules for inline suggestions
                   addTabKeybindingRules();
 
-                  editor.onMouseDown(() => {
+                  editor.onMouseDown((e) => {
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
-                  });
-
-                  editor.onMouseDown((e) => {
+                    if (isVisorOpenRef.current) {
+                      setIsVisorOpen(false);
+                    }
                     if (enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
                     }

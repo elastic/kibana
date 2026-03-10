@@ -120,6 +120,7 @@ export function KeyboardShortcuts() {
               data-test-subj="editorKeyboardShortcutsButton"
               onClick={() => setIsOpen(!isOpen)}
               aria-label={label}
+              color="text"
             />
           </EuiToolTip>
         }
