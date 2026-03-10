@@ -46,6 +46,7 @@ import { KPIsSection } from './kpis/kpis_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
+const FILTERS_SECTION_WIDTH = 480;
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -54,6 +55,11 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const VerticalDivider = styled(EuiFlexItem)`
+  align-self: stretch;
+  border-left: ${({ theme: { euiTheme } }) => euiTheme.border.thin};
 `;
 
 export interface AttacksPageContentProps {
@@ -138,33 +144,44 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <HeaderPage title={PAGE_TITLE}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <FilterByAssigneesPopover
-                  selectedUserIds={assignees}
-                  onSelectionChange={onAssigneesSelectionChange}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ConnectorFilter
-                  aiConnectors={aiConnectors}
-                  connectorNames={aiConnectorNames}
-                  selectedConnectorNames={selectedConnectorNames}
-                  setSelectedConnectorNames={setSelectedConnectorNames}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
                 <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
-          <FiltersSection
-            dataView={dataView}
-            pageFilters={pageFilters}
-            setStatusFilter={setStatusFilter}
-            setPageFilters={setPageFilters}
-            setPageFilterHandler={setPageFilterHandler}
-          />
+          <EuiFlexGroup direction="row" responsive={false} wrap={true}>
+            <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
+              <EuiFlexGroup direction="row" responsive={false}>
+                <EuiFlexItem grow={1}>
+                  <FilterByAssigneesPopover
+                    selectedUserIds={assignees}
+                    onSelectionChange={onAssigneesSelectionChange}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={1}>
+                  <ConnectorFilter
+                    aiConnectors={aiConnectors}
+                    connectorNames={aiConnectorNames}
+                    selectedConnectorNames={selectedConnectorNames}
+                    setSelectedConnectorNames={setSelectedConnectorNames}
+                    compressed={true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <VerticalDivider grow={false} aria-hidden={true} />
+            <EuiFlexItem grow={1} style={{ minWidth: FILTERS_SECTION_WIDTH }}>
+              <FiltersSection
+                dataView={dataView}
+                pageFilters={pageFilters}
+                setStatusFilter={setStatusFilter}
+                setPageFilters={setPageFilters}
+                setPageFilterHandler={setPageFilterHandler}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="l" />
         </Display>
 
