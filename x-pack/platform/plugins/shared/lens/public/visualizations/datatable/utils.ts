@@ -89,10 +89,10 @@ export function getColorByValuePalette(
         params: { ...defaultPaletteParams },
       };
 
-  const computedStops = applyPaletteParams(paletteService, activePalette, dataBounds);
-
   // For non-custom palettes -> update the stops with computed values
   if (activePalette.name !== CUSTOM_PALETTE) {
+    const computedStops = applyPaletteParams(paletteService, activePalette, dataBounds);
+
     activePalette.params = {
       ...activePalette.params,
       stops: computedStops,
