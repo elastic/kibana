@@ -65,8 +65,7 @@ export function hasArbitraryExpressionSignature(signatures: Signature[]): boolea
     const isVariadicWithMultipleParams = minParams != null && minParams >= 2;
     const hasUnknownReturn = returnType === 'unknown';
     const hasMixedBooleanAndAny =
-      params.some(({ type }) => type === 'boolean') &&
-      params.some(({ type }) => type === 'any');
+      params.some(({ type }) => type === 'boolean') && params.some(({ type }) => type === 'any');
 
     return isVariadicWithMultipleParams && hasUnknownReturn && hasMixedBooleanAndAny;
   });
