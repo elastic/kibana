@@ -8,23 +8,14 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type {
-  AuthMode,
-  EarsGetTokenOpts,
-  GetTokenOpts,
-  OAuthGetTokenOpts,
-} from '@kbn/connector-specs';
-import type { AxiosErrorWithRetry } from './axios_utils';
-import { type EarsParams, resolveEarsUrl, handleEars401Error, getEarsAccessToken } from './ears';
+import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
-import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
-import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
-import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
+import { getAxiosAuthStrategy } from './axios_auth_strategies';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
 
@@ -35,85 +26,6 @@ interface GetAxiosInstanceOpts {
 }
 
 type ValidatedSecrets = Record<string, unknown>;
-
-interface OAuth2AuthCodeParams {
-  clientId?: string;
-  clientSecret?: string;
-  tokenUrl?: string;
-  scope?: string;
-  useBasicAuth?: boolean;
-}
-
-async function handleOAuth401Error({
-  error,
-  connectorId,
-  secrets,
-  connectorTokenClient,
-  logger,
-  configurationUtilities,
-  axiosInstance,
-  authMode,
-  profileUid,
-}: {
-  error: AxiosErrorWithRetry;
-  connectorId: string;
-  secrets: OAuth2AuthCodeParams;
-  connectorTokenClient: ConnectorTokenClientContract;
-  logger: Logger;
-  configurationUtilities: ActionsConfigurationUtilities;
-  axiosInstance: AxiosInstance;
-  authMode?: AuthMode;
-  profileUid?: string;
-}): Promise<AxiosInstance> {
-  // Prevent retry loops - only attempt refresh once per request
-  if (error.config._retry) {
-    return Promise.reject(error);
-  }
-
-  error.config._retry = true;
-  logger.debug(`Attempting token refresh for connectorId ${connectorId} after 401 error`);
-
-  const { clientId, clientSecret, tokenUrl, scope, useBasicAuth } = secrets;
-  if (!clientId || !clientSecret || !tokenUrl) {
-    error.message =
-      'Authentication failed: Missing required OAuth configuration (clientId, clientSecret, tokenUrl).';
-    return Promise.reject(error);
-  }
-
-  // Use the shared token refresh function with mutex protection
-  const newAccessToken = await getOAuthAuthorizationCodeAccessToken({
-    connectorId,
-    logger,
-    configurationUtilities,
-    credentials: {
-      config: {
-        clientId,
-        tokenUrl,
-        useBasicAuth,
-      },
-      secrets: {
-        clientSecret,
-      },
-    },
-    connectorTokenClient,
-    scope,
-    authMode,
-    profileUid,
-    forceRefresh: true,
-  });
-
-  if (!newAccessToken) {
-    error.message =
-      'Authentication failed: Unable to refresh access token. Please re-authorize the connector.';
-    return Promise.reject(error);
-  }
-
-  logger.debug(`Token refreshed successfully for connectorId ${connectorId}. Retrying request.`);
-
-  // Update request with the new token and retry
-  error.config.headers.Authorization = newAccessToken;
-  return axiosInstance.request(error.config);
-}
 
 export interface GetAxiosInstanceWithAuthFnOpts {
   additionalHeaders?: Record<string, AxiosHeaderValue>;
@@ -183,125 +95,24 @@ export const getAxiosInstanceWithAuth = ({
         return config;
       });
 
+      const strategy = getAxiosAuthStrategy(authTypeId);
+      const strategyDeps = {
+        connectorId,
+        secrets,
+        connectorTokenClient,
+        logger,
+        configurationUtilities,
+        authMode,
+        profileUid,
+      };
+
       if (connectorTokenClient) {
-        if (authTypeId === 'oauth_authorization_code' || authTypeId === 'ears') {
-          // Add a response interceptor to handle 401 errors for OAuth authz code grant connectors
-          axiosInstance.interceptors.response.use(
-            (response) => response,
-            (error) => {
-              if (error.response?.status === 401) {
-                if (authTypeId === 'ears') {
-                  return handleEars401Error({
-                    error,
-                    connectorId,
-                    secrets: secrets as EarsParams,
-                    connectorTokenClient,
-                    logger,
-                    configurationUtilities,
-                    axiosInstance,
-                    authMode,
-                    profileUid,
-                  });
-                }
-                return handleOAuth401Error({
-                  error,
-                  connectorId,
-                  secrets: secrets as OAuth2AuthCodeParams,
-                  connectorTokenClient,
-                  logger,
-                  configurationUtilities,
-                  axiosInstance,
-                  authMode,
-                  profileUid,
-                });
-              }
-              return Promise.reject(error);
-            }
-          );
-        } else {
-          // add a response interceptor to clean up saved tokens if necessary
-          const { onFulfilled, onRejected } = getDeleteTokenAxiosInterceptor({
-            connectorTokenClient,
-            connectorId,
-          });
-          axiosInstance.interceptors.response.use(onFulfilled, onRejected);
-        }
+        strategy.installResponseInterceptor(axiosInstance, strategyDeps);
       }
 
       const configureCtx = {
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
-        getToken: async (opts: GetTokenOpts) => {
-          // Use different token retrieval method based on auth type
-          if (authTypeId === 'ears') {
-            // For EARS flow, retrieve stored tokens (no client credentials needed)
-            if (!connectorTokenClient) {
-              throw new Error('ConnectorTokenClient is required for EARS OAuth flow');
-            }
-            // todo: think about how to get rid of the implicit connection between authTypeId and opts.kind
-            // todo: might be better to to have separate opts types for the 3 different auth types
-            const earsOpts = opts as EarsGetTokenOpts;
-            return await getEarsAccessToken({
-              connectorId,
-              logger,
-              configurationUtilities,
-              tokenUrl: resolveEarsUrl(earsOpts.tokenUrl, configurationUtilities.getEarsUrl()),
-              connectorTokenClient,
-              authMode,
-              profileUid,
-            });
-          }
-
-          if (authTypeId === 'oauth_authorization_code') {
-            // For authorization code flow, retrieve stored tokens from callback
-            if (!connectorTokenClient) {
-              throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
-            }
-            const oauthOpts = opts as OAuthGetTokenOpts;
-            return await getOAuthAuthorizationCodeAccessToken({
-              connectorId,
-              logger,
-              configurationUtilities,
-              credentials: {
-                config: {
-                  clientId: oauthOpts.clientId,
-                  tokenUrl: oauthOpts.tokenUrl,
-                  ...(oauthOpts.additionalFields
-                    ? { additionalFields: oauthOpts.additionalFields }
-                    : {}),
-                },
-                secrets: {
-                  clientSecret: oauthOpts.clientSecret,
-                },
-              },
-              connectorTokenClient,
-              scope: oauthOpts.scope,
-              authMode,
-              profileUid,
-            });
-          }
-
-          // For client credentials flow, request new token each time
-          const oauthOpts = opts as OAuthGetTokenOpts;
-          return await getOAuthClientCredentialsAccessToken({
-            connectorId,
-            logger,
-            tokenUrl: oauthOpts.tokenUrl,
-            oAuthScope: oauthOpts.scope,
-            configurationUtilities,
-            credentials: {
-              config: {
-                clientId: oauthOpts.clientId,
-                ...(oauthOpts.additionalFields
-                  ? { additionalFields: oauthOpts.additionalFields }
-                  : {}),
-              },
-              secrets: {
-                clientSecret: oauthOpts.clientSecret,
-              },
-            },
-            connectorTokenClient,
-          });
-        },
+        getToken: (opts: GetTokenOpts) => strategy.getToken(opts, strategyDeps),
         logger,
         proxySettings: configurationUtilities.getProxySettings(),
         sslSettings: configurationUtilities.getSSLSettings(),

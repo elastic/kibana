@@ -4,5 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { resolveEarsUrl } from './url';
-export { getEarsAccessToken } from './get_ears_access_token';
+
+export { getAxiosAuthStrategy } from './get_axios_auth_strategy';
+export type { AxiosAuthStrategy, AuthStrategyDeps } from './types';
