@@ -96,7 +96,7 @@ export const getHistoryUsersRoute = (
           ];
 
           if (searchTerm?.trim()) {
-            const escaped = searchTerm.trim().replace(/[*?]/g, '\\$&');
+            const escaped = searchTerm.trim().replace(/[\\*?]/g, '\\$&');
             filter.push({ wildcard: { user_id: `*${escaped}*` } });
           }
 

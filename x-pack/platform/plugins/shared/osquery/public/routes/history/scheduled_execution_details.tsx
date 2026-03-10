@@ -26,10 +26,6 @@ const ScheduledExecutionDetailsPageComponent = () => {
   });
 
   const historyNavProps = useRouterNavigate('/history');
-  const placeholderValues = React.useMemo(
-    () => ({ scheduleId, executionCount }),
-    [scheduleId, executionCount]
-  );
 
   if (!isValid) {
     return <Redirect to="/history" />;
@@ -52,7 +48,8 @@ const ScheduledExecutionDetailsPageComponent = () => {
           <FormattedMessage
             id="xpack.osquery.scheduledExecutionDetails.placeholder"
             defaultMessage="Detail view for schedule {scheduleId}, execution #{executionCount}."
-            values={placeholderValues}
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{ scheduleId, executionCount }}
           />
         }
         actions={
