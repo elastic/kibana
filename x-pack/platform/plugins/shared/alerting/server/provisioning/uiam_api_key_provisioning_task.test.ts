@@ -396,7 +396,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(uiamConvert).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(logger.info).toHaveBeenCalledWith(
-        `Wrote provisioning status: 0 skipped rules, 0 failed conversions, ${batchSize} completed and 0 failed updates.`,
+        `Wrote provisioning status: ${batchSize} total (0 skipped, 0 failed conversions, ${batchSize} completed, 0 failed updates).`,
         { tags: TAGS }
       );
     });
@@ -543,7 +543,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         { overwrite: true }
       );
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 0 skipped rules, 0 failed conversions, 3 completed and 0 failed updates.',
+        'Wrote provisioning status: 3 total (0 skipped, 0 failed conversions, 3 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });
@@ -656,7 +656,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         { overwrite: true }
       );
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 0 skipped rules, 2 failed conversions, 1 completed and 0 failed updates.',
+        'Wrote provisioning status: 3 total (0 skipped, 2 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });
@@ -703,7 +703,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         { overwrite: true }
       );
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 1 skipped rules, 0 failed conversions, 0 completed and 0 failed updates.',
+        'Wrote provisioning status: 1 total (1 skipped, 0 failed conversions, 0 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });
@@ -749,7 +749,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         { overwrite: true }
       );
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 1 skipped rules, 0 failed conversions, 0 completed and 0 failed updates.',
+        'Wrote provisioning status: 1 total (1 skipped, 0 failed conversions, 0 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });
@@ -800,7 +800,7 @@ describe('UiamApiKeyProvisioningTask', () => {
         { overwrite: true }
       );
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 1 skipped rules, 0 failed conversions, 0 completed and 0 failed updates.',
+        'Wrote provisioning status: 1 total (1 skipped, 0 failed conversions, 0 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });
@@ -851,7 +851,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(result).toEqual({ state: { runs: 1 } });
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 0 skipped rules, 0 failed conversions, 1 completed and 0 failed updates.',
+        'Wrote provisioning status: 1 total (0 skipped, 0 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });
@@ -1223,7 +1223,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(statuses).toContainEqual({ id: 'r1', status: UiamApiKeyProvisioningStatus.COMPLETED });
       expect(statuses).toContainEqual({ id: 'r2', status: UiamApiKeyProvisioningStatus.FAILED });
       expect(logger.info).toHaveBeenCalledWith(
-        'Wrote provisioning status: 0 skipped rules, 1 failed conversions, 1 completed and 0 failed updates.',
+        'Wrote provisioning status: 2 total (0 skipped, 1 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
       );
     });

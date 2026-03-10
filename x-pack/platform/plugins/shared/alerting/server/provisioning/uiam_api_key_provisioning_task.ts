@@ -187,8 +187,8 @@ export class UiamApiKeyProvisioningTask {
     await this.updateProvisioningStatus(
       {
         skipped: provisioningStatusForSkippedRules,
-        failedConversions: provisioningStatusForFailedConversions,
         updated: provisioningStatusForUpdatedRules,
+        failedConversions: provisioningStatusForFailedConversions,
       },
       context
     );
@@ -214,7 +214,7 @@ export class UiamApiKeyProvisioningTask {
     try {
       await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
       this.logger.info(
-        `Wrote provisioning status: ${counts.skipped} skipped rules, ${counts.failedConversions} failed conversions, ${counts.completed} completed and ${counts.failed} failed updates.`,
+        `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
         { tags: TAGS }
       );
     } catch (e) {

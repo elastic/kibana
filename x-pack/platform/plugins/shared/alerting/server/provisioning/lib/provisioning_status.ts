@@ -67,10 +67,11 @@ export interface ProvisioningStatusCounts {
   failedConversions: number;
   completed: number;
   failed: number;
+  total: number;
 }
 
 /**
- * Builds the flat docs array and counts for a provisioning status write.
+ * Builds the flat docs array and counts (including total) for a provisioning status write.
  * Use before bulkCreate and for logging.
  */
 export const prepareProvisioningStatusWrite = (
@@ -85,6 +86,7 @@ export const prepareProvisioningStatusWrite = (
       .length,
     failed: updated.filter((d) => d.attributes.status === UiamApiKeyProvisioningStatus.FAILED)
       .length,
+    total: docs.length,
   };
   return { docs, counts };
 };
