@@ -11,18 +11,23 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
-import { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } from '@kbn/scout-info';
 import type { RepoPath } from '@kbn/repo-path';
 import ignore from 'ignore';
 
+// Scout test files live inside plugins/packages
+const SCOUT_TEST_PATTERNS = [
+  ':(glob)src/platform/**/test/scout*/**/*.spec.ts',
+  ':(glob)x-pack/**/**/test/scout*/**/*.spec.ts',
+];
+
+// FTR tests live under top-level directories, not inside plugins or packages
 const FTR_TEST_PATTERNS = [
   'src/platform/test',
   'x-pack/platform/test',
   ':(glob)x-pack/solutions/*/test/**',
 ];
 
-const SCOUT_TEST_PATTERNS = [`:(glob)${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**`];
-
+// Jest tests are co-located with source files anywhere in the repository
 const JEST_TEST_PATTERNS = [
   ':(glob)**/*.test.ts',
   ':(glob)**/*.test.tsx',
@@ -42,6 +47,9 @@ async function getTestFileGroups(): Promise<TestFileGroup[]> {
     getRepoFiles(JEST_TEST_PATTERNS),
   ]);
 
+  // A file can match multiple groups (e.g. a .test.ts inside an FTR test tree
+  // matches both FTR and Jest). We deduplicate so each file appears in exactly
+  // one bucket, with more-specific patterns claiming first: Scout > FTR > Jest
   const seen = new Set(scoutFiles.map((f) => f.repoRel));
   const dedup = (files: RepoPath[]): RepoPath[] =>
     files.filter((f) => {
