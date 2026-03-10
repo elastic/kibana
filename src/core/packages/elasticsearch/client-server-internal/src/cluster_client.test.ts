@@ -272,6 +272,7 @@ describe('ClusterClient', () => {
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
         onRequest: expect.any(Function),
+        logger,
       });
     });
 
@@ -300,6 +301,7 @@ describe('ClusterClient', () => {
         getExecutionContext,
         getUnauthorizedErrorHandler: expect.any(Function),
         onRequest: expect.any(Function),
+        logger,
       });
 
       const { getUnauthorizedErrorHandler: getHandler } = createTransportMock.mock.calls[0][0];
