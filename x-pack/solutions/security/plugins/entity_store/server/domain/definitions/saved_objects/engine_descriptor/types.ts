@@ -22,42 +22,20 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
     },
     logExtractionState: {
       properties: {
-        filter: {
-          type: 'keyword',
-        },
-        additionalIndexPattern: {
-          type: 'keyword',
-        },
-        additionalIndexPatterns: {
-          type: 'keyword',
-        },
-        fieldHistoryLength: {
-          type: 'integer',
-        },
-        lookbackPeriod: {
-          type: 'keyword',
-        },
-        delay: {
-          type: 'keyword',
-        },
-        docsLimit: {
-          type: 'integer',
-        },
-        timeout: {
-          type: 'keyword',
-        },
-        frequency: {
-          type: 'keyword',
-        },
-        paginationTimestamp: {
-          type: 'date',
-        },
-        paginationId: {
-          type: 'keyword',
-        },
-        lastExecutionTimestamp: {
-          type: 'date',
-        },
+        // Config fields kept in mappings for migration validation (v1/v2 added them; v3 schema-only stops returning them; v4 data_removal deletes from docs)
+        filter: { type: 'keyword' },
+        additionalIndexPattern: { type: 'keyword' },
+        additionalIndexPatterns: { type: 'keyword' },
+        fieldHistoryLength: { type: 'integer' },
+        lookbackPeriod: { type: 'keyword' },
+        delay: { type: 'keyword' },
+        docsLimit: { type: 'integer' },
+        timeout: { type: 'keyword' },
+        frequency: { type: 'keyword' },
+        // Runtime fields (v3 and current)
+        paginationTimestamp: { type: 'date' },
+        paginationId: { type: 'keyword' },
+        lastExecutionTimestamp: { type: 'date' },
       },
     },
     error: {
@@ -147,6 +125,19 @@ const engineDescriptorSchemaV2 = engineDescriptorSchemaV1.extends({
   logExtractionState: logExtractionStateSchemaV2,
 });
 
+const logExtractionRuntimeStateSchemaV3 = schema.object({
+  paginationTimestamp: schema.maybe(schema.string()),
+  paginationId: schema.maybe(schema.string()),
+  lastExecutionTimestamp: schema.maybe(schema.string()),
+});
+
+const engineDescriptorAttributesSchemaV3 = {
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV3,
+};
+
+const engineDescriptorSchemaV3 = schema.object(engineDescriptorAttributesSchemaV3);
+
 const version1: SavedObjectsFullModelVersion = {
   changes: [],
   schemas: {
@@ -194,11 +185,44 @@ const version2: SavedObjectsFullModelVersion = {
   },
 };
 
+const version3: SavedObjectsFullModelVersion = {
+  changes: [],
+  schemas: {
+    create: engineDescriptorSchemaV3,
+    forwardCompatibility: engineDescriptorSchemaV3.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
+// const version4: SavedObjectsFullModelVersion = {
+//   changes: [
+//     {
+//       type: 'data_removal' as const,
+//       removedAttributePaths: [
+//         'logExtractionState.filter',
+//         'logExtractionState.additionalIndexPattern',
+//         'logExtractionState.additionalIndexPatterns',
+//         'logExtractionState.fieldHistoryLength',
+//         'logExtractionState.lookbackPeriod',
+//         'logExtractionState.delay',
+//         'logExtractionState.docsLimit',
+//         'logExtractionState.timeout',
+//         'logExtractionState.frequency',
+//       ],
+//     },
+//   ],
+//   schemas: {
+//     create: engineDescriptorSchemaV3,
+//     forwardCompatibility: engineDescriptorSchemaV3.extends({}, { unknowns: 'ignore' }),
+//   },
+// };
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2 },
+  modelVersions: { 1: version1, 2: version2, 3: version3 },
+  // we need to merge and then add the version4
+  // modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
   hiddenFromHttpApis: true,
 };

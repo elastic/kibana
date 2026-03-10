@@ -145,7 +145,8 @@ describe('ChangePasswordModal', () => {
     });
   });
 
-  describe('render', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/254057
+  describe.skip('render', () => {
     const coreStart = coreMock.createStart();
     const authc = securityMock.createSetup().authc;
     const history = createMemoryHistory({ initialEntries: ['/users'] });

@@ -14,11 +14,12 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BadCRUDRequestError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
-import { EntityType } from '../../../../common/domain/definitions/entity_schema';
+
+const ENTITY_TYPES = ['user', 'host', 'service', 'generic'] as const;
 
 const paramsSchema = z
   .object({
-    entityType: EntityType,
+    entityType: z.enum(ENTITY_TYPES),
   })
   .required();
 

@@ -718,7 +718,7 @@ describe(
         author: ['Test'],
         false_positives: ['false-positive-1', 'false-positive-2'],
         references: ['http://reference-1', 'http://reference-2'],
-        max_signals: 50,
+        max_signals: 100,
         threat: [
           {
             framework: 'MITRE ATT&CK',

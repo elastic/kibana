@@ -15,7 +15,7 @@ export interface GcsConfig {
  * GCS subfolder: `<basePathPrefix>/<run-id>/`.
  *
  * Override at runtime with:
- *   SIGEVENTS_SNAPSHOT_RUN=2026-02-25 node scripts/scout ...
+ *   SIGEVENTS_SNAPSHOT_RUN=2026-02-23 node scripts/scout ...
  */
 export const SIGEVENTS_SNAPSHOT_RUN = process.env.SIGEVENTS_SNAPSHOT_RUN || '2026-02-25';
 

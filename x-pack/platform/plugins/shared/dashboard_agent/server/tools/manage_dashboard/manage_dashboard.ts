@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -46,7 +46,7 @@ const createEmptyDashboardData = (): DashboardAttachmentData => ({
   panels: [],
 });
 
-export const manageDashboardTool = (): BuiltinSkillBoundedTool => {
+export const manageDashboardTool = (): BuiltinSkillBoundedTool<typeof manageDashboardSchema> => {
   return {
     id: dashboardTools.manageDashboard,
     type: ToolType.builtin,

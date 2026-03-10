@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { ExpandablePanel } from '../../../../flyout_v2/shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';

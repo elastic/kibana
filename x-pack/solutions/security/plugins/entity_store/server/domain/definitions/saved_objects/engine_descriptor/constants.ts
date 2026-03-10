@@ -5,39 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { TasksConfig } from '../../../../tasks/config';
-import { EntityStoreTaskType } from '../../../../tasks/constants';
+import { z } from '@kbn/zod/v4';
 import { EntityType } from '../../../../../common/domain/definitions/entity_schema';
 
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
 
-export const DELAY_DEFAULT = '1m';
-export const LOOKBACK_PERIOD_DEFAULT = '3h';
-
-export type LogExtractionState = z.infer<typeof LogExtractionState>;
-export const LogExtractionState = z.object({
-  filter: z.string().default(''),
-  additionalIndexPatterns: z.array(z.string()).default([]),
-  fieldHistoryLength: z.number().int().default(10),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOOKBACK_PERIOD_DEFAULT),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(DELAY_DEFAULT),
-  docsLimit: z.number().int().positive().default(10000),
-  timeout: z
-    .string()
-    .regex(/[smdh]$/)
-    .default('25s'),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval || '30s'),
+export type EngineLogExtractionState = z.infer<typeof EngineLogExtractionState>;
+export const EngineLogExtractionState = z.object({
   paginationTimestamp: z.string().optional(),
   paginationId: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
@@ -60,7 +35,7 @@ export type EngineDescriptor = z.infer<typeof EngineDescriptor>;
 export const EngineDescriptor = z.object({
   type: EntityType,
   status: EngineStatus,
-  logExtractionState: LogExtractionState,
+  logExtractionState: EngineLogExtractionState,
   error: EngineError.optional(),
   versionState: VersionState,
 });

@@ -9,7 +9,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
-import { FLYOUT_STORAGE_KEYS } from '../../../flyout/document_details/shared/constants/local_storage';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import { ExpandableSection } from '../../shared/components/expandable_section';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
