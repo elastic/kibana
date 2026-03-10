@@ -73,7 +73,7 @@ export const initTelemetry = (
     if (telemetryConfig.tracing.enabled) {
       maybeInitAutoInstrumentations();
     }
-    
+
     const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
     asyncSettled.then(() => {
       if (telemetryConfig.tracing.enabled) {
