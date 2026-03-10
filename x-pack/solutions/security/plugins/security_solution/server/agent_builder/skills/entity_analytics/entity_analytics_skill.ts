@@ -20,7 +20,7 @@ import { SECURITY_GET_ENTITY_TOOL_ID, SECURITY_SEARCH_ENTITIES_TOOL_ID } from '.
 // if they use controlled queries that we author and maintain.
 export const FF_DYNAMICALLY_GENERATE_ESQL = false;
 
-const ENTITY_RISK_SCORE_SIGNFICANT_CHANGE_THRESHOLD = 20; // Define a threshold for significant risk score change
+const ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD = 20; // Define a threshold for significant risk score change
 export interface EntityAnalyticsSkillsContext {
   isEntityStoreV2Enabled: boolean;
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -52,15 +52,15 @@ Use this skill when:
     - entity.name - the name of this entity
     - entity.risk.calculated_score_norm (0-100) - the normalized risk score for this entity
     - entity.risk.calculated_level (critical, high, moderate, low, unknown)
-    - entity.asset.criticality (extreme_impact, high_impact, moderate_impact, low_impact, unknown)
+    - asset.criticality (extreme_impact, high_impact, moderate_impact, low_impact, unknown)
     - entity.attributes.watchlists - watchlists that contain this entity
-    - entity.attributes.managed_status - whether this entity is managed
-    - entity.attributes.mfa_status - whether MFA is enabled for this entity
+    - entity.attributes.managed - whether this entity is managed
+    - entity.attributes.mfa_enabled - whether MFA is enabled for this entity
     - entity.attributes.asset - whether this entity is an asset
-    - entity.behaviors.behavior_rule_names - detection rules associated with this entity
+    - entity.behaviors.rule_names - detection rules associated with this entity
     - entity.behaviors.anomaly_job_ids - anomaly detection jobs that have detected this entity
     - entity.lifecycle.first_seen - first time this entity has been seen in the entity store
-    - entity.lifecycle.last_seen - last time this entity has been seen in the entity store
+    - entity.lifecycle.last_activity - last time this entity has been active in the entity store
     - risk_score_inputs - the alert inputs that contributed to the risk score calculation for this entity.
     - profile_history - historical snapshot profiles for this entity over a specified time interval
 

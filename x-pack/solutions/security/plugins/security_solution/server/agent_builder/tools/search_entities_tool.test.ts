@@ -274,7 +274,7 @@ describe('searchEntitiesTool', () => {
       expect(result.results[1].type).toBe(ToolResultType.esqlResults);
     });
 
-    it('uses entity.type for entity type filter', async () => {
+    it('uses entity.EngineMetadata.Type for entity type filter', async () => {
       mockSingleEntityResponse();
 
       await tool.handler(

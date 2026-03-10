@@ -250,7 +250,7 @@ export const getEntityTool = (
       },
     },
     handler: async (params, { spaceId, esClient }) => {
-      logger.info(
+      logger.debug(
         `${SECURITY_GET_ENTITY_TOOL_ID} tool called with parameters ${JSON.stringify(params)}`
       );
 

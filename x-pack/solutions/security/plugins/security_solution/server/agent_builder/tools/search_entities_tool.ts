@@ -136,7 +136,7 @@ const schema = z.object({
     .boolean()
     .optional()
     .describe(
-      'When trun, only returns entities that are assets (entity.attributes.asset == true).'
+      'When true, only returns entities that are assets (entity.attributes.asset == true).'
     ),
   firstSeenAfter: z
     .string()
@@ -357,7 +357,7 @@ export const searchEntitiesTool = (
     id: SECURITY_SEARCH_ENTITIES_TOOL_ID,
     type: ToolType.builtin,
     description: `Search entity store for security entities (host, user, service, generic).
-    Supports filtering by normalized risk score, asset criticality, entity attributes, behaviors, and lifecycle timestamps.
+    Supports filtering by normalized risk score, asset criticality, entity attributes, and lifecycle timestamps.
     Use this tool to find entities matching specific criteria.
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],
