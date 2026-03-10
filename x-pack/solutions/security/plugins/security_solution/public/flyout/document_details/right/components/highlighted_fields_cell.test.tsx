@@ -63,7 +63,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   beforeEach(() => {
-    mockFlyoutApi.openPreviewPanel.mockClear();
+    jest.clearAllMocks();
   });
 
   it('should render a basic cell', () => {

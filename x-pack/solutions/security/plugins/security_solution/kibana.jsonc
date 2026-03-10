@@ -18,6 +18,7 @@
       "entityStore",
       "actions",
       "alerting",
+      "anonymization",
       "cases",
       "cloud",
       "cloudDefend",
