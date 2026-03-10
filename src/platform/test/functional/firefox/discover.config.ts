@@ -37,6 +37,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       require.resolve('../apps/discover/group12'),
       require.resolve('../apps/discover/group13'),
       require.resolve('../apps/discover/group14'),
+      require.resolve('../apps/discover/group14/index_2'),
       require.resolve('../apps/discover/group16'),
       require.resolve('../apps/discover/group19'),
       require.resolve('../apps/discover/group7'),
