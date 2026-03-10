@@ -14,11 +14,8 @@ import type { TimePickerTimeDefaults } from '../components/shared/date_picker/ty
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
 
-function tryParseDate(
-  date: string | string[] | null | undefined,
-  options?: Parameters<typeof datemath.parse>[1]
-): Moment | undefined {
-  return typeof date === 'string' ? datemath.parse(date, options) : undefined;
+function tryParseDate(date: string | string[] | null | undefined): Moment | undefined {
+  return typeof date === 'string' ? datemath.parse(date) : undefined;
 }
 
 export function useDateRangeRedirect() {
@@ -36,14 +33,14 @@ export function useDateRangeRedirect() {
 
   const isDateRangeSet = useMemo(() => {
     const start = tryParseDate(query.rangeFrom);
-    const end = tryParseDate(query.rangeTo, { roundUp: true });
+    const end = tryParseDate(query.rangeTo);
 
     return Boolean(start?.isValid() && end?.isValid());
   }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
     const start = tryParseDate(query.rangeFrom);
-    const end = tryParseDate(query.rangeTo, { roundUp: true });
+    const end = tryParseDate(query.rangeTo);
 
     const nextQuery = {
       ...query,
