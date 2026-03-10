@@ -192,7 +192,7 @@ export const getDatatableVisualization = ({
         }
       }
 
-      // Numeric column with categorical-only palette (canDynamicColoring=false) or stop-less palette (was used categorically) → recompute proper stops
+      // Numeric column with categorical-only palette (canDynamicColoring=false) or stop-less (legacy color by terms) palette → recompute proper stops
       const paletteEntry = paletteMap.get(newColumn.palette?.name ?? '');
       if (paletteEntry && !showColorByTerms) {
         const hasStops = hasPaletteStops(newColumn.palette);
