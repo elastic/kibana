@@ -7,34 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { findStepRange, findInsertLineAfterLastStep } from './monaco_edit_utils';
-export type { StepRange } from './monaco_edit_utils';
-
-export {
-  createInsertStepTool,
-  createModifyStepTool,
-  createModifyStepPropertyTool,
-  createModifyWorkflowPropertyTool,
-  createDeleteStepTool,
-  createReplaceYamlTool,
-} from './browser_api_tools';
-export type { EditorContext, BrowserApiToolDefinition } from './browser_api_tools';
-
 export { ProposalManager } from './proposed_changes';
 export type { ProposedChange, PendingProposal, ProposalManagerOptions } from './proposed_changes';
 
+export { AttachmentBridge } from './attachment_bridge';
+
 export {
   setProposalActionHandlers,
-  setProposalRecord,
   updateProposalStatus,
-  getProposalRecord,
-  getAllProposalRecords,
-  subscribeToProposals,
-  clearProposalRecord,
-  clearAllProposalRecords,
-  initProposalPersistence,
-  suspendPersistence,
   acceptProposal,
   declineProposal,
 } from './proposal_status_bridge';
-export type { ProposalStatus, ProposalRecord } from './proposal_status_bridge';
+export type { ProposalStatus } from './proposal_status_bridge';
+
+export { registerWorkflowAttachmentRenderers } from './attachment_renderers';

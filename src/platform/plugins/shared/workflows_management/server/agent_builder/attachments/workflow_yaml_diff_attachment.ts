@@ -56,7 +56,6 @@ const buildUnifiedDiff = (beforeYaml: string, afterYaml: string): string => {
 
 const workflowYamlDiffAttachmentType = {
   id: WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE,
-  type: 'inline' as const,
   validate: (input: unknown) => {
     const parseResult = workflowYamlDiffDataSchema.safeParse(input);
     if (parseResult.success) {
@@ -84,6 +83,13 @@ If the proposal is pending, user can accept or decline it from the workflow YAML
       }),
     };
   },
+  getAgentDescription: () =>
+    `workflow.yaml.diff attachments represent a proposed change to an Elastic Workflow.\n` +
+    `Workflow edit tools return a diffAttachmentId in their result. ` +
+    `You MUST render it in your response using <render_attachment id="{diffAttachmentId}"/> ` +
+    `(replacing {diffAttachmentId} with the actual ID from the tool result) ` +
+    `so the user sees the colored diff hunks and accept/decline buttons.\n` +
+    `Do NOT paste the raw diff text — the rendered attachment provides the interactive UI.`,
 };
 
 export function registerWorkflowYamlDiffAttachment(

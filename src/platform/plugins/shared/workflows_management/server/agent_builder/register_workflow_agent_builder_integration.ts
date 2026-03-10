@@ -18,6 +18,7 @@ import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitio
 import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
+import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
 import type { AgentBuilderPluginSetupContract } from '../types';
 import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
@@ -41,6 +42,8 @@ export function registerWorkflowAgentBuilderIntegration({
   registerListWorkflowsTool(agentBuilder, api);
   registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
+
+  registerWorkflowEditTools(agentBuilder);
 
   registerWorkflowYamlAttachment(agentBuilder);
   registerWorkflowYamlDiffAttachment(agentBuilder);

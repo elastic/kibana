@@ -15,6 +15,14 @@ import { GET_TRIGGER_DEFINITIONS_TOOL_ID } from '../tools/get_trigger_definition
 import { GET_WORKFLOW_TOOL_ID } from '../tools/get_workflow_tool';
 import { LIST_WORKFLOWS_TOOL_ID } from '../tools/list_workflows_tool';
 import { VALIDATE_WORKFLOW_TOOL_ID } from '../tools/validate_workflow_tool';
+import {
+  WORKFLOW_DELETE_STEP_TOOL_ID,
+  WORKFLOW_INSERT_STEP_TOOL_ID,
+  WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+  WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+  WORKFLOW_MODIFY_STEP_TOOL_ID,
+  WORKFLOW_REPLACE_YAML_TOOL_ID,
+} from '../tools/workflow_edit_tools';
 
 export const workflowAuthoringSkill = defineSkillType({
   id: 'workflow-authoring',
@@ -33,6 +41,7 @@ Use this skill when the user wants to:
 
 ## Available Tools
 
+### Lookup Tools
 - **get_step_definitions**: Look up available step types, their input params (\`with\` block), config params, and examples
 - **get_trigger_definitions**: Look up available trigger types and their schemas
 - **get_examples**: Search the bundled example library for working workflow YAML patterns
@@ -40,6 +49,14 @@ Use this skill when the user wants to:
 - **validate_workflow**: Validate a complete workflow YAML string against all rules
 - **list_workflows**: List workflows in the user's environment
 - **get_workflow**: Retrieve a specific workflow by ID
+
+### Edit Tools (use when a \`workflow.yaml\` attachment is present)
+- **workflow_insert_step**: Insert a new step at the end of the steps list
+- **workflow_modify_step**: Replace an entire step by name
+- **workflow_modify_step_property**: Modify a single property of a step
+- **workflow_modify_property**: Modify a top-level workflow property (name, description, triggers, etc.)
+- **workflow_delete_step**: Delete a step by name
+- **workflow_replace_yaml**: Replace the entire workflow YAML (use sparingly, prefer surgical edits)
 
 ## Core Instructions
 
@@ -185,25 +202,21 @@ When the user asks you to fix a validation error:
 5. If the step type does NOT exist: tell the user and list similar alternatives
 6. NEVER guess or replace a step type with something unrelated
 
-### Using Browser Tools (When Available)
+### Proposing Changes (Edit Tools)
 
-When browser tools are available (in the workflow YAML editor context), you MUST use them to propose changes.
-Browser tools apply changes directly in the editor with an accept/reject UX. NEVER just describe changes
-in text when browser tools are available — always call the appropriate tool.
+When a \`workflow.yaml\` attachment is present in the conversation, you MUST use the edit tools to propose changes.
+Edit tools compute the diff on the server, emit a \`workflow.yaml.diff\` attachment visible in chat, and update
+the YAML attachment so subsequent edits see the latest state. The client-side editor will show the diff
+with an accept/decline UX. NEVER just describe changes in text when edit tools are available.
 
-Available browser tools (when the user is in the workflow editor):
-- **workflow_insert_step**: Insert a new step (provide structured JSON, NOT YAML)
-- **workflow_modify_step**: Replace an existing step entirely
-- **workflow_modify_step_property**: Change a single property within a step (e.g., \`with.message\`)
-- **workflow_modify_property**: Change a root-level workflow property (name, description, etc.)
-- **workflow_delete_step**: Remove a step by name
-- **workflow_replace_yaml**: Replace the entire YAML (use sparingly, prefer surgical edits)
-
-When using browser tools:
+When using edit tools:
 1. Provide step definitions as structured JSON objects, NOT as YAML strings
-2. Always include a \`proposalId\` to link the change with the chat diff attachment
-3. Validate the workflow AFTER the user accepts the proposed change
-4. For multi-step changes, call multiple browser tools — each will create a separate proposal
+2. Always include a \`proposalId\` — generate a unique identifier for each change
+3. Include a \`description\` explaining what the change does
+4. Validate the workflow AFTER the user accepts the proposed change
+5. For multi-step changes, call multiple edit tools — each creates a separate proposal
+6. Each edit tool reads the current YAML from the \`workflow.yaml\` attachment and updates it,
+   so sequential tool calls within a round see each other's changes
 
 ### Best Practices
 
@@ -220,5 +233,11 @@ When using browser tools:
     VALIDATE_WORKFLOW_TOOL_ID,
     LIST_WORKFLOWS_TOOL_ID,
     GET_WORKFLOW_TOOL_ID,
+    WORKFLOW_INSERT_STEP_TOOL_ID,
+    WORKFLOW_MODIFY_STEP_TOOL_ID,
+    WORKFLOW_MODIFY_STEP_PROPERTY_TOOL_ID,
+    WORKFLOW_MODIFY_PROPERTY_TOOL_ID,
+    WORKFLOW_DELETE_STEP_TOOL_ID,
+    WORKFLOW_REPLACE_YAML_TOOL_ID,
   ],
 });

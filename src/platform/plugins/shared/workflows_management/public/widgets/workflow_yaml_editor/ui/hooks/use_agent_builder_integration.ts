@@ -8,29 +8,19 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import type { Document } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import {
-  createDeleteStepTool,
-  createInsertStepTool,
-  createModifyStepPropertyTool,
-  createModifyStepTool,
-  createModifyWorkflowPropertyTool,
-  createReplaceYamlTool,
-  initProposalPersistence,
+  AttachmentBridge,
   ProposalManager,
   setProposalActionHandlers,
-  suspendPersistence,
   updateProposalStatus,
 } from '../../../../features/ai_integration';
-import type { BrowserApiToolDefinition, EditorContext } from '../../../../features/ai_integration';
 import { useKibana } from '../../../../hooks/use_kibana';
 
 interface UseAgentBuilderIntegrationParams {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
-  yamlDocumentRef: React.MutableRefObject<Document | null>;
   isEditorMounted?: boolean;
   workflowId?: string;
   workflowName?: string;
@@ -49,7 +39,6 @@ interface UseAgentBuilderIntegrationReturn {
 
 export const useAgentBuilderIntegration = ({
   editorRef,
-  yamlDocumentRef,
   isEditorMounted,
   workflowId,
   workflowName,
@@ -57,11 +46,8 @@ export const useAgentBuilderIntegration = ({
   const { workflowsManagement } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
   const proposalManagerRef = useRef<ProposalManager | null>(null);
+  const attachmentBridgeRef = useRef<AttachmentBridge | null>(null);
   const history = useHistory();
-
-  useEffect(() => {
-    initProposalPersistence(workflowId);
-  }, [workflowId]);
 
   useEffect(() => {
     if (!workflowId) return;
@@ -76,7 +62,7 @@ export const useAgentBuilderIntegration = ({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!isEditorMounted || !editor) return;
+    if (!isEditorMounted || !editor || !agentBuilder) return;
 
     const manager = new ProposalManager();
     manager.initialize(editor, {
@@ -111,34 +97,40 @@ export const useAgentBuilderIntegration = ({
       },
     });
 
+    const bridge = new AttachmentBridge();
+    bridge.start(agentBuilder.events.chat$, manager, editorRef);
+    attachmentBridgeRef.current = bridge;
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let modelListener: monaco.IDisposable | null = null;
+    const model = editor.getModel();
+    if (model) {
+      modelListener = model.onDidChangeContent(() => {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          const currentYaml = model.getValue();
+          agentBuilder.addAttachment({
+            type: 'workflow.yaml',
+            data: {
+              yaml: currentYaml,
+              workflowId,
+              name: workflowName,
+            },
+          });
+        }, 500);
+      });
+    }
+
     return () => {
-      suspendPersistence();
+      if (debounceTimer) clearTimeout(debounceTimer);
+      modelListener?.dispose();
+      bridge.stop();
+      attachmentBridgeRef.current = null;
       manager.dispose();
       proposalManagerRef.current = null;
       setProposalActionHandlers(null);
     };
-  }, [isEditorMounted, editorRef]);
-
-  const editorContext: EditorContext = useMemo(
-    () => ({
-      getEditor: () => editorRef.current,
-      getYamlDocument: () => yamlDocumentRef.current,
-      getProposedChangesManager: () => proposalManagerRef.current,
-    }),
-    [editorRef, yamlDocumentRef]
-  );
-
-  const browserApiTools: Array<BrowserApiToolDefinition<unknown>> = useMemo(
-    () => [
-      createInsertStepTool(editorContext),
-      createModifyStepTool(editorContext),
-      createModifyStepPropertyTool(editorContext),
-      createModifyWorkflowPropertyTool(editorContext),
-      createDeleteStepTool(editorContext),
-      createReplaceYamlTool(editorContext),
-    ],
-    [editorContext]
-  );
+  }, [isEditorMounted, editorRef, agentBuilder, workflowId, workflowName]);
 
   const syncConversationIdToUrl = useCallback(() => {
     const sessionTag = workflowId ? `workflow-${workflowId}` : 'workflow-new';
@@ -196,12 +188,11 @@ export const useAgentBuilderIntegration = ({
             },
           },
         ],
-        browserApiTools,
       });
 
       syncConversationIdToUrl();
     },
-    [agentBuilder, editorRef, workflowId, workflowName, browserApiTools, syncConversationIdToUrl]
+    [agentBuilder, editorRef, workflowId, workflowName, syncConversationIdToUrl]
   );
 
   return {

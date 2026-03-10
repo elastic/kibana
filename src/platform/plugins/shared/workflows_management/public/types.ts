@@ -37,6 +37,11 @@ import type { TelemetryServiceClient } from './common/lib/telemetry/types';
  * Defined here instead of importing from the plugin directly to avoid circular
  * dependencies (workflowsManagement uses runtimePluginDependencies).
  */
+export interface AgentBuilderChatEvent {
+  type: string;
+  data: Record<string, unknown>;
+}
+
 export interface AgentBuilderPluginStartContract {
   openConversationFlyout: (options?: {
     sessionTag?: string;
@@ -54,6 +59,10 @@ export interface AgentBuilderPluginStartContract {
   attachments: {
     addAttachmentType: (type: string, definition: unknown) => void;
   };
+  events: {
+    chat$: import('rxjs').Observable<AgentBuilderChatEvent>;
+  };
+  addAttachment: (attachment: { type: string; data: Record<string, unknown> }) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

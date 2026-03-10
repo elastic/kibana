@@ -250,7 +250,6 @@ export const WorkflowYAMLEditor = ({
   // Agent Builder integration for AI-assisted editing
   const { openAgentChat, isAgentBuilderAvailable } = useAgentBuilderIntegration({
     editorRef,
-    yamlDocumentRef,
     isEditorMounted,
     workflowId: workflow?.id,
     workflowName: workflow?.name,
