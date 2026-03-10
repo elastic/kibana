@@ -30,7 +30,7 @@ export function transformIn(state: LinksEmbeddableState) {
   return {
     state: {
       ...state,
-      links,
+      links: links?.map(({ order, id, ...link }) => link),
     },
     references,
   };

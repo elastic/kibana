@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_LINK_TYPE } from '../../content_management';
+import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../content_management';
 import { transformIn } from './transform_in';
 
 describe('transformIn', () => {
@@ -37,7 +37,6 @@ describe('transformIn', () => {
       title: 'Custom title',
       links: [
         {
-          id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
           type: DASHBOARD_LINK_TYPE as typeof DASHBOARD_LINK_TYPE,
           destination: '19e149f0-e95e-404b-b6f8-fc751317c6be',
         },
@@ -48,16 +47,43 @@ describe('transformIn', () => {
         "references": Array [
           Object {
             "id": "19e149f0-e95e-404b-b6f8-fc751317c6be",
-            "name": "link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard",
+            "name": "link_undefined_dashboard",
             "type": "dashboard",
           },
         ],
         "state": Object {
           "links": Array [
             Object {
-              "destinationRefName": "link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard",
-              "id": "fb1b3fc7-6e12-4542-bcf5-c61ad77241c5",
+              "destinationRefName": "link_undefined_dashboard",
               "type": "dashboardLink",
+            },
+          ],
+          "title": "Custom title",
+        },
+      }
+    `);
+  });
+
+  test('should strip 9.3.0 properties from links', () => {
+    const byValueState = {
+      title: 'Custom title',
+      links: [
+        {
+          id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
+          order: 0,
+          type: EXTERNAL_LINK_TYPE as typeof EXTERNAL_LINK_TYPE,
+          destination: 'https://a.b.c.d.e.f.g',
+        },
+      ],
+    };
+    expect(transformIn(byValueState)).toMatchInlineSnapshot(`
+      Object {
+        "references": Array [],
+        "state": Object {
+          "links": Array [
+            Object {
+              "destination": "https://a.b.c.d.e.f.g",
+              "type": "externalLink",
             },
           ],
           "title": "Custom title",
