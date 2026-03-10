@@ -21,6 +21,7 @@ const isIgnoredFile = (repoRel: string): boolean =>
 // Scout test files live inside plugins/packages
 const SCOUT_TEST_PATTERNS = [
   ':(glob)src/platform/**/test/scout*/**/*.spec.ts',
+  ':(glob)src/core/**/test/scout*/**/*.spec.ts',
   ':(glob)x-pack/**/**/test/scout*/**/*.spec.ts',
 ];
 
