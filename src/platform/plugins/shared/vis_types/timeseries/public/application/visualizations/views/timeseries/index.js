@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useEffect, useId, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
@@ -38,6 +38,7 @@ import { getValueOrEmpty } from '../../../../../common/empty_label';
 import { getSplitByTermsColor } from '../../../lib/get_split_by_terms_color';
 import { getAxisLabelString } from '../../../components/lib/get_axis_label_string';
 import { calculateDomainForSeries } from './utils/series_domain_calculation';
+import { syncAnnotationTooltipAriaDescription } from './annotation_tooltip_aria_description';
 
 const generateAnnotationData = (values, formatter) =>
   values.map(({ key, docs }) => ({
@@ -85,6 +86,7 @@ export const TimeSeries = ({
   const { theme: themeService, activeCursor: activeCursorService } = getCharts();
 
   const chartRef = useRef();
+  const annotationTooltipId = useId();
   const chartBaseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
@@ -104,6 +106,72 @@ export const TimeSeries = ({
     },
     [initialRender]
   );
+
+  // Links focused annotation markers to their tooltip via aria-describedby so
+  // screen readers announce tooltip content (timestamp, airline, message).
+  useEffect(() => {
+    if (!hasVisibleAnnotations) {
+      return;
+    }
+
+    const chartContainer = chartRef.current?.getChartContainerRef?.().current;
+
+    if (!chartContainer) {
+      return;
+    }
+
+    let animationFrame = null;
+
+    const syncAriaDescription = () => {
+      syncAnnotationTooltipAriaDescription(chartContainer, annotationTooltipId);
+    };
+
+    const scheduleSync = () => {
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+      }
+
+      animationFrame = requestAnimationFrame(() => {
+        animationFrame = null;
+        syncAriaDescription();
+      });
+    };
+
+    // Annotation tooltips render in portals on document.body, outside the chart
+    // container, so we observe body and filter for tooltip-related mutations.
+    const tooltipObserver = new MutationObserver((mutations) => {
+      const isRelevant = mutations.some(
+        (m) =>
+          m.target instanceof HTMLElement &&
+          (m.target.matches(
+            '.echTooltipPortal, .echTooltipPortal__invisible, .echTooltip.echAnnotation'
+          ) ||
+            m.target.closest('.echTooltipPortal, .echTooltipPortal__invisible'))
+      );
+      if (isRelevant) scheduleSync();
+    });
+
+    chartContainer.addEventListener('focusin', scheduleSync);
+    chartContainer.addEventListener('focusout', scheduleSync);
+    tooltipObserver.observe(chartContainer.ownerDocument.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    scheduleSync();
+
+    return () => {
+      chartContainer.removeEventListener('focusin', scheduleSync);
+      chartContainer.removeEventListener('focusout', scheduleSync);
+      tooltipObserver.disconnect();
+
+      if (animationFrame !== null) {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+  }, [annotationTooltipId, hasVisibleAnnotations]);
 
   let tooltipFormatter = decorateFormatter(xAxisFormatter);
   if (!isLastBucketDropped) {
@@ -228,7 +296,9 @@ export const TimeSeries = ({
             id={id}
             domainType={AnnotationDomainType.XDomain}
             dataValues={dataValues}
-            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
+            // aria-hidden: the marker button provides its own accessible label;
+            // the decorative icon should not be announced separately.
+            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} aria-hidden={true} />}
             hideLinesTooltips={true}
             style={style}
           />
