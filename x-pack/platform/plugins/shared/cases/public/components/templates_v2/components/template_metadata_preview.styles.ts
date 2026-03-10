@@ -6,19 +6,22 @@
  */
 
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
 export const componentStyles = {
-  list: css({
-    margin: 0,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 12,
-  }),
-  row: css({
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 2,
-  }),
+  list: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: 0,
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: euiTheme.size.m,
+    }),
+  row: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: euiTheme.size.xs,
+    }),
   value: css({
     marginInlineStart: 0,
   }),

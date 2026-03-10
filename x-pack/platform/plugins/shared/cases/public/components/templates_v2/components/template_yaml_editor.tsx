@@ -11,6 +11,7 @@ import { monaco } from '@kbn/monaco';
 import type { SchemasSettings } from 'monaco-yaml';
 import { templateYamlLanguageService } from '../utils/template_yaml_language_service';
 import type { ValidationError } from './template_yaml_validation_accordion';
+import { YAML_EDITOR_OPTIONS } from '../constants';
 
 interface TemplateYamlEditorBaseProps {
   value: string;
@@ -104,22 +105,7 @@ export const TemplateYamlEditorBase: React.FC<TemplateYamlEditorBaseProps> = ({
       width="100%"
       height="100%"
       editorDidMount={handleEditorDidMount}
-      options={{
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-        wordWrap: 'on',
-        automaticLayout: true,
-        lineNumbers: 'on',
-        glyphMargin: true,
-        tabSize: 2,
-        lineNumbersMinChars: 2,
-        insertSpaces: true,
-        fontSize: 14,
-        renderWhitespace: 'all',
-        wordWrapColumn: 80,
-        wrappingIndent: 'indent',
-        formatOnType: true,
-      }}
+      options={YAML_EDITOR_OPTIONS}
     />
   );
 };

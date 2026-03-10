@@ -26,7 +26,7 @@ export type ICasesDeepLinkId = (typeof CasesDeepLinkId)[keyof typeof CasesDeepLi
 export const getCasesDeepLinks = <T extends AppDeepLink = AppDeepLink>({
   basePath = DEFAULT_BASE_PATH,
   extend = {},
-  templatesEnabled = true,
+  templatesEnabled = false,
 }: {
   basePath?: string;
   extend?: Partial<Record<ICasesDeepLinkId, Partial<T>>>;

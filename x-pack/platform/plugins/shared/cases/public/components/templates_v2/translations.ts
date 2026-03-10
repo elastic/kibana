@@ -91,3 +91,10 @@ export const FIX_VALIDATION_ERRORS = i18n.translate('xpack.cases.templates.fixVa
 export const UNSAVED_CHANGES = i18n.translate('xpack.cases.templates.unsavedChanges', {
   defaultMessage: 'Unsaved changes',
 });
+
+export const FAILED_TO_SAVE_TEMPLATE = i18n.translate(
+  'xpack.cases.templates.failedToSaveTemplate',
+  {
+    defaultMessage: 'Failed to save template',
+  }
+);

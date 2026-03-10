@@ -32,7 +32,7 @@ export const createCasesNavigationTree = (templatesEnabled: boolean = false): No
     id: SecurityPageName.case,
     link: securityLink(SecurityPageName.case),
     icon: 'briefcase',
+    children,
     ...(templatesEnabled && { renderAs: 'panelOpener' as const }),
-    ...(templatesEnabled && { children }),
   };
 };

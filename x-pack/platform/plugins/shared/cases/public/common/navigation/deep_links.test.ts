@@ -8,7 +8,7 @@
 import { getCasesDeepLinks } from './deep_links';
 
 describe('getCasesDeepLinks', () => {
-  it('it returns the deep links with templates by default', () => {
+  it('it returns the deep links without templates by default', () => {
     const deepLinks = getCasesDeepLinks({});
     expect(deepLinks).toEqual({
       id: 'cases',
@@ -24,11 +24,6 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_configure',
           path: '/cases/configure',
           title: 'Settings',
-        },
-        {
-          id: 'cases_templates',
-          path: '/cases/templates',
-          title: 'Templates',
         },
       ],
     });
@@ -50,11 +45,6 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_configure',
           path: '/test/configure',
           title: 'Settings',
-        },
-        {
-          id: 'cases_templates',
-          path: '/test/templates',
-          title: 'Templates',
         },
       ],
     });
@@ -92,11 +82,6 @@ describe('getCasesDeepLinks', () => {
           path: '/cases/configure',
           title: 'Settings',
           order: 8002,
-        },
-        {
-          id: 'cases_templates',
-          path: '/cases/templates',
-          title: 'Templates',
         },
       ],
     });
@@ -136,11 +121,6 @@ describe('getCasesDeepLinks', () => {
           path: '/cases/configure',
           title: 'Settings',
         },
-        {
-          id: 'cases_templates',
-          path: '/cases/templates',
-          title: 'Templates',
-        },
       ],
     });
   });
@@ -174,11 +154,6 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_configure',
           path: '/cases/configure',
           title: 'My new settings title',
-        },
-        {
-          id: 'cases_templates',
-          path: '/cases/templates',
-          title: 'Templates',
         },
       ],
     });

@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
-import { EuiHorizontalRule, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { load as parseYaml } from 'js-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -17,12 +16,6 @@ import { TemplateMetadataPreview } from './template_metadata_preview';
 import * as i18n from '../translations';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
-
-const fieldsSectionStyles = css({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
-});
 
 export const TemplatePreview = () => {
   const { control } = useFormContext();
@@ -97,12 +90,11 @@ export const TemplatePreview = () => {
       {parsedTemplateData.fields.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
-          <div css={fieldsSectionStyles}>
-            <EuiText size="xs" color="subdued">
-              <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
-            </EuiText>
-            <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
-          </div>
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
         </>
       )}
     </div>
