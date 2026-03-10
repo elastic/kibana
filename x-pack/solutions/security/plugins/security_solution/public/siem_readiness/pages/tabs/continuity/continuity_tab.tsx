@@ -34,6 +34,7 @@ import {
   getContinuityCaseTags,
 } from './continuity_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
 // Extended PipelineStats with computed fields and Record<string, unknown> for CategoryAccordionTable
@@ -482,6 +483,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         })}
         defaultSortField="docsCount"
         defaultSortDirection="desc"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
       />
     </>
   );
