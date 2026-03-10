@@ -47,9 +47,7 @@ const WorkflowYAMLEditorMock = ({ highlightDiff, onStepRun }: any) => (
     <button
       type="button"
       data-test-subj="test-step-run"
-      onClick={() =>
-        onStepRun?.({ stepId: 'test-step', actionType: 'run' })
-      }
+      onClick={() => onStepRun?.({ stepId: 'test-step', actionType: 'run' })}
     >
       {'Run Step'}
     </button>
@@ -241,9 +239,7 @@ describe('WorkflowDetailEditor', () => {
     });
 
     it('should show toast error when immediate step run (no modal) fails', async () => {
-      mockUseContextOverrideData.mockReturnValue(
-        () => ({ stepContext: {}, schema: {} }) as any
-      );
+      mockUseContextOverrideData.mockReturnValue(() => ({ stepContext: {}, schema: {} } as any));
 
       const mockMutateAsync = jest.fn().mockRejectedValue(new Error('Failed to run step'));
       mockUseWorkflowActions.mockReturnValue({
