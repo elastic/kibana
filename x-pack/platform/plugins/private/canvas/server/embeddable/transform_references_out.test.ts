@@ -64,14 +64,14 @@ describe('transformPanelReferencesOut', () => {
   describe('savedLens function', () => {
     it('transforms panel references out for savedLens', () => {
       const panelReferences0 = [
-        { id: '16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d"', name: 'l0_savedLens.id', type: 'lens' },
+        { id: '16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d', name: 'l0_savedLens.id', type: 'lens' },
       ];
       const transformedPanelReferences = transformPanelReferencesOut(
         panelReferences0,
         'savedLens.id'
       );
       expect(transformedPanelReferences).toEqual([
-        { id: '16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d"', name: 'savedObjectRef', type: 'lens' },
+        { id: '16b1d7d0-ea71-11eb-8b4b-f7b600de0f7d', name: 'savedObjectRef', type: 'lens' },
       ]);
 
       const panelReferences1 = [{ id: 'test-id', name: 'l1_savedLens.id', type: 'lens' }];

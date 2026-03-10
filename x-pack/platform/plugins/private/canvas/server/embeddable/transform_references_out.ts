@@ -13,6 +13,7 @@ export function transformPanelReferencesOut(
   panelReferences: SavedObjectReference[],
   panelRefName?: string
 ) {
+  // Removes the link number prefix added by the expression service
   const basePanelRefName = panelRefName?.replace(/l\d+_/, '');
   return basePanelRefName
     ? panelReferences.map((ref) => {
