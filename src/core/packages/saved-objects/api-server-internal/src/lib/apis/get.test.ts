@@ -193,7 +193,7 @@ describe('#get', () => {
 
       it(`throws a BadRequestError when the id contains a forward slash (path traversal)`, async () => {
         await expect(repository.get(type, '../../../attack')).rejects.toThrowError(
-          createBadRequestErrorPayload("Invalid saved object ID: IDs cannot contain '/'")
+          createBadRequestErrorPayload("Invalid saved object ID: IDs cannot contain '/'.")
         );
         expect(client.get).not.toHaveBeenCalled();
       });

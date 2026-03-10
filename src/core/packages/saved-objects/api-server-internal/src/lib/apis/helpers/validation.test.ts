@@ -76,19 +76,19 @@ describe('Saved Objects type validation helper', () => {
 
     it('throws a BadRequestError when ID contains a forward slash', () => {
       expect(() => helper.validateId('../traversal/attack')).toThrowError(
-        "Invalid saved object ID: IDs cannot contain '/'"
+        "Invalid saved object ID: IDs cannot contain '/'."
       );
     });
 
     it('throws a BadRequestError when ID starts with a slash', () => {
       expect(() => helper.validateId('/leading-slash')).toThrowError(
-        "Invalid saved object ID: IDs cannot contain '/'"
+        "Invalid saved object ID: IDs cannot contain '/'."
       );
     });
 
     it('throws a BadRequestError when ID contains a slash in the middle', () => {
       expect(() => helper.validateId('some/path')).toThrowError(
-        "Invalid saved object ID: IDs cannot contain '/'"
+        "Invalid saved object ID: IDs cannot contain '/'."
       );
     });
   });

@@ -36,7 +36,7 @@ describe('assertValidId', () => {
   });
 
   it('error message lists the forbidden character', () => {
-    expect(() => assertValidId('path/traversal')).toThrowError("IDs cannot contain '/'");
+    expect(() => assertValidId('path/traversal')).toThrowError("IDs cannot contain '/'.");
   });
 
   it('FORBIDDEN_ID_CHARS contains forward slash', () => {

@@ -643,7 +643,7 @@ describe('#create', () => {
         await expect(
           repository.create(type, attributes, { id: '../../../attack' })
         ).rejects.toThrowError(
-          createBadRequestErrorPayload("Invalid saved object ID: IDs cannot contain '/'")
+          createBadRequestErrorPayload("Invalid saved object ID: IDs cannot contain '/'.")
         );
         expect(client.create).not.toHaveBeenCalled();
       });
