@@ -44,7 +44,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   describe('Controls', function () {
     before(setup);
     after(teardown);
-    loadTestFile(require.resolve('./range_slider'));
-    loadTestFile(require.resolve('./time_slider'));
+    loadTestFile(require.resolve('./control_chaining'));
+    loadTestFile(require.resolve('./control_group_apply_button'));
   });
 }

@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const security = getService('security');
   const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
 
-  describe('discover/tabs8', function () {
+  describe('discover/tabs8 (part 2)', function () {
     before(async function () {
       await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
@@ -64,6 +64,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    loadTestFile(require.resolve('./_unsaved_changes'));
+    loadTestFile(require.resolve('./_data_view_editing'));
   });
 }

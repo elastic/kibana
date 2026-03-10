@@ -8,8 +8,7 @@
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Rules Management - Prebuilt Rules Upgrade (Customization Enabled) (Part 2)', function () {
-    loadTestFile(require.resolve('./bulk_upgrade_all_prebuilt_rules'));
-    loadTestFile(require.resolve('./bulk_upgrade_selected_prebuilt_rules'));
+  describe('Rules Management - Prebuilt Rules Upgrade (Customization Enabled) (Part 3)', function () {
+    loadTestFile(require.resolve('./upgrade_single_prebuilt_rule'));
   });
 };

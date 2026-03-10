@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group1', function () {
+  describe('discover/group1 (part 2)', function () {
     this.tags(['esGate']);
 
     before(async function () {
@@ -24,6 +24,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_discover'));
+    loadTestFile(require.resolve('./_discover_histogram'));
   });
 }

@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/dashboard/group3')],
+    testFiles: [require.resolve('./apps/discover/ccs_compatibility')],
 
     services: {
       ...baseConfig.get('services'),
@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
 
     junit: {
-      reportName: 'Kibana CCS Tests',
+      reportName: 'Kibana CCS Tests (part 2)',
     },
 
     security: {

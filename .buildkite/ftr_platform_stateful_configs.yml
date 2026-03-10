@@ -67,6 +67,7 @@ enabled:
   - src/platform/test/functional/apps/context/config.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/common/config_1.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/common/config_2.ts
+  - src/platform/test/functional/apps/dashboard_elements/controls/common/config_3.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/options_list/config_1.ts
   - src/platform/test/functional/apps/dashboard_elements/controls/options_list/config_2.ts
   - src/platform/test/functional/apps/dashboard_elements/image_embeddable/config.ts
@@ -128,6 +129,7 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs6/config.ts
   - src/platform/test/functional/apps/discover/tabs7/config.ts
   - src/platform/test/functional/apps/discover/tabs8/config.ts
+  - src/platform/test/functional/apps/discover/tabs8/config_2.ts
   - src/platform/test/functional/apps/discover/tabs10/config.ts
   - src/platform/test/functional/apps/discover/tabs11/config.ts
   - src/platform/test/functional/apps/discover/tabs12/config.ts
@@ -164,6 +166,7 @@ enabled:
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_4/config.ts
   - src/platform/test/functional/config.ccs.1.ts
+  - src/platform/test/functional/config.ccs.1_2.ts
   - src/platform/test/functional/config.ccs.2.ts
   - src/platform/test/functional/config.ccs_2.ts
   - src/platform/test/functional/firefox/console.config.ts
