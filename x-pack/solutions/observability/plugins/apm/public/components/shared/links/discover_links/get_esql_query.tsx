@@ -6,7 +6,7 @@
  */
 
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
-import { esql } from '@kbn/esql-language';
+import { esql } from '@elastic/esql';
 import {
   AT_TIMESTAMP,
   ERROR_GROUP_ID,

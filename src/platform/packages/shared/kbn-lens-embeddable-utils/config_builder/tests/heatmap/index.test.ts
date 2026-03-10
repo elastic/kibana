@@ -29,6 +29,14 @@ describe('Heatmap', () => {
     it('should convert a heatmap with sort predicates', () => {
       validateConverter(dslMocks.withSortPredicates, heatmapStateSchema);
     });
+
+    it('should convert a default color by value palette', () => {
+      validateConverter(dslMocks.defaultColorByValueAttributes, heatmapStateSchema);
+    });
+
+    it('should convert a selector color by value palette', () => {
+      validateConverter(dslMocks.selectorColorByValueAttributes, heatmapStateSchema);
+    });
   });
 
   describe('ESQL', () => {

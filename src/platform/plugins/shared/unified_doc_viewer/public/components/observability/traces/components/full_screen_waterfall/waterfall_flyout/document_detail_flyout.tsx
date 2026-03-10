@@ -52,6 +52,7 @@ export interface DocumentDetailFlyoutProps {
   docIndex?: string;
   traceId: string;
   dataView: DocViewRenderProps['dataView'];
+  dataTestSubj?: string;
   onCloseFlyout: () => void;
   activeSection?: TraceOverviewSections;
 }
@@ -62,6 +63,7 @@ export function DocumentDetailFlyout({
   docIndex,
   traceId,
   dataView,
+  dataTestSubj,
   onCloseFlyout,
   activeSection,
 }: DocumentDetailFlyoutProps) {
@@ -74,6 +76,7 @@ export function DocumentDetailFlyout({
       hit={data.hit}
       loading={data.loading}
       title={data.title}
+      dataTestSubj={dataTestSubj}
     >
       {data.error && <EuiCallOut announceOnMount title={data.error} color="danger" />}
       {data.hit ? (
