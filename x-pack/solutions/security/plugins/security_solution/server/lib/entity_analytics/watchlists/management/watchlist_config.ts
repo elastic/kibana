@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 import type { SetOptional } from 'type-fest';
 import type { WatchlistObject } from '../../../../../common/api/entity_analytics/watchlists/management/common.gen';
+import type { MonitoringEntitySource } from '../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { getIndexForWatchlist } from '../entities/utils';
 import { generateWatchlistEntityIndexMappings } from '../entities/mappings';
 import { watchlistConfigTypeName } from './saved_object/watchlist_config_type';
@@ -60,6 +61,19 @@ const toWatchlistObject = (so: SavedObject<WatchlistSavedObjectAttributes>): Wat
   updatedAt: so.updated_at,
   entitySourceIds: extractEntitySourceIds(so.references ?? []),
 });
+
+export interface WatchlistValidationError extends Error {
+  statusCode: number;
+}
+
+export const createWatchlistValidationError = (
+  statusCode: number,
+  message: string
+): WatchlistValidationError => {
+  const error = new Error(message) as WatchlistValidationError;
+  error.statusCode = statusCode;
+  return error;
+};
 
 export class WatchlistConfigClient {
   constructor(private readonly deps: WatchlistConfigClientDeps) {}
@@ -163,15 +177,38 @@ export class WatchlistConfigClient {
     );
   }
 
-  async removeEntitySourceReference(watchlistId: string, entitySourceId: string): Promise<void> {
+  async removeEntitySourceReference(
+    watchlistId: string,
+    source: MonitoringEntitySource
+  ): Promise<void> {
     const so = await this.deps.soClient.get<WatchlistSavedObjectAttributes>(
       watchlistConfigTypeName,
       watchlistId
     );
 
+    if (so.attributes.managed === true) {
+      throw createWatchlistValidationError(400, `Cannot modify managed watchlist '${watchlistId}'`);
+    }
+
+    if (source.managed === true) {
+      throw createWatchlistValidationError(
+        400,
+        `Cannot delete managed entity source '${source.id}'`
+      );
+    }
+
     const existingRefs = so.references ?? [];
+    const hasRef = existingRefs.some((ref) => isEntitySourceRef(ref) && ref.id === source.id);
+
+    if (!hasRef) {
+      throw createWatchlistValidationError(
+        404,
+        `Entity source '${source.id}' is not linked to watchlist '${watchlistId}'`
+      );
+    }
+
     const filteredRefs = existingRefs.filter(
-      (ref) => !(isEntitySourceRef(ref) && ref.id === entitySourceId)
+      (ref) => !(isEntitySourceRef(ref) && ref.id === source.id)
     );
 
     await this.deps.soClient.update<WatchlistSavedObjectAttributes>(

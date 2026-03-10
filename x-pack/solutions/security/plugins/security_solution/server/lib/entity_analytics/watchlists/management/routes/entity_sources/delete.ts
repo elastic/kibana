@@ -47,31 +47,22 @@ export const deleteEntitySourceRoute = (
 
         try {
           const secSol = await context.securitySolution;
+          const core = await context.core;
           const client = secSol.getMonitoringEntitySourceDataClient();
 
-          // Get the source first to check if it's managed
+          // Get the source first so we can pass it for validation
           const source = await client.get(request.params.id);
 
-          if (source.managed === true) {
-            return siemResponse.error({
-              statusCode: 400,
-              body: 'Cannot delete managed entity source',
-            });
-          }
-
-          await client.delete(request.params.id);
-
-          const core = await context.core;
+          // Validate and remove the reference (checks watchlist managed, source managed, and link)
           const watchlistClient = new WatchlistConfigClient({
             logger,
             namespace: secSol.getSpaceId(),
             soClient: getRequestSavedObjectClient(core),
             esClient: core.elasticsearch.client.asCurrentUser,
           });
-          await watchlistClient.removeEntitySourceReference(
-            request.params.watchlist_id,
-            request.params.id
-          );
+          await watchlistClient.removeEntitySourceReference(request.params.watchlist_id, source);
+
+          await client.delete(request.params.id);
 
           return response.ok({ body: { acknowledged: true } });
         } catch (e) {
