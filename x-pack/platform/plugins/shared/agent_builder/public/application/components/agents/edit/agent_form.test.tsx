@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -69,7 +70,11 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 }));
 
 jest.mock('../../../hooks/use_ui_privileges', () => ({
-  useUiPrivileges: () => ({ manageAgents: true }),
+  useUiPrivileges: () => ({ manageAgents: true, hasAgentVisibilityAccessOverride: false }),
+}));
+
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: () => false,
 }));
 
 jest.mock('../../../hooks/tools/use_tools', () => ({
@@ -105,6 +110,7 @@ describe('AgentForm', () => {
           isSubmitting: false,
           submit: mockSubmit,
           tools: [],
+          skills: [],
           error: undefined,
         };
       }
@@ -121,6 +127,7 @@ describe('AgentForm', () => {
       isSubmitting: false,
       submit: mockSubmit,
       tools: [],
+      skills: [],
       error: undefined,
     });
 
@@ -137,6 +144,7 @@ describe('AgentForm', () => {
       isSubmitting: false,
       submit: mockSubmit,
       tools: [],
+      skills: [],
       error: undefined,
     });
 
@@ -155,6 +163,7 @@ describe('AgentForm', () => {
       isSubmitting: false,
       submit: mockSubmit,
       tools: [],
+      skills: [],
       error: undefined,
     });
 
