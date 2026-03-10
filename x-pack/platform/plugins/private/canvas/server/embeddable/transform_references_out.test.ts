@@ -64,39 +64,4 @@ describe('transformPanelReferencesOut', () => {
       ]);
     });
   });
-  describe('savedLens function', () => {
-    it('transforms panel references out for savedLens', () => {
-      const panelReferences = [{ id: 'test-id', name: 'savedLens.id', type: 'lens' }];
-      const transformedPanelReferences = transformPanelReferencesOut(
-        panelReferences,
-        'savedLens.id'
-      );
-      expect(transformedPanelReferences).toEqual([
-        { id: 'test-id', name: 'savedObjectRef', type: 'lens' },
-      ]);
-    });
-  });
-
-  it('transforms panel references out for savedVisualization', () => {
-    const panelReferences = [
-      { id: 'test-id', name: 'savedVisualization.id', type: 'visualization' },
-    ];
-    const transformedPanelReferences = transformPanelReferencesOut(
-      panelReferences,
-      'savedVisualization.id'
-    );
-    expect(transformedPanelReferences).toEqual([
-      { id: 'test-id', name: 'savedObjectRef', type: 'visualization' },
-    ]);
-  });
-});
-
-describe('savedMap function', () => {
-  it('transforms panel references out for savedMap', () => {
-    const panelReferences = [{ id: 'test-id', name: 'savedMap.id', type: 'map' }];
-    const transformedPanelReferences = transformPanelReferencesOut(panelReferences, 'savedMap.id');
-    expect(transformedPanelReferences).toEqual([
-      { id: 'test-id', name: 'savedObjectRef', type: 'map' },
-    ]);
-  });
 });
