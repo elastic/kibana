@@ -14,6 +14,7 @@ import type {
   GetTokenOpts,
   OAuthGetTokenOpts,
 } from '@kbn/connector-specs';
+import { resolveEarsUrl } from './ears';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -118,22 +119,6 @@ async function handleOAuth401Error({
   // Update request with the new token and retry
   error.config.headers.Authorization = newAccessToken;
   return axiosInstance.request(error.config);
-}
-
-/**
- * Resolves the full EARS URL by combining the configured base URL with the path
- * from the stored URL (which may be a full URL or just a path).
- */
-function resolveEarsUrl(storedUrl: string, earsBaseUrl: string | undefined): string {
-  if (!earsBaseUrl) return storedUrl;
-  const base = earsBaseUrl.replace(/\/$/, '');
-  let path: string;
-  try {
-    path = new URL(storedUrl).pathname;
-  } catch {
-    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
-  }
-  return `${base}${path}`;
 }
 
 interface EarsParams {

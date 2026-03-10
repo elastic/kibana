@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import { resolveEarsUrl } from '../lib/ears';
 import type { ILicenseState } from '../lib';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import type { ActionsRequestHandlerContext } from '../types';
@@ -30,22 +31,6 @@ const bodySchema = schema.object({
  * Initiates OAuth2 Authorization Code flow
  * Returns authorization URL for user to visit
  */
-/**
- * Resolves the full EARS URL by combining the configured base URL with the path
- * from the stored URL (which may be a full URL or just a path).
- * If no base URL is configured, returns the stored URL as-is.
- */
-function resolveEarsUrl(storedUrl: string, earsBaseUrl: string | undefined): string {
-  if (!earsBaseUrl) return storedUrl;
-  const base = earsBaseUrl.replace(/\/$/, '');
-  let path: string;
-  try {
-    path = new URL(storedUrl).pathname;
-  } catch {
-    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
-  }
-  return `${base}${path}`;
-}
 
 export const oauthAuthorizeRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
