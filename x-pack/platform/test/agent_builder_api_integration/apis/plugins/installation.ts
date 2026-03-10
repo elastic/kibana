@@ -53,7 +53,9 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const config = getService('config');
 
-  describe('FOO Plugin Installation API', function () {
+  describe('Plugin Installation API', function () {
+    this.tags(['skipServerless']);
+
     let pluginsServer: PluginsTestServer;
     let serverUrl: string;
     let zipBuffer: Buffer;
