@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
+import type {
+  AttachmentPanel,
+  DashboardSection as AgentDashboardSection,
+} from '@kbn/dashboard-agent-common';
 import { isGenericAttachmentPanel, isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
-import type { DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import type { DashboardPanel, DashboardSection } from '@kbn/dashboard-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
   LensConfigBuilder,
@@ -73,29 +77,14 @@ export const buildPanelFromRawConfig = ({
   };
 };
 
-const COLUMNS = 48;
-const DEFAULT_W = 24;
-const DEFAULT_H = 9;
-const PANELS_PER_ROW = Math.floor(COLUMNS / DEFAULT_W);
-
-const resolveFallbackGrid = (
-  index: number,
-  grid?: { w: number; h: number; x: number; y: number }
-): DashboardPanel['grid'] => ({
-  x: grid?.x ?? (index % PANELS_PER_ROW) * DEFAULT_W,
-  y: grid?.y ?? Math.floor(index / PANELS_PER_ROW) * DEFAULT_H,
-  w: grid?.w ?? DEFAULT_W,
-  h: grid?.h ?? DEFAULT_H,
-});
-
 export const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => {
   const panelList = panels ?? [];
 
-  return panelList.reduce<DashboardPanel[]>((acc, panel, index) => {
+  return panelList.reduce<DashboardPanel[]>((acc, panel) => {
     if (isLensAttachmentPanel(panel)) {
       acc.push({
         ...buildLensPanelFromApi(panel.visualization as LensApiSchemaType, panel.panelId),
-        grid: resolveFallbackGrid(index, panel.grid),
+        grid: panel.grid,
       });
     } else if (isGenericAttachmentPanel(panel)) {
       acc.push({
@@ -105,9 +94,31 @@ export const normalizePanels = (panels: AttachmentPanel[]): DashboardPanel[] => 
           title: panel.title,
           uid: panel.panelId,
         }),
-        grid: resolveFallbackGrid(index, panel.grid),
+        grid: panel.grid,
       });
     }
     return acc;
   }, []);
+};
+
+const normalizeSections = (sections: AgentDashboardSection[]): DashboardSection[] => {
+  return (sections ?? []).map((section) => ({
+    uid: section.sectionId,
+    title: section.title,
+    collapsed: section.collapsed,
+    grid: {
+      y: section.grid.y,
+    },
+    panels: normalizePanels(section.panels),
+  }));
+};
+
+export const normalizeDashboardWidgets = ({
+  panels,
+  sections,
+}: {
+  panels: AttachmentPanel[];
+  sections?: AgentDashboardSection[];
+}): DashboardState['panels'] => {
+  return [...normalizePanels(panels), ...normalizeSections(sections ?? [])];
 };
