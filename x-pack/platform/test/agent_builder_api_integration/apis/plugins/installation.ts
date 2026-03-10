@@ -34,18 +34,34 @@ const createZipBuffer = async (): Promise<Buffer> => {
   });
 };
 
+const getPluginsServerPort = (serverArgs: string[]): number => {
+  const githubBaseUrlArg = serverArgs.find((arg) =>
+    arg.startsWith('--xpack.agentBuilder.githubBaseUrl=')
+  );
+  if (!githubBaseUrlArg) {
+    throw new Error(
+      'Missing --xpack.agentBuilder.githubBaseUrl in kbnTestServer.serverArgs. ' +
+        'The plugins test server port must be configured in the FTR config.'
+    );
+  }
+  const url = new URL(githubBaseUrlArg.split('=')[1]);
+  return parseInt(url.port, 10);
+};
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
+  const config = getService('config');
 
-  describe('Plugin Installation API', function () {
+  describe('FOO Plugin Installation API', function () {
     let pluginsServer: PluginsTestServer;
     let serverUrl: string;
     let zipBuffer: Buffer;
     const createdPluginIds: string[] = [];
 
     before(async () => {
-      const port = parseInt(process.env.PLUGINS_TEST_SERVER_PORT!, 10);
+      const serverArgs: string[] = config.get('kbnTestServer.serverArgs');
+      const port = getPluginsServerPort(serverArgs);
       pluginsServer = new PluginsTestServer({ port, assetsDir: ASSETS_DIR, log });
       await pluginsServer.start();
       serverUrl = pluginsServer.getUrl();
