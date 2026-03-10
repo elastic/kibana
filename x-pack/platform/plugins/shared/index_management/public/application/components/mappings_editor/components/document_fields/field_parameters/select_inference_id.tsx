@@ -24,7 +24,6 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   useEuiTheme,
-  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InferenceCostsTransparencyTour } from '@kbn/search-api-panels';
@@ -123,25 +122,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           label: endpoint.inference_id,
           'data-test-subj': `custom-inference_${endpoint.inference_id}`,
           checked: value === endpoint.inference_id ? 'on' : undefined,
-          disabled: !endpoint.accessible,
-          append: !endpoint.accessible && endpoint.requiredLicense && (
-            <EuiBadge color="hollow" iconType="lock">
-              {endpoint.requiredLicense[0].toUpperCase() + endpoint.requiredLicense.slice(1)}
-            </EuiBadge>
-          ),
-          'aria-label':
-            !endpoint.accessible && endpoint.requiredLicense
-              ? i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.disabledOption.ariaLabel',
-                  {
-                    defaultMessage: '{inferenceId} endpoint disabled - {license} license required',
-                    values: {
-                      inferenceId: endpoint.inference_id,
-                      license: endpoint.requiredLicense,
-                    },
-                  }
-                )
-              : undefined,
         };
       }) || [];
 
