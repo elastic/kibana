@@ -13,6 +13,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { UserStorageDefinition, IUserStorageClient } from '@kbn/core-user-storage-common';
 import { USER_STORAGE_SO_TYPE, USER_STORAGE_GLOBAL_SO_TYPE } from './saved_objects';
 
+interface UserStorageAttributes {
+  userId: string;
+  data?: Record<string, unknown>;
+}
+
 interface UserStorageClientOpts {
   savedObjectsClient: SavedObjectsClientContract;
   profileUid: string;
@@ -39,8 +44,8 @@ export class UserStorageClient implements IUserStorageClient {
     const soType = this.getSoType(definition);
 
     try {
-      const doc = await this.soClient.get<Record<string, unknown>>(soType, this.profileUid);
-      const raw = doc.attributes[key];
+      const doc = await this.soClient.get<UserStorageAttributes>(soType, this.profileUid);
+      const raw = doc.attributes.data?.[key];
       if (raw != null) {
         return raw as T;
       }
@@ -62,15 +67,15 @@ export class UserStorageClient implements IUserStorageClient {
       if (hasSpace && hasGlobal) break;
     }
 
-    const [spaceAttrs, globalAttrs] = await Promise.all([
-      hasSpace ? this.readSoAttributes(USER_STORAGE_SO_TYPE) : undefined,
-      hasGlobal ? this.readSoAttributes(USER_STORAGE_GLOBAL_SO_TYPE) : undefined,
+    const [spaceData, globalData] = await Promise.all([
+      hasSpace ? this.readSoData(USER_STORAGE_SO_TYPE) : undefined,
+      hasGlobal ? this.readSoData(USER_STORAGE_GLOBAL_SO_TYPE) : undefined,
     ]);
 
     const result: Record<string, unknown> = {};
     for (const [key, definition] of this.definitions) {
-      const attrs = definition.scope === 'space' ? spaceAttrs : globalAttrs;
-      const raw = attrs?.[key];
+      const data = definition.scope === 'space' ? spaceData : globalData;
+      const raw = data?.[key];
       result[key] = raw != null ? raw : definition.defaultValue;
     }
     return result;
@@ -83,15 +88,21 @@ export class UserStorageClient implements IUserStorageClient {
 
     this.logger.debug(`Setting userStorage key [${key}] (scope: ${definition.scope})`);
 
+    const dataUpdate = { data: { [key]: validated } };
+
     try {
-      await this.soClient.update(soType, this.profileUid, { [key]: validated });
+      await this.soClient.update(soType, this.profileUid, dataUpdate);
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         try {
-          await this.soClient.create(soType, { [key]: validated }, { id: this.profileUid });
+          await this.soClient.create(
+            soType,
+            { userId: this.profileUid, data: { [key]: validated } },
+            { id: this.profileUid }
+          );
         } catch (createErr) {
           if (SavedObjectsErrorHelpers.isConflictError(createErr)) {
-            await this.soClient.update(soType, this.profileUid, { [key]: validated });
+            await this.soClient.update(soType, this.profileUid, dataUpdate);
           } else {
             throw createErr;
           }
@@ -109,7 +120,7 @@ export class UserStorageClient implements IUserStorageClient {
     this.logger.debug(`Removing userStorage key [${key}] (scope: ${definition.scope})`);
 
     try {
-      await this.soClient.update(soType, this.profileUid, { [key]: null });
+      await this.soClient.update(soType, this.profileUid, { data: { [key]: null } });
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
         throw err;
@@ -129,10 +140,10 @@ export class UserStorageClient implements IUserStorageClient {
     return definition.scope === 'space' ? USER_STORAGE_SO_TYPE : USER_STORAGE_GLOBAL_SO_TYPE;
   }
 
-  private async readSoAttributes(soType: string): Promise<Record<string, unknown> | undefined> {
+  private async readSoData(soType: string): Promise<Record<string, unknown> | undefined> {
     try {
-      const doc = await this.soClient.get<Record<string, unknown>>(soType, this.profileUid);
-      return doc.attributes;
+      const doc = await this.soClient.get<UserStorageAttributes>(soType, this.profileUid);
+      return doc.attributes.data;
     } catch (err) {
       if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
         return undefined;

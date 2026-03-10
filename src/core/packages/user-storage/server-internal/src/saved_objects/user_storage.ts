@@ -12,31 +12,36 @@ import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 export const USER_STORAGE_SO_TYPE = 'user-storage';
 export const USER_STORAGE_GLOBAL_SO_TYPE = 'user-storage-global';
 
+const USER_STORAGE_MAPPINGS = {
+  dynamic: false as const,
+  properties: {
+    userId: { type: 'keyword' as const },
+  },
+};
+
 /**
  * Space-scoped per-user storage. One document per user per space.
  * Document ID = profile_uid.
- * `dynamic: false` — attributes are stored in _source but not indexed.
+ *
+ * Attributes shape: `{ userId: string; data: Record<string, unknown> }`
+ * `userId` is indexed for admin queries. `data` is covered by `dynamic: false`.
  */
 export const userStorageType: SavedObjectsType = {
   name: USER_STORAGE_SO_TYPE,
   hidden: true,
   namespaceType: 'single',
-  mappings: {
-    dynamic: false,
-    properties: {},
-  },
+  mappings: USER_STORAGE_MAPPINGS,
 };
 
 /**
  * Global per-user storage (cross-space). One document per user.
  * Document ID = profile_uid.
+ *
+ * Same attributes shape as `user-storage`.
  */
 export const userStorageGlobalType: SavedObjectsType = {
   name: USER_STORAGE_GLOBAL_SO_TYPE,
   hidden: true,
   namespaceType: 'agnostic',
-  mappings: {
-    dynamic: false,
-    properties: {},
-  },
+  mappings: USER_STORAGE_MAPPINGS,
 };
