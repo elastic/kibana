@@ -10,11 +10,13 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   AttachmentPanel,
   DashboardAttachmentData,
+  DashboardPinnedPanelState,
   DashboardSection,
 } from '@kbn/dashboard-agent-common';
 import { panelGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { upsertMarkdownPanel, type VisualizationFailure } from './utils';
+import type { ResolveControlDataViewIdInput } from './data_view_id_resolver';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
@@ -36,6 +38,24 @@ const attachmentWithGridSchema = z.object({
 
 const sectionGridSchema = z.object({
   y: z.number().int().min(0).describe('Section position in outer dashboard grid coordinates.'),
+});
+
+const controlTypeSchema = z.enum(['optionsListControl', 'rangeSliderControl']);
+const controlWidthSchema = z.enum(['small', 'medium', 'large']);
+
+const manageControlInputSchema = z.object({
+  type: controlTypeSchema,
+  fieldName: z.string().describe('Field name used by the control.'),
+  dataViewId: z.string().optional().describe('Data view id (preferred when known).'),
+  dataViewTitle: z.string().optional().describe('Data view title to resolve server-side.'),
+  indexPattern: z.string().optional().describe('Index pattern title to resolve server-side.'),
+  title: z.string().optional().describe('Optional control title.'),
+  width: controlWidthSchema.optional(),
+  grow: z.boolean().optional(),
+  settings: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Additional control config settings.'),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({
@@ -77,6 +97,19 @@ export const removePanelsOperationSchema = z.object({
   panelIds: z.array(z.string()).min(1).describe('Panel ids to remove from the dashboard.'),
 });
 
+export const addControlsOperationSchema = z.object({
+  operation: z.literal('add_controls'),
+  items: z
+    .array(manageControlInputSchema)
+    .min(1)
+    .describe('Controls to append to pinned controls.'),
+});
+
+export const removeControlsOperationSchema = z.object({
+  operation: z.literal('remove_controls'),
+  controlIds: z.array(z.string()).min(1).describe('Control uid values to remove.'),
+});
+
 export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   setMetadataOperationSchema,
   upsertMarkdownOperationSchema,
@@ -84,6 +117,8 @@ export const dashboardOperationSchema = z.discriminatedUnion('operation', [
   addSectionOperationSchema,
   removeSectionOperationSchema,
   removePanelsOperationSchema,
+  addControlsOperationSchema,
+  removeControlsOperationSchema,
 ]);
 
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
@@ -92,6 +127,7 @@ interface ExecuteDashboardOperationsParams {
   dashboardData: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
+  resolveControlDataViewId: (input: ResolveControlDataViewIdInput) => Promise<string>;
   resolvePanelsFromAttachments: (
     attachmentInputs: Array<{ attachmentId: string; grid: AttachmentPanel['grid'] }>
   ) => Promise<{ panels: AttachmentPanel[]; failures: VisualizationFailure[] }>;
@@ -105,8 +141,74 @@ const asOptionalSections = (
   return sections && sections.length > 0 ? sections : undefined;
 };
 
+const asOptionalPinnedPanels = (
+  pinnedPanels: DashboardPinnedPanelState[] | undefined
+): DashboardPinnedPanelState[] | undefined => {
+  return pinnedPanels && pinnedPanels.length > 0 ? pinnedPanels : undefined;
+};
+
 const getPanelsBottomY = (panels: AttachmentPanel[]): number => {
   return panels.reduce((maxY, panel) => Math.max(maxY, panel.grid.y + panel.grid.h), 0);
+};
+
+type ManageControlInput = z.infer<typeof manageControlInputSchema>;
+
+const buildControlConfig = ({
+  input,
+  dataViewId,
+}: {
+  input: ManageControlInput;
+  dataViewId: string;
+}): Record<string, unknown> => {
+  return {
+    ...(input.settings ?? {}),
+    data_view_id: dataViewId,
+    field_name: input.fieldName,
+    ...(input.title !== undefined ? { title: input.title } : {}),
+  };
+};
+
+const resolvePinnedControlStates = async ({
+  inputs,
+  logger,
+  resolveControlDataViewId,
+}: {
+  inputs: ManageControlInput[];
+  logger: Logger;
+  resolveControlDataViewId: ExecuteDashboardOperationsParams['resolveControlDataViewId'];
+}): Promise<DashboardPinnedPanelState[]> => {
+  const controls: DashboardPinnedPanelState[] = [];
+
+  for (const input of inputs) {
+    let dataViewId: string;
+    try {
+      dataViewId = await resolveControlDataViewId({
+        dataViewId: input.dataViewId,
+        dataViewTitle: input.dataViewTitle,
+        indexPattern: input.indexPattern,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.debug(
+        `Skipping control "${input.type}:${input.fieldName}" because data view could not be resolved: ${errorMessage}`
+      );
+      continue;
+    }
+    const config = buildControlConfig({
+      input,
+      dataViewId,
+    });
+
+    controls.push({
+      type: input.type,
+      uid: uuidv4(),
+      ...(input.width !== undefined ? { width: input.width } : {}),
+      ...(input.grow !== undefined ? { grow: input.grow } : {}),
+      config,
+    } as DashboardPinnedPanelState);
+  }
+
+  return controls;
 };
 
 const removePanelsFromDashboard = ({
@@ -160,6 +262,7 @@ export const executeDashboardOperations = async ({
   dashboardData,
   operations,
   logger,
+  resolveControlDataViewId,
   resolvePanelsFromAttachments,
   onPanelsAdded,
   onPanelsRemoved,
@@ -324,6 +427,38 @@ export const executeDashboardOperations = async ({
           nextDashboardData = dashboardWithoutPanels;
           onPanelsRemoved(removedPanels);
           logger.debug(`Removed ${removedPanels.length} panels from dashboard`);
+        }
+        break;
+      }
+
+      case 'add_controls': {
+        const existingControls = nextDashboardData.pinnedPanels ?? [];
+        const controlsToAdd = await resolvePinnedControlStates({
+          inputs: operation.items,
+          logger,
+          resolveControlDataViewId,
+        });
+
+        nextDashboardData = {
+          ...nextDashboardData,
+          pinnedPanels: asOptionalPinnedPanels([...existingControls, ...controlsToAdd]),
+        };
+        break;
+      }
+
+      case 'remove_controls': {
+        const existingControls = nextDashboardData.pinnedPanels ?? [];
+        if (existingControls.length === 0) {
+          break;
+        }
+
+        const removeControlIdSet = new Set(operation.controlIds);
+        const nextControls = existingControls.filter(({ uid }) => !removeControlIdSet.has(uid));
+        if (nextControls.length !== existingControls.length) {
+          nextDashboardData = {
+            ...nextDashboardData,
+            pinnedPanels: asOptionalPinnedPanels(nextControls),
+          };
         }
         break;
       }

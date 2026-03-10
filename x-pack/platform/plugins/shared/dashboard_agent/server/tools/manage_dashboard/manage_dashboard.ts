@@ -29,6 +29,8 @@ import {
   type VisualizationFailure,
 } from './utils';
 import { dashboardOperationSchema, executeDashboardOperations } from './operations';
+import { getDataViewsServiceFactory } from '../../kibana_services';
+import { resolveControlDataViewId as resolveControlDataViewIdFromInput } from './data_view_id_resolver';
 
 const manageDashboardSchema = z.object({
   dashboardAttachmentId: z
@@ -59,17 +61,23 @@ Use operations[] to:
 2. upsert markdown
 3. add panels from attachments
 4. add / remove sections
-5. remove panels
+5. add / remove controls
+6. remove panels
 
 The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while operations run, and always returns the latest dashboard attachment state.`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
-      { logger, attachments, events }
+      { logger, attachments, events, request, savedObjectsClient, esClient }
     ) => {
       try {
         const latestVersion = retrieveLatestVersion(attachments, previousAttachmentId);
         const isNewDashboard = !latestVersion;
+        const dataViewsService = await getDataViewsServiceFactory().dataViewsServiceFactory(
+          savedObjectsClient,
+          esClient.asCurrentUser,
+          request
+        );
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
         const sendAddedEvents = (panels: AttachmentPanel[]) => {
@@ -98,6 +106,11 @@ The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) while
           dashboardData: latestVersion?.data ?? createEmptyDashboardData(),
           operations,
           logger,
+          resolveControlDataViewId: (input) =>
+            resolveControlDataViewIdFromInput({
+              dataViewsService,
+              input,
+            }),
           resolvePanelsFromAttachments: (attachmentInputs) =>
             resolvePanelsFromAttachments({
               attachmentInputs,

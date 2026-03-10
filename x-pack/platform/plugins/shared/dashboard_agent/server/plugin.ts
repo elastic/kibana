@@ -14,6 +14,7 @@ import type {
 } from './types';
 import { registerSkills } from './skills';
 import { createDashboardAttachmentType } from './attachment_types';
+import { setKibanaServices } from './kibana_services';
 
 export class DashboardAgentPlugin
   implements
@@ -35,8 +36,9 @@ export class DashboardAgentPlugin
 
   start(
     _coreStart: CoreStart,
-    _startDeps: DashboardAgentStartDependencies
+    startDeps: DashboardAgentStartDependencies
   ): DashboardAgentPluginStart {
+    setKibanaServices(startDeps);
     return {};
   }
 

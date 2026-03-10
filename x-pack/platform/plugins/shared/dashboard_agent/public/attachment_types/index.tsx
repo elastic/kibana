@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
-import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DashboardCanvasContent } from './dashboard_canvas_content';

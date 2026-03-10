@@ -63,11 +63,13 @@ const formatDashboardAttachment = (attachmentId: string, data: DashboardAttachme
   );
   const panelCount = data.panels.length + sectionPanelCount;
   const sectionCount = data.sections?.length ?? 0;
+  const controlCount = data.pinnedPanels?.length ?? 0;
   const sectionInfo =
     sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
+  const controlsInfo = `, ${controlCount} control${controlCount !== 1 ? 's' : ''}`;
 
   // Include attachment id prominently so the LLM can reference it in subsequent calls
   return `Dashboard "${data.title}" (dashboardAttachment.id: "${attachmentId}")
 Description: ${data.description}
-Panels: ${panelCount}${sectionInfo}`;
+Panels: ${panelCount}${sectionInfo}${controlsInfo}`;
 };
