@@ -313,7 +313,7 @@ describe('PackagePolicyActionsMenu', () => {
     });
   });
 
-  it('Should show standard upgrade button when hasUpgrade but review is not declined', async () => {
+  it('Should show "Review policy upgrade" when hasUpgrade, keepPoliciesUpToDate, and review is pending', async () => {
     const agentPolicies = createMockAgentPolicies();
     const packagePolicy = createMockPackagePolicy({
       hasUpgrade: true,
@@ -328,8 +328,8 @@ describe('PackagePolicyActionsMenu', () => {
     });
     const { utils } = renderMenu({ agentPolicies, packagePolicy });
     await waitFor(() => {
-      expect(utils.getByTestId('PackagePolicyActionsUpgradeItem')).not.toBeNull();
-      expect(utils.queryByTestId('PackagePolicyActionsDeclinedUpgradeItem')).toBeNull();
+      expect(utils.getByTestId('PackagePolicyActionsDeclinedUpgradeItem')).not.toBeNull();
+      expect(utils.queryByTestId('PackagePolicyActionsUpgradeItem')).toBeNull();
     });
   });
 

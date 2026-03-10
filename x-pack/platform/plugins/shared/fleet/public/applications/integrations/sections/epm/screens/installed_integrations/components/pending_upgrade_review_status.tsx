@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -32,9 +32,15 @@ import type { UpgradeReviewProps } from '../../../../../../../hooks';
 import { DeprecatedFeaturesList } from '../../detail/overview/deprecation_callout';
 
 const autoOpenModalForPackages = new Set<string>();
+const modalOpenListeners = new Map<string, () => void>();
 
 export const scheduleAutoOpenModal = (pkgName: string) => {
-  autoOpenModalForPackages.add(pkgName);
+  const listener = modalOpenListeners.get(pkgName);
+  if (listener) {
+    listener();
+  } else {
+    autoOpenModalForPackages.add(pkgName);
+  }
 };
 
 export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewProps> = React.memo(
@@ -46,6 +52,13 @@ export const PendingUpgradeReviewStatus: React.FunctionComponent<UpgradeReviewPr
       }
       return false;
     });
+
+    useEffect(() => {
+      modalOpenListeners.set(pkgName, () => setIsModalOpen(true));
+      return () => {
+        modalOpenListeners.delete(pkgName);
+      };
+    }, [pkgName]);
     const { data: packageInfoData, isLoading: isPackageInfoLoading } = useGetPackageInfoByKeyQuery(
       pkgName,
       pendingUpgradeReview.target_version,

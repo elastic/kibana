@@ -120,7 +120,8 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
     </EuiContextMenuItem>,
     ...(packagePolicy.hasUpgrade &&
     packagePolicy.keepPoliciesUpToDate &&
-    packagePolicy.pendingUpgradeReview?.action === 'declined'
+    packagePolicy.pendingUpgradeReview &&
+    packagePolicy.pendingUpgradeReview.action !== 'accepted'
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsDeclinedUpgradeItem"
