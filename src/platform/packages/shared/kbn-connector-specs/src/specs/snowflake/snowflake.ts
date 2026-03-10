@@ -59,6 +59,55 @@ const SNOWFLAKE_HEADERS = {
   'User-Agent': 'KibanaConnector/1.0',
 };
 
+interface SnowflakeRowType {
+  name: string;
+  type: string;
+  [key: string]: unknown;
+}
+
+interface SnowflakeApiResponse {
+  resultSetMetaData?: {
+    numRows?: number;
+    rowType?: SnowflakeRowType[];
+    [key: string]: unknown;
+  };
+  data?: Array<Array<string | null>>;
+  statementHandle?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Transforms the verbose Snowflake SQL API response into a compact format
+ * suitable for LLM consumption. Converts positional data arrays into named
+ * objects and strips unnecessary metadata fields.
+ */
+function transformResponse(raw: SnowflakeApiResponse): Record<string, unknown> {
+  const columns = (raw.resultSetMetaData?.rowType ?? []).map(({ name, type }) => ({ name, type }));
+  const columnNames = columns.map((c) => c.name);
+
+  const rows = (raw.data ?? []).map((row) => {
+    const obj: Record<string, string | null> = {};
+    for (let i = 0; i < columnNames.length; i++) {
+      obj[columnNames[i]] = row[i] ?? null;
+    }
+    return obj;
+  });
+
+  const result: Record<string, unknown> = {
+    columns,
+    rows,
+    totalRows: raw.resultSetMetaData?.numRows ?? rows.length,
+    message: raw.message,
+  };
+
+  if (raw.statementHandle) {
+    result.statementHandle = raw.statementHandle;
+  }
+
+  return result;
+}
+
 export const SnowflakeConnector: ConnectorSpec = {
   metadata: {
     id: '.snowflake',
@@ -203,7 +252,7 @@ export const SnowflakeConnector: ConnectorSpec = {
         const response = await ctx.client.post(buildApiUrl(accountUrl), body, {
           headers: SNOWFLAKE_HEADERS,
         });
-        return response.data;
+        return transformResponse(response.data);
       },
     },
 
@@ -225,7 +274,7 @@ export const SnowflakeConnector: ConnectorSpec = {
           buildApiUrl(accountUrl, `${SNOWFLAKE_SQL_API_PATH}/${encodeURIComponent(typedInput.statementHandle)}`),
           { headers: SNOWFLAKE_HEADERS, params }
         );
-        return response.data;
+        return transformResponse(response.data);
       },
     },
 
@@ -255,7 +304,7 @@ export const SnowflakeConnector: ConnectorSpec = {
         const response = await ctx.client.post(buildApiUrl(accountUrl), body, {
           headers: SNOWFLAKE_HEADERS,
         });
-        return response.data;
+        return transformResponse(response.data);
       },
     },
 
@@ -275,7 +324,7 @@ export const SnowflakeConnector: ConnectorSpec = {
         const response = await ctx.client.post(buildApiUrl(accountUrl), body, {
           headers: SNOWFLAKE_HEADERS,
         });
-        return response.data;
+        return transformResponse(response.data);
       },
     },
 
@@ -301,7 +350,7 @@ export const SnowflakeConnector: ConnectorSpec = {
         const response = await ctx.client.post(buildApiUrl(accountUrl), body, {
           headers: SNOWFLAKE_HEADERS,
         });
-        return response.data;
+        return transformResponse(response.data);
       },
     },
 
@@ -320,7 +369,7 @@ export const SnowflakeConnector: ConnectorSpec = {
         const response = await ctx.client.post(buildApiUrl(accountUrl), body, {
           headers: SNOWFLAKE_HEADERS,
         });
-        return response.data;
+        return transformResponse(response.data);
       },
     },
 
@@ -332,7 +381,7 @@ export const SnowflakeConnector: ConnectorSpec = {
         const response = await ctx.client.post(buildApiUrl(accountUrl), body, {
           headers: SNOWFLAKE_HEADERS,
         });
-        return response.data;
+        return transformResponse(response.data);
       },
     },
   },
