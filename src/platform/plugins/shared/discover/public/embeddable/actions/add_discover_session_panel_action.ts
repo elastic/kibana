@@ -85,7 +85,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
     const hasDiscoverPermissions =
       (capabilities.discover_v2.show as boolean) || (capabilities.discover_v2.save as boolean);
 
-    if (!hasDiscoverPermissions) return false; // early return to delay async import until absolutely necessary
+    if (!hasDiscoverPermissions) return false;
 
     return (
       apiCanAccessViewMode(embeddable) &&
