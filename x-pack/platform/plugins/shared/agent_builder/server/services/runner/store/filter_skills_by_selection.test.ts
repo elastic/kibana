@@ -20,6 +20,7 @@ const createMockSkill = (
   basePath: 'skills/platform',
   getRegistryTools: () => [],
   ...overrides,
+  referencedContentCount: overrides.referencedContentCount ?? 0,
 });
 
 describe('filterSkillsBySelection', () => {

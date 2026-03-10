@@ -67,6 +67,7 @@ const createMockSkill = (
   getRegistryTools: jest.fn().mockReturnValue([]),
   getInlineTools: jest.fn().mockReturnValue([]),
   ...overrides,
+  referencedContentCount: overrides.referencedContentCount ?? 0,
 });
 
 const createHookContext = ({

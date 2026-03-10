@@ -18,7 +18,6 @@ export interface SkillPersistedDefinition {
   content: string;
   referenced_content?: SkillReferencedContent[];
   tool_ids: string[];
-  plugin_id?: string;
   /**
    * Number of referenced content items.
    * Computed from the `referenced_content` array length, or via ES runtime field when using `summaryOnly`.

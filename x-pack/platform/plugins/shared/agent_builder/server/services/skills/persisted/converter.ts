@@ -16,13 +16,12 @@ export const convertPersistedSkill = (
   basePath: '/skills',
   description: skill.description,
   content: skill.content,
-  readonly: !!skill.plugin_id,
+  readonly: false,
   referencedContent: skill.referenced_content?.map((rc) => ({
     name: rc.name,
     relativePath: rc.relativePath,
     content: rc.content,
   })),
   getRegistryTools: () => skill.tool_ids ?? [],
-  plugin_id: skill.plugin_id,
   referencedContentCount: skill.referenced_content_count,
 });

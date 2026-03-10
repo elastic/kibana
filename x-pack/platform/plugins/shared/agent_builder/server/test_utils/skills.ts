@@ -49,6 +49,7 @@ export const createMockedInternalSkill = (
   basePath: '/skills',
   getRegistryTools: () => [],
   ...parts,
+  referencedContentCount: parts.referencedContentCount ?? 0,
 });
 
 export const createMockedPersistedSkillDefinition = (
@@ -62,4 +63,5 @@ export const createMockedPersistedSkillDefinition = (
   created_at: '2024-09-04T06:44:17.944Z',
   updated_at: '2024-09-04T06:44:17.944Z',
   ...parts,
+  referenced_content_count: parts.referenced_content_count ?? 0,
 });

@@ -29,6 +29,7 @@ describe('skills utils', () => {
     readonly: true,
     getRegistryTools: () => [],
     ...overrides,
+    referencedContentCount: overrides.referencedContentCount ?? 0,
   });
 
   describe('getSkillEntryPath', () => {

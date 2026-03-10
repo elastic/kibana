@@ -21,6 +21,7 @@ describe('SkillsStore', () => {
     readonly: true,
     getRegistryTools: () => [],
     ...overrides,
+    referencedContentCount: overrides.referencedContentCount ?? 0,
   });
 
   describe('createSkillsStore', () => {
@@ -292,6 +293,7 @@ describe('SkillsStore', () => {
       readonly: false,
       getRegistryTools: () => ['tool-1'],
       ...overrides,
+      referencedContentCount: overrides.referencedContentCount ?? 0,
     });
 
     it('adds a persisted skill to the store and volume', () => {
