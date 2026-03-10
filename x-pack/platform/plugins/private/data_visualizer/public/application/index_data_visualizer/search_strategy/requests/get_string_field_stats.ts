@@ -33,7 +33,7 @@ export const getStringFieldStatsRequest = (
   params: FieldStatsCommonRequestParams,
   fields: Field[]
 ) => {
-  const { index, query, runtimeFieldMap } = params;
+  const { index, query, runtimeFieldMap, projectRouting } = params;
 
   const size = 0;
 
@@ -63,6 +63,7 @@ export const getStringFieldStatsRequest = (
     index,
     size,
     ...searchBody,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 };
 

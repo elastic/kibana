@@ -51,6 +51,7 @@ const createMockScore = ({
     trace_id: 'trace-task-123',
     repetition_index: repetitionIndex,
     model: baseTaskModel,
+    output: {},
   },
   evaluator: {
     name: evaluatorName,

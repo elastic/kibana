@@ -38,6 +38,7 @@ import {
   getFailureRateString,
   isCriticalFailureRateFromString,
 } from '../../../hooks/visibility_status_utils';
+import { SIEM_READINESS_ACCORDIONS_STORAGE_KEY } from '../../../constants';
 
 const DATA_CONTINUITY_CASE_TAGS = ['siem-readiness', 'data-continuity', 'ingest-pipelines'];
 
@@ -477,6 +478,7 @@ export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         })}
         defaultSortField="docsCount"
         defaultSortDirection="desc"
+        storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
       />
     </>
   );
