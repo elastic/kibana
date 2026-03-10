@@ -55,21 +55,9 @@ export const testSubj = {
 const getRecentlyClosedGroupPanelId = (closedAt: number) => `recentlyClosedGroup_${closedAt}`;
 
 const groupRecentlyClosedItems = (recentlyClosedItems: RecentlyClosedTabItem[]) => {
-  const groups = new Map<number, RecentlyClosedTabItem[]>();
-
   // Group by closedAt (batch close), while preserving incoming item order per group.
-  for (const item of recentlyClosedItems) {
-    const existing = groups.get(item.closedAt);
-    if (existing) {
-      existing.push(item);
-    } else {
-      groups.set(item.closedAt, [item]);
-    }
-  }
-
-  return Array.from(groups.entries())
-    .sort(([a], [b]) => b - a)
-    .map(([closedAt, items]) => ({ closedAt, items }));
+  const groups = Map.groupBy(recentlyClosedItems, (item) => item.closedAt);
+  return [...groups].sort(([a], [b]) => b - a).map(([closedAt, items]) => ({ closedAt, items }));
 };
 
 interface TabPanelItemParams {
