@@ -17,9 +17,6 @@ import {
   teardownTracesExperience,
 } from '../../fixtures/traces_experience';
 
-const SIMPLE_SERVICE = 'synth-traces-service';
-const RICH_SERVICE = 'synth-traces-frontend';
-
 const APM_TIME_RANGE = {
   rangeFrom: TRACES.DEFAULT_START_TIME,
   rangeTo: TRACES.DEFAULT_END_TIME,
@@ -47,7 +44,7 @@ spaceTest.describe(
       'Service Overview - Latency chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/overview`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -74,7 +71,7 @@ spaceTest.describe(
       'Service Overview - Throughput chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/overview`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -96,7 +93,7 @@ spaceTest.describe(
       'Service Overview - Failed transaction rate chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/overview`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -121,15 +118,14 @@ spaceTest.describe(
       'Service Overview - Transactions table "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM service overview', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/overview`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/overview`, {
             params: APM_TIME_RANGE,
           });
         });
 
         await spaceTest.step('open row actions menu on first transaction', async () => {
           await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
-          // eslint-disable-next-line playwright/no-nth-methods
-          await page.testSubj.locator('apmManagedTableActionsCellButton').nth(0).click();
+          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
         });
 
         await spaceTest.step('click Open in Discover in actions menu', async () => {
@@ -151,7 +147,7 @@ spaceTest.describe(
       'Transactions - Latency chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -173,7 +169,7 @@ spaceTest.describe(
       'Transactions - Throughput chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -195,7 +191,7 @@ spaceTest.describe(
       'Transactions - Failed transaction rate chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -220,15 +216,14 @@ spaceTest.describe(
       'Transactions - Transactions table "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transactions page', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions`, {
             params: APM_TIME_RANGE,
           });
         });
 
         await spaceTest.step('open row actions menu on first transaction', async () => {
           await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
-          // eslint-disable-next-line playwright/no-nth-methods
-          await page.testSubj.locator('apmManagedTableActionsCellButton').nth(0).click();
+          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
         });
 
         await spaceTest.step('click Open in Discover in actions menu', async () => {
@@ -250,10 +245,10 @@ spaceTest.describe(
       'Transaction Detail - Latency chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions/view`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: {
               ...APM_TIME_RANGE,
-              transactionName: 'GET /api/data',
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
               transactionType: 'request',
             },
           });
@@ -276,10 +271,10 @@ spaceTest.describe(
       'Transaction Detail - Throughput chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions/view`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: {
               ...APM_TIME_RANGE,
-              transactionName: 'GET /api/data',
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
               transactionType: 'request',
             },
           });
@@ -302,10 +297,10 @@ spaceTest.describe(
       'Transaction Detail - Failed transaction rate chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions/view`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: {
               ...APM_TIME_RANGE,
-              transactionName: 'GET /api/data',
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
               transactionType: 'request',
             },
           });
@@ -331,10 +326,10 @@ spaceTest.describe(
       'Transaction Detail - "Open in Discover" button opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions/view`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: {
               ...APM_TIME_RANGE,
-              transactionName: 'GET /api/data',
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
               transactionType: 'request',
             },
           });
@@ -362,18 +357,17 @@ spaceTest.describe(
       'Transaction Detail - Span flyout "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM transaction detail', async () => {
-          await page.gotoApp(`apm/services/${SIMPLE_SERVICE}/transactions/view`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
             params: {
               ...APM_TIME_RANGE,
-              transactionName: 'GET /api/data',
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
               transactionType: 'request',
             },
           });
         });
 
         await spaceTest.step('click a span in the waterfall to open span flyout', async () => {
-          // eslint-disable-next-line playwright/no-nth-methods
-          await page.getByText('SELECT * FROM data').nth(0).click();
+          await page.getByText(RICH_TRACE.DB_SPAN_NAME).first().click();
         });
 
         await spaceTest.step('click Open in Discover in span flyout', async () => {
@@ -393,7 +387,7 @@ spaceTest.describe(
       'Errors - Failed transaction rate chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM errors page', async () => {
-          await page.gotoApp(`apm/services/${RICH_SERVICE}/errors`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/errors`, {
             params: APM_TIME_RANGE,
           });
         });
@@ -418,14 +412,13 @@ spaceTest.describe(
       'Errors - "Open in Discover" from error sample opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM errors page', async () => {
-          await page.gotoApp(`apm/services/${RICH_SERVICE}/errors`, {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/errors`, {
             params: APM_TIME_RANGE,
           });
         });
 
         await spaceTest.step('click into first error group', async () => {
-          // eslint-disable-next-line playwright/no-nth-methods
-          await page.getByText(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR).nth(0).click();
+          await page.getByText(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR).first().click();
         });
 
         await spaceTest.step('click Open in Discover on error sample', async () => {
@@ -452,8 +445,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click into operation detail to view a trace sample', async () => {
-          // eslint-disable-next-line playwright/no-nth-methods
-          await page.getByText('SELECT * FROM data').nth(0).click();
+          await page.getByText(RICH_TRACE.DB_SPAN_NAME).first().click();
         });
 
         await spaceTest.step('click Open in Discover button', async () => {
@@ -469,7 +461,58 @@ spaceTest.describe(
       }
     );
 
-    // TODO: Service Inventory "Open traces in Discover" and "Open logs in Discover"
-    // links do not exist in the APM codebase yet. Add tests once those links are implemented.
+    spaceTest(
+      'Service Inventory - "Open traces in Discover" opens traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM service inventory', async () => {
+          await page.gotoApp('apm/services', {
+            params: APM_TIME_RANGE,
+          });
+        });
+
+        await spaceTest.step('open row actions menu on first service', async () => {
+          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
+        });
+
+        await spaceTest.step('click Open traces in Discover in actions menu', async () => {
+          await page.testSubj
+            .locator('apmManagedTableActionsMenuItem-servicesTable-openTracesInDiscover')
+            .click();
+        });
+
+        await spaceTest.step('verify Discover traces experience columns', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+        });
+      }
+    );
+
+    spaceTest(
+      'Service Inventory - "Open logs in Discover" opens Discover',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM service inventory', async () => {
+          await page.gotoApp('apm/services', {
+            params: APM_TIME_RANGE,
+          });
+        });
+
+        await spaceTest.step('open row actions menu on first service', async () => {
+          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
+        });
+
+        await spaceTest.step('click Open logs in Discover in actions menu', async () => {
+          await page.testSubj
+            .locator('apmManagedTableActionsMenuItem-servicesTable-openLogsInDiscover')
+            .click();
+        });
+
+        await spaceTest.step('verify Discover loads with data', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
+        });
+      }
+    );
   }
 );
