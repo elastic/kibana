@@ -70,7 +70,9 @@ export function getContextSchemaForPath(
   );
 
   for (const enrichment of enrichments) {
-    schema = schema.extend({ [enrichment.key]: enrichment.value });
+    schema = schema.extend({
+      [enrichment.key]: enrichment.value,
+    }) as typeof DynamicStepContextSchema;
   }
 
   return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
