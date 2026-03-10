@@ -67,7 +67,6 @@ export interface UserActivityEvent {
 
 /**
  * Additional bucket of non-standard metadata specific to the user activity log.
- * Includes standardized optional fields (e.g. `user_input`) for normalization.
  * @public
  */
 export type UserActivityMetadata = Record<string, unknown>;
