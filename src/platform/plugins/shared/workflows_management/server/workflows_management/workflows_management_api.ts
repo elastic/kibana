@@ -123,6 +123,17 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflows(params, spaceId);
   }
 
+  /**
+   * Returns all enabled workflows in the space that are subscribed to the given trigger type.
+   * Used by the event-driven handler to resolve which workflows to run when an event is emitted.
+   */
+  public async getWorkflowsSubscribedToTrigger(
+    triggerId: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto[]> {
+    return this.workflowsService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+  }
+
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
     return this.workflowsService.getWorkflow(id, spaceId);
   }
@@ -199,13 +210,15 @@ export class WorkflowsManagementApi {
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
     inputs: Record<string, any>,
-    request: KibanaRequest
+    request: KibanaRequest,
+    triggeredBy?: string
   ): Promise<string> {
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
       spaceId,
       inputs: manualInputs,
+      triggeredBy,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(

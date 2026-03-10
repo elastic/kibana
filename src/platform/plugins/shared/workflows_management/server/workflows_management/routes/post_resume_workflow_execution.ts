@@ -21,12 +21,12 @@ export function registerPostResumeWorkflowExecutionRoute({
 }: RouteDependencies) {
   router.post(
     {
-      path: '/api/workflowExecutions/{executionId}/resume',
+      path: '/api/workflowExecutions/{workflowExecutionId}/resume',
       options: WORKFLOW_ROUTE_OPTIONS,
       security: WORKFLOW_EXECUTION_RESUME_SECURITY,
       validate: {
         params: schema.object({
-          executionId: schema.string(),
+          workflowExecutionId: schema.string(),
         }),
         body: schema.object({
           input: schema.recordOf(schema.string(), schema.any()),
@@ -35,7 +35,7 @@ export function registerPostResumeWorkflowExecutionRoute({
     },
     withLicenseCheck(async (context, request, response) => {
       try {
-        const { executionId } = request.params;
+        const { workflowExecutionId: executionId } = request.params;
         const { input } = request.body;
         const spaceId = spaces.getSpaceId(request);
 
