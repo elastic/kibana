@@ -235,6 +235,7 @@ const bulkEnableRulesWithOCC = async (
               });
             }
 
+            const nowIso = new Date().toISOString();
             const updatedAttributes = updateMetaAttributes(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
@@ -246,11 +247,12 @@ const bulkEnableRulesWithOCC = async (
                 }))),
               enabled: true,
               updatedBy: username,
-              updatedAt: new Date().toISOString(),
+              updatedAt: nowIso,
+              ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {
                 status: 'pending',
                 lastDuration: 0,
-                lastExecutionDate: new Date().toISOString(),
+                lastExecutionDate: nowIso,
                 error: null,
                 warning: null,
               },
