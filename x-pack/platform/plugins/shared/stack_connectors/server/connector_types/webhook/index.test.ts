@@ -101,7 +101,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 
@@ -175,12 +175,12 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 });
@@ -225,9 +225,10 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"method\\": Invalid enum value. Expected 'post' | 'put' | 'patch' | 'get' | 'delete', received 'https'"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid option: expected one of \\"post\\"|\\"put\\"|\\"patch\\"|\\"get\\"|\\"delete\\"
+        → at method"
+    `);
   });
 
   test('config validation passes when a url is specified', () => {
@@ -277,9 +278,10 @@ describe('config validation', () => {
     };
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"headers\\": Expected object, received string"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected record, received string
+        → at headers"
+    `);
   });
 
   test('config validation passes when kibana config url does not present in allowedHosts', () => {

@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
+import { act, render } from '@testing-library/react';
+import React from 'react';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
+import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
 
 jest.mock('./alert_description', () => ({
   AlertDescription: () => <div>{'AlertDescription'}</div>,
+}));
+
+jest.mock('./alert_reason', () => ({
+  AlertReason: () => <div>{'AlertReason'}</div>,
+}));
+
+jest.mock('./alert_status', () => ({
+  AlertStatus: () => <div>{'AlertStatus'}</div>,
 }));
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
@@ -77,6 +85,8 @@ describe('AboutSection', () => {
     await act(async () => {
       expect(getByTestId(`${ABOUT_SECTION_TEST_ID}Content`)).toBeVisible();
       expect(getByText('AlertDescription')).toBeInTheDocument();
+      expect(getByText('AlertReason')).toBeInTheDocument();
+      expect(getByText('AlertStatus')).toBeInTheDocument();
     });
   });
 });

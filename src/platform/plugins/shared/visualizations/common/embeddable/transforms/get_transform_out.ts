@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 import { flow } from 'lodash';
@@ -20,6 +20,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
   function transformOut(storedState: StoredVisualizeEmbeddableState, references?: Reference[]) {
     const transformsFlow = flow(
       transformTitlesOut<StoredVisualizeEmbeddableState>,
+      transformTimeRangeOut<StoredVisualizeEmbeddableState>,
       (state: StoredVisualizeEmbeddableState) => transformDrilldownsOut(state, references)
     );
     const state = transformsFlow(storedState);

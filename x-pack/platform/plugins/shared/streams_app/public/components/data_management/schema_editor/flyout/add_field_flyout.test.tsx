@@ -57,12 +57,24 @@ jest.mock('@kbn/code-editor', () => ({
 
 const renderAddFieldFlyout = (
   streamType: 'wired' | 'classic',
-  existingFieldNames: string[] = []
+  existingFieldNames: string[] = [],
+  streamName?: string
 ) => {
-  const definition =
+  const baseDefinition =
     streamType === 'wired'
       ? createMockWiredStreamDefinition()
       : createMockClassicStreamDefinition();
+
+  const definition =
+    streamName && streamType === 'wired'
+      ? {
+          ...baseDefinition,
+          stream: {
+            ...baseDefinition.stream,
+            name: streamName,
+          },
+        }
+      : baseDefinition;
 
   const fields = existingFieldNames.map((name) => ({
     name,
@@ -236,6 +248,18 @@ describe('AddFieldFlyout', () => {
       renderAddFieldFlyout('wired');
 
       await typeFieldName(user, 'trace_id');
+
+      await waitFor(() => {
+        const error = getFieldNameError();
+        expect(error).toBeNull();
+      });
+    });
+
+    it('allows arbitrary custom field names for ECS streams (logs.ecs.*)', async () => {
+      const user = userEvent.setup();
+      renderAddFieldFlyout('wired', [], 'logs.ecs.windows');
+
+      await typeFieldName(user, 'abc');
 
       await waitFor(() => {
         const error = getFieldNameError();

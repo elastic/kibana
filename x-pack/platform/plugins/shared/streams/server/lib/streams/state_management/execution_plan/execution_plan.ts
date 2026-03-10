@@ -6,8 +6,10 @@
  */
 
 import { groupBy } from 'lodash';
-import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import { getSegments, getStreamNameFromViewName } from '@kbn/streams-schema';
+import { StatusError } from '../../errors/status_error';
+import { processInDepthOrder } from '../../helpers/process_in_depth_order';
 import {
   deleteComponent,
   upsertComponent,
@@ -29,6 +31,7 @@ import {
 } from '../../ingest_pipelines/manage_ingest_pipelines';
 import { getErrorMessage } from '../../errors/parse_error';
 import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
+import { retryTransientEsErrors } from '../../helpers/retry';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
 import { InsufficientPermissionsError } from '../../errors/insufficient_permissions_error';
@@ -247,6 +250,9 @@ export class ExecutionPlan {
       // Upsert ES|QL views after the stream documents are created
       await this.upsertEsqlViews(upsert_esql_view);
     } catch (error) {
+      if (error instanceof StatusError) {
+        throw error;
+      }
       throw new FailedToExecuteElasticsearchActionsError(
         `Failed to execute Elasticsearch actions: ${getErrorMessage(error)}`
       );
@@ -277,15 +283,8 @@ export class ExecutionPlan {
   }
 
   private async unlinkSystems(actions: UnlinkSystemsAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        this.dependencies.systemClient.syncSystemList(action.request.name, [])
-      )
-    );
+    // Systems have been removed; this is a no-op kept for backward compatibility
+    // with existing execution plans that may contain unlink_systems actions.
   }
 
   private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
@@ -386,28 +385,16 @@ export class ExecutionPlan {
   }
 
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
-    const actionWithStreamsDepth = actions.map((action) => ({
-      ...action,
-      depth: getSegments(action.stream).length - 1,
-    }));
-
-    const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
-    const depths = Object.keys(actionsByDepth)
-      .map(Number)
-      .sort((a, b) => b - a); // Sort descending: deepest (children) first
-
-    // Process each depth level sequentially, with pipelines at the same depth in parallel
-    for (const depth of depths) {
-      await Promise.all(
-        actionsByDepth[depth].map((action) =>
-          upsertIngestPipeline({
-            esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-            logger: this.dependencies.logger,
-            pipeline: action.request,
-          })
-        )
-      );
-    }
+    await processInDepthOrder(
+      actions,
+      (action) => getSegments(action.stream).length - 1,
+      (action) =>
+        upsertIngestPipeline({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          pipeline: action.request,
+        })
+    );
   }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
@@ -475,11 +462,15 @@ export class ExecutionPlan {
   private async upsertAndDeleteDotStreamsDocuments(
     actions: Array<UpsertDotStreamsDocumentAction | DeleteDotStreamsDocumentAction>
   ) {
-    return this.dependencies.storageClient.bulk({
-      operations: actions.map(dotDocumentActionToBulkOperation),
-      refresh: true,
-      throwOnFail: true,
-    });
+    return retryTransientEsErrors(
+      () =>
+        this.dependencies.storageClient.bulk({
+          operations: actions.map(dotDocumentActionToBulkOperation),
+          refresh: true,
+          throwOnFail: true,
+        }),
+      { logger: this.dependencies.logger }
+    );
   }
 
   private async updateIngestSettings(actions: UpdateIngestSettingsAction[]) {
@@ -495,19 +486,23 @@ export class ExecutionPlan {
   }
 
   private async upsertEsqlViews(actions: UpsertEsqlViewAction[]) {
-    if (actions.length === 0) {
-      return;
-    }
-
-    return Promise.all(
-      actions.map((action) =>
-        upsertEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          name: action.request.name,
-          query: action.request.query,
-        })
-      )
+    await processInDepthOrder(
+      actions,
+      (action) => {
+        const streamName = getStreamNameFromViewName(action.request.name);
+        return streamName ? getSegments(streamName).length - 1 : 0;
+      },
+      (action) =>
+        retryTransientEsErrors(
+          () =>
+            upsertEsqlView({
+              esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+              logger: this.dependencies.logger,
+              name: action.request.name,
+              query: action.request.query,
+            }),
+          { logger: this.dependencies.logger }
+        )
     );
   }
 
@@ -518,11 +513,15 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.map((action) =>
-        deleteEsqlView({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          name: action.request.name,
-        })
+        retryTransientEsErrors(
+          () =>
+            deleteEsqlView({
+              esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+              logger: this.dependencies.logger,
+              name: action.request.name,
+            }),
+          { logger: this.dependencies.logger }
+        )
       )
     );
   }

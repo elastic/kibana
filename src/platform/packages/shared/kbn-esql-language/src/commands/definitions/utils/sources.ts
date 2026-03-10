@@ -9,7 +9,8 @@
 import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '../../../types';
+import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
+import { isAsExpression, Walker, LeafPrinter } from '@elastic/esql';
 import type { ISuggestionItem } from '../../registry/types';
 import { handleFragment } from './autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../../registry/complete_items';
@@ -17,8 +18,6 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { EDITOR_MARKER } from '../constants';
 import { metadataSuggestion } from '../../registry/options/metadata';
 import { fuzzySearch } from './shared';
-import { isAsExpression, Walker } from '../../../ast';
-import { LeafPrinter } from '../../../pretty_print';
 
 const removeSourceNameQuotes = (sourceName: string) =>
   sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
@@ -228,12 +227,16 @@ export async function additionalSourcesSuggestions(
             text: fragment + ' METADATA ',
             rangeToReplace,
           },
-          ...recommendedQuerySuggestions.map((suggestion) => ({
-            ...suggestion,
-            rangeToReplace,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-          })),
+          ...recommendedQuerySuggestions.map((suggestion) =>
+            suggestion.text
+              ? {
+                  ...suggestion,
+                  rangeToReplace,
+                  filterText: fragment,
+                  text: fragment + suggestion.text,
+                }
+              : suggestion
+          ),
         ];
         return _suggestions;
       }

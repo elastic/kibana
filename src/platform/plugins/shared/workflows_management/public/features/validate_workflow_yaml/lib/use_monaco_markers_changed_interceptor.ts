@@ -90,7 +90,7 @@ export function useMonacoMarkersChangedInterceptor({
           owner,
           source: marker.source,
           hoverMessage: null,
-        });
+        } as YamlValidationResult);
       }
       const errorsUpdater = (prevErrors: YamlValidationResult[] | null) => {
         const prevOtherOwners = prevErrors?.filter((e) => e.owner !== owner);

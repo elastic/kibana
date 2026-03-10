@@ -17,6 +17,8 @@ export type {
   RunInternalToolParams,
   RunContext,
   RunContextStackEntry,
+  RunAgentStackEntry,
+  RunToolStackEntry,
   RunToolParams,
   RunToolReturn,
 } from './runner';

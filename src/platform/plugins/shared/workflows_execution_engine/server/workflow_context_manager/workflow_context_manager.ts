@@ -341,9 +341,21 @@ export class WorkflowContextManager {
 
     // Build foreach context in outer-to-inner order so inner expressions like
     // {{foreach.item}} resolve against the outer foreach context.
-    for (const { stepExecution } of foreachEntries.reverse()) {
+    for (const { stepExecution } of foreachEntries.toReversed()) {
       if (stepExecution) {
-        stepContext.foreach = this.buildForeachContext(stepExecution, stepContext);
+        const foreachCtx = this.buildForeachContext(stepExecution, stepContext);
+        stepContext.foreach = foreachCtx;
+        /**
+         * Merge foreach context into step context so that inner foreach can
+         * access the outer context.
+         */
+        if (stepExecution.stepId && foreachCtx) {
+          if (!stepContext.steps[stepExecution.stepId]) {
+            stepContext.steps[stepExecution.stepId] = {};
+          }
+          const { item, items, index, total } = foreachCtx;
+          Object.assign(stepContext.steps[stepExecution.stepId], { item, items, index, total });
+        }
       }
     }
 
