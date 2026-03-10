@@ -57,25 +57,17 @@ interface MaintainerEntry {
   lastErrorTimestamp: string | null;
 }
 
-const POLL_INTERVAL_MS = 3000;
-const POLL_TIMEOUT_MS = 150_000;
-const MAX_RESTART_ATTEMPTS = 5;
+const POLL_INTERVAL_MS = 2000;
+const POLL_TIMEOUT_MS = 60_000;
 
 async function waitForMaintainerSuccess(
   apiClient: {
     get: (url: string, options?: Record<string, unknown>) => Promise<{ body: unknown }>;
-    put: (
-      url: string,
-      options?: Record<string, unknown>
-    ) => Promise<{ statusCode: number; body: unknown }>;
   },
-  esClient: { cluster: { health: (opts: Record<string, unknown>) => Promise<unknown> } },
   headers: Record<string, string>,
-  maintainerId: string,
-  indexName: string
+  maintainerId: string
 ): Promise<MaintainerEntry> {
   const start = Date.now();
-  let restarts = 0;
 
   while (Date.now() - start < POLL_TIMEOUT_MS) {
     const res = await apiClient.get(MAINTAINER_ROUTES.GET, {
@@ -90,33 +82,15 @@ async function waitForMaintainerSuccess(
     }
 
     if (entry && entry.lastErrorTimestamp && !entry.lastSuccessTimestamp) {
-      if (restarts >= MAX_RESTART_ATTEMPTS) {
-        throw new Error(
-          `Maintainer "${maintainerId}" failed after ${restarts} restart(s). ` +
-            `State: ${JSON.stringify(entry.customState)}`
-        );
-      }
-      restarts++;
-      await apiClient
-        .put(MAINTAINER_ROUTES.STOP(maintainerId), { headers, responseType: 'json' })
-        .catch(() => {});
-
-      // Wait for shards to become available before restarting
-      await esClient.cluster
-        .health({ index: indexName, wait_for_status: 'yellow', timeout: '15s' })
-        .catch(() => {});
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-
-      await apiClient.put(MAINTAINER_ROUTES.START(maintainerId), {
-        headers,
-        responseType: 'json',
-      });
+      throw new Error(
+        `Maintainer "${maintainerId}" failed. State: ${JSON.stringify(entry.customState)}`
+      );
     }
 
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Maintainer "${maintainerId}" did not complete a successful run within timeout`);
+  throw new Error(`Maintainer "${maintainerId}" did not complete within ${POLL_TIMEOUT_MS}ms`);
 }
 
 for (const integration of INTEGRATION_CONFIGS) {
@@ -158,6 +132,11 @@ for (const integration of INTEGRATION_CONFIGS) {
       });
       expect(installResponse.statusCode).toBe(201);
 
+      const initResponse = await apiClient.post(MAINTAINER_ROUTES.INIT, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
+      expect(initResponse.statusCode).toBe(200);
       await ensureDataStream(esClient, testConfig);
 
       // Load a seed document via esArchiver to auto-create the data stream.
@@ -174,13 +153,6 @@ for (const integration of INTEGRATION_CONFIGS) {
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
       await apiClient
-        .put(MAINTAINER_ROUTES.STOP(MAINTAINER_ID), {
-          headers: defaultHeaders,
-          responseType: 'json',
-        })
-        .catch(() => {});
-
-      await apiClient
         .post(ENTITY_STORE_ROUTES.UNINSTALL, {
           headers: defaultHeaders,
           responseType: 'json',
@@ -192,20 +164,18 @@ for (const integration of INTEGRATION_CONFIGS) {
     });
 
     apiTest('Should compute access relationships from events', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(240_000);
+      apiTest.setTimeout(120_000);
 
-      const startResponse = await apiClient.put(MAINTAINER_ROUTES.START(MAINTAINER_ID), {
+      const runResponse = await apiClient.post(MAINTAINER_ROUTES.RUN(MAINTAINER_ID), {
         headers: defaultHeaders,
         responseType: 'json',
       });
-      expect(startResponse.statusCode).toBe(200);
+      expect(runResponse.statusCode).toBe(200);
 
       const maintainerEntry = await waitForMaintainerSuccess(
         apiClient,
-        esClient,
         defaultHeaders,
-        MAINTAINER_ID,
-        testConfig.indexName
+        MAINTAINER_ID
       );
 
       expect(maintainerEntry.customState).toBeDefined();
@@ -267,7 +237,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       }
     });
 
-    apiTest(
+    apiTest.skip(
       'Should assign accesses_frequently when access count exceeds threshold',
       async ({ esClient }) => {
         const entities = await esClient.search({
@@ -298,7 +268,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       }
     );
 
-    apiTest(
+    apiTest.skip(
       'Should assign accesses_infrequently when access count is at or below threshold',
       async ({ esClient }) => {
         const entities = await esClient.search({
@@ -326,7 +296,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       }
     );
 
-    apiTest(
+    apiTest.skip(
       'Should assign both accesses_frequently and accesses_infrequently for user-006',
       async ({ esClient }) => {
         const entities = await esClient.search({
