@@ -95,7 +95,8 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
-    "@kbn/mock-idp-utils"
+    "@kbn/mock-idp-utils",
+    "@kbn/core-user-activity-server"
   ],
   "exclude": ["target/**/*"]
 }
