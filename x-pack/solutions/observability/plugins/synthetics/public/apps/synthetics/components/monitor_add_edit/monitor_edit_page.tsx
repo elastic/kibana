@@ -103,7 +103,7 @@ export const MonitorEditPage: React.FC = () => {
     <>
       <DisabledCallout />
       <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
-      <MissingIntegrationCallout configId={data[ConfigKey.CONFIG_ID]} monitor={data} />
+      <MissingIntegrationCallout configId={data[ConfigKey.CONFIG_ID]} />
       <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
       <MonitorForm
         defaultValues={data}

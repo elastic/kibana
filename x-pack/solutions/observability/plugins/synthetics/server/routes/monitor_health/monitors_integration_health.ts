@@ -9,7 +9,12 @@ import type { SavedObject } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ConfigKey,
+  LocationHealthStatusValue,
   type EncryptedSyntheticsMonitorAttributes,
+  type LocationHealthStatus,
+  type MonitorHealthError,
+  type MonitorHealthStatus,
+  type MonitorsHealthResponse,
 } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../../synthetics_service/private_location/synthetics_private_location';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
@@ -18,39 +23,13 @@ import type { RouteContext } from '../types';
 import { server } from 'typescript';
 import { SyntheticsServerSetup } from '../../types';
 
-export enum LocationHealthStatusValue {
-  Healthy = 'healthy',
-  MissingPackagePolicy = 'missing_package_policy',
-  MissingAgentPolicy = 'missing_agent_policy',
-  AgentPolicyMismatch = 'agent_policy_mismatch',
-  MissingLocation = 'missing_location',
-  PackageNotInstalled = 'package_not_installed',
-}
-
-export interface LocationHealthStatus {
-  locationId: string;
-  locationLabel: string;
-  status: LocationHealthStatusValue;
-  policyId: string;
-  reason?: string;
-}
-
-export interface MonitorHealthStatus {
-  configId: string;
-  monitorName: string;
-  isMissingIntegration: boolean;
-  locations: LocationHealthStatus[];
-}
-
-export interface MonitorHealthError {
-  configId: string;
-  error: string;
-}
-
-export interface MonitorsHealthResponse {
-  monitors: MonitorHealthStatus[];
-  errors: MonitorHealthError[];
-}
+export {
+  LocationHealthStatusValue,
+  type LocationHealthStatus,
+  type MonitorHealthStatus,
+  type MonitorHealthError,
+  type MonitorsHealthResponse,
+} from '../../../common/runtime_types';
 
 const STATUS_REASONS: Record<
   Exclude<LocationHealthStatusValue, LocationHealthStatusValue.Healthy>,

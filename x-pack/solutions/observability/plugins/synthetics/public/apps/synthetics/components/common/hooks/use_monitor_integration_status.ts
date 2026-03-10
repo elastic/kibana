@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchMonitorListAction,
   getMonitorListPageStateWithDefaults,
   selectMonitorListState,
 } from '../../../state';
-import type { SyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../common/runtime_types';
+import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
+import { LocationHealthStatusValue } from '../../../state/monitor_health/models';
 
 export interface MonitorIntegrationStatus {
   configId: string;
@@ -24,12 +25,6 @@ export interface MonitorIntegrationStatus {
 
 interface UseMonitorIntegrationStatusOptions {
   configIds?: string[];
-  /**
-   * When provided, the hook uses these monitors directly instead of reading
-   * from the monitor-list Redux slice.  Useful on pages (e.g. monitor edit)
-   * where the list state may not be populated.
-   */
-  providedMonitors?: SyntheticsMonitor[];
 }
 
 interface UseMonitorIntegrationStatusReturn {
@@ -44,19 +39,12 @@ interface UseMonitorIntegrationStatusReturn {
   getMissingConfigIdsForLocation: (locationId: string) => string[];
 }
 
-/**
- * Hook to check whether monitors on private locations have their Fleet
- * package policies intact. Currently returns mock data — when the backend
- * detection route (#256393) and reset route (#256394) are merged, the
- * internals will swap to real HTTP calls with no consumer-side changes.
- */
 export const useMonitorIntegrationStatus = (
   options?: UseMonitorIntegrationStatusOptions
 ): UseMonitorIntegrationStatusReturn => {
-  const { configIds, providedMonitors } = options ?? {};
+  const { configIds: explicitConfigIds } = options ?? {};
   const dispatch = useDispatch();
   const [isResetting, setIsResetting] = useState(false);
-  const [resetIds, setResetIds] = useState<Set<string>>(new Set());
 
   const {
     data: { monitors: listMonitors },
@@ -64,53 +52,54 @@ export const useMonitorIntegrationStatus = (
     loading: listLoading,
   } = useSelector(selectMonitorListState);
 
+  const { data: healthData, loading: healthLoading } = useSelector(selectMonitorHealth);
+
   useEffect(() => {
-    if (!providedMonitors && !listLoaded && !listLoading) {
+    if (!explicitConfigIds && !listLoaded && !listLoading) {
       dispatch(fetchMonitorListAction.get(getMonitorListPageStateWithDefaults()));
     }
-  }, [dispatch, providedMonitors, listLoaded, listLoading]);
+  }, [dispatch, explicitConfigIds, listLoaded, listLoading]);
 
-  const monitors = providedMonitors ?? listMonitors;
-  const loaded = providedMonitors ? providedMonitors.length > 0 : listLoaded;
+  const monitorIdsToFetch = useMemo(() => {
+    if (explicitConfigIds) {
+      return explicitConfigIds;
+    }
+    if (!listLoaded) {
+      return [];
+    }
+    return listMonitors
+      .filter((m) => (m[ConfigKey.LOCATIONS] ?? []).some((loc) => !loc.isServiceManaged))
+      .map((m) => m[ConfigKey.CONFIG_ID]);
+  }, [explicitConfigIds, listLoaded, listMonitors]);
+
+  const prevIdsRef = useRef<string>('');
+
+  useEffect(() => {
+    if (monitorIdsToFetch.length === 0) return;
+
+    const key = monitorIdsToFetch.slice().sort().join(',');
+    if (key === prevIdsRef.current) return;
+    prevIdsRef.current = key;
+
+    dispatch(fetchMonitorHealthAction.get(monitorIdsToFetch));
+  }, [dispatch, monitorIdsToFetch]);
 
   const statuses = useMemo(() => {
     const map = new Map<string, MonitorIntegrationStatus[]>();
-    if (!loaded) return map;
+    if (!healthData) return map;
 
-    const filtered = configIds
-      ? monitors.filter((m) => configIds.includes(m[ConfigKey.CONFIG_ID]))
-      : monitors;
-
-    let markedFirst = false;
-    for (const monitor of filtered) {
-      const monitorConfigId = monitor[ConfigKey.CONFIG_ID];
-      const privateLocations = (monitor[ConfigKey.LOCATIONS] ?? []).filter(
-        (loc) => !loc.isServiceManaged
-      );
-
-      if (privateLocations.length === 0) continue;
-
-      const locationStatuses: MonitorIntegrationStatus[] = privateLocations.map((loc) => {
-        const isMissing =
-          !markedFirst && !resetIds.has(monitorConfigId);
-
-        return {
-          configId: monitorConfigId,
-          locationId: loc.id,
-          policyId: `mock-policy-${monitorConfigId}-${loc.id}`,
-          isMissing,
-        };
-      });
-
-      if (!markedFirst && locationStatuses.some((s) => s.isMissing)) {
-        markedFirst = true;
-      }
-
-      map.set(monitorConfigId, locationStatuses);
+    for (const monitor of healthData.monitors) {
+      const locationStatuses: MonitorIntegrationStatus[] = monitor.locations.map((loc) => ({
+        configId: monitor.configId,
+        locationId: loc.locationId,
+        policyId: loc.policyId,
+        isMissing: loc.status !== LocationHealthStatusValue.Healthy,
+      }));
+      map.set(monitor.configId, locationStatuses);
     }
 
     return map;
-  }, [loaded, monitors, configIds, resetIds]);
+  }, [healthData]);
 
   const hasMissingIntegrations = useCallback(
     (configId: string): boolean => {
@@ -152,27 +141,24 @@ export const useMonitorIntegrationStatus = (
     [statuses]
   );
 
-  const resetMonitor = useCallback(async (configId: string): Promise<void> => {
+  // Reset functionality is a stub until the reset endpoint is implemented (#256394)
+  const resetMonitor = useCallback(async (_configId: string): Promise<void> => {
     setIsResetting(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
-    setResetIds((prev) => new Set(prev).add(configId));
     setIsResetting(false);
   }, []);
 
-  const resetMonitors = useCallback(async (ids: string[]): Promise<void> => {
+  const resetMonitors = useCallback(async (_ids: string[]): Promise<void> => {
     setIsResetting(true);
     await new Promise((resolve) => setTimeout(resolve, 800));
-    setResetIds((prev) => {
-      const next = new Set(prev);
-      ids.forEach((id) => next.add(id));
-      return next;
-    });
     setIsResetting(false);
   }, []);
+
+  const loading = explicitConfigIds ? healthLoading : !listLoaded || healthLoading;
 
   return {
     statuses,
-    loading: !loaded,
+    loading,
     isResetting,
     resetMonitor,
     resetMonitors,
