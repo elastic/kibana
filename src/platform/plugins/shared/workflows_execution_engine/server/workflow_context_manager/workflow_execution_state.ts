@@ -37,10 +37,25 @@ export class WorkflowExecutionState {
   }
 
   public async load(): Promise<void> {
-    const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
-      this.workflowExecution.id
+    if (!this.workflowExecution.stepExecutionIds) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step execution IDs to be loaded'
+      );
+    }
+
+    if (!this.workflowExecution.stepExecutionsIndex) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
+      );
+    }
+
+    const stepExecutions = await this.workflowStepExecutionRepository.getStepExecutionsByIds(
+      this.workflowExecution.stepExecutionIds,
+      this.workflowExecution.stepExecutionsIndex
     );
-    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
+    stepExecutions.forEach((stepExecution) =>
+      this.stepExecutions.set(stepExecution.id, stepExecution)
+    );
     this.buildStepIdExecutionIdIndex();
   }
 

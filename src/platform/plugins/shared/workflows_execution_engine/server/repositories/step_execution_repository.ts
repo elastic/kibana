@@ -57,6 +57,24 @@ export class StepExecutionRepository {
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
   }
 
+  public async getStepExecutionsByIds(
+    stepExecutionIds: string[],
+    stepsExecutionIndex?: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    const response = await this.esClient.mget<EsWorkflowStepExecution>({
+      index: stepsExecutionIndex,
+      ids: stepExecutionIds,
+    });
+
+    const stepExecutions: EsWorkflowStepExecution[] = [];
+    for (const doc of response.docs) {
+      if ('found' in doc && doc.found && doc._source) {
+        stepExecutions.push(doc._source as EsWorkflowStepExecution);
+      }
+    }
+    return stepExecutions;
+  }
+
   /**
    * Fetches all step executions for a workflow execution.
    * Uses mget (real-time, O(1)) when stepExecutionIds are available,

@@ -26,11 +26,12 @@ import {
 
 interface CreateIndexesOptions {
   esClient: ElasticsearchClient;
+  rolloverMaxAge: string;
   logger?: Logger;
 }
 
 export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
-  const { esClient, logger } = options;
+  const { esClient, rolloverMaxAge, logger } = options;
   await Promise.all([
     setupRolloverIndex({
       esClient,
@@ -39,7 +40,7 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       initialIndex: WORKFLOWS_EXECUTIONS_INITIAL_INDEX,
       ilmPolicyName: WORKFLOWS_EXECUTIONS_ILM_POLICY,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-      rolloverMaxAge: '10m',
+      rolloverMaxAge,
       logger,
     }),
     setupRolloverIndex({
@@ -49,7 +50,7 @@ export async function createIndexes(options: CreateIndexesOptions): Promise<void
       initialIndex: WORKFLOWS_STEP_EXECUTIONS_INITIAL_INDEX,
       ilmPolicyName: WORKFLOWS_STEP_EXECUTIONS_ILM_POLICY,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      rolloverMaxAge: '10m',
+      rolloverMaxAge,
       logger,
     }),
   ]);
