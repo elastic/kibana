@@ -27,3 +27,13 @@ export interface ListProjectFilesInput {
 export interface ListTeamProjectsInput {
   teamId: string;
 }
+
+export interface ParseFigmaUrlInput {
+  url: string;
+}
+
+export interface ParseFigmaUrlResult {
+  fileKey?: string;
+  teamId?: string;
+  nodeId?: string;
+}

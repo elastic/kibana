@@ -1,0 +1,21 @@
+version: '1'
+name: 'sources.figma.parse_figma_url'
+description: >
+  Ask the user to paste a Figma URL (file or team page). Returns extracted file_key,
+  team_id, and node_id (when present) for use with get_file, list_team_projects, or
+  render_nodes. No API call—parses the URL only.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: url
+    type: string
+    required: true
+    description: 'Figma URL pasted from the browser (e.g. file link or team page link)'
+steps:
+  - name: parse-figma-url
+    type: figma.parseFigmaUrl
+    connector-id: <%= figma-stack-connector-id %>
+    with:
+      url: "${{inputs.url}}"

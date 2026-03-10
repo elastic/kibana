@@ -178,6 +178,65 @@ describe('FigmaConnector', () => {
     });
   });
 
+  describe('parseFigmaUrl action', () => {
+    it('should extract fileKey from a design URL', async () => {
+      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'https://www.figma.com/design/ABC123xyz/My-File',
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual({ fileKey: 'ABC123xyz' });
+    });
+
+    it('should extract fileKey and nodeId from design URL with node-id query (hyphen normalized to colon)', async () => {
+      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'https://www.figma.com/design/ABC123/My-Design?node-id=1-2',
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual({ fileKey: 'ABC123', nodeId: '1:2' });
+    });
+
+    it('should extract teamId from a team URL', async () => {
+      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'https://www.figma.com/team/123456789/Team-Name',
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual({ teamId: '123456789' });
+    });
+
+    it('should return empty result for invalid URL', async () => {
+      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'not-a-valid-url',
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    });
+
+    it('should return empty result for non-Figma URL', async () => {
+      const result = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'https://example.com/design/ABC123/Name',
+      });
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual({});
+    });
+
+    it('should extract fileKey from file and board URL types', async () => {
+      const fileResult = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'https://www.figma.com/file/XYZ789/Some-File',
+      });
+      expect(fileResult).toEqual({ fileKey: 'XYZ789' });
+
+      const boardResult = await FigmaConnector.actions.parseFigmaUrl.handler(mockContext, {
+        url: 'https://www.figma.com/board/BOARD99/Board-Name',
+      });
+      expect(boardResult).toEqual({ fileKey: 'BOARD99' });
+    });
+  });
+
   describe('test handler', () => {
     it('should return success when API is accessible', async () => {
       if (!FigmaConnector.test) {

@@ -14,6 +14,10 @@ import type * as Figma from './types';
 
 const FIGMA_API_BASE = 'https://api.figma.com';
 
+const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
+const FILE_PATH_PREFIX_SET: Set<string> = new Set(FILE_PATH_PREFIXES);
+const FILE_KEY_REGEX = /^[0-9a-zA-Z_-]+$/;
+
 export const FigmaConnector: ConnectorSpec = {
   metadata: {
     id: '.figma',
@@ -37,9 +41,19 @@ export const FigmaConnector: ConnectorSpec = {
     getFile: {
       isTool: false,
       input: z.object({
-        fileKey: z.string(),
-        nodeIds: z.string().optional(),
-        depth: z.number().optional(),
+        fileKey: z
+          .string()
+          .describe('File key from the Figma file URL (e.g. from figma.com/file/FILE_KEY/...)'),
+        nodeIds: z
+          .string()
+          .optional()
+          .describe('Comma-separated node IDs to retrieve specific nodes (e.g. "1:2,1:3")'),
+        depth: z
+          .number()
+          .optional()
+          .describe(
+            'Tree depth: 1 = pages only, 2 = pages + top-level objects; omit for full tree'
+          ),
       }),
       handler: async (ctx, input: Figma.GetFileInput) => {
         const params: Record<string, string | number> = {};
@@ -67,10 +81,17 @@ export const FigmaConnector: ConnectorSpec = {
     renderNodes: {
       isTool: false,
       input: z.object({
-        fileKey: z.string(),
-        nodeIds: z.string(),
-        format: z.enum(['png', 'jpg', 'svg', 'pdf']).optional(),
-        scale: z.number().optional(),
+        fileKey: z.string().describe('File key from the Figma file URL'),
+        nodeIds: z
+          .string()
+          .describe(
+            'Comma-separated node IDs to render (e.g. "1:2,1:3"); find in URL ?node-id= or get_file output'
+          ),
+        format: z
+          .enum(['png', 'jpg', 'svg', 'pdf'])
+          .optional()
+          .describe('Image format (default: png)'),
+        scale: z.number().optional().describe('Scale factor between 0.01 and 4 (default: 1)'),
       }),
       handler: async (ctx, input: Figma.RenderNodesInput) => {
         const params: Record<string, string | number> = { ids: input.nodeIds };
@@ -92,7 +113,7 @@ export const FigmaConnector: ConnectorSpec = {
     listProjectFiles: {
       isTool: false,
       input: z.object({
-        projectId: z.string(),
+        projectId: z.string().describe('Figma project ID (from list_team_projects or project URL)'),
       }),
       handler: async (ctx, input: Figma.ListProjectFilesInput) => {
         const response = await ctx.client.get(
@@ -107,7 +128,7 @@ export const FigmaConnector: ConnectorSpec = {
     listTeamProjects: {
       isTool: false,
       input: z.object({
-        teamId: z.string(),
+        teamId: z.string().describe('Figma team ID (found in the URL when viewing a team page)'),
       }),
       handler: async (ctx, input: Figma.ListTeamProjectsInput) => {
         const response = await ctx.client.get(
@@ -115,6 +136,49 @@ export const FigmaConnector: ConnectorSpec = {
           {}
         );
         return response.data;
+      },
+    },
+
+    parseFigmaUrl: {
+      isTool: false,
+      input: z.object({
+        url: z
+          .string()
+          .describe('A Figma URL (file, team, or project page). Paste from the browser.'),
+      }),
+      handler: async (
+        _ctx,
+        input: Figma.ParseFigmaUrlInput
+      ): Promise<Figma.ParseFigmaUrlResult> => {
+        const result: Figma.ParseFigmaUrlResult = {};
+        try {
+          const url = new URL(input.url.trim());
+          if (!url.hostname.includes('figma.com')) {
+            return result;
+          }
+          const pathSegments = url.pathname.replace(/^\/+|\/+$/g, '').split('/');
+          if (pathSegments.length >= 2 && pathSegments[0] === 'team') {
+            result.teamId = pathSegments[1];
+          }
+          const firstSegment = pathSegments[0];
+          if (
+            pathSegments.length >= 2 &&
+            firstSegment !== undefined &&
+            FILE_PATH_PREFIX_SET.has(firstSegment)
+          ) {
+            const candidate = pathSegments[1];
+            if (candidate && FILE_KEY_REGEX.test(candidate)) {
+              result.fileKey = candidate;
+            }
+          }
+          const nodeIdParam = url.searchParams.get('node-id');
+          if (nodeIdParam) {
+            result.nodeId = nodeIdParam.replace(/-/g, ':');
+          }
+        } catch {
+          // Invalid URL; return empty result
+        }
+        return result;
       },
     },
   },
