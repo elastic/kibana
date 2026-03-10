@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Fullscreen mode tests: view metrics in fullscreen for focused analysis.
- *
- * These tests verify that the metrics grid can be toggled to fullscreen mode,
- * metrics remain interactive in fullscreen, and fullscreen can be exited
- * via button click or Escape key.
- */
-
 import { expect } from '@kbn/scout/ui';
 import {
   spaceTest,
@@ -58,9 +50,7 @@ spaceTest.describe(
 
       await spaceTest.step('enter fullscreen mode', async () => {
         await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreenContainer).toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeVisible();
       });
 
       await spaceTest.step('verify grid is visible in fullscreen', async () => {
@@ -70,9 +60,7 @@ spaceTest.describe(
 
       await spaceTest.step('exit fullscreen mode via button', async () => {
         await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreenContainer).not.toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeHidden();
       });
     });
 
@@ -83,16 +71,12 @@ spaceTest.describe(
 
       await spaceTest.step('enter fullscreen mode', async () => {
         await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreenContainer).toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeVisible();
       });
 
       await spaceTest.step('exit fullscreen with Escape key', async () => {
         await page.keyboard.press('Escape');
-        await expect(metricsExperience.fullscreenContainer).not.toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeHidden();
       });
     });
 
@@ -103,9 +87,7 @@ spaceTest.describe(
 
       await spaceTest.step('enter fullscreen mode', async () => {
         await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreenContainer).toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeVisible();
       });
 
       await spaceTest.step('interact with pagination in fullscreen', async () => {
@@ -126,10 +108,8 @@ spaceTest.describe(
       });
 
       await spaceTest.step('exit fullscreen mode', async () => {
-        await pageObjects.metricsExperience.fullscreenButton.click();
-        await expect(metricsExperience.fullscreenContainer).not.toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await metricsExperience.fullscreenButton.click();
+        await expect(metricsExperience.fullscreen).toBeHidden();
       });
     });
 
@@ -140,29 +120,21 @@ spaceTest.describe(
 
       await spaceTest.step('enter fullscreen and open flyout', async () => {
         await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreenContainer).toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeVisible();
 
         await metricsExperience.openInsightsFlyout(0);
         await expect(metricsExperience.flyout.container).toBeVisible();
       });
 
       await spaceTest.step('close flyout and verify still in fullscreen', async () => {
-        await metricsExperience.flyout.container
-          .locator('[data-test-subj="euiFlyoutCloseButton"]')
-          .click();
+        await metricsExperience.flyout.closeButton.click();
         await expect(metricsExperience.flyout.container).toBeHidden();
-        await expect(metricsExperience.fullscreenContainer).toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeVisible();
       });
 
       await spaceTest.step('exit fullscreen', async () => {
         await metricsExperience.toggleFullscreen();
-        await expect(metricsExperience.fullscreenContainer).not.toHaveClass(
-          /metricsGridWrapper--fullScreen/
-        );
+        await expect(metricsExperience.fullscreen).toBeHidden();
       });
     });
   }

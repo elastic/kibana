@@ -7,23 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 
 export class Inspector {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly panel: Locator;
+  public readonly closeButton: Locator;
+  public readonly viewChooser: Locator;
+  public readonly requestsView: Locator;
+  public readonly statisticsTab: Locator;
+  public readonly requestTab: Locator;
+  public readonly responseTab: Locator;
+  public readonly requestTimestamp: Locator;
+  public readonly requestCodeViewer: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.panel = page.testSubj.locator('inspectorPanel');
+    this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
+    this.viewChooser = page.testSubj.locator('inspectorViewChooser');
+    this.requestsView = page.testSubj.locator('inspectorViewChooserRequests');
+    this.statisticsTab = page.testSubj.locator('inspectorRequestDetailStatistics');
+    this.requestTab = page.testSubj.locator('inspectorRequestDetailRequest');
+    this.responseTab = page.testSubj.locator('inspectorRequestDetailResponse');
+    this.requestTimestamp = page.testSubj.locator('inspector.statistics.requestTimestamp');
+    this.requestCodeViewer = page.testSubj.locator('inspectorRequestCodeViewerContainer');
+  }
 
   async open() {
     await this.page.testSubj.click('openInspectorButton');
-    await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'visible' });
+    await this.panel.waitFor({ state: 'visible' });
   }
 
   async close() {
-    await this.page.testSubj.click('euiFlyoutCloseButton');
-    await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'hidden' });
+    await this.closeButton.click();
+    await this.panel.waitFor({ state: 'hidden' });
   }
 
-  async getRequestTimestamp(): Promise<string> {
-    await this.page.testSubj.waitForSelector('inspectorPanel', { state: 'visible' });
-    return await this.page.testSubj.locator('inspector.statistics.requestTimestamp').innerText();
+  async switchToRequestsView() {
+    await this.viewChooser.click();
+    await this.requestsView.click();
   }
 }
