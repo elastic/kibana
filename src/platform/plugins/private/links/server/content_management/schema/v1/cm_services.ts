@@ -91,29 +91,6 @@ export const linksSchema = serializedTitlesSchema.extends(
   { unknowns: 'forbid' }
 );
 
-const baseLinkSavedObjectSchema = {
-  label: schema.maybe(schema.string()),
-  // Deprecated, included in schema for BWC
-  id: schema.maybe(schema.string()),
-  order: schema.maybe(schema.number()),
-};
-
-export const storedDashboardLinkSchema = dashboardLinkSchema.extends({
-  ...baseLinkSavedObjectSchema,
-  destination: undefined,
-  destinationRefName: schema.string(),
-});
-
-export const storedExternalLinkSchema = externalLinkSchema.extends(baseLinkSavedObjectSchema);
-
-export const storedLinksSchema = serializedTitlesSchema.extends({
-  layout: layoutSchema,
-  links: schema.arrayOf(
-    schema.oneOf([storedDashboardLinkSchema, storedExternalLinkSchema]),
-    { maxSize: 9999 } // For DoS prevention
-  ),
-});
-
 const linksSavedObjectSchema = savedObjectSchema(linksSchema);
 
 export const linksSearchOptionsSchema = schema.maybe(
@@ -189,3 +166,27 @@ export const serviceDefinition: ServicesDefinition = {
     },
   },
 };
+
+// Schemas for LinksStorage, including possible deprecated props
+const baseStoredLinkSchema = {
+  label: schema.maybe(schema.string()),
+  // Deprecated, included in schema for BWC
+  id: schema.maybe(schema.string()),
+  order: schema.maybe(schema.number()),
+};
+
+export const storedDashboardLinkSchema = dashboardLinkSchema.extends({
+  ...baseStoredLinkSchema,
+  destination: undefined,
+  destinationRefName: schema.string(),
+});
+
+export const storedExternalLinkSchema = externalLinkSchema.extends(baseStoredLinkSchema);
+
+export const storedLinksSchema = serializedTitlesSchema.extends({
+  layout: layoutSchema,
+  links: schema.arrayOf(
+    schema.oneOf([storedDashboardLinkSchema, storedExternalLinkSchema]),
+    { maxSize: 9999 } // For DoS prevention
+  ),
+});
