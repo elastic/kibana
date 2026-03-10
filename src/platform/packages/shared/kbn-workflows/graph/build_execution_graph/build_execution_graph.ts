@@ -856,7 +856,7 @@ function resolveWorklfowSettings(
     ...workflowSettings,
     timeout: workflowSettings.timeout ?? defaultSettings.timeout,
     'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
-    timezone: workflowSettings.timeout ?? defaultSettings.timezone,
+    timezone: workflowSettings.timezone ?? defaultSettings.timezone,
   };
 }
 
