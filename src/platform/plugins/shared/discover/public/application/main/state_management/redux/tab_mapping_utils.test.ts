@@ -145,11 +145,8 @@ describe('tab mapping utils', () => {
             ],
           },
           "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
+            "fields": "none",
             "resetId": "",
-            "rowHeight": false,
           },
           "uiState": Object {},
         }
@@ -238,11 +235,8 @@ describe('tab mapping utils', () => {
             ],
           },
           "resetDefaultProfileState": Object {
-            "breakdownField": false,
-            "columns": false,
-            "hideChart": false,
+            "fields": "none",
             "resetId": "",
-            "rowHeight": false,
           },
           "uiState": Object {},
         }

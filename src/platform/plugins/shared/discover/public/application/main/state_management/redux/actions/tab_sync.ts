@@ -19,7 +19,12 @@ import { selectTab, selectTabAppState } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
 import { addLog } from '../../../../../utils/add_log';
 import { internalStateActions } from '..';
-import type { DiscoverAppState } from '../types';
+import {
+  DEFAULT_PROFILE_STATE_FIELDS,
+  type DiscoverAppState,
+  type ResetDefaultProfileStateFields,
+  type DefaultProfileStateField,
+} from '../types';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { getCurrentUrlState } from '../../utils/cleanup_url_state';
 import { buildStateSubscribe } from '../../utils/build_state_subscribe';
@@ -108,12 +113,12 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         dispatch(
           internalStateActions.setResetDefaultProfileState({
             tabId,
-            resetDefaultProfileState: {
+            resetDefaultProfileState: getResetDefaultProfileFields({
               columns: columns === undefined,
               rowHeight: rowHeight === undefined,
               breakdownField: breakdownField === undefined,
               hideChart: hideChart === undefined,
-            },
+            }),
           })
         );
       }
@@ -282,3 +287,21 @@ export const stopSyncing: InternalStateThunkActionCreator<[TabActionPayload]> = 
     unsubscribeFn?.();
     tabRuntimeState.unsubscribeFn$.next(undefined);
   };
+
+const getResetDefaultProfileFields = (
+  shouldResetByField: Record<DefaultProfileStateField, boolean>
+): ResetDefaultProfileStateFields => {
+  const fields = DEFAULT_PROFILE_STATE_FIELDS.filter((field) => shouldResetByField[field]);
+
+  if (fields.length === 0) {
+    return 'none';
+  }
+
+  if (fields.length === DEFAULT_PROFILE_STATE_FIELDS.length) {
+    return 'all';
+  }
+
+  const [firstField, ...restFields] = fields;
+
+  return [firstField, ...restFields];
+};

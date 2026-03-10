@@ -178,10 +178,7 @@ describe('tab_state_data_view actions', () => {
       const params = setupTestParams(dataViewComplexMock);
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: 'none',
         })
       );
       await params.internalState.dispatch(
@@ -191,10 +188,7 @@ describe('tab_state_data_view actions', () => {
       );
       expect(params.getCurrentTab().resetDefaultProfileState).toEqual(
         expect.objectContaining({
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
+          fields: 'all',
         })
       );
     });

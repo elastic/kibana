@@ -614,10 +614,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     const documents$ = stateContainer.dataState.data$.documents$;
     expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      hideChart: false,
-      rowHeight: false,
-      breakdownField: false,
+      fields: 'none',
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -634,10 +631,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        hideChart: true,
-        rowHeight: true,
-        breakdownField: true,
+        fields: 'all',
       })
     );
     documents$.next({
@@ -646,12 +640,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-        resetDefaultProfileState: {
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
-        },
+        resetDefaultProfileState: 'none',
       })
     );
     stateContainer.internalState.dispatch(
@@ -665,10 +654,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: 'none',
       })
     );
     documents$.next({
@@ -686,10 +672,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
+        fields: 'all',
       })
     );
     documents$.next({
@@ -757,10 +740,7 @@ describe('buildEsqlFetchSubscribe', () => {
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
     expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-      hideChart: false,
+      fields: 'none',
     });
     documents$.next({
       fetchStatus: FetchStatus.PARTIAL,
@@ -769,10 +749,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: 'none',
       })
     );
     documents$.next({
@@ -782,10 +759,7 @@ describe('buildEsqlFetchSubscribe', () => {
     });
     await waitFor(() =>
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: true,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: ['columns'],
       })
     );
   });

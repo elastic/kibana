@@ -18,6 +18,9 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
+  type DefaultProfileStateField,
+  type ResetDefaultProfileStateFields,
+  type ResetDefaultProfileState,
   TabInitializationStatus,
 } from './types';
 

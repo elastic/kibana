@@ -196,12 +196,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: {
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
-        },
+        resetDefaultProfileState: 'all',
       })
     );
 
@@ -248,12 +243,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     dispatch(
       internalStateSlice.actions.setResetDefaultProfileState({
         tabId,
-        resetDefaultProfileState: {
-          columns: true,
-          rowHeight: true,
-          breakdownField: true,
-          hideChart: true,
-        },
+        resetDefaultProfileState: 'all',
       })
     );
 

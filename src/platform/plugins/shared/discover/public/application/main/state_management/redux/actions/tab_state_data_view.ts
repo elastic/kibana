@@ -103,12 +103,7 @@ export const changeDataView: InternalStateThunkActionCreator<
       dispatch(
         internalStateActions.setResetDefaultProfileState({
           tabId,
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: true,
-            breakdownField: true,
-            hideChart: true,
-          },
+          resetDefaultProfileState: 'all',
         })
       );
 

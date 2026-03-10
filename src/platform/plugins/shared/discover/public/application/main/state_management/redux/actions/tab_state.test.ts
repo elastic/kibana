@@ -64,10 +64,7 @@ describe('tab_state actions', () => {
 
       expect(prevResetDefaultProfileState).toEqual({
         resetId: expect.any(String),
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: 'none',
       });
 
       // Transition to data view mode
@@ -95,10 +92,7 @@ describe('tab_state actions', () => {
 
       expect(tab.resetDefaultProfileState).toEqual({
         resetId: expect.any(String),
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
+        fields: 'all',
       });
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId
@@ -155,10 +149,7 @@ describe('tab_state actions', () => {
 
       expect(prevResetDefaultProfileState).toEqual({
         resetId: expect.any(String),
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: 'none',
       });
 
       // Transition to ES|QL mode
@@ -186,10 +177,7 @@ describe('tab_state actions', () => {
 
       expect(tab.resetDefaultProfileState).toEqual({
         resetId: expect.any(String),
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
-        hideChart: true,
+        fields: 'all',
       });
       expect(tab.resetDefaultProfileState.resetId).not.toEqual(
         prevResetDefaultProfileState.resetId
