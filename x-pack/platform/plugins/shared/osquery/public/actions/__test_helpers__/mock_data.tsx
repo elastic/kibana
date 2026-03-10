@@ -10,8 +10,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { EuiProvider } from '@elastic/eui';
 
-import { SearchHit } from '../../../common/search_strategy';
-import {
+import type { SearchHit } from '../../../common/search_strategy';
+import type {
   LiveHistoryRow,
   ScheduledHistoryRow,
   UnifiedHistoryResponse,

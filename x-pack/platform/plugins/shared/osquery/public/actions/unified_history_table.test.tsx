@@ -12,7 +12,7 @@ import { UnifiedHistoryTable } from './unified_history_table';
 import { useUnifiedHistory } from './use_unified_history';
 import { useBulkGetUserProfiles } from './use_user_profiles';
 import { usePacks } from '../packs/use_packs';
-import { UnifiedHistoryResponse } from '../../common/api/unified_history/types';
+import type { UnifiedHistoryResponse } from '../../common/api/unified_history/types';
 import {
   TestProviders,
   createMockLiveRow,
