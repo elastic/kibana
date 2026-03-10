@@ -69,7 +69,7 @@ async function handleOAuth401Error({
   axiosInstance: AxiosInstance;
   authMode?: AuthMode;
   profileUid?: string;
-}): Promise<never | AxiosInstance> {
+}): Promise<AxiosInstance> {
   // Prevent retry loops - only attempt refresh once per request
   if (error.config._retry) {
     return Promise.reject(error);
@@ -161,7 +161,7 @@ async function handleEars401Error({
   axiosInstance: AxiosInstance;
   authMode?: AuthMode;
   profileUid?: string;
-}): Promise<never | AxiosInstance> {
+}): Promise<AxiosInstance> {
   if (error.config._retry) {
     return Promise.reject(error);
   }
