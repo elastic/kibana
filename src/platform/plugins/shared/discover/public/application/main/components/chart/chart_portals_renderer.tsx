@@ -306,6 +306,10 @@ const CustomChartSectionWrapper = ({
 
   const isComponentVisible = !!layoutProps.chart && !layoutProps.chart.hidden;
 
+  if (!isComponentVisible) {
+    return null;
+  }
+
   if (!isComponentVisible && renderCustomChartToggleActions) {
     if (!layoutProps.chart) {
       return null;
