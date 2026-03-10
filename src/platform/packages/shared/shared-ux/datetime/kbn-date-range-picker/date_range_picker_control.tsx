@@ -142,8 +142,8 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
-  // This magic number is fine for now
-  // and the --kbnDateRangePickerWidth is undefined on purpose
+  // The CSS custom property --kbnDateRangePickerWidth is not set by this component,
+  // allowing consumers to override the width; 21.25rem is the default fallback.
   const wrapperRestrictedStyles = css`
     inline-size: var(--kbnDateRangePickerWidth, 21.25rem);
   `;
@@ -155,7 +155,8 @@ export function DateRangePickerControl() {
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={width === 'restricted' && wrapperRestrictedStyles}
+      css={width === 'restricted' ? wrapperRestrictedStyles : undefined}
+      data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
         compressed={compressed}

@@ -29,7 +29,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   jobIds,
   swimlaneType,
   viewBy,
-  timeRange,
+  time_range: timeRange,
   filters,
   query,
   refreshConfig,

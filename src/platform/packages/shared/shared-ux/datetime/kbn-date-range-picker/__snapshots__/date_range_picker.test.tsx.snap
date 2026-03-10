@@ -6,9 +6,11 @@ exports[`DateRangePicker renders 1`] = `
 >
   <div
     class="euiPopover emotion-euiPopover-inline"
+    data-test-subj="dateRangePickerDialogTriggerWrapper"
   >
     <div
       class="css-0"
+      data-test-subj="dateRangePickerControlWrapper"
     >
       <div
         class="euiFormControlLayout emotion-euiFormControlLayout-compressed"

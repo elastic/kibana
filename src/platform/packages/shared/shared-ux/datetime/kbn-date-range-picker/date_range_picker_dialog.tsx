@@ -85,6 +85,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       repositionToCrossAxis={false}
       display={width === 'auto' ? 'inline' : 'block'}
       ownFocus={false}
+      data-test-subj="dateRangePickerDialogTriggerWrapper"
       panelPaddingSize="none"
       panelRef={(node) => {
         panelRef.current = node;

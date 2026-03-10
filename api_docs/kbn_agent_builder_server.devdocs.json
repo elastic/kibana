@@ -1370,7 +1370,7 @@
           "BuiltInToolSpecificConfig"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 107,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1395,7 +1395,7 @@
               ".builtin"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 113,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1413,7 +1413,7 @@
               "RunInput"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 117,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1428,9 +1428,7 @@
               "\nHandler to call to execute the tool."
             ],
             "signature": [
-              "(args: ",
-              "TypeOf",
-              "<RunInput>, context: ",
+              "(args: z.infer<RunInput>, context: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -1465,7 +1463,7 @@
               ">>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 121,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1531,32 +1529,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 125,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/agent-builder-server",
-            "id": "def-common.BuiltinToolDefinition.summarizeToolReturn",
-            "type": "Function",
-            "tags": [],
-            "label": "summarizeToolReturn",
-            "description": [
-              "\nOptional function to summarize a tool return for conversation history.\nWhen provided, this function will be called when processing conversation history\nto replace large tool results with compact summaries.\nThis helps prevent context bloat in long conversations."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/agent-builder-server",
-                "scope": "common",
-                "docId": "kibKbnAgentBuilderServerPluginApi",
-                "section": "def-common.ToolReturnSummarizerFn",
-                "text": "ToolReturnSummarizerFn"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 130,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1600,7 +1573,7 @@
           ", TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1626,7 +1599,7 @@
               "<TSchema>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1651,9 +1624,7 @@
                 "section": "def-common.ExecutableToolHandlerParams",
                 "text": "ExecutableToolHandlerParams"
               },
-              "<",
-              "TypeOf",
-              "<TSchema>>) => Promise<",
+              "<z.infer<TSchema>>) => Promise<",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -1664,7 +1635,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1691,7 +1662,7 @@
                   " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-                "lineNumber": 76,
+                "lineNumber": 83,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1718,7 +1689,32 @@
               "<TConfig> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ExecutableTool.summarizeToolReturn",
+            "type": "Function",
+            "tags": [],
+            "label": "summarizeToolReturn",
+            "description": [
+              "\nOptional function to summarize a tool return for conversation history.\nWhen provided, this function will be called when processing conversation history\nto replace large tool results with compact summaries."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolReturnSummarizerFn",
+                "text": "ToolReturnSummarizerFn"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2242,9 +2238,7 @@
                 "section": "def-common.ToolHandlerFn",
                 "text": "ToolHandlerFn"
               },
-              "<",
-              "TypeOf",
-              "<TSchema>>>"
+              "<z.infer<TSchema>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
             "lineNumber": 36,
@@ -2344,7 +2338,7 @@
           "<TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 55,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2360,7 +2354,7 @@
               "TConfig"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 56,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2373,7 +2367,7 @@
             "label": "description",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 57,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2562,13 +2556,7 @@
             "description": [],
             "signature": [
               "AttachmentBoundedTool",
-              "<",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]"
+              "<ZodObject<any>>[]"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/processed_input.ts",
             "lineNumber": 17,
@@ -4582,7 +4570,7 @@
           "\nCommon interface shared across all tool providers."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 14,
+        "lineNumber": 15,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4608,7 +4596,7 @@
               ") => Promise<boolean>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4630,7 +4618,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-                "lineNumber": 21,
+                "lineNumber": 22,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4665,16 +4653,10 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              "<{}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4696,7 +4678,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-                "lineNumber": 26,
+                "lineNumber": 27,
                 "columnNumber": 7,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4731,16 +4713,10 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              "<{}, ZodObject<any>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4762,7 +4738,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-                "lineNumber": 30,
+                "lineNumber": 31,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4784,7 +4760,7 @@
           "\nOptions for {@link ToolProvider.get}"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 87,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4797,7 +4773,7 @@
             "label": "toolId",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 91,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4814,7 +4790,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 92,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4832,7 +4808,7 @@
           "\nOptions for {@link ToolProvider.has}"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 79,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4845,7 +4821,7 @@
             "label": "toolId",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 83,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4862,7 +4838,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 84,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4880,7 +4856,7 @@
           "\nOptions for {@link ToolProvider.list}"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 95,
+        "lineNumber": 102,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4897,7 +4873,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 99,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4984,13 +4960,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 52,
@@ -5052,13 +5022,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              ", {}, ZodObject<any>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 57,
@@ -5127,13 +5091,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 61,
@@ -5202,13 +5160,7 @@
                 "section": "def-common.ToolType",
                 "text": "ToolType"
               },
-              ", {}, ",
-              "ZodObject",
-              "<any, ",
-              "UnknownKeysParam",
-              ", ",
-              "ZodTypeAny",
-              ", { [x: string]: any; }, { [x: string]: any; }>>>"
+              ", {}, ZodObject<any>>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 65,
@@ -5308,7 +5260,7 @@
               "\nExecute a tool."
             ],
             "signature": [
-              "<TParams extends object = Record<string, unknown>>(params: ",
+              "<TParams extends Record<string, unknown> = Record<string, unknown>>(params: ",
               {
                 "pluginId": "@kbn/agent-builder-server",
                 "scope": "common",
@@ -6147,7 +6099,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 72,
+        "lineNumber": 79,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6174,7 +6126,7 @@
               " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 76,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6205,7 +6157,7 @@
           " | undefined; toolParams: TParams; toolCallId?: string | undefined; defaultConnectorId?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 64,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6371,7 +6323,7 @@
           "<string>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-        "lineNumber": 60,
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6395,7 +6347,7 @@
               "<TConfig>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/tool_provider.ts",
-            "lineNumber": 61,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7247,7 +7199,7 @@
           "[] | undefined"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 92,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7274,7 +7226,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 104,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
