@@ -131,7 +131,7 @@ export const getGroupingQuery = ({
         ? {
             filter: unitsCountFilter,
             aggs: {
-              filtered_unitsCount: {
+              filteredUnitsCount: {
                 value_count: {
                   field: shouldFlattenMultiValueField
                     ? countByKeyForMultiValueFields ?? 'groupByField'
@@ -221,7 +221,7 @@ export const parseGroupingQuery = <T>(
       value: aggs.groupsCount?.value ?? 0,
     },
     unitsCount: {
-      value: (aggs as any).unitsCount?.filtered_unitsCount?.value ?? aggs.unitsCount?.value ?? 0,
+      value: (aggs as any).unitsCount?.filteredUnitsCount?.value ?? aggs.unitsCount?.value ?? 0,
     },
   };
 };

@@ -103,7 +103,7 @@ describe('group selector', () => {
       expect(result.aggs.unitsCount).toEqual({
         filter: { term: { 'kibana.alert.workflow_status': 'open' } },
         aggs: {
-          filtered_unitsCount: {
+          filteredUnitsCount: {
             value_count: { field: 'groupByField' },
           },
         },
@@ -230,12 +230,12 @@ describe('group selector', () => {
       });
     });
 
-    it('parseGroupingQuery hoists filtered_unitsCount.value if present', () => {
+    it('parseGroupingQuery hoists filteredUnitsCount.value if present', () => {
       const filteredAggs = {
         ...groupingAggs,
         unitsCount: {
           doc_count: 100,
-          filtered_unitsCount: {
+          filteredUnitsCount: {
             value: 42,
           },
         },
