@@ -117,6 +117,8 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Pinned backing index for step executions — prevents cross-index splitting on rollover */
   stepExecutionsIndex?: string;
+  /** Pinned backing index for workflow execution — all updates target this index after creation */
+  executionsIndex?: string;
 }
 
 export interface ProviderInput {

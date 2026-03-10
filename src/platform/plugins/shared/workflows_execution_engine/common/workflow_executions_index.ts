@@ -11,7 +11,16 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_EXECUTIONS_INDEX_PREFIX = '.workflows-executions';
+
+/** Alias used for reads (fans out to all backing indexes) and new writes (routes to write index). */
+export const WORKFLOWS_EXECUTIONS_INDEX = WORKFLOWS_EXECUTIONS_INDEX_PREFIX;
+
+export const WORKFLOWS_EXECUTIONS_ILM_POLICY = '.workflows-executions-ilm-policy';
+
+export const WORKFLOWS_EXECUTIONS_INDEX_PATTERN = `${WORKFLOWS_EXECUTIONS_INDEX_PREFIX}-*`;
+
+export const WORKFLOWS_EXECUTIONS_INITIAL_INDEX = `${WORKFLOWS_EXECUTIONS_INDEX_PREFIX}-000001`;
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,

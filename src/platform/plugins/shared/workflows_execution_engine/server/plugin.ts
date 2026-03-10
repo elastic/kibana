@@ -57,6 +57,8 @@ import type {
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -395,8 +397,14 @@ export class WorkflowsExecutionEnginePlugin
               );
               span?.end();
 
+              const resolvedStepExecutionsIndex = await stepExecutionRepository.resolveWriteIndex();
+              const resolvedExecutionsIndex = await workflowExecutionRepository.resolveWriteIndex();
+
               const workflowExecution: Partial<EsWorkflowExecution> = {
-                id: generateUuid(),
+                id: generateEncodedWorkflowExecutionId({
+                  indexName: resolvedExecutionsIndex,
+                  indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+                }),
                 spaceId,
                 workflowId: workflow.id,
                 isTestRun: false,
@@ -411,6 +419,8 @@ export class WorkflowsExecutionEnginePlugin
                 createdAt: workflowCreatedAt.toISOString(),
                 executedBy,
                 triggeredBy: 'scheduled',
+                stepExecutionsIndex: resolvedStepExecutionsIndex,
+                executionsIndex: resolvedExecutionsIndex,
                 // Store queue delay metrics for observability (only if enabled in config)
                 ...(this.config.collectQueueMetrics
                   ? {
@@ -435,8 +445,7 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
-              workflowExecution.stepExecutionsIndex =
-                await stepExecutionRepository.resolveWriteIndex();
+
 
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
@@ -529,8 +538,16 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.elasticsearch.client
       );
       const spaceId = (context.spaceId as string | undefined) || 'default';
+      const resolvedStepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
+      const resolvedExecutionsIndex = await workflowExecutionRepository.resolveWriteIndex();
+
       const workflowExecution: Partial<EsWorkflowExecution> = {
-        id: generateUuid(),
+        id: generateEncodedWorkflowExecutionId({
+          indexName: resolvedExecutionsIndex,
+          indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+        }),
+        stepExecutionsIndex: resolvedStepExecutionsIndex,
+        executionsIndex: resolvedExecutionsIndex,
         spaceId,
         workflowId: workflow.id,
         isTestRun: workflow.isTestRun,
@@ -554,6 +571,7 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       workflowExecution.stepExecutionsIndex = await stepExecutionRepo.resolveWriteIndex();
+      workflowExecution.executionsIndex = await workflowExecutionRepository.resolveWriteIndex();
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
@@ -723,6 +741,7 @@ export class WorkflowsExecutionEnginePlugin
         executedBy,
         triggeredBy,
         stepExecutionsIndex: await stepExecutionRepo.resolveWriteIndex(),
+        executionsIndex: await workflowExecutionRepository.resolveWriteIndex(),
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);

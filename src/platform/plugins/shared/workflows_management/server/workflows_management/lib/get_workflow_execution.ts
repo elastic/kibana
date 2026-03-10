@@ -14,6 +14,8 @@ import type {
   WorkflowExecutionDto,
 } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
+import { decodeEncodedWorkflowExecutionId, resolveIndex } from '@kbn/workflows/server/utils';
+import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../../../common';
 import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
 
 interface GetWorkflowExecutionParams {
@@ -37,13 +39,22 @@ export const getWorkflowExecution = async ({
   includeInput = false,
   includeOutput = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
+  const result = decodeEncodedWorkflowExecutionId(workflowExecutionId);
+
+  if (!result.success) {
+    logger.error(`Failed to decode workflow execution ID: ${result.error}`);
+    return null;
+  }
+
+  const { indexSuffix } = result;
+
   try {
     // Use direct GET by _id for O(1) lookup performance instead of search
     // This is critical for reducing ES CPU load from frequent UI polling
     let response;
     try {
       response = await esClient.get<EsWorkflowExecution>({
-        index: workflowExecutionIndex,
+        index: resolveIndex({ indexSuffix, indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN }),
         id: workflowExecutionId,
       });
     } catch (error: unknown) {

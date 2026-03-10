@@ -8,17 +8,20 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { createOrUpdateIndex, setupRolloverIndex } from './create_index';
+import { setupRolloverIndex } from './create_index';
 import {
+  WORKFLOWS_STEP_EXECUTIONS_ILM_POLICY,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
-  WORKFLOWS_STEP_EXECUTIONS_ILM_POLICY,
   WORKFLOWS_STEP_EXECUTIONS_INITIAL_INDEX,
 } from './step_executions_index';
 import {
+  WORKFLOWS_EXECUTIONS_ILM_POLICY,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+  WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+  WORKFLOWS_EXECUTIONS_INITIAL_INDEX,
 } from './workflow_executions_index';
 
 interface CreateIndexesOptions {
@@ -29,10 +32,14 @@ interface CreateIndexesOptions {
 export async function createIndexes(options: CreateIndexesOptions): Promise<void> {
   const { esClient, logger } = options;
   await Promise.all([
-    createOrUpdateIndex({
+    setupRolloverIndex({
       esClient,
-      indexName: WORKFLOWS_EXECUTIONS_INDEX,
+      aliasName: WORKFLOWS_EXECUTIONS_INDEX,
+      indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+      initialIndex: WORKFLOWS_EXECUTIONS_INITIAL_INDEX,
+      ilmPolicyName: WORKFLOWS_EXECUTIONS_ILM_POLICY,
       mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+      rolloverMaxAge: '10m',
       logger,
     }),
     setupRolloverIndex({
