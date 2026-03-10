@@ -240,7 +240,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
     >
       {fullscreenLabels.tools}
     </EuiContextMenuItem>,
-<<<<<<< HEAD
     ...(isExperimentalFeaturesEnabled
       ? [
           <EuiContextMenuItem
@@ -251,7 +250,9 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             data-test-subj="agentBuilderActionsSkills"
           >
             {fullscreenLabels.skills}
-=======
+          </EuiContextMenuItem>,
+        ]
+      : []),
     ...(isABConnectorsEnabled
       ? [
           <EuiContextMenuItem
@@ -262,7 +263,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onRenameCo
             data-test-subj="agentBuilderActionsConnectors"
           >
             {fullscreenLabels.connectors}
->>>>>>> cf1733041f0a (First pass at connectors in Agent Builder)
           </EuiContextMenuItem>,
         ]
       : []),
