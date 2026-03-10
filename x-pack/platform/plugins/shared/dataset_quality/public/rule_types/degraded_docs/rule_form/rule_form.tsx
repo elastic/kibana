@@ -71,7 +71,7 @@ export const RuleForm: React.FunctionComponent<
   );
 
   const updateProperty = useCallback(
-    (property: keyof DegradedDocsRuleParams, value?: any) => {
+    (property: keyof DegradedDocsRuleParams, value?: DegradedDocsRuleParams[typeof property]) => {
       setRuleParams(property, value);
     },
     [setRuleParams]

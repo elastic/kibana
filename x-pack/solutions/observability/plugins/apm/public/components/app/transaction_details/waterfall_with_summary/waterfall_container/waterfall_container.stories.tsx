@@ -76,17 +76,20 @@ export const Example: StoryFn<any> = () => {
 
   const traceDocs = events
     .filter((event) => event['processor.event'] !== 'metric')
-    .map((event) => dedot(event, {}) as WaterfallTransaction | WaterfallSpan);
+    .map((event) => dedot(event, {}) as unknown as WaterfallTransaction | WaterfallSpan);
   const traceItems = {
     exceedsMax: false,
     traceDocs,
-    errorDocs: errorDocs.map((error) => dedot(error, {}) as Error),
+    errorDocs: errorDocs.map((error) => dedot(error, {}) as unknown as Error),
     spanLinksCountById: {},
     traceDocsTotal: traceDocs.length,
     maxTraceItems: 5000,
   };
 
-  const entryTransaction = dedot(traceDocs[0]!, {}) as Transaction;
+  const entryTransaction = dedot(
+    traceDocs[0]! as unknown as Record<string, unknown>,
+    {}
+  ) as unknown as Transaction;
   const waterfall = getWaterfall({ traceItems, entryTransaction });
 
   return (

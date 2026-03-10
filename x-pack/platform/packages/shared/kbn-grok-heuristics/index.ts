@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { GrokPatternNode } from './src/types';
 export { getReviewFields } from './src/review/get_review_fields';
 export { getGrokPattern } from './src/review/get_grok_pattern';
 export { unwrapPatternDefinitions } from '@kbn/streamlang/types/utils/grok_pattern_definitions';

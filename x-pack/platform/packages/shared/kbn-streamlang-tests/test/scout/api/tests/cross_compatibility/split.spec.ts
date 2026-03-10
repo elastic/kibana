@@ -156,10 +156,14 @@ apiTest.describe('Cross-compatibility - Split Processor', { tag: ['@ess', '@svlO
     expect(ingestResult).toHaveLength(2);
     expect(esqlResult.documents).toHaveLength(2);
 
-    const ingestDoc1 = ingestResult.find((d: any) => d.should_split === 'yes');
-    const ingestDoc2 = ingestResult.find((d: any) => d.should_split === 'no');
-    const esqlDoc1 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_split === 'yes');
-    const esqlDoc2 = esqlResult.documentsWithoutKeywords.find((d: any) => d.should_split === 'no');
+    const ingestDoc1 = ingestResult.find((d: Record<string, unknown>) => d.should_split === 'yes');
+    const ingestDoc2 = ingestResult.find((d: Record<string, unknown>) => d.should_split === 'no');
+    const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
+      (d: Record<string, unknown>) => d.should_split === 'yes'
+    );
+    const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
+      (d: Record<string, unknown>) => d.should_split === 'no'
+    );
 
     expect(ingestDoc1).toStrictEqual(esqlDoc1);
     expect(ingestDoc1).toStrictEqual(expect.objectContaining({ tags: ['foo', 'bar', 'baz'] }));

@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { RenameProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -35,9 +36,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.host?.renamed).toBe('test-host');
-      expect(source?.host?.original).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.host)?.renamed).toBe('test-host');
+      expect(asDoc(source?.host)?.original).toBeUndefined();
     });
 
     [
@@ -90,8 +91,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.host?.renamed).toBeUndefined();
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.host)?.renamed).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -137,8 +138,8 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source?.host?.renamed).toBe('test-host');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.host)?.renamed).toBe('test-host');
     });
 
     apiTest('should fail if target field exists and override is false', async ({ testBed }) => {

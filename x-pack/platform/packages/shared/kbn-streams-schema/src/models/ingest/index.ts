@@ -28,10 +28,7 @@ export namespace IngestStream {
 
   export const all: ModelValidation<BaseStream.Model, IngestStream.all.Model> = joinValidation(
     BaseStream,
-    [
-      WiredStream as ModelValidation<BaseStream.Model, WiredStream.Model>,
-      ClassicStream as ModelValidation<BaseStream.Model, ClassicStream.Model>,
-    ]
+    [WiredStream, ClassicStream]
   );
 
   // Optimized implementation for Definition check - the fallback is a zod-based check

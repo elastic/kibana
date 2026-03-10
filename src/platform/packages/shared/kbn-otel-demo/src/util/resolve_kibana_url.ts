@@ -63,12 +63,9 @@ export async function resolveKibanaUrl(kibanaHostname: string, log?: ToolingLog)
     // No base path detected or request succeeded without redirect
     log?.debug(`No dev mode base path detected, using: ${kibanaHostname}`);
     return kibanaHostname;
-  } catch (error: any) {
-    // If we can't connect, just return the original URL
-    // The actual API call will handle the connection error
-    log?.debug(
-      `Could not detect base path (${error.code || error.message}), using: ${kibanaHostname}`
-    );
+  } catch (error: unknown) {
+    const { code, message } = error as { code?: string; message?: string };
+    log?.debug(`Could not detect base path (${code || message}), using: ${kibanaHostname}`);
     return kibanaHostname;
   }
 }

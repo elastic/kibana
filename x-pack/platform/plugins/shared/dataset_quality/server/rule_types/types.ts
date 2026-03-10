@@ -26,7 +26,7 @@ export type DatasetQualityAlert = Omit<StackAlert, 'kibana.alert.evaluation.thre
 };
 
 export interface AdditionalContext {
-  [x: string]: any;
+  [x: string]: unknown;
 }
 
 export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'dataset.quality';
