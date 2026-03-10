@@ -10,7 +10,7 @@
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
 import { columnsAfter } from './columns_after';
-import { METRICS_INFO_COLUMNS } from './constants';
+import { METRICS_INFO_COLUMNS } from './columns_after';
 
 describe('METRICS_INFO > columnsAfter', () => {
   const mockCommand = { name: 'metrics_info' } as ESQLCommand;

@@ -9,15 +9,14 @@
 
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../types';
-import type { SupportedDataType } from '../../definitions/types';
 
-export const METRICS_INFO_COLUMNS: Array<{ name: string; type: SupportedDataType }> = [
-  { name: 'metric_name', type: 'keyword' },
-  { name: 'data_stream', type: 'keyword' },
-  { name: 'unit', type: 'keyword' },
-  { name: 'metric_type', type: 'keyword' },
-  { name: 'field_type', type: 'keyword' },
-  { name: 'dimension_fields', type: 'keyword' },
+export const METRICS_INFO_COLUMNS: ESQLColumnData[] = [
+  { name: 'metric_name', type: 'keyword', userDefined: false },
+  { name: 'data_stream', type: 'keyword', userDefined: false },
+  { name: 'unit', type: 'keyword', userDefined: false },
+  { name: 'metric_type', type: 'keyword', userDefined: false },
+  { name: 'field_type', type: 'keyword', userDefined: false },
+  { name: 'dimension_fields', type: 'keyword', userDefined: false },
 ];
 
 export const columnsAfter = (
@@ -25,9 +24,5 @@ export const columnsAfter = (
   previousColumns: ESQLColumnData[],
   _query: string
 ): ESQLColumnData[] => {
-  const newColumns: ESQLColumnData[] = METRICS_INFO_COLUMNS.map((column) => ({
-    ...column,
-    userDefined: false,
-  }));
-  return [...previousColumns, ...newColumns];
+  return [...previousColumns, ...METRICS_INFO_COLUMNS];
 };
