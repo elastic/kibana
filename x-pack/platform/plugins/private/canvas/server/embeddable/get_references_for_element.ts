@@ -15,5 +15,5 @@ export const getReferencesForElement = (
     .filter(({ name }) => name.startsWith(`${elementId}:`))
     .map(({ name, ...rest }) => ({
       ...rest,
-      name: name.slice(`${elementId}:`.length),
+      name: name.replace(`${elementId}:`, '').replace(/l\d+_/, ''), // Removes the element ID prefix and subsequently the link number prefix added by the expression service
     }));
