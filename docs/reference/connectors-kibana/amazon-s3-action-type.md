@@ -31,7 +31,7 @@ AWS Region
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by trying to access a list of available buckets for your authenticated account.
 
-The Amazon s3 connector has the following actions:
+The Amazon S3 connector has the following actions:
 
 List buckets
 :   List the available buckets your authenticated account has access to
@@ -69,7 +69,7 @@ If you do not see the **Security Credentials** link, reach out to your AWS admin
 6. Navigate to the **Security credentials** tab for the selected user.
 7. Under **Access keys**, you can view existing access keys (the Access Key ID is visible, but the Secret Access Key is only shown when first created).
 8. To create a new access key, click **Create access key** and choose the appropriate use case (for example, **Application running outside AWS**). Download the `.csv` file or copy both the **Access Key ID** and **Secret Access Key** immediately. The secret key is only shown once and cannot be retrieved later.
-1.  For the **AWS Region**, select the region where your S3 buckets are located (for example, `us-east-1`, `eu-west-1`). You can find the region in the AWS console URL or in the S3 bucket details.
+9.  For the **AWS Region**, select the region where your S3 buckets are located (for example, `us-east-1`, `eu-west-1`). You can find the region in the AWS console URL or in the S3 bucket details.
 
 :::{tip}
 Make sure that the IAM user has the necessary S3 permissions (for example, `s3:ListBucket`, `s3:GetObject`) on the buckets you want the credentials to access for the connector to function properly.

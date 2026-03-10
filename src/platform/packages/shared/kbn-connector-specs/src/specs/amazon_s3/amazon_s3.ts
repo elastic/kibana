@@ -68,7 +68,7 @@ export const AmazonS3: ConnectorSpec = {
         }),
         helpText: i18n.translate('core.kibanaConnectorSpecs.amazonS3.config.region.helpText', {
           defaultMessage:
-            'The AWS region where your S3 buckets are located (for example, us-east-1)',
+            'The AWS Region where your S3 buckets are located (for example, us-east-1)',
         }),
       }),
   }),

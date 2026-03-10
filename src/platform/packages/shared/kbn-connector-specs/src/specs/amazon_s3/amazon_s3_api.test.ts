@@ -186,7 +186,7 @@ describe('amazon_s3_api exports', () => {
       'us-east-1'
     );
     expect(result).toMatch(
-      /^https:\/\/s3\.amazonaws\.com\/test-object-key\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.+&X-Amz-Date=.+&X-Amz-Expires=300&X-Amz-Signature=.+&X-Amz-SignedHeaders=.+$/
+      /^https:\/\/test-bucket-name\.s3\.us-east-1\.amazonaws\.com\/test-object-key\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.+&X-Amz-Date=.+&X-Amz-Expires=300&X-Amz-Signature=.+&X-Amz-SignedHeaders=.+$/
     );
   });
 
@@ -252,7 +252,7 @@ describe('amazon_s3_api exports', () => {
       <DisplayName>owner display name</DisplayName>
       <ID>owner-id</ID>
    </Owner>
-   <ContinuationToken>continuation-token</ContinuationToken>
+   <NextContinuationToken>continuation-token</NextContinuationToken>
    <Prefix></Prefix>
 </ListAllMyBucketsResult>`;
 
@@ -275,7 +275,7 @@ describe('amazon_s3_api exports', () => {
   const responseListBucketObjectsMultipleObjects = `
   <ListBucketResult>
     <IsTruncated>true</IsTruncated>
-    <ContinuationToken>continuation-token</ContinuationToken>
+    <NextContinuationToken>continuation-token</NextContinuationToken>
     <Contents>
       <Key>test-object-key</Key>
       <Size>12345</Size>

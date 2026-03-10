@@ -34,7 +34,7 @@ function parseAwsHost(
     return null;
   }
 
-  if (parts.length == 2) {
+  if (parts.length === 2) {
     return { service: parts[0], region: parts[1] };
   }
 

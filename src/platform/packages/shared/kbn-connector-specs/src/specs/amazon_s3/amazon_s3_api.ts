@@ -69,7 +69,7 @@ interface AmazonS3Object {
   message?: string;
 }
 
-function createQueryQueryString(params: Record<string, string | undefined>): string {
+function createQueryString(params: Record<string, string | undefined>): string {
   const queryParams: Record<string, string> = {};
   if (params) {
     for (const [key, value] of Object.entries(params)) {
@@ -161,23 +161,26 @@ function jsObjectToRecord(
 // This function parses a response from AWS in XML and returns a Record set of the found object
 // The collectionItems parameter is used to specify if there are any nested collections in the XML that should be returned as an array of items instead of a single object.
 // The key of the collectionItems object is the name of the collection in the XML, and the value is the name of the item within that collection.
-function parseAwsXmlResponse(
+async function parseAwsXmlResponse(
   xml: string,
   collectionItems?: Record<string, string | undefined>
-): Record<string, unknown> {
+): Promise<Record<string, unknown>> {
   const parser = new Parser({ explicitArray: false, explicitRoot: false, ignoreAttrs: true });
 
   let returnValue: Record<string, unknown> = {};
 
-  parser.parseString(xml, (err, result) => {
-    if (err) {
-      throw new Error(`Failed to parse AWS XML response: ${err.message}`);
-    }
+  let parsed = await parser.parseStringPromise(xml);
+  return jsObjectToRecord(parsed, collectionItems || {});
+}
 
-    returnValue = jsObjectToRecord(result, collectionItems || {});
-  });
+function urlEncodeS3ObjectKey(objectKey: string): string {
+  return encodeURIComponent(objectKey).split('/').map((segment) => encodeURIComponent(segment)).join('/');
+}
 
-  return returnValue;
+function getAwsS3EndpointForBucketObject(region: string, bucketName: string, objectKey: string): string {
+  // Ensure each segment of the key is encoded, but slashes are preserved
+  const encodedObjectKey = urlEncodeS3ObjectKey(objectKey);
+  return `https://${bucketName}.s3.${region}.amazonaws.com/${encodedObjectKey}`;
 }
 
 export async function listAmazonS3Buckets(
@@ -190,7 +193,7 @@ export async function listAmazonS3Buckets(
   const region = (ctx.config as { region: string }).region;
   const awsS3Host = `s3.${region}.amazonaws.com`;
 
-  const queryString = createQueryQueryString({
+  const queryString = createQueryString({
     'bucket-region': bucketsRegion,
     'continuation-token': continuationToken,
     'max-buckets': maxBuckets?.toString(),
@@ -201,7 +204,7 @@ export async function listAmazonS3Buckets(
 
   try {
     const rawResponse = await ctx.client.get(url);
-    const response = parseAwsXmlResponse(rawResponse.data, { Buckets: 'Bucket' }) as Record<
+    const response = await parseAwsXmlResponse(rawResponse.data, { Buckets: 'Bucket' }) as Record<
       string,
       unknown
     >;
@@ -218,7 +221,7 @@ export async function listAmazonS3Buckets(
 
     return {
       buckets,
-      nextContinuationToken: (response.ContinuationToken as string) || undefined,
+      nextContinuationToken: (response.NextContinuationToken as string) || undefined,
       isTruncated: response.IsTruncated ? /true/i.test(response.IsTruncated as string) : false,
     };
   } catch (error: unknown) {
@@ -237,7 +240,7 @@ export async function listAmazonS3BucketObjects(
   const region = bucketRegion || (ctx.config as { region: string }).region;
   const awsS3Host = `${bucketName}.s3.${region}.amazonaws.com`;
 
-  const queryString = createQueryQueryString({
+  const queryString = createQueryString({
     'list-type': '2',
     'continuation-token': continuationToken,
     'max-keys': maxKeys?.toString(),
@@ -248,7 +251,7 @@ export async function listAmazonS3BucketObjects(
 
   try {
     const rawResponse = await ctx.client.get(url);
-    const response = parseAwsXmlResponse(rawResponse.data, { Contents: undefined }) as Record<
+    const response = await parseAwsXmlResponse(rawResponse.data, { Contents: undefined }) as Record<
       string,
       unknown
     >;
@@ -262,7 +265,7 @@ export async function listAmazonS3BucketObjects(
         lastModified: item.LastModified as string,
         storageClass: item.StorageClass as string,
       })),
-      nextContinuationToken: (response.ContinuationToken as string) || undefined,
+      nextContinuationToken: (response.NextContinuationToken as string) || undefined,
       isTruncated: response.IsTruncated ? /true/i.test(response.IsTruncated as string) : false,
     };
   } catch (error: unknown) {
@@ -277,10 +280,10 @@ export async function getAmazonS3BucketObjectMetadata(
   bucketRegion?: string
 ): Promise<AmazonS3ObjectMetadata> {
   const region = bucketRegion || (ctx.config as { region: string }).region;
-  const awsS3Host = `${bucketName}.s3.${region}.amazonaws.com`;
-  const url = `https://${awsS3Host}/${objectKey}`;
+  const objectUrl = getAwsS3EndpointForBucketObject(region, bucketName, objectKey);
+
   try {
-    const rawResponse = await ctx.client.head(url);
+    const rawResponse = await ctx.client.head(objectUrl);
 
     return {
       acceptRanges: rawResponse.headers['accept-ranges'],
@@ -345,10 +348,10 @@ export async function generateAmazonS3BucketObjectPresignedUrl(
     'X-Amz-Expires': expiresInSeconds.toString(),
     'X-Amz-SignedHeaders': signedHeadersString,
   };
-  const queryString = createQueryQueryString(queryStringValues);
+  const queryString = createQueryString(queryStringValues);
 
   // and create the actual request
-  const canonicalUri = `/${objectKey}`;
+  const canonicalUri = `/${urlEncodeS3ObjectKey(objectKey)}`;
   const canonicalRequest = `GET\n${canonicalUri}\n${queryString}\n${canonicalHeaders}\n\n${signedHeadersString}\nUNSIGNED-PAYLOAD`;
 
   // assemble the string to sign
@@ -366,7 +369,7 @@ export async function generateAmazonS3BucketObjectPresignedUrl(
   );
   queryStringValues['X-Amz-Signature'] = signature;
 
-  return `https://${awsS3Host}${canonicalUri}?${createQueryQueryString(queryStringValues)}`;
+  return `https://${awsS3Host}${canonicalUri}?${createQueryString(queryStringValues)}`;
 }
 
 export async function downloadAmazonS3BucketObject(
@@ -376,8 +379,7 @@ export async function downloadAmazonS3BucketObject(
   bucketRegion?: string
 ): Promise<AmazonS3Object> {
   const region = bucketRegion || (ctx.config as { region: string }).region;
-  const awsS3Host = `${bucketName}.s3.${region}.amazonaws.com`;
-  const objectUrl = `https://${awsS3Host}/${objectKey}`;
+  const objectUrl = getAwsS3EndpointForBucketObject(region, bucketName, objectKey);
 
   try {
     const response = await ctx.client.get(objectUrl, { responseType: 'arraybuffer' });
