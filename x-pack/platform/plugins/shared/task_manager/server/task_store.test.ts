@@ -840,7 +840,6 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
-        executionContext: mockExecutionContextStart,
       });
 
       let getApiKeysCallCount = 0;
@@ -945,7 +944,6 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
-        executionContext: mockExecutionContextStart,
       });
 
       let getApiKeysCallCount = 0;
@@ -1044,7 +1042,6 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
         basePath: basePathMock,
-        executionContext: mockExecutionContextStart,
       });
 
       let getApiKeysCallCount = 0;
