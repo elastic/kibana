@@ -9,6 +9,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { omit } from 'lodash';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
@@ -22,7 +23,13 @@ export function transformOut(
   const latestState = isLegacyState(storedState)
     ? transformLegacyState(storedState)
     : (storedState as StoredLinksEmbeddableState);
-  const state = transformTitlesOut(latestState);
+  const state = {
+    ...transformTitlesOut(latestState),
+    // Strip legacy properties
+    links: latestState.links?.map((link) =>
+      omit(link, 'order', 'id')
+    ) as StoredLinksEmbeddableState['links'],
+  };
 
   // inject saved object reference when by-reference
   const savedObjectRef = (references ?? []).find(

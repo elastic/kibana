@@ -110,13 +110,12 @@ export const storedDashboardLinkSchema = dashboardLinkSchema.extends({
   destinationRefName: schema.string(),
 });
 
+export const storedExternalLinkSchema = externalLinkSchema.extends(baseLinkSavedObjectSchema);
+
 export const storedLinksSchema = serializedTitlesSchema.extends({
   layout: layoutSchema,
   links: schema.arrayOf(
-    schema.oneOf([
-      storedDashboardLinkSchema,
-      externalLinkSchema.extends(baseLinkSavedObjectSchema),
-    ]),
+    schema.oneOf([storedDashboardLinkSchema, storedExternalLinkSchema]),
     { maxSize: 9999 } // For DoS prevention
   ),
 });
