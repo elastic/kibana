@@ -16,8 +16,9 @@ import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId } from '../utils';
+import { generateEncodedStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
@@ -106,11 +107,13 @@ export class StepExecutionRuntimeFactory {
     // to prevent context resolution issues during step execution.
     const modifiedStackFrames = removeCurrentNodeFromStackFrames(nodeId, stackFrames);
 
-    const stepExecutionId = buildStepExecutionId(
-      workflowExecution.id,
-      node.stepId,
-      modifiedStackFrames
-    );
+    const stepExecutionId = generateEncodedStepExecutionId({
+      executionId: workflowExecution.id,
+      stepId: node.stepId,
+      stackFrames: modifiedStackFrames,
+      indexName: workflowExecution.stepExecutionsIndex!,
+      indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
+    });
 
     const stepLogger = this.params.workflowLogger.createStepLogger(
       stepExecutionId,

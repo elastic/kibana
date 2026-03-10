@@ -27,7 +27,7 @@ const dependencies = mockContextDependencies();
 
 jest.mock('../../utils', () => ({
   ...jest.requireActual<typeof import('../../utils')>('../../utils'),
-  buildStepExecutionId: jest.fn().mockImplementation((executionId: string, stepId: string) => {
+  generateEncodedStepExecutionId: jest.fn().mockImplementation(({ stepId }: { stepId: string }) => {
     return `${stepId}_generated`;
   }),
   getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
