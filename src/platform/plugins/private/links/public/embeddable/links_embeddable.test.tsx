@@ -20,25 +20,21 @@ import { getMockLinksParentApi } from '../mocks';
 
 const getLinks = (): Link[] => [
   {
-    id: '001',
     type: 'dashboardLink',
     label: '',
     destination: '999',
   },
   {
-    id: '002',
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
   },
   {
-    id: '003',
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
   },
   {
-    id: '004',
     type: 'externalLink',
     destination: 'https://elastic.co',
   },
@@ -78,9 +74,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
 
 jest.mock('../lib/resolve_links', () => {
   return {
-    serializeResolvedLinks: (resolvedLinks: ResolvedLink[]) => {
-      return resolvedLinks.map(({ title, description, error, ...linkToSave }) => linkToSave);
-    },
+    ...jest.requireActual('../lib/resolve_links'),
     resolveLinks: jest.fn().mockResolvedValue(getResolvedLinks()),
   };
 });
