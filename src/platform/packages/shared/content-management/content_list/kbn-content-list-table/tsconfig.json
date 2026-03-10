@@ -27,6 +27,8 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/content-list-toolbar",
+    "@kbn/user-profile-components",
+    "@kbn/content-management-user-profiles",
   ],
   "exclude": [
     "target/**/*"
