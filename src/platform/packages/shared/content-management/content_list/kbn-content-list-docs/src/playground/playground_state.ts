@@ -11,7 +11,7 @@
 // Types
 // =============================================================================
 
-export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type';
+export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred';
 
 export interface ActiveColumn {
   instanceId: string;
@@ -28,7 +28,7 @@ export interface ActiveAction {
   type: ActionType;
 }
 
-export type FilterType = 'sort' | 'tags';
+export type FilterType = 'sort' | 'tags' | 'starred';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -45,6 +45,7 @@ export interface PlaygroundState {
     sorting: boolean;
     pagination: boolean;
     search: boolean;
+    starred: boolean;
     initialPageSize: number;
   };
   item: {
@@ -93,10 +94,11 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     type: 'name',
     label: 'Column.Name',
     allowMultiple: false,
-    defaultProps: { showDescription: true, showTags: false },
+    defaultProps: { showDescription: true, showTags: false, showStarred: false },
     configurableProps: [
       { name: 'showDescription', label: 'showDescription', type: 'boolean', defaultValue: true },
       { name: 'showTags', label: 'showTags', type: 'boolean', defaultValue: false },
+      { name: 'showStarred', label: 'showStarred', type: 'boolean', defaultValue: false },
       { name: 'width', label: 'width', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
@@ -122,6 +124,13 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     ],
   },
   {
+    type: 'starred',
+    label: 'Column.Starred',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [{ name: 'width', label: 'width', type: 'string', defaultValue: '' }],
+  },
+  {
     type: 'actions',
     label: 'Column.Actions',
     allowMultiple: false,
@@ -134,6 +143,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
 ];
 
 export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
+  { type: 'starred', label: 'Filters.Starred' },
   { type: 'sort', label: 'Filters.Sort' },
   { type: 'tags', label: 'Filters.Tags' },
 ];
@@ -189,6 +199,7 @@ export const INITIAL_STATE: PlaygroundState = {
     sorting: true,
     pagination: true,
     search: true,
+    starred: false,
     initialPageSize: 10,
   },
   item: {
