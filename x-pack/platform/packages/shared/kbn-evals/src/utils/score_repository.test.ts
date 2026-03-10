@@ -91,13 +91,50 @@ describe('EvaluationScoreRepository', () => {
 
     mockEsClient = {
       indices: {
-        existsIndexTemplate: jest.fn().mockResolvedValue(true),
         putIndexTemplate: jest.fn().mockResolvedValue({}),
-        getDataStream: jest.fn().mockResolvedValue({}),
+        getIndexTemplate: jest.fn().mockResolvedValue({
+          index_templates: [
+            {
+              index_template: {
+                template: {
+                  mappings: {
+                    _meta: { kbn_evals: { schema_version: 1 } },
+                    properties: {
+                      example: { properties: { input: { enabled: false } } },
+                      task: { properties: { output: { enabled: false } } },
+                      evaluator: { properties: { metadata: { type: 'flattened' } } },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+        getDataStream: jest.fn().mockResolvedValue({
+          data_streams: [
+            {
+              name: 'kibana-evaluations',
+              indices: [{ index_name: '.ds-kibana-evaluations-000001' }],
+            },
+          ],
+        }),
         createDataStream: jest.fn().mockResolvedValue({}),
-        create: jest.fn(),
-        delete: jest.fn(),
+        getMapping: jest.fn().mockResolvedValue({
+          '.ds-kibana-evaluations-000001': {
+            mappings: {
+              properties: {
+                example: { properties: { input: { enabled: false } } },
+                task: { properties: { output: { enabled: false } } },
+              },
+            },
+          },
+        }),
       },
+      security: {
+        hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: true }),
+      },
+      create: jest.fn().mockResolvedValue({}),
+      delete: jest.fn().mockResolvedValue({}),
       helpers: {
         bulk: jest.fn(),
       },
@@ -158,6 +195,7 @@ describe('EvaluationScoreRepository', () => {
 
       await repository.exportScores(mockDocuments);
 
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalled();
       expect(mockEsClient.helpers.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           datasource: mockDocuments,
@@ -274,6 +312,55 @@ describe('EvaluationScoreRepository', () => {
           _id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
+    });
+  });
+
+  describe('preflightExport', () => {
+    it('validates schema compatibility, backing index mapping, and privileges for external clusters', async () => {
+      const prev = process.env.EVALUATIONS_ES_URL;
+      process.env.EVALUATIONS_ES_URL = 'https://example.test';
+      try {
+        await expect(repository.preflightExport('run-preflight')).resolves.toBeUndefined();
+
+        expect(mockEsClient.indices.getIndexTemplate).toHaveBeenCalled();
+        expect(mockEsClient.security.hasPrivileges).toHaveBeenCalled();
+        expect(mockEsClient.indices.getDataStream).toHaveBeenCalled();
+        expect(mockEsClient.indices.getMapping).toHaveBeenCalled();
+        expect(mockEsClient.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: 'kibana-evaluations',
+            refresh: 'wait_for',
+            id: expect.stringContaining('preflight-'),
+            document: expect.objectContaining({
+              run_id: 'kbn-evals-preflight',
+              experiment_id: 'preflight',
+              evaluator: expect.objectContaining({ name: 'preflight' }),
+            }),
+          })
+        );
+        expect(mockEsClient.delete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: 'kibana-evaluations',
+            refresh: 'wait_for',
+            id: expect.stringContaining('preflight-'),
+          })
+        );
+      } finally {
+        if (prev) process.env.EVALUATIONS_ES_URL = prev;
+        else delete process.env.EVALUATIONS_ES_URL;
+      }
+    });
+
+    it('ignores delete 403 errors for writer keys without delete privileges', async () => {
+      const prev = process.env.EVALUATIONS_ES_URL;
+      process.env.EVALUATIONS_ES_URL = 'https://example.test';
+      mockEsClient.delete.mockRejectedValueOnce({ statusCode: 403 });
+      try {
+        await expect(repository.preflightExport('run-preflight')).resolves.toBeUndefined();
+      } finally {
+        if (prev) process.env.EVALUATIONS_ES_URL = prev;
+        else delete process.env.EVALUATIONS_ES_URL;
+      }
     });
   });
 

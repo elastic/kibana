@@ -620,9 +620,28 @@ The evaluation results are automatically exported to Elasticsearch in datastream
 
 ### Golden cluster API key privileges (required)
 
-When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `kibana-evaluations*` pattern.
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, `@kbn/evals` will export documents into the `kibana-evaluations` data stream.
 
-Use Kibana Dev Tools on the golden cluster to create an API key with the minimal required privileges:
+By default, when exporting to an external cluster (`EVALUATIONS_ES_URL`/`EVALUATIONS_ES_API_KEY`), `@kbn/evals` will **not** attempt to create/update templates or create the data stream. Instead it validates that:
+
+- The `kibana-evaluations-template` schema is compatible (including schema version)
+- The latest backing index is compatible (meaning rollover has already occurred)
+- The API key has the privileges needed to export results
+
+To explicitly opt-in to schema management (intended for operators / scheduled pipelines), set:
+
+```bash
+KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA=true
+```
+
+Recommended approach: use **two** API keys
+
+- **Writer key (PR CI + most runs)**: can export results but cannot mutate schema
+- **Schema manager key (weekly + operators)**: can update templates and roll over data streams when intentional schema changes land
+
+#### Writer key (minimal)
+
+Use Kibana Dev Tools on the golden cluster to create an API key with the minimal privileges required to export results:
 
 ```http
 POST /_security/api_key
@@ -631,13 +650,11 @@ POST /_security/api_key
   "expiration": "365d",
   "role_descriptors": {
     "kbn-evals-evaluations-writer": {
-      "cluster": ["manage_index_templates"],
+      "cluster": [],
       "indices": [
         {
           "names": ["kibana-evaluations*"],
           "privileges": [
-            "auto_configure",
-            "create_index",
             "create_doc",
             "read",
             "view_index_metadata"
@@ -655,6 +672,51 @@ POST /_security/api_key
 ```
 
 Then copy the returned `encoded` value into `evaluationsEs.apiKey` (Vault `kbn-evals` config) as `EVALUATIONS_ES_API_KEY`.
+
+`@kbn/evals` also runs a preflight check that writes a single sentinel document (with a deterministic ID) to validate that exports will succeed. It attempts to delete the document afterwards, but deletion failures are ignored (so the writer key does not need `delete`). Any leftover preflight document uses `run_id:"kbn-evals-preflight"` and `evaluator.name:"preflight"` and should not interfere with normal analysis.
+
+#### Schema manager key (weekly/operators)
+
+This key is only needed for intentional schema changes. It can update the index template and roll over the `kibana-evaluations` data stream.
+
+```http
+POST /_security/api_key
+{
+  "name": "kbn-evals-golden-cluster-schema-manager",
+  "expiration": "365d",
+  "role_descriptors": {
+    "kbn-evals-evaluations-schema-manager": {
+      "cluster": ["manage_index_templates"],
+      "indices": [
+        {
+          "names": ["kibana-evaluations*"],
+          "privileges": [
+            "auto_configure",
+            "create_index",
+            "create_doc",
+            "read",
+            "view_index_metadata",
+            "manage"
+          ]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "application": "kbn-evals",
+    "purpose": "manage evaluation results schema",
+    "environment": "ci"
+  }
+}
+```
+
+Run schema management (and roll over only if needed):
+
+```bash
+node scripts/evals manage-schema --rollover-if-needed
+```
+
+> Note: `manage-schema` will fall back to **validate-only** when run with a writer-only API key (403). In that mode it will not update templates or roll over, but it will still fail if the golden cluster schema is incompatible.
 
 ### Exporting to a separate Elasticsearch cluster
 

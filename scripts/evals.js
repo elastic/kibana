@@ -263,9 +263,37 @@ var ENV_DOCS = [
     example: 'TRACING_ES_URL=http://elastic:changeme@localhost:9200',
   },
   {
+    name: 'TRACING_ES_API_KEY',
+    description: 'API key for authenticating with the tracing Elasticsearch cluster.',
+    example: 'TRACING_ES_API_KEY=...',
+  },
+  {
+    name: 'TRACING_EXPORTERS',
+    description:
+      'JSON array of trace exporter configs (http/grpc/phoenix/langfuse). Overrides kibana.dev.yml tracing exporters when set.',
+    example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
+  },
+  {
     name: 'EVALUATIONS_ES_URL',
     description: 'Elasticsearch URL where evaluation results are exported.',
     example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
+  },
+  {
+    name: 'EVALUATIONS_ES_API_KEY',
+    description: 'API key for authenticating with the evaluations Elasticsearch cluster.',
+    example: 'EVALUATIONS_ES_API_KEY=...',
+  },
+  {
+    name: 'KBN_EVALS_PREFLIGHT_EXPORT',
+    description:
+      'Disable Elasticsearch export preflight checks (not recommended for CI). Preflight validates the golden cluster schema and runs a small sentinel write.',
+    example: 'KBN_EVALS_PREFLIGHT_EXPORT=false',
+  },
+  {
+    name: 'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA',
+    description:
+      'Opt-in to managing the golden cluster schema (template + data stream). Not allowed on Buildkite PR builds.',
+    example: 'KBN_EVALS_MANAGE_EVALUATIONS_SCHEMA=true',
   },
   {
     name: 'SELECTED_EVALUATORS',
@@ -320,6 +348,7 @@ function runFastHelp() {
   logInfo('');
   logInfo('Commands:');
   logInfo('  init                          Set up connectors for local evals');
+  logInfo('  manage-schema                 Manage golden cluster schema (operators/weekly)');
   logInfo('  start [--suite <id>] [...]    Start stack + run an eval suite');
   logInfo('  stop [--service <name>]       Stop backgrounded eval services');
   logInfo('  logs [--service <name>]       Tail logs from eval services');
@@ -333,6 +362,7 @@ function runFastHelp() {
   logInfo('');
   logInfo('Examples:');
   logInfo('  node scripts/evals init');
+  logInfo('  node scripts/evals manage-schema --rollover-if-needed');
   logInfo('  node scripts/evals start --suite agent-builder --model eis-gpt-4.1');
   logInfo('  node scripts/evals stop');
   logInfo('  node scripts/evals logs --service scout');
@@ -343,12 +373,16 @@ function runFastHelp() {
 function main() {
   var args = process.argv.slice(2);
   var command = args[0];
+  if (command && String(command).startsWith('-')) {
+    command = null;
+  }
   var repoRoot = process.cwd();
 
   var hasHelpFlag = hasFlag(args, '--help') || hasFlag(args, '-h');
 
   // For subcommand-level help, prefer the full CLI help output.
-  if (hasHelpFlag && (command === 'list' || command === 'env')) {
+  // Keep the fast help output for `node scripts/evals --help` (no command).
+  if (hasHelpFlag && command && command !== 'help') {
     process.env.KBN_PEGGY_REQUIRE_HOOK_LOG ??= 'false';
     require('@kbn/setup-node-env');
     void require('@kbn/evals').cli.run();

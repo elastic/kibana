@@ -28,6 +28,25 @@ fi
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
+# Optional: manage the golden cluster schema before fanning out connector steps.
+# This is intended for scheduled pipelines (e.g. weekly), not PR builds.
+#
+# Why it lives here:
+# - This step script already bootstraps the repo (node_modules, scripts), so it avoids adding a separate
+#   pipeline step that would need its own bootstrap.
+if [[ "${KBN_EVALS_RUN_MANAGE_SCHEMA:-}" =~ ^(1|true)$ ]]; then
+  if [[ "${BUILDKITE_PULL_REQUEST:-}" != "" && "${BUILDKITE_PULL_REQUEST:-}" != "false" ]]; then
+    echo "Buildkite PR build detected (BUILDKITE_PULL_REQUEST=$BUILDKITE_PULL_REQUEST). Skipping schema management."
+  else
+    if [[ -z "${EVALUATIONS_ES_URL:-}" || -z "${EVALUATIONS_ES_API_KEY:-}" ]]; then
+      echo "EVALUATIONS_ES_URL / EVALUATIONS_ES_API_KEY not set; skipping schema management."
+    else
+      echo "--- Ensuring golden cluster evaluations schema"
+      node scripts/evals manage-schema --rollover-if-needed
+    fi
+  fi
+fi
+
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
     kill "$SCOUT_PID" 2>/dev/null || true
