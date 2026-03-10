@@ -30,7 +30,8 @@ export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
 {
   private config: SearchInferenceEndpointsConfigType;
-  private registeredApp?: ManagementApp;
+  private registerInferenceEndpoints?: ManagementApp;
+  private registerModelSettings?: ManagementApp;
   private licenseSubscription?: Subscription;
   private isServerless: boolean;
   constructor(initializerContext: PluginInitializerContext) {
@@ -46,28 +47,29 @@ export class SearchInferenceEndpointsPlugin
 
     registerLocators(plugins.share);
 
-    this.registeredApp = plugins.management.sections.section.machineLearning.registerApp({
-      id: INFERENCE_ENDPOINTS_APP_ID,
-      title: PLUGIN_TITLE,
-      order: 2,
-      async mount({ element, history }: ManagementAppMountParams) {
-        const { renderInferenceEndpointsMgmtApp } = await import('./application');
-        const [coreStart, depsStart] = await core.getStartServices();
-        const startDeps: AppPluginStartDependencies = {
-          ...depsStart,
-          history,
-        };
+    this.registerInferenceEndpoints =
+      plugins.management.sections.section.machineLearning.registerApp({
+        id: INFERENCE_ENDPOINTS_APP_ID,
+        title: PLUGIN_TITLE,
+        order: 2,
+        async mount({ element, history }: ManagementAppMountParams) {
+          const { renderInferenceEndpointsMgmtApp } = await import('./application');
+          const [coreStart, depsStart] = await core.getStartServices();
+          const startDeps: AppPluginStartDependencies = {
+            ...depsStart,
+            history,
+          };
 
-        return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
-      },
-    });
+          return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
+        },
+      });
 
     const isEnabled = isModelSettingsEnabled(core.uiSettings);
     const shouldRegisterModelSettingsApp = this.isServerless
       ? this.config.enableModelSettings && isEnabled
       : isEnabled;
     if (shouldRegisterModelSettingsApp) {
-      this.registeredApp = plugins.management.sections.section.machineLearning.registerApp({
+      this.registerModelSettings = plugins.management.sections.section.machineLearning.registerApp({
         id: MODEL_SETTINGS_APP_ID,
         title: MODEL_SETTINGS_PLUGIN_TITLE,
         order: 2,
@@ -84,7 +86,8 @@ export class SearchInferenceEndpointsPlugin
       });
     }
 
-    this.registeredApp.disable();
+    this.registerInferenceEndpoints.disable();
+    this.registerModelSettings?.disable();
 
     return {};
   }
@@ -100,9 +103,11 @@ export class SearchInferenceEndpointsPlugin
       const hasAccess = core.application.capabilities.management?.ml?.inference_endpoints === true;
 
       if (hasEnterpriseLicense && hasAccess) {
-        this.registeredApp?.enable();
+        this.registerInferenceEndpoints?.enable();
+        this.registerModelSettings?.enable();
       } else {
-        this.registeredApp?.disable();
+        this.registerInferenceEndpoints?.disable();
+        this.registerModelSettings?.disable();
       }
     });
 
