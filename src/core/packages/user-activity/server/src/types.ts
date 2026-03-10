@@ -65,26 +65,9 @@ export interface UserActivityEvent {
   duration?: number;
 }
 
-/** @public */
-export interface UserActivityUserInputFilter {
-  /** Human-readable filter name/label. */
-  name?: string;
-  /** Filter query DSL. */
-  dslQuery?: Record<string, unknown>;
-  /** Whether the filter is enabled. */
-  enabled?: boolean;
-}
-
-/** @public */
-export interface UserActivityUserInputTimeRange {
-  /** ISO timestamp of the start of the selected time range in the date picker. */
-  start?: string;
-  /** ISO timestamp of the end of the selected time range in the date picker. */
-  end?: string;
-}
-
 /**
  * Additional bucket of non-standard metadata specific to the user activity log.
+ * Includes standardized optional fields (e.g. `user_input`) for normalization.
  * @public
  */
 export type UserActivityMetadata = Record<string, unknown>;
