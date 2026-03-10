@@ -81,7 +81,10 @@ export const patchRule = async ({
   let allKeysUpdateable = true;
 
   for (const [key, value] of Object.entries(rulePatchObjWithoutIds)) {
-    if (value !== undefined && !isEqual(value, (existingRule as Record<string, unknown>)[key])) {
+    if (
+      value !== undefined &&
+      (!isEqual(value, (existingRule as Record<string, unknown>)[key]) || isReadAuthEditField(key))
+    ) {
       rulePatchDefinedFields[key] = value;
       allKeysUpdateable = allKeysUpdateable && isReadAuthEditField(key);
     }
