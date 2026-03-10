@@ -47,9 +47,13 @@ export class EndpointExceptionsValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
 
     await this.validatePreImportItems(items, async (item) => {
-      await this.validateImportOwnerSpaceIds(item);
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
       await this.validateCanCreateGlobalArtifacts(item);
-      await this.removeInvalidPolicyIds(item);
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateCanCreateByPolicyArtifacts(item);
     });
   }
 
