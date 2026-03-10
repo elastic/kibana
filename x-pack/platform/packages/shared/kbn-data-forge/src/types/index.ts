@@ -187,4 +187,5 @@ export interface CliOptions {
   ephemeralProjectIds: number;
   alignEventsToInterval: boolean;
   scheduleEnd?: string;
+  slashLogs: boolean;
 }
