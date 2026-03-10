@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { SLO_BURN_RATE_EMBEDDABLE_ID } from '../../../../common/embeddables/burn_rate/constants';
-export const ADD_BURN_RATE_ACTION_ID = 'CREATE_SLO_BURN_RATE_EMBEDDABLE';
+/** Re-exported from server (derived from schemas there) */
+export type {
+  BurnRateCustomState,
+  BurnRateEmbeddableState,
+} from '../../../server/lib/embeddables/burn_rate_schema';
