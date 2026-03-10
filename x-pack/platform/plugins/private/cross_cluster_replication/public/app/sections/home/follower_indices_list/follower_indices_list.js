@@ -114,7 +114,7 @@ export class FollowerIndicesList extends PureComponent {
           <EuiButton
             {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="createFollowerIndexButton"
           >
             <FormattedMessage

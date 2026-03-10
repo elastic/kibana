@@ -131,7 +131,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               color="primary"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onBack}
               data-test-subj="backButton"
             >

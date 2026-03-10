@@ -82,7 +82,7 @@ export const IndexActionsContextMenu = ({
   resetSelection,
   anchorPosition = 'rightUp',
   iconSide = 'right',
-  iconType = 'arrowDown',
+  iconType = 'chevronSingleDown',
   label,
   closeIndices,
   openIndices,

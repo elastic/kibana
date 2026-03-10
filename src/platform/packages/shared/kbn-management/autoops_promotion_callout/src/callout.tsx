@@ -69,7 +69,7 @@ export const AutoOpsPromotionCallout = ({
         />
       }
       color="accent"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="autoOpsPromotionCallout"
       onDismiss={handleDismiss}
       {...overrideCalloutProps}

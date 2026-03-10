@@ -35,7 +35,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     <EuiButton
       key="createPolicy"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="createPolicyButton"
       {...reactRouterNavigate(history, '/enrich_policies/create')}
     >

@@ -53,7 +53,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ createField, runtimeFiel
       actions={
         <EuiButton
           onClick={() => createField()}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createRuntimeFieldButton"
           fill
         >
