@@ -17,8 +17,8 @@ import {
   PROVISION_UIAM_API_KEYS_FLAG,
   TAGS,
   API_KEY_PROVISIONING_TASK_SCHEDULE,
-  GET_RULES_BATCH_SIZE,
 } from './uiam_api_key_provisioning_task';
+import { GET_RULES_BATCH_SIZE } from './lib/helpers';
 import { emptyState } from './uiam_api_key_provisioning_task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {

@@ -14,7 +14,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { RawRule } from '../types';
 import {
   RULE_SAVED_OBJECT_TYPE,
   UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
@@ -32,6 +31,7 @@ import {
   createFailedConversionStatus,
   createStatusFromBulkUpdateResult,
   classifyRuleForUiamProvisioning,
+  fetchFirstBatchOfRulesToConvert,
   getErrorMessage,
 } from './lib/helpers';
 import { buildRuleUpdatesForUiam } from './lib/build_rule_updates_for_uiam';
@@ -84,7 +84,6 @@ export const createProvisioningRunContext = async (
 export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
 export const API_KEY_PROVISIONING_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
 const TASK_TIMEOUT = '5m';
-export const GET_RULES_BATCH_SIZE = 300;
 /** Delay before the next run when more batches are pending (1 minute) */
 const RESCHEDULE_DELAY_MS = 60000;
 
@@ -285,37 +284,20 @@ export class UiamApiKeyProvisioningTask {
   ): Promise<GetApiKeysToConvertResult> => {
     try {
       const excludeRulesFilter = await getExcludeRulesFilter(context.savedObjectsClient);
-      const rulesFinder =
-        await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-          {
-            type: RULE_SAVED_OBJECT_TYPE,
-            perPage: GET_RULES_BATCH_SIZE,
-            namespaces: ['*'],
-            ...(excludeRulesFilter ? { filter: excludeRulesFilter } : {}),
-          }
-        );
+      const { rules, hasMore: hasMoreToProvision } = await fetchFirstBatchOfRulesToConvert(
+        context.encryptedSavedObjectsClient,
+        { excludeRulesFilter, ruleType: RULE_SAVED_OBJECT_TYPE }
+      );
 
       const provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs> = [];
       const apiKeysToConvert: Array<ApiKeyToConvert> = [];
-      let hasMoreToProvision = false;
-
-      try {
-        const findIterator = rulesFinder.find();
-        const firstBatch = await findIterator.next();
-        if (!firstBatch.done && firstBatch.value?.saved_objects) {
-          const response = firstBatch.value;
-          hasMoreToProvision = response.total > response.saved_objects.length;
-          for (const rule of response.saved_objects) {
-            const result = classifyRuleForUiamProvisioning(rule);
-            if (result.action === 'skip') {
-              provisioningStatusForSkippedRules.push(result.status);
-            } else {
-              apiKeysToConvert.push(result.rule);
-            }
-          }
+      for (const rule of rules) {
+        const result = classifyRuleForUiamProvisioning(rule);
+        if (result.action === 'skip') {
+          provisioningStatusForSkippedRules.push(result.status);
+        } else {
+          apiKeysToConvert.push(result.rule);
         }
-      } finally {
-        await rulesFinder.close();
       }
 
       this.logger.info(
