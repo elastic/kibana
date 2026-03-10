@@ -36,9 +36,10 @@ import {
   createMockFavoritesClient,
   extractTagIds,
   mockTagsService,
+  mockUserProfileServices,
 } from '@kbn/content-list-mock-data';
 
-export { mockTagsService, createMockFavoritesClient };
+export { mockTagsService, createMockFavoritesClient, mockUserProfileServices };
 
 // =============================================================================
 // Mock Data
@@ -117,6 +118,8 @@ export const createStoryFindItems = (options?: {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: (item as { managed?: boolean }).managed,
       })),
       total: result.total,
       counts: result.counts,

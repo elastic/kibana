@@ -33,6 +33,7 @@ import {
   createMockFavoritesClient,
   createStoryFindItems,
   mockTagsService,
+  mockUserProfileServices,
   toJsx,
 } from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
@@ -146,6 +147,10 @@ const usePreview = (state: PlaygroundState) => {
     };
   }, [data.totalItems, data.isLoading, data.hasItems, favoritesClient]);
 
+  const hasCreatedBy =
+    toolbar.filters.some((f) => f.type === 'createdBy') ||
+    table.columns.some((c) => c.type === 'createdBy');
+
   const providerFeatures = useMemo(
     () => ({
       sorting: features.sorting
@@ -157,6 +162,7 @@ const usePreview = (state: PlaygroundState) => {
       search: features.search ? {} : (false as const),
       tags: hasTags ? true : (false as const),
       starred: hasStarred ? true : (false as const),
+      createdBy: hasCreatedBy ? true : (false as const),
     }),
     [
       features.sorting,
@@ -166,6 +172,7 @@ const usePreview = (state: PlaygroundState) => {
       sortFields,
       hasTags,
       hasStarred,
+      hasCreatedBy,
     ]
   );
 
@@ -202,6 +209,8 @@ const usePreview = (state: PlaygroundState) => {
             return <Column.Name key={col.instanceId} {...cleanProps} />;
           case 'updatedAt':
             return <Column.UpdatedAt key={col.instanceId} {...cleanProps} />;
+          case 'createdBy':
+            return <Column.CreatedBy key={col.instanceId} {...cleanProps} />;
           case 'type': {
             const { columnTitle, ...rest } = cleanProps;
             return (
@@ -277,6 +286,13 @@ const usePreview = (state: PlaygroundState) => {
                 </React.Fragment>
               );
             }
+            if (f.type === 'createdBy') {
+              return (
+                <React.Fragment key={f.instanceId}>
+                  <Filters.CreatedBy />
+                </React.Fragment>
+              );
+            }
             return null;
           })
         : [
@@ -295,15 +311,18 @@ const usePreview = (state: PlaygroundState) => {
   const tableTitle = `${provider.entityPlural} table`;
 
   const services = useMemo(() => {
-    const s: Record<string, unknown> = {};
+    const svc: Record<string, unknown> = {};
     if (hasTags) {
-      s.tags = mockTagsService;
+      svc.tags = mockTagsService;
     }
     if (hasStarred && favoritesClient) {
-      s.favorites = favoritesClient;
+      svc.favorites = favoritesClient;
     }
-    return Object.keys(s).length > 0 ? s : undefined;
-  }, [hasTags, hasStarred, favoritesClient]);
+    if (hasCreatedBy) {
+      svc.userProfile = mockUserProfileServices;
+    }
+    return Object.keys(svc).length > 0 ? svc : undefined;
+  }, [hasTags, hasStarred, favoritesClient, hasCreatedBy]);
 
   const providerProps = useMemo(
     () => ({
@@ -312,7 +331,7 @@ const usePreview = (state: PlaygroundState) => {
       features: providerFeatures,
       isReadOnly: provider.isReadOnly,
       item: providerItemConfig,
-      ...(services && { services }),
+      services,
     }),
     [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, services]
   );

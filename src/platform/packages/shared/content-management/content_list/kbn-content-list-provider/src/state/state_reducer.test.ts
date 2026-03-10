@@ -302,6 +302,22 @@ describe('state_reducer', () => {
 
       expect(newState.selection.selectedIds).toEqual([]);
     });
+
+    it('preserves user filter when search changes', () => {
+      const userFilter = { uid: ['user-1', 'user-2'], query: {} };
+      const initialState = createInitialState({
+        filters: { search: 'old', user: userFilter },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
+        payload: { queryText: 'new search', filters: { search: 'new search' } },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toEqual(userFilter);
+      expect(newState.filters.search).toBe('new search');
+    });
   });
 
   describe('CLEAR_FILTERS', () => {
@@ -375,6 +391,23 @@ describe('state_reducer', () => {
       const newState = reducer(initialState, action);
 
       expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('clears user filter when filters are cleared', () => {
+      const initialState = createInitialState({
+        filters: {
+          search: 'test',
+          user: { uid: ['user-1', 'user-2'], query: { 'Jane Doe': ['user-1'] } },
+        },
+        search: { queryText: 'test createdBy:jane@elastic.co' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.CLEAR_FILTERS,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toBeUndefined();
     });
   });
 
@@ -506,7 +539,7 @@ describe('state_reducer', () => {
         expect(newState.filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
       });
 
-      it('works for non-tag filter dimensions', () => {
+      it('works for non-tag filter dimensions (custom)', () => {
         const initialState = createInitialState();
         const action: ContentListAction = {
           type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
@@ -520,7 +553,7 @@ describe('state_reducer', () => {
 
         const newState = reducer(initialState, action);
 
-        expect(newState.filters.type).toEqual({ include: ['dashboard'], exclude: [] });
+        expect(newState.filters.custom?.type).toEqual({ include: ['dashboard'], exclude: [] });
         expect(newState.filters.tag).toBeUndefined();
       });
     });
@@ -707,7 +740,10 @@ describe('state_reducer', () => {
 
       it('preserves other filter dimensions', () => {
         const initialState = createInitialState({
-          filters: { search: 'my query', type: { include: ['dashboard'], exclude: [] } },
+          filters: {
+            search: 'my query',
+            custom: { type: { include: ['dashboard'], exclude: [] } },
+          },
         });
         const action: ContentListAction = {
           type: CONTENT_LIST_ACTIONS.TOGGLE_FILTER,
@@ -722,7 +758,7 @@ describe('state_reducer', () => {
         const newState = reducer(initialState, action);
 
         expect(newState.filters.search).toBe('my query');
-        expect(newState.filters.type).toEqual({ include: ['dashboard'], exclude: [] });
+        expect(newState.filters.custom?.type).toEqual({ include: ['dashboard'], exclude: [] });
       });
     });
 
@@ -752,6 +788,343 @@ describe('state_reducer', () => {
 
         parseSpy.mockRestore();
       });
+    });
+  });
+
+  describe('TOGGLE_USER_FILTER', () => {
+    it('adds a user to filters.user.uid when not active', () => {
+      const initialState = createInitialState();
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toEqual({ uid: ['user-1'], query: {} });
+    });
+
+    it('removes a user from filters.user.uid when already active', () => {
+      const initialState = createInitialState({
+        filters: { user: { uid: ['user-1', 'user-2'], query: {} } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toEqual({ uid: ['user-2'], query: {} });
+    });
+
+    it('clears filters.user when last user is removed and no text queries exist', () => {
+      const initialState = createInitialState({
+        filters: { user: { uid: ['user-1'], query: {} } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toBeUndefined();
+    });
+
+    it('preserves text queries when toggling uid', () => {
+      const initialState = createInitialState({
+        filters: {
+          user: { uid: ['user-1'], query: { 'Jane Doe': ['user-1'] } },
+        },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.user).toEqual({
+        uid: [],
+        query: { 'Jane Doe': ['user-1'] },
+      });
+    });
+
+    it('updates query text with createdBy clause when adding user', () => {
+      const initialState = createInitialState({
+        search: { queryText: 'dashboard' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.search.queryText).toContain('createdBy');
+      expect(newState.search.queryText).toContain('jane@elastic.co');
+    });
+
+    it('removes createdBy clause from query text when removing user', () => {
+      const initialState = createInitialState({
+        search: { queryText: 'dashboard createdBy:(jane@elastic.co)' },
+        filters: { user: { uid: ['user-1'], query: {} } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.search.queryText).not.toContain('jane@elastic.co');
+    });
+
+    it('resets page index to 0', () => {
+      const initialState = createInitialState({
+        page: { index: 3, size: 20 },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.page.index).toBe(0);
+      expect(newState.page.size).toBe(20);
+    });
+
+    it('clears selection', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('preserves query text on parse failure', () => {
+      const parseSpy = jest.spyOn(Query, 'parse').mockImplementation(() => {
+        throw new Error('parse error');
+      });
+
+      const initialState = createInitialState({
+        search: { queryText: 'some broken query' },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.search.queryText).toBe('some broken query');
+      expect(newState.filters.user).toEqual({ uid: ['user-1'], query: {} });
+
+      parseSpy.mockRestore();
+    });
+
+    it('preserves other filters when toggling user', () => {
+      const initialState = createInitialState({
+        filters: {
+          search: 'dashboard',
+          tag: { include: ['tag-1'], exclude: [] },
+        },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER,
+        payload: { uid: 'user-1', queryValue: 'jane@elastic.co' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters.search).toBe('dashboard');
+      expect(newState.filters.tag).toEqual({ include: ['tag-1'], exclude: [] });
+      expect(newState.filters.user).toEqual({ uid: ['user-1'], query: {} });
+    });
+  });
+
+  describe('SET_FILTERS', () => {
+    it('sets filters', () => {
+      const initialState = createInitialState();
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
+        payload: { search: 'hello', user: userFilter },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'hello', user: userFilter });
+    });
+
+    it('replaces existing filters', () => {
+      const initialState = createInitialState({
+        filters: { search: 'old', user: { uid: ['user-1'], query: {} } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
+        payload: { search: 'new' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'new' });
+    });
+
+    it('preserves sort when setting filters', () => {
+      const initialState = createInitialState({
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
+        payload: { user: userFilter },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when filters change', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
+        payload: { user: userFilter },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('resets page index to 0 when filters change', () => {
+      const initialState = createInitialState({
+        page: { index: 3, size: 20 },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
+        payload: { search: 'new' },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.page.index).toBe(0);
+      expect(newState.page.size).toBe(20);
+    });
+
+    it('returns a new state object', () => {
+      const initialState = createInitialState();
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_FILTERS,
+        payload: { user: userFilter },
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
+    });
+  });
+
+  describe('SET_USER_FILTER', () => {
+    it('sets user filter while preserving other filters', () => {
+      const initialState = createInitialState({
+        filters: { search: 'dashboard' },
+      });
+      const userFilter = { uid: ['user-1', 'user-2'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: userFilter,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'dashboard', user: userFilter });
+    });
+
+    it('clears user filter when payload is undefined', () => {
+      const initialState = createInitialState({
+        filters: { search: 'dashboard', user: { uid: ['user-1'], query: {} } },
+      });
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: undefined,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.filters).toEqual({ search: 'dashboard', user: undefined });
+    });
+
+    it('preserves sort when setting user filter', () => {
+      const initialState = createInitialState({
+        sort: { field: 'title', direction: 'asc' },
+      });
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: userFilter,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.sort).toEqual({ field: 'title', direction: 'asc' });
+    });
+
+    it('clears selection when user filter changes', () => {
+      const initialState = createInitialState({
+        selection: { selectedIds: ['1', '2'] },
+      });
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: userFilter,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.selection.selectedIds).toEqual([]);
+    });
+
+    it('resets page index to 0 when user filter changes', () => {
+      const initialState = createInitialState({
+        page: { index: 3, size: 20 },
+      });
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: userFilter,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState.page.index).toBe(0);
+      expect(newState.page.size).toBe(20);
+    });
+
+    it('returns a new state object', () => {
+      const initialState = createInitialState();
+      const userFilter = { uid: ['user-1'], query: {} };
+      const action: ContentListAction = {
+        type: CONTENT_LIST_ACTIONS.SET_USER_FILTER,
+        payload: userFilter,
+      };
+
+      const newState = reducer(initialState, action);
+
+      expect(newState).not.toBe(initialState);
     });
   });
 

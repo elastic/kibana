@@ -11,7 +11,7 @@
 // Types
 // =============================================================================
 
-export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred';
+export type ColumnType = 'name' | 'updatedAt' | 'createdBy' | 'actions' | 'type' | 'starred';
 
 export interface ActiveColumn {
   instanceId: string;
@@ -28,7 +28,7 @@ export interface ActiveAction {
   type: ActionType;
 }
 
-export type FilterType = 'sort' | 'tags' | 'starred';
+export type FilterType = 'sort' | 'tags' | 'starred' | 'createdBy';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -114,6 +114,16 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     ],
   },
   {
+    type: 'createdBy',
+    label: 'Column.CreatedBy',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [
+      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
+    ],
+  },
+  {
     type: 'type',
     label: 'Column (Type)',
     allowMultiple: false,
@@ -146,6 +156,7 @@ export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
   { type: 'starred', label: 'Filters.Starred' },
   { type: 'sort', label: 'Filters.Sort' },
   { type: 'tags', label: 'Filters.Tags' },
+  { type: 'createdBy', label: 'Filters.CreatedBy' },
 ];
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [

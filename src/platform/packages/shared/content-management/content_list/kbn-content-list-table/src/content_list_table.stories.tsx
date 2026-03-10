@@ -47,6 +47,7 @@ import {
   createMockFindItems,
   extractTagIds,
   mockTagsService,
+  mockUserProfileServices,
 } from '@kbn/content-list-mock-data/storybook';
 import { ContentListTable } from './content_list_table';
 
@@ -61,6 +62,9 @@ import { ContentListTable } from './content_list_table';
  * - Sorting (locale-aware for strings).
  * - Configurable delay for loading states.
  * - Empty state simulation.
+ *
+ * Note: user filtering is applied client-side by the provider, so `findItems`
+ * never receives `users` in its filter params.
  */
 const createStoryFindItems = (options?: {
   items?: typeof MOCK_DASHBOARDS;
@@ -98,6 +102,8 @@ const createStoryFindItems = (options?: {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: (item as { managed?: boolean }).managed,
       })),
       total: result.total,
       counts: result.counts,
@@ -389,10 +395,12 @@ interface PlaygroundArgs {
   isReadOnly: boolean;
   hasPagination: boolean;
   hasTags: boolean;
+  hasCreatedByColumn: boolean;
   compressed: boolean;
   tableLayout: 'auto' | 'fixed';
   showDescription: boolean;
   showTags: boolean;
+  showCreatedByColumn: boolean;
   showTypeColumn: boolean;
   showActions: boolean;
   showCustomActions: boolean;
@@ -478,6 +486,17 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     [addToast]
   );
 
+  const services: ContentListServices | undefined = useMemo(() => {
+    const svc: ContentListServices = {};
+    if (args.hasTags) {
+      svc.tags = mockTagsService;
+    }
+    if (args.hasCreatedByColumn) {
+      svc.userProfile = mockUserProfileServices;
+    }
+    return Object.keys(svc).length > 0 ? svc : undefined;
+  }, [args.hasTags, args.hasCreatedByColumn]);
+
   // Build a display element representing the consumer-facing JSX.
   // `toJsx()` (inside `StateDiagnosticPanel`) serializes it automatically.
   const displayElement = useMemo(
@@ -489,6 +508,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
       >
         <Column.Name showDescription={args.showDescription} showTags={args.showTags} />
         <Column.UpdatedAt />
+        {args.showCreatedByColumn && <Column.CreatedBy />}
         {args.showTypeColumn && (
           <Column
             id="type"
@@ -531,6 +551,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
       args.tableLayout,
       args.showDescription,
       args.showTags,
+      args.showCreatedByColumn,
       args.showTypeColumn,
       args.showActions,
       args.showCustomActions,
@@ -539,13 +560,8 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     ]
   );
 
-  const services: ContentListServices | undefined = useMemo(
-    () => (args.hasTags ? { tags: mockTagsService } : undefined),
-    [args.hasTags]
-  );
-
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.hasTags}-${args.showActions}-${args.showSelection}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.hasTags}-${args.hasCreatedByColumn}-${args.showActions}-${args.showSelection}`;
 
   return (
     <>
@@ -563,6 +579,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
           selection: args.showSelection,
           tags: args.hasTags,
+          createdBy: args.hasCreatedByColumn,
         }}
         services={services}
       >
@@ -576,6 +593,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           >
             <Column.Name showDescription={args.showDescription} showTags={args.showTags} />
             <Column.UpdatedAt />
+            {args.showCreatedByColumn && <Column.CreatedBy />}
             {args.showTypeColumn && (
               <Column
                 id="type"
@@ -636,6 +654,7 @@ export const Table: PlaygroundStory = {
     isReadOnly: false,
     hasPagination: true,
     hasTags: true,
+    hasCreatedByColumn: true,
     showTypeColumn: false,
     showActions: true,
     showCustomActions: false,
@@ -643,6 +662,7 @@ export const Table: PlaygroundStory = {
     hasClickableRows: true,
     showDescription: true,
     showTags: true,
+    showCreatedByColumn: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
     compressed: false,
@@ -685,6 +705,11 @@ export const Table: PlaygroundStory = {
       description: 'Enable tag filtering. Provides a mock tags service.',
       table: { category: 'Features' },
     },
+    hasCreatedByColumn: {
+      control: 'boolean',
+      description: 'Enable user profile service for created-by column and filter.',
+      table: { category: 'Features' },
+    },
     compressed: {
       control: 'boolean',
       description: 'Use compact table style.',
@@ -706,6 +731,12 @@ export const Table: PlaygroundStory = {
       description: 'Show tag badges in Name column. Clicking a tag toggles a filter.',
       table: { category: 'Columns' },
       if: { arg: 'hasTags' },
+    },
+    showCreatedByColumn: {
+      control: 'boolean',
+      description: 'Add a "Created by" column with user avatars.',
+      table: { category: 'Columns' },
+      if: { arg: 'hasCreatedByColumn' },
     },
     showTypeColumn: {
       control: 'boolean',

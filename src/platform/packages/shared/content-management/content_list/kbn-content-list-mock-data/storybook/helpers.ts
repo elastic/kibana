@@ -13,7 +13,7 @@ import { MOCK_DASHBOARDS, type DashboardMockItem } from './dashboards';
 import { MOCK_MAPS, type MapMockItem } from './maps';
 import { MOCK_FILES, type FileMockItem } from './files';
 import { MOCK_VISUALIZATIONS, type VisualizationMockItem } from './visualizations';
-import { MOCK_USER_PROFILES } from './user_profiles';
+
 import { mockFavoritesClient } from './services';
 
 /** Shape compatible with `ActiveFilters` from `@kbn/content-list-provider`. Defined locally to avoid circular dependency. */
@@ -378,52 +378,6 @@ export const NULL_USER = 'no-user';
  * Build a map of email → uid for user profile lookup.
  * Used to resolve email-based createdBy filters to user IDs.
  */
-const EMAIL_TO_UID_MAP: Record<string, string> = MOCK_USER_PROFILES.reduce<Record<string, string>>(
-  (acc, profile) => {
-    if (profile.user.email) {
-      acc[profile.user.email] = profile.uid;
-    }
-    return acc;
-  },
-  {}
-);
-
-/**
- * Resolve a filter value (email or uid) to a user ID.
- * Supports both email-based filtering (new) and uid-based filtering (legacy).
- */
-function resolveToUid(filterValue: string): string | undefined {
-  // If it's an email, resolve to uid
-  if (EMAIL_TO_UID_MAP[filterValue]) {
-    return EMAIL_TO_UID_MAP[filterValue];
-  }
-  // If it's already a uid (or unknown value), return as-is
-  return filterValue;
-}
-
-/**
- * Check if an item's creator matches the filter values.
- * Handles both email and uid filter values for backwards compatibility.
- */
-function matchesUserFilter(itemCreatedBy: string | undefined, filterValues: string[]): boolean {
-  // Resolve all filter values to uids
-  const resolvedUids = filterValues
-    .filter((v) => v !== NULL_USER)
-    .map(resolveToUid)
-    .filter((uid): uid is string => uid !== undefined);
-
-  // Check if NULL_USER is in the filter (matches items without creator)
-  const includesNullUser = filterValues.includes(NULL_USER);
-
-  // Item has no creator
-  if (!itemCreatedBy) {
-    return includesNullUser;
-  }
-
-  // Check if item's createdBy matches any resolved uid
-  return resolvedUids.includes(itemCreatedBy);
-}
-
 /**
  * Create mock findItems function for dashboard stories.
  * Simplified API for examples - just pass optional delay.
@@ -485,11 +439,7 @@ export const createSimpleMockFindItems = (
       );
     }
 
-    // Apply user filters (createdBy) - supports both email and uid filter values
-    const usersFilter = (filters as { users?: string[] }).users;
-    if (usersFilter && usersFilter.length > 0) {
-      items = items.filter((item) => matchesUserFilter(item.createdBy, usersFilter));
-    }
+    // User filtering is applied client-side by the provider, not the data source.
 
     // Apply starred filter.
     if (filters.starredOnly) {

@@ -28,7 +28,7 @@ import {
   useContentListSearch,
   useContentListPagination,
   useContentListFilters,
-  useContentListConfig,
+  useContentListUserFilter,
 } from '@kbn/content-list-provider';
 import type {
   FindItemsParams,
@@ -40,6 +40,8 @@ import {
   createMockFindItems,
   extractTagIds,
   mockTagsService,
+  mockUserProfileServices,
+  MOCK_USER_PROFILES_MAP,
 } from '@kbn/content-list-mock-data/storybook';
 import { ContentListToolbar } from './content_list_toolbar';
 
@@ -51,6 +53,8 @@ import { ContentListToolbar } from './content_list_toolbar';
  * Creates a mock `findItems` function with configurable behavior.
  *
  * Supports sorting, search, tag filtering, and configurable delay.
+ * Note: user filtering is applied client-side by the provider, so `findItems`
+ * never receives `users` in its filter params.
  */
 const createStoryFindItems = (options?: { delay?: number }) => {
   const { delay = 0 } = options ?? {};
@@ -76,6 +80,8 @@ const createStoryFindItems = (options?: { delay?: number }) => {
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
         tags: extractTagIds(item.references),
+        createdBy: item.createdBy,
+        managed: (item as { managed?: boolean }).managed,
       })),
       total: result.total,
       counts: result.counts,
@@ -107,7 +113,7 @@ const StateDiagnosticPanel = ({
   const { search } = useContentListSearch();
   const { filters } = useContentListFilters();
   const pagination = useContentListPagination();
-  const config = useContentListConfig();
+  const { selectedUsers, isSupported: hasCreatedBy } = useContentListUserFilter();
 
   const toolbarJsx = useMemo(() => {
     if (useDeclarativeConfig) {
@@ -115,6 +121,7 @@ const StateDiagnosticPanel = ({
   <ContentListToolbar.Filters>
     <ContentListToolbar.Filters.Tags />
     <ContentListToolbar.Filters.Sort />
+    <ContentListToolbar.Filters.CreatedBy />
   </ContentListToolbar.Filters>
 </ContentListToolbar>`;
     }
@@ -174,14 +181,6 @@ const StateDiagnosticPanel = ({
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                 <EuiTitle size="xxs">
-                  <h3>Sorting Config</h3>
-                </EuiTitle>
-                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-                  {JSON.stringify(config.features.sorting, null, 2)}
-                </EuiCodeBlock>
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
-                <EuiTitle size="xxs">
                   <h3>Search</h3>
                 </EuiTitle>
                 <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
@@ -196,6 +195,20 @@ const StateDiagnosticPanel = ({
                   {JSON.stringify(filters, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              {hasCreatedBy && (
+                <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                  <EuiTitle size="xxs">
+                    <h3>User Filter</h3>
+                  </EuiTitle>
+                  <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                    {JSON.stringify(
+                      { selectedUsers: selectedUsers.length > 0 ? selectedUsers : '(none)' },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiFlexItem>
+              )}
               {pagination.isSupported && (
                 <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                   <EuiTitle size="xxs">
@@ -231,7 +244,21 @@ const StateDiagnosticPanel = ({
 };
 
 /**
- * Simple item list to show sorted results.
+ * Resolves a creator UID to a display name using the mock profile map.
+ */
+const resolveCreatorName = (createdBy?: string, managed?: boolean): string => {
+  if (managed) {
+    return 'Managed';
+  }
+  if (!createdBy) {
+    return '—';
+  }
+  const profile = MOCK_USER_PROFILES_MAP[createdBy];
+  return profile?.user.full_name ?? createdBy;
+};
+
+/**
+ * Simple item list to show sorted/filtered results with creator info.
  */
 const ItemList = () => {
   const { items, isLoading } = useContentListItems();
@@ -243,13 +270,25 @@ const ItemList = () => {
   return (
     <EuiPanel hasBorder paddingSize="m">
       <EuiTitle size="xxs">
-        <h3>Items (sorted)</h3>
+        <h3>Items ({items.length})</h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       {items.map((item, index) => (
-        <EuiText key={item.id} size="s">
-          {index + 1}. {item.title}
-        </EuiText>
+        <EuiFlexGroup key={item.id} gutterSize="s" responsive={false} alignItems="baseline">
+          <EuiFlexItem grow={false} style={{ minWidth: 24 }}>
+            <EuiText size="s" color="subdued">
+              {index + 1}.
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiText size="s">{item.title}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={item.managed ? 'accent' : 'hollow'}>
+              {resolveCreatorName(item.createdBy, item.managed)}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ))}
     </EuiPanel>
   );
@@ -283,6 +322,7 @@ interface PlaygroundArgs {
   hasSorting: boolean;
   hasPagination: boolean;
   hasTags: boolean;
+  hasCreatedByFilter: boolean;
   useDeclarativeConfig: boolean;
   showDiagnostics: boolean;
 }
@@ -326,12 +366,19 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     [args.hasSorting, args.hasPagination, args.hasTags]
   );
 
-  const services: ContentListServices | undefined = useMemo(
-    () => (args.hasTags ? { tags: mockTagsService } : undefined),
-    [args.hasTags]
-  );
+  const services: ContentListServices | undefined = useMemo(() => {
+    const svc: ContentListServices = {};
+    if (args.hasTags) {
+      svc.tags = mockTagsService;
+    }
+    if (args.hasCreatedByFilter) {
+      svc.userProfile = mockUserProfileServices;
+    }
+    return Object.keys(svc).length > 0 ? svc : undefined;
+  }, [args.hasTags, args.hasCreatedByFilter]);
 
-  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.useDeclarativeConfig}`;
+  // Key forces re-mount when configuration changes.
+  const key = `${args.hasSorting}-${args.hasPagination}-${args.hasTags}-${args.hasCreatedByFilter}-${args.useDeclarativeConfig}`;
 
   const { Filters } = ContentListToolbar;
 
@@ -368,6 +415,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
             <Filters>
               <Filters.Tags />
               <Filters.Sort />
+              <Filters.CreatedBy />
             </Filters>
           </ContentListToolbar>
         </>
@@ -410,6 +458,7 @@ export const Toolbar: PlaygroundStory = {
     hasSorting: true,
     hasPagination: true,
     hasTags: true,
+    hasCreatedByFilter: true,
     showDiagnostics: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
@@ -449,6 +498,11 @@ export const Toolbar: PlaygroundStory = {
     hasTags: {
       control: 'boolean',
       description: 'Enable tag filtering. Provides a mock tags service with 8 tags.',
+      table: { category: 'Features' },
+    },
+    hasCreatedByFilter: {
+      control: 'boolean',
+      description: 'Enable "Created by" filter (provides user profile service).',
       table: { category: 'Features' },
     },
     showDiagnostics: {

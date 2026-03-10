@@ -12,16 +12,19 @@ import { filter, type FilterContext } from './part';
 import { SortRenderer } from './sort';
 import { TagFilterRenderer } from './tags';
 import { StarredFilterRenderer } from './starred';
+import { CreatedByRenderer } from './created_by';
 
 // Ensure preset resolve callbacks are registered.
 import './sort/sort';
 import './tags/tag_filter';
 import './starred/starred_filter';
+import './created_by/created_by';
 
 const createContext = (overrides: Partial<FilterContext> = {}): FilterContext => ({
   hasSorting: false,
   hasTags: false,
   hasStarred: false,
+  hasCreatedBy: false,
   ...overrides,
 });
 
@@ -61,6 +64,30 @@ describe('filter.resolve', () => {
 
     it('returns `undefined` for the sort preset when sorting is unavailable.', () => {
       const result = filter.resolve(createSortPart(), createContext({ hasSorting: false }));
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('createdBy preset', () => {
+    const createCreatedByPart = (): ParsedPart => ({
+      type: 'part',
+      part: 'filter',
+      preset: 'createdBy',
+      instanceId: 'createdBy',
+      attributes: {},
+    });
+
+    it('returns a `SearchFilterConfig` for the createdBy preset when createdBy is available.', () => {
+      const result = filter.resolve(createCreatedByPart(), createContext({ hasCreatedBy: true }));
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject({ type: 'custom_component' });
+      expect((result as { component: unknown }).component).toBe(CreatedByRenderer);
+    });
+
+    it('returns `undefined` for the createdBy preset when createdBy is unavailable.', () => {
+      const result = filter.resolve(createCreatedByPart(), createContext({ hasCreatedBy: false }));
 
       expect(result).toBeUndefined();
     });
