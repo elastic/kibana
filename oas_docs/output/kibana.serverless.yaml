@@ -40623,7 +40623,8 @@ paths:
           schema:
             example: 'true'
             type: string
-        - in: path
+        - description: Package name to review upgrade for
+          in: path
           name: pkgName
           required: true
           schema:
@@ -40631,6 +40632,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              acceptUpgrade:
+                value:
+                  action: accept
+                  target_version: 2.0.0
             schema:
               additionalProperties: false
               type: object
@@ -40650,6 +40656,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                successResponse:
+                  value:
+                    success: true
               schema:
                 additionalProperties: false
                 type: object
@@ -40662,6 +40672,10 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequestResponse:
+                  value:
+                    message: Bad Request
               schema:
                 additionalProperties: false
                 description: Generic Error
