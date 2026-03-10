@@ -376,7 +376,7 @@ function resolveAndCreatePipeline({
             return throwError(() =>
               createInferenceRequestError(
                 `No connector or inference endpoint found for ID '${connectorId}'`,
-                404
+                400
               )
             );
           }

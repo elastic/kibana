@@ -200,7 +200,7 @@ export const chatCompleteSuite = (
           type: 'error',
           code: 'requestError',
           message:
-            "No connector found for id 'do-not-exist'\nSaved object [action/do-not-exist] not found",
+            "No connector or inference id found for id 'do-not-exist'",
         });
       });
 
@@ -368,7 +368,7 @@ export const chatCompleteSuite = (
             error: {
               code: 'requestError',
               message:
-                "No connector found for id 'do-not-exist'\nSaved object [action/do-not-exist] not found",
+                "No connector or inference id found for id 'do-not-exist'",
               meta: {
                 status: 400,
               },

@@ -94,6 +94,7 @@ export function registerChatCompleteRoute({
           body: chatCompleteResponse,
         });
       } catch (e) {
+        console.log({e});
         return response.custom({
           statusCode: isInferenceError(e) ? e.meta?.status ?? 500 : 500,
           bypassErrorFormat: true,
