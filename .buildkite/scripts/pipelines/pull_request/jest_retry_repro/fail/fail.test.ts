@@ -11,4 +11,8 @@ describe('jest checkpoint retry repro failing config', () => {
   it('fails', () => {
     expect(true).toBe(false);
   });
+
+  it('passes', () => {
+    expect(true).toBe(true);
+  });
 });
