@@ -26,14 +26,10 @@ export const dataControlSchema = controlSchema.extends({
   field_name: schema.string({
     meta: { description: 'The name of the field in the data view that the control is tied to' },
   }),
-  use_global_filters: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
-    })
-  ),
-  ignore_validations: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_IGNORE_VALIDATIONS,
-    })
-  ),
+  use_global_filters: schema.boolean({
+    defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
+  }),
+  ignore_validations: schema.boolean({
+    defaultValue: DEFAULT_IGNORE_VALIDATIONS,
+  }),
 });

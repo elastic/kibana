@@ -38,12 +38,10 @@ export const controlWidthSchema = schema.oneOf(
 export const pinnedControlSchema = schema.object({
   uid: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: schema.maybe(controlWidthSchema),
-  grow: schema.maybe(
-    schema.boolean({
-      defaultValue: DEFAULT_CONTROL_GROW,
-      meta: { description: 'Expand width of the control panel to fit available space.' },
-    })
-  ),
+  grow: schema.boolean({
+    defaultValue: DEFAULT_CONTROL_GROW,
+    meta: { description: 'Expand width of the control panel to fit available space.' },
+  }),
 });
 
 export const controlsGroupSchema = schema.arrayOf(
