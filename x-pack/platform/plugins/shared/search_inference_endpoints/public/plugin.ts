@@ -42,7 +42,6 @@ export class SearchInferenceEndpointsPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchInferenceEndpointsPluginStart>,
     plugins: AppPluginSetupDependencies
   ): SearchInferenceEndpointsPluginSetup {
-    console.log("this.config", this.config)
     if (!this.config.ui?.enabled) return {};
 
     registerLocators(plugins.share);
