@@ -175,7 +175,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
                 alertSearchResult.body.hits.hits[0]._source as object,
-                ['alertInfo.createdAt', 'alertInfo.updatedAt']
+                ['alertInfo.createdAt', 'alertInfo.updatedAt', 'alertInfo.lastEnabledAt']
               );
               expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
@@ -299,7 +299,7 @@ instanceStateValue: true
               expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
                 alertSearchResult.body.hits.hits[0]._source as object,
-                ['alertInfo.createdAt', 'alertInfo.updatedAt']
+                ['alertInfo.createdAt', 'alertInfo.updatedAt', 'alertInfo.lastEnabledAt']
               );
               expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
@@ -411,7 +411,7 @@ instanceStateValue: true
           const alertSearchResultInfoWithoutDates = omit(
             // @ts-expect-error _source: unknown
             alertSearchResult.body.hits.hits[0]._source.alertInfo,
-            ['createdAt', 'updatedAt']
+            ['createdAt', 'updatedAt', 'lastEnabledAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
             id: alertId,

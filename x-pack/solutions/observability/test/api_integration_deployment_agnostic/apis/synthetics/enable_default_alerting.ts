@@ -108,6 +108,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'id',
         'updatedAt',
         'createdAt',
+        'lastEnabledAt',
         'scheduledTaskId',
         'executionStatus',
         'monitoring',
