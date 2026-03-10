@@ -188,6 +188,24 @@ export const MaxStepSizePropSchema = z.object({
 });
 export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
 
+export const MaxIterationsObjectSchema = z.object({
+  limit: z.number().int().positive(),
+  'on-limit': z.enum(['continue', 'fail']),
+});
+
+export const MaxIterationsSchema = z.union([
+  z.number().int().positive(),
+  MaxIterationsObjectSchema,
+]);
+export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
+
+export const LoopStepPropsSchema = z.object({
+  'max-iterations': MaxIterationsSchema.optional(),
+  'iteration-timeout': DurationSchema.optional(),
+  'iteration-on-failure': WorkflowOnFailureSchema.optional(),
+});
+export type LoopStepProps = z.infer<typeof LoopStepPropsSchema>;
+
 const StepWithForEachSchema = z.object({
   foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
@@ -223,6 +241,9 @@ export const BuiltInStepProperties = [
   'timeout',
   'max-step-size',
   'on-failure',
+  'max-iterations',
+  'iteration-timeout',
+  'iteration-on-failure',
 ];
 export type BuiltInStepProperty = (typeof BuiltInStepProperties)[number];
 
@@ -374,6 +395,7 @@ export const ForEachStepConfigSchema = z.object({
     ),
   steps: z.array(BaseStepSchema).min(1).describe('Steps to execute for each item'),
 });
+
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z
     .literal('foreach')
@@ -382,13 +404,21 @@ export const ForEachStepSchema = BaseStepSchema.extend({
     ),
   ...ForEachStepConfigSchema.shape,
   ...StepWithIfConditionSchema.shape,
+  ...LoopStepPropsSchema.shape,
+  ...TimeoutPropSchema.shape,
 });
+
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
+
+const getLoopStepSchemaOverrides = (stepSchema: z.ZodType, loose: boolean) => ({
+  'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+  'iteration-on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+});
 
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = ForEachStepSchema.extend({
     steps: z.array(stepSchema).min(1),
-    'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
+    ...getLoopStepSchemaOverrides(stepSchema, loose),
   });
 
   if (loose) {
