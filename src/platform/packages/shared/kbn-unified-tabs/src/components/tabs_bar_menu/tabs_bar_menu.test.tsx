@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TabsBarMenu } from './tabs_bar_menu';
+import { TabsBarMenu, testSubj } from './tabs_bar_menu';
 import type { TabItem } from '../../types';
 import { TabStatus, type RecentlyClosedTabItem } from '../../types';
 
@@ -30,8 +30,6 @@ const mockRecentlyClosedGroup: RecentlyClosedTabItem[] = [
 const mockRecentlyClosedSingle: RecentlyClosedTabItem[] = [
   { id: 'closed3', label: 'Closed Tab 3', closedAt: now - 10 * 60 * 1000 }, // 10 minutes
 ];
-
-const tabsBarMenuButtonTestId = 'unifiedTabs_tabsBarMenuButton';
 
 describe('TabsBarMenu', () => {
   const mockOnSelectOpenedTab = jest.fn();
@@ -56,7 +54,7 @@ describe('TabsBarMenu', () => {
   it('renders the menu button', async () => {
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     expect(menuButton).toBeInTheDocument();
   });
 
@@ -64,10 +62,10 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
-    const tabsBarMenu = await screen.findByTestId('unifiedTabs_tabsBarMenu');
+    const tabsBarMenu = await screen.findByTestId(testSubj.tabsBarMenu);
     expect(tabsBarMenu).toBeInTheDocument();
     expect(screen.getByText('Opened tabs')).toBeInTheDocument();
   });
@@ -76,7 +74,7 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(await screen.findByText('Opened tabs')).toBeInTheDocument();
@@ -89,10 +87,10 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
-    const secondTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab2');
+    const secondTabOption = await screen.findByTestId(testSubj.openedTab('tab2'));
     await user.click(secondTabOption);
 
     expect(mockOnSelectOpenedTab).toHaveBeenCalledWith(mockTabs[1]);
@@ -102,7 +100,7 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(await screen.findByText('Recently closed')).toBeInTheDocument();
@@ -123,7 +121,7 @@ describe('TabsBarMenu', () => {
       />
     );
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(await screen.findByText('Recently closed')).toBeInTheDocument();
@@ -135,11 +133,11 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup();
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(await screen.findByText('Recently closed')).toBeInTheDocument();
-    await user.click(screen.getByTestId('unifiedTabs_tabsMenu_clearRecentlyClosed'));
+    await user.click(screen.getByTestId(testSubj.clearRecentlyClosed));
 
     expect(defaultProps.onClearRecentlyClosed).toHaveBeenCalled();
   });
@@ -154,11 +152,11 @@ describe('TabsBarMenu', () => {
       />
     );
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     const closedTabOption = await screen.findByTestId(
-      `unifiedTabs_tabsMenu_recentlyClosedTab_${mockRecentlyClosedSingle[0].id}`
+      testSubj.recentlyClosedTab(mockRecentlyClosedSingle[0].id)
     );
     await user.click(closedTabOption);
 
@@ -169,13 +167,13 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     // Enter the group
     await user.click(screen.getByText('2 tabs'));
 
-    const restoreAllItem = await screen.findByTestId('unifiedTabs_tabsMenu_restoreAllTabs');
+    const restoreAllItem = await screen.findByTestId(testSubj.restoreAllTabs);
     await user.click(restoreAllItem);
     expect(mockOnRestoreClosedGroup).toHaveBeenCalledWith(mockRecentlyClosedGroup);
   });
@@ -184,15 +182,15 @@ describe('TabsBarMenu', () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 });
     render(<TabsBarMenu {...defaultProps} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     await user.click(screen.getByText('2 tabs'));
 
-    await screen.findByTestId('unifiedTabs_tabsMenu_restoreAllTabs');
+    await screen.findByTestId(testSubj.restoreAllTabs);
 
     const groupTabItem = await screen.findByTestId(
-      `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${mockRecentlyClosedGroup[0].id}`
+      testSubj.recentlyClosedGroupTab(mockRecentlyClosedGroup[0].id)
     );
     await user.click(groupTabItem);
 
@@ -208,7 +206,7 @@ describe('TabsBarMenu', () => {
 
     render(<TabsBarMenu {...propsWithNoClosedTabs} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(screen.queryByText('Recently closed')).not.toBeInTheDocument();
@@ -222,11 +220,11 @@ describe('TabsBarMenu', () => {
       </div>
     );
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
-    const selectedTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab1');
-    const unselectedTabOption = await screen.findByTestId('unifiedTabs_tabsMenu_openedTab_tab2');
+    const selectedTabOption = await screen.findByTestId(testSubj.openedTab('tab1'));
+    const unselectedTabOption = await screen.findByTestId(testSubj.openedTab('tab2'));
 
     expect(selectedTabOption).toHaveAttribute('aria-current', 'true');
     expect(unselectedTabOption).not.toHaveAttribute('aria-current');
@@ -244,7 +242,7 @@ describe('TabsBarMenu', () => {
 
     render(<TabsBarMenu {...propsWithTimestamps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = screen.getByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(await screen.findByText('Recently closed')).toBeVisible();
@@ -266,7 +264,7 @@ describe('TabsBarMenu', () => {
 
     render(<TabsBarMenu {...propsWithTimestamps} />);
 
-    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+    const menuButton = screen.getByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     expect(await screen.findByText('Recently closed')).toBeVisible();
@@ -274,9 +272,9 @@ describe('TabsBarMenu', () => {
     // Enter the group and hover over the closed tab item
     await user.click(screen.getByText('2 tabs'));
 
-    await screen.findByTestId('unifiedTabs_tabsMenu_restoreAllTabs');
+    await screen.findByTestId(testSubj.restoreAllTabs);
     const groupTabItem = await screen.findByTestId(
-      `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${mockRecentlyClosedGroup[0].id}`
+      testSubj.recentlyClosedGroupTab(mockRecentlyClosedGroup[0].id)
     );
     await user.hover(groupTabItem);
 
@@ -302,12 +300,12 @@ describe('TabsBarMenu', () => {
 
     render(<TabsBarMenu {...propsWithPreview} />);
 
-    const menuButton = await screen.findByTestId(tabsBarMenuButtonTestId);
+    const menuButton = await screen.findByTestId(testSubj.tabsBarMenuButton);
     await user.click(menuButton);
 
     await user.click(screen.getByText('2 tabs'));
     const groupTabItem = await screen.findByTestId(
-      `unifiedTabs_tabsMenu_recentlyClosedGroupTab_${mockRecentlyClosedGroup[0].id}`
+      testSubj.recentlyClosedGroupTab(mockRecentlyClosedGroup[0].id)
     );
 
     await user.hover(groupTabItem);
@@ -317,9 +315,7 @@ describe('TabsBarMenu', () => {
     await user.click(groupTabItem);
     await user.click(menuButton);
     await user.click(
-      screen.getByTestId(
-        `unifiedTabs_tabsMenu_recentlyClosedGroup_${mockRecentlyClosedGroup[0].closedAt}`
-      )
+      screen.getByTestId(testSubj.recentlyClosedGroup(mockRecentlyClosedGroup[0].closedAt))
     );
 
     expect(screen.queryByTestId(previewTitleTestId)).not.toBeInTheDocument();

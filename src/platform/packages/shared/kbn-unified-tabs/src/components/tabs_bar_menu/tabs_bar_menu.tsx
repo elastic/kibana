@@ -38,7 +38,14 @@ import { TabPreview } from '../tab_preview';
 const OPENED_TABS_ROOT_PANEL_ID = 'openedTabsRoot';
 const RECENTLY_CLOSED_ROOT_PANEL_ID = 'recentlyClosedRoot';
 
-const testSubj = {
+export const testSubj = {
+  tabsBarMenu: 'unifiedTabs_tabsBarMenu',
+  tabsBarMenuPanel: 'unifiedTabs_tabsBarMenuPanel',
+  tabsBarMenuButton: 'unifiedTabs_tabsBarMenuButton',
+  openedTabsContextMenu: 'unifiedTabs_tabsMenu_openedTabsContextMenu',
+  clearRecentlyClosed: 'unifiedTabs_tabsMenu_clearRecentlyClosed',
+  recentlyClosedContextMenu: 'unifiedTabs_tabsMenu_recentlyClosedContextMenu',
+  restoreAllTabs: 'unifiedTabs_tabsMenu_restoreAllTabs',
   openedTab: (id: string) => `unifiedTabs_tabsMenu_openedTab_${id}`,
   recentlyClosedTab: (id: string) => `unifiedTabs_tabsMenu_recentlyClosedTab_${id}`,
   recentlyClosedGroup: (closedAt: number) => `unifiedTabs_tabsMenu_recentlyClosedGroup_${closedAt}`,
@@ -265,7 +272,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               onRestoreRecentlyClosedGroup(groupItems);
               closePopover();
             },
-            'data-test-subj': 'unifiedTabs_tabsMenu_restoreAllTabs',
+            'data-test-subj': testSubj.restoreAllTabs,
           },
           {
             key: 'restoreAllTabsSeparator',
@@ -310,7 +317,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
 
     return (
       <EuiPopover
-        data-test-subj="unifiedTabs_tabsBarMenu"
+        data-test-subj={testSubj.tabsBarMenu}
         id={contextMenuPopoverId}
         isOpen={isPopoverOpen}
         closePopover={closePopover}
@@ -320,14 +327,14 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
         buffer={0}
         panelProps={{
           css: { overflow: 'hidden' },
-          ['data-test-subj']: 'unifiedTabs_tabsBarMenuPanel',
+          ['data-test-subj']: testSubj.tabsBarMenuPanel,
         }}
         button={
           <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={menuButtonLabel}
               color="text"
-              data-test-subj="unifiedTabs_tabsBarMenuButton"
+              data-test-subj={testSubj.tabsBarMenuButton}
               iconType="arrowDown"
               onClick={() => {
                 const isOpen = !isPopoverOpen;
@@ -353,7 +360,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
               size="s"
               initialPanelId={OPENED_TABS_ROOT_PANEL_ID}
               panels={openedTabsPanels}
-              data-test-subj="unifiedTabs_tabsMenu_openedTabsContextMenu"
+              data-test-subj={testSubj.openedTabsContextMenu}
             />
           </div>
           {recentlyClosedItems.length > 0 && (
@@ -375,7 +382,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                     <EuiButtonEmpty
                       size="xs"
                       flush="both"
-                      data-test-subj="unifiedTabs_tabsMenu_clearRecentlyClosed"
+                      data-test-subj={testSubj.clearRecentlyClosed}
                       aria-label={i18n.translate('unifiedTabs.tabsBarMenu.clearRecentlyClosed', {
                         defaultMessage: 'Clear',
                       })}
@@ -394,7 +401,7 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
                   size="s"
                   initialPanelId={RECENTLY_CLOSED_ROOT_PANEL_ID}
                   panels={recentlyClosedPanels}
-                  data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"
+                  data-test-subj={testSubj.recentlyClosedContextMenu}
                 />
               </div>
             </>
