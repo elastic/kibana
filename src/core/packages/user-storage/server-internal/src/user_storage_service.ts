@@ -11,7 +11,10 @@ import type { Logger } from '@kbn/logging';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
-import type { UserStorageDefinition, UserStorageRegistrations } from '@kbn/core-user-storage-common';
+import type {
+  UserStorageDefinition,
+  UserStorageRegistrations,
+} from '@kbn/core-user-storage-common';
 import type {
   UserStorageServiceSetup,
   UserStorageServiceStart,
