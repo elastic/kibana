@@ -60,7 +60,6 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
     [selectedSources, selectedSet, onSelectedSourcesChanged]
   );
 
-
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
