@@ -24,9 +24,9 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { generateEncodedStepExecutionId, isTemplateExpression } from '../utils';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN } from '../../common/step_executions_index';
 
 export interface ContextManagerInit {
   // New properties for logging

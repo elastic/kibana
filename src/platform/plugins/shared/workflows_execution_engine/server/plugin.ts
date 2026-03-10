@@ -23,6 +23,7 @@ import type {
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
@@ -57,7 +58,6 @@ import type {
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
-import { generateEncodedWorkflowExecutionId } from '@kbn/workflows/server/utils';
 import { WORKFLOWS_EXECUTIONS_INDEX_PATTERN } from '../common/workflow_executions_index';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
@@ -444,8 +444,6 @@ export class WorkflowsExecutionEnginePlugin
               if (concurrencyGroupKey) {
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
-
-
 
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
