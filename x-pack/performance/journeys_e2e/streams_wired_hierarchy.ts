@@ -171,10 +171,13 @@ export const journey = new Journey({
       wiredFieldsToAdd: { 'attributes.perf_hierarchy_field': { type: 'keyword' } },
     });
   })
-  .step('Verify child schema page loads after scale parent field update', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`/app/streams/${WIRED_CHILD_FIRST_NAME}/management/schema`));
-    await page.waitForSelector(subj('streamsAppContentAddFieldButton'), { timeout: 120000 });
-  })
+  .step(
+    'Verify child schema page loads after scale parent field update',
+    async ({ page, kbnUrl }) => {
+      await page.goto(kbnUrl.get(`/app/streams/${WIRED_CHILD_FIRST_NAME}/management/schema`));
+      await page.waitForSelector(subj('streamsAppContentAddFieldButton'), { timeout: 120000 });
+    }
+  )
   .step('Set complex retention on scale parent stream via API', async ({ page }) => {
     await updateIngestViaApi({
       page,
