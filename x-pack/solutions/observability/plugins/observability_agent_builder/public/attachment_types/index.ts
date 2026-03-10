@@ -12,9 +12,11 @@ import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 
 type UnknownAttachmentWithLabel = Attachment<
@@ -70,6 +72,20 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
       defaultMessage: 'Service',
     }),
     icon: 'gear',
+  },
+  {
+    type: OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
+    label: i18n.translate('xpack.observabilityAgentBuilder.attachments.host.label', {
+      defaultMessage: 'Host',
+    }),
+    icon: 'storage',
+  },
+  {
+    type: OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
+    label: i18n.translate('xpack.observabilityAgentBuilder.attachments.transaction.label', {
+      defaultMessage: 'Transaction',
+    }),
+    icon: 'merge',
   },
 ];
 
