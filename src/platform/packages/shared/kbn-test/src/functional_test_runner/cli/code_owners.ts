@@ -23,6 +23,11 @@ const TEST_DIRECTORIES = [
   'x-pack/solutions/chat/test',
 ];
 
+const IGNORED_FILENAMES = ['moon.yml'];
+
+const isIgnoredFile = (repoRel: string): boolean =>
+  IGNORED_FILENAMES.some((fileName) => repoRel.endsWith(`/${fileName}`));
+
 export async function checkFTRCodeOwnersCLI() {
   await run(
     async ({ log }) => {
@@ -36,7 +41,9 @@ export async function checkFTRCodeOwnersCLI() {
       const moonConfigMatcher = ignore().add(['**/moon.yml']);
       const isMoonConfig = (path: string): boolean => moonConfigMatcher.test(path).ignored;
 
-      const testFiles = await getRepoFiles(TEST_DIRECTORIES);
+      const testFiles = (await getRepoFiles(TEST_DIRECTORIES)).filter(
+        (repoPath) => !isIgnoredFile(repoPath.repoRel)
+      );
       const filesWithoutOwner = testFiles
         .filter((repoPath) => !hasOwner(repoPath.repoRel))
         .filter((repoPath) => !isMoonConfig(repoPath.repoRel))
