@@ -24,24 +24,24 @@ import {
  */
 const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
 
-type ActionListBucketsInput = {
+interface ActionListBucketsInput {
   region?: string;
   prefix?: string;
-};
+}
 
-type ActionListBucketObjectsInput = {
+interface ActionListBucketObjectsInput {
   bucket: string;
   region?: string;
   prefix?: string;
   continuationToken?: string;
   maxKeys?: number;
-};
+}
 
-type ActionDownloadFileInput = {
+interface ActionDownloadFileInput {
   bucket: string;
   key: string;
   maximumDownloadSizeBytes?: number;
-};
+}
 
 export const AmazonS3: ConnectorSpec = {
   metadata: {
@@ -130,7 +130,7 @@ export const AmazonS3: ConnectorSpec = {
           .default(1000),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as ActionListBucketObjectsInput
+        const typedInput = input as ActionListBucketObjectsInput;
 
         return await listAmazonS3BucketObjects(
           ctx,
