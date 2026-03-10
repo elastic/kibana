@@ -39,6 +39,12 @@ export type { Entity } from './domain/definitions/entity.gen';
 export type { IdentitySourceFields } from './domain/euid';
 export { ALL_ENTITY_TYPES } from './domain/definitions/entity_schema';
 
+export const ENTITY_SCHEMA_VERSION_V2 = 'v2';
+export const ENTITY_LATEST = 'latest' as const;
+
+export const getLatestEntityStoreIndexName = (namespace: string) =>
+  `.entities.${ENTITY_SCHEMA_VERSION_V2}.${ENTITY_LATEST}.security_${namespace}` as const;
+
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
 export const EntityStoreStatus = z.enum([
   'not_installed',
