@@ -11,6 +11,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@kbn/react-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { ruleFormKeys } from './query_key_factory';
 
 interface UseDataFieldsProps {
   query: string;
@@ -24,7 +25,7 @@ export const useDataFields = ({ query, http, dataViews, onSuccess }: UseDataFiel
   onSuccessRef.current = onSuccess;
 
   const fieldsQuery = useQuery({
-    queryKey: ['dataFields', query],
+    queryKey: ruleFormKeys.dataFields(query),
     queryFn: async () => {
       const dataView = await getESQLAdHocDataview({
         dataViewsService: dataViews,

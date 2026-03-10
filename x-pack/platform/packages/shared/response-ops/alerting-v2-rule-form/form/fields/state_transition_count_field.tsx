@@ -7,12 +7,11 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
+import { MAX_CONSECUTIVE_BREACHES } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
-
-const MAX_PENDING_COUNT = 1000;
 const DEFAULT_PENDING_COUNT = 2;
 
 interface StateTransitionCountFieldProps {
@@ -46,7 +45,7 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
           defaultMessage: 'Consecutive breaches is required.',
         }),
         min: 1,
-        max: MAX_PENDING_COUNT,
+        max: MAX_CONSECUTIVE_BREACHES,
         validate: (value) => {
           if (value != null && !Number.isInteger(value)) {
             return i18n.translate('xpack.alertingV2.ruleForm.stateTransition.countIntegerError', {
@@ -61,13 +60,13 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
           value={value ?? DEFAULT_PENDING_COUNT}
           onChange={(e) => {
             const parsedValue = parsePositiveIntegerInput(e.target.value);
-            if (parsedValue != null && parsedValue <= MAX_PENDING_COUNT) {
+            if (parsedValue != null && parsedValue <= MAX_CONSECUTIVE_BREACHES) {
               onChange(parsedValue);
             }
           }}
           onKeyDown={onKeyDown}
           min={1}
-          max={MAX_PENDING_COUNT}
+          max={MAX_CONSECUTIVE_BREACHES}
           step={1}
           isInvalid={!!error}
           data-test-subj="stateTransitionCountInput"
