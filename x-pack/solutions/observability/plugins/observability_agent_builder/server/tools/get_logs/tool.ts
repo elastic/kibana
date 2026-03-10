@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -36,10 +37,11 @@ const getLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'KQL filter to narrow results. Build this iteratively by adding NOT clauses to exclude noise. ' +
-        'Examples: "service.name: checkout", ' +
-        '"NOT message: \\"GET /health\\" AND NOT kubernetes.namespace: \\"kube-system\\"", ' +
-        '"error.message: * AND NOT message: \\"Known benign warning\\"".'
+      dedent(`KQL filter to narrow results. Build this iteratively by adding NOT clauses to exclude noise.
+        Examples:
+         - "service.name: checkout",
+         - "NOT message: \\"GET /health\\" AND NOT kubernetes.namespace: \\"kube-system\\"",
+         - "error.message: * AND NOT message: \\"Known benign warning\\"".`)
     ),
   limit: z
     .number()
@@ -52,21 +54,20 @@ const getLogsSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". ' +
-        'If not provided, automatically calculated from the time range to produce ~30 buckets.'
+      `Histogram bucket size for the time-series trend. Examples: "30s", "1m", "5m", "1h". If not provided, automatically calculated from the time range to produce ~30 buckets.`
     ),
   groupBy: z
     .string()
     .optional()
     .describe(
-      'Field to group the histogram by. ' +
-        'Examples: "log.level", "service.name", "kubernetes.namespace". ' +
-        'Adds a second dimension to the trend for richer analysis.'
+      `Field to group the histogram by. Examples: "log.level", "service.name", "kubernetes.namespace". Adds a second dimension to the trend for richer analysis.`
     ),
   fields: z
     .array(z.string())
     .default(DEFAULT_SAMPLE_FIELDS)
-    .describe('Fields to include in log samples. Overrides the default fields when provided.'),
+    .describe(
+      'Fields to include in log samples and category samples. Overrides the default fields when provided.'
+    ),
 });
 
 export function createGetLogsTool({
@@ -79,28 +80,33 @@ export function createGetLogsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
     id: OBSERVABILITY_GET_LOGS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Searches and filters logs, returning a histogram trend, total count, compact log samples, and message pattern categories in a single query.
+    description: dedent(
+      `Searches and filters logs, returning a histogram trend, total count, compact log samples, and message pattern categories in a single query.
 
-When to use:
-- Investigating log spikes, errors, or anomalies by iteratively narrowing down with KQL filters
-- Getting an overview of log volume and trends for a time window
-- Drilling into specific services, hosts, or containers during incident investigation
+      When to use:
+      - Investigating log spikes, errors, or anomalies by iteratively narrowing down with KQL filters
+      - Getting an overview of log volume and trends for a time window
+      - Drilling into specific services, hosts, or containers during incident investigation
 
-How to use (the "funnel" workflow):
-1. Start with a broad filter (or no kqlFilter) to see the landscape
-2. Review the totalCount, categories, and samples — identify noise (health checks, cron jobs, verbose info logs)
-3. Call again with NOT clauses added to kqlFilter to exclude noise
-4. Repeat until categories shows fewer than 20 distinct patterns or samples show the root cause
-5. Use groupBy (e.g. "log.level") to slice the histogram for richer trend analysis
+      How to use (the "funnel" workflow):
+      1. Start with a broad filter (or no kqlFilter) to see the landscape
+      2. Review the totalCount, categories, and samples — identify noise (health checks, cron jobs, verbose info logs)
+      3. Call again with NOT clauses added to kqlFilter to exclude noise
+      4. Repeat until categories shows fewer than 20 distinct patterns or samples show the root cause
+      5. Use groupBy (e.g. "log.level") to slice the histogram for richer trend analysis
 
-Response includes:
-- categories: top message patterns by frequency (only when totalCount > 100). Use the number of categories to gauge noise diversity — fewer than 20 patterns means the dataset is focused enough to review.
-- topValues: top values with counts for key fields (log.level, service.name, host.name, etc.). Use these exact values when building kqlFilter or choosing a groupBy field — do not guess field values.
+      Response structure:
+      - histogram: time-series buckets [{bucket, count, group?}]. Controlled by bucketSize (bucket width) and groupBy (adds a "group" field to each bucket).
+      - totalCount: total number of matching logs.
+      - samples: the most recent log documents, controlled by limit (max count) and fields (which fields to include).
+      - categories: top message patterns by frequency (max 30), each with a pattern string, count, and one sample document. The sample includes the same fields controlled by the fields parameter. Use the number of categories to gauge noise diversity — fewer than 20 patterns means the dataset is focused enough to review.
+      - topValues: top 10 values for fixed key fields: log.level, service.name, service.environment, host.name, agent.name, error.exception.type, kubernetes.namespace, kubernetes.node.name, kubernetes.pod.name, kubernetes.container.name. Not affected by groupBy or fields. Use these exact values when building kqlFilter or choosing a groupBy field — do not guess field values.
 
-When NOT to use:
-- For detailed log pattern grouping with samples and exception analysis, use get_log_groups
-- For log rate spike/dip correlation analysis, use run_log_rate_analysis
-- For metrics or traces, use the dedicated metric/trace tools`,
+      When NOT to use:
+      - For detailed log pattern grouping with samples and exception analysis, use get_log_groups
+      - For log rate spike/dip correlation analysis, use run_log_rate_analysis
+      - For metrics or traces, use the dedicated metric/trace tools`
+    ),
     schema: getLogsSchema,
     tags: ['observability', 'logs', 'investigation'],
     availability: {
