@@ -34,8 +34,8 @@ const JEST_TEST_PATTERNS = [
   ':(glob)**/*.test.jsx',
 ];
 
-// These groups are effectively disjoint: Scout uses .spec.ts, Jest uses .test.*,
-// and FTR tests live in separate top-level directories. No dedup needed.
+// No dedup needed as these groups are disjoint:  Scout uses .spec.ts, Jest uses .test.*
+// and FTR tests live in separate top-level directories
 const TEST_FILE_GROUPS = [
   { label: 'Scout', patterns: SCOUT_TEST_PATTERNS },
   { label: 'FTR', patterns: FTR_TEST_PATTERNS },
