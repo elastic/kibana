@@ -28,7 +28,11 @@ export const transformWorkpadIn = (
         if (fn.function === 'embeddable') {
           const embeddableConfig = decode(fn.arguments.config[0] as string);
           const embeddableType = fn.arguments.type[0] as string;
-          const transforms = embeddableService.getTransforms(embeddableType);
+          // Temporary escape hatch for lens as code
+          // TODO remove when lens as code transforms are ready for production
+          const transformType = embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType;
+          const transforms = embeddableService.getTransforms(transformType);
+
           try {
             if (transforms?.transformIn) {
               const { state, references: panelReferences = [] } =
