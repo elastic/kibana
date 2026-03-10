@@ -27,6 +27,7 @@
     {
       "id": "streams",
       "name": "Streams",
+      "slackChannel": "#significant-events-dev",
       "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-streams/playwright.config.ts",
       "tags": [
         "platform",
@@ -99,6 +100,7 @@
     {
       "id": "entity-analytics",
       "name": "Security Entity Analytics",
+      "slackChannel": "#security-entity-analytics-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.config.ts",
       "tags": [
         "security",
