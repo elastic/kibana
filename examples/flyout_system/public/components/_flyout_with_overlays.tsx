@@ -33,6 +33,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   createChildFlyoutDescriptionItems,
   createMainFlyoutDescriptionItems,
+  FLYOUT_MIN_WIDTH,
   FlyoutOwnFocusSwitch,
   FlyoutTypeSwitch,
 } from '../utils';
@@ -46,7 +47,7 @@ interface SessionFlyoutProps {
   title: string;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
-  childSize?: 's' | 'm' | 'fill';
+  childSize: 's' | 'm' | 'fill';
   childMaxWidth?: number;
   overlays: OverlayStart;
 }
@@ -82,7 +83,7 @@ interface FlyoutContentProps {
   flyoutOwnFocus: boolean;
   mainSize: 's' | 'm' | 'l' | 'fill';
   mainMaxWidth?: number;
-  childSize?: 's' | 'm' | 'fill';
+  childSize: 's' | 'm' | 'fill';
   childMaxWidth?: number;
   overlays: OverlayStart;
   childFlyoutRefA: React.MutableRefObject<OverlayRef | null>;
@@ -146,7 +147,9 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         title: `Child flyout A of ${title}`,
         session: 'inherit',
         size: childSize,
+        hasChildBackground: true,
         maxWidth: childMaxWidth,
+        minWidth: FLYOUT_MIN_WIDTH,
         onActive: () => {
           console.log('activate child flyout', title); // eslint-disable-line no-console
         },
@@ -174,7 +177,9 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         title: `Child flyout B of ${title}`,
         session: 'inherit',
         size: childSize,
+        hasChildBackground: true,
         maxWidth: childMaxWidth,
+        minWidth: FLYOUT_MIN_WIDTH,
         onActive: () => {
           console.log('activate child flyout B', title); // eslint-disable-line no-console
         },
@@ -216,13 +221,8 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
         <EuiSpacer size="m" />
         <EuiText>
           <p>
-            Below is some filler content to demonstrate scrolling behavior.
-            {childSize && (
-              <>
-                {' '}
-                Scroll down to access the button to <strong>open the child flyout</strong>.
-              </>
-            )}
+            Below is some filler content to demonstrate scrolling behavior. Scroll down to access
+            the button to <strong>open the child flyout</strong>.
           </p>
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
@@ -243,22 +243,18 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
           </p>
         </EuiText>
         <EuiSpacer />
-        {childSize && (
-          <>
-            <EuiButton
-              buttonRef={childTriggerARef}
-              onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}
-            >
-              {isChildFlyoutAOpen ? 'Close child flyout A' : 'Open child flyout A'}
-            </EuiButton>{' '}
-            <EuiButton
-              buttonRef={childTriggerBRef}
-              onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}
-            >
-              {isChildFlyoutBOpen ? 'Close child flyout B' : 'Open child flyout B'}
-            </EuiButton>
-          </>
-        )}
+        <EuiButton
+          buttonRef={childTriggerARef}
+          onClick={isChildFlyoutAOpen ? handleCloseChildFlyoutA : openChildFlyoutA}
+        >
+          {isChildFlyoutAOpen ? 'Close child flyout A' : 'Open child flyout A'}
+        </EuiButton>{' '}
+        <EuiButton
+          buttonRef={childTriggerBRef}
+          onClick={isChildFlyoutBOpen ? handleCloseChildFlyoutB : openChildFlyoutB}
+        >
+          {isChildFlyoutBOpen ? 'Close child flyout B' : 'Open child flyout B'}
+        </EuiButton>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
@@ -325,7 +321,9 @@ const SessionFlyout: React.FC<SessionFlyoutProps> = React.memo((props) => {
         type: flyoutType,
         ownFocus: flyoutOwnFocus,
         size: mainSize,
+        minWidth: FLYOUT_MIN_WIDTH,
         maxWidth: mainMaxWidth,
+        resizable: true,
         onActive: mainFlyoutOnActive,
         onClose: handleCloseFlyout,
         ['aria-labelledby']: `flyoutHeading-${title}`,
@@ -486,8 +484,10 @@ export const FlyoutWithOverlays: React.FC<FlyoutFromOverlaysProps> = ({ overlays
             ),
           },
           {
-            title: 'Session Z: main size = fill',
-            description: <SessionFlyout title="Session Z" mainSize="fill" overlays={overlays} />,
+            title: 'Session Z: main size = m, child size = fill',
+            description: (
+              <SessionFlyout title="Session Z" mainSize="m" childSize="fill" overlays={overlays} />
+            ),
           },
         ]}
       />
