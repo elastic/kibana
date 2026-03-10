@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - advanced_settings
+    - alerting
     - apm
     - banners
     - cloud_security_posture
@@ -37,6 +38,7 @@ plugins:
     - streams_app
     - synthetics
     - transform
+    - triggers_actions_ui
     - uptime
     - ux
     - workflows_extensions

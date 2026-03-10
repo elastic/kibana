@@ -27,7 +27,7 @@ import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
 import type { ProcessorFormState } from '../../../../types';
-import { AdditionalChargesCallout } from '../grok/additional_charges_callout';
+import { AdditionalChargesCallout } from '../../../../../shared/additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useDissectPatternSuggestion } from './use_dissect_pattern_suggestion';
 import type { AIFeatures } from '../../../../../../../hooks/use_ai_features';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ESQL_CONFIG_SCHEMA_VERSION } from '@kbn/agent-builder-common/tools/types/esql';
 import type { EsqlToolConfig } from '@kbn/agent-builder-common/tools/types/esql';

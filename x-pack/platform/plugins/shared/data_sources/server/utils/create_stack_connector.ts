@@ -37,10 +37,20 @@ function buildSecretsFromConnectorSpec(
     return typeId === 'bearer';
   });
 
+  const hasBasicAuth = connectorSpec.auth?.types.some((authType) => {
+    const typeId = typeof authType === 'string' ? authType : authType.type;
+    return typeId === 'basic';
+  });
+
   const secrets: Record<string, string> = {};
   if (hasBearerAuth) {
     secrets.authType = 'bearer';
     secrets.token = credentials;
+  } else if (hasBasicAuth) {
+    const colonIdx = credentials.indexOf(':');
+    secrets.authType = 'basic';
+    secrets.username = colonIdx !== -1 ? credentials.slice(0, colonIdx) : credentials;
+    secrets.password = colonIdx !== -1 ? credentials.slice(colonIdx + 1) : '';
   } else {
     const apiKeyHeaderAuth = connectorSpec.auth?.types.find((authType) => {
       const typeId = typeof authType === 'string' ? authType : authType.type;
@@ -78,15 +88,9 @@ function buildSecretsFromMCPConnectorConfig(
     case 'bearer':
       secrets.token = credentials;
       break;
-    case 'apiKey': {
+    case 'apiKey':
       secrets.apiKey = credentials;
-      if (config.apiKeyHeaderName) {
-        secrets.secretHeaders = {
-          [config.apiKeyHeaderName]: credentials,
-        };
-      }
       break;
-    }
     case 'basic': {
       // credentials is in the format "username:password"
       secrets.user = credentials.split(':')[0];
@@ -114,6 +118,7 @@ export const createStackConnector = async (
     connectorConfig = mcpConnectorConfig;
     secrets = buildSecretsFromMCPConnectorConfig(mcpConnectorConfig, credentials);
   } else {
+    connectorConfig = stackConnectorConfig.config ?? {};
     secrets = buildSecretsFromConnectorSpec(connectorType, credentials);
   }
 

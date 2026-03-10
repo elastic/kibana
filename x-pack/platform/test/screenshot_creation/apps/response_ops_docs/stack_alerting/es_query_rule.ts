@@ -105,6 +105,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rulesList = await testSubjects.find('rulesList');
       const alertRule = await rulesList.findByCssSelector(`[title="${esQueryRuleName}"]`);
       await alertRule.click();
+      const actionsButton = await testSubjects.find('ruleActionsButton');
+      await actionsButton.click();
       const editRule = await testSubjects.find('openEditRuleFlyoutButton');
       await editRule.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
