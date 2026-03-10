@@ -96,7 +96,7 @@ export class ConnectorExecutor {
     );
 
     if (connectors.length === 0) {
-      throw new Error(`Connector "${connectorNameOrId}" not found`);
+      throw new Error(`Connector ${connectorNameOrId} not found`);
     }
     // Do not throw if multiple connectors are found. We will use the first one.
 
