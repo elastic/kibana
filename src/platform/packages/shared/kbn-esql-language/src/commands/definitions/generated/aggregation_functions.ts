@@ -1429,6 +1429,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1480,6 +1497,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1531,6 +1565,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1582,6 +1633,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1633,6 +1701,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1684,6 +1769,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1735,6 +1837,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1786,6 +1905,23 @@ const firstDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1821,6 +1957,23 @@ const firstDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -1906,6 +2059,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -1957,6 +2127,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2008,6 +2195,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date_nanos',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2059,6 +2263,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2110,6 +2331,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2161,6 +2399,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'ip',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'ip',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2212,6 +2467,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2263,6 +2535,23 @@ const lastDefinition: FunctionDefinition = {
         },
         {
           name: 'sortField',
+          type: 'integer',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
           type: 'long',
           optional: false,
           description: 'The sort field',
@@ -2298,6 +2587,23 @@ const lastDefinition: FunctionDefinition = {
         {
           name: 'sortField',
           type: 'date_nanos',
+          optional: false,
+          description: 'The sort field',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+          description: 'The search field',
+        },
+        {
+          name: 'sortField',
+          type: 'integer',
           optional: false,
           description: 'The sort field',
         },
@@ -3876,6 +4182,17 @@ const sumDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'dense_vector',
+          optional: false,
+          description: '',
+        },
+      ],
+      returnType: 'dense_vector',
     },
     {
       params: [

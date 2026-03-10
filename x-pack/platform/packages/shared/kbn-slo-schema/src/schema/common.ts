@@ -8,7 +8,7 @@
 import { either } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
-const ALL_VALUE = '*';
+import { ALL_VALUE } from '../constants';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 

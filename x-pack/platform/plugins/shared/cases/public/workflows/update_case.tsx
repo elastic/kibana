@@ -10,15 +10,13 @@ import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { updateCaseStepCommonDefinition } from '../../common/workflows/steps/update_case';
 // import { caseIdInputEditorHandlers } from './case_id_selection_handler';
 
-export const createUpdateCaseStepDefinition = () => {
-  return createPublicStepDefinition({
-    ...updateCaseStepCommonDefinition,
-    icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
-        default: icon,
-      }))
-    ),
-    // TODO: enable one case_id can be a template AND an inputHandler
-    // editorHandlers: caseIdInputEditorHandlers,
-  });
-};
+export const updateCaseStepDefinition = createPublicStepDefinition({
+  ...updateCaseStepCommonDefinition,
+  icon: React.lazy(() =>
+    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+      default: icon,
+    }))
+  ),
+  // TODO: enable one case_id can be a template AND an inputHandler
+  // editorHandlers: caseIdInputEditorHandlers,
+});

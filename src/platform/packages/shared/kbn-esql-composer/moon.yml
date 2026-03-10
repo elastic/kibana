@@ -17,8 +17,7 @@ project:
   owner: '@elastic/obs-presentation-team'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-esql-composer
-dependsOn:
-  - '@kbn/esql-language'
+dependsOn: []
 tags:
   - shared-common
   - package

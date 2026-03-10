@@ -280,6 +280,42 @@ describe('SkillsStore', () => {
     });
   });
 
+  describe('persisted (custom) skills', () => {
+    const createPersistedSkill = (
+      overrides: Partial<InternalSkillDefinition> = {}
+    ): InternalSkillDefinition => ({
+      id: 'custom-skill-1',
+      name: 'custom-skill',
+      basePath: '/skills',
+      description: 'A persisted custom skill',
+      content: 'Custom skill content',
+      readonly: false,
+      getRegistryTools: () => ['tool-1'],
+      ...overrides,
+    });
+
+    it('adds a persisted skill to the store and volume', () => {
+      const store = new SkillsStoreImpl({ skills: [] });
+      const skill = createPersistedSkill();
+
+      store.add(skill);
+
+      expect(store.has('custom-skill-1')).toBe(true);
+      const volume = store.getVolume();
+      expect(volume.has('/skills/custom-skill/SKILL.md')).toBe(true);
+    });
+
+    it('mounts persisted skills alongside builtin skills', async () => {
+      const builtin = createMockSkill({ id: 'builtin-1', name: 'builtin-skill' });
+      const persisted = createPersistedSkill({ id: 'custom-1', name: 'custom-skill' });
+      const store = new SkillsStoreImpl({ skills: [builtin, persisted] });
+
+      const volume = store.getVolume();
+      expect(volume.has('/skills/platform/builtin-skill/SKILL.md')).toBe(true);
+      expect(volume.has('/skills/custom-skill/SKILL.md')).toBe(true);
+    });
+  });
+
   describe('edge cases', () => {
     it('handles skills with empty body', () => {
       const store = new SkillsStoreImpl({ skills: [] });
