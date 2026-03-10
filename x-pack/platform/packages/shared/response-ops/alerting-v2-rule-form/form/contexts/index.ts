@@ -7,7 +7,6 @@
 
 export {
   RuleFormProvider,
-  RuleFormServicesProvider,
   useRuleFormServices,
   useRuleFormMeta,
   type RuleFormServices,

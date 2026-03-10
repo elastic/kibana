@@ -25,12 +25,7 @@ export { DynamicRuleForm, StandaloneRuleForm } from './form';
 export { RuleResultsPreview } from './form';
 
 // Context - for consumers who need custom integrations
-export {
-  RuleFormProvider,
-  RuleFormServicesProvider,
-  useRuleFormServices,
-  useRuleFormMeta,
-} from './form';
+export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
 
 // Types
 export type {

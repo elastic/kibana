@@ -66,10 +66,3 @@ export const useRuleFormMeta = (): RuleFormMeta => {
   const { meta } = useRuleFormContext();
   return meta;
 };
-
-/**
- * @deprecated Use `RuleFormProvider` instead. Kept for backward compatibility.
- */
-export const RuleFormServicesProvider: React.FC<
-  PropsWithChildren<{ services: RuleFormServices }>
-> = ({ children, services }) => <RuleFormProvider services={services}>{children}</RuleFormProvider>;

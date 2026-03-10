@@ -52,9 +52,4 @@ export type { FormValues } from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
-export {
-  RuleFormProvider,
-  RuleFormServicesProvider,
-  useRuleFormServices,
-  useRuleFormMeta,
-} from './contexts';
+export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';

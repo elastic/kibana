@@ -260,7 +260,7 @@ describe('RuleForm', () => {
   });
 
   describe('services context', () => {
-    it('provides services via RuleFormServicesProvider (tested implicitly)', () => {
+    it('provides services via RuleFormProvider (tested implicitly)', () => {
       // Child components use useRuleFormServices and would throw if context was not provided
       render(<RuleForm {...defaultProps} />, { wrapper: createFormWrapper() });
 
