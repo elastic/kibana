@@ -1,0 +1,37 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "slo-burn-rate-1",
+      "title": "SLO Burn Rate Embeddable creates a dashboard with an SLO burn rate embeddable panel via REST API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/burn_rate_embeddable.spec.ts",
+        "line": 37,
+        "column": 12
+      }
+    },
+    {
+      "id": "slo-burn-rate-2",
+      "title": "SLO Burn Rate Embeddable rejects invalid burn rate panel config when slo_id is missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/burn_rate_embeddable.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    }
+  ]
+}
