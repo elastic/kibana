@@ -3105,7 +3105,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all installed plugins.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        List all installed plugins and their managed assets. Plugins are installable packages that bundle agent capabilities such as skills, following the [Claude agent plugin specification](https://code.claude.com/docs/en/plugins).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: get-agent-builder-plugins
       parameters: []
       responses:
@@ -3285,7 +3285,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a plugin from a GitHub URL or a direct zip URL.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
+        Install a plugin from a [GitHub Claude plugin URL](https://code.claude.com/docs/en/plugins) or a direct ZIP URL. Plugins bundle agent capabilities such as skills.<br/><br/>[Required authorization] Route required privileges: agentBuilder:write.
       operationId: post-agent-builder-plugins-install
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -3357,7 +3357,7 @@ paths:
                     updated_at: '2025-01-01T00:00:00.000Z'
                     version: 1.0.0
           description: Indicates a successful response
-      summary: Install a plugin
+      summary: Install a plugin from a GitHub URL or zip URL.
       tags:
         - agent builder
       x-codeSamples:
