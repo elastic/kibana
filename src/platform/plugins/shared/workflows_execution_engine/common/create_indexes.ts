@@ -10,11 +10,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createIndexWithMappings, createOrUpdateIndex } from './create_index';
 import {
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from './mappings';
+} from './step_executions_index';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+} from './workflow_executions_index';
 
 interface CreateIndexesOptions {
   esClient: ElasticsearchClient;
