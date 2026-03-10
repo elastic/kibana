@@ -132,6 +132,49 @@ describe('useAssistantAvailability', () => {
     expect(result.current.hasAgentBuilderManagePrivilege).toBe(true);
   });
 
+  it('returns hasAgentBuilderManagePrivilege when legacy showManagement and advanced settings save are true', () => {
+    mockUseLicense.mockReturnValue({
+      isEnterprise: jest.fn().mockReturnValue(true),
+    } as unknown as LicenseService);
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            [ASSISTANT_FEATURE_ID]: {
+              'ai-assistant': true,
+              updateAIAssistantAnonymization: true,
+              manageGlobalKnowledgeBaseAIAssistant: true,
+            },
+            [SECURITY_FEATURE_ID]: {
+              configurations: true,
+            },
+            [AGENTBUILDER_FEATURE_ID]: {
+              show: true,
+              showManagement: true,
+            },
+            advancedSettings: {
+              save: true,
+            },
+            actions: {
+              show: true,
+              execute: true,
+              save: true,
+              delete: true,
+            },
+          },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+
+    const { result } = renderHook(() => useAssistantAvailability());
+
+    expect(result.current.hasAgentBuilderManagePrivilege).toBe(true);
+  });
+
   it('returns correct values when all privileges are available but assistant his hidden', () => {
     mockUseLicense.mockReturnValue({
       isEnterprise: jest.fn().mockReturnValue(true),

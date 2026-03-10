@@ -29,8 +29,10 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
   const hasSearchAILakeConfigurations = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
 
   const hasAgentBuilderPrivilege = capabilities[AGENTBUILDER_FEATURE_ID]?.show === true;
+  // Keep legacy fallback while capabilities migrate from showManagement -> manageAgents.
   const hasAgentBuilderManageCapability =
-    capabilities[AGENTBUILDER_FEATURE_ID]?.[uiPrivileges.manageAgents] === true;
+    capabilities[AGENTBUILDER_FEATURE_ID]?.[uiPrivileges.manageAgents] === true ||
+    capabilities[AGENTBUILDER_FEATURE_ID]?.showManagement === true;
   const hasAgentBuilderManagePrivilege =
     hasAgentBuilderManageCapability && capabilities.advancedSettings?.save === true;
 
