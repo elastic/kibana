@@ -36,6 +36,8 @@ export interface BuilderContext {
   isReadOnly?: boolean;
   /** Entity name for display in tooltips and messages. */
   entityName?: string;
+  /** Plural entity name for display in tooltips and messages. */
+  entityNamePlural?: string;
   /** Feature support flags from the provider. */
   supports?: ContentListSupports;
   /** Callbacks for action orchestration. */

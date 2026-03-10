@@ -14,6 +14,8 @@ import { DEFAULT_FILTERS } from './types';
 import { ContentListStateContext } from './use_content_list_state';
 import { useContentListConfig } from '../context';
 import { isSortingConfig, isPaginationConfig, isSearchConfig } from '../features';
+import { MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER } from '../features';
+import type { CreatorsList } from '../features';
 import { DEFAULT_PAGE_SIZE } from '../features/pagination';
 import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
@@ -54,6 +56,7 @@ const resolveInitialPageSize = (
  * This provider:
  * - Manages client-controlled state (search, filters, sort, pagination, selection) via reducer.
  * - Uses React Query for data fetching with caching and deduplication.
+ * - Applies user filtering client-side after fetch, so the full creator list is always available.
  * - Combines client state with query data for a unified state interface.
  *
  * Note: Initial state is derived from `features.sorting`, `features.pagination`, and
@@ -103,8 +106,10 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
   const [clientState, dispatch] = useReducer(reducer, initialClientState);
 
   // Use React Query for data fetching - returns query data directly.
+  // Note: the query excludes `user` from the server request — user filtering
+  // is applied client-side below, matching the original `TableListView` pattern.
   const {
-    items,
+    items: unfilteredItems,
     totalItems,
     counts,
     isLoading,
@@ -112,6 +117,55 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     error,
     refetch: queryRefetch,
   } = useContentListItemsQuery(clientState);
+
+  // Derive the full creator list from the unfiltered query result.
+  // This is computed before user filtering so the "Created by" filter popover
+  // always shows every creator, regardless of the active filter selection.
+  const allCreators: CreatorsList = useMemo(() => {
+    const uids = new Set<string>();
+    let hasNoCreator = false;
+    let hasManaged = false;
+
+    for (const item of unfilteredItems) {
+      if (item.managed) {
+        hasManaged = true;
+      } else if (item.createdBy) {
+        uids.add(item.createdBy);
+      } else {
+        hasNoCreator = true;
+      }
+    }
+
+    return { uids: Array.from(uids), hasNoCreator, hasManaged };
+  }, [unfilteredItems]);
+
+  // Apply user filter client-side using the deduplicated union of all UIDs
+  // from `user.uid` (UI-driven) and `user.query` (text-driven).
+  const userFilter = clientState.filters.user;
+  const items = useMemo(() => {
+    if (!userFilter) {
+      return unfilteredItems;
+    }
+
+    const allUids = new Set([...userFilter.uid, ...Object.values(userFilter.query).flat()]);
+
+    if (allUids.size === 0) {
+      return unfilteredItems;
+    }
+
+    return unfilteredItems.filter((item) => {
+      if (item.managed && allUids.has(MANAGED_USER_FILTER)) {
+        return true;
+      }
+      if (!item.createdBy && !item.managed && allUids.has(NO_CREATOR_USER_FILTER)) {
+        return true;
+      }
+      if (item.createdBy && allUids.has(item.createdBy)) {
+        return true;
+      }
+      return false;
+    });
+  }, [unfilteredItems, userFilter]);
 
   // Expose refetch for manual refresh.
   const refetch = useCallback(() => queryRefetch(), [queryRefetch]);
@@ -122,6 +176,7 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
       state: {
         ...clientState,
         items,
+        allCreators,
         totalItems,
         counts,
         isLoading,
@@ -131,7 +186,18 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
       dispatch,
       refetch,
     }),
-    [clientState, items, totalItems, counts, isLoading, isFetching, error, dispatch, refetch]
+    [
+      clientState,
+      items,
+      allCreators,
+      totalItems,
+      counts,
+      isLoading,
+      isFetching,
+      error,
+      dispatch,
+      refetch,
+    ]
   );
 
   return (

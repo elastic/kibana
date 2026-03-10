@@ -8,8 +8,9 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ActiveFilters, FilterCounts } from '../datasource';
+import type { ActiveFilters, FilterCounts, UserFilter } from '../datasource';
 import type { ContentListItem } from '../item';
+import type { CreatorsList } from '../features';
 
 /**
  * Action type constants for state reducer.
@@ -21,6 +22,12 @@ export const CONTENT_LIST_ACTIONS = {
   CLEAR_FILTERS: 'CLEAR_FILTERS',
   /** Toggle a value's include/exclude state for any filter dimension, updating filters and query text atomically. */
   TOGGLE_FILTER: 'TOGGLE_FILTER',
+  /** Update only the `user` portion of `ActiveFilters`. */
+  SET_USER_FILTER: 'SET_USER_FILTER',
+  /** Toggle a single user's email in the query text, updating the `createdBy` clause atomically. */
+  TOGGLE_USER_FILTER: 'TOGGLE_USER_FILTER',
+  /** Replace the entire `ActiveFilters` object. */
+  SET_FILTERS: 'SET_FILTERS',
   /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
   /** Set page index. */
@@ -34,9 +41,7 @@ export const CONTENT_LIST_ACTIONS = {
 /**
  * Default filter state.
  */
-export const DEFAULT_FILTERS: ActiveFilters = {
-  search: undefined,
-};
+export const DEFAULT_FILTERS: ActiveFilters = {};
 
 /**
  * Client-controlled state managed by the reducer.
@@ -59,7 +64,8 @@ export interface ContentListClientState {
    * Always updated atomically with `search.queryText` via `SET_SEARCH`.
    * When no tag service is configured, `filters.search` equals `search.queryText`.
    * When tag parsing is available, `filters.search` contains only the free-text
-   * portion and `filters.tag`, `filters.type`, etc. hold structured filters.
+   * portion and `filters.tag`, `filters.custom`, etc. hold structured filters.
+   * The `user` field is always applied client-side and never sent to the server.
    */
   filters: ActiveFilters;
   /** Sort state. */
@@ -89,8 +95,15 @@ export interface ContentListClientState {
  * This is read-only state derived from the data fetching layer.
  */
 export interface ContentListQueryData {
-  /** Currently loaded items (transformed for rendering). */
+  /** Currently loaded items (after client-side user filtering). */
   items: ContentListItem[];
+  /**
+   * Summary of all unique creators from the unfiltered query result.
+   *
+   * Derived before client-side user filtering so the creator list shown in
+   * the filter popover never shrinks when a filter is active.
+   */
+  allCreators: CreatorsList;
   /** Total number of items matching the current query (for pagination). */
   totalItems: number;
   /**
@@ -152,6 +165,31 @@ interface ToggleFilterAction {
   payload: { filterId: string; valueId: string; valueName: string; withModifierKey: boolean };
 }
 
+/** Update only the `user` portion of active filters. */
+interface SetUserFilterAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_USER_FILTER;
+  payload: UserFilter | undefined;
+}
+
+/**
+ * Toggle a single user's email in the `createdBy` query clause.
+ *
+ * Checks whether `uid` is present in `filters.user.uid` to decide add vs remove.
+ * Updates both `search.queryText` and `filters.user` atomically.
+ * The renderer's `useEffect` syncs `filters.user` again when the query prop changes,
+ * but the reducer sets it directly so client-side filtering reflects immediately.
+ */
+interface ToggleUserFilterAction {
+  type: typeof CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER;
+  payload: { uid: string; queryValue: string };
+}
+
+/** Replace the entire active filters object. */
+interface SetFiltersAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_FILTERS;
+  payload: ActiveFilters;
+}
+
 /** Set sort field and direction. */
 interface SetSortAction {
   type: typeof CONTENT_LIST_ACTIONS.SET_SORT;
@@ -167,6 +205,9 @@ export type ContentListAction =
   | SetSearchAction
   | ClearFiltersAction
   | ToggleFilterAction
+  | SetUserFilterAction
+  | ToggleUserFilterAction
+  | SetFiltersAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }

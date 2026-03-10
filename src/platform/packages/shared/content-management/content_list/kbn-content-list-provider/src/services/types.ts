@@ -9,6 +9,7 @@
 
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserProfileService } from './user_profile';
 
 /**
  * Services provided to the content list provider to enable additional capabilities.
@@ -35,4 +36,12 @@ export interface ContentListServices {
    * filter in toolbar) unless explicitly disabled via `features.starred: false`.
    */
   favorites?: FavoritesClientPublic;
+  /**
+   * User profile service for resolving creator avatars and filtering by user.
+   *
+   * Provides `getUserProfile` for single lookups and `bulkGetUserProfiles` for
+   * batch resolution. When present, enables the `createdBy` column and filter
+   * automatically (unless `features.createdBy` is `false`).
+   */
+  userProfile?: UserProfileService;
 }

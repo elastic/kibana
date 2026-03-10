@@ -29,6 +29,10 @@ export type ContentListItem<T = Record<string, unknown>> = T & {
   updatedAt?: Date;
   /** Optional array of tag IDs associated with this item. */
   tags?: string[];
+  /** User ID of the item's creator. */
+  createdBy?: string;
+  /** Whether the item is managed by Elastic (not user-created). */
+  managed?: boolean;
 };
 
 /**

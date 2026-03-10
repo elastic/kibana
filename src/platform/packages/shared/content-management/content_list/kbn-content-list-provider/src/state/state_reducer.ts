@@ -9,7 +9,7 @@
 
 import { Query } from '@elastic/eui';
 import type { IncludeExcludeFilter, ActiveFilters } from '../datasource';
-import { getIncludeExcludeFilter } from '../datasource';
+import { TAG_FILTER_ID } from '../datasource';
 import type { ContentListClientState, ContentListAction } from './types';
 import { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './types';
 
@@ -19,6 +19,37 @@ const normalizeIncludeExclude = (
   exclude: string[]
 ): IncludeExcludeFilter | undefined =>
   include.length === 0 && exclude.length === 0 ? undefined : { include, exclude };
+
+/**
+ * Read the current {@link IncludeExcludeFilter} for a filter dimension,
+ * routing to `filters.tag` for the built-in tag filter and to
+ * `filters.custom[filterId]` for plugin-provided dimensions.
+ */
+const readFilterDimension = (
+  filters: ActiveFilters,
+  filterId: string
+): IncludeExcludeFilter | undefined =>
+  filterId === TAG_FILTER_ID ? filters.tag : filters.custom?.[filterId];
+
+/**
+ * Write an updated {@link IncludeExcludeFilter} for a filter dimension,
+ * routing to `filters.tag` or `filters.custom[filterId]`.
+ */
+const writeFilterDimension = (
+  filters: ActiveFilters,
+  filterId: string,
+  value: IncludeExcludeFilter | undefined
+): ActiveFilters => {
+  if (filterId === TAG_FILTER_ID) {
+    return { ...filters, tag: value };
+  }
+  const { [filterId]: _, ...restCustom } = filters.custom ?? {};
+  const nextCustom = value ? { ...restCustom, [filterId]: value } : restCustom;
+  return {
+    ...filters,
+    custom: Object.keys(nextCustom).length > 0 ? nextCustom : undefined,
+  };
+};
 
 /**
  * Default selection state.
@@ -49,7 +80,7 @@ export const reducer = (
       return {
         ...state,
         search: { queryText: action.payload.queryText },
-        filters: action.payload.filters,
+        filters: { ...action.payload.filters, user: state.filters.user },
         page: { ...state.page, index: 0 },
         selection: { ...DEFAULT_SELECTION },
       };
@@ -57,7 +88,7 @@ export const reducer = (
     case CONTENT_LIST_ACTIONS.TOGGLE_FILTER: {
       const { filterId, valueId, valueName, withModifierKey } = action.payload;
       const { filters, search } = state;
-      const existingFilter = getIncludeExcludeFilter(filters[filterId]);
+      const existingFilter = readFilterDimension(filters, filterId);
       const currentInclude = existingFilter?.include ?? [];
       const currentExclude = existingFilter?.exclude ?? [];
 
@@ -79,10 +110,7 @@ export const reducer = (
       }
 
       const nextFilterValue = normalizeIncludeExclude(nextInclude, nextExclude);
-      const { [filterId]: _, ...rest } = filters;
-      const nextFilters: ActiveFilters = nextFilterValue
-        ? { ...rest, [filterId]: nextFilterValue }
-        : rest;
+      const nextFilters = writeFilterDimension(filters, filterId, nextFilterValue);
 
       let nextQueryText = search.queryText;
       try {
@@ -116,6 +144,77 @@ export const reducer = (
         ...state,
         filters: { ...DEFAULT_FILTERS },
         search: { queryText: '' },
+        page: { ...state.page, index: 0 },
+        selection: { ...DEFAULT_SELECTION },
+      };
+
+    case CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER: {
+      const { uid, queryValue } = action.payload;
+      const currentUids = state.filters.user?.uid ?? [];
+      const isActive = currentUids.includes(uid);
+
+      const nextUid = isActive ? currentUids.filter((u) => u !== uid) : [...currentUids, uid];
+
+      const currentQuery = state.filters.user?.query ?? {};
+      const hasActiveUids = nextUid.length > 0 || Object.keys(currentQuery).length > 0;
+      const nextUserFilter = hasActiveUids ? { uid: nextUid, query: currentQuery } : undefined;
+
+      let nextQueryText = state.search.queryText;
+      try {
+        let nextQuery = nextQueryText ? Query.parse(nextQueryText) : Query.parse('');
+
+        const existing = new Set<string>();
+        const clauses = nextQuery.ast.getFieldClauses('createdBy');
+        if (clauses) {
+          for (const clause of clauses) {
+            const vs = Array.isArray(clause.value) ? clause.value : [clause.value];
+            vs.forEach((v) => existing.add(String(v)));
+          }
+        }
+
+        nextQuery = nextQuery
+          .removeSimpleFieldClauses('createdBy')
+          .removeOrFieldClauses('createdBy');
+
+        if (isActive) {
+          existing.delete(queryValue);
+        } else {
+          existing.add(queryValue);
+        }
+
+        for (const v of existing) {
+          nextQuery = nextQuery.addOrFieldValue('createdBy', v, true, 'eq');
+        }
+
+        nextQueryText = nextQuery.text;
+      } catch {
+        // Preserve query text on parse failure.
+      }
+
+      return {
+        ...state,
+        search: { queryText: nextQueryText },
+        filters: { ...state.filters, user: nextUserFilter },
+        page: { ...state.page, index: 0 },
+        selection: { ...DEFAULT_SELECTION },
+      };
+    }
+
+    case CONTENT_LIST_ACTIONS.SET_USER_FILTER:
+      return {
+        ...state,
+        filters: {
+          ...state.filters,
+          user: action.payload,
+        },
+        page: { ...state.page, index: 0 },
+        selection: { ...DEFAULT_SELECTION },
+      };
+
+    case CONTENT_LIST_ACTIONS.SET_FILTERS:
+      return {
+        ...state,
+        filters: action.payload,
         page: { ...state.page, index: 0 },
         selection: { ...DEFAULT_SELECTION },
       };

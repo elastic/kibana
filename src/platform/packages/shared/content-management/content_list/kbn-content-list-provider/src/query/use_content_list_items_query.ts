@@ -24,6 +24,10 @@ const DEFAULT_PAGE = { index: 0, size: 20 };
  * This hook:
  * - Fetches items using the configured `findItems` function.
  * - Returns query data directly (items, loading, error) without dispatching.
+ * - Excludes `users` from server params — user filtering is applied client-side
+ *   after the query returns, matching the original `TableListView` behavior. This
+ *   ensures the full item list is always available for deriving the creator list
+ *   shown in the filter.
  *
  * Note: Items are expected to already be in `ContentListItem` format.
  * Transformation should happen in the `findItems` implementation.
@@ -33,21 +37,28 @@ const DEFAULT_PAGE = { index: 0, size: 20 };
  */
 export const useContentListItemsQuery = (
   clientState: ContentListClientState
-): ContentListQueryData & { refetch: () => void } => {
+): Omit<ContentListQueryData, 'allCreators'> & { refetch: () => void } => {
   const { dataSource, queryKeyScope, supports } = useContentListConfig();
 
   // Build query parameters from client state.
   // Only include sort if sorting is supported; otherwise, let the data source use its natural order.
   // Only include page if pagination is supported; otherwise, use a sensible default.
-  const queryParams = useMemo(
-    () => ({
-      searchQuery: clientState.filters.search ?? '',
-      filters: clientState.filters,
+  // Exclude `user` from server params — user filtering is applied client-side.
+  const queryParams = useMemo(() => {
+    const { user: _user, ...serverFilters } = clientState.filters;
+    return {
+      searchQuery: serverFilters.search ?? '',
+      filters: serverFilters,
       sort: supports.sorting ? clientState.sort : undefined,
       page: supports.pagination ? clientState.page : DEFAULT_PAGE,
-    }),
-    [clientState.filters, clientState.sort, clientState.page, supports.sorting, supports.pagination]
-  );
+    };
+  }, [
+    clientState.filters,
+    clientState.sort,
+    clientState.page,
+    supports.sorting,
+    supports.pagination,
+  ]);
 
   // React Query for data fetching.
   // `keepPreviousData` retains the previous results while a new query loads,

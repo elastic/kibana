@@ -16,6 +16,7 @@ import type { NameColumnProps } from './name/name_builder';
 import type { UpdatedAtColumnProps } from './updated_at/updated_at_builder';
 import type { ActionsColumnProps } from './actions/actions_builder';
 import type { StarredColumnProps } from './starred/starred_builder';
+import type { CreatedByColumnProps } from './created_by/created_by_builder';
 
 /**
  * Props for the `Column` component (custom columns).
@@ -49,7 +50,7 @@ export interface ColumnProps {
  * Namespace interface for `Column` sub-components.
  *
  * The base `Column` accepts {@link ColumnProps}; pre-built columns
- * are properties (e.g., `Column.Name`, `Column.Actions`).
+ * are properties (e.g., `Column.Name`, `Column.Actions`, `Column.CreatedBy`).
  */
 export interface ColumnNamespace {
   (props: ColumnProps): ReactNode;
@@ -62,6 +63,7 @@ export interface ColumnNamespace {
    * @param props - {@link StarredColumnProps}
    */
   Starred: (props: StarredColumnProps) => ReactNode;
+  CreatedBy: (props: CreatedByColumnProps) => ReactNode;
 }
 
 /** Preset-to-props mapping for table columns. */
@@ -70,6 +72,7 @@ export interface ColumnPresets {
   updatedAt: UpdatedAtColumnProps;
   actions: ActionsColumnProps;
   starred: StarredColumnProps;
+  createdBy: CreatedByColumnProps;
 }
 
 /** Part factory for table columns. */

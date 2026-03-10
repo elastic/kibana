@@ -8,6 +8,7 @@
  */
 
 import type { SearchFilterConfig } from '@elastic/eui';
+import type { CreatedByFilterProps } from './created_by';
 import { toolbar } from '../assembly';
 
 /**
@@ -48,6 +49,7 @@ export interface FilterPresets {
   sort: SortFilterProps;
   tags: TagFilterProps;
   starred: StarredFilterProps;
+  createdBy: CreatedByFilterProps;
 }
 
 /** Context passed to filter `resolve` callbacks. */
@@ -58,6 +60,8 @@ export interface FilterContext {
   hasTags: boolean;
   /** Whether starred filtering is available from the provider. */
   hasStarred: boolean;
+  /** Whether created-by filtering is available from the provider. */
+  hasCreatedBy: boolean;
 }
 
 /** Part factory for toolbar filters. */

@@ -43,6 +43,13 @@ export interface ContentListFeatures {
    * - `false`: Explicitly disables starring even if `services.favorites` is present.
    */
   starred?: boolean;
+  /**
+   * CreatedBy feature configuration.
+   *
+   * - `true` or `undefined`: Auto-enabled when `services.userProfile` is provided.
+   * - `false`: Explicitly disables created-by column and filter even if the service is present.
+   */
+  createdBy?: boolean;
 }
 
 /**
@@ -88,6 +95,7 @@ export const isSearchConfig = (search: ContentListFeatures['search']): search is
  *   <div>
  *     {supports.sorting && <SortDropdown />}
  *     {supports.tags && <TagFilter />}
+ *     {supports.createdBy && <CreatedByFilter />}
  *   </div>
  * );
  * ```
@@ -105,4 +113,6 @@ export interface ContentListSupports {
   tags: boolean;
   /** Whether starring items is supported. */
   starred: boolean;
+  /** Whether created-by column and user filtering is supported. */
+  createdBy: boolean;
 }

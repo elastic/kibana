@@ -8,3 +8,4 @@
  */
 
 export type { ContentListServices } from './types';
+export type { UserProfileService } from './user_profile';

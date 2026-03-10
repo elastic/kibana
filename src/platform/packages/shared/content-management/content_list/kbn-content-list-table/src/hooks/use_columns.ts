@@ -65,6 +65,7 @@ export const useColumns = (
       itemConfig,
       isReadOnly,
       entityName: labels.entity,
+      entityNamePlural: labels.entityPlural,
       supports,
       actions: { onDelete },
     };
@@ -76,5 +77,5 @@ export const useColumns = (
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete]);
+  }, [itemConfig, isReadOnly, labels.entity, labels.entityPlural, supports, onDelete]);
 };

@@ -10,7 +10,7 @@
 import type { ContentListItem } from '../item';
 
 /**
- * Include/exclude filter shape used by tag, type, lastResponse, and other filter dimensions.
+ * Include/exclude filter shape used by `tag`, and plugin-provided `custom` filter dimensions.
  */
 export interface IncludeExcludeFilter {
   /** Values that items must match (include filter). */
@@ -23,31 +23,58 @@ export interface IncludeExcludeFilter {
 export const TAG_FILTER_ID = 'tag';
 
 /**
+ * User filter state for creator-based filtering.
+ *
+ * Separates UI-driven selections (popover / avatar clicks) from text-driven
+ * query bar clauses so they can be managed independently:
+ *
+ * - `uid` holds UIDs resolved from email or sentinel values selected through UI controls.
+ *   The {@link CONTENT_LIST_ACTIONS.TOGGLE_USER_FILTER} action checks this array to
+ *   decide whether to add or remove an email from the query bar.
+ * - `query` maps raw text values typed in the query bar (e.g. `createdBy:"Jane Doe"`)
+ *   to the UIDs they resolve to. Text clauses are "sticky" — only removed by manually
+ *   editing the query bar or clearing all filters.
+ *
+ * Client-side filtering uses the deduplicated union of all UIDs from both fields.
+ */
+export interface UserFilter {
+  /** UIDs resolved from email or sentinel values selected via UI controls. */
+  uid: string[];
+  /**
+   * Text-driven query values mapped to their resolved UIDs.
+   *
+   * Keys are the raw text values from `createdBy:` clauses (names, usernames, etc.).
+   * Values are arrays of UIDs that each text value resolved to.
+   * E.g. `{ "Jane Doe": ["uid123", "uid456"], "clint": ["uid789"] }`.
+   */
+  query: Record<string, string[]>;
+}
+
+/**
  * Active filters applied to the content list.
  *
- * Filter dimensions (e.g. `tag`, `type`, `lastResponse`) are keyed by their
- * `fieldName` and hold an {@link IncludeExcludeFilter}. The index signature is
- * required to allow arbitrary filter dimensions, but note:
- *
- * - The `search` key is always `string | undefined` — access it directly.
- * - All other keys return `IncludeExcludeFilter | string | undefined`; use
- *   {@link getIncludeExcludeFilter} to safely narrow them to `IncludeExcludeFilter`.
+ * Each built-in filter dimension (`search`, `tag`, `user`) has an explicit,
+ * precisely-typed field. Plugin-provided filter dimensions (e.g. `type`,
+ * `lastResponse`) live under the `custom` record.
  */
 export interface ActiveFilters {
   /** Search text extracted from the search bar, without filter syntax. */
   search?: string;
   /** When `true`, restrict results to starred items only. */
   starredOnly?: boolean;
-  [filterId: string]: IncludeExcludeFilter | string | boolean | undefined;
+  /** Tag include/exclude filter. */
+  tag?: IncludeExcludeFilter;
+  /** User filter for creator-based filtering. Applied client-side; never sent to the server. */
+  user?: UserFilter;
+  /** Plugin-provided filter dimensions keyed by their `fieldName`. */
+  custom?: Record<string, IncludeExcludeFilter | undefined>;
 }
 
 /**
- * Returns the filter value as `IncludeExcludeFilter` if it is an object; otherwise `undefined`.
- * Use when accessing `include`/`exclude` on a filter dimension, since the index signature
- * allows `string`, `boolean`, and `IncludeExcludeFilter`.
+ * Narrows a filter value to {@link IncludeExcludeFilter} if it is one; otherwise returns `undefined`.
  */
 export const getIncludeExcludeFilter = (
-  value: IncludeExcludeFilter | string | boolean | undefined
+  value: IncludeExcludeFilter | undefined
 ): IncludeExcludeFilter | undefined => (value && typeof value === 'object' ? value : undefined);
 
 /**

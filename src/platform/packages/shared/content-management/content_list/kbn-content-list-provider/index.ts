@@ -26,7 +26,6 @@ export type {
 
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
-export type { ContentListQueryData } from './src/state';
 export {
   useContentListSort,
   useContentListSearch,
@@ -35,18 +34,19 @@ export {
   useFilterDisplay,
   useContentListFilters,
   useTagFilterToggle,
+  useUserFilterToggle,
   TAG_FILTER_ID,
   DeleteConfirmationModal,
   DeleteConfirmationComponent,
   useDeleteConfirmation,
+  useContentListUserFilter,
 } from './src/features';
 
 // State.
 export { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './src/state';
 export type { ContentListAction } from './src/state';
 
-// Types.
-export type { ContentListItem, ContentListItemConfig } from './src/item';
+// Types — features.
 export type {
   ContentListFeatures,
   ContentListSupports,
@@ -65,10 +65,16 @@ export type {
   DeleteConfirmationComponentProps,
   UseDeleteConfirmationOptions,
   UseDeleteConfirmationReturn,
+  UseContentListUserFilterReturn,
+  CreatorsList,
 } from './src/features';
+export { MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER } from './src/features';
+
+// Types — datasource.
 export type {
   ActiveFilters,
   IncludeExcludeFilter,
+  UserFilter,
   FilterCounts,
   FindItemsFn,
   FindItemsParams,
@@ -76,5 +82,15 @@ export type {
   DataSourceConfig,
 } from './src/datasource';
 
+// Types — item.
+export type { ContentListItem, ContentListItemConfig } from './src/item';
+
+// Types — services.
+export type { UserProfileService } from './src/services';
+
+// Types — state.
+export type { ContentListQueryData } from './src/state';
+
 // Utilities.
 export { contentListKeys } from './src/query';
+export { contentListQueryClient } from './src/query';

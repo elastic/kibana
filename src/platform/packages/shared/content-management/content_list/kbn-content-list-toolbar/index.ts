@@ -21,9 +21,11 @@ export {
   Filters,
   SortFilter,
   TagFilter,
+  CreatedByFilter,
   type FiltersProps,
   type SortFilterProps,
   type TagFilterProps,
+  type CreatedByFilterProps,
 } from './src/filters';
 
 // Selection bar component for direct imports.
@@ -56,6 +58,7 @@ export {
 export {
   parseFiltersFromQuery,
   useTagQueryParser,
+  useCreatedByQueryParser,
   type QueryParser,
   type QueryParserResult,
 } from './src/filters';

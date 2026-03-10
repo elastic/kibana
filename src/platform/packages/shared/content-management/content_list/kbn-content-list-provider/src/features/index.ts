@@ -36,6 +36,15 @@ export {
   TAG_FILTER_ID,
 } from './filtering';
 
+// User profile filtering feature.
+export type { UseContentListUserFilterReturn, CreatorsList } from './filtering/user_profile';
+export {
+  useContentListUserFilter,
+  useUserFilterToggle,
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+} from './filtering/user_profile';
+
 // Delete feature.
 export type {
   DeleteConfirmationModalProps,

@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  IncludeExcludeFilter,
-  UserFilter,
-  FilterCounts,
-  ActiveFilters,
-  FindItemsParams,
-  FindItemsResult,
-  FindItemsFn,
-  DataSourceConfig,
-} from './types';
-export { getIncludeExcludeFilter, TAG_FILTER_ID } from './types';
+export { useContentListUserFilter } from './use_content_list_user_filter';
+export { useUserFilterToggle } from './use_user_filter_toggle';
+export type { UseContentListUserFilterReturn, CreatorsList } from './types';
+export { MANAGED_USER_FILTER, NO_CREATOR_USER_FILTER } from './types';

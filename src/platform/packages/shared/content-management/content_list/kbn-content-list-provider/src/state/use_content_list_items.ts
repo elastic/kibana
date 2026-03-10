@@ -38,6 +38,7 @@ export const useContentListItems = () => {
 
   return {
     items: state.items,
+    allCreators: state.allCreators,
     totalItems: state.totalItems,
     counts: state.counts,
     isLoading: state.isLoading,

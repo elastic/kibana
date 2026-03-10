@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  IncludeExcludeFilter,
-  UserFilter,
-  FilterCounts,
-  ActiveFilters,
-  FindItemsParams,
-  FindItemsResult,
-  FindItemsFn,
-  DataSourceConfig,
-} from './types';
-export { getIncludeExcludeFilter, TAG_FILTER_ID } from './types';
+export { CreatedByFilter, type CreatedByFilterProps } from './created_by';
+export { CreatedByRenderer, type CreatedByRendererProps } from './created_by_renderer';
+export { useCreatedByQueryParser } from './use_created_by_query_parser';
