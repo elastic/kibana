@@ -47,7 +47,13 @@ export class UserStorageClient implements IUserStorageClient {
       const doc = await this.soClient.get<UserStorageAttributes>(soType, this.profileUid);
       const raw = doc.attributes.data?.[key];
       if (raw != null) {
-        return raw as T;
+        const parsed = definition.schema.safeParse(raw);
+        if (parsed.success) {
+          return parsed.data as T;
+        }
+        this.logger.warn(
+          `Ignoring invalid userStorage value for key [${key}]. ${parsed.error.message}`
+        );
       }
     } catch (err) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
@@ -76,7 +82,17 @@ export class UserStorageClient implements IUserStorageClient {
     for (const [key, definition] of this.definitions) {
       const data = definition.scope === 'space' ? spaceData : globalData;
       const raw = data?.[key];
-      result[key] = raw != null ? raw : definition.defaultValue;
+      if (raw != null) {
+        const parsed = definition.schema.safeParse(raw);
+        if (parsed.success) {
+          result[key] = parsed.data;
+          continue;
+        }
+        this.logger.warn(
+          `Ignoring invalid userStorage value for key [${key}]. ${parsed.error.message}`
+        );
+      }
+      result[key] = definition.defaultValue;
     }
     return result;
   }
