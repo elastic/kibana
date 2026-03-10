@@ -12,7 +12,8 @@ import { DefaultStrategy } from './default_strategy';
 
 /**
  * Returns the AxiosAuthStrategy for the given auth type.
- * This is the single place where authTypeId is inspected for strategy selection.
+ * This is the single place where authTypeId is inspected for strategy selection,
+ * which includes 401 handling and token request.
  */
 export const getAxiosAuthStrategy = (authTypeId: string): AxiosAuthStrategy => {
   switch (authTypeId) {

@@ -128,7 +128,6 @@ export const getStoredTokenWithRefresh = async ({
     const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
 
     const extractedTokens = extractStoredOAuthTokens({
-      // TODO: look into discrimated unions here as well
       connectorToken: connectorToken as ConnectorToken | UserConnectorToken,
       isPerUser,
     });

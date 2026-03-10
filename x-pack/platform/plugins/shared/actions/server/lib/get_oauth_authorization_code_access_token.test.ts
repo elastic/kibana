@@ -221,7 +221,7 @@ describe('getOAuthAuthorizationCodeAccessToken', () => {
       expect(result).toBe('Bearer new-access-token');
     });
 
-    it('passes tokenUrl, clientId, clientSecret, and scope to requestOAuthRefreshToken', async () => {
+    it('calls requestOAuthRefreshToken with correct arguments including scope', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: expiredToken,

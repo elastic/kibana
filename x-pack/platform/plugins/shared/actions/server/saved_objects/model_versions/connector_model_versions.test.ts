@@ -34,80 +34,81 @@ describe('Connector Model Versions', () => {
       expect(version2.schemas?.forwardCompatibility).toBeDefined();
     });
 
-  describe('backfillFn', () => {
-    const backfillChange = version.changes.find((change) => change.type === 'data_backfill');
-    const backfillFn =
-      backfillChange && backfillChange.type === 'data_backfill'
-        ? backfillChange.backfillFn
-        : undefined;
+    describe('backfillFn', () => {
+      const backfillChange = version.changes.find((change) => change.type === 'data_backfill');
+      const backfillFn =
+        backfillChange && backfillChange.type === 'data_backfill'
+          ? backfillChange.backfillFn
+          : undefined;
 
-    it('exists', () => {
-      expect(backfillFn).toBeDefined();
-      expect(typeof backfillFn).toBe('function');
-    });
-
-    it('adds authMode "shared" correctly', () => {
-      const mockDocument = {
-        id: 'test-connector-id',
-        type: 'action',
-        attributes: {
-          actionTypeId: '.slack',
-          name: 'Test Connector',
-          isMissingSecrets: false,
-          config: {
-            authType: 'apiKey',
-            url: 'https://example.com',
-          },
-          secrets: '{}',
-        },
-        references: [],
-        migrationVersion: {},
-        coreMigrationVersion: '8.0.0',
-        typeMigrationVersion: '8.0.0',
-        updated_at: '2024-01-01T00:00:00.000Z',
-        version: '1',
-        namespaces: ['default'],
-      };
-
-      const result = backfillFn!(mockDocument, context);
-
-      expect(result).toEqual({
-        ...mockDocument,
-        attributes: {
-          ...mockDocument.attributes,
-          authMode: 'shared',
-        },
+      it('exists', () => {
+        expect(backfillFn).toBeDefined();
+        expect(typeof backfillFn).toBe('function');
       });
-    });
 
-    it('does not overwrite existing authMode if already present', () => {
-      const mockDocument = {
-        id: 'test-connector-id',
-        type: 'action',
-        attributes: {
-          actionTypeId: '.webhook',
-          name: 'Test Webhook',
-          isMissingSecrets: false,
-          config: {
-            authType: 'bearer',
-            url: 'https://example.com',
+      it('adds authMode "shared" correctly', () => {
+        const mockDocument = {
+          id: 'test-connector-id',
+          type: 'action',
+          attributes: {
+            actionTypeId: '.slack',
+            name: 'Test Connector',
+            isMissingSecrets: false,
+            config: {
+              authType: 'apiKey',
+              url: 'https://example.com',
+            },
+            secrets: '{}',
           },
-          secrets: '{}',
-          authMode: 'per-user' as const,
-        },
-        references: [],
-        migrationVersion: {},
-        coreMigrationVersion: '8.0.0',
-        typeMigrationVersion: '8.0.0',
-        updated_at: '2024-01-01T00:00:00.000Z',
-        version: '1',
-        namespaces: ['default'],
-      };
+          references: [],
+          migrationVersion: {},
+          coreMigrationVersion: '8.0.0',
+          typeMigrationVersion: '8.0.0',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          version: '1',
+          namespaces: ['default'],
+        };
 
-      const result = backfillFn!(mockDocument, context);
+        const result = backfillFn!(mockDocument, context);
 
-      expect(result).toEqual({
-        ...mockDocument,
+        expect(result).toEqual({
+          ...mockDocument,
+          attributes: {
+            ...mockDocument.attributes,
+            authMode: 'shared',
+          },
+        });
+      });
+
+      it('does not overwrite existing authMode if already present', () => {
+        const mockDocument = {
+          id: 'test-connector-id',
+          type: 'action',
+          attributes: {
+            actionTypeId: '.webhook',
+            name: 'Test Webhook',
+            isMissingSecrets: false,
+            config: {
+              authType: 'bearer',
+              url: 'https://example.com',
+            },
+            secrets: '{}',
+            authMode: 'per-user' as const,
+          },
+          references: [],
+          migrationVersion: {},
+          coreMigrationVersion: '8.0.0',
+          typeMigrationVersion: '8.0.0',
+          updated_at: '2024-01-01T00:00:00.000Z',
+          version: '1',
+          namespaces: ['default'],
+        };
+
+        const result = backfillFn!(mockDocument, context);
+
+        expect(result).toEqual({
+          ...mockDocument,
+        });
       });
     });
   });

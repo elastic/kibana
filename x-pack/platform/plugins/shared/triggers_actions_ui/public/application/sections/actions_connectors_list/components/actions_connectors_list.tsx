@@ -411,7 +411,7 @@ const ActionsConnectorsList = ({
         );
       },
     },
-  ] as EuiBasicTableColumn<ActionConnectorTableItem>[];
+  ].filter(Boolean) as EuiBasicTableColumn<ActionConnectorTableItem>[];
 
   const table = (
     <EuiInMemoryTable

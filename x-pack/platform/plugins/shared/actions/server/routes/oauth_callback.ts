@@ -9,6 +9,8 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { capitalize, escape } from 'lodash';
+import { OAuthAuthorizationService } from '../lib';
+import { resolveEarsUrl } from '../lib/ears';
 import type { ActionsPluginsStart } from '../plugin';
 import type { ILicenseState } from '../lib';
 import {
@@ -22,9 +24,8 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
-import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
-import { requestEarsToken } from '../lib/request_ears_token';
+import { requestEarsToken } from '../lib/ears/request_ears_token';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 
@@ -82,21 +83,6 @@ const querySchema = schema.object(
   // Allow unknown query parameters to be passed in like scope, authuser, etc.
   { unknowns: 'allow' }
 );
-
-/**
- * Resolves the full EARS URL by combining the configured base URL with the path
- * from the stored URL (which may be a full URL or just a path).
- */
-function resolveEarsUrl(storedUrl: string, earsBaseUrl: string): string {
-  const base = earsBaseUrl.replace(/\/$/, '');
-  let path: string;
-  try {
-    path = new URL(storedUrl).pathname;
-  } catch {
-    path = storedUrl.startsWith('/') ? storedUrl : `/${storedUrl}`;
-  }
-  return `${base}${path}`;
-}
 
 interface OAuthConnectorSecrets {
   authType?: string;
