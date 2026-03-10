@@ -17,6 +17,7 @@ import type {
   ObservationModule,
 } from '../types';
 import { DEFAULT_ENGINE_CONFIG } from '../types';
+import { entityToKey } from '../observation_modules/utils';
 import { llmSynthesizeLeadContent } from './llm_synthesize';
 
 // ---------------------------------------------------------------------------
@@ -78,7 +79,10 @@ export const createLeadGenerationEngine = ({
 
       // 2. Score entities based on their observations
       const scoreStart = Date.now();
-      const scoredEntities = scoreEntities(observations, entities, config);
+      const moduleWeights = new Map<string, number>(
+        modules.map((m) => [m.config.id, m.config.weight])
+      );
+      const scoredEntities = scoreEntities(observations, entities, config, moduleWeights);
       const scoreMs = Date.now() - scoreStart;
       logger.info(
         `[LeadGenerationEngine][Telemetry] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
@@ -145,23 +149,18 @@ const collectAllObservations = async (
 };
 
 // ---------------------------------------------------------------------------
-// Step 2: Entity scoring
+// Step 2: Entity scoring — weighted formula
 //
-// Simplified formula:
-//   priority = max(severity_rank) + clamp(observation_count - 1, 0, 4)
+// Contribution per observation:
+//   module_weight × observation.score × observation.confidence
 //
-// severity_rank: critical=7, high=5, medium=3, low=1
-// This gives a natural 1-10 scale:
-//   - 1 low observation  = 1
-//   - 1 critical + 4 more = 7 + min(4, 4) = 10 (max possible, capped at 10)
+// Bonuses (multiplicative):
+//   Corroboration: +corroborationBonus% when multiple observations share a module
+//   Diversity:     +diversityBonus% when observations span multiple modules
+//
+// Normalization:
+//   priority = round(rawScore / normalizationCeiling × 9 + 1), clamped to [1, 10]
 // ---------------------------------------------------------------------------
-
-const SEVERITY_RANK: Record<string, number> = {
-  critical: 7,
-  high: 5,
-  medium: 3,
-  low: 1,
-};
 
 interface ScoredEntity {
   readonly entity: LeadEntity;
@@ -172,7 +171,8 @@ interface ScoredEntity {
 const scoreEntities = (
   observations: Observation[],
   allEntities: LeadEntity[],
-  _config: LeadGenerationEngineConfig
+  config: LeadGenerationEngineConfig,
+  moduleWeights: ReadonlyMap<string, number>
 ): ScoredEntity[] => {
   const entityByKey = new Map<string, LeadEntity>();
   for (const entity of allEntities) {
@@ -190,7 +190,7 @@ const scoreEntities = (
   for (const [entityId, entityObservations] of observationsByEntity.entries()) {
     const entity = entityByKey.get(entityId);
     if (entity) {
-      const priority = calculatePriority(entityObservations);
+      const priority = calculateWeightedPriority(entityObservations, moduleWeights, config);
       scored.push({ entity, priority, observations: entityObservations });
     }
   }
@@ -200,14 +200,41 @@ const scoreEntities = (
 };
 
 /**
- * priority = max(severity_rank) + clamp(observation_count - 1, 0, 4)
+ * Weighted scoring with corroboration and diversity bonuses.
  *
- * Capped at 10.
+ * Falls back to weight=1.0 for observations from unregistered modules so the
+ * pipeline degrades gracefully when a module is added without engine wiring.
  */
-const calculatePriority = (observations: Observation[]): number => {
-  const maxSeverityRank = Math.max(...observations.map((o) => SEVERITY_RANK[o.severity] ?? 1));
-  const countBonus = Math.min(observations.length - 1, 4);
-  return Math.min(10, maxSeverityRank + countBonus);
+const calculateWeightedPriority = (
+  observations: Observation[],
+  moduleWeights: ReadonlyMap<string, number>,
+  config: LeadGenerationEngineConfig
+): number => {
+  if (observations.length === 0) {
+    return 1;
+  }
+
+  let rawScore = 0;
+  const countByModule = new Map<string, number>();
+
+  for (const obs of observations) {
+    const weight = moduleWeights.get(obs.moduleId) ?? 1.0;
+    rawScore += weight * obs.score * obs.confidence;
+    countByModule.set(obs.moduleId, (countByModule.get(obs.moduleId) ?? 0) + 1);
+  }
+
+  const hasCorroboration = [...countByModule.values()].some((count) => count > 1);
+  if (hasCorroboration) {
+    rawScore *= 1 + config.corroborationBonus;
+  }
+
+  const hasDiversity = countByModule.size > 1;
+  if (hasDiversity) {
+    rawScore *= 1 + config.diversityBonus;
+  }
+
+  const normalized = (rawScore / config.normalizationCeiling) * 9 + 1;
+  return Math.max(1, Math.min(10, Math.round(normalized)));
 };
 
 // ---------------------------------------------------------------------------
@@ -722,5 +749,3 @@ const buildRecommendations = (group: ScoredEntity[], observations: Observation[]
 
   return recommendations.slice(0, 5);
 };
-
-const entityToKey = (entity: LeadEntity): string => `${entity.type}:${entity.name}`;
