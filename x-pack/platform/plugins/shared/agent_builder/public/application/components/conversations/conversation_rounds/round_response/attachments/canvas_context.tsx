@@ -10,12 +10,13 @@ import type { UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 
 interface CanvasState {
   attachment: UnknownAttachment;
+  version?: number;
   isSidebar: boolean;
 }
 
 interface CanvasContextValue {
   canvasState: CanvasState | null;
-  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean) => void;
+  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => void;
   closeCanvas: () => void;
   setCanvasAttachmentOrigin: (origin: unknown) => void;
 }
@@ -29,9 +30,12 @@ interface CanvasProviderProps {
 export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   const [canvasState, setCanvasState] = useState<CanvasState | null>(null);
 
-  const openCanvas = useCallback((attachment: UnknownAttachment, isSidebar: boolean) => {
-    setCanvasState({ attachment, isSidebar });
-  }, []);
+  const openCanvas = useCallback(
+    (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => {
+      setCanvasState({ attachment, isSidebar, version });
+    },
+    []
+  );
 
   const closeCanvas = useCallback(() => {
     setCanvasState(null);
