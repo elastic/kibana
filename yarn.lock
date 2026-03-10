@@ -6154,6 +6154,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-storage-common@link:src/core/packages/user-storage/common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-server-internal@link:src/core/packages/user-storage/server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-user-storage-server@link:src/core/packages/user-storage/server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core@link:src/core":
   version "0.0.0"
   uid ""

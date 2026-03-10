@@ -85,6 +85,7 @@
     "@kbn/core-di-server-internal",
     "@kbn/core-data-streams-server-internal",
     "@kbn/core-user-activity-server-internal",
+    "@kbn/core-user-storage-server-internal",
   ],
   "exclude": [
     "target/**/*",
