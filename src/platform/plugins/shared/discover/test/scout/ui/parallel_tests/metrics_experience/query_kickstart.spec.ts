@@ -38,16 +38,16 @@ spaceTest.describe(
     });
 
     spaceTest('should run Search all metrics from recommended queries', async ({ pageObjects }) => {
-      const { discover, metricsExperience } = pageObjects;
+      const { discover, discoverActions, metricsExperience } = pageObjects;
       let selectedRecommendation = '';
       await discover.selectTextBaseLang();
 
       await spaceTest.step('open recommended queries from the ES|QL help menu', async () => {
-        await discover.openRecommendedQueriesPanel();
+        await discoverActions.openRecommendedQueriesPanel();
       });
 
       await spaceTest.step('apply Search all metrics query recommendation', async () => {
-        selectedRecommendation = await discover.runRecommendedEsqlQuery(
+        selectedRecommendation = await discoverActions.runRecommendedEsqlQuery(
           testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS,
           testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_FIELDS_FALLBACK
         );
