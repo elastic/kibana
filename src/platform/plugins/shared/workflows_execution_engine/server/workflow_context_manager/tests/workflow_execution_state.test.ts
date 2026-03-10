@@ -491,7 +491,9 @@ describe('WorkflowExecutionState', () => {
       await loadableState.load();
 
       expect(
-        loadableState.getStepExecutionsByStepId('testStep')?.map((stepExecution) => stepExecution.id)
+        loadableState
+          .getStepExecutionsByStepId('testStep')
+          ?.map((stepExecution) => stepExecution.id)
       ).toEqual(['11', '22', '33', '44']);
     });
   });

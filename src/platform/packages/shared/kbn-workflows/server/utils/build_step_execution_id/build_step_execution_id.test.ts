@@ -8,8 +8,8 @@
  */
 
 import crypto from 'crypto';
-import type { StackFrame } from '@kbn/workflows';
 import { buildStepExecutionId } from './build_step_execution_id';
+import type { StackFrame } from '../../..';
 
 describe('buildStepExecutionId', () => {
   describe('basic functionality', () => {
