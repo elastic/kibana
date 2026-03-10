@@ -42,10 +42,6 @@ export const manageControlInputSchema = z.object({
   title: z.string().optional().describe('Optional control title.'),
   width: controlWidthSchema.optional(),
   grow: z.boolean().optional(),
-  settings: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe('Additional control config settings.'),
 });
 
 export const addPanelsFromAttachmentsOperationSchema = z.object({

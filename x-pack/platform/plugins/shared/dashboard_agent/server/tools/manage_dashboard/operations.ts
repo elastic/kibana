@@ -53,7 +53,6 @@ const buildControlConfig = ({
   dataViewId: string;
 }): Record<string, unknown> => {
   return {
-    ...(input.settings ?? {}),
     data_view_id: dataViewId,
     field_name: input.fieldName,
     ...(input.title !== undefined ? { title: input.title } : {}),

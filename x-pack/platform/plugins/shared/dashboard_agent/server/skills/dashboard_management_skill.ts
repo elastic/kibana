@@ -316,8 +316,7 @@ Use this when a dashboard needs reusable filters across multiple panels.
           "type": "rangeSliderControl",
           "fieldName": "event.duration",
           "indexPattern": "logs-*",
-          "title": "Duration",
-          "settings": { "step": 1000 }
+          "title": "Duration"
         }
       ]
     }
