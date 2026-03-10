@@ -81,7 +81,7 @@ describe('getSolutionContext', () => {
       expect(getSolutionContext(createCloud('workplaceai')).solution).toBe('workplaceai');
     });
 
-    // in theory this should never happen (security project using oblt solution nav) 
+    // in theory this should never happen (security project using oblt solution nav)
     // but this is how we handle it if it does
     it('serverless projectType takes precedence over space solution', () => {
       const ctx = getSolutionContext(createCloud('security'), 'oblt');

@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KibanaSolution, SolutionView, CloudSetup, CloudStart, SolutionContext } from './types';
+import type {
+  KibanaSolution,
+  SolutionView,
+  CloudSetup,
+  CloudStart,
+  SolutionContext,
+} from './types';
 import { normalizeSolutionView } from './normalize';
 
 /**
