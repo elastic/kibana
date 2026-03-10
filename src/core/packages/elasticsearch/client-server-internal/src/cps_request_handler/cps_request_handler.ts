@@ -86,11 +86,9 @@ export function getCpsRequestHandler(
     });
 
     if (cpsEnabled && routingType === 'none') {
-      if (isProjectRoutingInQuery(acceptedParams) || isProjectRoutingInBody(acceptedParams)) {
-        requestsWithoutRoutingCounter.add(1, {
-          'api.name': name ?? 'unknown',
-        });
-      }
+      requestsWithoutRoutingCounter.add(1, {
+        'api.name': name ?? 'unknown',
+      });
     }
   };
 }
