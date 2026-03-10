@@ -97,7 +97,7 @@ export const getStoredTokenWithRefresh = async ({
   // Acquire lock for this connector to prevent concurrent token refreshes
   const lock = getOrCreateLock(connectorId);
 
-  return await lock(async () => {
+  const result = await lock(async () => {
     // Re-fetch token inside lock - another request may have already refreshed it
     const { connectorToken, hasErrors } = isPerUser
       ? await connectorTokenClient.get({
@@ -128,6 +128,7 @@ export const getStoredTokenWithRefresh = async ({
     const expiresAt = connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) : Infinity;
 
     const extractedTokens = extractStoredOAuthTokens({
+      // TODO: look into discrimated unions here as well
       connectorToken: connectorToken as ConnectorToken | UserConnectorToken,
       isPerUser,
     });
@@ -191,4 +192,10 @@ export const getStoredTokenWithRefresh = async ({
       return null;
     }
   });
+
+  if (lock.pendingCount === 0 && lock.activeCount === 0) {
+    tokenRefreshLocks.delete(connectorId);
+  }
+
+  return result;
 };
