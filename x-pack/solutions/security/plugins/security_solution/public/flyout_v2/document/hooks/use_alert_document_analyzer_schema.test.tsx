@@ -13,9 +13,9 @@ import type {
   UseAlertDocumentAnalyzerSchemaResult,
 } from './use_alert_document_analyzer_schema';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
-import { useHttp } from '../../../../common/lib/kibana';
+import { useHttp } from '../../../common/lib/kibana';
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/react-query');
 
 describe('useAlertPrevalenceFromProcessTree', () => {

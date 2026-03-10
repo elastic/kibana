@@ -365,11 +365,10 @@ export class EvaluationScoreRepository {
             // Documents are exported from multiple suites *and* multiple task models/connectors.
             // Keep IDs unique across that matrix while maintaining deterministic IDs for re-runs.
             const suiteIdPart = doc.suite?.id ?? 'unknown-suite';
-            const taskModelIdPart = doc.task.model.id;
             const docId = [
               doc.run_id,
               suiteIdPart,
-              taskModelIdPart,
+              doc.task.model.id,
               doc.example.dataset.id,
               doc.example.id,
               doc.evaluator.name,
