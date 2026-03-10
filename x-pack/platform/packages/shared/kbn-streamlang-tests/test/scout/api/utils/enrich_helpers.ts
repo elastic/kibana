@@ -48,6 +48,10 @@ export const setupEnrichIndexWithPolicy = async (esClient: EsClient) => {
   await esClient.enrich.executePolicy({ name: ENRICH_POLICY_NAME });
 };
 
+/**
+ * Tears down an enrich index with an enrich policy that were created by the setup function.
+ * @param esClient The Elasticsearch client.
+ */
 export const teardownEnrichIndexWithPolicy = async (esClient: EsClient) => {
   await esClient.enrich.deletePolicy({ name: ENRICH_POLICY_NAME });
   await esClient.indices.delete({
