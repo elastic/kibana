@@ -62,17 +62,7 @@ export function createElasticsearchTool({
           prompts,
           stateManager,
         });
-        if (response.prompt) {
-          return response.prompt;
-        }
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: response.result,
-            },
-          ],
-        };
+        return response;
       } catch (error) {
         logger.error(`Error executing Elasticsearch tool: ${error.message}`);
         logger.debug(error);

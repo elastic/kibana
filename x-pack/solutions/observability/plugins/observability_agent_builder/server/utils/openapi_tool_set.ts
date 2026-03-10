@@ -23,7 +23,7 @@ export type OperationObject = OpenAPIV3.OperationObject<{
 type ToolHandler = (
   args: any,
   esClient: IScopedClusterClient
-) => Promise<{ response?: any; console_command: string; error?: string }>;
+) => Promise<{ response?: any; consoleRequest: string; error?: string }>;
 
 export interface Tool {
   name: string;
@@ -75,7 +75,7 @@ class RestApiTool {
     };
   }
 
-  getApiCallConsoleCommand(operation: OperationObject, args: Record<string, any>): string {
+  formatConsoleRequest(operation: OperationObject, args: Record<string, any>): string {
     const { path, method, query } = this.buildHttpRequestFromOperation(operation, args);
     return `${method.toUpperCase()} ${path}${
       Object.keys(query).length
@@ -91,7 +91,7 @@ class RestApiTool {
       const { path, method, query } = this.buildHttpRequestFromOperation(operation, args);
 
       // equivalent command for debugging
-      const consoleCommand = this.getApiCallConsoleCommand(operation, args);
+      const consoleRequest = this.formatConsoleRequest(operation, args);
 
       try {
         const response = await esClient.asCurrentUser.transport.request({
@@ -102,10 +102,10 @@ class RestApiTool {
 
         return {
           response,
-          console_command: consoleCommand,
+          consoleRequest,
         };
       } catch (error) {
-        return { error: error.message, console_command: consoleCommand };
+        return { error: error.message, consoleRequest };
       }
     };
   }
@@ -219,12 +219,12 @@ export class OpenAPIToolSet {
     return this.tools.find((tool) => tool.getName() === operationId)?.getOperation();
   }
 
-  getApiCallConsoleCommand(operationId: string, args: Record<string, any>) {
+  formatConsoleRequest(operationId: string, args: Record<string, any>) {
     const tool = this.tools.find((t) => t.getName() === operationId);
     if (!tool) {
       throw new Error(`No tool found for operationId: ${operationId}`);
     }
-    return tool.getApiCallConsoleCommand(tool.getOperation(), args);
+    return tool.formatConsoleRequest(tool.getOperation(), args);
   }
 
   getToolName(operationId: string): string | undefined {

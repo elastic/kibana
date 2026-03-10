@@ -58,12 +58,7 @@ export const getToolHandler = async ({
         { nlQuery },
         { tags: ['elasticsearch_tool'], metadata: { graphName: 'elasticsearch_tool' } }
       );
-
-      if (outState.error) {
-        throw new Error(outState.error);
-      }
-
-      return outState;
+      return outState.toolOutput;
     }
   );
 };

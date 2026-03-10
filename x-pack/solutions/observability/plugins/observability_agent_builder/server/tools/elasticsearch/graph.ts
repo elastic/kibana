@@ -18,7 +18,8 @@ import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
-import type { ToolHandlerPromptReturn } from '@kbn/agent-builder-server/tools';
+import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   createErrorResult,
   type ModelProvider,
@@ -63,23 +64,11 @@ const StateAnnotation = Annotation.Root({
   }),
   openApiToolSet: Annotation<OpenAPIToolSet>(),
   // outputs
-  error: Annotation<string>(),
-  result: Annotation<{ content: unknown }>(),
-  prompt: Annotation<ToolHandlerPromptReturn>(),
+  toolOutput: Annotation<ToolHandlerReturn>(),
 });
 
 export type StateType = typeof StateAnnotation.State;
 type StateManagerType = Pick<StateType, 'nlQuery' | 'openapiSpecs' | 'messages'>;
-
-interface GraphContext {
-  core: ObservabilityAgentBuilderCoreSetup;
-  modelProvider: ModelProvider;
-  esClient: IScopedClusterClient;
-  events: ToolEventEmitter;
-  request: KibanaRequest;
-  prompts: ToolPromptManager;
-  stateManager: ToolStateManager;
-}
 
 const isDangerousOperation = (
   response: AIMessageChunk,
@@ -123,14 +112,21 @@ const isValidLangchainTool = (tool: Tool, esClient: IScopedClusterClient): boole
 
 const parseToolResponse = (
   toolMessage: BaseMessage
-): { name: string; response: unknown; console_command?: string } => {
+): { name: string; response: unknown; console_request?: string } => {
   const parsedContent = JSON.parse(toolMessage.content as string);
+  if (parsedContent.error) {
+    return {
+      name: toolMessage.name || 'unknown',
+      response: parsedContent.error,
+      console_request: parsedContent.consoleRequest,
+    };
+  }
   const truncatedContent = truncateJsonResponse(parsedContent.response);
 
   return {
     name: toolMessage.name || 'unknown',
     response: truncatedContent,
-    console_command: parsedContent.console_command,
+    console_request: parsedContent.consoleRequest,
   };
 };
 
@@ -139,15 +135,15 @@ const parseToolResponse = (
  *
  * Graph Flow:
  * 1. routeEntry: Routes execution based on whether the invocation is fresh or resumed
- * 2. generateTools: Retrieves OpenAPI specs and generates LangChain tools
- * 3. terminateIfInvalidTools: Validates that tools were generated successfully
- * 4. llmSelectTools: Invokes the LLM to select which Elasticsearch API tools to call
- * 5. askForConfirmation: Checks if confirmation was provided (for dangerous operations)
- * 6. executeTool: Runs the selected tool against Elasticsearch
+ * 2. generateTools: Retrieves OpenAPI specs, generates and validates LangChain tools,
+ *    then routes to llmSelectTools on success or END on failure
+ * 3. llmSelectTools: Invokes the LLM to select which Elasticsearch API tools to call
+ * 4. askForConfirmation: Persists state and prompts the user (for dangerous operations)
+ * 5. executeTool: Runs the selected tool against Elasticsearch
  *
  * Dangerous operations (POST, PUT, DELETE) require user confirmation before execution.
  * State can be persisted and resumed across multiple invocations.
- * @param context - Encapsulated dependencies including core services, model provider, etc.
+ * @param options - Dependencies including core services, model provider, ES client, events, request, prompts, and state manager
  * @returns Compiled LangGraph StateGraph ready for execution
  */
 export const createElasticsearchToolGraph = async ({
@@ -158,7 +154,15 @@ export const createElasticsearchToolGraph = async ({
   request,
   prompts,
   stateManager,
-}: GraphContext) => {
+}: {
+  core: ObservabilityAgentBuilderCoreSetup;
+  modelProvider: ModelProvider;
+  esClient: IScopedClusterClient;
+  events: ToolEventEmitter;
+  request: KibanaRequest;
+  prompts: ToolPromptManager;
+  stateManager: ToolStateManager;
+}) => {
   // TODO make this configurable, we need a platform level setting for the embedding model
   const inferenceId = defaultInferenceEndpoints.ELSER;
 
@@ -172,7 +176,6 @@ export const createElasticsearchToolGraph = async ({
   const routeEntry = async (state: StateType) => {
     // retrieve the tool's execution state - present only if the execution was resumed
     const resumedState = stateManager.getState<StateManagerType>();
-
     if (!resumedState) {
       return new Command({
         goto: NODE_NAMES.GENERATE_TOOLS,
@@ -185,7 +188,7 @@ export const createElasticsearchToolGraph = async ({
     if (confirmStatus === ConfirmationStatus.rejected) {
       return new Command({
         update: {
-          result: createErrorResult(`User denied usage of the action`),
+          toolOutput: { results: [createErrorResult(`User denied usage of the action`)] },
         },
         goto: END,
       });
@@ -210,8 +213,17 @@ export const createElasticsearchToolGraph = async ({
     const llmTasks = await getLlmTasks();
     if (!llmTasks) {
       return {
-        toolsValid: false,
-        error: 'LLM Tasks plugin is not available',
+        tools: [],
+        toolOutput: {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message: 'LLM Tasks plugin is not available',
+              },
+            },
+          ],
+        },
       };
     }
     const connector = model.connector;
@@ -253,18 +265,18 @@ export const createElasticsearchToolGraph = async ({
     });
 
     const aiMessage = state.messages[state.messages.length - 1] as AIMessageChunk;
-    const commands = aiMessage.tool_calls!.map((t) =>
-      state.openApiToolSet.getApiCallConsoleCommand(t.name, t.args)
+    const consoleRequests = aiMessage.tool_calls!.map((t) =>
+      state.openApiToolSet.formatConsoleRequest(t.name, t.args)
     );
-    const confirmationMessage = `Are you sure you want to call these Elasticsearch APIs?\n\n${commands.join(
-      '\n'
-    )}`;
+    const confirmationMessage = `
+    Are you sure you want to call this Elasticsearch API? **${consoleRequests.join(', ')}**
+    `;
 
-    const confirmation = await prompts.askForConfirmation({
+    const prompt = await prompts.askForConfirmation({
       id: CONFIRMATION_IDS.EXECUTE_ACTION,
       message: confirmationMessage,
     });
-    return { prompt: confirmation };
+    return { toolOutput: prompt };
   };
 
   const llmSelectTools = async (state: StateType) => {
@@ -298,20 +310,18 @@ export const createElasticsearchToolGraph = async ({
     const tools = state.tools.map((tool) => toLangchainTool(tool, esClient));
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
     const toolNodeResult = await toolNode.invoke(state.messages);
-
-    if (!toolNodeResult || !toolNodeResult.length) {
-      return {
-        result: {
-          content: state.messages[0].content,
-        },
-      };
-    }
-
     const toolMessage = toolNodeResult[toolNodeResult.length - 1];
     const toolResponse = parseToolResponse(toolMessage);
 
     return {
-      result: toolResponse,
+      toolOutput: {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: toolResponse,
+          },
+        ],
+      },
     };
   };
 
