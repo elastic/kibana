@@ -98,6 +98,17 @@ export const computeMinimalChange = (
   const startLine = prefixLen + 1;
 
   if (changedBefore.length === 0 && changedAfter.length > 0) {
+    if (startLine > beforeLines.length) {
+      const lastLineContent = beforeLines[beforeLines.length - 1];
+      return {
+        proposalId,
+        type: 'replace',
+        startLine: beforeLines.length,
+        endLine: beforeLines.length,
+        newText: `${lastLineContent}\n${changedAfter.join('\n')}\n`,
+      };
+    }
+
     return {
       proposalId,
       type: 'insert',

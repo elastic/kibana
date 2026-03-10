@@ -213,20 +213,23 @@ const MonacoDiffViewer: React.FC<{
   );
 };
 
-const DiffInlineContent: React.FC<{ attachment: WorkflowYamlDiffAttachment }> = ({
-  attachment,
-}) => {
+const DiffInlineContent: React.FC<{
+  attachment: WorkflowYamlDiffAttachment;
+  updateData?: (data: unknown) => Promise<unknown>;
+}> = ({ attachment, updateData }) => {
   const { euiTheme } = useEuiTheme();
   const { beforeYaml, afterYaml, proposalId, status: serverStatus } = attachment.data;
   const status = useProposalStatus(proposalId, serverStatus);
 
   const handleAccept = useCallback(async () => {
     await acceptProposal(proposalId);
-  }, [proposalId]);
+    updateData?.({ ...attachment.data, status: 'accepted' });
+  }, [proposalId, updateData, attachment.data]);
 
   const handleDecline = useCallback(async () => {
     await declineProposal(proposalId);
-  }, [proposalId]);
+    updateData?.({ ...attachment.data, status: 'declined' });
+  }, [proposalId, updateData, attachment.data]);
 
   const headerStyles = css`
     padding: ${euiTheme.size.s};
@@ -306,7 +309,11 @@ export const workflowYamlDiffAttachmentUiDefinition = {
           defaultMessage: 'Workflow changes',
         }),
   getIcon: () => 'merge',
-  renderInlineContent: ({ attachment }: { attachment: WorkflowYamlDiffAttachment }) => (
-    <DiffInlineContent attachment={attachment} />
-  ),
+  renderInlineContent: ({
+    attachment,
+    updateData,
+  }: {
+    attachment: WorkflowYamlDiffAttachment;
+    updateData?: (data: unknown) => Promise<unknown>;
+  }) => <DiffInlineContent attachment={attachment} updateData={updateData} />,
 };

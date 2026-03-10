@@ -38,6 +38,18 @@ interface EditResult {
   error?: string;
 }
 
+const ROOT_PROPERTY_ORDER = [
+  'version',
+  'name',
+  'description',
+  'enabled',
+  'tags',
+  'consts',
+  'triggers',
+  'inputs',
+  'steps',
+];
+
 const parseForEditing = (yaml: string): { doc: Document; error?: string } => {
   const { document } = parseYamlToJSONWithoutValidation(yaml);
 
@@ -123,8 +135,11 @@ export const insertStep = (yaml: string, step: StepDefinition): EditResult => {
   }
 
   const indentUnit = detectIndent(yaml);
-  const stepYaml = stringifyValue([step], indentUnit, 1);
-  const stepLines = stepYaml.trimEnd();
+  const rawStepYaml = stringify([step], { indent: indentUnit, lineWidth: 0 }).trimEnd();
+  const stepLines = rawStepYaml
+    .split('\n')
+    .map((line) => (line.length > 0 ? ' '.repeat(indentUnit) + line : line))
+    .join('\n');
 
   const stepsNode = doc.getIn(['steps']) as YAMLSeq | undefined;
   if (!isSeq(stepsNode) || !stepsNode.range) {
@@ -218,6 +233,40 @@ export const modifyStepProperty = (
   return { success: true, yaml: spliceYaml(yaml, stepRange[1], stepRange[1], insertion) };
 };
 
+/**
+ * Find the canonical insertion point for a new root-level property
+ * based on `ROOT_PROPERTY_ORDER`. Returns the offset to splice at,
+ * or null if the property isn't in the canonical list.
+ */
+const findCanonicalInsertOffset = (map: YAMLMap, property: string): number | null => {
+  const newPropIdx = ROOT_PROPERTY_ORDER.indexOf(property);
+  if (newPropIdx === -1) return null;
+
+  let insertAfterEnd: number | null = null;
+  let insertBeforeStart: number | null = null;
+
+  for (const item of map.items) {
+    if (isPair(item) && isScalar(item.key)) {
+      const idx = ROOT_PROPERTY_ORDER.indexOf(item.key.value as string);
+      if (idx !== -1) {
+        const keyRange = item.key.range;
+        const valRange = (item.value as { range?: [number, number, number] | null } | null)?.range;
+        const pairEnd = valRange?.[2] ?? keyRange?.[2] ?? null;
+        const pairStart = keyRange?.[0] ?? null;
+
+        if (idx < newPropIdx && pairEnd !== null) {
+          insertAfterEnd = pairEnd;
+        }
+        if (idx > newPropIdx && insertBeforeStart === null && pairStart !== null) {
+          insertBeforeStart = pairStart;
+        }
+      }
+    }
+  }
+
+  return insertAfterEnd ?? insertBeforeStart ?? null;
+};
+
 export const modifyWorkflowProperty = (
   yaml: string,
   property: string,
@@ -250,6 +299,15 @@ export const modifyWorkflowProperty = (
   }
 
   const newProp = stringifyValue({ [property]: value }, indentUnit, 0).trimEnd();
+  const insertOffset = findCanonicalInsertOffset(doc.contents, property);
+
+  if (insertOffset !== null) {
+    return {
+      success: true,
+      yaml: spliceYaml(yaml, insertOffset, insertOffset, `${newProp}\n`),
+    };
+  }
+
   const trimmed = yaml.trimEnd();
   return { success: true, yaml: `${trimmed}\n${newProp}\n` };
 };

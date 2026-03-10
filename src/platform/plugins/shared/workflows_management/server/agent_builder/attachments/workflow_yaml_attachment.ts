@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 import {
   WORKFLOW_DELETE_STEP_TOOL_ID,
   WORKFLOW_INSERT_STEP_TOOL_ID,
@@ -28,7 +30,13 @@ const workflowYamlDataSchema = z.object({
 
 type WorkflowYamlData = z.infer<typeof workflowYamlDataSchema>;
 
-const workflowYamlAttachmentType = {
+const workflowYamlOriginSchema = z.object({
+  workflowId: z.string().describe('The workflow ID to resolve'),
+});
+
+type WorkflowYamlOrigin = z.infer<typeof workflowYamlOriginSchema>;
+
+const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
   id: WORKFLOW_YAML_ATTACHMENT_TYPE,
   validate: (input: unknown) => {
     const parseResult = workflowYamlDataSchema.safeParse(input);
@@ -36,6 +44,21 @@ const workflowYamlAttachmentType = {
       return { valid: true as const, data: parseResult.data };
     }
     return { valid: false as const, error: parseResult.error.message };
+  },
+  validateOrigin: (input: unknown) => {
+    const parseResult = workflowYamlOriginSchema.safeParse(input);
+    if (parseResult.success) {
+      return { valid: true as const, data: parseResult.data };
+    }
+    return { valid: false as const, error: parseResult.error.message };
+  },
+  resolve: async (
+    origin: WorkflowYamlOrigin,
+    context: AttachmentResolveContext
+  ): Promise<WorkflowYamlData | undefined> => {
+    const workflow = await api.getWorkflow(origin.workflowId, context.spaceId);
+    if (!workflow) return undefined;
+    return { yaml: workflow.yaml, workflowId: workflow.id, name: workflow.name };
   },
   format: (attachment: { data: WorkflowYamlData }) => {
     const { data } = attachment;
@@ -58,10 +81,15 @@ const workflowYamlAttachmentType = {
     `workflow.yaml attachments represent the current state of an Elastic Workflow YAML document.\n` +
     `Do NOT paste the full YAML into your response text — the user already sees it in the editor.\n` +
     `Use the workflow edit tools to modify the workflow. Each tool returns a diffAttachmentId that you must render.`,
-};
+});
 
 export function registerWorkflowYamlAttachment(
-  agentBuilder: AgentBuilderPluginSetupContract
+  agentBuilder: AgentBuilderPluginSetupContract,
+  api: WorkflowsManagementApi
 ): void {
-  agentBuilder.attachments.registerType(workflowYamlAttachmentType);
+  agentBuilder.attachments.registerType(
+    createWorkflowYamlAttachmentType(api) as Parameters<
+      typeof agentBuilder.attachments.registerType
+    >[0]
+  );
 }

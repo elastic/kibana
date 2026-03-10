@@ -29,6 +29,8 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   isSidebar: boolean;
   /** Data from the screen context attachment, if present in the conversation */
   screenContext?: ScreenContextAttachmentData;
+  /** Update the attachment data, creating a new version if content changed */
+  updateData?: (data: unknown) => Promise<unknown>;
 }
 
 /**
@@ -39,6 +41,8 @@ export interface CanvasRenderCallbacks {
   registerActionButtons: (buttons: ActionButton[]) => void;
   /** Update the attachment's origin reference (e.g., after saving to library) */
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  /** Update the attachment data, creating a new version if content changed */
+  updateData: (data: unknown) => Promise<unknown>;
 }
 
 /**
@@ -53,6 +57,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   isCanvas: boolean;
   /** Function to update the attachment's origin reference */
   updateOrigin: (origin: unknown) => Promise<UpdateOriginResponse | undefined>;
+  /** Update the attachment data, creating a new version if content changed */
+  updateData: (data: unknown) => Promise<unknown>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
 }

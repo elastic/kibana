@@ -58,6 +58,22 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     ]
   );
 
+  const updateData = useCallback(
+    async (data: unknown) => {
+      if (!conversationId || !canvasState) {
+        return;
+      }
+      const result = await attachmentsService.updateData(
+        conversationId,
+        canvasState.attachment.id,
+        data
+      );
+      conversationActions.invalidateConversation();
+      return result;
+    },
+    [attachmentsService, conversationId, canvasState, conversationActions]
+  );
+
   const uiDefinition = canvasState
     ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
     : null;
@@ -82,10 +98,11 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         attachment: canvasState.attachment,
         isSidebar: canvasState.isSidebar,
         updateOrigin,
+        updateData,
         isCanvas: true,
       }) ?? [];
     return [...staticButtons, ...dynamicButtons];
-  }, [canvasState, uiDefinition, updateOrigin, dynamicButtons]);
+  }, [canvasState, uiDefinition, updateOrigin, updateData, dynamicButtons]);
 
   if (!canvasState || !uiDefinition?.renderCanvasContent) {
     return null;
@@ -132,7 +149,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       <EuiFlyoutBody css={flyoutBodyStyles}>
         {uiDefinition.renderCanvasContent(
           { attachment, isSidebar },
-          { registerActionButtons, updateOrigin }
+          { registerActionButtons, updateOrigin, updateData }
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

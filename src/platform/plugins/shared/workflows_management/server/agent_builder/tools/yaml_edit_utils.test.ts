@@ -118,6 +118,74 @@ describe('yaml_edit_utils', () => {
       expect(result.success).toBe(false);
       expect(result.error).toContain('not a mapping');
     });
+
+    it('inserts a new property in canonical order between existing properties', () => {
+      const yamlWithoutInputs = `version: "1"
+name: Test
+triggers:
+  - type: manual
+steps:
+  - name: step1
+    type: console
+`;
+      const result = modifyWorkflowProperty(yamlWithoutInputs, 'inputs', {
+        alert_id: { type: 'string' },
+      });
+
+      expect(result.success).toBe(true);
+
+      const lines = result.yaml.split('\n');
+      const triggersLine = lines.findIndex((l) => l === 'triggers:');
+      const inputsLine = lines.findIndex((l) => l === 'inputs:');
+      const stepsLine = lines.findIndex((l) => l === 'steps:');
+
+      expect(inputsLine).toBeGreaterThan(triggersLine);
+      expect(inputsLine).toBeLessThan(stepsLine);
+    });
+
+    it('inserts enabled between name and steps when intermediate properties are absent', () => {
+      const yamlMinimal = `version: "1"
+name: Test
+steps:
+  - name: step1
+    type: console
+`;
+      const result = modifyWorkflowProperty(yamlMinimal, 'enabled', true);
+
+      expect(result.success).toBe(true);
+
+      const lines = result.yaml.split('\n');
+      const nameLine = lines.findIndex((l) => l.startsWith('name:'));
+      const enabledLine = lines.findIndex((l) => l === 'enabled: true');
+      const stepsLine = lines.findIndex((l) => l === 'steps:');
+
+      expect(enabledLine).toBeGreaterThan(nameLine);
+      expect(enabledLine).toBeLessThan(stepsLine);
+    });
+
+    it('inserts version before all other properties when it is missing', () => {
+      const yamlNoVersion = `name: Test
+steps:
+  - name: step1
+    type: console
+`;
+      const result = modifyWorkflowProperty(yamlNoVersion, 'version', '1');
+
+      expect(result.success).toBe(true);
+
+      const lines = result.yaml.split('\n');
+      const versionLine = lines.findIndex((l) => l.startsWith('version:'));
+      const nameLine = lines.findIndex((l) => l.startsWith('name:'));
+
+      expect(versionLine).toBeLessThan(nameLine);
+    });
+
+    it('appends non-canonical properties at the end', () => {
+      const result = modifyWorkflowProperty(SAMPLE_WORKFLOW, 'custom_field', 'custom_value');
+
+      expect(result.success).toBe(true);
+      expect(result.yaml.trimEnd().endsWith('custom_field: custom_value')).toBe(true);
+    });
   });
 
   describe('modifyStepProperty', () => {
@@ -213,7 +281,7 @@ steps:
   });
 
   describe('insertStep', () => {
-    it('appends a step without changing existing lines', () => {
+    it('appends a step with correct indentation matching existing steps', () => {
       const result = insertStep(SAMPLE_WORKFLOW, {
         name: 'new_step',
         type: 'console',
@@ -221,8 +289,9 @@ steps:
       });
 
       expect(result.success).toBe(true);
-      expect(result.yaml).toContain('new_step');
-      expect(result.yaml).toContain('I am new');
+      expect(result.yaml).toContain('  - name: new_step');
+      expect(result.yaml).toContain('    type: console');
+      expect(result.yaml).toContain('      message: I am new');
 
       const unchanged = getUnchangedLines(SAMPLE_WORKFLOW, result.yaml);
       expect(unchanged).toContain('  - name: log_greeting');
@@ -251,8 +320,9 @@ steps:
       });
 
       expect(result.success).toBe(true);
-      expect(result.yaml).toContain('- name: print_hello');
-      expect(result.yaml).toContain('message: hello world');
+      expect(result.yaml).toContain('  - name: print_hello');
+      expect(result.yaml).toContain('    type: console');
+      expect(result.yaml).toContain('      message: hello world');
 
       const lines = result.yaml.split('\n');
       const liquidLine = lines.findIndex((l) =>
@@ -282,6 +352,9 @@ steps:
       });
 
       expect(result.success).toBe(true);
+      expect(result.yaml).toContain('  - name: next_step');
+      expect(result.yaml).toContain('    type: console');
+
       const lines = result.yaml.split('\n');
       const bodyLine = lines.findIndex((l) => l.includes('"nested": true}'));
       const nextLine = lines.findIndex((l) => l.includes('- name: next_step'));
@@ -289,7 +362,7 @@ steps:
       expect(lines[bodyLine]).not.toContain('- name:');
     });
 
-    it('creates a steps array if none exists', () => {
+    it('creates a steps array with correct indentation if none exists', () => {
       const noSteps = `version: "1"\nname: Empty\n`;
       const result = insertStep(noSteps, {
         name: 'first_step',
@@ -297,8 +370,56 @@ steps:
       });
 
       expect(result.success).toBe(true);
-      expect(result.yaml).toContain('first_step');
-      expect(result.yaml).toContain('console');
+      expect(result.yaml).toContain('steps:\n  - name: first_step');
+      expect(result.yaml).toContain('    type: console');
+    });
+
+    it('inserts after ESQL step with params referencing Liquid templates', () => {
+      const yamlWithEsql = `name: test_coalesce_safe
+enabled: true
+
+triggers:
+  - type: manual
+
+steps:
+  - name: test_values
+    type: console
+    with:
+      message: "3"
+
+  - name: esql_coalesce_test
+    type: elasticsearch.esql.query
+    with:
+      format: json
+      query: |
+        FROM test_properties
+        | EVAL bedrooms_checked = COALESCE(?, 0)
+        | KEEP bedrooms_checked
+      params:
+        - "{{ steps.test_values.output.message }}"`;
+
+      const result = insertStep(yamlWithEsql, {
+        name: 'print_hello_world',
+        type: 'console',
+        with: { message: 'hello world' },
+      });
+
+      expect(result.success).toBe(true);
+
+      const lines = result.yaml.split('\n');
+      const newStepLine = lines.find((l) => l.includes('- name: print_hello_world'));
+      expect(newStepLine).toBe('  - name: print_hello_world');
+
+      const typeLine = lines.find((l) => l.includes('type: console') && l.includes('print'));
+      expect(typeLine).toBeUndefined();
+      const typeLineIdx = lines.findIndex((l) => l.includes('- name: print_hello_world'));
+      expect(lines[typeLineIdx + 1]).toBe('    type: console');
+      expect(lines[typeLineIdx + 2]).toBe('    with:');
+      expect(lines[typeLineIdx + 3]).toBe('      message: hello world');
+
+      const unchanged = getUnchangedLines(yamlWithEsql, result.yaml);
+      expect(unchanged).toContain('  - name: test_values');
+      expect(unchanged).toContain('  - name: esql_coalesce_test');
     });
   });
 

@@ -50,6 +50,15 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     [attachmentsService, conversationId, attachment.id, conversationActions]
   );
 
+  const updateData = useCallback(
+    async (data: unknown) => {
+      const result = await attachmentsService.updateData(conversationId, attachment.id, data);
+      conversationActions.invalidateConversation();
+      return result;
+    },
+    [attachmentsService, conversationId, attachment.id, conversationActions]
+  );
+
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   const inlineActionButtons = useMemo(
@@ -58,10 +67,11 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         attachment,
         isSidebar,
         updateOrigin,
+        updateData,
         openCanvas,
         isCanvas: false,
       }),
-    [uiDefinition, attachment, isSidebar, updateOrigin, openCanvas]
+    [uiDefinition, attachment, isSidebar, updateOrigin, updateData, openCanvas]
   );
 
   const isViewingAttachmentInCanvas = useMemo(() => {
@@ -82,7 +92,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
         showCurrentlyPreviewingBadge={isViewingAttachmentInCanvas}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar, screenContext })}
+        {uiDefinition?.renderInlineContent?.({ attachment, isSidebar, screenContext, updateData })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

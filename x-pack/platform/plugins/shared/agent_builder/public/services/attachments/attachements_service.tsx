@@ -11,6 +11,7 @@ import type {
   UpdateOriginResponse,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import type { UpdateAttachmentResponse } from '../../../common/http_api/attachments';
 import { publicApiPath } from '../../../common/constants';
 
 /**
@@ -82,6 +83,26 @@ export class AttachmentsService {
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}/origin`,
       {
         body: JSON.stringify({ origin }),
+      }
+    );
+  }
+
+  /**
+   * Updates the data for an attachment, creating a new version if content changed.
+   *
+   * @param conversationId - The conversation containing the attachment
+   * @param attachmentId - The ID of the attachment to update
+   * @param data - The new attachment data
+   */
+  async updateData(
+    conversationId: string,
+    attachmentId: string,
+    data: unknown
+  ): Promise<UpdateAttachmentResponse> {
+    return await this.http.put<UpdateAttachmentResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
+      {
+        body: JSON.stringify({ data }),
       }
     );
   }

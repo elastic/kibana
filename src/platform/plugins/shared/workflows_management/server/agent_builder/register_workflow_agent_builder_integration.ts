@@ -45,7 +45,7 @@ export function registerWorkflowAgentBuilderIntegration({
 
   registerWorkflowEditTools(agentBuilder);
 
-  registerWorkflowYamlAttachment(agentBuilder);
+  registerWorkflowYamlAttachment(agentBuilder, api);
   registerWorkflowYamlDiffAttachment(agentBuilder);
 
   agentBuilder.skills.register(workflowAuthoringSkill);
