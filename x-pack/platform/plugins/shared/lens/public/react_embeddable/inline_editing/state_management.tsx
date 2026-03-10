@@ -29,10 +29,12 @@ export function getStateManagementForInlineEditing(
   const updatePanelState = (
     datasourceState: unknown,
     visualizationState: unknown,
-    visualizationType?: string
+    visualizationType?: string,
+    datasourceId?: 'formBased' | 'textBased'
   ) => {
     const viz = getAttributes();
-    const activeDatasourceId = getActiveDatasourceIdFromDoc(viz) ?? initialDatasourceId;
+    const activeDatasourceId =
+      datasourceId ?? getActiveDatasourceIdFromDoc(viz) ?? initialDatasourceId;
     const datasourceStates: DatasourceStates = {
       [activeDatasourceId]: {
         isLoading: false,
