@@ -46,6 +46,7 @@ import { KPIsSection } from './kpis/kpis_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
+const FILTERS_SECTION_WIDTH = 480;
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -54,6 +55,11 @@ const StyledFullHeightContainer = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
+`;
+
+const VerticalDivider = styled(EuiFlexItem)`
+  align-self: stretch;
+  border-left: ${({ theme: { euiTheme } }) => euiTheme.border.thin};
 `;
 
 export interface AttacksPageContentProps {
@@ -145,7 +151,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
           <EuiFlexGroup direction="row" responsive={false} wrap={true}>
-            <EuiFlexItem grow={1} style={{ minWidth: 480 }}>
+            <EuiFlexItem grow={1} style={{ maxWidth: FILTERS_SECTION_WIDTH }}>
               <EuiFlexGroup direction="row" responsive={false}>
                 <EuiFlexItem grow={1}>
                   <FilterByAssigneesPopover
@@ -165,7 +171,8 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={1} style={{ minWidth: 480 }}>
+            <VerticalDivider grow={false} aria-hidden={true} />
+            <EuiFlexItem grow={1} style={{ minWidth: FILTERS_SECTION_WIDTH }}>
               <FiltersSection
                 dataView={dataView}
                 pageFilters={pageFilters}
