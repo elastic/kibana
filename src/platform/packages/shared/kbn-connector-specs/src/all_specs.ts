@@ -26,6 +26,6 @@ export * from './specs/servicenow_search/servicenow_search';
 export * from './specs/sharepoint_online/sharepoint_online';
 export * from './specs/slack/slack';
 export * from './specs/firecrawl/firecrawl';
-export { mcpConnectorSpec } from './specs/mcp/mcp';
+export * from './specs/mcp/mcp';
 export * from './specs/zoom/zoom';
 export * from './specs/zendesk/zendesk';

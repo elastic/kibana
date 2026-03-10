@@ -168,7 +168,7 @@ describe('Stack Connectors Plugin', () => {
         })
       );
 
-      // Spec Connector Types registered (includes MCP from connector-specs all_specs)
+      // Spec Connector Types registered
       specConnectorTypes.forEach((spec, index) => {
         expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
           builtInConnectorTypesCount + index + 1,
@@ -179,7 +179,7 @@ describe('Stack Connectors Plugin', () => {
         );
       });
 
-      // SubAction Connectors (MCP is now v2 spec, so 14 not 15)
+      // SubAction Connectors
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
