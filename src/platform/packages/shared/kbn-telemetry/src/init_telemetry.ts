@@ -70,19 +70,12 @@ export const initTelemetry = (
     );
 
   if (telemetryConfig.enabled) {
-    // Auto-instrumentations must be registered synchronously (before any HTTP
-    // requests are made), so they are set up immediately regardless of async
-    // resource detection state.
     if (telemetryConfig.tracing.enabled) {
       maybeInitAutoInstrumentations();
     }
-
-    // Async resource detectors (host, os, env, process) return promises.
-    // Wait for them to settle before initializing tracing/metrics so that
-    // span processors don't access resource.attributes while promises are
-    // still pending -- which causes "Accessing resource attributes before
-    // async attributes settled" errors and drops unsettled attributes.
-    void resource.waitForAsyncAttributes().then(() => {
+    
+    const asyncSettled = resource.waitForAsyncAttributes?.() ?? Promise.resolve();
+    asyncSettled.then(() => {
       if (telemetryConfig.tracing.enabled) {
         initTracing({ resource, tracingConfig: telemetryConfig.tracing });
       }
