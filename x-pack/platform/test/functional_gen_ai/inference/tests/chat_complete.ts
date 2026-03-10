@@ -199,8 +199,7 @@ export const chatCompleteSuite = (
         expect(message).to.eql({
           type: 'error',
           code: 'requestError',
-          message:
-            "No connector or inference endpoint found for ID 'do-not-exist'",
+          message: "No connector or inference endpoint found for ID 'do-not-exist'",
         });
       });
 
@@ -367,8 +366,7 @@ export const chatCompleteSuite = (
             type: 'error',
             error: {
               code: 'requestError',
-              message:
-                "No connector or inference endpoint found for ID 'do-not-exist'",
+              message: "No connector or inference endpoint found for ID 'do-not-exist'",
               meta: {
                 status: 400,
               },
