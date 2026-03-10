@@ -55,8 +55,8 @@ test.describe(
     test('save modal does not show access control and request omits access_control', async ({
       page,
     }) => {
-      // Intercept the POST to /api/dashboards to capture the request body
-      await page.route('**/api/dashboards*', async (route) => {
+      // Intercept the POST to /internal/dashboards/app to capture the request body
+      await page.route('**/internal/dashboards/app*', async (route) => {
         const request = route.request();
         if (request.method() === 'POST') {
           capturedRequestBody = request.postDataJSON();
@@ -82,7 +82,7 @@ test.describe(
       expect(capturedRequestBody).not.toHaveProperty('access_control');
 
       // Cleanup route interception
-      await page.unroute('**/api/dashboards*');
+      await page.unroute('**/internal/dashboards/app*');
     });
   }
 );
