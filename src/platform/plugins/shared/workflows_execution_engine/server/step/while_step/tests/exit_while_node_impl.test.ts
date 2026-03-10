@@ -32,11 +32,8 @@ describe('ExitWhileNodeImpl', () => {
     wfExecutionRuntimeManager = {} as unknown as WorkflowExecutionRuntimeManager;
     wfExecutionRuntimeManager.navigateToNextNode = jest.fn();
     wfExecutionRuntimeManager.navigateToNode = jest.fn();
-<<<<<<< HEAD
     wfExecutionRuntimeManager.isLoopBreakRequested = jest.fn().mockReturnValue(false);
     wfExecutionRuntimeManager.clearLoopBreak = jest.fn();
-=======
->>>>>>> 8df89e7662c35022013f4642650f9a958c0ccd15
 
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
     stepExecutionRuntime.finishStep = jest.fn();
@@ -224,7 +221,6 @@ describe('ExitWhileNodeImpl', () => {
       expect(wfExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
     });
   });
-<<<<<<< HEAD
 
   describe('when loop break is requested', () => {
     beforeEach(() => {
@@ -257,6 +253,4 @@ describe('ExitWhileNodeImpl', () => {
       expect(wfExecutionRuntimeManager.navigateToNode).not.toHaveBeenCalled();
     });
   });
-=======
->>>>>>> 8df89e7662c35022013f4642650f9a958c0ccd15
 });

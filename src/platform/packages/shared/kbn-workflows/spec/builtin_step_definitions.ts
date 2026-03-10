@@ -120,7 +120,6 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
-<<<<<<< HEAD
     id: 'flow.break',
     label: 'Break',
     description: 'Exit the enclosing loop immediately. Valid only inside a foreach or while body',
@@ -152,8 +151,6 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     },
   },
   {
-=======
->>>>>>> 8df89e7662c35022013f4642650f9a958c0ccd15
     id: 'wait',
     label: 'Wait',
     description: 'Pause execution for a specified duration',

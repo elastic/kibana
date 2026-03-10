@@ -23,10 +23,7 @@ import {
   ExitConditionBranchNodeSchema,
   ExitIfNodeSchema,
 } from './branching_nodes';
-<<<<<<< HEAD
 import { FlowBreakNodeSchema, FlowContinueNodeSchema } from './flow_control_nodes';
-=======
->>>>>>> 8df89e7662c35022013f4642650f9a958c0ccd15
 import {
   EnterForeachNodeSchema,
   EnterWhileNodeSchema,
