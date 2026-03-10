@@ -11,7 +11,6 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
-import type { RepoPath } from '@kbn/repo-path';
 import ignore from 'ignore';
 
 // Scout test files live inside plugins/packages
@@ -35,34 +34,13 @@ const JEST_TEST_PATTERNS = [
   ':(glob)**/*.test.jsx',
 ];
 
-interface TestFileGroup {
-  label: string;
-  files: RepoPath[];
-}
-
-async function getTestFileGroups(): Promise<TestFileGroup[]> {
-  const [ftrFiles, scoutFiles, jestFiles] = await Promise.all([
-    getRepoFiles(FTR_TEST_PATTERNS),
-    getRepoFiles(SCOUT_TEST_PATTERNS),
-    getRepoFiles(JEST_TEST_PATTERNS),
-  ]);
-
-  // A file can match multiple groups. We deduplicate so each file appears in exactly
-  // one bucket, with more-specific patterns claiming first: Scout > FTR > Jest
-  const seen = new Set(scoutFiles.map((f) => f.repoRel));
-  const dedup = (files: RepoPath[]): RepoPath[] =>
-    files.filter((f) => {
-      if (seen.has(f.repoRel)) return false;
-      seen.add(f.repoRel);
-      return true;
-    });
-
-  return [
-    { label: 'Scout', files: scoutFiles },
-    { label: 'FTR', files: dedup(ftrFiles) },
-    { label: 'Jest', files: dedup(jestFiles) },
-  ];
-}
+// These groups are effectively disjoint: Scout uses .spec.ts, Jest uses .test.*,
+// and FTR tests live in separate top-level directories. No dedup needed.
+const TEST_FILE_GROUPS = [
+  { label: 'Scout', patterns: SCOUT_TEST_PATTERNS },
+  { label: 'FTR', patterns: FTR_TEST_PATTERNS },
+  { label: 'Jest', patterns: JEST_TEST_PATTERNS },
+];
 
 export async function checkTestCodeOwnersCLI(): Promise<void> {
   await run(
@@ -74,11 +52,13 @@ export async function checkTestCodeOwnersCLI(): Promise<void> {
       );
       const hasOwner = (path: string): boolean => matcher.test(path).ignored;
 
-      const groups = await getTestFileGroups();
-      const totalFiles = groups.reduce((sum, g) => sum + g.files.length, 0);
+      let totalFiles = 0;
       const allMissing: string[] = [];
 
-      for (const { label, files } of groups) {
+      for (const { label, patterns } of TEST_FILE_GROUPS) {
+        const files = await getRepoFiles(patterns);
+        totalFiles += files.length;
+
         const missing = files
           .filter((repoPath) => !hasOwner(repoPath.repoRel))
           .map((repoPath) => repoPath.repoRel);
