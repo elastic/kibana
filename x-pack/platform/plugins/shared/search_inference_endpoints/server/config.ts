@@ -16,6 +16,10 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  dynamicConnectors: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    pollingIntervalMins: schema.number({ defaultValue: 15, min: 5, max: 720 }),
+  }),
 });
 
 export type SearchInferenceEndpointsConfig = TypeOf<typeof configSchema>;
