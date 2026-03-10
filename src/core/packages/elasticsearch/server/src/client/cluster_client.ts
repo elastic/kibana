@@ -37,7 +37,7 @@ export interface AsScopedOptions {
    * - `'all'`: Requests are broadcast to all CPS-connected Elasticsearch instances. This is the
    *   broadest option and is appropriate when the intent is to search or aggregate data across
    *   all connected projects.
-   * - `'request-header'`: The `project_routing` value is read from the `kbn-project-routing` HTTP
+   * - `'request-header'`: The `project_routing` value is read from the `x-kbn-project-routing` HTTP
    *   header present on the incoming request. This lets browser-side code set the routing via the
    *   Kibana HTTP client without requiring any body-level propagation through server-side layers.
    *   Falls back to `'origin-only'` when the header is absent.
@@ -79,9 +79,9 @@ export interface AllProjectsRouting extends AsScopedOptions {
 }
 
 /**
- * {@link AsScopedOptions} variant that reads `project_routing` from the `kbn-project-routing`
+ * {@link AsScopedOptions} variant that reads `project_routing` from the `x-kbn-project-routing`
  * HTTP header present on the incoming request. Browser-side code sets this header via the Kibana
- * HTTP client (e.g. `http.post('/api/...', { headers: { 'kbn-project-routing': value } })`),
+ * HTTP client (e.g. `http.post('/api/...', { headers: { 'x-kbn-project-routing': value } })`),
  * eliminating the need to propagate the value through request bodies or service layers.
  * Falls back to `'origin-only'` routing when the header is absent.
  * @public
@@ -129,7 +129,7 @@ export interface IClusterClient {
    * is injected into outgoing requests. See {@link AsScopedOptions} for details.
    *
    * @param request - The incoming {@link ScopeableRequest | request} whose credentials are used
-   *   to authenticate Elasticsearch calls. The `kbn-project-routing` header, if present, is read
+   *   to authenticate Elasticsearch calls. The `x-kbn-project-routing` header, if present, is read
    *   from this request to determine the routing scope.
    * @param opts - {@link RequestHeaderRouting} options with `projectRouting` set to
    *   `'request-header'`.

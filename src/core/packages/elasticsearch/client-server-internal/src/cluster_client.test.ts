@@ -389,7 +389,7 @@ describe('ClusterClient', () => {
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
       });
 
-      it("reads routing from the kbn-project-routing header when projectRouting is 'request-header'", () => {
+      it("reads routing from the x-kbn-project-routing header when projectRouting is 'request-header'", () => {
         const onRequest = captureTransportOnRequest();
 
         const clusterClient = new ClusterClient({
@@ -410,7 +410,7 @@ describe('ClusterClient', () => {
         }).asCurrentUser;
 
         const params = makeSearchParams();
-        onRequest.get()({} as never, params, {});
+        onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
       });
@@ -434,7 +434,7 @@ describe('ClusterClient', () => {
         }).asCurrentUser;
 
         const params = makeSearchParams();
-        onRequest.get()({} as never, params, {});
+        onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });

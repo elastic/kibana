@@ -23,4 +23,4 @@ export const PROJECT_ROUTING_ALL = '_alias:*';
  * (via the Kibana HTTP client) and opt in on the server by calling
  * `esClient.asScoped(request, { projectRouting: 'request-header' })`.
  */
-export const KBN_PROJECT_ROUTING_HEADER = 'kbn-project-routing' as const;
+export const KBN_PROJECT_ROUTING_HEADER = 'x-kbn-project-routing' as const;
