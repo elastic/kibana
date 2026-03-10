@@ -53,6 +53,11 @@ export const renderApp = (
       queries: {
         staleTime: Infinity,
         retry: false,
+        // Some browsers (e.g. Firefox ESR on Windows) can report navigator.onLine as false
+        // even when the network is available. React Query v4 defaults to networkMode: 'online',
+        // which skips query execution when navigator.onLine is false, causing the page to fail
+        // to load with no visible errors. Setting 'always' ensures queries always fire.
+        networkMode: 'always',
       },
     },
   });
