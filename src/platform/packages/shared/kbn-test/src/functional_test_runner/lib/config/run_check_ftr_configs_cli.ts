@@ -26,6 +26,10 @@ const IGNORED_PATHS = [
   'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts',
   'src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js',
   'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts',
+  'src/platform/test/moon.yml',
+  'x-pack/platform/test/moon.yml',
+  'x-pack/solutions/observability/test/moon.yml',
+  'x-pack/solutions/security/test/moon.yml',
 ];
 
 export async function runCheckFtrConfigsCli() {
