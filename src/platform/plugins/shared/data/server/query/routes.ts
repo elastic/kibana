@@ -23,7 +23,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
     query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
     language: schema.string(),
   }),
-  filters: schema.maybe(schema.arrayOf(schema.any())),
+  filters: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 100 })),
   timefilter: schema.maybe(schema.any()),
 });
 
@@ -31,7 +31,7 @@ const savedQueryResponseSchema = () =>
   schema.object({
     id: schema.string(),
     attributes: SAVED_QUERY_ATTRS_CONFIG,
-    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   });
 
 const access = 'internal';
@@ -253,7 +253,7 @@ export function registerSavedQueryRoutes({ http }: CoreSetup): void {
               body: () =>
                 schema.object({
                   total: schema.number(),
-                  savedQueries: schema.arrayOf(savedQueryResponseSchema()),
+                  savedQueries: schema.arrayOf(savedQueryResponseSchema(), { maxSize: 10000 }),
                 }),
             },
           },
