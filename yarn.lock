@@ -8998,6 +8998,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/solution-context@link:src/platform/packages/shared/kbn-solution-context":
+  version "0.0.0"
+  uid ""
+
 "@kbn/some-dev-log@link:src/platform/packages/private/kbn-some-dev-log":
   version "0.0.0"
   uid ""
