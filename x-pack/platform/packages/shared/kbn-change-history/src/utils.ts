@@ -138,8 +138,8 @@ export function maskSensitiveFields(
   if (!maskFields) {
     return { masked, snapshot };
   }
-  const flatSnapshot = flatten(snapshot) as Record<string, any>;
-  const flatMaskings = flatten(maskFields) as Record<string, boolean>;
+  const flatSnapshot = flatten(snapshot);
+  const flatMaskings = flatten(maskFields);
   const isMasked = (key: string) =>
     Object.entries(flatMaskings).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
 
