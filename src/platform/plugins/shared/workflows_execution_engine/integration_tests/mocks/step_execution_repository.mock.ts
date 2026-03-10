@@ -12,6 +12,25 @@ import type { StepExecutionRepository } from '../../server/repositories/step_exe
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
+
+  public resolveWriteIndex(): Promise<string> {
+    return Promise.resolve('.workflows-step-executions-000001');
+  }
+
+  public getStepExecutionsByIds(
+    stepExecutionIds: string[],
+    _stepsExecutionIndex?: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    const results: EsWorkflowStepExecution[] = [];
+    for (const id of stepExecutionIds) {
+      const step = this.stepExecutions.get(id);
+      if (step) {
+        results.push(step);
+      }
+    }
+    return Promise.resolve(results);
+  }
+
   public searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
@@ -22,12 +41,16 @@ export class StepExecutionRepositoryMock implements Required<StepExecutionReposi
 
   public getStepExecutionsByWorkflowExecution(
     workflowExecutionId: string,
+    _stepsExecutionWriteIndex?: string,
     _stepExecutionIds?: string[]
   ): Promise<EsWorkflowStepExecution[]> {
     return this.searchStepExecutionsByExecutionId(workflowExecutionId);
   }
 
-  public bulkUpsert(stepExecutions: Partial<EsWorkflowStepExecution>[]): Promise<void> {
+  public bulkUpsert(
+    stepExecutions: Partial<EsWorkflowStepExecution>[],
+    _targetIndex: string
+  ): Promise<void> {
     for (const stepExecution of stepExecutions) {
       if (!stepExecution.id) {
         throw new Error('Step execution ID is required for upsert');

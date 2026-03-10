@@ -9,6 +9,8 @@
 
 import { StepExecutionRepository } from './step_execution_repository';
 
+const TARGET_INDEX = '.workflows-step-executions-000001';
+
 describe('StepExecutionRepository', () => {
   let underTest: StepExecutionRepository;
   let esClient: {
@@ -48,11 +50,11 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
-        index: expect.any(String),
+        index: TARGET_INDEX,
         body: [
           { update: { _id: 'step-1' } },
           { doc: stepExecutions[0], doc_as_upsert: true },
@@ -65,7 +67,7 @@ describe('StepExecutionRepository', () => {
     });
 
     it('should handle empty array without making ES call', async () => {
-      await underTest.bulkUpsert([]);
+      await underTest.bulkUpsert([], TARGET_INDEX);
 
       expect(esClient.bulk).not.toHaveBeenCalled();
     });
@@ -76,7 +78,7 @@ describe('StepExecutionRepository', () => {
         { stepId: 'test-step-2' }, // Missing id
       ];
 
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+      await expect(underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX)).rejects.toThrow(
         'Step execution ID is required for upsert'
       );
 
@@ -117,7 +119,7 @@ describe('StepExecutionRepository', () => {
         ],
       });
 
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+      await expect(underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX)).rejects.toThrow(
         'Failed to upsert 2 step executions'
       );
 
@@ -146,7 +148,7 @@ describe('StepExecutionRepository', () => {
       });
 
       try {
-        await underTest.bulkUpsert(stepExecutions as any);
+        await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
         fail('Should have thrown an error');
       } catch (error: any) {
         expect(error.message).toContain('Failed to upsert 1 step executions');
@@ -178,7 +180,7 @@ describe('StepExecutionRepository', () => {
       });
 
       try {
-        await underTest.bulkUpsert(stepExecutions as any);
+        await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
         fail('Should have thrown an error');
       } catch (error: any) {
         expect(error.message).toContain('Failed to upsert 1 step executions');
@@ -196,7 +198,7 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
       expect(bulkCall.body[1]).toEqual({
@@ -213,11 +215,11 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: false,
-        index: expect.any(String),
+        index: TARGET_INDEX,
         body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
       });
     });
@@ -239,7 +241,7 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       const bulkCall = esClient.bulk.mock.calls[0][0];
       expect(bulkCall.body[1].doc).toEqual(stepExecutions[0]);
@@ -251,7 +253,7 @@ describe('StepExecutionRepository', () => {
         { stepId: 'test-step-2' }, // Missing id
       ];
 
-      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+      await expect(underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX)).rejects.toThrow(
         'Step execution ID is required for upsert'
       );
     });
@@ -264,7 +266,7 @@ describe('StepExecutionRepository', () => {
         items: [{ update: { _id: 'step-1', status: 200 } }],
       });
 
-      await underTest.bulkUpsert(stepExecutions as any);
+      await underTest.bulkUpsert(stepExecutions as any, TARGET_INDEX);
 
       expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
