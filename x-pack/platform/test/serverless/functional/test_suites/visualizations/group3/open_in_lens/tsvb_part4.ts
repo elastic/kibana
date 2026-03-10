@@ -6,7 +6,7 @@
  */
 
 import type { EsArchiver } from '@kbn/es-archiver';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -17,8 +17,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - TSVB Open in Lens', function () {
-    // see details: https://github.com/elastic/kibana/issues/208926
+  describe('lens app - TSVB Open in Lens (part 4)', function () {
     this.tags(['failsOnMKI']);
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
@@ -54,7 +53,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       }
 
       await esNode.load(esArchive);
-      // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
@@ -71,7 +69,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./metric'));
-    loadTestFile(require.resolve('./gauge'));
+    loadTestFile(require.resolve('./tsvb/timeseries'));
+    loadTestFile(require.resolve('./tsvb/top_n'));
   });
 }

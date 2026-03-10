@@ -16,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('./apps/canvas'),
       require.resolve('./apps/security'),
+      require.resolve('./apps/security/index_2'),
       require.resolve('./apps/spaces'),
       require.resolve('./apps/watcher'),
     ],

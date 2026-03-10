@@ -15,5 +15,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(
       require.resolve('../../../../../functional/apps/transform/creation/index_pattern')
     );
+    loadTestFile(
+      require.resolve('../../../../../functional/apps/transform/creation/index_pattern/index_2')
+    );
   });
 }
