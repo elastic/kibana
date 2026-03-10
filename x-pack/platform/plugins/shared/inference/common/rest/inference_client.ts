@@ -46,7 +46,7 @@ export function createInferenceRestClient({
       );
 
       if (!matchingConnector) {
-        throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 404);
+        throw createInferenceRequestError(`No connector or inference endpoint found for id '${connectorId}'`, 404);
       }
       return matchingConnector;
     },
