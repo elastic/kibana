@@ -182,6 +182,17 @@ export function getActionOptions(
         iconColor: euiTheme.colors.vis.euiColorVis0,
       },
       {
+        id: 'while',
+        label: i18n.translate('workflows.actionsMenu.while', {
+          defaultMessage: 'While Loop',
+        }),
+        description: i18n.translate('workflows.actionsMenu.whileDescription', {
+          defaultMessage: 'Repeat steps while a condition is true',
+        }),
+        iconType: 'refresh',
+        iconColor: euiTheme.colors.vis.euiColorVis0,
+      },
+      {
         id: 'wait',
         label: i18n.translate('workflows.actionsMenu.wait', {
           defaultMessage: 'Wait',
