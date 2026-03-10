@@ -67,6 +67,6 @@ yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inferenc
 node scripts/eis.js
 ```
 
-The script will fetch the EIS API key from Vault and register it in your local Elasticsearch instance using an internal Cloud Connect APIs.
+The script will fetch the EIS API key from Vault and register it in your local Elasticsearch instance using an internal Cloud Connect API.
 
 **Important**: note that the script only enables EIS. It does not go through the full Cloud Connect onboarding. The cluster will not show as connected to the Cloud Connect page in Kibana. However, you should have access to all built-in EIS inference endpoints after running this script. 
