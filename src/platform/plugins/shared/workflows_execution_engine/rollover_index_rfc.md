@@ -2,13 +2,13 @@
 
 ## Summary
 
-This RFC proposes replacing the current flat Elasticsearch indexes for workflow execution state with **ILM-managed rollover aliases**. Each execution pins the backing index active at its creation time, ensuring all documents for that execution live in the same index regardless of subsequent rollovers. Completed executions are cleaned up by dropping entire backing indexes once all their executions reach terminal status -- an O(1) operation that avoids the performance cost of `delete_by_query`. **Encoded execution IDs** carry index routing information, enabling direct O(1) document lookups without alias fan-out.
+This RFC proposes replacing the current flat Elasticsearch indexes for workflow execution state with **ILM-managed rollover aliases**. Each execution pins the backing index active at its creation time, ensuring all documents for that execution live in the same index regardless of subsequent rollovers. Backing indexes are advanced through ILM lifecycle phases once all their executions reach terminal status, keeping active indexes small and enabling cost-optimized long-term retention. **Encoded execution IDs** carry index routing information, enabling direct O(1) document lookups without alias fan-out.
 
 ## TLDR
 
 - **Before**: Two flat indexes (`.workflows-executions`, `.workflows-step-executions`) with hardcoded names. No lifecycle management, unbounded growth, and `delete_by_query` as the only cleanup mechanism -- which degrades hot index performance through inverted-index overhead and segment merge costs.
-- **After**: ILM-managed rollover aliases where each workflow execution pins the backing index it was created in. Writes target the pinned index; reads by ID decode the index from the execution ID itself. Old backing indexes where every execution is terminal are dropped whole.
-- **Result**: Execution state indexes stay bounded and fast. Cleanup is O(1) (whole-index deletion, no `delete_by_query`). Mutability (`update`, `mget`, `doc_as_upsert`) is fully preserved -- unlike data streams. The architecture remains single-tier with no migration tasks or cross-tier query complexity.
+- **After**: ILM-managed rollover aliases where each workflow execution pins the backing index it was created in. Writes target the pinned index; reads by ID decode the index from the execution ID itself. Old backing indexes where every execution is terminal are advanced through ILM lifecycle phases for long-term retention and eventual deletion.
+- **Result**: Active execution indexes stay bounded and fast. No `delete_by_query` is needed. Mutability (`update`, `mget`, `doc_as_upsert`) is fully preserved -- unlike data streams. Fully-terminal backing indexes are managed by ILM lifecycle phases, enabling cost-optimized storage and eventual automatic deletion. Unlike the CQRS approach, there is no migration task and no deduplication logic.
 
 ## Motivation
 
@@ -42,7 +42,7 @@ Event sourcing (appending immutable events and reconstructing state by replaying
 
 ### The chosen approach
 
-Rollover aliases give the execution engine what it needs from a single tier: full mutability (`update`, `mget`, `doc_as_upsert`) for the execution loop, ILM-managed lifecycle for automatic rollover, and O(1) cleanup via whole-index deletion when a backing index contains only terminal executions. Unlike the CQRS approach, there is no second tier, no migration task, no cross-tier queries, and no deduplication logic.
+Rollover aliases give the execution engine what it needs: full mutability (`update`, `mget`, `doc_as_upsert`) for the execution loop, ILM-managed lifecycle for automatic rollover, and ILM-managed lifecycle progression once a backing index contains only terminal executions. Unlike the CQRS approach, there is no migration task and no deduplication logic. All execution data -- active and historical -- lives behind a single alias, with ILM managing the progression of fully-terminal backing indexes through lifecycle phases.
 
 ## Design
 
@@ -57,7 +57,8 @@ This architecture follows the **rollover alias** pattern -- a well-established E
 │  ┌──────────────────────┐  ┌──────────────────────┐        │
 │  │ -000001 (old)        │  │ -000002 (old)        │  ...   │
 │  │ All execs terminal   │  │ Mixed: some active   │        │
-│  │ → eligible for drop  │  │ → kept               │        │
+│  │ → eligible for ILM   │  │ → kept in hot         │        │
+│  │   lifecycle progress  │  │                       │        │
 │  └──────────────────────┘  └──────────────────────┘        │
 │                                                             │
 │  ┌──────────────────────┐                                   │
@@ -66,13 +67,13 @@ This architecture follows the **rollover alias** pattern -- a well-established E
 │  └──────────────────────┘                                   │
 │                                                             │
 │  ILM: rollover on max_age (default: 1d)                    │
-│  Cleanup: drop backing indexes where all execs are terminal │
+│  Lifecycle: advance fully-terminal indexes through ILM phases│
 └─────────────────────────────────────────────────────────────┘
 ```
 
 On plugin startup, the system ensures three Elasticsearch resources exist for each execution index (workflow executions and step executions):
 
-1. **ILM policy**: A lifecycle policy with a single `hot` phase that rolls over based on `max_age` (configurable, default `1d`).
+1. **ILM policy**: A lifecycle policy that starts with a `hot` phase for rollover based on `max_age` (configurable, default `1d`). Additional lifecycle phases for long-term retention and eventual deletion will be configured as part of the lifecycle design.
 2. **Index template**: Matches the index pattern (e.g., `.workflows-executions-*`), applies the ILM policy and rollover alias, and defines field mappings.
 3. **Bootstrap write index**: The initial backing index (e.g., `.workflows-executions-000001`) with the alias configured as `is_write_index: true`.
 
@@ -201,38 +202,39 @@ searchWorkflowExecutions(query, spaceId, sort, size):
 
 **Step execution loading**: O(1) `mget` on a single backing index using the `stepExecutionIds` manifest from the workflow execution document. All step documents for one execution live in the same backing index due to index pinning, so the mget targets a single shard set.
 
-**Search queries**: Fan out across all backing indexes via the alias. Performance is proportional to the total number of backing indexes, but in practice the cleanup task keeps this bounded to a small number (typically the current write index plus a few old indexes with long-running executions).
+**Search queries**: Fan out across all backing indexes via the alias. Performance is proportional to the total number of backing indexes. The number of hot-phase backing indexes stays small (typically the current write index plus a few old indexes with long-running executions that have not yet reached fully-terminal status). Backing indexes in later lifecycle phases are retained for long-term history but may have higher read latency depending on the tier.
 
-### Automated Cleanup (TOBEDEFINED)
+### Automated Lifecycle Progression (TOBEDEFINED)
 
-The cleanup mechanism for dropping fully-terminal backing indexes is not yet implemented. The design intent is:
+The mechanism for advancing fully-terminal backing indexes through ILM lifecycle phases is not yet implemented. The design intent is:
 
 - A periodic background task lists all backing indexes for each alias.
 - The current write index is always skipped.
-- For each old backing index, the task counts non-terminal documents. If zero, the entire index is dropped -- an O(1) operation with no `delete_by_query`, no tombstones, and no segment merge overhead.
-- The cleanup is safe because active executions have their write index pinned (they never reference old indexes) and terminal statuses are immutable.
+- For each old backing index still in the hot phase, the task counts non-terminal documents. If zero (all executions are terminal), the task signals ILM to advance that index to the next lifecycle phase (e.g., via the `_ilm/move` API).
+- The progression is safe because active executions have their write index pinned (they never reference old indexes) and terminal statuses are immutable.
+- Once an index leaves the hot phase, ILM manages subsequent phase transitions (and eventual deletion) automatically based on `min_age` thresholds.
 
-The exact implementation (Task Manager task vs. system workflow, frequency, error handling, observability) is to be defined.
+The exact implementation (Task Manager task vs. system workflow, frequency, error handling, observability) and the specific ILM lifecycle phase configuration are to be defined.
 
 ### Failure Recovery
 
 - **ILM rollover is atomic**: Elasticsearch handles rollover internally. If the Kibana node restarts during a rollover, ILM completes or retries the operation independently. There is no application-level state to recover.
 - **Index pinning is race-free**: The backing index name is resolved from the alias metadata and stored on the execution document atomically during creation. If ILM rolls over between resolution and the first write, the document lands in whichever index ES routes it to, and that index name is what gets persisted. Subsequent writes use the persisted name.
-- **No transactional coupling**: Rollover and cleanup are independent operations. ILM manages rollover; the cleanup mechanism (TOBEDEFINED) manages deletion. Neither depends on the other's success. The system is always in a consistent state -- at worst, old backing indexes accumulate until the next successful cleanup run.
+- **No transactional coupling**: Rollover and lifecycle progression are independent operations. ILM manages rollover; the lifecycle progression mechanism (TOBEDEFINED) manages phase transitions for fully-terminal indexes. Neither depends on the other's success. The system is always in a consistent state -- at worst, old backing indexes remain in the hot phase until the next successful progression run.
 
 ### Multi-Node Safety
 
-ILM rollover is managed by Elasticsearch itself, not by any Kibana node. It executes exactly once regardless of how many Kibana instances are running. The cleanup task is registered via Kibana Task Manager, which guarantees single-node execution across a multi-node deployment. There is no risk of duplicate rollover or conflicting cleanup operations.
+ILM rollover is managed by Elasticsearch itself, not by any Kibana node. It executes exactly once regardless of how many Kibana instances are running. The lifecycle progression task is registered via Kibana Task Manager, which guarantees single-node execution across a multi-node deployment. There is no risk of duplicate rollover or conflicting lifecycle operations.
 
 ### Space Isolation
 
-All execution documents carry a `spaceId` field, and all queries filter by `spaceId`. Index pinning does not affect space isolation because all executions in a backing index are separated by their `spaceId` at query time. The cleanup task operates on index-level metadata (terminal status counts) and does not need to be space-aware -- it drops an entire backing index only when every document in it is terminal, regardless of which space the documents belong to.
+All execution documents carry a `spaceId` field, and all queries filter by `spaceId`. Index pinning does not affect space isolation because all executions in a backing index are separated by their `spaceId` at query time. The lifecycle progression task operates on index-level metadata (terminal status counts) and does not need to be space-aware -- it advances a backing index through lifecycle phases only when every document in it is terminal, regardless of which space the documents belong to.
 
 ### Configuration
 
 A single configuration knob controls the rollover behavior in `kibana.yml`:
 
-- `workflowsExecutionEngine.rolloverMaxAge` (default: `'1d'`): The ILM `max_age` threshold for rollover. Controls how frequently new backing indexes are created. Lower values (e.g., `'1h'`) create more backing indexes but enable more granular cleanup. Higher values (e.g., `'7d'`) create fewer indexes but delay cleanup of completed executions. Changes take effect on the next Kibana restart.
+- `workflowsExecutionEngine.rolloverMaxAge` (default: `'1d'`): The ILM `max_age` threshold for rollover. Controls how frequently new backing indexes are created. Lower values (e.g., `'1h'`) create more backing indexes but enable more granular lifecycle management. Higher values (e.g., `'7d'`) create fewer indexes but delay lifecycle progression of completed executions. Changes take effect on the next Kibana restart.
 
 ## Key Changes
 
@@ -260,35 +262,34 @@ The exact migration mechanism (rename-and-alias on startup, one-time migration t
 
 ## Observability (TODO)
 
-The cleanup task should provide visibility into its health and effectiveness:
+The lifecycle progression task should provide visibility into its health and effectiveness:
 
-- Logging the number of backing indexes checked and deleted per run, along with task duration.
-- Monitoring the total number of backing indexes per alias as a health metric. An increasing count may indicate long-running executions preventing cleanup.
-- Alerting operators when the cleanup task has not run successfully within a configurable window.
+- Logging the number of backing indexes checked and progressed per run, along with task duration.
+- Monitoring the total number of backing indexes per alias and per lifecycle phase as a health metric. An increasing count of hot-phase indexes may indicate long-running executions preventing lifecycle progression.
+- Alerting operators when the lifecycle progression task has not run successfully within a configurable window.
 
 ## Benefits and Trade-offs
 
 ### Benefits
 
-- **Bounded execution indexes**: ILM automatically creates new backing indexes on a configurable cadence. Old backing indexes are dropped whole once all their executions are terminal. The total volume of data that search queries must scan is bounded by the number of active backing indexes, not the total number of historical executions.
-- **O(1) cleanup**: Deleting an entire backing index is instantaneous and reclaims all resources immediately. There are no tombstones, no segment merges, and no lingering deleted documents. This is a fundamental improvement over `delete_by_query`, which creates per-document deletion markers that degrade performance until segment merges complete.
+- **Bounded hot-phase indexes**: ILM automatically creates new backing indexes on a configurable cadence. Once all executions in a backing index are terminal, the index is advanced through ILM lifecycle phases, moving it off the hot tier. The hot tier stays small and fast, bounded by the number of actively written backing indexes rather than the total volume of historical executions.
+- **ILM-managed lifecycle**: Fully-terminal backing indexes are advanced through ILM lifecycle phases, enabling cost-optimized long-term retention and eventual automatic deletion. No `delete_by_query` is needed at any stage -- there are no tombstones, no segment merges, and no lingering deleted documents.
 - **Preserved mutability**: Unlike data streams, rollover aliases fully support `update`, `doc_as_upsert`, `mget`, and `delete` operations. The execution engine's flush loop, which updates workflow and step documents on every step transition, works without any changes to the write pattern.
-- **Single-tier simplicity**: There is no second storage tier, no migration task, no cross-tier queries, and no deduplication logic. All execution data lives in the same set of backing indexes behind the alias. Reads and writes use the same index infrastructure.
 - **O(1) document lookups via encoded IDs**: Encoded execution IDs carry the backing index suffix, enabling direct GET operations on a specific backing index. This avoids alias fan-out for by-ID lookups, which is the hot path for cancel polling, execution status checks, and UI polling.
 - **Transparent search via alias**: Search queries use the alias, which fans out across all backing indexes automatically. No application-level coordination is needed to search across the full execution history.
 
 ### Trade-offs
 
 - **Encoded ID complexity**: Execution IDs are no longer human-readable UUIDs. They are base64url-encoded strings that require decoding to extract the index suffix. This adds complexity to debugging (IDs must be decoded to understand which backing index they reference) and to any external system that stores or parses execution IDs.
-- **Long-running executions hold old indexes open**: A workflow with a multi-hour timeout or indefinite wait steps prevents its backing index from being deleted, even if all other executions in that index are terminal. In extreme cases, this could lead to index accumulation. Monitoring the backing index count and setting maximum execution timeouts mitigates this risk.
+- **Long-running executions hold old indexes in the hot phase**: A workflow with a multi-hour timeout or indefinite wait steps prevents its backing index from progressing through lifecycle phases, even if all other executions in that index are terminal. In extreme cases, this could lead to hot-phase index accumulation. Monitoring the backing index count and setting maximum execution timeouts mitigates this risk.
 - **ILM dependency**: The architecture depends on ILM being enabled and functioning correctly in the Elasticsearch cluster. If ILM is disabled or misconfigured, rollover will not occur and the index will behave like a flat index (growing unboundedly). This is mitigated by the fact that ILM is a core Elasticsearch feature that is enabled by default and widely used.
 - **Separate indexes for workflows and steps**: Unlike the unified execution state index proposed in the prior RFC, this approach retains two separate indexes (one for workflow executions, one for step executions). This means two ILM policies, two rollover aliases, and two sets of backing indexes. The operational surface area is doubled compared to a unified index. However, this matches the existing index structure and avoids the migration complexity of merging two index schemas.
-- **No built-in history tier**: All execution data (active and historical) lives in the same alias. There is no separate history layer optimized for long-term retention, time-series queries, or different storage tiers. If long-term execution history with different retention policies is needed in the future, a history tier (data streams or similar) can be added as an extension to this architecture.
+- **Search latency across lifecycle phases**: Search queries via the alias fan out across backing indexes in all lifecycle phases. Indexes in later phases (e.g., cold, frozen) have higher read latency, which may affect search performance for queries spanning old execution history. Get-by-id lookups are unaffected since they target a specific backing index directly.
 
 ## Risks and Open Questions
 
-- **Cleanup mechanism not yet implemented (TOBEDEFINED)**: The POC validates the rollover, pinning, and encoded ID mechanics, but the cleanup mechanism that drops fully-terminal backing indexes is not yet built. The design, implementation approach, and operational model are to be defined.
+- **Lifecycle progression mechanism not yet implemented (TOBEDEFINED)**: The POC validates the rollover, pinning, and encoded ID mechanics, but the mechanism that advances fully-terminal backing indexes through ILM lifecycle phases is not yet built. The design, implementation approach, lifecycle phase configuration, and operational model are to be defined.
 - **Upgrade migration not yet implemented (TOBEDEFINED)**: The migration from existing flat indexes to rollover-based aliases, including backward compatibility for pre-encoded execution IDs, is to be defined. Key concerns include the flat-index-name / alias-name collision (Elasticsearch does not allow both to share the same name) and the fallback strategy for legacy plain-UUID execution IDs.
-- **Tuning rollover frequency**: The `rolloverMaxAge` default of `1d` is a starting point. Too aggressive (e.g., `1h`) creates many backing indexes, increasing the number of shards and the cost of alias fan-out for search queries. Too conservative (e.g., `7d`) delays cleanup and lets the active index grow larger. Optimal values depend on execution volume and cluster size.
-- **Index count under high concurrency**: If many long-running executions span multiple rollover periods, the number of backing indexes held open can grow. Each backing index consumes cluster resources (shard memory, file handles). Monitoring and a max-age safety net (force-close executions in indexes older than a configurable threshold) should be considered.
+- **Tuning rollover frequency**: The `rolloverMaxAge` default of `1d` is a starting point. Too aggressive (e.g., `1h`) creates many backing indexes, increasing the number of shards and the cost of alias fan-out for search queries. Too conservative (e.g., `7d`) delays lifecycle progression and lets the active index grow larger. Optimal values depend on execution volume and cluster size.
+- **Hot-phase index count under high concurrency**: If many long-running executions span multiple rollover periods, the number of hot-phase backing indexes can grow. Each hot-phase backing index consumes premium cluster resources (shard memory, file handles). Monitoring and a max-age safety net (force-close executions in indexes older than a configurable threshold) should be considered.
 - **Mapping evolution**: Index templates apply mappings to new backing indexes automatically, but existing backing indexes are not updated when the template changes. If a new field is added to the mappings, only new backing indexes will have it indexed. Old backing indexes will store the field in `_source` (because `dynamic: false`) but it will not be searchable. This is the same constraint as data streams and requires explicit reindexing for retroactive mapping changes.
