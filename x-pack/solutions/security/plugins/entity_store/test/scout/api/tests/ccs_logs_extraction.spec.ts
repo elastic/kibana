@@ -479,11 +479,7 @@ apiTest.describe.skip(
       }
     );
 
-    // TODO: Fix bug - entity.id field conflict in ES|QL query for generic entity type
-    // The query uses entity.id both as aggregation field and GROUP BY key which is invalid
-    // See: https://github.com/elastic/kibana/issues/XXXXX
-    // eslint-disable-next-line playwright/no-skipped-test
-    apiTest.skip(
+    apiTest(
       'Should run CCS extraction for generic and write to updates then latest index',
       async ({ apiClient, esClient }) => {
         await createCcsTestLogsIndex(esClient);
