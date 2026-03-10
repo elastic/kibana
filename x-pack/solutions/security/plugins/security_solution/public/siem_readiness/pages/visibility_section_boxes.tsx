@@ -27,7 +27,6 @@ import { useVisibilityStatuses } from '../hooks/use_visibility_statuses';
 import type { VisibilityStatus } from '../hooks/use_visibility_statuses';
 
 export type VisibilityTabId = 'coverage' | 'quality' | 'continuity' | 'retention';
-export type { VisibilityStatus };
 
 interface VisibilityBox {
   id: VisibilityTabId;

@@ -13,7 +13,6 @@ import {
 } from '@kbn/siem-readiness';
 import type {
   MainCategories,
-  SiemReadinessPackageInfo,
   CategoriesResponse,
   DataQualityResultDocument,
   PipelineStats,
@@ -193,7 +192,6 @@ export const useVisibilityStatuses = (activeCategories: MainCategories[]): Visib
     getIndexQualityResultsLatest,
     getReadinessPipelines,
     getReadinessRetention,
-    getIntegrations,
     getDetectionRules,
   } = useSiemReadinessApi();
 
@@ -202,21 +200,7 @@ export const useVisibilityStatuses = (activeCategories: MainCategories[]): Visib
   const { data: pipelinesData } = getReadinessPipelines;
   const { data: retentionData } = getReadinessRetention;
 
-  // Coverage: Get installed integrations and use detection rules hook
-  const installedIntegrations = useMemo(
-    () =>
-      getIntegrations?.data?.items?.filter(
-        (pkg: SiemReadinessPackageInfo) => pkg.status === 'installed'
-      ) || [],
-    [getIntegrations?.data?.items]
-  );
-
-  const integrationNames = useMemo(
-    () => installedIntegrations.map((item) => item.name),
-    [installedIntegrations]
-  );
-
-  const { ruleIntegrationCoverage } = useDetectionRulesByIntegration(integrationNames);
+  const { ruleIntegrationCoverage } = useDetectionRulesByIntegration();
 
   // Build index → category mapping for continuity status
   const indexToCategoryMap = useMemo(
