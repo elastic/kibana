@@ -7,16 +7,14 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
-import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsContext } from '../../shared/context';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../../common/mock';
+import { useAlertPrevalenceFromProcessTree } from '../hooks/use_alert_prevalence_from_process_tree';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './test_ids';
-import * as mock from '../mocks/mock_analyzer_data';
+import * as mock from '../../../flyout/document_details/right/mocks/mock_analyzer_data';
 
-jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
+jest.mock('../hooks/use_alert_prevalence_from_process_tree', () => ({
   useAlertPrevalenceFromProcessTree: jest.fn(),
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
@@ -28,15 +26,31 @@ const mockTreeValues = {
   statsNodes: mock.mockStatsNodes,
 };
 
+const createMockHit = (
+  flattened: DataTableRecord['flattened'],
+  rawId = 'eventId'
+): DataTableRecord =>
+  ({
+    id: 'test-id',
+    raw: { _id: rawId },
+    flattened,
+    isAnchor: false,
+  } as DataTableRecord);
+
 const renderAnalyzerPreview = (
-  contextValue: DocumentDetailsContext,
-  dataViewIndices: string[] = ['index']
+  hit: DataTableRecord,
+  options?: {
+    dataViewIndices?: string[];
+    shouldUseAncestor?: boolean;
+  }
 ) =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <AnalyzerPreview dataViewIndices={dataViewIndices} />
-      </DocumentDetailsContext.Provider>
+      <AnalyzerPreview
+        dataViewIndices={options?.dataViewIndices ?? ['index']}
+        hit={hit}
+        shouldUseAncestor={options?.shouldUseAncestor ?? false}
+      />
     </TestProviders>
   );
 
@@ -47,16 +61,15 @@ describe('<AnalyzerPreview />', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue(mockTreeValues);
   });
 
-  it('shows analyzer preview correctly when documentId and index are present', async () => {
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    };
-    const wrapper = renderAnalyzerPreview(contextValue);
+  it('shows analyzer preview correctly when documentId and alert rule indices are present', async () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.indices': ['rule-indices'],
+    });
+    const wrapper = renderAnalyzerPreview(hit);
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       documentId: 'eventId',
-      indices: ['rule-indices'],
+      indices: 'rule-indices',
     });
 
     await waitFor(() => {
@@ -64,12 +77,9 @@ describe('<AnalyzerPreview />', () => {
     });
   });
 
-  it('should use provided data view indices for non-alerts', async () => {
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: [],
-    };
-    const wrapper = renderAnalyzerPreview(contextValue, ['index']);
+  it('should use provided data view indices when alert indices are missing', async () => {
+    const hit = createMockHit({});
+    const wrapper = renderAnalyzerPreview(hit, { dataViewIndices: ['index'] });
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       documentId: 'eventId',
@@ -81,18 +91,32 @@ describe('<AnalyzerPreview />', () => {
     });
   });
 
-  it('should use ancestor id as document id when in rule preview', async () => {
-    const contextValue = {
-      ...mockContextValue,
-      getFieldsData: () => 'ancestors-id',
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      isRulePreview: true,
-    };
-    const wrapper = renderAnalyzerPreview(contextValue);
+  it('should use rule parameters index when rule indices are not present', async () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': { index: 'rule-parameters-index' },
+    });
+    const wrapper = renderAnalyzerPreview(hit);
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId: 'eventId',
+      indices: ['rule-parameters-index'],
+    });
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('should use ancestor id as document id when shouldUseAncestor is true', async () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.indices': ['rule-indices'],
+      'kibana.alert.ancestors.id': ['ancestors-id'],
+    });
+    const wrapper = renderAnalyzerPreview(hit, { shouldUseAncestor: true });
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       documentId: 'ancestors-id',
-      indices: ['rule-indices'],
+      indices: 'rule-indices',
     });
 
     await waitFor(() => {
@@ -105,11 +129,8 @@ describe('<AnalyzerPreview />', () => {
       loading: true,
     });
 
-    const contextValue = {
-      ...mockContextValue,
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-    };
-    const { getByTestId } = renderAnalyzerPreview(contextValue);
+    const hit = createMockHit({});
+    const { getByTestId } = renderAnalyzerPreview(hit);
 
     expect(getByTestId(ANALYZER_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
   });
@@ -122,7 +143,8 @@ describe('<AnalyzerPreview />', () => {
       statsNodes: undefined,
     });
 
-    const { getByText } = renderAnalyzerPreview(mockContextValue);
+    const hit = createMockHit({});
+    const { getByText } = renderAnalyzerPreview(hit);
 
     expect(getByText('An error is preventing this alert from being analyzed.')).toBeInTheDocument();
   });
@@ -135,7 +157,8 @@ describe('<AnalyzerPreview />', () => {
       statsNodes: [],
     });
 
-    const { getByText } = renderAnalyzerPreview(mockContextValue);
+    const hit = createMockHit({});
+    const { getByText } = renderAnalyzerPreview(hit);
 
     expect(getByText('An error is preventing this alert from being analyzed.')).toBeInTheDocument();
   });

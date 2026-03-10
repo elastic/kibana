@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
 import type { Node } from '@elastic/eui/src/components/tree_view/tree_view';
 import { EuiToken } from '@elastic/eui';
-import type { StatsNode } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
+import type { StatsNode } from '../hooks/use_alert_prevalence_from_process_tree';
 
 /**
  * Helper function to recursively create ancestor tree nodes

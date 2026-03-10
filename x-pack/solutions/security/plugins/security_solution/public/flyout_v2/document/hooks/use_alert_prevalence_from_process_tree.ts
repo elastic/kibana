@@ -8,11 +8,11 @@
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
-import { useHttp } from '../../../../common/lib/kibana';
-import { sourcererSelectors } from '../../../../sourcerer/store';
-import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useHttp } from '../../../common/lib/kibana';
+import { sourcererSelectors } from '../../../sourcerer/store';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface StatsNode {
   /**
