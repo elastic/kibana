@@ -381,6 +381,7 @@ export class ProposalManager {
       originalLines.forEach((_, index) => {
         const lineDiv = document.createElement('div');
         lineDiv.className = 'wfDiffLine';
+        lineDiv.style.height = `${fontInfo.lineHeight}px`;
 
         const lineContent = document.createElement('span');
         lineContent.className = 'wfDiffLineContent';
