@@ -441,12 +441,12 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <EuiEmptyPrompt
           data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
-            <h2>
+            <h3>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptTitle"
                 defaultMessage="The analysis did not return any results."
               />
-            </h2>
+            </h3>
           }
           titleSize="xs"
           body={

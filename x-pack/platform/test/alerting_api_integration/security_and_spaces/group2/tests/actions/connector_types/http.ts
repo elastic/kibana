@@ -339,6 +339,55 @@ export default function httpTest({ getService }: FtrProviderContext) {
       expect(result.service_message).to.eql('[500] Internal Server Error');
     });
 
+    it('should not abort when the request completes normally', async () => {
+      await fetch(`${httpSimulatorURL}?reset_aborted_count`);
+
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_200', method: 'POST' } })
+        .expect(200);
+
+      expect(result.status).to.eql('ok');
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(0);
+    });
+
+    it('should abort the http request when the execution is cancelled', async () => {
+      await fetch(`${httpSimulatorURL}?reset_aborted_count`);
+
+      const httpActionId = await createHttpAction(httpSimulatorURL, kibanaURL);
+
+      const startTime = Date.now();
+
+      const executeReq = supertest
+        .post(`/api/actions/connector/${httpActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: { body: 'delay_30000', method: 'POST' } });
+
+      setTimeout(() => executeReq.abort(), 1000);
+
+      try {
+        await executeReq;
+      } catch (err) {
+        // Expected: connection reset due to client abort
+      }
+
+      const elapsed = Date.now() - startTime;
+      expect(elapsed).to.be.lessThan(5000);
+
+      // wait for the proxy server to close the connection
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const abortedRaw = await fetch(`${httpSimulatorURL}?aborted_count`);
+      const { abortedCount } = await abortedRaw.json();
+      expect(abortedCount).to.be(1);
+    });
+
     it('sends both config and secret headers in the http request', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')

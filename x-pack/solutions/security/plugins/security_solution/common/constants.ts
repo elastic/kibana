@@ -215,9 +215,6 @@ export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as con
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
-/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
-export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
-
 /** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
 export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
   'securitySolution:suppressionBehaviorOnAlertClosure' as const;
@@ -530,6 +527,9 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+export const DEFAULT_ALERT_CLOSE_REASONS_KEY = 'securitySolution:alertCloseReasons' as const;
+export const DEFAULT_ALERT_CLOSE_REASONS_VALUE = [] as const;
 
 /**
  * Max length for the comments within security solution
