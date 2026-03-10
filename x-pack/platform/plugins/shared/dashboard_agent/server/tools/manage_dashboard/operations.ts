@@ -46,9 +46,9 @@ const controlWidthSchema = z.enum(['small', 'medium', 'large']);
 const manageControlInputSchema = z.object({
   type: controlTypeSchema,
   fieldName: z.string().describe('Field name used by the control.'),
-  dataViewId: z.string().optional().describe('Data view id (preferred when known).'),
-  dataViewTitle: z.string().optional().describe('Data view title to resolve server-side.'),
-  indexPattern: z.string().optional().describe('Index pattern title to resolve server-side.'),
+  indexPattern: z
+    .string()
+    .describe('Data view title/index pattern (for example "logs-*") used to resolve data view id.'),
   title: z.string().optional().describe('Optional control title.'),
   width: controlWidthSchema.optional(),
   grow: z.boolean().optional(),
@@ -183,8 +183,6 @@ const resolvePinnedControlStates = async ({
     let dataViewId: string;
     try {
       dataViewId = await resolveControlDataViewId({
-        dataViewId: input.dataViewId,
-        dataViewTitle: input.dataViewTitle,
         indexPattern: input.indexPattern,
       });
     } catch (error) {

@@ -405,8 +405,7 @@ describe('executeDashboardOperations', () => {
 
   it('appends controls and generates unique uids', async () => {
     const resolveControlDataViewId = jest.fn(
-      async ({ dataViewId, dataViewTitle }: { dataViewId?: string; dataViewTitle?: string }) =>
-        dataViewId ?? `${dataViewTitle}-id`
+      async ({ indexPattern }: { indexPattern: string }) => `${indexPattern}-id`
     );
 
     const result = await executeDashboardOperations({
@@ -432,13 +431,13 @@ describe('executeDashboardOperations', () => {
             {
               type: 'optionsListControl',
               fieldName: 'service.name',
-              dataViewTitle: 'logs-*',
+              indexPattern: 'logs-*',
               width: 'medium',
             },
             {
               type: 'rangeSliderControl',
               fieldName: 'bytes',
-              dataViewId: 'metrics-id',
+              indexPattern: 'metrics-*',
             },
           ],
         },
@@ -451,14 +450,10 @@ describe('executeDashboardOperations', () => {
     });
 
     expect(resolveControlDataViewId).toHaveBeenNthCalledWith(1, {
-      dataViewId: undefined,
-      dataViewTitle: 'logs-*',
-      indexPattern: undefined,
+      indexPattern: 'logs-*',
     });
     expect(resolveControlDataViewId).toHaveBeenNthCalledWith(2, {
-      dataViewId: 'metrics-id',
-      dataViewTitle: undefined,
-      indexPattern: undefined,
+      indexPattern: 'metrics-*',
     });
 
     expect(result.dashboardData.pinnedPanels).toHaveLength(3);
@@ -478,7 +473,7 @@ describe('executeDashboardOperations', () => {
       expect.objectContaining({
         type: 'rangeSliderControl',
         config: expect.objectContaining({
-          data_view_id: 'metrics-id',
+          data_view_id: 'metrics-*-id',
           field_name: 'bytes',
         }),
       })
@@ -535,18 +530,19 @@ describe('executeDashboardOperations', () => {
             {
               type: 'optionsListControl',
               fieldName: 'service.name',
-              dataViewTitle: 'logs-*',
+              indexPattern: 'logs-*',
             },
             {
               type: 'rangeSliderControl',
               fieldName: 'bytes',
+              indexPattern: 'metrics-*',
             },
           ],
         },
       ],
       logger,
-      resolveControlDataViewId: async ({ dataViewTitle }) => {
-        if (dataViewTitle === 'logs-*') {
+      resolveControlDataViewId: async ({ indexPattern }) => {
+        if (indexPattern === 'logs-*') {
           return 'logs-id';
         }
         throw new Error('no selector');

@@ -16,7 +16,7 @@ const createDataViewsServiceMock = () => {
 };
 
 describe('resolveControlDataViewId', () => {
-  it('resolves exact match by dataViewTitle and indexPattern', async () => {
+  it('resolves exact match by indexPattern', async () => {
     const dataViewsService = createDataViewsServiceMock();
     dataViewsService.getIdsWithTitle.mockResolvedValue([
       { id: 'dv-1', title: 'logs-*' },
@@ -27,7 +27,7 @@ describe('resolveControlDataViewId', () => {
       resolveControlDataViewId({
         dataViewsService,
         input: {
-          dataViewTitle: 'logs-*',
+          indexPattern: 'logs-*',
         },
       })
     ).resolves.toBe('dv-1');
@@ -53,7 +53,7 @@ describe('resolveControlDataViewId', () => {
       resolveControlDataViewId({
         dataViewsService,
         input: {
-          dataViewTitle: 'logs-*',
+          indexPattern: 'logs-*',
         },
       })
     ).rejects.toThrow(
@@ -61,30 +61,4 @@ describe('resolveControlDataViewId', () => {
     );
   });
 
-  it('fails when direct dataViewId validation fails', async () => {
-    const dataViewsService = createDataViewsServiceMock();
-    dataViewsService.get.mockRejectedValue(new Error('not found'));
-
-    await expect(
-      resolveControlDataViewId({
-        dataViewsService,
-        input: {
-          dataViewId: 'missing-data-view-id',
-        },
-      })
-    ).rejects.toThrow('Data view id "missing-data-view-id" does not exist.');
-  });
-
-  it('fails when no data view selector is provided', async () => {
-    const dataViewsService = createDataViewsServiceMock();
-
-    await expect(
-      resolveControlDataViewId({
-        dataViewsService,
-        input: {},
-      })
-    ).rejects.toThrow(
-      'Each control must provide one of "dataViewId", "dataViewTitle", or "indexPattern".'
-    );
-  });
 });

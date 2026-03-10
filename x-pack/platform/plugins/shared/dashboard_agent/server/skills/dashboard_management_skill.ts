@@ -85,7 +85,7 @@ If you omit metadata on a new dashboard, creation can fail.
    - \`add_panels_from_attachments\` with \`items[]\` to add visualization attachments with their dashboard grid layout, optionally targeting an existing section via \`sectionId\`
    - \`add_section\` to create a new section (server generates \`sectionId\`)
    - \`remove_section\` with required \`panelAction: "promote" | "delete"\`
-   - \`add_controls\` to append pinned controls; use \`dataViewId\` when known, otherwise pass \`dataViewTitle\` or \`indexPattern\` for server-side resolution
+   - \`add_controls\` to append pinned controls; pass \`indexPattern\` (for example \`logs-*\`) for server-side data view resolution
    - \`remove_controls\` to remove controls by control \`uid\`
    - \`remove_panels\` to remove by \`panelId\`
    - \`set_metadata\` / \`upsert_markdown\` for dashboard metadata and summary updates
@@ -139,7 +139,7 @@ Use controls sparingly and only when they improve exploration:
 - Add a **range slider** control when a numeric threshold is useful across panels (for example \`latency\`, \`duration\`, \`bytes\`).
 - Prefer fields that already appear in multiple visualizations or key panel breakdowns.
 - Avoid controls for highly unique identifiers (for example trace IDs) or dashboards already scoped to a single entity.
-- If data view resolution is ambiguous, do not guess. Ask the user to choose, or pass a more specific \`dataViewTitle\`/index pattern.
+- \`indexPattern\` is resolved server-side to a data view. If multiple data views match, do not guess; ask the user to choose or provide a more specific \`indexPattern\`.
 - Default to adding **0-2 controls**, usually one high-value options list first.
 
 ## Edge Cases
@@ -315,7 +315,7 @@ Use this when a dashboard needs reusable filters across multiple panels.
         {
           "type": "rangeSliderControl",
           "fieldName": "event.duration",
-          "dataViewTitle": "logs-*",
+          "indexPattern": "logs-*",
           "title": "Duration",
           "settings": { "step": 1000 }
         }
