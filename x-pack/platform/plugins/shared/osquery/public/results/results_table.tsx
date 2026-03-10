@@ -22,13 +22,21 @@ import {
   EuiSkeletonText,
   EuiProgress,
   EuiIconTip,
+  EuiTablePagination,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { UnifiedDataTable, DataLoadingState, DataGridDensity } from '@kbn/unified-data-table';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { UnifiedDataTableSettings } from '@kbn/unified-data-table/src/types';
+import { FilterStateStore } from '@kbn/es-query';
 import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import type { AddToTimelineHandler } from '../types';
 import { useAllResults } from './use_all_results';
@@ -45,6 +53,14 @@ import {
 } from '../packs/pack_queries_status_table';
 import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
+import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
+import { useOsqueryDataView } from './use_osquery_data_view';
+import { transformEdgesToRecords, getNestedOrFlat } from './transform_results';
+import { getOsqueryCellRenderers } from './cell_renderers';
+import { useOsqueryTrailingColumns } from './row_actions';
+import { OsqueryResultsFlyout } from './results_flyout';
+import { useResultsFiltering } from './use_results_filtering';
+import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 
 const DataContext = createContext<ResultEdges>([]);
 
@@ -88,8 +104,26 @@ const euiProgressCss = {
 
 const resultsTableContainerCss = {
   width: '100%',
-  maxWidth: '1200px',
+  display: 'flex' as const,
+  flexDirection: 'column' as const,
+  flex: '1 1 auto',
+  minHeight: 0,
+  height: '100%',
 };
+
+const unifiedTableWrapperCss = {
+  flex: '1 1 auto',
+  minHeight: 0,
+};
+
+const gridStyleOverride = {
+  border: 'all' as const,
+  header: 'shade' as const,
+  stripes: false,
+};
+
+const CONTROL_COLUMN_IDS = ['openDetails', 'select'];
+const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, 100, 250, 500];
 
 export interface ResultsTableComponentProps {
   actionId: string;
@@ -113,6 +147,17 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   error,
   addToTimeline,
 }) => {
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
+  const { euiTheme } = useEuiTheme();
+
+  const searchBarWrapperCss = useMemo(
+    () => ({
+      padding: '16px',
+      backgroundColor: euiTheme.colors.body,
+    }),
+    [euiTheme.colors.body]
+  );
+
   const [isLive, setIsLive] = useState(true);
 
   const { data } = useActionResults({
@@ -125,16 +170,45 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     sortField: '@timestamp',
     isLive,
   });
+
   const expired = useMemo(() => (!endDate ? false : new Date(endDate) < new Date()), [endDate]);
   const {
     application: { getUrlForApp },
     appName,
-    notifications: { toasts },
-    i18n: i18nStart,
+    timelines,
     theme,
+    uiSettings,
+    notifications: { toasts },
+    data: dataService,
+    analytics,
+    i18n: i18nStart,
+    uiActions,
+    unifiedSearch,
+    discover,
+    chrome,
   } = useKibana().services;
+
+  const startServices = useMemo(
+    () => ({ analytics, i18n: i18nStart, theme }),
+    [analytics, i18nStart, theme]
+  );
+
+  const storageInstance = useMemo(() => new Storage(localStorage), []);
+
+  const unifiedDataTableServices = useMemo(
+    () => ({
+      theme,
+      fieldFormats: dataService.fieldFormats,
+      uiSettings,
+      toastNotifications: toasts,
+      storage: storageInstance,
+      data: dataService,
+    }),
+    [dataService, storageInstance, theme, toasts, uiSettings]
+  );
+
   const getFleetAppUrl = useCallback(
-    (agentId: any) =>
+    (agentId: string) =>
       getUrlForApp('fleet', {
         path: pagePathGetters.agent_details({ agentId })[1],
       }),
@@ -150,7 +224,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
   const onChangeItemsPerPage = useCallback(
-    (pageSize: any) => {
+    (pageSize: number) => {
       setPagination((currentPagination) => ({
         ...currentPagination,
         pageSize,
@@ -160,7 +234,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [setPagination]
   );
   const onChangePage = useCallback(
-    (pageIndex: any) => {
+    (pageIndex: number) => {
       if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
         showPaginationLimitToast();
 
@@ -180,6 +254,40 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
+  const [hasUserSetColumns, setHasUserSetColumns] = useState(false);
+  const [rowHeight, setRowHeight] = useState<number>(0);
+  const [density, setDensity] = useState<DataGridDensity>(DataGridDensity.EXPANDED);
+  const [gridSettings, setGridSettings] = useState<UnifiedDataTableSettings>({});
+
+  const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
+
+  // Always call hooks unconditionally (React rules of hooks), but skip data view fetch when flag is off
+  const { dataView, isLoading: isDataViewLoading } = useOsqueryDataView({
+    skip: !queryHistoryRework,
+  });
+
+  const resetFilterPagination = useCallback(() => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, []);
+
+  const {
+    query,
+    filters,
+    kuery,
+    filtersForSuggestions,
+    handleQuerySubmit,
+    handleFiltersUpdated,
+    handleFilter,
+  } = useResultsFiltering(
+    {
+      enabled: queryHistoryRework,
+      dataView,
+      actionId,
+    },
+    resetFilterPagination
+  );
+
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
     liveQueryActionId,
@@ -187,20 +295,19 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     isLive,
+    kuery,
     sort: sortingColumns.map((sortedColumn) => ({
       field: sortedColumn.id,
       direction: sortedColumn.direction as Direction,
     })),
   });
 
-  const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const columnVisibility = useMemo(
     () => ({ visibleColumns, setVisibleColumns }),
     [visibleColumns, setVisibleColumns]
   );
 
-  const ecsMappingColumns = useMemo(() => keys(ecsMapping || {}), [ecsMapping]);
-
+  // --- Legacy EuiDataGrid path hooks ---
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(
     () =>
       // eslint-disable-next-line react/display-name
@@ -251,6 +358,88 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [onChangeItemsPerPage, onChangePage, pagination]
   );
 
+  // --- Unified DataTable path hooks ---
+  // Server-side pagination: each page change fetches fresh data from the server.
+  // No accumulated edges - rows always reflect the current page only.
+  const rows = useMemo<DataTableRecord[]>(
+    () =>
+      queryHistoryRework
+        ? transformEdgesToRecords({
+            edges: allResultsData?.edges ?? [],
+            ecsMapping,
+          })
+        : [],
+    [queryHistoryRework, allResultsData?.edges, ecsMapping]
+  );
+
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
+
+  const externalCustomRenderers = useMemo(
+    () =>
+      getOsqueryCellRenderers({
+        getFleetAppUrl,
+        ecsMappingColumns,
+      }),
+    [ecsMappingColumns, getFleetAppUrl]
+  );
+
+  // Hoist per-row hooks to table level: call once instead of per-row
+  const { data: logsDataView } = useLogsDataView({
+    skip: !queryHistoryRework || !actionId,
+    checkOnly: true,
+  });
+
+  const locator = discover?.locator;
+  const [discoverUrl, setDiscoverUrl] = useState<string>('');
+
+  useEffect(() => {
+    const getDiscoverUrl = async () => {
+      if (!locator || !logsDataView) return;
+
+      const newUrl = await locator.getUrl({
+        indexPatternId: logsDataView.id,
+        filters: [
+          {
+            meta: {
+              index: logsDataView.id,
+              alias: null,
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'action_id',
+              params: { query: actionId },
+            },
+            query: { match_phrase: { action_id: actionId } },
+            $state: { store: FilterStateStore.APP_STATE },
+          },
+        ],
+        refreshInterval: { pause: true, value: 0 },
+        timeRange:
+          startDate && endDate
+            ? { to: endDate, from: startDate, mode: 'absolute' }
+            : { to: 'now', from: 'now-1d', mode: 'relative' },
+      });
+      setDiscoverUrl(newUrl);
+    };
+
+    getDiscoverUrl();
+  }, [actionId, endDate, startDate, locator, logsDataView]);
+
+  const trailingColumns = useOsqueryTrailingColumns({
+    timelines,
+    appName: appName ?? '',
+    liveQueryActionId,
+    agentIds,
+    actionId,
+    endDate,
+    startDate,
+    startServices,
+    rows,
+    logsDataView,
+    discoverUrl,
+  });
+
+  // --- Shared hooks ---
   const ecsMappingConfig = useMemo(() => {
     if (!ecsMapping) return;
 
@@ -362,13 +551,55 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       { data: [], seen: new Set<string>() } as { data: EuiDataGridColumn[]; seen: Set<string> }
     ).data;
 
-    setColumns((currentColumns) =>
-      !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
-    );
-    setVisibleColumns(map('id', newColumns));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
+    const allColumnIds = map('id', newColumns);
 
+    if (queryHistoryRework) {
+      if (!hasUserSetColumns) {
+        // Only include ECS columns that have actual data in at least one row
+        const edges = allResultsData?.edges ?? [];
+        const ecsColumnsWithData = ecsMappingColumns.filter((col) => {
+          if (!allColumnIds.includes(col)) return false;
+
+          return edges.some((edge) => {
+            const value = getNestedOrFlat(col, edge._source);
+
+            return value !== undefined && value !== null && value !== '';
+          });
+        });
+
+        const osqueryColumns = allColumnIds.filter(
+          (col) => col !== 'agent.name' && !ecsMappingColumns.includes(col)
+        );
+
+        const defaultVisibleColumns = [
+          'agent.name',
+          ...ecsColumnsWithData.sort(),
+          ...osqueryColumns,
+        ]
+          .filter((col) => allColumnIds.includes(col))
+          .slice(0, 10);
+
+        setVisibleColumns((current) =>
+          !isEqual(current, defaultVisibleColumns) ? defaultVisibleColumns : current
+        );
+      }
+    } else {
+      setColumns((currentColumns) =>
+        !isEqual(map('id', currentColumns), allColumnIds) ? newColumns : currentColumns
+      );
+      setVisibleColumns(allColumnIds);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    queryHistoryRework,
+    allResultsData?.columns.length,
+    ecsMappingColumns,
+    getHeaderDisplay,
+    allResultsData?.columns,
+    hasUserSetColumns,
+  ]);
+
+  // --- Legacy EuiDataGrid: leading control columns ---
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const edges = allResultsData?.edges;
     if (addToTimeline && edges) {
@@ -399,6 +630,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     return [];
   }, [addToTimeline, allResultsData?.edges]);
 
+  // --- Legacy EuiDataGrid: toolbar visibility ---
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
@@ -427,6 +659,180 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [actionId, addToTimeline, agentIds, appName, endDate, liveQueryActionId, startDate]
   );
 
+  // --- Unified DataTable: handlers ---
+  const handleSort = useCallback((newSort: string[][]) => {
+    setSortingColumns(
+      newSort.map(([id, direction]) => ({
+        id,
+        direction: direction as 'asc' | 'desc',
+      }))
+    );
+    // Reset to first page when sort changes (server-side sorting)
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, []);
+
+  const handleSetColumns = useCallback((newColumns: string[], _hideTimeColumn: boolean) => {
+    setHasUserSetColumns(true);
+    setVisibleColumns(newColumns);
+  }, []);
+
+  const handleUpdateRowHeight = useCallback((newRowHeight: number) => {
+    setRowHeight(newRowHeight);
+  }, []);
+
+  const handleUpdateDensity = useCallback((newDensity: DataGridDensity) => {
+    setDensity(newDensity);
+  }, []);
+
+  const handleResize = useCallback(
+    (colSettings: { columnId: string; width: number | undefined }) => {
+      setGridSettings((prev) => ({
+        ...prev,
+        columns: {
+          ...prev.columns,
+          [colSettings.columnId]: {
+            ...prev.columns?.[colSettings.columnId],
+            width: colSettings.width,
+          },
+        },
+      }));
+    },
+    []
+  );
+
+  // Server-side pagination: compute total pages and handle page navigation
+  const totalResults = allResultsData?.total ?? 0;
+  const totalPages = Math.ceil(totalResults / pagination.pageSize);
+
+  const handleServerPageChange = useCallback(
+    (pageIndex: number) => {
+      if ((pageIndex + 1) * pagination.pageSize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+        showPaginationLimitToast();
+
+        return;
+      }
+
+      setPagination((prev) => ({ ...prev, pageIndex }));
+    },
+    [pagination.pageSize, showPaginationLimitToast]
+  );
+
+  const handleServerPageSizeChange = useCallback((pageSize: number) => {
+    setPagination({ pageIndex: 0, pageSize });
+  }, []);
+
+  const SearchBar = unifiedSearch.ui.SearchBar;
+  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
+
+  // Collect all dot-notation field paths present in the result _source documents.
+  // This captures ECS fields (e.g. process.name, host.ip) that are stored in
+  // _source but may not appear in the ES `fields` response.
+  const sourceFieldNames = useMemo(() => {
+    const names = new Set<string>();
+    const edges = allResultsData?.edges ?? [];
+    if (!edges.length) return names;
+
+    // Flatten nested _source objects into dot-notation paths
+    const collectPaths = (obj: unknown, prefix = '') => {
+      if (!obj || typeof obj !== 'object') return;
+      for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+        const path = prefix ? `${prefix}.${key}` : key;
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          collectPaths(value, path);
+        } else {
+          names.add(path);
+        }
+      }
+    };
+
+    // Sample first few edges to discover fields (no need to scan all)
+    for (const edge of edges.slice(0, 5)) {
+      if (edge._source) {
+        collectPaths(edge._source);
+      }
+    }
+
+    return names;
+  }, [allResultsData?.edges]);
+
+  // Create a filtered data view for the SearchBar that only shows fields from
+  // the current result set (not all ECS fields from the index mapping).
+  const searchBarIndexPatterns = useMemo(() => {
+    if (!dataView || !allResultsData?.columns?.length) return indexPatterns;
+
+    // Collect all field names that are relevant to the current results
+    const resultFieldNames = new Set<string>();
+
+    // Add agent.name (always shown)
+    resultFieldNames.add('agent.name');
+    resultFieldNames.add('agent.id');
+
+    // Add ECS mapping columns (these need to appear in suggestions even before typing)
+    for (const col of ecsMappingColumns) {
+      resultFieldNames.add(col);
+    }
+
+    // Add all columns from ES `fields` response (osquery.*, action_id, etc.)
+    for (const col of allResultsData.columns) {
+      resultFieldNames.add(col);
+      if (col.startsWith('osquery.') && !col.endsWith('.number')) {
+        resultFieldNames.add(`${col}.number`);
+      }
+    }
+
+    // Add all fields discovered from _source (ECS fields like process.name, host.ip)
+    for (const name of sourceFieldNames) {
+      resultFieldNames.add(name);
+    }
+
+    // Filter the data view fields to only include result-relevant fields
+    const filteredFields = dataView.fields.filter(
+      (field) => resultFieldNames.has(field.name) || field.name === '@timestamp'
+    );
+
+    // If filtering didn't reduce the field list, just use the original
+    if (filteredFields.length >= dataView.fields.length) return indexPatterns;
+
+    // Create a lightweight wrapper that the SearchBar can use for suggestions
+    const filteredDataView = {
+      ...dataView,
+      fields: filteredFields,
+      getFieldByName: (name: string) => filteredFields.find((f) => f.name === name),
+    };
+
+    return [filteredDataView] as typeof indexPatterns;
+  }, [dataView, allResultsData?.columns, ecsMappingColumns, sourceFieldNames, indexPatterns]);
+
+  const handleCloseFlyout = useCallback(() => {
+    setExpandedDoc(undefined);
+  }, []);
+
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) => {
+      if (!dataView) return undefined;
+
+      return (
+        <OsqueryResultsFlyout
+          hit={hit}
+          hits={displayedRows}
+          dataView={dataView}
+          columns={displayedColumns}
+          columnsMeta={customColumnsMeta}
+          onClose={handleCloseFlyout}
+          setExpandedDoc={setExpandedDoc}
+          toastNotifications={toasts}
+          chrome={chrome}
+        />
+      );
+    },
+    [dataView, handleCloseFlyout, toasts, chrome]
+  );
+
   useEffect(
     () =>
       setIsLive(() => {
@@ -448,6 +854,123 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     ]
   );
 
+  if (queryHistoryRework) {
+    // --- New UnifiedDataTable path ---
+    if (isLoading || isDataViewLoading) {
+      return <EuiSkeletonText lines={5} />;
+    }
+
+    if (!dataView) {
+      return (
+        <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
+          <EuiCallOut
+            announceOnMount={false}
+            title={i18n.translate('xpack.osquery.resultsTable.dataViewError', {
+              defaultMessage: 'Unable to load data view for results',
+            })}
+            color="warning"
+          />
+        </EuiPanel>
+      );
+    }
+
+    return (
+      <>
+        {isLive && <EuiProgress color="primary" size="xs" css={euiProgressCss} />}
+
+        <div css={resultsTableContainerCss}>
+          {/* Unified Search Bar with KQL autocomplete and filter pills */}
+          <div css={searchBarWrapperCss}>
+            <SearchBar
+              appName="osquery"
+              indexPatterns={searchBarIndexPatterns}
+              query={query}
+              filters={filters}
+              filtersForSuggestions={filtersForSuggestions}
+              onQuerySubmit={handleQuerySubmit}
+              onFiltersUpdated={handleFiltersUpdated}
+              showDatePicker={false}
+              showQueryInput
+              showFilterBar
+              showQueryMenu={false}
+              displayStyle="withBorders"
+              placeholder={i18n.translate('xpack.osquery.resultsTable.searchPlaceholder', {
+                defaultMessage: 'Search results (KQL)',
+              })}
+              dataTestSubj="osqueryResultsSearchBar"
+            />
+          </div>
+
+          {!allResultsData?.edges.length ? (
+            <EuiPanel hasShadow={false} data-test-subj="osqueryResultsPanel">
+              <EuiCallOut
+                announceOnMount
+                title={generateEmptyDataMessage(data?.aggregations.totalResponded ?? 0)}
+              />
+            </EuiPanel>
+          ) : (
+            <>
+              <div css={unifiedTableWrapperCss}>
+                <CellActionsProvider
+                  getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}
+                >
+                  <UnifiedDataTable
+                    ariaLabelledBy="osquery-results"
+                    data-test-subj="osqueryResultsTable"
+                    dataView={dataView}
+                    columns={visibleColumns}
+                    rows={rows}
+                    loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
+                    expandedDoc={expandedDoc}
+                    setExpandedDoc={setExpandedDoc}
+                    renderDocumentView={renderDocumentView}
+                    trailingControlColumns={trailingColumns}
+                    externalCustomRenderers={externalCustomRenderers}
+                    sort={sortingColumns.map((col) => [col.id, col.direction])}
+                    onSort={handleSort}
+                    onSetColumns={handleSetColumns}
+                    onResize={handleResize}
+                    settings={gridSettings}
+                    showTimeCol={false}
+                    showFullScreenButton={appName === OSQUERY_PLUGIN_NAME}
+                    showColumnTokens
+                    canDragAndDropColumns
+                    isSortEnabled
+                    isPaginationEnabled={false}
+                    rowHeightState={rowHeight}
+                    onUpdateRowHeight={handleUpdateRowHeight}
+                    dataGridDensityState={density}
+                    onUpdateDataGridDensity={handleUpdateDensity}
+                    sampleSizeState={allResultsData?.total ?? 0}
+                    totalHits={allResultsData?.total}
+                    services={unifiedDataTableServices}
+                    consumer="osquery"
+                    enableComparisonMode
+                    controlColumnIds={CONTROL_COLUMN_IDS}
+                    onFilter={handleFilter}
+                    gridStyleOverride={gridStyleOverride}
+                  />
+                </CellActionsProvider>
+              </div>
+
+              {/* Server-side pagination controls */}
+              <EuiTablePagination
+                pageCount={totalPages}
+                activePage={pagination.pageIndex}
+                onChangePage={handleServerPageChange}
+                itemsPerPage={pagination.pageSize}
+                onChangeItemsPerPage={handleServerPageSizeChange}
+                itemsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
+                showPerPageOptions
+              />
+            </>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  // --- Legacy EuiDataGrid path ---
   if (isLoading) {
     return <EuiSkeletonText lines={5} />;
   }

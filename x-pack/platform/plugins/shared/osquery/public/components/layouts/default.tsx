@@ -8,7 +8,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 export const containerCss = ({ euiTheme }: UseEuiTheme) => ({
   minHeight: `calc(100vh - ${parseFloat(euiTheme.size.xxxl) * 2}px)`,
-  background: euiTheme.colors.emptyShade,
+  background: euiTheme.colors.body,
   display: 'flex',
   flexDirection: 'column' as const,
 });
@@ -20,7 +20,7 @@ export const wrapperCss = {
 };
 
 export const navCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: euiTheme.colors.emptyShade,
+  background: euiTheme.colors.body,
   borderBottom: euiTheme.border.thin,
   padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.base} ${euiTheme.size.l}`,
   '.euiTabs': {

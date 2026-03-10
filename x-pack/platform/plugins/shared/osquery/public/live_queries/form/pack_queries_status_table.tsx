@@ -48,11 +48,9 @@ const euiFlexItemCss = {
   cursor: 'pointer',
 };
 
-// TODO fix types
 const euiBasicTableCss = {
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
-    padding: '0',
-    border: '1px solid #d3dae6',
+    padding: '8px 16px',
   },
 
   'div.euiDataGrid__virtualized::-webkit-scrollbar': {

@@ -67,7 +67,7 @@ interface ViewResultsInDiscoverActionProps {
   mode?: string;
 }
 
-function getLensAttributes(
+export function getLensAttributes(
   logsDataView: LogsDataView,
   actionId: string
 ): TypedLensByValueInput['attributes'] {

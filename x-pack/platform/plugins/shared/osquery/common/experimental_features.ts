@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
    *   - Introduces /history and /new routes, redirects legacy /live_queries paths
    *   - Introduces search input and users filter
    */
-  queryHistoryRework: false,
+  queryHistoryRework: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
