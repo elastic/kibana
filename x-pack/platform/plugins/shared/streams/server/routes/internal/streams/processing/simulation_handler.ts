@@ -21,7 +21,7 @@ import type {
   FieldCapsResponse,
   IngestSimulateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import type {
@@ -66,7 +66,7 @@ export interface ProcessingSimulationParams {
 
 export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
 }
@@ -105,7 +105,7 @@ export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKe
 
 export const simulateProcessing = async ({
   params,
-  scopedClusterClient,
+  esClient,
   streamsClient,
   fieldsMetadataClient,
 }: SimulateProcessingDeps): Promise<ProcessingSimulationResponse> => {
@@ -113,7 +113,7 @@ export const simulateProcessing = async ({
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
       streamsClient.getStream(params.path.name),
-      getStreamIndex(scopedClusterClient, streamsClient, params.path.name),
+      getStreamIndex(esClient, streamsClient, params.path.name),
     ]);
 
   const streamFields = await getStreamFields(streamsClient, stream);
@@ -166,8 +166,8 @@ export const simulateProcessing = async ({
    * - The ingest simulation is used to fail fast on mapping failures. This runs only if `detected_fields` is provided.
    */
   const [pipelineSimulationResult, ingestSimulationResult] = await Promise.all([
-    executePipelineSimulation(scopedClusterClient, pipelineSimulationBody),
-    executeIngestSimulation(scopedClusterClient, ingestSimulationBody),
+    executePipelineSimulation(esClient, pipelineSimulationBody),
+    executeIngestSimulation(esClient, ingestSimulationBody),
   ]);
 
   /* 3. Fail fast on pipeline simulations errors and return the generic error response gracefully */
@@ -348,13 +348,11 @@ const prepareIngestSimulationBody = (
  * In case any other error occurs, we delegate the error handling to currently in draft processor.
  */
 export const executePipelineSimulation = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   simulationBody: IngestSimulateRequest
 ): Promise<PipelineSimulationResult> => {
   try {
-    const originalSimulation = await scopedClusterClient.asCurrentUser.ingest.simulate(
-      simulationBody
-    );
+    const originalSimulation = await esClient.ingest.simulate(simulationBody);
     const simulation = sanitiseSimulationResult(originalSimulation);
     return {
       status: 'success',
@@ -460,11 +458,11 @@ function propagateProcessorResultsPipelineTags(
 }
 
 const executeIngestSimulation = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   simulationBody: SimulateIngestRequest
 ): Promise<IngestSimulationResult> => {
   try {
-    const simulation = await scopedClusterClient.asCurrentUser.simulate.ingest(simulationBody);
+    const simulation = await esClient.simulate.ingest(simulationBody);
 
     return {
       status: 'success',
@@ -956,7 +954,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
 };
 
 const getStreamIndex = async (
-  scopedClusterClient: IScopedClusterClient,
+  esClient: ElasticsearchClient,
   streamsClient: StreamsClient,
   streamName: string
 ): Promise<{
@@ -970,10 +968,10 @@ const getStreamIndex = async (
   }
 
   const [lastIndex, lastIndexFieldCaps] = await Promise.all([
-    scopedClusterClient.asCurrentUser.indices.get({
+    esClient.indices.get({
       index: lastIndexRef.index_name,
     }),
-    scopedClusterClient.asCurrentUser.fieldCaps({
+    esClient.fieldCaps({
       index: lastIndexRef.index_name,
       fields: '*',
     }),
