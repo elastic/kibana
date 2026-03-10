@@ -28,8 +28,14 @@ export interface UserActivityActionDefinition {
  * @private
  */
 export const userActivityActions = {
-  user_logged_in: {
+  user_log_in: {
     description: 'User logged in to Kibana.',
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Authentication',
+    versionAddedAt: '9.4',
+  },
+  user_log_out: {
+    description: 'User logged out of Kibana.',
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Authentication',
     versionAddedAt: '9.4',
