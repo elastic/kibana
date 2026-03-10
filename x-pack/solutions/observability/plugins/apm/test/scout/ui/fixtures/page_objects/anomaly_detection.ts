@@ -18,9 +18,7 @@ export class AnomalyDetectionPage {
     await waitForApmMainContainer(this.page);
 
     // Wait for the page content to load
-    this.page.getByRole('heading', { name: 'Settings', level: 1 });
-
-    return this.page;
+    await this.page.getByRole('heading', { name: 'Settings', level: 1 }).waitFor();
   }
 
   async getCreateJobButton() {
@@ -56,7 +54,9 @@ export class AnomalyDetectionPage {
     await this.selectEnvironment(environmentName);
     await this.clickCreateJobsButton();
 
-    this.page.getByText('Anomaly detection jobs created');
+    await this.page
+      .getByText('Anomaly detection jobs created')
+      .waitFor({ state: 'visible', timeout: BIGGER_TIMEOUT });
   }
 
   async deleteMlJob() {
