@@ -9,7 +9,7 @@
 
 import { useCallback, useRef, type MutableRefObject } from 'react';
 import type { TelemetryLatencyProps } from '@kbn/esql-types';
-import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 const isTestEnv = process.env.NODE_ENV === 'test';
 
