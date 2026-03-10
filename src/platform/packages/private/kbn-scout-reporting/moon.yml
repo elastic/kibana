@@ -24,7 +24,9 @@ dependsOn:
   - '@kbn/scout-info'
   - '@kbn/repo-info'
   - '@kbn/code-owners'
+  - '@kbn/get-repo-files'
   - '@kbn/repo-packages'
+  - '@kbn/repo-path'
   - '@kbn/zod'
 tags:
   - shared-common
