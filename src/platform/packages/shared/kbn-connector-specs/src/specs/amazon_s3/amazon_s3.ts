@@ -17,31 +17,13 @@ import {
   listAmazonS3BucketObjects,
   listAmazonS3Buckets,
 } from './amazon_s3_api';
+import { ActionDownloadFileInput, ActionListBucketObjectsInput, ActionListBucketsInput } from './amazon_s3_types';
 
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
  * If the user requests a file larger than this, we will return a pre-signed URL for them to download the file directly from S3 instead of through Kibana.
  */
 const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
-
-interface ActionListBucketsInput {
-  region?: string;
-  prefix?: string;
-}
-
-interface ActionListBucketObjectsInput {
-  bucket: string;
-  region?: string;
-  prefix?: string;
-  continuationToken?: string;
-  maxKeys?: number;
-}
-
-interface ActionDownloadFileInput {
-  bucket: string;
-  key: string;
-  maximumDownloadSizeBytes?: number;
-}
 
 export const AmazonS3: ConnectorSpec = {
   metadata: {

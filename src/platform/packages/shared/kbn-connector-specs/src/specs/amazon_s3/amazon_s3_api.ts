@@ -10,64 +10,7 @@
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_credentials_helpers';
-
-interface AmazonS3Bucket {
-  name?: string;
-  creationDate?: string;
-}
-
-interface AmazonS3BucketsListing {
-  buckets: AmazonS3Bucket[];
-  nextContinuationToken?: string;
-  isTruncated: boolean;
-}
-
-interface AmazonS3BucketObjectItem {
-  key: string;
-  size: number;
-  lastModified: string;
-  storageClass: string;
-}
-
-interface AmazonS3BucketObjectListing {
-  bucket: string;
-  objectCount: number;
-  objects: AmazonS3BucketObjectItem[];
-  nextContinuationToken?: string;
-  isTruncated: boolean;
-}
-
-interface AmazonS3ObjectMetadata {
-  acceptRanges: string;
-  bucket: string;
-  cacheControl: string;
-  contentDisposition: string;
-  contentEncoding: string;
-  contentLanguage: string;
-  contentLength: number;
-  contentRange: string;
-  contentType: string;
-  eTag: string;
-  expires: string;
-  key: string;
-  lastModified: string;
-  region: string;
-  server: string;
-  storageClass: string;
-}
-
-interface AmazonS3Object {
-  bucket: string;
-  key: string;
-  contentType: string;
-  contentLength: number;
-  lastModified: string;
-  etag: string;
-  content?: string;
-  encoding: string;
-  contentUrl?: string;
-  message?: string;
-}
+import { AmazonS3BucketObjectListing, AmazonS3Bucket, AmazonS3BucketsListing, AmazonS3ObjectMetadata, AmazonS3Object } from './amazon_s3_types';
 
 function createQueryString(params: Record<string, string | undefined>): string {
   const queryParams: Record<string, string> = {};
@@ -166,9 +109,6 @@ async function parseAwsXmlResponse(
   collectionItems?: Record<string, string | undefined>
 ): Promise<Record<string, unknown>> {
   const parser = new Parser({ explicitArray: false, explicitRoot: false, ignoreAttrs: true });
-
-  const returnValue: Record<string, unknown> = {};
-
   const parsed = await parser.parseStringPromise(xml);
   return jsObjectToRecord(parsed, collectionItems || {});
 }
