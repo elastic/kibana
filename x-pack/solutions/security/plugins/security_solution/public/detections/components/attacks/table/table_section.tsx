@@ -294,7 +294,7 @@ export const TableSection = React.memo(
           <EuiSpacer />
         </EuiFlexGroup>
       ),
-      [sort]
+      [sort, setSort]
     );
 
     return (
