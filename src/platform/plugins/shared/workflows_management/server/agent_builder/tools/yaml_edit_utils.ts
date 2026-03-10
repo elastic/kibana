@@ -134,7 +134,8 @@ export const insertStep = (yaml: string, step: StepDefinition): EditResult => {
   }
 
   const endOffset = stepsNode.range[2];
-  const insertion = `${stepLines}\n`;
+  const needsNewline = endOffset > 0 && yaml[endOffset - 1] !== '\n';
+  const insertion = `${needsNewline ? '\n' : ''}${stepLines}\n`;
   return { success: true, yaml: spliceYaml(yaml, endOffset, endOffset, insertion) };
 };
 
@@ -212,7 +213,8 @@ export const modifyStepProperty = (
   const propIndent = stepIndent + indentUnit;
   const pad = ' '.repeat(propIndent);
   const valStr = stringifyValue({ [property]: value }, indentUnit, 0).trimEnd();
-  const insertion = `${pad}${valStr}\n`;
+  const needsNewline = stepRange[1] > 0 && yaml[stepRange[1] - 1] !== '\n';
+  const insertion = `${needsNewline ? '\n' : ''}${pad}${valStr}\n`;
   return { success: true, yaml: spliceYaml(yaml, stepRange[1], stepRange[1], insertion) };
 };
 

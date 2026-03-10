@@ -7,12 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import { acceptProposal, declineProposal } from '../proposal_status_bridge';
+import {
+  acceptProposal,
+  declineProposal,
+  getProposalRecord,
+  subscribeToProposals,
+} from '../proposal_status_bridge';
 
 type DiffStatus = 'pending' | 'accepted' | 'declined';
 
@@ -54,6 +66,27 @@ const STATUS_COLORS: Record<DiffStatus, string> = {
 const DiffStatusBadge: React.FC<{ status: DiffStatus }> = ({ status }) => (
   <EuiBadge color={STATUS_COLORS[status]}>{STATUS_LABELS[status]}</EuiBadge>
 );
+
+/**
+ * Subscribes to the client-side proposal status bridge so the attachment
+ * renderer can reflect accept/decline state without a server round-trip.
+ */
+const useProposalStatus = (proposalId: string, serverStatus: DiffStatus): DiffStatus => {
+  const [status, setStatus] = useState<DiffStatus>(() => {
+    const record = getProposalRecord(proposalId);
+    return record?.status ?? serverStatus;
+  });
+
+  useEffect(() => {
+    const unsubscribe = subscribeToProposals(() => {
+      const record = getProposalRecord(proposalId);
+      setStatus(record?.status ?? serverStatus);
+    });
+    return unsubscribe;
+  }, [proposalId, serverStatus]);
+
+  return status;
+};
 
 const findFirstChangedLine = (beforeYaml: string, afterYaml: string): number => {
   const beforeLines = beforeYaml.split('\n');
@@ -184,7 +217,16 @@ const DiffInlineContent: React.FC<{ attachment: WorkflowYamlDiffAttachment }> = 
   attachment,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { beforeYaml, afterYaml, status } = attachment.data;
+  const { beforeYaml, afterYaml, proposalId, status: serverStatus } = attachment.data;
+  const status = useProposalStatus(proposalId, serverStatus);
+
+  const handleAccept = useCallback(async () => {
+    await acceptProposal(proposalId);
+  }, [proposalId]);
+
+  const handleDecline = useCallback(async () => {
+    await declineProposal(proposalId);
+  }, [proposalId]);
 
   const headerStyles = css`
     padding: ${euiTheme.size.s};
@@ -223,16 +265,35 @@ const DiffInlineContent: React.FC<{ attachment: WorkflowYamlDiffAttachment }> = 
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <DiffStatusBadge status={status} />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {status === 'pending' && (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="xs" color="success" iconType="check" onClick={handleAccept}>
+                    {i18n.translate('workflowsManagement.attachmentRenderers.diff.accept', {
+                      defaultMessage: 'Accept',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="xs" color="danger" iconType="cross" onClick={handleDecline}>
+                    {i18n.translate('workflowsManagement.attachmentRenderers.diff.decline', {
+                      defaultMessage: 'Decline',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </>
+            )}
+            <EuiFlexItem grow={false}>
+              <DiffStatusBadge status={status} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <MonacoDiffViewer beforeYaml={beforeYaml} afterYaml={afterYaml} />
     </div>
   );
 };
-
-const ACTION_TYPE_PRIMARY = 'primary';
-const ACTION_TYPE_SECONDARY = 'secondary';
 
 export const workflowYamlDiffAttachmentUiDefinition = {
   getLabel: (attachment: WorkflowYamlDiffAttachment) =>
@@ -248,35 +309,4 @@ export const workflowYamlDiffAttachmentUiDefinition = {
   renderInlineContent: ({ attachment }: { attachment: WorkflowYamlDiffAttachment }) => (
     <DiffInlineContent attachment={attachment} />
   ),
-  getActionButtons: ({ attachment }: { attachment: WorkflowYamlDiffAttachment }) => {
-    if (attachment.data.status !== 'pending') {
-      return [];
-    }
-
-    return [
-      {
-        label: i18n.translate('workflowsManagement.attachmentRenderers.diff.accept', {
-          defaultMessage: 'Accept',
-        }),
-        icon: 'check',
-        type: ACTION_TYPE_PRIMARY,
-        handler: async () => {
-          const res = await acceptProposal(attachment.data.proposalId);
-          console.log(res);
-        },
-      },
-      {
-        label: i18n.translate('workflowsManagement.attachmentRenderers.diff.decline', {
-          defaultMessage: 'Decline',
-        }),
-        icon: 'cross',
-        type: ACTION_TYPE_SECONDARY,
-        handler: async () => {
-          const res = await declineProposal(attachment.data.proposalId);
-          console.log(res);
-          declineProposal(attachment.data.proposalId);
-        },
-      },
-    ];
-  },
 };

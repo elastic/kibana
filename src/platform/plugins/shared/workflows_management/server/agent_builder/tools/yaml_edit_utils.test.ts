@@ -156,6 +156,29 @@ describe('yaml_edit_utils', () => {
       expect(unchanged).toContain('    type: elasticsearch.search');
     });
 
+    it('appends a new property to a step ending without trailing newline', () => {
+      const yamlNoTrailing = `version: "1"
+name: Test
+steps:
+  - name: my_step
+    type: console
+    with:
+      message: "{{ steps.prev.output.value }}"`;
+
+      const result = modifyStepProperty(
+        yamlNoTrailing,
+        'my_step',
+        'condition',
+        'steps.prev.output.ok'
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('condition:');
+      const lines = result.yaml.split('\n');
+      const msgLine = lines.findIndex((l) => l.includes('{{ steps.prev.output.value }}'));
+      expect(lines[msgLine]).not.toContain('condition');
+    });
+
     it('returns error for non-existent step', () => {
       const result = modifyStepProperty(SAMPLE_WORKFLOW, 'no_such_step', 'with', {});
       expect(result.success).toBe(false);
@@ -204,6 +227,66 @@ describe('yaml_edit_utils', () => {
       const unchanged = getUnchangedLines(SAMPLE_WORKFLOW, result.yaml);
       expect(unchanged).toContain('  - name: log_greeting');
       expect(unchanged).toContain('  - name: search_data');
+    });
+
+    it('inserts cleanly after a step ending with Liquid templates (no trailing newline)', () => {
+      const yamlWithLiquid = `version: "1"
+name: Test
+steps:
+  - name: esql_step
+    type: elasticsearch.esql.query
+    with:
+      format: json
+      query: |
+        FROM test_properties
+        | EVAL val = COALESCE(?param, 0)
+        | KEEP val
+      params:
+        value_present: "{{ steps.test_values.output.message }}"`;
+
+      const result = insertStep(yamlWithLiquid, {
+        name: 'print_hello',
+        type: 'console',
+        with: { message: 'hello world' },
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('- name: print_hello');
+      expect(result.yaml).toContain('message: hello world');
+
+      const lines = result.yaml.split('\n');
+      const liquidLine = lines.findIndex((l) =>
+        l.includes('{{ steps.test_values.output.message }}')
+      );
+      const newStepLine = lines.findIndex((l) => l.includes('- name: print_hello'));
+      expect(newStepLine).toBeGreaterThan(liquidLine);
+      expect(lines[liquidLine]).not.toContain('- name:');
+    });
+
+    it('inserts cleanly after a step ending with a block scalar', () => {
+      const yamlWithBlock = `version: "1"
+name: Test
+steps:
+  - name: http_call
+    type: http
+    with:
+      url: https://example.com
+      body: |
+        {"key": "value",
+         "nested": true}`;
+
+      const result = insertStep(yamlWithBlock, {
+        name: 'next_step',
+        type: 'console',
+        with: { message: 'done' },
+      });
+
+      expect(result.success).toBe(true);
+      const lines = result.yaml.split('\n');
+      const bodyLine = lines.findIndex((l) => l.includes('"nested": true}'));
+      const nextLine = lines.findIndex((l) => l.includes('- name: next_step'));
+      expect(nextLine).toBeGreaterThan(bodyLine);
+      expect(lines[bodyLine]).not.toContain('- name:');
     });
 
     it('creates a steps array if none exists', () => {

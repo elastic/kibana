@@ -9,6 +9,7 @@
 
 import type { Observable, Subscription } from 'rxjs';
 import type { monaco } from '@kbn/monaco';
+import { setProposalRecord } from './proposal_status_bridge';
 import type { ProposalManager, ProposedChange } from './proposed_changes';
 import type { AgentBuilderChatEvent } from '../../types';
 
@@ -175,6 +176,14 @@ export class AttachmentBridge {
     for (const diff of pendingDiffs) {
       if (!this.processedProposals.has(diff.proposalId)) {
         this.processedProposals.add(diff.proposalId);
+
+        setProposalRecord({
+          proposalId: diff.proposalId,
+          status: 'pending',
+          beforeYaml: diff.beforeYaml,
+          afterYaml: diff.afterYaml,
+          toolId: WORKFLOW_YAML_DIFF_TYPE,
+        });
 
         const currentContent = model.getValue();
         const change = computeMinimalChange(currentContent, diff.afterYaml, diff.proposalId);
