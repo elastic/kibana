@@ -789,6 +789,14 @@
             "description": "Indicates if the API returns only outdated SLO or all SLO definitions",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "includeHealth",
+            "in": "query",
+            "description": "Indicates if the API returns SLO health data with definitions",
+            "schema": {
+              "type": "boolean"
             },
             "example": true
           },
@@ -1768,47 +1776,6 @@
           }
         }
       },
-      "timeslice_metric_basic_metric_with_field": {
-        "title": "Timeslice Metric Basic Metric with Field",
-        "required": [
-          "name",
-          "aggregation",
-          "field"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the metric. Only valid options are A-Z",
-            "type": "string",
-            "example": "A",
-            "pattern": "^[A-Z]$"
-          },
-          "aggregation": {
-            "description": "The aggregation type of the metric.",
-            "type": "string",
-            "example": "sum",
-            "enum": [
-              "sum",
-              "avg",
-              "min",
-              "max",
-              "std_deviation",
-              "last_value",
-              "cardinality"
-            ]
-          },
-          "field": {
-            "description": "The field of the metric.",
-            "type": "string",
-            "example": "processor.processed"
-          },
-          "filter": {
-            "description": "The filter to apply to the metric.",
-            "type": "string",
-            "example": "processor.outcome: \"success\""
-          }
-        }
-      },
       "timeslice_metric_percentile_metric": {
         "title": "Timeslice Metric Percentile Metric",
         "required": [
@@ -1879,6 +1846,47 @@
           }
         }
       },
+      "timeslice_metric_basic_metric_with_field": {
+        "title": "Timeslice Metric Basic Metric with Field",
+        "required": [
+          "name",
+          "aggregation",
+          "field"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the metric. Only valid options are A-Z",
+            "type": "string",
+            "example": "A",
+            "pattern": "^[A-Z]$"
+          },
+          "aggregation": {
+            "description": "The aggregation type of the metric.",
+            "type": "string",
+            "example": "sum",
+            "enum": [
+              "sum",
+              "avg",
+              "min",
+              "max",
+              "std_deviation",
+              "last_value",
+              "cardinality"
+            ]
+          },
+          "field": {
+            "description": "The field of the metric.",
+            "type": "string",
+            "example": "processor.processed"
+          },
+          "filter": {
+            "description": "The filter to apply to the metric.",
+            "type": "string",
+            "example": "processor.outcome: \"success\""
+          }
+        }
+      },
       "indicator_properties_timeslice_metric": {
         "title": "Timeslice metric",
         "required": [
@@ -1932,6 +1940,20 @@
                     "description": "List of metrics with their name, aggregation type, and field.",
                     "type": "array",
                     "items": {
+                      "discriminator": {
+                        "propertyName": "aggregation",
+                        "mapping": {
+                          "percentile": "#/components/schemas/timeslice_metric_percentile_metric",
+                          "doc_count": "#/components/schemas/timeslice_metric_doc_count_metric",
+                          "sum": "#/components/schemas/timeslice_metric_basic_metric_with_field",
+                          "avg": "#/components/schemas/timeslice_metric_basic_metric_with_field",
+                          "min": "#/components/schemas/timeslice_metric_basic_metric_with_field",
+                          "max": "#/components/schemas/timeslice_metric_basic_metric_with_field",
+                          "std_deviation": "#/components/schemas/timeslice_metric_basic_metric_with_field",
+                          "last_value": "#/components/schemas/timeslice_metric_basic_metric_with_field",
+                          "cardinality": "#/components/schemas/timeslice_metric_basic_metric_with_field"
+                        }
+                      },
                       "anyOf": [
                         {
                           "$ref": "#/components/schemas/timeslice_metric_basic_metric_with_field"
@@ -2416,6 +2438,29 @@
           }
         }
       },
+      "artifacts": {
+        "title": "Artifacts",
+        "description": "Links to related assets for the SLO",
+        "type": "object",
+        "properties": {
+          "dashboards": {
+            "description": "Array of dashboard references",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "description": "Dashboard saved-object id",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
       "create_slo_request": {
         "title": "Create SLO request",
         "description": "The create SLO API request body varies depending on the type of indicator, time window and budgeting method.\n",
@@ -2485,6 +2530,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "artifacts": {
+            "$ref": "#/components/schemas/artifacts"
           }
         }
       },
@@ -2580,6 +2628,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "artifacts": {
+            "$ref": "#/components/schemas/artifacts"
           }
         }
       },
@@ -2683,6 +2734,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "artifacts": {
+            "$ref": "#/components/schemas/artifacts"
           },
           "createdAt": {
             "description": "The creation date",

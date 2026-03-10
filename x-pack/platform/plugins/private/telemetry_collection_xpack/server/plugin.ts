@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
 import { getClusterUuids } from '@kbn/telemetry-plugin/server';
 import { getStatsWithXpack } from './telemetry_collection';
 

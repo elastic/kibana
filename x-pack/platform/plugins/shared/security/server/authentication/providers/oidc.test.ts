@@ -20,6 +20,7 @@ import {
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
+import { InvalidGrantError } from '../../errors';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -64,6 +65,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -112,6 +114,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -150,6 +153,70 @@ describe('OIDCAuthenticationProvider', () => {
         method: 'POST',
         path: '/_security/oidc/prepare',
         body: { realm: 'oidc1' },
+      });
+    });
+
+    describe('returns "NotHandled" result if ES realm does not match provider', () => {
+      it('when initiated by the User', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          realm: 'other-realm',
+          redirect:
+            'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+        });
+
+        await expect(
+          provider.login(request, {
+            type: OIDCLogin.LoginInitiatedByUser,
+            redirectURL: '/mock-server-basepath/app/super-kibana#some-hash',
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/oidc/prepare',
+          body: { realm: 'oidc1' },
+        });
+      });
+
+      it('when initiated by 3rd party', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+          state: 'statevalue',
+          nonce: 'noncevalue',
+          realm: 'other-realm',
+          redirect:
+            'https://op-host/path/login?response_type=code' +
+            '&scope=openid%20profile%20email' +
+            '&client_id=s6BhdRkqt3' +
+            '&state=statevalue' +
+            '&redirect_uri=https%3A%2F%2Ftest-hostname:1234%2Ftest-base-path%2Fapi%2Fsecurity%2Fv1%2F/oidc' +
+            '&login_hint=loginhint',
+        });
+
+        await expect(
+          provider.login(request, {
+            type: OIDCLogin.LoginInitiatedBy3rdParty,
+            iss: 'some-issuer',
+          })
+        ).resolves.toEqual(AuthenticationResult.notHandled());
+
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+        expect(mockOptions.client.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/oidc/prepare',
+          body: { iss: 'some-issuer' },
+        });
       });
     });
 
@@ -391,6 +458,7 @@ describe('OIDCAuthenticationProvider', () => {
       mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
         state: 'statevalue',
         nonce: 'noncevalue',
+        realm: 'oidc1',
         redirect:
           'https://op-host/path/login?response_type=code' +
           '&scope=openid%20profile%20email' +
@@ -577,7 +645,9 @@ describe('OIDCAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
       await expect(
         provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
@@ -614,12 +684,18 @@ describe('OIDCAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
       await expect(
         provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
       ).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+        AuthenticationResult.failed(
+          Boom.badRequest(
+            'Your session has expired because your refresh token is no longer valid. Please log in again.'
+          )
+        )
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
@@ -641,12 +717,18 @@ describe('OIDCAuthenticationProvider', () => {
         new errors.ResponseError(securityMock.createApiResponse({ statusCode: 401, body: {} }))
       );
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
+      mockOptions.tokens.refresh.mockRejectedValue(
+        InvalidGrantError.expiredOrInvalidRefreshToken()
+      );
 
       await expect(
         provider.authenticate(request, { ...tokenPair, realm: 'oidc1' })
       ).resolves.toEqual(
-        AuthenticationResult.failed(Boom.badRequest('Both access and refresh tokens are expired.'))
+        AuthenticationResult.failed(
+          Boom.badRequest(
+            'Your session has expired because your refresh token is no longer valid. Please log in again.'
+          )
+        )
       );
 
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);

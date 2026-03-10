@@ -47,6 +47,7 @@ const CallOutComponent = ({
 
   return !isEmpty(messages) ? (
     <EuiCallOut
+      announceOnMount
       title={
         isCaseClosed
           ? i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE

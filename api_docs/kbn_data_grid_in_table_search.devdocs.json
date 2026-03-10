@@ -29,6 +29,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+        "lineNumber": 47,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,6 +51,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,6 +63,55 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.InTableSearchRestorableState",
+        "type": "Interface",
+        "tags": [],
+        "label": "InTableSearchRestorableState",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.InTableSearchRestorableState.searchTerm",
+            "type": "string",
+            "tags": [],
+            "label": "searchTerm",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.InTableSearchRestorableState.activeMatch",
+            "type": "Object",
+            "tags": [],
+            "label": "activeMatch",
+            "description": [],
+            "signature": [
+              "ActiveMatch",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/data-grid-in-table-search",
         "id": "def-public.UseDataGridInTableSearchProps",
@@ -79,6 +132,8 @@
           ", \"rows\" | \"visibleColumns\">"
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,6 +148,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -107,6 +164,8 @@
               "HTMLElement | null"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -123,6 +182,8 @@
               " | null>"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -137,6 +198,8 @@
               "CellContext | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,6 +215,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -166,8 +231,83 @@
               "((props: CellPropsWithContext) => React.ReactNode) | React.ComponentClass<CellPropsWithContext, any>"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.initialState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.InTableSearchRestorableState",
+                "text": "InTableSearchRestorableState"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.onInitialStateChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onInitialStateChange",
+            "description": [],
+            "signature": [
+              "((initialState: ",
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.InTableSearchRestorableState",
+                "text": "InTableSearchRestorableState"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-grid-in-table-search",
+                "id": "def-public.UseDataGridInTableSearchProps.onInitialStateChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/data-grid-in-table-search",
+                    "scope": "public",
+                    "docId": "kibKbnDataGridInTableSearchPluginApi",
+                    "section": "def-public.InTableSearchRestorableState",
+                    "text": "InTableSearchRestorableState"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+                "lineNumber": 32,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -180,6 +320,8 @@
         "label": "UseDataGridInTableSearchReturn",
         "description": [],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -195,6 +337,8 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,6 +353,8 @@
               "React.JSX.Element | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -223,6 +369,8 @@
               "CellContext | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -239,6 +387,8 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -257,6 +407,8 @@
                   ", \"inTableSearchTerm\" | \"onHighlightsCountFound\">"
                 ],
                 "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -279,6 +431,8 @@
           "\"inTableSearchButtonNext\""
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -294,6 +448,8 @@
           "\"inTableSearchButtonPrev\""
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -309,6 +465,8 @@
           "\"startInTableSearchButton\""
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -324,6 +482,8 @@
           "\"inTableSearchMatchesCounter\""
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -339,6 +499,8 @@
           "\"dataGridInTableSearch__match\""
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -354,6 +516,8 @@
           "\"inTableSearchInput\""
         ],
         "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

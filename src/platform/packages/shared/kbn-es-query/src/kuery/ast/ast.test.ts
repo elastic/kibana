@@ -14,8 +14,8 @@ import {
   toKqlExpression,
 } from './ast';
 import { nodeTypes } from '../node_types';
-import { DataViewBase } from '../../..';
-import { KueryNode } from '../types';
+import type { DataViewBase } from '../../..';
+import type { KueryNode } from '../types';
 import { fields } from '../../filters/stubs';
 import { performance } from 'perf_hooks';
 
@@ -277,7 +277,8 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
-    describe('performance', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/217598
+    describe.skip('performance', () => {
       const NUM_RUNS = 100;
       it('with simple expression', () => {
         const start = performance.now();

@@ -9,12 +9,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { ControlsPluginStartDeps } from '../types';
+import type { ControlsPluginStartDeps } from '../types';
 
 export let coreServices: CoreStart;
 export let dataService: DataPublicPluginStart;

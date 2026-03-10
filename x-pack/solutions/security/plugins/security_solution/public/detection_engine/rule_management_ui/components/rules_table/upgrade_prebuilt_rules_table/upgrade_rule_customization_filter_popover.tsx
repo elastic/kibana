@@ -78,7 +78,7 @@ const RuleCustomizationFilterPopoverComponent = ({
       }}
     >
       <EuiSelectable options={selectableOptions} onChange={handleSelectableOptionsChange}>
-        {(list) => <div style={{ width: RULE_CUSTOMIZATION_POPOVER_WIDTH }}>{list}</div>}
+        {(list) => <div css={{ width: RULE_CUSTOMIZATION_POPOVER_WIDTH }}>{list}</div>}
       </EuiSelectable>
     </EuiPopover>
   );

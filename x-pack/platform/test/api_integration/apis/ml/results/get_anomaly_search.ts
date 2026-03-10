@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('POST results/anomaly_search', () => {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
 
       // create spaces
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });

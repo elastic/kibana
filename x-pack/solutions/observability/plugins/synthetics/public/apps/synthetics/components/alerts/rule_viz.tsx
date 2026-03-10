@@ -21,12 +21,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
-import { PayloadAction } from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { RuleMonitorsTable } from './rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';
 import { selectInspectRule } from '../../state/alert_rules/selectors';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<unknown> }) => {
   const { data, loading } = useSelector(selectInspectRule);

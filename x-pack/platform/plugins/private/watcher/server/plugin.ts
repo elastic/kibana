@@ -7,7 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { SemVer } from 'semver';
-import { CoreStart, CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreStart,
+  CoreSetup,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
 import { PLUGIN, INDEX_NAMES } from '../common/constants';
 
@@ -60,6 +66,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
         {
           requiredClusterPrivileges: ['manage_watcher'],
           requiredIndexPrivileges: {
+            [INDEX_NAMES.WATCHES]: ['read'],
             [INDEX_NAMES.WATCHER_HISTORY]: ['read'],
           },
           ui: [],
@@ -67,6 +74,7 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
         {
           requiredClusterPrivileges: ['monitor_watcher'],
           requiredIndexPrivileges: {
+            [INDEX_NAMES.WATCHES]: ['read'],
             [INDEX_NAMES.WATCHER_HISTORY]: ['read'],
           },
           ui: [],

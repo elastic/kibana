@@ -41,7 +41,7 @@ export const getSignificantTermRequest = (
   let filter: estypes.QueryDslQueryContainer[] = [];
 
   if (query.bool && Array.isArray(query.bool.filter)) {
-    filter = query.bool.filter.filter((d) => Object.keys(d)[0] !== 'range');
+    filter = query.bool.filter.filter((d) => Object.keys(d || {})[0] !== 'range');
 
     query.bool.filter = [
       ...filter,
@@ -87,7 +87,6 @@ export const getSignificantTermRequest = (
             ],
           },
         },
-        // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
         p_value: { background_is_superset: false },
         size: 1000,
       },

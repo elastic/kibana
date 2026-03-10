@@ -8,7 +8,7 @@
  */
 
 import * as fs from 'fs';
-import { Role, User } from './types';
+import type { Role, User } from './types';
 
 export const readCloudUsersFromFile = (filePath: string): Array<[Role, User]> => {
   const defaultMessage = `Cannot read roles and email/password from ${filePath}`;

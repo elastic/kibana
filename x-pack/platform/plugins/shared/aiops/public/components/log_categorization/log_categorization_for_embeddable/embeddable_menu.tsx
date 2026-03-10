@@ -16,7 +16,7 @@ import {
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
@@ -25,8 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RandomSampler } from '../sampling_menu';
 import { SamplingPanel } from '../sampling_menu/sampling_panel';
-import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { MINIMUM_TIME_RANGE } from './minimum_time_range';
+import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
 interface Props {
   randomSampler: RandomSampler;
@@ -134,7 +134,7 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiToolTip
+              <EuiIconTip
                 content={i18n.translate(
                   'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRange.tooltip',
                   {
@@ -142,9 +142,9 @@ export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
                       'Adds a wider time range to the analysis to improve pattern accuracy.',
                   }
                 )}
-              >
-                <EuiIcon type="questionInCircle" color="subdued" />
-              </EuiToolTip>
+                type="question"
+                color="subdued"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

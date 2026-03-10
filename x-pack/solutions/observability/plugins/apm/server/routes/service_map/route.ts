@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
-import { toBooleanRt } from '@kbn/io-ts-utils';
 import type { ServiceMapResponse } from '../../../common/service_map';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map/utils';
@@ -34,7 +33,6 @@ const serviceMapRoute = createApmServerRoute({
         serviceName: t.string,
         serviceGroup: t.string,
         kuery: kueryRt.props.kuery,
-        useV2: toBooleanRt,
       }),
       environmentRt,
       rangeRt,
@@ -58,7 +56,7 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
-      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery, useV2 },
+      query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
     } = params;
 
     const {
@@ -99,7 +97,6 @@ const serviceMapRoute = createApmServerRoute({
       maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
-      useV2,
     });
   },
 });
@@ -153,7 +150,17 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 const serviceMapDependencyNodeRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map/dependency',
   params: t.type({
-    query: t.intersection([t.type({ dependencyName: t.string }), environmentRt, rangeRt, offsetRt]),
+    query: t.intersection([
+      t.type({
+        dependencies: t.union([t.string, t.array(t.string)]),
+      }),
+      t.partial({
+        sourceServiceName: t.string,
+      }),
+      environmentRt,
+      rangeRt,
+      offsetRt,
+    ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMapServiceDependencyInfoResponse> => {
@@ -169,12 +176,13 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
 
     const {
-      query: { dependencyName, environment, start, end, offset },
+      query: { dependencies, sourceServiceName, environment, start, end, offset },
     } = params;
 
     return getServiceMapDependencyNodeInfo({
       apmEventClient,
-      dependencyName,
+      sourceServiceName,
+      dependencies: Array.isArray(dependencies) ? dependencies : [dependencies],
       start,
       end,
       environment,

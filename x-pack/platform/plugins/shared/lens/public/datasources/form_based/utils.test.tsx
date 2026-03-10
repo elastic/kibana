@@ -16,10 +16,14 @@ import {
   cloneLayer,
   getUnsupportedOperationsWarningMessage,
 } from './utils';
-import type { FormBasedPrivateState, GenericIndexPatternColumn } from './types';
-import type { FramePublicAPI, IndexPattern } from '../../types';
-import { TermsIndexPatternColumn } from './operations';
-import { FormBasedLayer } from './types';
+import type {
+  FormBasedPrivateState,
+  GenericIndexPatternColumn,
+  FramePublicAPI,
+  IndexPattern,
+  TermsIndexPatternColumn,
+  FormBasedLayer,
+} from '@kbn/lens-common';
 import { createMockedIndexPatternWithAdditionalFields } from './mocks';
 import { getLongMessage } from '../../user_messages_utils';
 
@@ -478,7 +482,6 @@ describe('indexpattern_datasource utils', () => {
                 params: {
                   emptyAsNull: true,
                 },
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               '62f73507-09c4-4bf9-9e6f-a9692e348d94': {
@@ -497,7 +500,6 @@ describe('indexpattern_datasource utils', () => {
                   isFormulaBroken: false,
                 },
                 references: ['62f73507-09c4-4bf9-9e6f-a9692e348d94X0'],
-                scale: 'ratio',
                 // here's the issue - this should not be here
                 sourceField: '___records___',
               },

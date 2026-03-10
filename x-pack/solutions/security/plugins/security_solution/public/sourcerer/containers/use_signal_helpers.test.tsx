@@ -30,12 +30,15 @@ jest.mock('../../common/lib/kibana', () => {
       addError: mockAddError,
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
   };
 });
 
-describe('useSignalHelpers', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('useSignalHelpers', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
     <TestProviders>{children}</TestProviders>
   );

@@ -20,11 +20,13 @@ export async function getPercentileThresholdValue({
   query,
   percentileThreshold,
   searchMetrics,
+  isOtel,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   chartType: LatencyDistributionChartType;
   percentileThreshold: number;
   searchMetrics: boolean;
+  isOtel: boolean;
 }) {
   const durationPercentiles = await fetchDurationPercentiles({
     apmEventClient,
@@ -35,6 +37,7 @@ export async function getPercentileThresholdValue({
     kuery,
     query,
     searchMetrics,
+    isOtel,
   });
 
   return durationPercentiles.percentiles[`${percentileThreshold}.0`];

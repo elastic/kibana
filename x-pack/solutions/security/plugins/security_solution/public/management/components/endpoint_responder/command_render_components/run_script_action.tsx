@@ -8,26 +8,53 @@
 import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
+import { parsedExecuteTimeout } from '../lib/utils';
+import type { ParsedCommandInput } from '../../console/service/types';
+import { RunscriptActionResult } from '../../runscript_action_result';
+import type { ArgSelectorState, SupportedArguments } from '../../console';
 import { useSendRunScriptEndpoint } from '../../../hooks/response_actions/use_send_run_script_endpoint_request';
-import type { RunScriptActionRequestBody } from '../../../../../common/api/endpoint';
+import type {
+  EndpointRunScriptActionRequestParams,
+  RunScriptActionRequestBody,
+} from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
 } from '../../../../../common/endpoint/types';
 import type { ActionRequestComponentProps } from '../types';
+import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
+
+export interface CrowdStrikeRunScriptActionParameters extends SupportedArguments {
+  Raw: string;
+  HostPath: string;
+  CloudFile: string;
+  CommandLine: string;
+  Timeout: string;
+}
+
+export interface MicrosoftDefenderEndpointRunScriptActionParameters extends SupportedArguments {
+  ScriptName: string;
+  Args: string;
+}
+
+export interface SentinelOneRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
+}
+
+export interface EndpointRunScriptActionParameters extends SupportedArguments {
+  script: string;
+  inputParams: string;
+  timeout: string;
+}
 
 export const RunScriptActionResult = memo<
   ActionRequestComponentProps<
-    {
-      Raw?: string;
-      HostPath?: string;
-      CloudFile?: string;
-      CommandLine?: string;
-      Timeout?: number;
-      comment?: string;
-    },
+    | CrowdStrikeRunScriptActionParameters
+    | MicrosoftDefenderEndpointRunScriptActionParameters
+    | SentinelOneRunScriptActionParameters
+    | EndpointRunScriptActionParameters,
     ResponseActionRunScriptOutputContent,
     ResponseActionRunScriptParameters
   >
@@ -37,20 +64,71 @@ export const RunScriptActionResult = memo<
     const { endpointId, agentType } = command.commandDefinition?.meta ?? {};
 
     if (!endpointId) {
-      return;
+      return {} as unknown as RunScriptActionRequestBody;
     }
+
+    // Note TC: I had much issues moving this outside of useMemo - caused by command type. If you think this is a problem - please try to move it out.
+    const getParams = () => {
+      const args = command.args.args;
+
+      if (agentType === 'microsoft_defender_endpoint') {
+        const msDefenderArgs =
+          args as ParsedCommandInput<MicrosoftDefenderEndpointRunScriptActionParameters>['args'];
+
+        return {
+          scriptName: msDefenderArgs.ScriptName?.[0],
+          args: msDefenderArgs.Args?.[0],
+        };
+      }
+
+      if (agentType === 'crowdstrike') {
+        const csArgs = args as ParsedCommandInput<CrowdStrikeRunScriptActionParameters>['args'];
+
+        return {
+          raw: csArgs.Raw?.[0],
+          hostPath: csArgs.HostPath?.[0],
+          cloudFile: csArgs.CloudFile?.[0],
+          commandLine: csArgs.CommandLine?.[0],
+          timeout: csArgs.Timeout?.[0],
+        };
+      }
+
+      if (agentType === 'sentinel_one' || agentType === 'endpoint') {
+        const { inputParams, timeout } = args as ParsedCommandInput<
+          SentinelOneRunScriptActionParameters | EndpointRunScriptActionParameters
+        >['args'];
+        const scriptSelectionState: ArgSelectorState<CustomScriptSelectorState>[] | undefined =
+          command.argState?.script;
+
+        if (scriptSelectionState && scriptSelectionState?.[0].store?.selectedOption?.id) {
+          const params: RunScriptActionRequestBody['parameters'] = {
+            scriptId: scriptSelectionState[0].store.selectedOption.id,
+            scriptInput: inputParams?.[0],
+          };
+
+          if (agentType === 'endpoint') {
+            const timeoutInSeconds = parsedExecuteTimeout(timeout?.[0] as string);
+
+            if (timeoutInSeconds) {
+              (
+                params as RunScriptActionRequestBody<EndpointRunScriptActionRequestParams>['parameters']
+              ).timeout = timeoutInSeconds;
+            }
+          }
+
+          return params;
+        }
+      }
+
+      return {} as unknown as RunScriptActionRequestBody;
+    };
+
     return {
       agent_type: agentType,
       endpoint_ids: [endpointId],
-      parameters: {
-        raw: command.args.args.Raw?.[0],
-        hostPath: command.args.args.HostPath?.[0],
-        cloudFile: command.args.args.CloudFile?.[0],
-        commandLine: command.args.args.CommandLine?.[0],
-        timeout: command.args.args.Timeout?.[0],
-      },
+      parameters: getParams(),
       comment: command.args.args?.comment?.[0],
-    };
+    } as unknown as RunScriptActionRequestBody;
   }, [command]);
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
@@ -81,14 +159,10 @@ export const RunScriptActionResult = memo<
         { defaultMessage: 'RunScript was successful.' }
       )}
     >
-      <ExecuteActionHostResponse
+      <RunscriptActionResult
         action={completedActionDetails}
-        canAccessFileDownloadLink={true}
-        agentId={command.commandDefinition?.meta?.endpointId}
+        data-test-subj="runscriptResult"
         textSize="s"
-        data-test-subj="console"
-        hideFile={true}
-        hideContext={true}
       />
     </ResultComponent>
   );

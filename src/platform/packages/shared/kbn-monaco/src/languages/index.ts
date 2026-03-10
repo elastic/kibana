@@ -20,6 +20,7 @@ import { GrokLang, GROK_LANG_ID } from './grok';
 import { HandlebarsLang, HANDLEBARS_LANG_ID } from './handlebars';
 import { CssLang, CSS_LANG_ID } from './css';
 import { HJsonLang, HJSON_LANG_ID } from './hjson';
+import { PromQLLang, PROMQL_LANG_ID } from './promql';
 
 // export all language ids
 export {
@@ -35,6 +36,7 @@ export {
   CSS_LANG_ID,
   HJSON_LANG_ID,
   PAINLESS_LANG_ID,
+  PROMQL_LANG_ID,
 };
 
 // export all language definitions
@@ -51,17 +53,25 @@ export {
   HandlebarsLang,
   CssLang,
   HJsonLang,
+  PromQLLang,
 };
 
-export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID } from './esql';
+export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from './esql';
+export type { ESQLDependencies } from './esql/language';
 export {
   CONSOLE_THEME_ID,
   CONSOLE_OUTPUT_THEME_ID,
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
+  ConsoleWorkerProxyService,
   createOutputParser,
 } from './console';
-export type { ParsedRequest } from './console';
+export type {
+  ConsoleOutputParser,
+  ConsoleParserResult,
+  ErrorAnnotation,
+  ParsedRequest,
+} from './console';
 export * from './painless';
 export { configureMonacoYamlSchema } from './yaml';
 
@@ -70,6 +80,7 @@ export const initializeSupportedLanguages = () => {
     XJsonLang,
     PainlessLang,
     SQLLang,
+    PromQLLang,
     ESQLLang,
     YamlLang,
     ConsoleLang,

@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -13,7 +13,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/navigation-plugin",
@@ -21,9 +20,12 @@
     "@kbn/data-views-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/shared-ux-page-kibana-template",
-    "@kbn/controls-plugin",
     "@kbn/shared-ux-router",
     "@kbn/presentation-publishing",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/control-group-renderer",
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-util-plugin",
+    "@kbn/as-code-filters-schema"
   ]
 }

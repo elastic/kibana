@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
-import type { PolicySecretReference } from './secret';
+import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
+import type { SecretReference } from './secret';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -15,6 +15,7 @@ export interface PackagePolicyPackage {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   requires_root?: boolean;
   type?: string;
+  fips_compatible?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -48,6 +49,7 @@ export interface NewPackagePolicyInputStream {
   };
   release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   config?: PackagePolicyConfigRecord;
 }
 
@@ -65,6 +67,7 @@ export interface NewPackagePolicyInput {
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
+  deprecated?: DeprecationInfo;
 }
 
 export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams'> {
@@ -84,9 +87,12 @@ export interface NewPackagePolicy {
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
   output_id?: string | null;
+  cloud_connector_id?: string | null;
+  cloud_connector_name?: string | null;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
+  var_group_selections?: Record<string, string>;
   elasticsearch?: {
     privileges?: {
       cluster?: string[];
@@ -95,6 +101,7 @@ export interface NewPackagePolicy {
   };
   overrides?: { inputs?: { [key: string]: any } } | null;
   supports_agentless?: boolean | null;
+  supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
 }
 
@@ -110,7 +117,7 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
   version?: string;
   agents?: number;
   revision: number;
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   updated_at: string;
   updated_by: string;
   created_at: string;

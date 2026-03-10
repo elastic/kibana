@@ -90,6 +90,18 @@ const workerConfig = (languages) => ({
       },
     ],
   },
+  optimization: {
+    minimizer: [
+      (compiler) => {
+        const TerserPlugin = require('terser-webpack-plugin');
+        new TerserPlugin({
+          // exclude this file from being processed by terser,
+          // because attempts at tree shaking actually botches up the file
+          exclude: /monaco-editor[\\/]esm[\\/]vs[\\/]base[\\/]common[\\/]map.js/,
+        }).apply(compiler);
+      },
+    ],
+  },
 });
 
 module.exports = workerConfig(['default', 'json', 'xjson', 'painless', 'yaml', 'console']);

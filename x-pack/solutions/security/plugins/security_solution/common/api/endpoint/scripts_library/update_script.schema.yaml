@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: Update (PATCH) script schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/scripts_library/{script_id}:
+    patch:
+      summary: Update script
+      operationId: EndpointScriptLibraryPatchUpdateScript
+      description: Update (full or partial) a script entry
+      x-codegen-enabled: false
+      x-labels: []
+      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+      #      x-labels: [ ess, serverless ]
+      parameters:
+        - name: script_id
+          in: path
+          required: true
+          description: The ID of the script entry to be updated.
+          example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+          schema:
+            type: string
+            description: The ID of the script entry to be updated.
+            example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchUpdateScriptRouteRequestBody'
+            examples:
+              PatchUpdateScriptEntry:
+                summary: Update script entry instructions
+                value:
+                  instructions: ./collect_host_data.sh --help
+
+      responses:
+        '200':
+          description: Action request was successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+
+components:
+  x-codegen-enabled: false
+  schemas:
+    PatchUpdateScriptRouteRequestBody:
+      type: object
+      description: The script entry properties to be updated. At least one property must be provided.
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          description: Name of the script
+        platform:
+          type: array
+          description: Platforms supported by the the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptPlatform'
+        file:
+          type: object
+          format: binary
+          description: The script file upload
+        tags:
+          type: array
+          description: Tags to categorize the script
+          items:
+            $ref: './common.yaml#/components/schemas/EndpointScriptTags'
+        description:
+          type: string
+          description: Description of the script and its purpose/functionality
+        instructions:
+          type: string
+          description: Instructions for using the script, including details around its supported input arguments
+        example:
+          type: string
+          description: Example usage of the script
+        requiresInput:
+          type: boolean
+          description: Whether the script requires input arguments
+        pathToExecutable:
+          type: string
+          description: >
+            Used only for when the uploaded script is an archive (.zip file for example).
+            This property defines the relative path to the file included in the archive that should be executed
+            once its contents are extracted. The path should be relative to the root of the archive.
+          example: ./bin/script.sh
+
+
+
+

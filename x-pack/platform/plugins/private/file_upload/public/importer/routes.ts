@@ -14,7 +14,7 @@ import type {
   InitializeImportResponse,
   ImportDoc,
   ImportResponse,
-} from '../../common/types';
+} from '@kbn/file-upload-common';
 import { getHttp } from '../kibana_services';
 
 interface CallInitializeImportRoute {
@@ -22,12 +22,15 @@ interface CallInitializeImportRoute {
   settings: IndicesIndexSettings;
   mappings: MappingTypeMapping;
   ingestPipelines?: IngestPipelineWrapper[];
+  existingIndex?: boolean;
+  signal?: AbortSignal;
 }
 
 interface CallImportRoute {
   index: string;
   ingestPipelineId: string;
   data: ImportDoc[];
+  signal?: AbortSignal;
 }
 
 export function callInitializeImportRoute({
@@ -35,12 +38,15 @@ export function callInitializeImportRoute({
   settings,
   mappings,
   ingestPipelines,
+  existingIndex,
+  signal,
 }: CallInitializeImportRoute) {
   const body = JSON.stringify({
     index,
     settings,
     mappings,
     ingestPipelines,
+    existingIndex,
   });
 
   return getHttp().fetch<InitializeImportResponse>({
@@ -48,10 +54,11 @@ export function callInitializeImportRoute({
     method: 'POST',
     version: '1',
     body,
+    signal,
   });
 }
 
-export function callImportRoute({ index, data, ingestPipelineId }: CallImportRoute) {
+export function callImportRoute({ index, data, ingestPipelineId, signal }: CallImportRoute) {
   const body = JSON.stringify({
     index,
     ingestPipelineId,
@@ -63,5 +70,6 @@ export function callImportRoute({ index, data, ingestPipelineId }: CallImportRou
     method: 'POST',
     version: '2',
     body,
+    signal,
   });
 }

@@ -9,8 +9,8 @@
 
 import { parseRef } from '../../../utils/parse_ref';
 import { isPlainObjectType } from '../../../utils/is_plain_object_type';
-import { DocumentNode, PlainObjectNode, RefNode } from '../types/node';
-import { DocumentNodeProcessor } from './types/document_node_processor';
+import type { DocumentNode, PlainObjectNode, RefNode } from '../types/node';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
 
 /**
  * Helps to remove unused components.

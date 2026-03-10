@@ -8,7 +8,7 @@
  */
 
 import { migratePanelsTo730 } from './migrate_to_730_panels';
-import {
+import type {
   SavedDashboardPanel730ToLatest,
   RawSavedDashboardPanel640To720,
   RawSavedDashboardPanelTo60,

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBucketAggConfig } from './bucket_agg_type';
+import type { IBucketAggConfig } from './bucket_agg_type';
 
 export const autoInterval = 'auto';
 export const isAutoInterval = (value: unknown) => value === autoInterval;

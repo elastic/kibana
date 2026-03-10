@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '../types';
+import type { DataTableRecord } from '../types';
 
 export const getFieldValue = <TRecord extends DataTableRecord, TField extends string>(
   record: TRecord,
   field: TField & keyof TRecord['flattened']
 ): TRecord['flattened'][TField] => {
   const value = record.flattened[field];
-  return Array.isArray(value) ? value[0] : value;
+  return Array.isArray(value) ? value[0] : (value as TRecord['flattened'][TField]);
 };

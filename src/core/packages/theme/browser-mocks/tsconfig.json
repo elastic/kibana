@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -14,7 +14,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-theme-browser",
-    "@kbn/core-theme-browser-internal"
+    "@kbn/core-theme-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

@@ -15,6 +15,8 @@
       "label": "SecuritySolutionEssPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution_ess/public/types.ts",
+      "lineNumber": 18,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -29,6 +31,8 @@
       "label": "SecuritySolutionEssPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution_ess/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -51,6 +55,8 @@
       "label": "SecuritySolutionEssPluginSetup",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution_ess/server/types.ts",
+      "lineNumber": 14,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -65,6 +71,8 @@
       "label": "SecuritySolutionEssPluginStart",
       "description": [],
       "path": "x-pack/solutions/security/plugins/security_solution_ess/server/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -89,6 +97,8 @@
           "\"securitySolutionEss\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution_ess/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -104,6 +114,8 @@
           "\"securitySolutionEss\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution_ess/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

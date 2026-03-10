@@ -42,6 +42,7 @@ import { CaseMetricsFeature } from '../../../../common/types/api';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
+import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments';
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -113,8 +114,13 @@ const activityTab = CASE_VIEW_PAGE_TABS.ACTIVITY;
 
 const userActionsStats = {
   total: 21,
+  totalDeletions: 0,
   totalComments: 9,
+  totalCommentDeletions: 0,
+  totalCommentCreations: 9,
+  totalHiddenCommentUpdates: 0,
   totalOtherActions: 11,
+  totalOtherActionDeletions: 0,
 };
 
 const caseProps = {
@@ -615,7 +621,8 @@ describe('Case View Page activity tab', () => {
             ],
             latestAttachments:
               commentUpdate.type === 'comment' &&
-              commentUpdate.payload.comment?.type === AttachmentType.user
+              commentUpdate.payload.comment?.type === AttachmentType.user &&
+              isLegacyAttachmentRequest(commentUpdate.payload.comment)
                 ? [
                     {
                       comment: commentUpdate.payload.comment.comment,

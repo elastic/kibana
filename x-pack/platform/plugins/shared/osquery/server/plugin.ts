@@ -35,7 +35,10 @@ import type { OsqueryAppContext } from './lib/osquery_app_context_services';
 import { OsqueryAppContextService } from './lib/osquery_app_context_services';
 import type { ConfigType } from '../common/config';
 import { OSQUERY_INTEGRATION_NAME } from '../common';
-import { getPackagePolicyDeleteCallback } from './lib/fleet_integration';
+import {
+  getPackagePolicyDeleteCallback,
+  getAgentPolicyPostUpdateCallback,
+} from './lib/fleet_integration';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { initializeTransformsIndices } from './create_indices/create_transforms_indices';
@@ -65,6 +68,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup<StartPlugins, OsqueryPluginStart>, plugins: SetupPlugins) {
     this.logger.debug('osquery: Setup');
     const config = createConfig(this.initializerContext);
+    const experimentalFeatures = config.experimentalFeatures;
 
     registerFeatures(plugins.features);
 
@@ -75,6 +79,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       getStartServices: core.getStartServices,
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
+      experimentalFeatures,
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
@@ -82,6 +87,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     initSavedObjects(core.savedObjects);
 
+    // TODO: We do not pass so client here.
     this.createActionService = createActionService(osqueryContext);
 
     core
@@ -101,7 +107,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
-    plugins.cases.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+    plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
       createActionService: this.createActionService,
@@ -115,10 +121,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       ...plugins.fleet,
       ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
       logger: this.logger,
       registerIngestCallback,
+      spacesService: plugins.spaces?.spacesService,
     });
 
     this.telemetryReceiver.start(core, this.osqueryAppContextService);
@@ -169,6 +175,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
                     saved_objects: data.saved_objects.map((pack) => ({
                       ...pack.attributes,
                       saved_object_id: pack.id,
+                      references: pack.references,
                     })),
                   }));
 
@@ -192,6 +199,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
           );
 
           registerIngestCallback('packagePolicyPostDelete', getPackagePolicyDeleteCallback(client));
+          registerIngestCallback('agentPolicyPostUpdate', getAgentPolicyPostUpdateCallback(core));
         }
       })
       .catch(() => {

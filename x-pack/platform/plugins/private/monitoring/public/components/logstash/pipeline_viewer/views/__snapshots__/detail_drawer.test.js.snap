@@ -2,6 +2,7 @@
 
 exports[`DetailDrawer component If vertices shows basic info and no stats for if 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   onClose={[MockFunction]}
   size="s"
 >
@@ -17,7 +18,9 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2>
+          <h2
+            id="generated-id"
+          >
             if
           </h2>
         </EuiTitle>
@@ -53,6 +56,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
 
 exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID shows basic info and stats for plugin, suggesting that user set explicit ID 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   onClose={[MockFunction]}
   size="s"
 >
@@ -68,7 +72,9 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2>
+          <h2
+            id="generated-id"
+          >
             grok filter
           </h2>
         </EuiTitle>
@@ -300,6 +306,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
 
 exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows basic info and stats for plugin, including explicit ID 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   onClose={[MockFunction]}
   size="s"
 >
@@ -315,7 +322,9 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2>
+          <h2
+            id="generated-id"
+          >
             grok filter
           </h2>
         </EuiTitle>
@@ -541,6 +550,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
 
 exports[`DetailDrawer component Queue vertices shows basic info and no stats for queue 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   onClose={[MockFunction]}
   size="s"
 >
@@ -556,7 +566,9 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2>
+          <h2
+            id="generated-id"
+          >
             queue
           </h2>
         </EuiTitle>
@@ -584,6 +596,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
 
 exports[`DetailDrawer component shows vertex title 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id"
   onClose={[MockFunction]}
   size="s"
 >
@@ -599,7 +612,9 @@ exports[`DetailDrawer component shows vertex title 1`] = `
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
-          <h2 />
+          <h2
+            id="generated-id"
+          />
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>

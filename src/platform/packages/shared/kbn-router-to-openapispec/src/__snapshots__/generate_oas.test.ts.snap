@@ -19,6 +19,7 @@ Object {
           "name",
           "other",
         ],
+        "title": "foo",
         "type": "object",
       },
     },
@@ -102,7 +103,39 @@ Object {
 exports[`generateOpenApiDocument @kbn/config-schema generates the expected OpenAPI document 1`] = `
 Object {
   "components": Object {
-    "schemas": Object {},
+    "schemas": Object {
+      "myArray": Object {
+        "items": Object {
+          "additionalProperties": false,
+          "properties": Object {
+            "foo": Object {
+              "type": "string",
+            },
+          },
+          "required": Array [
+            "foo",
+          ],
+          "type": "object",
+        },
+        "title": "myArray",
+        "type": "array",
+      },
+      "myUnion": Object {
+        "anyOf": Array [
+          Object {
+            "description": "Union string",
+            "maxLength": 1,
+            "type": "string",
+          },
+          Object {
+            "description": "Union number",
+            "minimum": 0,
+            "type": "number",
+          },
+        ],
+        "title": "myUnion",
+      },
+    },
     "securitySchemes": Object {
       "apiKeyAuth": Object {
         "in": "header",
@@ -253,6 +286,24 @@ Object {
                 "additionalProperties": false,
                 "properties": Object {
                   "any": Object {},
+                  "array": Object {
+                    "items": Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "foo": Object {
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "foo",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "arrayWithId": Object {
+                    "$ref": "#/components/schemas/myArray",
+                  },
                   "booleanDefault": Object {
                     "default": true,
                     "description": "defaults to to true",
@@ -304,6 +355,9 @@ Object {
                       },
                     ],
                   },
+                  "unionWithId": Object {
+                    "$ref": "#/components/schemas/myUnion",
+                  },
                   "uri": Object {
                     "default": "prototest://something",
                     "format": "uri",
@@ -317,6 +371,9 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "unionWithId",
+                  "array",
+                  "arrayWithId",
                   "any",
                 ],
                 "type": "object",
@@ -397,6 +454,24 @@ Object {
                 "additionalProperties": false,
                 "properties": Object {
                   "any": Object {},
+                  "array": Object {
+                    "items": Object {
+                      "additionalProperties": false,
+                      "properties": Object {
+                        "foo": Object {
+                          "type": "string",
+                        },
+                      },
+                      "required": Array [
+                        "foo",
+                      ],
+                      "type": "object",
+                    },
+                    "type": "array",
+                  },
+                  "arrayWithId": Object {
+                    "$ref": "#/components/schemas/myArray",
+                  },
                   "booleanDefault": Object {
                     "default": true,
                     "description": "defaults to to true",
@@ -448,6 +523,9 @@ Object {
                       },
                     ],
                   },
+                  "unionWithId": Object {
+                    "$ref": "#/components/schemas/myUnion",
+                  },
                   "uri": Object {
                     "default": "prototest://something",
                     "format": "uri",
@@ -461,6 +539,9 @@ Object {
                   "map",
                   "record",
                   "union",
+                  "unionWithId",
+                  "array",
+                  "arrayWithId",
                   "any",
                 ],
                 "type": "object",
@@ -566,6 +647,132 @@ Object {
 }
 `;
 
+exports[`generateOpenApiDocument @kbn/config-schema handles discriminator schemas 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {
+      "my-a-my-team": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "type": Object {
+            "enum": Array [
+              "a",
+            ],
+            "type": "string",
+          },
+          "value": Object {
+            "type": "string",
+          },
+        },
+        "required": Array [
+          "type",
+          "value",
+        ],
+        "title": "my-a-my-team",
+        "type": "object",
+      },
+      "my-b-my-team": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "type": Object {
+            "enum": Array [
+              "b",
+            ],
+            "type": "string",
+          },
+          "value": Object {
+            "type": "number",
+          },
+        },
+        "required": Array [
+          "type",
+          "value",
+        ],
+        "title": "my-b-my-team",
+        "type": "object",
+      },
+      "my-catch-all-my-team": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "type": Object {
+            "type": "string",
+          },
+          "value": Object {
+            "type": "boolean",
+          },
+        },
+        "required": Array [
+          "type",
+          "value",
+        ],
+        "title": "my-catch-all-my-team",
+        "type": "object",
+        "x-oas-discriminator-default-case": true,
+      },
+    },
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/foo/{id}": Object {
+      "get": Object {
+        "operationId": "get-foo-id",
+        "parameters": Array [],
+        "requestBody": Object {
+          "content": Object {
+            "application/json": Object {
+              "schema": Object {
+                "discriminator": Object {
+                  "propertyName": "type",
+                },
+                "oneOf": Array [
+                  Object {
+                    "$ref": "#/components/schemas/my-a-my-team",
+                  },
+                  Object {
+                    "$ref": "#/components/schemas/my-b-my-team",
+                  },
+                ],
+              },
+            },
+          },
+        },
+        "responses": Object {},
+        "summary": "",
+        "tags": Array [],
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": Array [],
+}
+`;
+
 exports[`generateOpenApiDocument @kbn/config-schema handles recursive schemas 1`] = `
 Object {
   "components": Object {
@@ -584,6 +791,7 @@ Object {
           "name",
           "self",
         ],
+        "title": "recursive",
         "type": "object",
       },
     },

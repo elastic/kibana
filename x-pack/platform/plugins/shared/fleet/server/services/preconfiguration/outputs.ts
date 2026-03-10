@@ -25,10 +25,11 @@ import type {
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
+import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT, ECH_AGENTLESS_OUTPUT_ID } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { isAgentlessEnabled } from '../utils/agentless';
 
 import { isDifferent } from './utils';
 
@@ -46,6 +47,23 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             hosts: config?.agents.elasticsearch.hosts,
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
             ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
+            is_preconfigured: true,
+          } as PreconfiguredOutput,
+        ]
+      : []),
+    // Include agentless output in ECH
+    ...(isAgentlessEnabled() && !appContextService.getCloud()?.isServerlessEnabled
+      ? [
+          {
+            id: ECH_AGENTLESS_OUTPUT_ID,
+            name: 'Internal output for agentless',
+            type: 'elasticsearch' as const,
+            hosts: appContextService.getCloud()?.elasticsearchUrl
+              ? [appContextService.getCloud()!.elasticsearchUrl]
+              : config?.agents.elasticsearch.hosts || ['http://localhost:9200'],
+            ca_sha256: config?.agents.elasticsearch.ca_sha256,
+            is_default: false,
+            is_default_monitoring: false,
             is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
@@ -206,7 +224,7 @@ export async function cleanPreconfiguredOutputs(
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingOutputs = await outputService.list(soClient);
+  const existingOutputs = await outputService.list();
   const existingPreconfiguredOutput = existingOutputs.items.filter(
     (o) => o.is_preconfigured === true
   );
@@ -243,7 +261,7 @@ export async function cleanPreconfiguredOutputs(
       );
     } else {
       logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
+      await outputService.delete(output.id, { fromPreconfiguration: true });
     }
   }
 }
@@ -319,6 +337,10 @@ async function isPreconfiguredOutputDifferentFromCurrent(
       isDifferent(existingOutput.timeout, preconfiguredOutput.timeout) ||
       isDifferent(existingOutput.broker_timeout, preconfiguredOutput.broker_timeout) ||
       isDifferent(existingOutput.required_acks, preconfiguredOutput.required_acks) ||
+      isDifferent(
+        existingOutput.write_to_logs_streams,
+        preconfiguredOutput.write_to_logs_streams
+      ) ||
       passwordHashIsDifferent
     );
   };

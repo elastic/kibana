@@ -46,11 +46,19 @@ const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugi
         group: solution,
         visibility: 'private',
       };
+      acc[`x-pack/solutions/${solution}/test`] = {
+        group: solution,
+        visibility: 'private',
+      };
       return acc;
     }, {}),
   }))
   .reduce((acc, current) => ({ ...acc, ...current }), {
     'src/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+    'x-pack/platform/test': {
       group: 'platform',
       visibility: 'shared',
     },

@@ -13,7 +13,8 @@ import { join as joinPath } from 'path';
 import type { DataStream, Integration } from '../../common';
 import { DATASTREAM_NAME_REGEX_PATTERN, NAME_REGEX_PATTERN } from '../../common/constants';
 import { createSync, ensureDirSync, generateUniqueId, removeDirSync } from '../util';
-import { Field, flattenObjectsList } from '../util/samples';
+import type { Field } from '../util/samples';
+import { flattenObjectsList } from '../util/samples';
 import { createAgentInput } from './agent';
 import { FORMAT_VERSION, KIBANA_MINIMUM_VERSION } from './constants';
 import { createDataStream } from './data_stream';
@@ -158,7 +159,6 @@ function mergeAndSortFields(fields: Field[], dataStreamFields: Field[]): Field[]
   return flattenObjectsList(mergedFields);
 }
 
-/* eslint-disable @typescript-eslint/naming-convention */
 /**
  * Creates a package manifest dictionary.
  *
@@ -227,7 +227,6 @@ function createPackageManifestDict(
   }
   return data;
 }
-/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * Render the package manifest for an integration.

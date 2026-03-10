@@ -10,7 +10,8 @@ import type { StoryFn } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { SloEditForm as Component, Props } from './slo_edit_form';
+import type { Props } from './slo_edit_form';
+import { SloEditForm as Component } from './slo_edit_form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export default {

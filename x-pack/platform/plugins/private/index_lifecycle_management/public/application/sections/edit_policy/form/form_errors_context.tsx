@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, FunctionComponent, useState, useCallback } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
-import { Phases as _Phases } from '../../../../../common/types';
+import type { Phases as _Phases } from '../../../../../common/types';
 
 import { useFormContext } from '../../../../shared_imports';
 
-import { FormInternal } from '../types';
+import type { FormInternal } from '../types';
 
 type Phases = keyof _Phases;
 

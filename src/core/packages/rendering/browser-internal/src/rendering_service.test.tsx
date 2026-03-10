@@ -12,10 +12,43 @@ import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
+const mockRoots: Array<{ unmount: jest.Mock }> = [];
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn((container: HTMLElement) => {
+    const { createRoot: actualCreateRoot } = jest.requireActual('react-dom/client');
+    const root = actualCreateRoot(container);
+    const mockRoot = {
+      render: (element: React.ReactNode) => root.render(element),
+      unmount: jest.fn(() => root.unmount()),
+    };
+    mockRoots.push(mockRoot);
+    return mockRoot;
+  }),
+}));
+
+const mockLegacyRender = jest.fn();
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  render: (...args: unknown[]) => {
+    mockLegacyRender(...args);
+    return jest.requireActual('react-dom').render(...args);
+  },
+}));
+
 jest.mock('@kbn/react-kibana-context-render', () => ({
   KibanaRenderContextProvider: jest.fn(({ children }) => (
     <div data-test-subj="kibana-render-context">{children}</div>
   )),
+}));
+jest.mock('@kbn/core-chrome-browser-components', () => ({
+  ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  ClassicHeader: () => <div>Hello chrome!</div>,
+  ProjectHeader: () => <div>Project chrome!</div>,
+  GridLayoutProjectSideNav: () => <div>Side nav!</div>,
+  HeaderTopBanner: () => <div>Banner!</div>,
+  ChromelessHeader: () => <div>Chromeless!</div>,
+  AppMenuBar: () => <div>App menu!</div>,
+  Sidebar: () => <div>Sidebar!</div>,
 }));
 jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
@@ -33,7 +66,9 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { RenderingService } from './rendering_service';
+import { coreContextMock } from '@kbn/core-base-browser-mocks';
 
 describe('RenderingService', () => {
   let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceStart>;
@@ -44,8 +79,10 @@ describe('RenderingService', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
+  let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createStart>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
+  let coreEnv: ReturnType<typeof coreContextMock.create>['env'];
 
   beforeEach(() => {
     analytics = analyticsServiceMock.createAnalyticsServiceStart();
@@ -54,7 +91,6 @@ describe('RenderingService', () => {
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
     chrome = chromeServiceMock.createStartContract();
-    chrome.getHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
@@ -63,25 +99,46 @@ describe('RenderingService', () => {
     userProfile = userProfileServiceMock.createStart();
     theme = themeServiceMock.createStartContract();
     i18n = i18nServiceMock.createStartContract();
+    featureFlags = coreFeatureFlagsMock.createStart();
+    coreEnv = coreContextMock.create().env;
 
     targetDomElement = document.createElement('div');
     rendering = new RenderingService();
   });
 
+  afterEach(() => {
+    act(() => {
+      mockRoots.forEach((root) => root.unmount());
+    });
+    mockRoots.length = 0;
+    mockLegacyRender.mockClear();
+  });
+
   describe('renderCore', () => {
-    const startService = () => {
+    const startService = (overrides?: { isCoreRenderingInReactConcurrentMode?: boolean }) => {
+      const env =
+        overrides?.isCoreRenderingInReactConcurrentMode !== undefined
+          ? {
+              ...coreEnv,
+              isCoreRenderingInReactConcurrentMode: overrides.isCoreRenderingInReactConcurrentMode,
+            }
+          : coreEnv;
       return rendering.start({
         analytics,
         i18n,
         executionContext,
         theme,
         userProfile,
+        coreEnv: env,
+        chrome,
       });
     };
 
-    it('renders application service into provided DOM element', () => {
+    it('renders application service into provided DOM element', async () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
         <div
           class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
@@ -97,11 +154,13 @@ describe('RenderingService', () => {
       `);
     });
 
-    it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', () => {
+    it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', async () => {
       const isVisible$ = new BehaviorSubject(true);
       chrome.getIsVisible$.mockReturnValue(isVisible$);
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
 
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
@@ -118,9 +177,11 @@ describe('RenderingService', () => {
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toBeDefined();
     });
 
-    it('renders the banner UI', () => {
+    it('renders the banner UI', async () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays }, targetDomElement);
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
       expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
                 <div
                   id="globalBannerList"
@@ -136,6 +197,32 @@ describe('RenderingService', () => {
       startService();
       expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
     });
+
+    it('uses createRoot when isCoreRenderingInReactConcurrentMode is true', async () => {
+      const { createRoot } = jest.requireMock('react-dom/client');
+      (createRoot as jest.Mock).mockClear();
+
+      const service = startService({ isCoreRenderingInReactConcurrentMode: true });
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
+
+      expect(createRoot).toHaveBeenCalledWith(targetDomElement);
+      expect(mockLegacyRender).not.toHaveBeenCalled();
+    });
+
+    it('uses legacy ReactDOM.render when isCoreRenderingInReactConcurrentMode is false', async () => {
+      const { createRoot } = jest.requireMock('react-dom/client');
+      (createRoot as jest.Mock).mockClear();
+
+      const service = startService({ isCoreRenderingInReactConcurrentMode: false });
+      await act(async () => {
+        service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      });
+
+      expect(mockLegacyRender).toHaveBeenCalledWith(expect.anything(), targetDomElement);
+      expect(createRoot).not.toHaveBeenCalled();
+    });
   });
 
   describe('addContext', () => {
@@ -148,7 +235,7 @@ describe('RenderingService', () => {
     });
 
     it('renders the React element when dependencies are provided', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile };
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
       rendering.start(deps);
 
       const TestComponent = rendering.addContext(<div>Test Element</div>);
@@ -157,6 +244,92 @@ describe('RenderingService', () => {
 
       expect(screen.getByText('Test Element')).toBeInTheDocument();
       expect(screen.getByTestId('kibana-render-context')).toBeInTheDocument();
+    });
+
+    it('maintains component identity across multiple calls to prevent remounting', () => {
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
+      rendering.start(deps);
+
+      // Create a stateful component to test remounting behavior
+      let renderCount = 0;
+      const StatefulComponent: React.FC = () => {
+        const [value, setValue] = React.useState('initial');
+        renderCount++;
+
+        React.useEffect(() => {
+          setValue('updated');
+        }, []);
+
+        return (
+          <div>
+            <span data-test-subj="render-count">{renderCount}</span>
+            <span data-test-subj="state-value">{value}</span>
+          </div>
+        );
+      };
+
+      const TestComponent1 = rendering.addContext(<StatefulComponent />);
+      const TestComponent2 = rendering.addContext(<StatefulComponent />);
+
+      // Both components should use the same wrapper component reference
+      expect(TestComponent1.type).toBe(TestComponent2.type);
+
+      const { rerender } = render(TestComponent1);
+
+      // Wait for state update
+      expect(screen.getByTestId('state-value')).toHaveTextContent('updated');
+      const initialRenderCount = screen.getByTestId('render-count').textContent;
+
+      // Re-render the component
+      rerender(TestComponent1);
+
+      // Component should not remount, so render count should remain the same
+      // and state should be preserved
+      expect(screen.getByTestId('state-value')).toHaveTextContent('updated');
+      expect(screen.getByTestId('render-count')).toHaveTextContent(initialRenderCount!);
+    });
+
+    it('preserves component state and focus during re-renders', () => {
+      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
+      rendering.start(deps);
+
+      // Create a component with an input to test focus preservation
+      const FocusTestComponent: React.FC = () => {
+        const [inputValue, setInputValue] = React.useState('');
+        const inputRef = React.useRef<HTMLInputElement>(null);
+
+        return (
+          <div>
+            <input
+              ref={inputRef}
+              data-test-subj="test-input"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+            <span data-test-subj="input-value">{inputValue}</span>
+          </div>
+        );
+      };
+
+      const TestComponent = rendering.addContext(<FocusTestComponent />);
+      const { rerender } = render(TestComponent);
+
+      const input = screen.getByTestId('test-input') as HTMLInputElement;
+
+      // Simulate user typing
+      input.focus();
+      input.value = 'test';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+
+      expect(document.activeElement).toBe(input);
+      expect(input.value).toBe('test');
+
+      // Re-render the component (simulating a parent re-render)
+      rerender(TestComponent);
+
+      // Input should still be focused and retain its value
+      expect(document.activeElement).toBe(input);
+      expect(input.value).toBe('test');
     });
   });
 });

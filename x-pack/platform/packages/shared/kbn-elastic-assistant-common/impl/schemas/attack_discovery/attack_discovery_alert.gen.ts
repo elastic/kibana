@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { Replacements } from '../conversations/common_attributes.gen';
 import { NonEmptyTimestamp, User } from '../common_attributes.gen';
@@ -44,6 +44,26 @@ export const AttackDiscoveryAlert = z.object({
    * The (human readable) name of the connector that generated the attack discovery
    */
   connectorName: z.string(),
+  /**
+   * The optional time the attack discovery alert was created
+   */
+  alertStart: z.string().optional(),
+  /**
+   * The optional time the attack discovery alert was last updated
+   */
+  alertUpdatedAt: z.string().optional(),
+  /**
+   * The optional id of the user who last updated the attack discovery alert
+   */
+  alertUpdatedByUserId: z.string().optional(),
+  /**
+   * The optional username of the user who updated the attack discovery alert
+   */
+  alertUpdatedByUserName: z.string().optional(),
+  /**
+   * The optional time the attack discovery alert workflow status was last updated
+   */
+  alertWorkflowStatusUpdatedAt: z.string().optional(),
   /**
    * Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
    */
@@ -96,4 +116,12 @@ export const AttackDiscoveryAlert = z.object({
    * The optional array of users who may view the attack discovery. When empty, (or not present), all users may view the attack discovery.
    */
   users: z.array(User).optional(),
+  /**
+   * The optional array of user-IDs who have been assigned the attack
+   */
+  assignees: z.array(z.string()).optional(),
+  /**
+   * The optional array of tags assigned the attack
+   */
+  tags: z.array(z.string()).optional(),
 });

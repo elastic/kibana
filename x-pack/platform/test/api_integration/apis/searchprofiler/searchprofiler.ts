@@ -6,14 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const API_BASE_PATH = '/api/searchprofiler';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Profile', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240927
+  describe.skip('Profile', () => {
     it('should return profile results for a valid index', async () => {
       const payload = {
         index: '_all',

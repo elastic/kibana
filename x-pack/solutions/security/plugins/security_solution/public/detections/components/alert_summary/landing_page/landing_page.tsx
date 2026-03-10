@@ -16,11 +16,13 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useIsDarkMode,
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IntegrationCard } from './integration_card';
-import imageSrc from './alert_summary.png';
+import imageSrcLight from './alert_summary_light.webp';
+import imageSrcDark from './alert_summary_dark.webp';
 import { useNavigateToIntegrationsPage } from '../../../hooks/alert_summary/use_navigate_to_integrations_page';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.title', {
@@ -31,6 +33,9 @@ const SUB_TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPag
 });
 const DATA_TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.dataTitle', {
   defaultMessage: 'Start by connecting your data',
+});
+const IMAGE_TITLE = i18n.translate('xpack.securitySolution.alertSummary.landingPage.imageTitle', {
+  defaultMessage: 'Alert Summary Dashboard showing alerts from various integrations',
 });
 const VIEW_ALL_INTEGRATIONS = i18n.translate(
   'xpack.securitySolution.alertSummary.landingPage.viewAllIntegrationsButtonLabel',
@@ -49,18 +54,19 @@ export const LANDING_PAGE_VIEW_ALL_INTEGRATIONS_BUTTON_TEST_ID =
 
 export interface LandingPageProps {
   /**
-   * List of available AI for SOC integrations
+   * List of available EASE integrations
    */
   packages: PackageListItem[];
 }
 
 /**
- * Displays a gif of the alerts summary page, with empty prompt showing the top 2 available AI for SOC packages.
- * This page is rendered when no AI for SOC packages are installed.
+ * Displays a gif of the alerts summary page, with empty prompt showing the top 2 available EASE packages.
+ * This page is rendered when no EASE packages are installed.
  */
 export const LandingPage = memo(({ packages }: LandingPageProps) => {
   const { euiTheme } = useEuiTheme();
   const navigateToIntegrationsPage = useNavigateToIntegrationsPage();
+  const imageSrc = useIsDarkMode() ? imageSrcDark : imageSrcLight;
 
   // We only want to show the 2 top integrations, Splunk and GoogleSecOps, in that specific order
   const primaryPackages = useMemo(
@@ -102,12 +108,15 @@ export const LandingPage = memo(({ packages }: LandingPageProps) => {
             <EuiText>{SUB_TITLE}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiImage // TODO replace the image with a proper gif or video once provided by UIUX
+            <EuiImage
               data-test-subj={LANDING_PAGE_IMAGE_TEST_ID}
-              size="original"
               role="presentation"
-              alt=""
+              alt={IMAGE_TITLE}
               src={imageSrc}
+              margin={'xl'}
+              css={css`
+                width: 800px;
+              `}
             />
           </EuiFlexItem>
           <EuiFlexItem>

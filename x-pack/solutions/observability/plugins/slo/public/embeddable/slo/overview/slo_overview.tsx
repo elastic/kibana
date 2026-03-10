@@ -8,9 +8,9 @@
 import { EuiLoadingChart } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useEffect, useState } from 'react';
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
@@ -20,9 +20,10 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 
-import { SingleSloCustomInput } from './types';
-
-interface Props extends SingleSloCustomInput {
+interface Props {
+  sloId: string | undefined;
+  sloInstanceId: string | undefined;
+  remoteName?: string;
   reloadSubject?: Subject<boolean>;
 }
 
@@ -67,26 +68,24 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
     refetch();
   }, [lastRefreshTime, refetch]);
 
-  const isSloNotFound = !isLoading && slo === undefined;
+  if (!isLoading && !isRefetching && slo === undefined) {
+    return (
+      <LoadingContainer>
+        <LoadingContent>
+          {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
+            defaultMessage:
+              'Unable to find SLO. You can safely delete the widget from the dashboard.',
+          })}
+        </LoadingContent>
+      </LoadingContainer>
+    );
+  }
 
   if (isRefetching || isLoading || !slo) {
     return (
       <LoadingContainer>
         <LoadingContent>
           <EuiLoadingChart />
-        </LoadingContent>
-      </LoadingContainer>
-    );
-  }
-
-  if (isSloNotFound) {
-    return (
-      <LoadingContainer>
-        <LoadingContent>
-          {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
-            defaultMessage:
-              'The SLO has been deleted. You can safely delete the widget from the dashboard.',
-          })}
         </LoadingContent>
       </LoadingContainer>
     );

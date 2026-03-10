@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Plugin, CoreSetup } from '@kbn/core/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { DEFAULT_COLOR } from '../common/constants';
-import { RotatingNumberState as Post81RotatingNumberState } from '../common/types';
+import type { RotatingNumberState as Post81RotatingNumberState } from '../common/types';
 
 // Old versions of this visualization had a slightly different shape of state
 interface Pre81RotatingNumberState {

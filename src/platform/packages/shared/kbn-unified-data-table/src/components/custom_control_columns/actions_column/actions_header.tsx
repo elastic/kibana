@@ -7,61 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useLayoutEffect, useRef, useState } from 'react';
-import { EuiIconTip, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import {
+  type EuiResizeObserverProps,
+  EuiIconTip,
+  EuiResizeObserver,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import ColumnHeaderTruncateContainer from '../../column_header_truncate_container';
 
 export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
-  const textRef = useRef<HTMLSpanElement>(null);
   const [showText, setShowText] = useState(false);
-  const { euiTheme } = useEuiTheme();
 
-  useLayoutEffect(() => {
-    if (!textRef.current) return;
-    const textWidth = textRef.current.getBoundingClientRect().width;
-    setShowText(textWidth < maxWidth);
-  }, [textRef, maxWidth, setShowText]);
+  const measure: EuiResizeObserverProps['onResize'] = useCallback(
+    (dimensions) => {
+      if (!dimensions) return;
+
+      setShowText(dimensions.width < maxWidth);
+    },
+    [maxWidth]
+  );
 
   const actionsText = i18n.translate('unifiedDataTable.controlColumnsActionHeader', {
     defaultMessage: 'Actions',
   });
 
   return (
-    <div css={{ padding: euiTheme.size.xs }}>
-      <ColumnHeaderTruncateContainer>
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('unifiedDataTable.actionsColumnHeader', {
-              defaultMessage: 'Actions column',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-        {showText ? (
-          <span data-test-subj="unifiedDataTable_actionsColumnHeaderText">{actionsText}</span>
-        ) : (
-          <EuiIconTip
-            iconProps={{
-              'data-test-subj': 'unifiedDataTable_actionsColumnHeaderIcon',
-            }}
-            type="iInCircle"
-            content={actionsText}
-          />
-        )}
-        {/* Hidden measurement span */}
-        <span
-          ref={textRef}
-          css={css`
-            position: absolute;
-            visibility: hidden;
-            white-space: nowrap;
-            pointer-events: none;
-          `}
-        >
-          {actionsText}
+    <ColumnHeaderTruncateContainer>
+      <EuiScreenReaderOnly>
+        <span>
+          {i18n.translate('unifiedDataTable.actionsColumnHeader', {
+            defaultMessage: 'Actions column',
+          })}
         </span>
-      </ColumnHeaderTruncateContainer>
-    </div>
+      </EuiScreenReaderOnly>
+      {showText ? (
+        <span data-test-subj="unifiedDataTable_actionsColumnHeaderText">{actionsText}</span>
+      ) : (
+        <EuiIconTip
+          iconProps={{ 'data-test-subj': 'unifiedDataTable_actionsColumnHeaderIcon' }}
+          type="info"
+          content={actionsText}
+        />
+      )}
+      <EuiResizeObserver onResize={measure}>
+        {(resizeRef) => (
+          <span
+            ref={resizeRef}
+            css={css`
+              position: absolute;
+              visibility: hidden;
+              white-space: nowrap;
+              pointer-events: none;
+            `}
+          >
+            {actionsText}
+          </span>
+        )}
+      </EuiResizeObserver>
+    </ColumnHeaderTruncateContainer>
   );
 };

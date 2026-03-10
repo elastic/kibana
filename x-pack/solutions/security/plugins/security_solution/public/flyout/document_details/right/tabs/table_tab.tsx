@@ -115,11 +115,11 @@ export const TableTab = memo(() => {
     browserFields,
     dataFormattedForFieldBrowser,
     scopeId,
-    isPreview,
+    isRulePreview,
     eventId,
     investigationFields,
   } = useDocumentDetailsContext();
-  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { ruleId, isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const highlightedFieldsResult = useHighlightedFields({
     dataFormattedForFieldBrowser,
@@ -151,9 +151,10 @@ export const TableTab = memo(() => {
         setTableTabState={setTableTabState}
         isPopoverOpen={isPopoverOpen}
         setIsPopoverOpen={setIsPopoverOpen}
+        isAlert={isAlert}
       />,
     ],
-    [tableTabState, setTableTabState, isPopoverOpen, setIsPopoverOpen]
+    [tableTabState, setTableTabState, isPopoverOpen, setIsPopoverOpen, isAlert]
   );
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
@@ -256,16 +257,15 @@ export const TableTab = memo(() => {
         scopeId,
         getLinkValue,
         ruleId,
-        isPreview,
+        isRulePreview,
         onTogglePinned,
       }),
-    [browserFields, eventId, scopeId, getLinkValue, ruleId, isPreview, onTogglePinned]
+    [browserFields, eventId, scopeId, getLinkValue, ruleId, isRulePreview, onTogglePinned]
   );
 
   const search = useMemo(() => {
     return { ...SEARCH_CONFIG, toolsRight: renderToolsRight() };
   }, [renderToolsRight]);
-
   return (
     <>
       <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />
@@ -279,6 +279,9 @@ export const TableTab = memo(() => {
         search={search}
         sorting={false}
         data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        tableCaption={i18n.translate('xpack.securitySolution.flyout.table.documentFieldsCaption', {
+          defaultMessage: 'Document fields',
+        })}
         css={css`
           .euiTableRow {
             font-size: ${smallFontSize};

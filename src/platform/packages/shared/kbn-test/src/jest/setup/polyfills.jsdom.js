@@ -10,6 +10,7 @@
 const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
+// Required until JSDOM supports fetch: https://github.com/jsdom/jsdom/issues/1724
 require('whatwg-fetch');
 
 if (!Object.hasOwn(global.URL, 'createObjectURL')) {
@@ -31,7 +32,18 @@ if (!Object.hasOwn(global, 'TextEncoder')) {
 global.Blob = require('blob-polyfill').Blob;
 
 if (!Object.hasOwn(global, 'ResizeObserver')) {
-  global.ResizeObserver = require('resize-observer-polyfill');
+  global.ResizeObserver = class ResizeObserver {
+    constructor(callback) {
+      this.callback = callback;
+    }
+    observe(element) {
+      element.addEventListener('resize', this.callback);
+    }
+    unobserve(element) {
+      element.removeEventListener('resize', this.callback);
+    }
+    disconnect() {}
+  };
 }
 
 if (!Object.hasOwn(global, 'Worker')) {
@@ -71,3 +83,6 @@ if (!Object.hasOwn(global, 'Worker')) {
 if (!Object.hasOwn(global, 'MessagePort')) {
   global.MessagePort = {};
 }
+
+// Required from ts decorators support in tests
+import 'reflect-metadata/lite';

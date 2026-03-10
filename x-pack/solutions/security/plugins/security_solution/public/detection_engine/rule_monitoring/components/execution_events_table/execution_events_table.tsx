@@ -20,7 +20,7 @@ import type { RuleExecutionEvent } from '../../../../../common/api/detection_eng
 import { HeaderSection } from '../../../../common/components/header_section';
 import { EventTypeFilter } from '../basic/filters/event_type_filter';
 import { LogLevelFilter } from '../basic/filters/log_level_filter';
-import { ExecutionEventsTableRowDetails } from './execution_events_table_row_details';
+import { ExecutionEventsTableDetailsCell } from './execution_events_table_row_details';
 
 import { useFilters } from './use_filters';
 import { useSorting } from '../basic/tables/use_sorting';
@@ -34,6 +34,10 @@ import * as i18n from './translations';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100, 200];
 
+const tableRowProps = {
+  'data-test-subj': 'executionEventsTableRow',
+};
+
 interface ExecutionEventsTableProps {
   ruleId: string;
 }
@@ -44,7 +48,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
   }, []);
 
   const renderExpandedItem = useCallback((item: RuleExecutionEvent) => {
-    return <ExecutionEventsTableRowDetails item={item} />;
+    return <ExecutionEventsTableDetailsCell item={item} />;
   }, []);
 
   const rows = useExpandableRows<RuleExecutionEvent>({
@@ -96,7 +100,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
           <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EventMessageFilter value={filters.state.searchTerm} onChange={filters.setSearchTerm} />
+          <EventMessageFilter onSearch={filters.setSearchTerm} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <LogLevelFilter selectedItems={filters.state.logLevels} onChange={filters.setLogLevels} />
@@ -113,12 +117,14 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
             end={filters.state.dateRange.end}
             onTimeChange={filters.setDateRange}
             showUpdateButton={false}
+            data-test-subj="executionEventsTable-datePicker"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       {/* Table with items */}
       <EuiBasicTable
+        data-test-subj="executionEventsTable"
         columns={columns}
         items={items}
         itemId={getItemId}
@@ -127,6 +133,8 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
         sorting={sorting.state}
         pagination={pagination.state}
         onChange={handleTableChange}
+        tableCaption={i18n.TABLE_SUBTITLE}
+        rowProps={tableRowProps}
       />
     </EuiPanel>
   );

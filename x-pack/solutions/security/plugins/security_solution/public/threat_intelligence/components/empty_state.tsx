@@ -25,7 +25,7 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
     <EuiPanel color="subdued" data-test-subj={PANEL_TEST_ID}>
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={true} style={panelStyle}>
+          <EuiPanel hasBorder={true} css={panelStyle}>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiText size="s">

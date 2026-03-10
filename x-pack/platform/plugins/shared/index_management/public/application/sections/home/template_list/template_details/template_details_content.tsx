@@ -33,8 +33,10 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
-import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { SectionLoading } from '../../../../../shared_imports';
+import type { Error } from '../../../../components';
+import { TemplateDeleteModal, SectionError } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
@@ -53,30 +55,35 @@ const TABS = [
     name: i18n.translate('xpack.idxMgmt.templateDetails.summaryTabTitle', {
       defaultMessage: 'Summary',
     }),
+    dataTestSubj: 'summaryTabBtn',
   },
   {
     id: SETTINGS_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.settingsTabTitle', {
       defaultMessage: 'Settings',
     }),
+    dataTestSubj: 'settingsTabBtn',
   },
   {
     id: MAPPINGS_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.mappingsTabTitle', {
       defaultMessage: 'Mappings',
     }),
+    dataTestSubj: 'mappingsTabBtn',
   },
   {
     id: ALIASES_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.aliasesTabTitle', {
       defaultMessage: 'Aliases',
     }),
+    dataTestSubj: 'aliasesTabBtn',
   },
   {
     id: PREVIEW_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
       defaultMessage: 'Preview',
     }),
+    dataTestSubj: 'previewTabBtn',
   },
 ];
 
@@ -152,12 +159,9 @@ export const TemplateDetailsContent = ({
     if (error) {
       return (
         <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage"
-              defaultMessage="Error loading template"
-            />
-          }
+          title={i18n.translate('xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage', {
+            defaultMessage: 'Error loading template',
+          })}
           error={error as Error}
           data-test-subj="sectionError"
         />
@@ -180,6 +184,7 @@ export const TemplateDetailsContent = ({
       const managedTemplateCallout = isCloudManaged && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoTitle"
@@ -217,7 +222,7 @@ export const TemplateDetailsContent = ({
                 }}
                 isSelected={tab.id === activeTab}
                 key={tab.id}
-                data-test-subj="tab"
+                data-test-subj={tab.dataTestSubj}
               >
                 {tab.name}
               </EuiTab>

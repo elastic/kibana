@@ -14,24 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
-import { AlertIds, AlertTags } from '../../../model/alert.gen';
-
-/**
- * Object with list of tags to add and remove.
- */
-export type SetAlertTags = z.infer<typeof SetAlertTags>;
-export const SetAlertTags = z.object({
-  tags_to_add: AlertTags,
-  tags_to_remove: AlertTags,
-});
+import { SetAlertTagsBody } from '../../model/set_alert_tags_body.gen';
 
 export type SetAlertTagsRequestBody = z.infer<typeof SetAlertTagsRequestBody>;
-export const SetAlertTagsRequestBody = z.object({
-  ids: AlertIds,
-  tags: SetAlertTags,
-});
+export const SetAlertTagsRequestBody = SetAlertTagsBody;
 export type SetAlertTagsRequestBodyInput = z.input<typeof SetAlertTagsRequestBody>;
 
 /**

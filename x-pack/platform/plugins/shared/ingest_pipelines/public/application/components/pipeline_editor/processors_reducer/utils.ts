@@ -6,8 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { State } from './processors_reducer';
-import { ProcessorInternal, ProcessorSelector } from '../types';
+import type { State } from './processors_reducer';
+import type { ProcessorInternal, ProcessorSelector } from '../types';
 import { DropSpecialLocations } from '../constants';
 import { checkIfSamePath, getValue } from '../utils';
 

@@ -13,7 +13,7 @@ import {
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const LATEST_FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
+const LATEST_FINDINGS_INDEX = 'security_solution-cloud_security_posture.misconfiguration_latest';
 
 export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -74,6 +74,15 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     getKubernetesTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
       return await tabs.findByXpath(`//span[text()="${TAB_TYPES.KUBERNETES}"]`);
+    },
+
+    finishTourIfExists: async () => {
+      await retry.tryForTime(10000, async () => {
+        const tourShown = await testSubjects.exists('finishTourButton');
+        if (tourShown) {
+          await testSubjects.click('finishTourButton');
+        }
+      });
     },
 
     clickTab: async (tab: (typeof TAB_TYPES)[keyof typeof TAB_TYPES]) => {

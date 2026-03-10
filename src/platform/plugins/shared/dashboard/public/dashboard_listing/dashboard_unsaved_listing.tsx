@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCallOut,
@@ -15,18 +16,55 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiTitle,
+  euiBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import type { DashboardAttributes } from '../../server/content_management';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { DashboardState } from '../../server';
 import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { dashboardUnsavedListingStrings, getNewDashboardTitle } from './_dashboard_listing_strings';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
+import { findService } from '../dashboard_client';
+
+const unsavedItemStyles = {
+  item: (euiThemeContext: UseEuiTheme) =>
+    css({
+      marginTop: euiThemeContext.euiTheme.size.m,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        marginTop: euiThemeContext.euiTheme.size.base,
+      },
+    }),
+  heading: (euiThemeContext: UseEuiTheme) =>
+    css({
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        marginBottom: euiThemeContext.euiTheme.size.xs,
+      },
+    }),
+  icon: (euiThemeContext: UseEuiTheme) =>
+    css({
+      marginRight: euiThemeContext.euiTheme.size.m,
+    }),
+  title: css({
+    marginBottom: 0,
+  }),
+  titleLoading: (euiThemeContext: UseEuiTheme) =>
+    css({
+      color: `${euiThemeContext.euiTheme.colors.subduedText} !important`,
+    }),
+  actions: (euiThemeContext: UseEuiTheme) =>
+    css({
+      marginLeft: `calc(${euiThemeContext.euiTheme.size.l} + ${euiThemeContext.euiTheme.size.xs})`,
+      [euiBreakpoint(euiThemeContext, ['xs', 's'])]: {
+        flexDirection: 'column',
+      },
+    }),
+};
 
 const DashboardUnsavedItem = ({
   id,
@@ -39,28 +77,16 @@ const DashboardUnsavedItem = ({
   onOpenClick: () => void;
   onDiscardClick: () => void;
 }) => {
+  const styles = useMemoCss(unsavedItemStyles);
   return (
-    <div className="dshUnsavedListingItem">
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="none"
-        className="dshUnsavedListingItem__heading"
-        responsive={false}
-      >
+    <div css={styles.item} key={id}>
+      <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            color="text"
-            className="dshUnsavedListingItem__icon"
-            type={title ? 'dashboardApp' : 'clock'}
-          />
+          <EuiIcon color="text" css={styles.icon} type={title ? 'dashboardApp' : 'clock'} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h4
-              className={`dshUnsavedListingItem__title ${
-                title ? '' : 'dshUnsavedListingItem__loading'
-              }`}
-            >
+            <h4 css={[styles.title, !title && styles.titleLoading]}>
               {title || dashboardUnsavedListingStrings.getLoadingTitle()}
             </h4>
           </EuiTitle>
@@ -69,7 +95,7 @@ const DashboardUnsavedItem = ({
       <EuiFlexGroup
         alignItems="flexStart"
         gutterSize="none"
-        className="dshUnsavedListingItem__actions"
+        css={styles.actions}
         responsive={false}
       >
         <EuiFlexItem grow={false}>
@@ -104,7 +130,7 @@ const DashboardUnsavedItem = ({
 };
 
 interface UnsavedItemMap {
-  [key: string]: DashboardAttributes;
+  [key: string]: DashboardState;
 }
 
 export interface DashboardUnsavedListingProps {
@@ -146,34 +172,32 @@ export const DashboardUnsavedListing = ({
     const existingDashboardsWithUnsavedChanges = unsavedDashboardIds.filter(
       (id) => id !== DASHBOARD_PANELS_UNSAVED_ID
     );
-    getDashboardContentManagementService()
-      .findDashboards.findByIds(existingDashboardsWithUnsavedChanges)
-      .then((results) => {
-        const dashboardMap = {};
-        if (canceled) {
-          return;
-        }
-        let hasError = false;
-        const newItems = results.reduce((map, result) => {
-          if (result.status === 'error') {
-            hasError = true;
-            if (result.error.statusCode === 404) {
-              // Save object not found error
-              dashboardBackupService.clearState(result.id);
-            }
-            return map;
+    findService.findByIds(existingDashboardsWithUnsavedChanges).then((results) => {
+      const dashboardMap = {};
+      if (canceled) {
+        return;
+      }
+      let hasError = false;
+      const newItems = results.reduce((map, result) => {
+        if (result.status === 'error') {
+          hasError = true;
+          if (result.error && result.notFound) {
+            // Save object not found error
+            dashboardBackupService.clearState(result.id);
           }
-          return {
-            ...map,
-            [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
-          };
-        }, dashboardMap);
-        if (hasError) {
-          refreshUnsavedDashboards();
-          return;
+          return map;
         }
-        setItems(newItems);
-      });
+        return {
+          ...map,
+          [result.id || DASHBOARD_PANELS_UNSAVED_ID]: result.attributes,
+        };
+      }, dashboardMap);
+      if (hasError) {
+        refreshUnsavedDashboards();
+        return;
+      }
+      setItems(newItems);
+    });
 
     return () => {
       canceled = true;
@@ -183,6 +207,7 @@ export const DashboardUnsavedListing = ({
   return unsavedDashboardIds.length === 0 ? null : (
     <>
       <EuiCallOut
+        announceOnMount
         heading="h3"
         data-test-subj="unsavedDashboardsCallout"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(

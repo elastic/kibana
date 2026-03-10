@@ -135,7 +135,6 @@ export class SavedObjectsSyncService {
   ): Promise<TaskInstance | null> {
     this.core = core;
     try {
-      await taskManager.removeIfExists(SAVED_OBJECTS_SYNC_TASK_ID);
       const state: LatestTaskStateSchema = {
         runs: 0,
         totalSavedObjectsSynced: 0,

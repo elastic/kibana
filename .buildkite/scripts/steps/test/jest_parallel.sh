@@ -7,34 +7,24 @@ export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0
-results=()
 configs=""
-failedConfigs=""
 
+# Parallel execution tuning (can be overridden via env)
+#   JEST_MAX_PARALLEL: number of concurrent Jest config processes
+#   JEST_MAX_OLD_SPACE_MB: per-process max old space size (MB)
+# NOTE: defaults depend on TEST_TYPE — unit tests run 3 parallel processes
+# with a lower heap limit, while integration tests run 1 process with more memory.
 if [[ "$1" == 'jest.config.js' ]]; then
-  # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
-  # https://github.com/elastic/kibana/issues/141477
-  # parallelism="-w2"
-  parallelism="--runInBand"
   TEST_TYPE="unit"
+  JEST_MAX_PARALLEL=3
+  JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-4096}"
 else
-  # run integration tests in-band
-  parallelism="--runInBand"
   TEST_TYPE="integration"
+  JEST_MAX_PARALLEL=1
+  JEST_MAX_OLD_SPACE_MB="${JEST_MAX_OLD_SPACE_MB:-6144}"
 fi
 
 export TEST_TYPE
-
-# Added section for tracking and retrying failed configs
-FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${TEST_TYPE}${JOB}"
-
-if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
-  configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
-  if [[ "$configs" ]]; then
-    echo "--- Retrying only failed configs"
-    echo "$configs"
-  fi
-fi
 
 if [ "$configs" == "" ]; then
   echo "--- downloading jest test run order"
@@ -50,68 +40,41 @@ fi
 echo "+++ ⚠️ WARNING ⚠️"
 echo "
   console.log(), console.warn(), and console.error() output in jest tests causes a massive amount
-  of noise on CI without any percevable benefit, so they have been disabled. If you want to log
+  of noise on CI without any perceivable benefit, so they have been disabled. If you want to log
   output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 
-while read -r config; do
-  echo "--- $ node scripts/jest --config $config"
+# Execute all configs through the combined jest_all runner.
+# The new runner will handle iterating through configs and reporting.
 
-  # --trace-warnings to debug
-  # Node.js process-warning detected:
-  # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings"
+# Flatten configs (newline separated) into comma-separated list for flag usage.
+CONFIGS_CSV=$(echo "$configs" | tr '\n' ',' | sed 's/,$//')
 
-  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
-    cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
-  fi
+echo "--- Running combined jest_all for configs ($TEST_TYPE)"
+echo "$configs"
+echo "JEST_MAX_PARALLEL is set to: $JEST_MAX_PARALLEL"
 
-  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
-
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
-
-  start=$(date +%s)
-
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  eval "$cmd"
-  lastCode=$?
-  set -e;
-
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
-
-  results+=("- $config
-    duration: ${duration}
-    result: ${lastCode}")
-
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
-done <<< "$configs"
-
-if [[ "$failedConfigs" ]]; then
-  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
+node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
+if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-3" ]] ; then
+  node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
 fi
 
-echo "--- Jest configs complete"
-printf "%s\n" "${results[@]}"
+full_command="NODE_OPTIONS=\"$node_opts\" node ./scripts/jest_all --configs=\"$CONFIGS_CSV\" --coverage=false --passWithNoTests --maxParallel=\"$JEST_MAX_PARALLEL\""
+
+echo "Actual full command is:"
+echo "$full_command"
 echo ""
+
+set +e
+eval "$full_command"
+code=$?
+set -e
+
+if [ $code -ne 0 ]; then
+  exitCode=10
+fi
+
+# Scout reporter
+source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 exit $exitCode

@@ -7,23 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = () => ({
+module.exports = (api) => ({
+  // Enables import-attributes syntax on imports
+  generatorOpts: {
+    importAttributesKeyword: 'with',
+  },
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
+        require.resolve('@kbn/lazy-object/src/plugin/lazy_babel_plugin'),
         require.resolve('babel-plugin-add-module-exports'),
-
-        /**
-         * The static class features proposal https://github.com/tc39/proposal-static-class-features
-         * has been merged with the class fields proposal and is now stage 4.
-         * We include this here because Monaco needs this and
-         * this transform has to run before the transform class properties transform.
-         */
-        require.resolve('@babel/plugin-transform-class-static-block'),
-
         // The class properties proposal was merged with the private fields proposal
         // into the "class fields" proposal. Babel doesn't support this combined
         // proposal yet, which includes private field, so this transform is
@@ -58,7 +54,8 @@ module.exports = () => ({
       ],
     },
 
-    require.resolve('@babel/preset-react'),
+    // 'development: true' adds '_debugSource' and '_debugOwner' properties to React Fiber nodes, which is required for @kbn/inspect-component-plugin to work
+    [require.resolve('@babel/preset-react'), { development: api.env('development') }],
 
     [
       require.resolve('@babel/preset-typescript'),

@@ -255,9 +255,10 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
-      'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Request validation failed (✖ Invalid input: expected string, received undefined
+        → at id)"
+    `);
   });
 
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {

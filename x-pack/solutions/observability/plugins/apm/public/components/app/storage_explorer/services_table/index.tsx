@@ -202,7 +202,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
             {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
               defaultMessage: 'Sampling rate',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -300,7 +300,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
 
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.apm.storageExplorer.table.caption', {
-          defaultMessage: 'Storage Explorer',
+          defaultMessage: 'Storage explorer',
         })}
         items={items ?? []}
         columns={columns}
@@ -313,7 +313,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         }}
         itemId="serviceName"
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        data-test-subj="storageExplorerServicesTable"
+        data-test-subj={`storageExplorerServicesTable-${loading ? 'loading' : 'loaded'}`}
         error={
           status === FETCH_STATUS.FAILURE
             ? i18n.translate('xpack.apm.storageExplorer.table.errorMessage', {
@@ -321,7 +321,7 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
               })
             : ''
         }
-        message={
+        noItemsMessage={
           loading
             ? i18n.translate('xpack.apm.storageExplorer.table.loading', {
                 defaultMessage: 'Loading...',

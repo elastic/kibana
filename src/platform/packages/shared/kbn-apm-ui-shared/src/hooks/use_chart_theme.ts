@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PartialTheme, Theme } from '@elastic/charts';
+import type { PartialTheme, Theme } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useMemo } from 'react';
 

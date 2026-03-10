@@ -1,13 +1,13 @@
 - name: find docker image
   find:
     paths: /packages/
-    patterns: kibana-[0-9]*-docker-image.tar.gz
+    patterns: kibana-[0-9]*-docker-image-amd64.tar.gz
   register: kibana_docker
 
 - name: load image
   become: yes
   docker_image:
-    name: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
+    name: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image-amd64.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
     load_path: '{{ kibana_docker.files[0].path }}'
     timeout: 300
     source: load
@@ -17,7 +17,7 @@
   become: yes
   docker_container:
     name: kibana
-    image: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
+    image: "{{ kibana_docker.files[0].path | basename| regex_replace('kibana-(.*)-docker-image-amd64.tar.gz', 'docker.elastic.co/kibana/kibana:\\1') }}"
     network_mode: host
     env:
       SERVER_HOST: 0.0.0.0

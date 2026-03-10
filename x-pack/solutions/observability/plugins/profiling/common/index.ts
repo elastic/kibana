@@ -16,19 +16,21 @@ export const INDEX_FRAMES = 'profiling-stackframes';
 export const INDEX_EXECUTABLES = 'profiling-executables';
 
 const BASE_ROUTE_PATH = '/internal/profiling';
+const PUBLIC_BASE_ROUTE_PATH = '/api/profiling';
 
 export function getRoutePaths() {
   return {
     TopN: `${BASE_ROUTE_PATH}/topn`,
     TopNContainers: `${BASE_ROUTE_PATH}/topn/containers`,
     TopNDeployments: `${BASE_ROUTE_PATH}/topn/deployments`,
+    TopNExecutables: `${BASE_ROUTE_PATH}/topn/executables`,
     TopNFunctions: `${BASE_ROUTE_PATH}/topn/functions`,
     TopNHosts: `${BASE_ROUTE_PATH}/topn/hosts`,
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     APMTransactions: `${BASE_ROUTE_PATH}/topn/functions/apm/transactions`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
-    HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
+    HasSetupESResources: `${PUBLIC_BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
     StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
     StorageExplorerHostStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/host_storage_details`,

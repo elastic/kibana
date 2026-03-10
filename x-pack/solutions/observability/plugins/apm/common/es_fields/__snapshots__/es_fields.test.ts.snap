@@ -15,6 +15,12 @@ exports[`Error AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Error CHILD_ID 1`] = `undefined`;
 
 exports[`Error CLIENT_GEO_CITY_NAME 1`] = `undefined`;
@@ -67,7 +73,11 @@ exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Error DURATION 1`] = `undefined`;
+
 exports[`Error ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
+exports[`Error ERROR_CODE 1`] = `undefined`;
 
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
@@ -98,6 +108,8 @@ exports[`Error ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Error ERROR_MESSAGE 1`] = `undefined`;
+
 exports[`Error ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Error ERROR_STACK_TRACE 1`] = `undefined`;
@@ -109,6 +121,10 @@ exports[`Error EVENT_NAME 1`] = `undefined`;
 exports[`Error EVENT_OUTCOME 1`] = `undefined`;
 
 exports[`Error EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
+exports[`Error EXCEPTION_MESSAGE 1`] = `undefined`;
+
+exports[`Error EXCEPTION_TYPE 1`] = `undefined`;
 
 exports[`Error FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -144,7 +160,11 @@ exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
+exports[`Error ID 1`] = `undefined`;
+
 exports[`Error INDEX 1`] = `undefined`;
+
+exports[`Error KIND 1`] = `undefined`;
 
 exports[`Error KUBERNETES 1`] = `undefined`;
 
@@ -164,6 +184,8 @@ exports[`Error KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Error KUBERNETES_POD_NAME 1`] = `undefined`;
 
+exports[`Error KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
+
 exports[`Error KUBERNETES_POD_UID 1`] = `undefined`;
 
 exports[`Error KUBERNETES_REPLICASET 1`] = `undefined`;
@@ -176,9 +198,15 @@ exports[`Error LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
+exports[`Error LABEL_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
+
+exports[`Error LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Error LOG_LEVEL 1`] = `undefined`;
 
@@ -204,7 +232,17 @@ exports[`Error METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
 
+exports[`Error METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
+
 exports[`Error METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_GC_DURATION_SECONDS 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Error METRIC_OTEL_JVM_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
@@ -216,7 +254,11 @@ exports[`Error METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE 1`] = `undefined`;
 
 exports[`Error METRIC_OTEL_JVM_PROCESS_THREADS_COUNT 1`] = `undefined`;
 
+exports[`Error METRIC_OTEL_JVM_SYSTEM_CPU 1`] = `undefined`;
+
 exports[`Error METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Error METRIC_OTEL_JVM_THREAD_COUNT 1`] = `undefined`;
 
 exports[`Error METRIC_OTEL_SYSTEM_CPU_UTILIZATION 1`] = `undefined`;
 
@@ -244,6 +286,8 @@ exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Error OTEL_EVENT_NAME 1`] = `"otel event name"`;
+
 exports[`Error OTEL_SPAN_LINKS 1`] = `undefined`;
 
 exports[`Error OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
@@ -259,6 +303,8 @@ exports[`Error PROCESS_PID 1`] = `undefined`;
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
 exports[`Error PROCESSOR_NAME 1`] = `"error"`;
+
+exports[`Error RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Error SERVER_ADDRESS 1`] = `undefined`;
 
@@ -336,6 +382,8 @@ exports[`Error SPAN_SYNC 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
+exports[`Error STATUS_CODE 1`] = `undefined`;
+
 exports[`Error TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Error TELEMETRY_SDK_NAME 1`] = `undefined`;
@@ -392,9 +440,9 @@ exports[`Error USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
-exports[`Error VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
+exports[`Error VALUE_OTEL_JVM_MEMORY_TYPE_HEAP 1`] = `undefined`;
 
-exports[`Error VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP 1`] = `undefined`;
+exports[`Error VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP 1`] = `undefined`;
 
 exports[`Span AGENT 1`] = `
 Object {
@@ -410,6 +458,12 @@ exports[`Span AGENT_NAME 1`] = `"java"`;
 exports[`Span AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Span CHILD_ID 1`] = `undefined`;
 
@@ -463,7 +517,11 @@ exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Span DURATION 1`] = `undefined`;
+
 exports[`Span ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
+exports[`Span ERROR_CODE 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
@@ -485,6 +543,8 @@ exports[`Span ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Span ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Span ERROR_MESSAGE 1`] = `undefined`;
+
 exports[`Span ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Span ERROR_STACK_TRACE 1`] = `undefined`;
@@ -496,6 +556,10 @@ exports[`Span EVENT_NAME 1`] = `undefined`;
 exports[`Span EVENT_OUTCOME 1`] = `"unknown"`;
 
 exports[`Span EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
+exports[`Span EXCEPTION_MESSAGE 1`] = `undefined`;
+
+exports[`Span EXCEPTION_TYPE 1`] = `undefined`;
 
 exports[`Span FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -527,7 +591,11 @@ exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
+exports[`Span ID 1`] = `undefined`;
+
 exports[`Span INDEX 1`] = `undefined`;
+
+exports[`Span KIND 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
 
@@ -547,6 +615,8 @@ exports[`Span KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Span KUBERNETES_POD_NAME 1`] = `undefined`;
 
+exports[`Span KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
+
 exports[`Span KUBERNETES_POD_UID 1`] = `undefined`;
 
 exports[`Span KUBERNETES_REPLICASET 1`] = `undefined`;
@@ -559,9 +629,15 @@ exports[`Span LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
 
+exports[`Span LABEL_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
+
+exports[`Span LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Span LOG_LEVEL 1`] = `undefined`;
 
@@ -587,7 +663,17 @@ exports[`Span METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
 
+exports[`Span METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
+
 exports[`Span METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_GC_DURATION_SECONDS 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Span METRIC_OTEL_JVM_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
@@ -599,7 +685,11 @@ exports[`Span METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE 1`] = `undefined`;
 
 exports[`Span METRIC_OTEL_JVM_PROCESS_THREADS_COUNT 1`] = `undefined`;
 
+exports[`Span METRIC_OTEL_JVM_SYSTEM_CPU 1`] = `undefined`;
+
 exports[`Span METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Span METRIC_OTEL_JVM_THREAD_COUNT 1`] = `undefined`;
 
 exports[`Span METRIC_OTEL_SYSTEM_CPU_UTILIZATION 1`] = `undefined`;
 
@@ -627,6 +717,8 @@ exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Span OTEL_EVENT_NAME 1`] = `"otel event name"`;
+
 exports[`Span OTEL_SPAN_LINKS 1`] = `undefined`;
 
 exports[`Span OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
@@ -642,6 +734,8 @@ exports[`Span PROCESS_PID 1`] = `undefined`;
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
 exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Span RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Span SERVER_ADDRESS 1`] = `undefined`;
 
@@ -715,6 +809,8 @@ exports[`Span SPAN_SYNC 1`] = `false`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
+exports[`Span STATUS_CODE 1`] = `undefined`;
+
 exports[`Span TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Span TELEMETRY_SDK_NAME 1`] = `undefined`;
@@ -771,9 +867,9 @@ exports[`Span USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
-exports[`Span VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
+exports[`Span VALUE_OTEL_JVM_MEMORY_TYPE_HEAP 1`] = `undefined`;
 
-exports[`Span VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP 1`] = `undefined`;
+exports[`Span VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP 1`] = `undefined`;
 
 exports[`Transaction AGENT 1`] = `
 Object {
@@ -789,6 +885,12 @@ exports[`Transaction AGENT_NAME 1`] = `"java"`;
 exports[`Transaction AGENT_VERSION 1`] = `"agent version"`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Transaction CHILD_ID 1`] = `undefined`;
 
@@ -846,7 +948,11 @@ exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Transaction DURATION 1`] = `undefined`;
+
 exports[`Transaction ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
+exports[`Transaction ERROR_CODE 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
@@ -868,6 +974,8 @@ exports[`Transaction ERROR_LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction ERROR_LOG_MESSAGE 1`] = `undefined`;
 
+exports[`Transaction ERROR_MESSAGE 1`] = `undefined`;
+
 exports[`Transaction ERROR_PAGE_URL 1`] = `undefined`;
 
 exports[`Transaction ERROR_STACK_TRACE 1`] = `undefined`;
@@ -879,6 +987,10 @@ exports[`Transaction EVENT_NAME 1`] = `undefined`;
 exports[`Transaction EVENT_OUTCOME 1`] = `"unknown"`;
 
 exports[`Transaction EVENT_SUCCESS_COUNT 1`] = `undefined`;
+
+exports[`Transaction EXCEPTION_MESSAGE 1`] = `undefined`;
+
+exports[`Transaction EXCEPTION_TYPE 1`] = `undefined`;
 
 exports[`Transaction FAAS_BILLED_DURATION 1`] = `undefined`;
 
@@ -914,7 +1026,11 @@ exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
+exports[`Transaction ID 1`] = `undefined`;
+
 exports[`Transaction INDEX 1`] = `undefined`;
+
+exports[`Transaction KIND 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES 1`] = `
 Object {
@@ -940,6 +1056,8 @@ exports[`Transaction KUBERNETES_NODE_NAME 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES_POD_NAME 1`] = `undefined`;
 
+exports[`Transaction KUBERNETES_POD_NAME_OTEL 1`] = `undefined`;
+
 exports[`Transaction KUBERNETES_POD_UID 1`] = `"pod1234567890abcdef"`;
 
 exports[`Transaction KUBERNETES_REPLICASET 1`] = `undefined`;
@@ -952,9 +1070,15 @@ exports[`Transaction LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
 
+exports[`Transaction LABEL_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
+
+exports[`Transaction LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
@@ -980,7 +1104,17 @@ exports[`Transaction METRIC_JAVA_NON_HEAP_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_JAVA_THREAD_COUNT 1`] = `undefined`;
 
+exports[`Transaction METRIC_OTEL_JVM_CPU_PERCENT 1`] = `undefined`;
+
 exports[`Transaction METRIC_OTEL_JVM_GC_DURATION 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_GC_DURATION_SECONDS 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_MEMORY_COMMITTED 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_MEMORY_LIMIT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_MEMORY_USED 1`] = `undefined`;
 
 exports[`Transaction METRIC_OTEL_JVM_PROCESS_CPU_PERCENT 1`] = `undefined`;
 
@@ -992,7 +1126,11 @@ exports[`Transaction METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE 1`] = `undefined`;
 
 exports[`Transaction METRIC_OTEL_JVM_PROCESS_THREADS_COUNT 1`] = `undefined`;
 
+exports[`Transaction METRIC_OTEL_JVM_SYSTEM_CPU 1`] = `undefined`;
+
 exports[`Transaction METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT 1`] = `undefined`;
+
+exports[`Transaction METRIC_OTEL_JVM_THREAD_COUNT 1`] = `undefined`;
 
 exports[`Transaction METRIC_OTEL_SYSTEM_CPU_UTILIZATION 1`] = `undefined`;
 
@@ -1020,6 +1158,8 @@ exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Transaction OTEL_EVENT_NAME 1`] = `"otel event name"`;
+
 exports[`Transaction OTEL_SPAN_LINKS 1`] = `undefined`;
 
 exports[`Transaction OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
@@ -1035,6 +1175,8 @@ exports[`Transaction PROCESS_PID 1`] = `undefined`;
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
 exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Transaction RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Transaction SERVER_ADDRESS 1`] = `undefined`;
 
@@ -1112,6 +1254,8 @@ exports[`Transaction SPAN_SYNC 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
+exports[`Transaction STATUS_CODE 1`] = `undefined`;
+
 exports[`Transaction TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Transaction TELEMETRY_SDK_NAME 1`] = `undefined`;
@@ -1168,6 +1312,6 @@ exports[`Transaction USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
 
-exports[`Transaction VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP 1`] = `undefined`;
+exports[`Transaction VALUE_OTEL_JVM_MEMORY_TYPE_HEAP 1`] = `undefined`;
 
-exports[`Transaction VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP 1`] = `undefined`;
+exports[`Transaction VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP 1`] = `undefined`;

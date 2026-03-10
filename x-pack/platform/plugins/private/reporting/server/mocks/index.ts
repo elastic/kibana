@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ReportingStart } from '../types';
+import type { ReportingStart } from '../types';
 
 export const reportingMock = {
   createStart: (): ReportingStart => ({
     registerExportTypes: () => {},
+    handleGenerateSystemReportRequest: jest.fn(),
   }),
 };

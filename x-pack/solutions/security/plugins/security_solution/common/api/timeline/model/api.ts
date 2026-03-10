@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataProviderType } from './components.gen';
 import {
   BareNote,
   BarePinnedEvent,
   ColumnHeaderResult,
+  type DataProviderType,
   DataProviderTypeEnum,
   DataProviderResult,
   FavoriteTimelineResponse,
@@ -90,7 +90,7 @@ export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timeline
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
 
 export const RowRendererCount = Object.keys(RowRendererIdEnum).length;
-export const RowRendererValues = Object.values(RowRendererId.Values);
+export const RowRendererValues = Object.values(RowRendererId.enum);
 
 /**
  * Import/export timelines

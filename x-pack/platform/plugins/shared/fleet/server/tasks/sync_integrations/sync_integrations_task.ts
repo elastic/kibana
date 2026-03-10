@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -19,7 +19,7 @@ import { errors } from '@elastic/elasticsearch';
 import { SO_SEARCH_LIMIT, outputType } from '../../../common/constants';
 import type { NewRemoteElasticsearchOutput } from '../../../common/types';
 
-import { outputService } from '../../services';
+import { appContextService, outputService } from '../../services';
 import { getInstalledPackageSavedObjects } from '../../services/epm/packages/get';
 import {
   FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
@@ -32,16 +32,21 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.5';
+export const VERSION = '1.0.6';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '5m';
+const DEFAULT_INTERVAL = '5m';
 const TIMEOUT = '5m';
+
+interface SyncIntegrationsTaskConfig {
+  taskInterval?: string;
+}
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  config: SyncIntegrationsTaskConfig;
 }
 
 interface SyncIntegrationsTaskStartContract {
@@ -51,24 +56,29 @@ interface SyncIntegrationsTaskStartContract {
 export class SyncIntegrationsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
+  private taskInterval: string;
 
   constructor(setupContract: SyncIntegrationsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          abortController,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          abortController: AbortController;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, abortController);
             },
-            cancel: async () => {
-              this.abortController.abort('Task cancelled');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -82,7 +92,7 @@ export class SyncIntegrationsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(`[SyncIntegrationsTask] Started with interval of [${this.taskInterval}]`);
 
     try {
       await taskManager.ensureScheduled({
@@ -90,7 +100,7 @@ export class SyncIntegrationsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -105,10 +115,14 @@ export class SyncIntegrationsTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[SyncIntegrationsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    abortController: AbortController
+  ) => {
     if (!this.wasStarted) {
       this.logger.debug('[SyncIntegrationsTask] runTask Aborted. Task not started yet');
       return;
@@ -121,26 +135,27 @@ export class SyncIntegrationsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     if (!canEnableSyncIntegrations()) {
+      this.logger.debug(`[SyncIntegrationsTask] Remote synced integration cannot be enabled.`);
       return;
     }
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       // write integrations on main cluster
-      await this.updateSyncedIntegrationsData(esClient, soClient);
+      await this.updateSyncedIntegrationsData(esClient, soClient, abortController);
 
       // sync integrations on remote cluster
       await syncIntegrationsOnRemote(
         esClient,
         soClient,
         packageService.asInternalUser,
-        this.abortController,
+        abortController,
         this.logger
       );
 
@@ -181,9 +196,10 @@ export class SyncIntegrationsTask {
 
   private updateSyncedIntegrationsData = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClient
+    soClient: SavedObjectsClientContract,
+    abortController: AbortController
   ) => {
-    const outputs = await outputService.list(soClient);
+    const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
     );
@@ -224,14 +240,22 @@ export class SyncIntegrationsTask {
       perPage: SO_SEARCH_LIMIT,
       sortOrder: 'asc',
     });
-    newDoc.integrations = packageSavedObjects.saved_objects.map((item) => {
-      return {
-        package_name: item.attributes.name,
-        package_version: item.attributes.version,
-        updated_at: item.updated_at ?? new Date().toISOString(),
-        install_status: item.attributes.install_status,
-      };
-    });
+    newDoc.integrations = packageSavedObjects.saved_objects
+      .filter(
+        (item) =>
+          item.attributes.install_source === 'registry' ||
+          item.attributes.install_source === 'bundled'
+      ) // not included install sources: 'custom' and 'upload'
+      .map((item) => {
+        return {
+          package_name: item.attributes.name,
+          package_version: item.attributes.version,
+          updated_at: item.updated_at ?? new Date().toISOString(),
+          install_status: item.attributes.install_status,
+          install_source: item.attributes.install_source,
+          rolled_back: item.attributes.rolled_back,
+        };
+      });
 
     const isSyncUninstalledEnabled = remoteESOutputs.some(
       (output) => (output as NewRemoteElasticsearchOutput).sync_uninstalled_integrations
@@ -253,7 +277,7 @@ export class SyncIntegrationsTask {
         esClient,
         soClient,
         newDoc.integrations,
-        this.abortController,
+        abortController,
         previousSyncIntegrationsData
       );
       newDoc.custom_assets = keyBy(customAssets, (asset) => `${asset.type}:${asset.name}`);
@@ -271,7 +295,7 @@ export class SyncIntegrationsTask {
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: newDoc,
       },
-      { signal: this.abortController.signal }
+      { signal: abortController.signal }
     );
   };
 }

@@ -1,0 +1,507 @@
+{
+  "id": "@kbn/actions-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.getCustomAgents",
+        "type": "Function",
+        "tags": [],
+        "label": "getCustomAgents",
+        "description": [],
+        "signature": [
+          "(opts: GetCustomAgentsOpts) => GetCustomAgentsResponse"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_custom_agents.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getCustomAgents.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "GetCustomAgentsOpts"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_custom_agents.ts",
+            "lineNumber": 36,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.getNodeSSLOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getNodeSSLOptions",
+        "description": [],
+        "signature": [
+          "(logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", verificationMode: string | undefined, sslOverrides: ",
+          {
+            "pluginId": "@kbn/actions-utils",
+            "scope": "common",
+            "docId": "kibKbnActionsUtilsPluginApi",
+            "section": "def-common.SSLSettings",
+            "text": "SSLSettings"
+          },
+          " | undefined) => { rejectUnauthorized?: boolean | undefined; checkServerIdentity?: ((host: string, cert: ",
+          "PeerCertificate",
+          ") => Error | undefined) | undefined; cert?: Buffer | undefined; key?: Buffer | undefined; pfx?: Buffer | undefined; passphrase?: string | undefined; ca?: Buffer | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getNodeSSLOptions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getNodeSSLOptions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "verificationMode",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getNodeSSLOptions.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "sslOverrides",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/actions-utils",
+                "scope": "common",
+                "docId": "kibKbnActionsUtilsPluginApi",
+                "section": "def-common.SSLSettings",
+                "text": "SSLSettings"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.getSSLSettingsFromConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "getSSLSettingsFromConfig",
+        "description": [],
+        "signature": [
+          "(verificationMode: \"none\" | \"full\" | \"certificate\" | undefined, rejectUnauthorized: boolean | undefined) => ",
+          {
+            "pluginId": "@kbn/actions-utils",
+            "scope": "common",
+            "docId": "kibKbnActionsUtilsPluginApi",
+            "section": "def-common.SSLSettings",
+            "text": "SSLSettings"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+        "lineNumber": 69,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getSSLSettingsFromConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verificationMode",
+            "description": [],
+            "signature": [
+              "\"none\" | \"full\" | \"certificate\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.getSSLSettingsFromConfig.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rejectUnauthorized",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/get_node_ssl_options.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.ProxySettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProxySettings",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 51,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.ProxySettings.proxyUrl",
+            "type": "string",
+            "tags": [],
+            "label": "proxyUrl",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.ProxySettings.proxyBypassHosts",
+            "type": "Object",
+            "tags": [],
+            "label": "proxyBypassHosts",
+            "description": [],
+            "signature": [
+              "Set<string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.ProxySettings.proxyOnlyHosts",
+            "type": "Object",
+            "tags": [],
+            "label": "proxyOnlyHosts",
+            "description": [],
+            "signature": [
+              "Set<string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.ProxySettings.proxyHeaders",
+            "type": "Object",
+            "tags": [],
+            "label": "proxyHeaders",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.ProxySettings.proxySSLSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "proxySSLSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/actions-utils",
+                "scope": "common",
+                "docId": "kibKbnActionsUtilsPluginApi",
+                "section": "def-common.SSLSettings",
+                "text": "SSLSettings"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.SSLSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "SSLSettings",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.SSLSettings.verificationMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "verificationMode",
+            "description": [],
+            "signature": [
+              "\"none\" | \"full\" | \"certificate\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.SSLSettings.pfx",
+            "type": "Object",
+            "tags": [],
+            "label": "pfx",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.SSLSettings.cert",
+            "type": "Object",
+            "tags": [],
+            "label": "cert",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.SSLSettings.key",
+            "type": "Object",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.SSLSettings.passphrase",
+            "type": "string",
+            "tags": [],
+            "label": "passphrase",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-utils",
+            "id": "def-common.SSLSettings.ca",
+            "type": "Object",
+            "tags": [],
+            "label": "ca",
+            "description": [],
+            "signature": [
+              "Buffer | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.CustomHostSettings",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomHostSettings",
+        "description": [],
+        "signature": [
+          "{ readonly ssl?: Readonly<{ verificationMode?: \"none\" | \"full\" | \"certificate\" | undefined; certificateAuthoritiesFiles?: string | string[] | undefined; certificateAuthoritiesData?: string | undefined; } & {}> | undefined; readonly smtp?: Readonly<{ ignoreTLS?: boolean | undefined; requireTLS?: boolean | undefined; } & {}> | undefined; readonly url: string; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/actions-utils",
+        "id": "def-common.customHostSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "customHostSettingsSchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ url: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; smtp: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ ignoreTLS?: boolean | undefined; requireTLS?: boolean | undefined; } & {}> | undefined>; ssl: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ verificationMode?: \"none\" | \"full\" | \"certificate\" | undefined; certificateAuthoritiesFiles?: string | string[] | undefined; certificateAuthoritiesData?: string | undefined; } & {}> | undefined>; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-utils/utils/types.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

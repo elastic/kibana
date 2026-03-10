@@ -7,6 +7,7 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import type { BreadcrumbsNav } from './common/breadcrumbs';
 import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
@@ -19,6 +20,7 @@ export const contractStartServicesMock: ContractStartServices = {
   getComponents$: jest.fn(() => of({})),
   upselling,
   onboarding: onboardingService,
+  productFeatureKeys$: new BehaviorSubject<Set<ProductFeatureKeyType> | null>(null),
 };
 
 const setupMock = (): PluginSetup => ({

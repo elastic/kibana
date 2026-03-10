@@ -7,6 +7,7 @@
 
 import * as rt from 'io-ts';
 import { CaseStatuses } from '@kbn/cases-components/src/status/types';
+import { CASE_EXTENDED_FIELDS } from '../../../constants';
 import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
@@ -49,8 +50,20 @@ export const CaseSeverityRt = rt.union([
  * Case
  */
 
-export const CaseSettingsRt = rt.strict({
-  syncAlerts: rt.boolean,
+export const CaseSettingsRt = rt.intersection([
+  rt.strict({
+    syncAlerts: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      extractObservables: rt.boolean,
+    })
+  ),
+]);
+
+export const CaseTemplate = rt.strict({
+  id: rt.string,
+  version: rt.number,
 });
 
 const CaseBaseFields = {
@@ -126,10 +139,17 @@ export const CaseAttributesRt = rt.intersection([
     external_service: rt.union([ExternalServiceRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
+    total_observables: rt.union([rt.number, rt.null]),
   }),
   rt.exact(
     rt.partial({
       incremental_id: rt.union([rt.number, rt.null]),
+      in_progress_at: rt.union([rt.string, rt.null]),
+      time_to_acknowledge: rt.union([rt.number, rt.null]),
+      time_to_investigate: rt.union([rt.number, rt.null]),
+      time_to_resolve: rt.union([rt.number, rt.null]),
+      template: rt.union([rt.null, CaseTemplate]),
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
@@ -140,6 +160,7 @@ export const CaseRt = rt.intersection([
     id: rt.string,
     totalComment: rt.number,
     totalAlerts: rt.number,
+    totalEvents: rt.union([rt.number, rt.undefined]),
     version: rt.string,
   }),
   rt.exact(
@@ -153,6 +174,7 @@ export const CasesRt = rt.array(CaseRt);
 
 export const AttachmentTotalsRt = rt.strict({
   alerts: rt.number,
+  events: rt.number,
   userComments: rt.number,
 });
 

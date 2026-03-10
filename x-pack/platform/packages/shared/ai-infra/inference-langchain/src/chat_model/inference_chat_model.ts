@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type { ZodSchema } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseChatModel,
@@ -14,6 +15,7 @@ import {
   type BindToolsInput,
   type LangSmithParams,
 } from '@langchain/core/language_models/chat_models';
+import type { InteropZodType } from '@langchain/core/utils/types';
 import type {
   BaseLanguageModelInput,
   StructuredOutputMethodOptions,
@@ -21,28 +23,26 @@ import type {
 } from '@langchain/core/language_models/base';
 import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { isZodSchema } from '@langchain/core/utils/types';
-import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import { isInteropZodSchema } from '@langchain/core/utils/types';
+import type { ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { OutputParserException } from '@langchain/core/output_parsers';
-import {
-  Runnable,
-  RunnablePassthrough,
-  RunnableSequence,
-  RunnableLambda,
-} from '@langchain/core/runnables';
-import {
+import type { Runnable } from '@langchain/core/runnables';
+import { RunnablePassthrough, RunnableSequence, RunnableLambda } from '@langchain/core/runnables';
+import type {
   InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
-  ChatCompleteCompositeResponse,
   FunctionCallingMode,
-  ToolOptions,
+  ConnectorTelemetryMetadata,
+  ChatCompleteResponse,
+} from '@kbn/inference-common';
+import {
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   isToolValidationError,
   getConnectorDefaultModel,
   getConnectorProvider,
-  ConnectorTelemetryMetadata,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -64,6 +64,7 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   temperature?: number;
   model?: string;
   signal?: AbortSignal;
+  timeout?: number;
   telemetryMetadata?: ConnectorTelemetryMetadata;
 }
 
@@ -73,6 +74,7 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   tool_choice?: ToolChoice;
   temperature?: number;
   model?: string;
+  timeout?: number;
 }
 
 type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
@@ -100,8 +102,10 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
+  protected maxRetries?: number;
   protected model?: string;
   protected signal?: AbortSignal;
+  protected timeout?: number;
 
   constructor(args: InferenceChatModelParams) {
     super(args);
@@ -113,6 +117,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
+    this.timeout = args.timeout;
+    this.maxRetries = args.maxRetries;
   }
 
   static lc_name() {
@@ -162,7 +168,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   getLsParams(options: this['ParsedCallOptions']): LangSmithParams {
     const params = this.invocationParams(options);
     return {
-      ls_provider: `inference-${getConnectorProvider(this.connector)}`,
+      ls_provider: `inference-${getConnectorProvider(this.connector).toLowerCase()}`,
       ls_model_name: options.model ?? this.model ?? getConnectorDefaultModel(this.connector),
       ls_model_type: 'chat',
       ls_temperature: params.temperature ?? this.temperature ?? undefined,
@@ -179,27 +185,32 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
+    const inferredTools = options.tools ? toolDefinitionToInference(options.tools) : undefined;
+    const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
+    const resolvedToolChoice = options.tool_choice ?? 'auto';
+
     return {
       connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
-      tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
-      toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
+      // OpenAI tool-calling params are only valid when tools are present. Many OpenAI-compatible
+      // endpoints reject `tool_choice` when no tools are provided and/or reject empty tools lists.
+      // Only forward tool params when we actually have tools.
+      tools: hasTools ? inferredTools : undefined,
+      // Default to `auto` when tools are present so OpenAI-compatible endpoints that require an
+      // explicit tool choice can still accept the request.
+      toolChoice: hasTools ? toolChoiceToInference(resolvedToolChoice) : undefined,
       abortSignal: options.signal ?? this.signal,
+      maxRetries: this.maxRetries,
       metadata: { connectorTelemetry: this.telemetryMetadata },
+      timeout: options.timeout ?? this.timeout,
     };
   }
 
-  async completionWithRetry(
-    request: ChatCompleteOptions<ToolOptions, false>
-  ): Promise<ChatCompleteCompositeResponse<ToolOptions, false>>;
-  async completionWithRetry(
-    request: ChatCompleteOptions<ToolOptions, true>
-  ): Promise<ChatCompleteCompositeResponse<ToolOptions, true>>;
-  async completionWithRetry(
-    request: ChatCompleteOptions<ToolOptions, boolean>
-  ): Promise<ChatCompleteCompositeResponse<ToolOptions, boolean>> {
+  completionWithRetry = <TStream extends boolean | undefined = false>(
+    request: ChatCompleteOptions & { stream?: TStream }
+  ) => {
     return this.caller.call(async () => {
       try {
         return await this.chatComplete(request);
@@ -207,7 +218,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
         throw wrapInferenceError(e);
       }
     });
-  }
+  };
 
   async _generate(
     baseMessages: BaseMessage[],
@@ -216,7 +227,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   ): Promise<ChatResult> {
     const { system, messages } = messagesToInference(baseMessages);
 
-    let response: Awaited<ChatCompleteCompositeResponse<ToolOptions, false>>;
+    let response: ChatCompleteResponse;
+
     try {
       response = await this.completionWithRetry({
         ...this.invocationParams(options),
@@ -269,7 +281,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       system,
       messages,
       stream: true as const,
-    } as ChatCompleteOptions<ToolOptions, true>);
+    });
 
     const responseIterator = toAsyncIterator(response$);
     for await (const event of responseIterator) {
@@ -308,34 +320,40 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
-    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
+    outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<false>
   ): Runnable<BaseLanguageModelInput, RunOutput>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
-    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
+    outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<true>
   ): Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }>;
   withStructuredOutput<RunOutput extends Record<string, any> = Record<string, any>>(
-    outputSchema: z.ZodType<RunOutput> | Record<string, any>,
+    outputSchema: InteropZodType<RunOutput> | Record<string, any>,
     config?: StructuredOutputMethodOptions<boolean>
   ):
     | Runnable<BaseLanguageModelInput, RunOutput>
     | Runnable<BaseLanguageModelInput, { raw: BaseMessage; parsed: RunOutput }> {
-    const schema: z.ZodType<RunOutput> | Record<string, any> = outputSchema;
+    const schema: InteropZodType<RunOutput> | Record<string, any> = outputSchema;
     const name = config?.name;
-    const description = schema.description ?? 'A function available to call.';
+    const description =
+      'description' in schema && typeof schema.description === 'string'
+        ? schema.description
+        : 'A function available to call.';
     const includeRaw = config?.includeRaw;
 
     let functionName = name ?? 'extract';
     let tools: ToolDefinition[];
-    if (isZodSchema(schema)) {
+    if (isInteropZodSchema(schema)) {
       tools = [
         {
           type: 'function',
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema),
+            parameters:
+              '_zod' in (schema as object)
+                ? z4.toJSONSchema(schema as unknown as z4.ZodType, { io: 'input' })
+                : zodToJsonSchema(schema as unknown as ZodSchema),
           },
         },
       ];

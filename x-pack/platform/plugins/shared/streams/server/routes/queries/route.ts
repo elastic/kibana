@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import {
-  StreamQuery,
-  streamQuerySchema,
-  upsertStreamQueryRequestSchema,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { streamQuerySchema, upsertStreamQueryRequestSchema } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { QueryNotFoundError } from '../../lib/streams/errors/query_not_found_error';
 import { createServerRoute } from '../create_server_route';
+import { assertEnterpriseLicense } from '../utils/assert_enterprise_license';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -50,17 +49,18 @@ const listQueriesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { queryClient, streamsClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
-    const queryAssets = await assetClient.getAssetLinks(streamName, ['query']);
+    const { [streamName]: queryLinks } = await queryClient.getStreamToQueryLinksMap([streamName]);
 
     return {
-      queries: queryAssets.map((queryAsset) => queryAsset.query),
+      queries: queryLinks.map((queryLink) => queryLink.query),
     };
   },
 });
@@ -88,19 +88,20 @@ const upsertQueryRoute = createServerRoute({
     body: upsertStreamQueryRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
+    await assertEnterpriseLicense(licensing);
 
-    await streamsClient.ensureStream(streamName);
-    await queryClient.upsert(streamName, {
+    const definition = await streamsClient.getStream(streamName);
+    await queryClient.upsert(definition, {
       id: queryId,
       title: body.title,
-      kql: {
-        query: body.kql.query,
-      },
+      esql: body.esql,
+      severity_score: body.severity_score,
+      evidence: body.evidence,
     });
 
     return {
@@ -130,15 +131,26 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, queryClient, licensing } = await getScopedClients({
+      request,
+    });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { queryId, name: streamName },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
-    await queryClient.delete(streamName, queryId);
+    const definition = await streamsClient.getStream(streamName);
+
+    const queryLink = await queryClient.bulkGetByIds(streamName, [queryId]);
+    if (queryLink.length === 0) {
+      throw new QueryNotFoundError(`Query [${queryId}] not found in stream [${streamName}]`);
+    }
+
+    await queryClient.delete(definition, queryId);
+
+    logger.get('significant_events').debug(`Deleting query ${queryId} for stream ${streamName}`);
 
     return {
       acknowledged: true,
@@ -178,16 +190,29 @@ const bulkQueriesRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, queryClient } = await getScopedClients({ request });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<BulkUpdateAssetsResponse> => {
+    const { streamsClient, queryClient, licensing } = await getScopedClients({ request });
+    await assertEnterpriseLicense(licensing);
 
     const {
       path: { name: streamName },
       body: { operations },
     } = params;
 
-    await streamsClient.ensureStream(streamName);
-    await queryClient.bulk(streamName, operations);
+    const definition = await streamsClient.getStream(streamName);
+
+    await queryClient.bulk(definition, operations);
+
+    logger
+      .get('significant_events')
+      .debug(
+        `Performing bulk significant events operation with ${operations.length} operations for stream ${streamName}`
+      );
 
     return { acknowledged: true };
   },

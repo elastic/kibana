@@ -12,7 +12,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerFavoritesRoutes } from './favorites_routes';
 import { favoritesSavedObjectType } from './favorites_saved_object';
 import { registerFavoritesUsageCollection } from './favorites_usage_collection';
-import { FavoritesRegistry, FavoritesRegistrySetup } from './favorites_registry';
+import type { FavoritesRegistrySetup } from './favorites_registry';
+import { FavoritesRegistry } from './favorites_registry';
 
 export type {
   GetFavoritesResponse,

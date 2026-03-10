@@ -23,12 +23,11 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { getDiscoverHref } from '../links/discover_links/discover_link';
-import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import type { SectionRecord, Action } from './sections_helper';
 import { getNonEmptySections } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
 import type { ApmRouter } from '../../routing/apm_route_config';
+import { getPodMetricsLink } from './pod_metrics_utils';
 
 function getInfraMetricsQuery(transaction: Transaction) {
   const timestamp = new Date(transaction['@timestamp']).getTime();
@@ -54,6 +53,8 @@ export const getSections = ({
   logsLocator,
   dataViewId,
   assetDetailsLocator,
+  discoverLocator,
+  metricsIndices,
 }: {
   transaction?: Transaction;
   basePath: IBasePath;
@@ -68,10 +69,12 @@ export const getSections = ({
   logsLocator: LocatorPublic<LogsLocatorParams>;
   dataViewId?: string;
   assetDetailsLocator?: AssetDetailsLocator;
+  discoverLocator?: LocatorPublic<SerializableRecord>;
+  metricsIndices?: string;
 }) => {
   if (!transaction) return [];
 
-  const hostName = transaction.host?.hostname;
+  const hostName = transaction.host?.name || transaction.host?.hostname;
   const podId = transaction.kubernetes?.pod?.uid;
   const containerId = transaction.container?.id;
 
@@ -117,9 +120,18 @@ export const getSections = ({
     timeRange: getTimeRange(time),
   });
 
-  const hasPodLink = !!podId && infraLinksAvailable && !!assetDetailsLocator;
   const hasContainerLink = !!containerId && infraLinksAvailable && !!assetDetailsLocator;
   const hasHostLink = !!hostName && infraLinksAvailable && !!assetDetailsLocator;
+
+  const podMetricsLink = getPodMetricsLink({
+    podId,
+    agentName: transaction.agent?.name,
+    infraMetricsQuery,
+    assetDetailsLocator,
+    discoverLocator,
+    infraLinksAvailable,
+    metricsIndices,
+  });
 
   const podActions: Action[] = [
     {
@@ -135,16 +147,8 @@ export const getSections = ({
       label: i18n.translate('xpack.apm.transactionActionMenu.showPodMetricsLinkLabel', {
         defaultMessage: 'Pod metrics',
       }),
-      href: hasPodLink
-        ? assetDetailsLocator.getRedirectUrl({
-            assetId: podId,
-            assetType: 'pod',
-            assetDetails: {
-              dateRange: infraMetricsQuery,
-            },
-          })
-        : undefined,
-      condition: hasPodLink,
+      href: podMetricsLink,
+      condition: !!podMetricsLink,
     },
   ];
 
@@ -164,8 +168,8 @@ export const getSections = ({
       }),
       href: hasContainerLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: containerId,
-            assetType: 'container',
+            entityId: containerId,
+            entityType: 'container',
             assetDetails: { dateRange: infraMetricsQuery },
           })
         : undefined,
@@ -189,8 +193,8 @@ export const getSections = ({
       }),
       href: hasHostLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: hostName,
-            assetType: 'host',
+            entityId: hostName,
+            entityType: 'host',
             assetDetails: {
               dateRange: infraMetricsQuery,
             },
@@ -252,22 +256,6 @@ export const getSections = ({
       }),
       href: uptimeLink,
       condition: !!transaction.url?.domain && !!uptimeLink,
-    },
-  ];
-
-  const kibanaActions: Action[] = [
-    {
-      key: 'sampleDocument',
-      label: i18n.translate('xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel', {
-        defaultMessage: 'View transaction in Discover',
-      }),
-      href: getDiscoverHref({
-        basePath,
-        query: getDiscoverQuery(transaction),
-        location,
-        dataViewId: dataViewId ?? '',
-      }),
-      condition: !!dataViewId,
     },
   ];
 
@@ -347,7 +335,7 @@ export const getSections = ({
       {
         key: 'serviceMap',
         title: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         subtitle: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.subtitle', {
           defaultMessage: 'View service map filtered by this trace.',
@@ -355,7 +343,6 @@ export const getSections = ({
         actions: serviceMapActions,
       },
     ],
-    kibana: [{ key: 'kibana', actions: kibanaActions }],
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.

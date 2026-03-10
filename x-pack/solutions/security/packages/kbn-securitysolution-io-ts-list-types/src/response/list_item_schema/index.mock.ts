@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ListItemSchema } from '.';
+import type { ListItemSchema } from '.';
 import {
   DATE_NOW,
   ELASTIC_USER,
@@ -23,11 +23,9 @@ export const getListItemResponseMock = (): ListItemSchema => ({
   '@timestamp': DATE_NOW,
   created_at: DATE_NOW,
   created_by: USER,
-  deserializer: undefined,
   id: LIST_ITEM_ID,
   list_id: LIST_ID,
   meta: META,
-  serializer: undefined,
   tie_breaker_id: TIE_BREAKER,
   type: TYPE,
   updated_at: DATE_NOW,

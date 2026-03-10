@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import { useMemo } from 'react';
 import { useHttp } from '../../../../common/lib/kibana';
 
 interface EntityResponse {
@@ -55,14 +56,19 @@ export function useAlertDocumentAnalyzerSchema({
 }: UseAlertDocumentAnalyzerSchemaParams): UseAlertDocumentAnalyzerSchemaResult {
   const http = useHttp();
 
-  const query = useQuery<EntityResponse[]>(['getAlertPrevalenceSchema', documentId], () => {
-    return http.get<EntityResponse[]>(`/api/endpoint/resolver/entity`, {
-      query: {
-        _id: documentId,
-        indices,
-      },
-    });
-  });
+  const indicesKey = useMemo(() => indices.slice().sort().join(','), [indices]);
+
+  const query = useQuery<EntityResponse[]>(
+    ['getAlertPrevalenceSchema', documentId, indicesKey],
+    () => {
+      return http.get<EntityResponse[]>(`/api/endpoint/resolver/entity`, {
+        query: {
+          _id: documentId,
+          indices,
+        },
+      });
+    }
+  );
 
   if (query.isLoading) {
     return {

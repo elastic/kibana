@@ -95,7 +95,6 @@ const stories: Meta<Args> = {
             transactionTypeStatus: FETCH_STATUS.SUCCESS,
             transactionTypes: ['request'],
             serviceAgentStatus: FETCH_STATUS.SUCCESS,
-            serviceEntitySummaryStatus: FETCH_STATUS.SUCCESS,
           }}
         >
           <StoryComponent />

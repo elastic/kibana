@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LocatorDefinition } from './types';
-import { Locator, LocatorDependencies } from './locator';
-import { KibanaLocation } from '../../../public';
-import { LocatorGetUrlParams } from '.';
+import type { LocatorDefinition } from './types';
+import type { LocatorDependencies } from './locator';
+import { Locator } from './locator';
+import type { KibanaLocation } from '../../../public';
+import type { LocatorGetUrlParams } from '.';
 import { decompressFromBase64 } from 'lz-string';
 
 const setup = (

@@ -7,22 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiSwitch,
-  EuiToolTip,
-  EuiText,
-} from '@elastic/eui';
-import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSwitch, EuiToolTip, EuiText } from '@elastic/eui';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LAST_VALUE_ID, LAST_VALUE_NAME } from '@kbn/lens-formula-docs';
+import type {
+  DataType,
+  LastValueIndexPatternColumn,
+  IndexPatternField,
+  IndexPattern,
+} from '@kbn/lens-common';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '.';
-import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
-import type { IndexPatternField, IndexPattern } from '../../../../types';
-import { DataType } from '../../../../types';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -149,16 +146,6 @@ function setDefaultShowArrayValues(
   );
 }
 
-export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof LAST_VALUE_ID;
-  params: {
-    sortField: string;
-    showArrayValues: boolean;
-    // last value on numeric fields can be formatted
-    format?: ValueFormatConfig;
-  };
-}
-
 function getScale(type: string) {
   return type === 'string' ||
     type === 'ip' ||
@@ -184,6 +171,16 @@ export const lastValueOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   input: 'field',
+  scale: (column, dataview) => {
+    if (!dataview) {
+      return 'ratio';
+    }
+    const field = dataview.getFieldByName(column.sourceField);
+    if (!field) {
+      return 'ratio';
+    }
+    return getScale(field?.type);
+  },
   onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
 
@@ -198,7 +195,6 @@ export const lastValueOperation: OperationDefinition<
       label: ofName(field.displayName, oldColumn.timeShift, oldColumn.reducedTimeRange),
       sourceField: field.name,
       params: newParams,
-      scale: getScale(field.type),
       filter:
         oldColumn.filter && comparePreviousColumnFilter(oldColumn.filter, oldColumn.sourceField)
           ? getExistsFilter(field.name)
@@ -251,7 +247,6 @@ export const lastValueOperation: OperationDefinition<
       dataType: field.type as DataType,
       operationType: LAST_VALUE_ID,
       isBucketed: false,
-      scale: getScale(field.type),
       sourceField: field.name,
       filter: getFilter(previousColumn, columnParams) || getExistsFilter(field.name),
       timeShift: columnParams?.shift || previousColumn?.timeShift,

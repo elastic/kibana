@@ -23,11 +23,10 @@ import {
 } from '@elastic/eui';
 
 import { useServices } from '../../../../app_context';
+import type { UpdateRetentionSettings, ExecuteRetention } from '../../../../components';
 import {
   RetentionSettingsUpdateModalProvider,
-  UpdateRetentionSettings,
   RetentionExecuteModalProvider,
-  ExecuteRetention,
 } from '../../../../components';
 
 interface Props {
@@ -250,6 +249,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
     return (
       <Fragment>
         <EuiCallOut
+          announceOnMount={false}
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.policyRetentionSchedulePanel.errorFetchingRetentionScheduleTitle"

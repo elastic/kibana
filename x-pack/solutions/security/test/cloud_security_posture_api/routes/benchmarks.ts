@@ -8,14 +8,12 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import {
-  CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
+import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import expect from '@kbn/expect';
 import Chance from 'chance';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { CspSecurityCommonProvider } from './helper/user_roles_utilites';
 import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
@@ -31,7 +29,10 @@ export default function (providerContext: FtrProviderContext) {
   const logger = getService('log');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const cspSecurity = CspSecurityCommonProvider(providerContext);
-  const findingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const findingsIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+  );
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     let cspBenchmarkRules: CspBenchmarkRule[] = [];
@@ -83,7 +84,8 @@ export default function (providerContext: FtrProviderContext) {
   });
 
   describe('GET /internal/cloud_security_posture/benchmarks', () => {
-    describe('Get Benchmark API', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/249641
+    describe.skip('Get Benchmark API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();
         await kibanaServer.savedObjects.clean({
@@ -242,8 +244,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(benchmarksResult.statusCode).to.equal(403);
       });
 
-      // Blocked by https://github.com/elastic/kibana/issues/188059
-      it.skip('Calling Benchmark API as User with read access to Security', async () => {
+      it('Calling Benchmark API as User with read access to Security', async () => {
         const benchmark = 'cis_aws';
         const benchmarkRules = await getCspBenchmarkRules(benchmark);
 

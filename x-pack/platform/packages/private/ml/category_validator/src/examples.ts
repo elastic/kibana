@@ -73,16 +73,20 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
           },
         },
       };
-      if (query.bool === undefined) {
-        query.bool = {};
-      }
-      if (query.bool.filter === undefined) {
-        query.bool.filter = range;
+      if (!query || typeof query !== 'object') {
+        query = { bool: { filter: range } };
       } else {
-        if (Array.isArray(query.bool.filter)) {
-          query.bool.filter.push(range);
+        if (query.bool === undefined) {
+          query.bool = {};
+        }
+        if (query.bool.filter === undefined) {
+          query.bool.filter = range;
         } else {
-          query.bool.filter.range = range;
+          if (Array.isArray(query.bool.filter)) {
+            query.bool.filter.push(range);
+          } else {
+            query.bool.filter = [query.bool.filter, range] as estypes.QueryDslBoolQuery['filter'];
+          }
         }
       }
     }
@@ -114,8 +118,6 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
     const allExamples = tempExamples.filter(
       (example: string | null | undefined) => example !== undefined && example !== null
     );
-
-    validationResults.createMedianMessageLengthResult(allExamples);
 
     try {
       const examplesWithTokens = await getTokens(CHUNK_SIZE, allExamples, analyzer);

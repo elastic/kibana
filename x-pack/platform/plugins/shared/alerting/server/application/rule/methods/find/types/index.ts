@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './find_rules_types';
+export type * from './find_rules_types';

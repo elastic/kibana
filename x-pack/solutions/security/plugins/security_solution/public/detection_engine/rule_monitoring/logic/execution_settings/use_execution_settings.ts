@@ -10,33 +10,26 @@ import { useMemo } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
 
-import {
-  EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-  EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-} from '../../../../../common/constants';
+import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '../../../../../common/constants';
 import type { RuleExecutionSettings } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { LogLevelSetting } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 export const useRuleExecutionSettings = (): RuleExecutionSettings => {
   const featureFlagEnabled = useIsExperimentalFeatureEnabled('extendedRuleExecutionLoggingEnabled');
 
-  const advancedSettingEnabled = useAdvancedSettingSafely<boolean>(
-    EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
-    false
-  );
-  const advancedSettingMinLevel = useAdvancedSettingSafely<LogLevelSetting>(
+  const minLevel = useAdvancedSettingSafely<LogLevelSetting>(
     EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING,
-    LogLevelSetting.off
+    featureFlagEnabled ? LogLevelSetting.info : LogLevelSetting.off
   );
 
   return useMemo<RuleExecutionSettings>(() => {
     return {
       extendedLogging: {
-        isEnabled: featureFlagEnabled && advancedSettingEnabled,
-        minLevel: advancedSettingMinLevel,
+        isEnabled: featureFlagEnabled && minLevel !== LogLevelSetting.off,
+        minLevel,
       },
     };
-  }, [featureFlagEnabled, advancedSettingEnabled, advancedSettingMinLevel]);
+  }, [featureFlagEnabled, minLevel]);
 };
 
 const useAdvancedSettingSafely = <T>(key: string, defaultValue: T): T => {
@@ -44,7 +37,6 @@ const useAdvancedSettingSafely = <T>(key: string, defaultValue: T): T => {
     const [value] = useUiSetting$<T>(key);
     return value;
   } catch (e) {
-    // It throws when the setting is not registered (when featureFlagEnabled === false).
     return defaultValue;
   }
 };

@@ -1,12 +1,23 @@
 {
   "_internal.get_desired_nodes": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_internal/desired_nodes/_latest"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/get-desired-nodes.html",
+    "documentation": null,
     "availability": {
       "stack": false,
       "serverless": false

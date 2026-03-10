@@ -11,25 +11,42 @@ import { fetchDocuments } from './fetch_documents';
 import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { discoverServiceMock } from '../../../__mocks__/services';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { FetchDeps } from './fetch_all';
+import type { CommonFetchParams } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
+import { selectTabRuntimeState } from '../state_management/redux';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
-const getDeps = () =>
-  ({
+const getDeps = async (): Promise<CommonFetchParams> => {
+  const services = createDiscoverServicesMock();
+  const toolkit = getDiscoverInternalStateMock({ services });
+  await toolkit.initializeTabs();
+  const { stateContainer } = await toolkit.initializeSingleTab({
+    tabId: toolkit.getCurrentTab().id,
+  });
+  const { scopedProfilesManager$, scopedEbtManager$ } = selectTabRuntimeState(
+    toolkit.runtimeStateManager,
+    toolkit.getCurrentTab().id
+  );
+  return {
+    dataSubjects: stateContainer.dataState.data$,
+    initialFetchStatus: stateContainer.dataState.getInitialFetchStatus(),
     abortController: new AbortController(),
     inspectorAdapters: { requests: new RequestAdapter() },
-    onResults: jest.fn(),
     searchSessionId: '123',
-    services: discoverServiceMock,
-    savedSearch: savedSearchMock,
-    getAppState: () => ({ sampleSize: 100 }),
-  } as unknown as FetchDeps);
+    services,
+    searchSource: savedSearchMock.searchSource,
+    internalState: toolkit.internalState,
+    scopedProfilesManager: scopedProfilesManager$.getValue(),
+    scopedEbtManager: scopedEbtManager$.getValue(),
+    getCurrentTab: toolkit.getCurrentTab,
+  };
+};
 
 describe('test fetchDocuments', () => {
   beforeEach(() => {
@@ -44,11 +61,12 @@ describe('test fetchDocuments', () => {
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     savedSearchMock.searchSource.fetch$ = <T>() =>
       of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    const deps = await getDeps();
     const resolveDocumentProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
+      deps.scopedProfilesManager,
       'resolveDocumentProfile'
     );
-    expect(await fetchDocuments(savedSearchMock.searchSource, getDeps())).toEqual({
+    expect(await fetchDocuments(savedSearchMock.searchSource, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
@@ -61,14 +79,14 @@ describe('test fetchDocuments', () => {
     savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
 
     try {
-      await fetchDocuments(savedSearchMock.searchSource, getDeps());
+      await fetchDocuments(savedSearchMock.searchSource, await getDeps());
     } catch (e) {
       expect(e).toEqual(new Error('Oh noes!'));
     }
   });
 
   test('passes a correct session id', async () => {
-    const deps = getDeps();
+    const deps = await getDeps();
     const hits = [
       { _id: '1', foo: 'bar' },
       { _id: '2', foo: 'baz' },

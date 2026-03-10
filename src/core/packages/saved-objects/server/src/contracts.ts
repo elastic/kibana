@@ -23,8 +23,16 @@ import type {
 import type { SavedObjectsType } from './saved_objects_type';
 import type { ISavedObjectTypeRegistry } from './type_registry';
 import type { ISavedObjectsExporter } from './export';
-import type { ISavedObjectsImporter, SavedObjectsImporterOptions } from './import';
+import type {
+  AccessControlImportTransformsFactory,
+  ISavedObjectsImporter,
+  SavedObjectsImporterOptions,
+} from './import';
 import type { SavedObjectsExtensions } from './extensions/extensions';
+
+export interface SavedObjectsAccessControlTransforms {
+  createImportTransforms: AccessControlImportTransformsFactory;
+}
 
 /**
  * Saved Objects is Kibana's data persistence mechanism allowing plugins to
@@ -85,6 +93,11 @@ export interface SavedObjectsServiceSetup {
   setSpacesExtension: (factory: SavedObjectsSpacesExtensionFactory) => void;
 
   /**
+   * Sets the {@link SavedObjectsAccessControlTransforms access control transforms}.
+   */
+  setAccessControlTransforms: (transforms: SavedObjectsAccessControlTransforms) => void;
+
+  /**
    * Register a {@link SavedObjectsType | savedObjects type} definition.
    *
    * See the {@link SavedObjectsTypeMappingDefinition | mappings format} and
@@ -138,6 +151,11 @@ export interface SavedObjectsServiceSetup {
    * Returns the default index used for saved objects.
    */
   getDefaultIndex: () => string;
+
+  /**
+   * Returns whether the access control feature is enabled for saved objects.
+   */
+  isAccessControlEnabled: () => boolean;
 }
 
 /**
@@ -159,6 +177,37 @@ export interface SavedObjectsServiceStart {
    */
   getScopedClient: (
     req: KibanaRequest,
+    options?: SavedObjectsClientProviderOptions
+  ) => SavedObjectsClientContract;
+  /**
+   * Creates a {@link SavedObjectsClientContract | Saved Objects client} that
+   * uses the internal Kibana user for authenticating with Elasticsearch.
+   * This client supports extensions (encryption, spaces) but bypasses user-based security.
+   *
+   * @param options - Options for configuring the internal client.
+   *
+   * @remarks
+   * This is intended for internal operations that need extension support
+   * (like encryption) but should not be scoped to a specific user.
+   *
+   * **Security Note**: The security extension is automatically excluded to prevent
+   * user-based filtering. Use this only for operations that should run with
+   * system-level privileges.
+   *
+   * Use this instead of creating fake requests to work around security scoping.
+   *
+   * @example
+   * ```typescript
+   * // Basic usage
+   * const client = savedObjects.getUnsafeInternalClient();
+   *
+   * // With hidden types
+   * const client = savedObjects.getUnsafeInternalClient({
+   *   includedHiddenTypes: ['fleet-agent-policies']
+   * });
+   * ```
+   */
+  getUnsafeInternalClient: (
     options?: SavedObjectsClientProviderOptions
   ) => SavedObjectsClientContract;
   /**

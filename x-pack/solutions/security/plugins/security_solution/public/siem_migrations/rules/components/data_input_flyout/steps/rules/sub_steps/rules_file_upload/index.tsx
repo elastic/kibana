@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationStats } from '../../../../../../types';
 import type { OnMigrationCreated } from '../../../../types';
 import { RulesFileUpload } from './rules_file_upload';
 import {
@@ -15,18 +15,27 @@ import {
   type OnSuccess,
 } from '../../../../../../service/hooks/use_create_migration';
 import * as i18n from './translations';
+import { RulesXMLFileUpload } from './rules_xml_file_upload';
+import { MigrationSource } from '../../../../../../../common/types';
 
 export interface RulesFileUploadStepProps {
   status: EuiStepStatus;
-  migrationStats?: RuleMigrationTaskStats;
+  migrationStats: RuleMigrationStats | undefined;
+  migrationName: string | undefined;
+  migrationSource: MigrationSource;
   onMigrationCreated: OnMigrationCreated;
+  onRulesFileChanged: (files: FileList | null) => void;
 }
 export const useRulesFileUploadStep = ({
   status,
   migrationStats,
+  migrationName,
+  migrationSource,
   onMigrationCreated,
+  onRulesFileChanged,
 }: RulesFileUploadStepProps): EuiStepProps => {
   const [isCreated, setIsCreated] = useState<boolean>(!!migrationStats);
+
   const onSuccess = useCallback<OnSuccess>(
     (stats) => {
       setIsCreated(true);
@@ -46,15 +55,20 @@ export const useRulesFileUploadStep = ({
     return status;
   }, [isLoading, error, status]);
 
+  const Component =
+    migrationSource === MigrationSource.QRADAR ? RulesXMLFileUpload : RulesFileUpload;
+
   return {
     title: i18n.RULES_DATA_INPUT_FILE_UPLOAD_TITLE,
     status: uploadStepStatus,
     children: (
-      <RulesFileUpload
+      <Component
         createMigration={createMigration}
+        migrationName={migrationName}
         isLoading={isLoading}
         isCreated={isCreated}
         apiError={error?.message}
+        onRulesFileChanged={onRulesFileChanged}
       />
     ),
   };

@@ -9,12 +9,12 @@
 
 import { from } from 'rxjs';
 import { action } from '@storybook/addon-actions';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFormatService } from './format_service';
 import { palettes } from './palettes';
 import { theme } from './theme';
-import { VisTypePieDependencies } from '../plugin';
+import type { VisTypePieDependencies } from '../plugin';
 
 const data = {
   actions: {

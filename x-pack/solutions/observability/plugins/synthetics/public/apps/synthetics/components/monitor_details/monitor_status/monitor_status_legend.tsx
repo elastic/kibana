@@ -6,25 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-  VISUALIZATION_COLORS,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import * as labels from './labels';
 import { getSkippedVizColor } from './monitor_status_data';
 
 export const MonitorStatusLegend = ({ brushable }: { brushable: boolean }) => {
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
-  const SUCCESS_COLOR = isAmsterdam ? VISUALIZATION_COLORS[0] : euiTheme.colors.success;
-  const DANGER_COLOR = isAmsterdam
-    ? VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1]
-    : euiTheme.colors.danger;
+  const SUCCESS_COLOR = euiTheme.colors.success;
+  const DANGER_COLOR = euiTheme.colors.danger;
 
   const LegendItem = useMemo(() => {
     return ({

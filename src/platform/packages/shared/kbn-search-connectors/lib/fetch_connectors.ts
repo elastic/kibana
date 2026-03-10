@@ -9,9 +9,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { ConnectorAPIListConnectorsResponse } from '..';
+import type { ConnectorAPIListConnectorsResponse } from '..';
 
-import { Connector } from '../types/connectors';
+import type { Connector } from '../types/connectors';
 
 import { isNotFoundException } from '../utils/identify_exceptions';
 import { CRAWLER_SERVICE_TYPE } from '..';

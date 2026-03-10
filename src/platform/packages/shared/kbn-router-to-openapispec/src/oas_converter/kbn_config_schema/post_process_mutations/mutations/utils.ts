@@ -50,3 +50,8 @@ export const deleteField = (schema: object, field: string): void => {
 export const isAnyType = (schema: OpenAPIV3.SchemaObject): boolean => {
   return metaFields.META_FIELD_X_OAS_ANY in schema;
 };
+
+/** Assumes ref is in the form of "#/components/schemas/my-schema-my-team" */
+export const getIdFromRefString = (ref: string): string => {
+  return ref.split('/').pop()!;
+};

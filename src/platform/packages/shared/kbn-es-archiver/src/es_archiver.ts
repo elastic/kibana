@@ -11,9 +11,10 @@ import Fs from 'fs';
 import Path from 'path';
 
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
+import { withSpan } from '@kbn/apm-utils';
 import type { LoadActionPerfOptions } from './lib';
 import {
   saveAction,
@@ -27,16 +28,27 @@ interface Options {
   client: Client;
   baseDir?: string;
   log: ToolingLog;
-  kbnClient: KbnClient;
+  kbnClient?: KbnClient;
+  /**
+   * When true, `kbnClient` is not required and loading archives that contain
+   * saved-object indices (.kibana*) will throw an error. Intended for Scout tests and
+   * linked CPS projects that should only ingest pure ES data.
+   */
+  dataOnly?: boolean;
 }
 
 export class EsArchiver {
   private readonly client: Client;
   private readonly baseDir: string;
   private readonly log: ToolingLog;
-  private readonly kbnClient: KbnClient;
+  private readonly kbnClient: KbnClient | undefined;
+  private readonly dataOnly: boolean;
 
   constructor(options: Options) {
+    this.dataOnly = options.dataOnly ?? false;
+    if (!this.dataOnly && !options.kbnClient) {
+      throw new Error('kbnClient is required when dataOnly is not enabled');
+    }
     this.client = options.client;
     this.baseDir = options.baseDir ?? REPO_ROOT;
     this.log = options.log;
@@ -97,16 +109,19 @@ export class EsArchiver {
       performance?: LoadActionPerfOptions;
     } = {}
   ) {
-    return await loadAction({
-      inputDir: this.findArchive(path),
-      skipExisting: !!skipExisting,
-      useCreate: !!useCreate,
-      docsOnly,
-      client: this.client,
-      log: this.log,
-      kbnClient: this.kbnClient,
-      performance,
-    });
+    return await withSpan('es_archiver load', () =>
+      loadAction({
+        inputDir: this.findArchive(path),
+        skipExisting: !!skipExisting,
+        useCreate: !!useCreate,
+        docsOnly,
+        client: this.client,
+        log: this.log,
+        kbnClient: this.kbnClient,
+        performance,
+        dataOnly: this.dataOnly,
+      })
+    );
   }
 
   /**
@@ -115,12 +130,13 @@ export class EsArchiver {
    * @param {String} path - relative path to the archive to unload, resolved relative to this.baseDir which defaults to REPO_ROOT
    */
   async unload(path: string) {
-    return await unloadAction({
-      inputDir: this.findArchive(path),
-      client: this.client,
-      log: this.log,
-      kbnClient: this.kbnClient,
-    });
+    return await withSpan('es_archiver unload', () =>
+      unloadAction({
+        inputDir: this.findArchive(path),
+        client: this.client,
+        log: this.log,
+      })
+    );
   }
 
   /**
@@ -164,10 +180,19 @@ export class EsArchiver {
    * Cleanup saved object indices, preserving the space:default saved object.
    */
   async emptyKibanaIndex() {
-    return await emptyKibanaIndexAction({
-      client: this.client,
-      log: this.log,
-    });
+    if (this.dataOnly) {
+      throw new Error(
+        'emptyKibanaIndex is not supported in dataOnly mode. ' +
+          'Use kbnArchiver to manage Kibana saved objects instead.'
+      );
+    }
+
+    return await withSpan('es_archiver empty_kibana_index', () =>
+      emptyKibanaIndexAction({
+        client: this.client,
+        log: this.log,
+      })
+    );
   }
 
   /**

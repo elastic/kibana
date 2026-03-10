@@ -8,6 +8,8 @@
  */
 
 export {
+  DISCOVER_APP_LOCATOR,
+  CANVAS_APP_LOCATOR,
   DASHBOARD_APP_ID,
   DISCOVER_APP_ID,
   VISUALIZE_APP_ID,
@@ -15,6 +17,7 @@ export {
   LENS_APP_LOCATOR,
   DISCOVER_ESQL_LOCATOR,
   DASHBOARD_APP_LOCATOR,
+  AI_VALUE_REPORT_LOCATOR,
 } from './constants';
 
 export type { AppId, DeepLinkId } from './deep_links';

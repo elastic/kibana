@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -18,7 +19,7 @@ export const EmptySearchApplicationsPrompt: FC<PropsWithChildren<unknown>> = ({ 
         <h2>
           <FormattedMessage
             id="xpack.enterpriseSearch.searchApplications.list.empty.title"
-            defaultMessage="Create your first Search Application"
+            defaultMessage="Create your first search application"
           />
         </h2>
       }
@@ -26,7 +27,7 @@ export const EmptySearchApplicationsPrompt: FC<PropsWithChildren<unknown>> = ({ 
         <p>
           <FormattedMessage
             id="xpack.enterpriseSearch.searchApplications.list.empty.description"
-            defaultMessage="Let's walk you through creating your first Search Application."
+            defaultMessage="Let's walk you through creating your first search application."
           />
         </p>
       }

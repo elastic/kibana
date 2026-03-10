@@ -258,7 +258,8 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         // TODO Handle data view without time fields.
         timeFieldName: dataView.timeFieldName ?? '',
         index: dataView.getIndexPattern(),
-        grouping: true,
+        // Temporarily disable grouping until https://github.com/elastic/kibana/issues/232849 is resolved.
+        grouping: false,
         flushFix: true,
         // If analysis type is `spike`, pass on window parameters as is,
         // if it's `dip`, swap baseline and deviation.
@@ -358,8 +359,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
               <EuiToolTip
                 position="top"
                 content={i18n.translate('xpack.aiops.logRateAnalysis.optionsButtonTooltip', {
-                  defaultMessage:
-                    'Options to customize the analysis, such as filtering fields and grouping.',
+                  defaultMessage: 'Options to customize the analysis, such as filtering fields.',
                 })}
               >
                 <EuiButtonIcon
@@ -389,6 +389,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount={false}
             title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
               defaultMessage:
                 'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
@@ -438,12 +439,12 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         <EuiEmptyPrompt
           data-test-subj="aiopsNoResultsFoundEmptyPrompt"
           title={
-            <h2>
+            <h3>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.noResultsPromptTitle"
                 defaultMessage="The analysis did not return any results."
               />
-            </h2>
+            </h3>
           }
           titleSize="xs"
           body={

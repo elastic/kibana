@@ -80,6 +80,7 @@ export function registerMetricThresholdRuleType(
       context: [
         { name: 'group', description: groupActionVariableDescription },
         { name: 'groupByKeys', description: groupByKeysActionVariableDescription },
+        { name: 'grouping', description: groupByKeysActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,

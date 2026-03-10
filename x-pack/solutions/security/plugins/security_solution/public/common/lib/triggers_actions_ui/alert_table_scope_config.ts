@@ -11,7 +11,11 @@ import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 type PickKey<T, K extends keyof T> = Extract<keyof T, K>;
 type KeysAlertTableId = PickKey<
   typeof TableId,
-  'alertsOnAlertsPage' | 'alertsOnRuleDetailsPage' | 'alertsOnCasePage' | 'alertsRiskInputs'
+  | 'alertsOnAlertsPage'
+  | 'alertsOnAttacksPage'
+  | 'alertsOnRuleDetailsPage'
+  | 'alertsOnCasePage'
+  | 'alertsRiskInputs'
 >;
 
 type ValuesAlertTableId = (typeof TableId)[KeysAlertTableId];
@@ -25,6 +29,7 @@ const ScopeIdLinkToAlertTableConfiguration: Record<
   ValuesAlertTableConfiguration
 > = {
   [TableId.alertsOnAlertsPage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE,
+  [TableId.alertsOnAttacksPage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ATTACKS_PAGE,
   [TableId.alertsOnRuleDetailsPage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS,
   [TableId.alertsOnCasePage]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
   [TableId.alertsRiskInputs]: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RISK_INPUTS,

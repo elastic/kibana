@@ -38,6 +38,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
   readonly env: {
     mode: Readonly<EnvironmentMode>;
     packageInfo: Readonly<PackageInfo>;
+    airgapped: boolean;
   };
   readonly logger: LoggerFactory;
   readonly config: {

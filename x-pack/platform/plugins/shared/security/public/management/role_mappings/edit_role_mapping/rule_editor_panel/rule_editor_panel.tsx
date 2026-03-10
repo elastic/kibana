@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
@@ -67,6 +68,8 @@ export class RuleEditorPanel extends Component<Props, State> {
   }
 
   public render() {
+    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
+
     const validationResult =
       this.props.validateForm &&
       validateRoleMappingRules({ rules: this.state.rules ? this.state.rules.toRaw() : {} });
@@ -75,7 +78,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (validationResult && validationResult.error) {
       validationWarning = (
         <Fragment>
-          <EuiCallOut color="danger" title={validationResult.error} size="s" />
+          <EuiCallOut announceOnMount color="danger" title={validationResult.error} size="s" />
         </Fragment>
       );
     }
@@ -122,7 +125,7 @@ export class RuleEditorPanel extends Component<Props, State> {
                   {validationWarning}
                   {this.conditionallyRenderEditModeToggle()}
                   {this.getEditor()}
-                  {this.getConfirmModeChangePrompt()}
+                  {this.getConfirmModeChangePrompt(confirmModalTitleId)}
                 </Fragment>
               </EuiErrorBoundary>
             </EuiFormRow>
@@ -157,6 +160,7 @@ export class RuleEditorPanel extends Component<Props, State> {
     if (this.state.mode === 'json' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
       return (
         <EuiCallOut
+          announceOnMount
           size="s"
           title={i18n.translate(
             'xpack.security.management.editRoleMapping.visualEditorUnavailableTitle',
@@ -244,12 +248,14 @@ export class RuleEditorPanel extends Component<Props, State> {
     }
   }
 
-  private getConfirmModeChangePrompt = () => {
+  private getConfirmModeChangePrompt = (confirmModalTitleId: string) => {
     if (!this.state.showConfirmModeChange) {
       return null;
     }
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"

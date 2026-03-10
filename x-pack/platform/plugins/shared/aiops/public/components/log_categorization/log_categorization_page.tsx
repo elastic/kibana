@@ -120,7 +120,7 @@ export const LogCategorizationPage: FC = () => {
 
   const setSearchParams = useCallback(
     (searchParams: {
-      searchQuery: estypes.QueryDslQueryContainer;
+      searchQuery: NonNullable<estypes.QueryDslQueryContainer>;
       searchString: Query['query'];
       queryLanguage: SearchQueryLanguage;
       filters: Filter[];

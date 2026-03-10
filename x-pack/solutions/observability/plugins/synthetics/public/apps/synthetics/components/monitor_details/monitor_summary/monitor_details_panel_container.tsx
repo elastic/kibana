@@ -8,10 +8,8 @@
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import {
-  MonitorDetailsPanelProps,
-  MonitorDetailsPanel,
-} from '../../common/components/monitor_details_panel';
+import type { MonitorDetailsPanelProps } from '../../common/components/monitor_details_panel';
+import { MonitorDetailsPanel } from '../../common/components/monitor_details_panel';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';

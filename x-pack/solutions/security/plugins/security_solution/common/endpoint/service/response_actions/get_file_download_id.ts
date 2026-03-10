@@ -12,7 +12,10 @@ import type { ActionDetails } from '../../types';
  * @param action
  * @param agentId
  */
-export const getFileDownloadId = (action: ActionDetails, agentId?: string): string => {
+export const getFileDownloadId = (
+  action: Pick<ActionDetails, 'id' | 'agents' | 'agentType'>,
+  agentId?: string
+): string => {
   const { id: actionId, agents, agentType } = action;
 
   if (agentId && !agents.includes(agentId)) {

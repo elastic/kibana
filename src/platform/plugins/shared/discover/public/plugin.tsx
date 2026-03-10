@@ -26,6 +26,9 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -39,10 +42,7 @@ import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
-import {
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
-  ACTION_VIEW_SAVED_SEARCH,
-} from './embeddable/constants';
+import { ACTION_VIEW_SAVED_SEARCH, LEGACY_LOG_STREAM_EMBEDDABLE } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
@@ -55,14 +55,11 @@ import type {
   DiscoverStart,
   DiscoverStartPlugins,
 } from './types';
-import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
-import type {
-  DiscoverEBTContextProps,
-  DiscoverEBTManager,
-} from './plugin_imports/discover_ebt_manager';
-import type { ProfilesManager } from './context_awareness';
+import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
+import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
+import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
 import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
-import { registerDiscoverEBTManagerAnalytics } from './plugin_imports/discover_ebt_manager_registrations';
+import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -83,6 +80,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
+  private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -140,6 +138,8 @@ export class DiscoverPlugin
       );
     }
 
+    plugins.inspector.registerView(getProfilesInspectorView());
+
     const {
       setTrackedUrl,
       restorePreviousUrl,
@@ -177,12 +177,18 @@ export class DiscoverPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       visibleIn: ['globalSearch', 'sideNav', 'kibanaOverview'],
       mount: async (params: AppMountParameters) => {
-        const [coreStart, discoverStartPlugins] = await core.getStartServices();
+        const [[coreStart, discoverStartPlugins], historyService, ebtManager, { renderApp }] =
+          await Promise.all([
+            core.getStartServices(),
+            getHistoryService(),
+            getEbtManager(),
+            import('./application'),
+          ]);
 
         // Store the current scoped history so initializeKbnUrlTracking can access it
         this.scopedHistory = params.history;
 
-        (await getHistoryService()).syncHistoryLocations();
+        historyService.syncHistoryLocations();
         appMounted();
 
         // dispatch synthetic hash change event to update hash history objects
@@ -191,7 +197,6 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
-        const ebtManager = await getEbtManager();
         ebtManager.onDiscoverAppMounted();
 
         const services = await this.getDiscoverServicesWithProfiles({
@@ -205,9 +210,9 @@ export class DiscoverPlugin
         // make sure the data view list is up to date
         discoverStartPlugins.dataViews.clearCache();
 
-        const { renderApp } = await import('./application');
         const unmount = renderApp({
           element: params.element,
+          onAppLeave: params.onAppLeave,
           services,
           customizationContext: defaultCustomizationContext,
         });
@@ -232,16 +237,16 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
+    plugins.cps?.cpsManager?.registerAppAccess('discover', () => ProjectRoutingAccess.EDITABLE);
+
     plugins.uiActions.addTriggerActionAsync(
-      'CONTEXT_MENU_TRIGGER',
+      ON_OPEN_PANEL_MENU,
       ACTION_VIEW_SAVED_SEARCH,
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
       }
     );
-    plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
@@ -254,14 +259,17 @@ export class DiscoverPlugin
           return esqlLocatorGetLocation({
             discoverAppLocator,
             dataViews: plugins.dataViews,
+            http: core.http,
           });
         },
       });
     }
 
     const getDiscoverServicesInternal = async () => {
-      const ebtManager = await getEmptyEbtManager();
-      const { profilesManager } = await this.createProfileServices(ebtManager);
+      const [ebtManager, { profilesManager }] = await Promise.all([
+        getEmptyEbtManager(),
+        this.createProfileServices(),
+      ]);
       return this.getDiscoverServices({ core, plugins, profilesManager, ebtManager });
     };
 
@@ -279,7 +287,7 @@ export class DiscoverPlugin
     }
   }
 
-  private async createProfileServices(ebtManager: DiscoverEBTManager) {
+  private async createProfileServices() {
     const {
       RootProfileService,
       DataSourceProfileService,
@@ -293,8 +301,7 @@ export class DiscoverPlugin
     const profilesManager = new ProfilesManager(
       rootProfileService,
       dataSourceProfileService,
-      documentProfileService,
-      ebtManager
+      documentProfileService
     );
 
     return {
@@ -318,27 +325,32 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) {
-    const {
-      rootProfileService,
-      dataSourceProfileService,
-      documentProfileService,
-      profilesManager,
-    } = await this.createProfileServices(ebtManager);
-    const services = await this.getDiscoverServices({
-      core,
-      plugins,
-      profilesManager,
-      ebtManager,
-      scopedHistory,
-      setHeaderActionMenu,
-    });
-    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
+    const [
+      { rootProfileService, dataSourceProfileService, documentProfileService, profilesManager },
+      { createProfileProviderSharedServices, registerProfileProviders },
+    ] = await Promise.all([
+      this.createProfileServices(),
+      import('./context_awareness/profile_providers'),
+    ]);
 
-    await registerProfileProviders({
+    const [sharedServices, services] = await Promise.all([
+      (this.profileProviderSharedServices ??= createProfileProviderSharedServices(plugins)),
+      this.getDiscoverServices({
+        core,
+        plugins,
+        profilesManager,
+        ebtManager,
+        scopedHistory,
+        setHeaderActionMenu,
+      }),
+    ]);
+
+    registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds: this.experimentalFeatures.enabledProfiles ?? [],
+      sharedServices,
       services,
     });
 
@@ -360,7 +372,10 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const { buildServices } = await getSharedServices();
+    const [{ buildServices }, historyService] = await Promise.all([
+      getSharedServices(),
+      getHistoryService(),
+    ]);
     return buildServices({
       core,
       plugins,
@@ -368,7 +383,7 @@ export class DiscoverPlugin
       locator: this.locator!,
       contextLocator: this.contextLocator!,
       singleDocLocator: this.singleDocLocator!,
-      history: (await getHistoryService()).getHistory(),
+      history: historyService.getHistory(),
       scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
@@ -387,8 +402,10 @@ export class DiscoverPlugin
     };
 
     const getDiscoverServicesForEmbeddable = async () => {
-      const [coreStart, deps] = await core.getStartServices();
-      const ebtManager = await getEmptyEbtManager();
+      const [[coreStart, deps], ebtManager] = await Promise.all([
+        core.getStartServices(),
+        getEmptyEbtManager(),
+      ]);
       return this.getDiscoverServicesWithProfiles({
         core: coreStart,
         plugins: deps,
@@ -398,16 +415,8 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        container.addNewPanel(
-          {
-            panelType: SEARCH_EMBEDDABLE_TYPE,
-            serializedState: {
-              rawState: { savedObjectId: savedObject.id },
-              references: savedObject.references,
-            },
-          },
-          true
-        );
+        const { addPanelFromLibrary } = await getEmbeddableServices();
+        await addPanelFromLibrary(container, savedObject);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
@@ -428,6 +437,29 @@ export class DiscoverPlugin
         discoverServices,
       });
     });
+
+    // We register a specialized saved search embeddable factory for the log stream embeddable to support old log stream panels.
+    plugins.embeddable.registerReactEmbeddableFactory(LEGACY_LOG_STREAM_EMBEDDABLE, async () => {
+      const [startServices, discoverServices, { getLegacyLogStreamEmbeddableFactory }] =
+        await Promise.all([
+          getStartServices(),
+          getDiscoverServicesForEmbeddable(),
+          getEmbeddableServices(),
+        ]);
+
+      return getLegacyLogStreamEmbeddableFactory({
+        startServices,
+        discoverServices,
+      });
+    });
+
+    plugins.embeddable.registerLegacyURLTransform(
+      SEARCH_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await getEmbeddableServices();
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
   }
 }
 
