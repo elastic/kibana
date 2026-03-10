@@ -378,6 +378,6 @@ export function groupIsNotCollapsed(def: {
 }
 
 export function isLensESQLConfig(config: LensApiState): boolean {
-  if (config.type == 'xy') return config.layers.some(layer => layer.dataset?.type === 'esql');
+  if (config.type == 'xy') return config.layers.some((layer) => layer.dataset?.type === 'esql');
   return config.dataset?.type === 'esql';
 }

@@ -78,7 +78,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       if (isLensESQLConfig(req.body)) {
         return res.badRequest({
           body: {
-            message: 'ES|QL charts are not yet supported in Lens. Use POST /api/dashboards instead.',
+            message:
+              'ES|QL charts are not yet supported in Lens. Use POST /api/dashboards instead.',
           },
         });
       }
