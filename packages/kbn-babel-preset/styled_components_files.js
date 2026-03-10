@@ -234,7 +234,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]add_item_form[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]description_step[\/\\]helpers.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]description_step[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]description_step[\/\\]threat_description.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]mitre[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]mitre[\/\\]subtechnique_fields.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_creation_ui[\/\\]components[\/\\]mitre[\/\\]technique_fields.tsx/,
