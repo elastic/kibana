@@ -132,7 +132,7 @@ async function handleMatchTypeSuggestions(
           lineParseResult.fullKey,
           adjustedRange,
           autocompleteContext.dynamicConnectorTypes,
-          { isInsideLoopBody: isInsideLoopBody(autocompleteContext) }
+          isInsideLoopBody(autocompleteContext)
         );
       }
       return null;

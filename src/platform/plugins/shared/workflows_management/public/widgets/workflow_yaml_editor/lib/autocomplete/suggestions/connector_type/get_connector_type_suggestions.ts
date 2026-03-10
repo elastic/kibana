@@ -37,11 +37,10 @@ export function getConnectorTypeSuggestions(
   typePrefix: string,
   range: monaco.IRange,
   dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>,
-  options?: { isInsideLoopBody?: boolean }
+  isInsideLoopBody = false
 ): monaco.languages.CompletionItem[] {
-  const isInsideLoop = options?.isInsideLoopBody ?? false;
   // Create a cache key based on the type prefix, context, and loop state
-  const cacheKey = `${typePrefix}|${JSON.stringify(range)}|${isInsideLoop}`;
+  const cacheKey = `${typePrefix}|${JSON.stringify(range)}|${isInsideLoopBody}`;
 
   // Check cache first
   if (connectorTypeSuggestionsCache.has(cacheKey)) {
@@ -118,7 +117,7 @@ export function getConnectorTypeSuggestions(
     const matchingBuiltInTypes = builtInStepTypes.filter(
       (stepType) =>
         stepType.type.toLowerCase().includes(typePrefix.toLowerCase()) &&
-        (!stepType.loopOnly || isInsideLoop)
+        (!stepType.loopOnly || isInsideLoopBody)
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
