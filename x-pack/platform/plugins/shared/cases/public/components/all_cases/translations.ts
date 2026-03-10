@@ -251,7 +251,7 @@ export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreF
 export const CLOSE_CASE_MODAL_TITLE = i18n.translate(
   'xpack.cases.allCasesView.closeCaseModal.title',
   {
-    defaultMessage: 'Sync alert close reason',
+    defaultMessage: 'Select alert close reason',
   }
 );
 
@@ -265,14 +265,21 @@ export const CLOSE_CASE_MODAL_REASON_LABEL = i18n.translate(
 export const CLOSE_CASE_MODAL_CONFIRM = i18n.translate(
   'xpack.cases.allCasesView.closeCaseModal.confirmButtonLabel',
   {
-    defaultMessage: 'Sync',
+    defaultMessage: 'Confirm and close case',
   }
 );
 
 export const CLOSE_CASE_MODAL_CLOSE_BUTTON = i18n.translate(
   'xpack.cases.allCasesView.closeCaseModal.closeButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.allCasesView.closeCaseModal.reasonSearchPlaceholder',
+  {
+    defaultMessage: 'Reason for closing attached alerts',
   }
 );
 

@@ -64,6 +64,7 @@ const CloseCaseModalComponent = React.memo<CloseCaseModalProps>(
           singleSelection="always"
           height={240}
           searchable
+          searchProps={{ placeholder: i18n.CLOSE_CASE_MODAL_REASON_SEARCH_PLACEHOLDER }}
         >
           {(list, search) => (
             <>
