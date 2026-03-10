@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS } from '@kbn/management-settings-ids';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { StreamsConfig } from '../common/config';
@@ -42,6 +43,7 @@ import type {
   StreamsServer,
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
+import { backfillWiredStreamViews } from './lib/streams/esql_views/backfill_wired_stream_views';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
@@ -155,6 +157,7 @@ export class StreamsPlugin
         attachmentClient,
         queryClient,
         featureClient,
+        uiSettingsClient,
       });
 
       return {
@@ -270,6 +273,24 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
+
+    const soClient = core.savedObjects.getUnsafeInternalClient();
+    const startupUiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+
+    startupUiSettingsClient
+      .get<boolean>(OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS)
+      .then((isWiredStreamViewsEnabled) =>
+        backfillWiredStreamViews({
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+          isWiredStreamViewsEnabled,
+        })
+      )
+      .catch((err: Error) => {
+        this.logger.error(`Failed to backfill wired stream views on startup: ${err?.message}`, {
+          error: err,
+        });
+      });
 
     return {};
   }
