@@ -33,7 +33,7 @@ const eventAnnotationGroupAttributesSchema = schema.object(
     title: schema.string(),
     description: schema.maybe(schema.string()),
     ignoreGlobalFilters: schema.boolean(),
-    annotations: schema.arrayOf(schema.any()),
+    annotations: schema.arrayOf(schema.any(), { maxSize: 100 }),
     dataViewSpec: schema.oneOf([schema.literal(null), schema.object({}, { unknowns: 'allow' })]),
   },
   { unknowns: 'forbid' }
