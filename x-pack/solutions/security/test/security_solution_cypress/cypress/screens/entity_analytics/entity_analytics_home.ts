@@ -8,9 +8,30 @@
 export const PAGE_TITLE = '[data-test-subj="entityAnalyticsHomePage"]';
 export const COMBINED_RISK_DONUT_CHART = '[data-test-subj="risk-score-donut-chart"]';
 export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="recent-anomalies-panel"]';
-// The table wrapper can be in loading-true or loading-false state
-export const ENTITIES_TABLE = '[data-test-subj*="entity-analytics-home-entities-table-loading"]';
-// Table when fully loaded (no longer loading)
-export const ENTITIES_TABLE_LOADED =
-  '[data-test-subj="entity-analytics-home-entities-table-loading-false"]';
-export const TIMELINE_ICON = '[data-test-subj="entity-analytics-home-timeline-icon"]';
+
+export const ENTITIES_TABLE_GRID = '[data-test-subj="entity-analytics-test-subj-grid-wrapper"]';
+export const ENTITIES_TABLE_EMPTY = '[data-test-subj="entity-analytics-empty-state"]';
+
+export const DATAGRID_HEADER = '[data-test-subj="dataGridHeader"]';
+export const DATAGRID_COLUMN_SELECTOR = '[data-test-subj="dataGridColumnSelectorButton"]';
+export const DATAGRID_SORTING_SELECTOR = '[data-test-subj="dataGridColumnSortingButton"]';
+
+export const EXPAND_ROW_BUTTON = '[data-test-subj="docTableExpandToggleColumn"]';
+
+export const TIMELINE_ACTION = '[data-test-subj="entity-analytics-home-timeline-icon"]';
+export const AI_ACTION = '[data-test-subj="entity-analytics-home-ai-action-icon"]';
+
+export const FIELDS_SELECTOR_BUTTON = '[data-test-subj="entityAnalyticsFieldsSelectorOpenButton"]';
+export const FIELDS_SELECTOR_MODAL = '[data-test-subj="entityAnalyticsFieldsSelectorModal"]';
+export const FIELDS_SELECTOR_RESET = '[data-test-subj="entityAnalyticsFieldsSelectorResetButton"]';
+export const FIELDS_SELECTOR_CLOSE = '[data-test-subj="entityAnalyticsFieldsSelectorCloseButton"]';
+
+export const LAST_UPDATED = '[data-test-subj="entity-analytics-toolbar-updated-at"]';
+
+export const GROUPING_SELECTOR = '[data-test-subj="entity-analytics-grouping"]';
+export const GROUPING_COUNTER = '[data-test-subj="entity-analytics-grouping-counter"]';
+
+export const FLYOUT_RIGHT_PANEL = '[data-test-subj="rightSection"]';
+
+export const ALERTS_DISTRIBUTION_BAR =
+  '[data-test-subj="entity-analytics-alerts-distribution-bar"]';
