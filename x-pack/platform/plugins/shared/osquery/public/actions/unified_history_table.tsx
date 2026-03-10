@@ -428,7 +428,7 @@ const UnifiedHistoryTableComponent = () => {
       {
         field: 'timestamp',
         name: i18n.translate('xpack.osquery.liveQueryActions.table.createdAtColumnTitle', {
-          defaultMessage: 'Timestamp',
+          defaultMessage: 'Created at',
         }),
         width: '200px',
         render: renderTimestampColumn,
@@ -442,7 +442,7 @@ const UnifiedHistoryTableComponent = () => {
         render: renderRunByColumn,
       },
       {
-        name: i18n.translate('xpack.osquery.liveQueryActions.table.viewDetailsColumnTitle', {
+        name: i18n.translate('xpack.osquery.liveQueryActions.table.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
         width: '120px',

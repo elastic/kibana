@@ -132,7 +132,7 @@ describe('UnifiedHistoryTable', () => {
     expect(headerTexts).toContain('Source');
     expect(headerTexts).toContain('Results');
     expect(headerTexts).toContain('Agents');
-    expect(headerTexts).toContain('Timestamp');
+    expect(headerTexts).toContain('Created at');
     expect(headerTexts).toContain('Run by');
     expect(headerTexts).toContain('Actions');
   });
