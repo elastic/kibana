@@ -6,7 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 export interface InferenceFeatureConfig {
   featureId: string;
@@ -22,13 +22,10 @@ export interface InferenceFeatureRegistryContract {
   register: (feature: InferenceFeatureConfig) => void;
 }
 
-export interface InferenceFeatureRegistryReadContract {
+export interface InferenceFeatureRegistryStartContract extends InferenceFeatureRegistryContract {
   getAll: () => InferenceFeatureConfig[];
   get: (featureId: string) => InferenceFeatureConfig | undefined;
 }
-
-export type InferenceFeatureRegistryStartContract = InferenceFeatureRegistryContract &
-  InferenceFeatureRegistryReadContract;
 
 export interface SearchInferenceEndpointsPluginSetup {
   features: InferenceFeatureRegistryContract;
@@ -40,7 +37,6 @@ export interface SearchInferenceEndpointsPluginStart {
 
 export interface SearchInferenceEndpointsPluginStartDependencies {
   actions: ActionsPluginStartContract;
-  features: FeaturesPluginStart;
 }
 
 export interface SearchInferenceEndpointsPluginSetupDependencies {
