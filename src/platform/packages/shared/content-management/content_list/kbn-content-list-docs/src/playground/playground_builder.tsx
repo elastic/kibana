@@ -111,18 +111,6 @@ const usePreview = (state: PlaygroundState) => {
     [provider.entity, provider.entityPlural]
   );
 
-  const dataSource = useMemo(() => {
-    const baseOptions = { totalItems: data.totalItems, isEmpty: !data.hasItems };
-    if (data.isLoading) {
-      return {
-        findItems: createStoryFindItems({ ...baseOptions, delay: 800 }),
-      };
-    }
-    return {
-      findItems: createStoryFindItems(baseOptions),
-    };
-  }, [data.totalItems, data.isLoading, data.hasItems]);
-
   const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
 
   const hasTagsFilter = toolbar.filters.some((f) => f.type === 'tags');
@@ -134,10 +122,29 @@ const usePreview = (state: PlaygroundState) => {
   // Starred columns and filters render silently empty without it.
   const hasStarred = features.starred;
 
+  // Memoized before `dataSource` so both the provider and findItems share the same
+  // in-memory favorites set — starring an item is immediately reflected when the
+  // `starredOnly` filter is toggled.
   const favoritesClient = useMemo(
     () => (hasStarred ? createMockFavoritesClient() : undefined),
     [hasStarred]
   );
+
+  const dataSource = useMemo(() => {
+    const baseOptions = {
+      totalItems: data.totalItems,
+      isEmpty: !data.hasItems,
+      favoritesClient,
+    };
+    if (data.isLoading) {
+      return {
+        findItems: createStoryFindItems({ ...baseOptions, delay: 800 }),
+      };
+    }
+    return {
+      findItems: createStoryFindItems(baseOptions),
+    };
+  }, [data.totalItems, data.isLoading, data.hasItems, favoritesClient]);
 
   const providerFeatures = useMemo(
     () => ({

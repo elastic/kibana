@@ -69,10 +69,12 @@ const CoreTagsStarredFeaturesWrapper = () => {
     []
   );
 
+  const favoritesClient = useMemo(() => createMockFavoritesClient(), []);
+
   const dataSource = useMemo(() => {
-    const findItems = createStoryFindItems({ totalItems: 30 });
+    const findItems = createStoryFindItems({ totalItems: 30, favoritesClient });
     return { findItems };
-  }, []);
+  }, [favoritesClient]);
 
   const features = useMemo(
     () => ({
@@ -94,8 +96,6 @@ const CoreTagsStarredFeaturesWrapper = () => {
     }),
     []
   );
-
-  const favoritesClient = useMemo(() => createMockFavoritesClient(), []);
 
   const itemConfig = useMemo(
     () => ({
