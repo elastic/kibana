@@ -810,6 +810,11 @@ describe('generateOtelcolConfig', () => {
       expect(tracesPipeline).toBeDefined();
       expect(tracesPipeline?.exporters).toContain('elasticapm');
       expect(tracesPipeline?.processors).toContain('elasticapm');
+      const metricsPipelineKey = 'metrics/otlp/test-multi-signal-stream-id-1';
+      const metricsPipeline = result.service?.pipelines?.[metricsPipelineKey];
+      expect(metricsPipeline).toBeDefined();
+      expect(metricsPipeline?.exporters).not.toContain('elasticapm');
+      expect(metricsPipeline?.processors).not.toContain('elasticapm');
     });
 
     it('should generate transform with multiple signal type statements when dynamic_signal_types is true', () => {

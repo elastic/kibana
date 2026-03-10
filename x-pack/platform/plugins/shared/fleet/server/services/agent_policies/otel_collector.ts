@@ -285,24 +285,18 @@ function conditionallyAddApmToPipelines(
   if (!shouldAddAPMConfig) {
     return pipelines;
   }
-  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'exporters');
-  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'processors');
-  return pipelines;
-}
-
-function addCompomentToPipelines(
-  pipelines: any,
-  componentId: string,
-  type: string
-): Record<OTelCollectorPipelineID, any> {
-  for (const pipelineId in pipelines) {
-    if (pipelines[pipelineId][type]) {
-      pipelines[pipelineId][type] = pipelines[pipelineId][type].concat([componentId]);
-    } else {
-      pipelines[pipelineId][type] = [componentId];
+  const result: Record<OTelCollectorPipelineID, any> = {};
+  Object.entries(pipelines as Record<OTelCollectorPipelineID, Record<string, string[]>>).forEach(
+    ([pipelineID, pipeline]) => {
+      const signalType = getSignalType(pipelineID);
+      if (signalType === 'traces') {
+        pipeline.exporters = [...(pipeline.exporters || []), 'elasticapm'];
+        pipeline.processors = [...(pipeline.processors || []), 'elasticapm'];
+      }
+      result[pipelineID] = pipeline;
     }
-  }
-  return pipelines;
+  );
+  return result;
 }
 
 function addSuffixToOtelcolPipelinesComponents(
