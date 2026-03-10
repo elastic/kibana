@@ -17,8 +17,15 @@ import { EntityStoreTaskType } from './constants';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
+import { AssetManagerClient } from '../domain/asset_manager';
 import { getLatestEntitiesIndexName } from '../domain/asset_manager/latest_index';
+import { ENTITY_STORE_STATUS } from '../domain/constants';
+import { CRUDClient } from '../domain/crud';
+import { CcsLogsExtractionClient, LogsExtractionClient } from '../domain/logs_extraction';
+import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
+import type { GetStatusResult } from '../domain/types';
 import {
+  ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   createReportEvent,
   type TelemetryReporter,
@@ -34,16 +41,54 @@ const getStoreSize = (esClient: ElasticsearchClient, index: string, entityType: 
     query: { term: { 'entity.EngineMetadata.Type': entityType } },
   });
 
+const toHealthReportPayload = (statusResult: GetStatusResult) => {
+  if (statusResult.status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
+    return { engines: [] };
+  }
+
+  const { engines } = statusResult;
+
+  return {
+    engines: engines.map((engine) => ({
+      type: engine.type,
+      status: engine.status,
+      components: ('components' in engine ? engine.components : []).map((component) => {
+        const normalizedComponent: {
+          id: string;
+          resource: string;
+          installed: boolean;
+          status?: string;
+          lastError?: string;
+        } = {
+          id: component.id,
+          resource: component.resource,
+          installed: component.installed,
+        };
+
+        if ('status' in component && typeof component.status === 'string') {
+          normalizedComponent.status = component.status;
+        }
+
+        if ('lastError' in component && typeof component.lastError === 'string') {
+          normalizedComponent.lastError = component.lastError;
+        }
+
+        return normalizedComponent;
+      }),
+    })),
+  };
+};
+
 async function runTask({
   taskInstance,
   fakeRequest,
   logger,
   core,
-  reportEvent,
+  telemetryReporter,
 }: RunContext & {
   logger: Logger;
   core: EntityStoreCoreSetup;
-  reportEvent: TelemetryReporter['reportEvent'];
+  telemetryReporter: TelemetryReporter;
 }): Promise<RunResult> {
   const namespace = taskInstance.state.namespace as string;
 
@@ -53,17 +98,67 @@ async function runTask({
   }
 
   try {
-    const [coreStart] = await core.getStartServices();
+    const [coreStart, startPlugins] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+    const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
     const index = getLatestEntitiesIndexName(namespace);
 
     for (const entityType of ALL_ENTITY_TYPES) {
       try {
         const { count: storeSize } = await getStoreSize(esClient, index, entityType);
-        reportEvent(ENTITY_STORE_USAGE_EVENT, { storeSize, entityType, namespace });
+        telemetryReporter.reportEvent(ENTITY_STORE_USAGE_EVENT, {
+          storeSize,
+          entityType,
+          namespace,
+        });
       } catch (e) {
         logger.error(`Error reporting store usage for ${entityType}: ${e.message}`);
       }
+    }
+
+    try {
+      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+        soClient,
+        coreStart.elasticsearch.client.asInternalUser,
+        fakeRequest
+      );
+      const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
+      const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+      const crudClient = new CRUDClient({
+        logger,
+        esClient,
+        namespace,
+      });
+      const ccsLogsExtractionClient = new CcsLogsExtractionClient(logger, esClient, crudClient);
+      const logsExtractionClient = new LogsExtractionClient({
+        logger,
+        namespace,
+        esClient,
+        dataViewsService,
+        engineDescriptorClient,
+        globalStateClient,
+        ccsLogsExtractionClient,
+      });
+      const assetManagerClient = new AssetManagerClient({
+        logger,
+        esClient,
+        taskManager: startPlugins.taskManager,
+        engineDescriptorClient,
+        globalStateClient,
+        namespace,
+        isServerless: false,
+        logsExtractionClient,
+        security: startPlugins.security,
+        analytics: telemetryReporter,
+        savedObjectsClient: soClient,
+      });
+      const statusResult = await assetManagerClient.getStatus(true);
+      telemetryReporter.reportEvent(
+        ENTITY_STORE_HEALTH_REPORT_EVENT,
+        toHealthReportPayload(statusResult)
+      );
+    } catch (e) {
+      logger.error(`Error reporting entity store health: ${e.message}`);
     }
   } catch (e) {
     logger.error(`Error running store usage task: ${e.message}`);
@@ -82,7 +177,7 @@ export function registerStoreUsageTask({
   logger: Logger;
 }): void {
   try {
-    const { reportEvent } = createReportEvent(core.analytics);
+    const telemetryReporter = createReportEvent(core.analytics);
     taskManager.registerTaskDefinitions({
       [config.type]: {
         title: config.title,
@@ -95,7 +190,7 @@ export function registerStoreUsageTask({
               abortController,
               logger: logger.get(taskInstance.id),
               core,
-              reportEvent,
+              telemetryReporter,
             }),
         }),
       },

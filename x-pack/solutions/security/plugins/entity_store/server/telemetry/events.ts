@@ -32,6 +32,24 @@ interface StoreUsageEventPayload {
   entityType: string;
   namespace: string;
 }
+
+interface EntityStoreHealthComponentPayload {
+  id: string;
+  resource: string;
+  installed: boolean;
+  status?: string;
+  lastError?: string;
+}
+
+interface EntityStoreHealthEnginePayload {
+  type: string;
+  status: string;
+  components: EntityStoreHealthComponentPayload[];
+}
+
+interface EntityStoreHealthReportPayload {
+  engines: EntityStoreHealthEnginePayload[];
+}
 // ------------------------------------
 // Event definitions
 // ------------------------------------
@@ -114,6 +132,64 @@ export const ENTITY_STORE_USAGE_EVENT = {
   },
 } as const satisfies EventTypeOpts<StoreUsageEventPayload>;
 
+export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
+  eventType: 'entity_store_health_report',
+  schema: {
+    engines: {
+      type: 'array',
+      items: {
+        properties: {
+          type: {
+            type: 'keyword',
+            _meta: { description: 'Engine type (e.g "host" or "generic")' },
+          },
+          status: {
+            type: 'keyword',
+            _meta: {
+              description: 'Overall engine status',
+            },
+          },
+          components: {
+            type: 'array',
+            items: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                  _meta: { description: 'Component identifier' },
+                },
+                resource: {
+                  type: 'keyword',
+                  _meta: {
+                    description: 'Type of the component (e.g. "index" or "task")',
+                  },
+                },
+                installed: {
+                  type: 'boolean',
+                  _meta: { description: 'Whether the component is installed' },
+                },
+                status: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Task component status when the component is a task',
+                  },
+                },
+                lastError: {
+                  type: 'keyword',
+                  _meta: {
+                    optional: true,
+                    description: 'Task component last error message, when present',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntityStoreHealthReportPayload>;
+
 // ------------------------------------
 // Registration
 // ------------------------------------
@@ -123,6 +199,7 @@ const events = [
   ENTITY_STORE_INITIALIZATION_FAILURE_EVENT,
   ENTITY_STORE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  ENTITY_STORE_HEALTH_REPORT_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -137,6 +214,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_DELETION_EVENT.eventType]: DeletionEvent;
   [ENTITY_STORE_INITIALIZATION_FAILURE_EVENT.eventType]: InitializationFailureEvent;
   [ENTITY_STORE_USAGE_EVENT.eventType]: StoreUsageEventPayload;
+  [ENTITY_STORE_HEALTH_REPORT_EVENT.eventType]: EntityStoreHealthReportPayload;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
