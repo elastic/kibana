@@ -7,7 +7,10 @@
 
 import React, { memo, useState, useCallback, useEffect } from 'react';
 
-import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type {
+  FieldConfig,
+  ValidationFunc,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   useFormContext,
@@ -17,6 +20,9 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
 import { toSlugIdentifier, isValidSlugIdentifier } from '@kbn/std';
+import type { HttpSetup } from '@kbn/core/public';
+import { useKibana } from '../../../common/lib/kibana';
+import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
 
 interface ConnectorFormData {
   name: string;
@@ -30,10 +36,37 @@ interface ConnectorFormFieldsProps {
 
 const { emptyField } = fieldValidators;
 
+const createConnectorIdValidator = (http: HttpSetup, isEdit: boolean) => {
+  const validator: ValidationFunc<ConnectorFormData, string, { id: string }> = async ({
+    value,
+  }) => {
+    if (isEdit || !value || typeof value !== 'string') return;
+
+    try {
+      const response = await checkConnectorIdAvailability({ http, id: value });
+      if (!response.connectorIdAvailable) {
+        return {
+          message: i18n.translate(
+            'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdExists',
+            {
+              defaultMessage:
+                'A connector with this ID already exists. Please choose a different ID.',
+            }
+          ),
+        };
+      }
+    } catch (error) {
+      // if the check fails, allow form submission - server will validate
+    }
+  };
+  return validator;
+};
+
 const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.nameFieldLabel', {
     defaultMessage: 'Connector name',
   }),
+
   validations: [
     {
       validator: emptyField(
@@ -48,7 +81,10 @@ const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   ],
 };
 
-const idConfig = (isEdit: boolean): FieldConfig<{ id: string }, ConnectorFormData> => ({
+const idConfig = (
+  http: HttpSetup,
+  isEdit: boolean
+): FieldConfig<{ id: string }, ConnectorFormData> => ({
   label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldLabel', {
     defaultMessage: 'Connector ID',
   }),
@@ -59,6 +95,7 @@ const idConfig = (isEdit: boolean): FieldConfig<{ id: string }, ConnectorFormDat
     : i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.idFieldHelpText', {
         defaultMessage: 'A unique identifier for this connector.',
       }),
+
   validations: [
     {
       validator: emptyField(
@@ -86,6 +123,10 @@ const idConfig = (isEdit: boolean): FieldConfig<{ id: string }, ConnectorFormDat
         }
       },
     },
+    {
+      validator: createConnectorIdValidator(http, isEdit),
+      isAsync: true,
+    },
   ],
 });
 
@@ -93,6 +134,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
   canSave,
   isEdit,
 }) => {
+  const { http } = useKibana().services;
   const { setFieldValue } = useFormContext();
   const [{ name }] = useFormData<ConnectorFormData>({ watch: ['name'] });
   const [usingCustomIdentifier, setUsingCustomIdentifier] = useState(false);
@@ -128,7 +170,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
       <UseField
         path="id"
         component={Field}
-        config={idConfig(isEdit)}
+        config={idConfig(http, isEdit)}
         componentProps={{
           euiFieldProps: {
             readOnly: !canSave || isEdit,

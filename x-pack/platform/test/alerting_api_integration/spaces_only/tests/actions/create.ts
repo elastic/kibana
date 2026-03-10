@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('create', () => {
+  describe.only('create', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
