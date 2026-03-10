@@ -6,16 +6,16 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
+import type { EntityDefinition } from '../../../common/domain/definitions/entity_schema';
 import {
-  type EntityDefinition,
+  isSingleFieldIdentity,
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import {
   getEuidEsqlDocumentsContainsIdFilter,
-  getFieldEvaluationsEsql,
+  getFieldEvaluationsEsqlFromDefinition,
 } from '../../../common/domain/euid/esql';
 
 export const ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD =
@@ -36,9 +36,12 @@ export interface PaginationParams {
 }
 
 export interface PaginationFields {
+  // Timestamp to sort and paginate on
   timestampField: string;
-  idField: string;
-  idFieldExprForWhere: string;
+  // Intermediate id field used in the query for pagination
+  idFieldInQuery: string;
+  // Final id field kept in the result
+  finalIdField: string;
 }
 
 export function buildExtractionSourceClause(params: {
@@ -110,38 +113,6 @@ export function castSrcType(field: EntityField): string {
   }
 }
 
-export function getPaginationWhereClause(
-  paginationFields: PaginationFields,
-  pagination?: PaginationParams,
-  paginationRecovery?: { fromDateISO: string; recoveryId: string }
-): string {
-  if (!pagination && !paginationRecovery) {
-    return '';
-  }
-
-  if (paginationRecovery) {
-    return buildPaginationWhereClause(
-      { timestampCursor: paginationRecovery.fromDateISO, idCursor: paginationRecovery.recoveryId },
-      paginationFields.idFieldExprForWhere
-    );
-  }
-
-  if (pagination) {
-    return buildPaginationWhereClause(pagination, paginationFields.idFieldExprForWhere);
-  }
-
-  return '';
-}
-
-function buildPaginationWhereClause(
-  { timestampCursor, idCursor }: PaginationParams,
-  idFieldExprForWhere: string
-): string {
-  return `| WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${timestampCursor}") 
-            OR (${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} == TO_DATETIME("${timestampCursor}") 
-                AND ${idFieldExprForWhere} > "${idCursor}")`;
-}
-
 export function extractPaginationParams(
   esqlResponse: ESQLSearchResponse,
   maxDocs: number,
@@ -152,7 +123,7 @@ export function extractPaginationParams(
     return undefined;
   }
 
-  const { timestampField, idField } = paginationFields;
+  const { timestampField, finalIdField: idField } = paginationFields;
   const columns = esqlResponse.columns;
   const timestampFieldIdx = columns.findIndex(({ name }) => name === timestampField);
   if (timestampFieldIdx === -1) {
@@ -177,19 +148,65 @@ export function extractPaginationParams(
  * Builds the ESQL fragment that evaluates identityField.fieldEvaluations (EVAL only).
  * Returns empty string when there are no field evaluations.
  */
-export function buildFieldEvaluations(type: EntityType): string {
-  const fieldEvaluationsEsql = getFieldEvaluationsEsql(type);
-  if (!fieldEvaluationsEsql) {
-    return '';
-  }
-
-  return `
-  | EVAL ${fieldEvaluationsEsql}`;
+export function buildFieldEvaluations(entityDefinition: EntityDefinition): string {
+  const fieldEvaluationsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+  return `| EVAL ${fieldEvaluationsEsql}`;
 }
 
-/** ESQL WHERE clause fragment after LOOKUP JOIN when entity definition has postAggFilter; otherwise empty. */
-export function buildPostAggFilter(entityDefinition: EntityDefinition): string {
-  return entityDefinition.postAggFilter
-    ? `| WHERE ${conditionToESQL(entityDefinition.postAggFilter)}\n  `
-    : '';
+export function buildPaginationSection(
+  fromDateISO: string,
+  docsLimit: number,
+  paginationFields: PaginationFields,
+  pagination?: PaginationParams,
+  recoveryId?: string
+): string[] {
+  const parts = [];
+  parts.push(
+    `| SORT ${paginationFields.timestampField} ASC, ${paginationFields.idFieldInQuery} ASC`
+  );
+
+  if (pagination) {
+    if (!recoveryId) {
+      parts.push(getPaginationWhereClause(paginationFields, pagination));
+    } else {
+      parts.push(
+        getPaginationWhereClause(paginationFields, pagination, { fromDateISO, recoveryId })
+      );
+    }
+  }
+
+  parts.push(`| LIMIT ${docsLimit}`);
+  return parts;
+}
+
+function getPaginationWhereClause(
+  paginationFields: PaginationFields,
+  pagination: PaginationParams,
+  paginationRecovery?: { fromDateISO: string; recoveryId: string }
+): string {
+  if (paginationRecovery) {
+    return buildPaginationWhereClause(
+      { timestampCursor: paginationRecovery.fromDateISO, idCursor: paginationRecovery.recoveryId },
+      paginationFields
+    );
+  }
+
+  return buildPaginationWhereClause(pagination, paginationFields);
+}
+
+function buildPaginationWhereClause(
+  { timestampCursor, idCursor }: PaginationParams,
+  { timestampField, idFieldInQuery: idFieldExprForWhere }: PaginationFields
+): string {
+  return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}") 
+            OR (${timestampField} == TO_DATETIME("${timestampCursor}") 
+                AND ${idFieldExprForWhere} > "${idCursor}")`;
+}
+
+export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {
+  if (isSingleFieldIdentity(entityDefinition.identityField)) {
+    return false;
+  }
+
+  return (entityDefinition.identityField.fieldEvaluations?.length ?? 0) > 0;
 }

@@ -18,8 +18,9 @@ import {
   TIMESTAMP_FIELD,
   aggregationStats,
   fieldsToKeep,
-  getPaginationWhereClause,
   extractPaginationParams,
+  buildPaginationSection,
+  hasFieldEvaluations,
 } from './query_builder_commons';
 
 const CCS_FIELDS_TO_KEEP = [
@@ -30,8 +31,8 @@ const CCS_FIELDS_TO_KEEP = [
 
 export const CCS_PAGINATION_FIELDS: PaginationFields = {
   timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  idField: MAIN_ENTITY_ID_FIELD,
-  idFieldExprForWhere: MAIN_ENTITY_ID_FIELD,
+  finalIdField: MAIN_ENTITY_ID_FIELD,
+  idFieldInQuery: MAIN_ENTITY_ID_FIELD,
 };
 
 export interface CcsLogsExtractionQueryParams {
@@ -50,33 +51,49 @@ export interface CcsLogsExtractionQueryParams {
  */
 export function buildCcsLogsExtractionEsqlQuery({
   indexPatterns,
-  entityDefinition: { fields, type },
+  entityDefinition,
   fromDateISO,
   toDateISO,
   docsLimit,
   recoveryId,
   pagination,
 }: CcsLogsExtractionQueryParams): string {
-  return (
-    `SET unmapped_fields="nullify";
-    ${buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })}` +
-    buildFieldEvaluations(type) +
-    `| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}
-    | STATS
-      ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
-      ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
-      ${aggregationStats(fields, false)}
-      BY ${MAIN_ENTITY_ID_FIELD}` +
-    `
-    | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${MAIN_ENTITY_ID_FIELD} ASC
-    ${getPaginationWhereClause(
-      CCS_PAGINATION_FIELDS,
-      pagination,
-      recoveryId ? { fromDateISO, recoveryId } : undefined
-    )}
-    | KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}
-    | LIMIT ${docsLimit}`
+  const { fields, type } = entityDefinition;
+
+  const parts = [];
+
+  // Because we don't have updates on remote clusters, we need to nullify the unmapped fields
+  parts.push(`SET unmapped_fields="nullify";`);
+
+  // FROM and WHERE
+  parts.push(
+    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
   );
+
+  // Special evaluations for entity id
+  if (hasFieldEvaluations(entityDefinition)) {
+    parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  // Builds the id
+  parts.push(`| EVAL ${MAIN_ENTITY_ID_FIELD} = ${getEuidEsqlEvaluation(type)}`);
+
+  // Main stats aggregation from incoming data
+  parts.push(`| STATS
+    ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
+    ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
+    ${aggregationStats(fields, false)}
+    BY ${MAIN_ENTITY_ID_FIELD}`);
+
+  // Keep fields
+  parts.push(`| KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}`);
+
+  // Paginate
+  parts.push(
+    ...buildPaginationSection(fromDateISO, docsLimit, CCS_PAGINATION_FIELDS, pagination, recoveryId)
+  );
+
+  return parts.join('\n');
 }
 
 export function extractCcsPaginationParams(

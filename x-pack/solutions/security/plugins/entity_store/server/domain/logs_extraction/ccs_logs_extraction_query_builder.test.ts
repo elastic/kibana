@@ -9,15 +9,14 @@ import { buildCcsLogsExtractionEsqlQuery } from './ccs_logs_extraction_query_bui
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 
 describe('buildCcsLogsExtractionEsqlQuery', () => {
-  it('generates query without LOOKUP JOIN', () => {
+  it('generates query for generic entity type', () => {
     const query = buildCcsLogsExtractionEsqlQuery({
       indexPatterns: ['remote_cluster:logs-*'],
-      entityDefinition: getEntityDefinition('host', 'default'),
+      entityDefinition: getEntityDefinition('generic', 'default'),
       fromDateISO: '2022-01-01T00:00:00.000Z',
       toDateISO: '2022-01-01T23:59:59.999Z',
       docsLimit: 10000,
     });
-    expect(query).not.toContain('LOOKUP JOIN');
     expect(query).toMatchSnapshot();
   });
 

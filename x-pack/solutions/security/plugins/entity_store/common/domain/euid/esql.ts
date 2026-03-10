@@ -6,7 +6,7 @@
  */
 
 import { conditionToESQL } from '@kbn/streamlang';
-import type { EntityType } from '../definitions/entity_schema';
+import type { EntityDefinitionWithoutId, EntityType } from '../definitions/entity_schema';
 import type { FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
@@ -139,12 +139,17 @@ function escapeEsqlString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
+  return getFieldEvaluationsEsqlFromDefinition(getEntityDefinitionWithoutId(entityType));
+}
+
 /**
  * Returns an ESQL EVAL fragment for all field evaluations of the given entity type.
  * Use in a pipeline as | EVAL <result>. Returns undefined when there are no field evaluations.
  */
-export function getFieldEvaluationsEsql(entityType: EntityType): string | undefined {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
+export function getFieldEvaluationsEsqlFromDefinition({
+  identityField,
+}: EntityDefinitionWithoutId): string | undefined {
   if (isSingleFieldIdentity(identityField)) {
     return undefined;
   }

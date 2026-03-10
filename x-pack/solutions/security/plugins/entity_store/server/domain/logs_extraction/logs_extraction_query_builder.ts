@@ -6,6 +6,8 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import type { Condition } from '@kbn/streamlang';
+import { conditionToESQL } from '@kbn/streamlang';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
@@ -26,11 +28,11 @@ import {
   ENTITY_NAME_FIELD,
   ENTITY_TYPE_FIELD,
   TIMESTAMP_FIELD,
-  buildPostAggFilter,
   aggregationStats,
   fieldsToKeep,
-  getPaginationWhereClause,
   extractPaginationParams,
+  buildPaginationSection,
+  hasFieldEvaluations,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -38,8 +40,8 @@ const HASH_ALG = 'MD5';
 
 export const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
   timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
-  idField: ENGINE_METADATA_UNTYPED_ID_FIELD,
-  idFieldExprForWhere: recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
+  finalIdField: ENGINE_METADATA_UNTYPED_ID_FIELD,
+  idFieldInQuery: recentData(ENGINE_METADATA_UNTYPED_ID_FIELD),
 };
 
 const FIELDS_TO_KEEP = [
@@ -89,46 +91,89 @@ export function buildLogsExtractionEsqlQuery({
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
 
-  return (
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId }) +
-    buildFieldEvaluations(type) +
-    `
-  | EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
+  const parts = [];
+
+  // FROM and WHERE
+  parts.push(
+    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+  );
+
+  // Special evaluations for entity id
+  if (hasFieldEvaluations(entityDefinition)) {
+    parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  // Evaluation of the id without type so we can fallback to name
+  parts.push(
+    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
       withTypeId: false,
-    })}` +
-    `
-  | STATS
+    })}`
+  );
+
+  // Main stats aggregation from incoming data
+  parts.push(`| STATS
     ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
     ${aggregationStats(fields)}
-    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}` +
-    `
-  | EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = ${getMainEntityIdFromUntypedEsql(
+    BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}`);
+
+  // If there is no post aggregation filter we can paginate before the lookup join
+  // and save some performance
+  if (!entityDefinition.postAggFilter) {
+    parts.push(
+      ...buildPaginationSection(
+        fromDateISO,
+        docsLimit,
+        MAIN_EXTRACTION_PAGINATION_FIELDS,
+        pagination,
+        recoveryId
+      )
+    );
+  }
+
+  // Builds the main entity id
+  parts.push(
+    `| EVAL ${recentData(MAIN_ENTITY_ID_FIELD)} = ${getMainEntityIdFromUntypedEsql(
       entityDefinition,
       recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)
-    )}` +
-    `
-  | LOOKUP JOIN ${latestIndex}
-      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}` +
-    `${buildPostAggFilter(entityDefinition)}` +
-    `
-  | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
-      ENGINE_METADATA_UNTYPED_ID_FIELD
-    )} ASC
-  ${getPaginationWhereClause(
-    MAIN_EXTRACTION_PAGINATION_FIELDS,
-    pagination,
-    recoveryId ? { fromDateISO, recoveryId } : undefined
-  )}
-  | LIMIT ${docsLimit}
-  | EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)}
-  | EVAL ${customFieldEvalLogic(type, entityTypeFallback)}` +
-    `
-  | RENAME
-    ${recentData(MAIN_ENTITY_ID_FIELD)} AS ${MAIN_ENTITY_ID_FIELD},
-    ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}
-  | KEEP ${fieldsToKeep(fields, FIELDS_TO_KEEP)}`
+    )}`
   );
+
+  // Lookup join to the latest index to perform data retention
+  parts.push(`| LOOKUP JOIN ${latestIndex}
+      ON ${recentData(MAIN_ENTITY_ID_FIELD)} == ${MAIN_ENTITY_ID_FIELD}`);
+
+  if (entityDefinition.postAggFilter) {
+    // If it has post aggregation filter, we filter it right after lookup join
+    parts.push(buildPostAggFilter(entityDefinition.postAggFilter));
+    // then we can paginate after the post aggregation filter
+    parts.push(
+      ...buildPaginationSection(
+        fromDateISO,
+        docsLimit,
+        MAIN_EXTRACTION_PAGINATION_FIELDS,
+        pagination,
+        recoveryId
+      )
+    );
+  }
+
+  // Perform the final merge of the fields between latest and recent data
+  parts.push(`| EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)}`);
+
+  // Perform some custom field evaluations, like type and name fallback
+  parts.push(`| EVAL ${customFieldEvalLogic(type, entityTypeFallback)}`);
+
+  // Rename the fields to the final names
+  parts.push(`| RENAME
+    ${recentData(MAIN_ENTITY_ID_FIELD)} AS ${MAIN_ENTITY_ID_FIELD},
+    ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} AS ${ENGINE_METADATA_UNTYPED_ID_FIELD}`);
+
+  // keep recent data fields
+  parts.push(`| KEEP ${fieldsToKeep(fields, FIELDS_TO_KEEP)}`);
+
+  // join everything together
+  return parts.join('\n');
 }
 
 export function extractMainPaginationParams(
@@ -189,4 +234,9 @@ function getMainEntityIdFromUntypedEsql(
     return untypedIdExpression;
   }
   return `CONCAT("${type}:", ${untypedIdExpression})`;
+}
+
+/** ESQL WHERE clause fragment after LOOKUP JOIN when entity definition has postAggFilter; otherwise empty. */
+function buildPostAggFilter(postAggFilter: Condition): string {
+  return `| WHERE ${conditionToESQL(postAggFilter)} `;
 }

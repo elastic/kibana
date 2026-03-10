@@ -9,8 +9,9 @@ import {
   getEuidEsqlEvaluation,
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlFilterBasedOnDocument,
-  getFieldEvaluationsEsql,
+  getFieldEvaluationsEsqlFromDefinition,
 } from './esql';
+import { getEntityDefinition } from '../definitions/registry';
 
 const normalize = (s: string) =>
   s
@@ -197,13 +198,19 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
 
 describe('getFieldEvaluationsEsql', () => {
   it('returns empty string for entity types without field evaluations', () => {
-    expect(getFieldEvaluationsEsql('generic')).toBe(undefined);
-    expect(getFieldEvaluationsEsql('host')).toBe(undefined);
-    expect(getFieldEvaluationsEsql('service')).toBe(undefined);
+    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('generic', 'default'))).toBe(
+      undefined
+    );
+    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('host', 'default'))).toBe(
+      undefined
+    );
+    expect(getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('service', 'default'))).toBe(
+      undefined
+    );
   });
 
   it('returns EVAL fragment for user entity.namespace with var per source then CASE', () => {
-    const result = getFieldEvaluationsEsql('user');
+    const result = getFieldEvaluationsEsqlFromDefinition(getEntityDefinition('user', 'default'));
     const base = '_src_entity_namespace';
     const v0 = `${base}0`;
     const v1 = `${base}1`;
