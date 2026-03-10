@@ -12,14 +12,23 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FormValues } from './types';
 import { EditModeToggle, type EditMode } from './components/edit_mode_toggle';
-import { RuleFormServicesProvider, useRuleFormServices, type RuleFormServices } from './contexts';
+import {
+  RuleFormProvider,
+  useRuleFormServices,
+  useRuleFormMeta,
+  type RuleFormServices,
+  type RuleFormLayout,
+} from './contexts';
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
+import { RulePreviewPanel } from './fields/rule_preview_panel';
 import { useCreateRule } from './hooks/use_create_rule';
 import { RULE_FORM_ID } from './constants';
 
 export interface RuleFormProps {
   services: RuleFormServices;
+  /** Layout mode: 'page' renders the preview side-by-side; 'flyout' uses a nested flyout. Default: 'page'. */
+  layout?: RuleFormLayout;
   /**
    * External submit handler. When provided, form submission delegates to this callback.
    * When omitted and `includeSubmission` is true, the form uses `useCreateRule` internally.
@@ -114,6 +123,7 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
 }) => {
   const { reset } = useFormContext<FormValues>();
   const services = useRuleFormServices();
+  const { layout } = useRuleFormMeta();
   const { http, notifications } = services;
   const [editMode, setEditMode] = useState<EditMode>('form');
 
@@ -149,7 +159,7 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
 
   const isYamlMode = editMode === 'yaml';
 
-  return (
+  const formContent = (
     <>
       {includeYaml && (
         <>
@@ -187,6 +197,25 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
       )}
     </>
   );
+
+  if (layout === 'page') {
+    return (
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+        <EuiFlexItem grow={1}>{formContent}</EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <RulePreviewPanel />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  // Flyout layout: form with nested flyout preview
+  return (
+    <>
+      {formContent}
+      <RulePreviewPanel />
+    </>
+  );
 };
 
 /**
@@ -201,9 +230,9 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
  * calls `onSuccess` after a successful API save.
  *
  * Includes its own QueryClientProvider for react-query hooks used by field components.
- * Services are provided via RuleFormServicesProvider context, eliminating prop drilling.
+ * Services and layout metadata are provided via RuleFormProvider context, eliminating prop drilling.
  */
-export const RuleForm: React.FC<RuleFormProps> = (props) => {
+export const RuleForm: React.FC<RuleFormProps> = ({ layout = 'page', ...props }) => {
   const queryClient = useMemo(
     () =>
       new QueryClient({
@@ -217,11 +246,13 @@ export const RuleForm: React.FC<RuleFormProps> = (props) => {
     []
   );
 
+  const meta = useMemo(() => ({ layout }), [layout]);
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RuleFormServicesProvider services={props.services}>
+      <RuleFormProvider services={props.services} meta={meta}>
         <RuleFormContent {...props} />
-      </RuleFormServicesProvider>
+      </RuleFormProvider>
     </QueryClientProvider>
   );
 };

@@ -12,6 +12,11 @@ import { RuleForm } from './rule_form';
 import { RULE_FORM_ID } from './constants';
 import { createFormWrapper, createMockServices } from '../test_utils';
 
+// Mock RulePreviewPanel to avoid rendering the full preview
+jest.mock('./fields/rule_preview_panel', () => ({
+  RulePreviewPanel: () => <div data-test-subj="mockRulePreviewPanel">Preview Panel</div>,
+}));
+
 // Mock GuiRuleForm to avoid rendering complex form fields
 jest.mock('./gui_rule_form', () => ({
   GuiRuleForm: ({

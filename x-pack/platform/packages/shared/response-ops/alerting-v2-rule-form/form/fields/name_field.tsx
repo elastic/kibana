@@ -7,14 +7,30 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiInlineEditTitle, EuiFormRow, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 
-const NAME_ROW_ID = 'ruleV2FormNameField';
+const DEFAULT_NAME = i18n.translate('xpack.alertingV2.ruleForm.defaultRuleName', {
+  defaultMessage: 'Untitled rule',
+});
 
 export const NameField: React.FC = () => {
   const { control } = useFormContext<FormValues>();
+  const { euiTheme } = useEuiTheme();
+  const editTitleId = useGeneratedHtmlId({ prefix: 'ruleNameInlineEdit' });
+
+  const titleStyles = css`
+    .euiInlineEditForm {
+      .euiFieldText {
+        font-size: ${euiTheme.size.l};
+        font-weight: ${euiTheme.font.weight.bold};
+        height: auto;
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+      }
+    }
+  `;
 
   return (
     <Controller
@@ -25,19 +41,42 @@ export const NameField: React.FC = () => {
           defaultMessage: 'Name is required.',
         }),
       }}
-      render={({ field: { ref, ...field }, fieldState: { error } }) => (
-        <EuiFormRow
-          id={NAME_ROW_ID}
-          label={i18n.translate('xpack.alertingV2.ruleForm.nameLabel', {
-            defaultMessage: 'Name',
-          })}
-          isInvalid={!!error}
-          error={error?.message}
-          fullWidth
-        >
-          <EuiFieldText {...field} inputRef={ref} isInvalid={!!error} fullWidth />
-        </EuiFormRow>
-      )}
+      render={({ field: { value, onChange }, fieldState: { error } }) => {
+        const displayValue = value || DEFAULT_NAME;
+
+        return (
+          <EuiFormRow isInvalid={!!error} error={error?.message} fullWidth>
+            <EuiInlineEditTitle
+              heading="h2"
+              inputAriaLabel={i18n.translate('xpack.alertingV2.ruleForm.nameAriaLabel', {
+                defaultMessage: 'Edit rule name',
+              })}
+              value={displayValue}
+              onChange={(e) => {
+                const target = e.currentTarget as HTMLInputElement;
+                onChange(target.value);
+              }}
+              onCancel={(previousValue) => {
+                onChange(previousValue);
+              }}
+              css={titleStyles}
+              size="m"
+              isInvalid={!!error}
+              data-test-subj="ruleNameInlineEdit"
+              id={editTitleId}
+              isReadOnly={false}
+              editModeProps={{
+                formRowProps: {
+                  fullWidth: true,
+                },
+                inputProps: {
+                  fullWidth: true,
+                },
+              }}
+            />
+          </EuiFormRow>
+        );
+      }}
     />
   );
 };

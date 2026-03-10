@@ -16,6 +16,7 @@ import { StateTransitionFieldGroup } from './field_groups/state_transition_field
 import { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
 import { ErrorCallOut } from '../flyout/error_callout';
 import { RULE_FORM_ID } from './constants';
+import { KindField } from './fields/kind_field';
 
 export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
@@ -27,9 +28,10 @@ export interface GuiRuleFormProps {
  * GUI-based rule form with standard form fields.
  *
  * This component renders the visual form interface with field groups for:
- * - Rule details (name, description, tags, etc.)
+ * - Rule details (name, tags, description — no wrapper panel)
  * - Rule evaluation (ES|QL query + WHERE clause trigger condition)
- * - Rule execution settings (schedule, time field, grouping)
+ * - Rule execution settings (schedule, lookback)
+ * - Rule kind (alert vs monitor)
  * - Alert delay / state transition (immediate, breaches, duration)
  * - Alert conditions (recovery policy)
  *
@@ -49,6 +51,8 @@ export const GuiRuleForm: React.FC<GuiRuleFormProps> = ({
       <ConditionFieldGroup includeBase={includeQueryEditor} />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
+      <EuiSpacer size="m" />
+      <KindField />
       <EuiSpacer size="m" />
       <StateTransitionFieldGroup />
       <EuiSpacer size="m" />

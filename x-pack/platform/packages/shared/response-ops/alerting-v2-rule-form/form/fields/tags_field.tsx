@@ -24,8 +24,11 @@ export const TagsField: React.FC = () => {
 
         return (
           <EuiFormRow
-            label={i18n.translate('xpack.alertingV2.ruleForm.labelsLabel', {
-              defaultMessage: 'Labels',
+            label={i18n.translate('xpack.alertingV2.ruleForm.tagsLabel', {
+              defaultMessage: 'Tags',
+            })}
+            labelAppend={i18n.translate('xpack.alertingV2.ruleForm.tagsOptional', {
+              defaultMessage: 'optional',
             })}
             isInvalid={!!error}
             error={error?.message}

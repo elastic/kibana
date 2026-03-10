@@ -13,6 +13,8 @@ import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
 import { WhereClauseEditor } from '../fields/where_clause_editor';
 import { EvaluationQueryField } from '../fields/evaluation_query_field';
+import { GroupFieldSelect } from '../fields/group_field_select';
+import { TimeFieldSelect } from '../fields/time_field_select';
 
 interface ConditionFieldGroupProps {
   /**
@@ -100,6 +102,8 @@ export const ConditionFieldGroup: React.FC<ConditionFieldGroupProps> = ({
         disabled={!baseQuery}
         fullWidth={true}
       />
+      <GroupFieldSelect />
+      <TimeFieldSelect />
     </FieldGroup>
   );
 };

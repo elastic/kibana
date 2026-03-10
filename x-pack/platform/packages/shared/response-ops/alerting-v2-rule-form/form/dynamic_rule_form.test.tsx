@@ -79,8 +79,7 @@ describe('DynamicRuleForm', () => {
     );
 
     // The form should render
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
   it('updates form state when query prop changes', async () => {
@@ -101,7 +100,7 @@ describe('DynamicRuleForm', () => {
     // The form should update - we can verify by checking that no errors occurred
     // and the component re-rendered successfully
     await waitFor(() => {
-      expect(screen.getByText('Name')).toBeInTheDocument();
+      expect(screen.getByText('Untitled rule')).toBeInTheDocument();
     });
   });
 
@@ -115,11 +114,22 @@ describe('DynamicRuleForm', () => {
       </Wrapper>
     );
 
-    // User modifies the name field
-    const nameInput = screen.getByRole('textbox', { name: 'Name' });
-    await user.type(nameInput, 'My Custom Rule');
+    // User modifies the name field — click to enter edit mode, then type
+    const readModeButton = screen.getByTestId('euiInlineReadModeButton');
+    await user.click(readModeButton);
+
+    // Find the name input (not the combo box input) and replace content
+    const nameInput = screen.getByLabelText('Edit rule name');
+
+    // Select all text and replace with new value
+    await user.tripleClick(nameInput);
+    await user.keyboard('My Custom Rule');
 
     expect(nameInput).toHaveValue('My Custom Rule');
+
+    // Save the edit
+    const saveButton = screen.getByTestId('euiInlineEditModeSaveButton');
+    await user.click(saveButton);
 
     // Query prop changes (simulating Discover updating the query)
     rerender(
@@ -130,7 +140,7 @@ describe('DynamicRuleForm', () => {
 
     // User's input should be preserved (keepDirtyValues: true)
     await waitFor(() => {
-      expect(nameInput).toHaveValue('My Custom Rule');
+      expect(screen.getByText('My Custom Rule')).toBeInTheDocument();
     });
   });
 
@@ -170,7 +180,7 @@ describe('DynamicRuleForm', () => {
 
     // Form should have updated - component renders without errors
     await waitFor(() => {
-      expect(screen.getByText('Rule details')).toBeInTheDocument();
+      expect(screen.getByText('Untitled rule')).toBeInTheDocument();
     });
   });
 
@@ -185,7 +195,7 @@ describe('DynamicRuleForm', () => {
     );
 
     // Form should still render
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
   it('handles query prop changes from invalid to valid', () => {
@@ -204,7 +214,7 @@ describe('DynamicRuleForm', () => {
     );
 
     // Form should still render
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
   it('calls onSubmit with form values when form is submitted', async () => {
@@ -222,9 +232,19 @@ describe('DynamicRuleForm', () => {
       </Wrapper>
     );
 
-    // Fill in required field
-    const nameInput = screen.getByRole('textbox', { name: 'Name' });
-    await user.type(nameInput, 'Test Rule');
+    // Fill in required field — click inline edit title, then type
+    const readModeButton = screen.getByTestId('euiInlineReadModeButton');
+    await user.click(readModeButton);
+
+    const nameInput = screen.getByLabelText('Edit rule name');
+
+    // Select all and replace with new value
+    await user.tripleClick(nameInput);
+    await user.keyboard('Test Rule');
+
+    // Save the edit
+    const saveButton = screen.getByTestId('euiInlineEditModeSaveButton');
+    await user.click(saveButton);
 
     // Submit the form using the constant RULE_FORM_ID
     const form = document.getElementById(RULE_FORM_ID);

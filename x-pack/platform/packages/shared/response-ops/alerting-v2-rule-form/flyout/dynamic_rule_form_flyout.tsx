@@ -57,6 +57,7 @@ const DynamicRuleFormFlyoutInner: React.FC<DynamicRuleFormFlyoutProps> = ({
         isSubmitting={isLoading}
         query={query}
         services={services}
+        layout="flyout"
       />
     </RuleFormFlyout>
   );

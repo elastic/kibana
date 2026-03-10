@@ -35,8 +35,26 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = (props) => 
   </Suspense>
 );
 
+// Lazy load preview component
+const LazyRuleResultsPreview = React.lazy(() =>
+  import('./fields/rule_results_preview').then((module) => ({
+    default: module.RuleResultsPreview,
+  }))
+);
+
+export const RuleResultsPreview: React.FC = () => (
+  <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+    <LazyRuleResultsPreview />
+  </Suspense>
+);
+
 export type { FormValues } from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
-export type { RuleFormServices } from './contexts';
-export { RuleFormServicesProvider, useRuleFormServices } from './contexts';
+export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
+export {
+  RuleFormProvider,
+  RuleFormServicesProvider,
+  useRuleFormServices,
+  useRuleFormMeta,
+} from './contexts';

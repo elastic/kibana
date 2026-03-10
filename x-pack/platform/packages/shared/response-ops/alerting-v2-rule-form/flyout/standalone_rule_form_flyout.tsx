@@ -57,6 +57,7 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
         isSubmitting={isLoading}
         query={query}
         services={services}
+        layout="flyout"
       />
     </RuleFormFlyout>
   );

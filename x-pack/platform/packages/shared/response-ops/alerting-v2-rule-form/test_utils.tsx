@@ -15,7 +15,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import type { FormValues } from './form/types';
-import { RuleFormServicesProvider, type RuleFormServices } from './form/contexts';
+import { RuleFormProvider, type RuleFormServices, type RuleFormMeta } from './form/contexts';
 
 /**
  * Creates a QueryClient configured for testing (no retries, silent logger).
@@ -77,13 +77,14 @@ export const defaultTestFormValues: FormValues = {
 };
 
 /**
- * Creates a wrapper component with QueryClientProvider, FormProvider, and RuleFormServicesProvider
+ * Creates a wrapper component with QueryClientProvider, FormProvider, and RuleFormProvider
  * for testing components. Use this for component tests that need React Query, react-hook-form,
  * and services context.
  */
 export const createFormWrapper = (
   defaultValues: Partial<FormValues> = {},
-  services: RuleFormServices = createMockServices()
+  services: RuleFormServices = createMockServices(),
+  meta: RuleFormMeta = { layout: 'page' }
 ) => {
   const queryClient = createTestQueryClient();
 
@@ -99,7 +100,9 @@ export const createFormWrapper = (
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <FormProvider {...form}>
-            <RuleFormServicesProvider services={services}>{children}</RuleFormServicesProvider>
+            <RuleFormProvider services={services} meta={meta}>
+              {children}
+            </RuleFormProvider>
           </FormProvider>
         </QueryClientProvider>
       </IntlProvider>

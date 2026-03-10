@@ -12,19 +12,22 @@ import { createFormWrapper } from '../../test_utils';
 import { RuleDetailsFieldGroup } from './rule_details_field_group';
 
 describe('RuleDetailsFieldGroup', () => {
-  it('renders the field group with title', () => {
+  it('renders without a field group wrapper', () => {
     const Wrapper = createFormWrapper();
 
-    render(
+    const { container } = render(
       <Wrapper>
         <RuleDetailsFieldGroup />
       </Wrapper>
     );
 
-    expect(screen.getByText('Rule details')).toBeInTheDocument();
+    // Should not render the FieldGroup panel
+    expect(container.querySelector('.euiSplitPanel')).not.toBeInTheDocument();
+    // Should not render a "Rule details" title
+    expect(screen.queryByText('Rule details')).not.toBeInTheDocument();
   });
 
-  it('renders the name field', () => {
+  it('renders the name as an inline editable title with default text', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -33,11 +36,11 @@ describe('RuleDetailsFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    // The inline edit title should show the default name in read mode
+    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
   });
 
-  it('renders the labels field', () => {
+  it('renders the tags field with optional label', () => {
     const Wrapper = createFormWrapper();
 
     render(
@@ -46,7 +49,8 @@ describe('RuleDetailsFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByText('Labels')).toBeInTheDocument();
+    expect(screen.getByText('Tags')).toBeInTheDocument();
+    expect(screen.getByText('optional')).toBeInTheDocument();
   });
 
   it('renders the add description button initially', () => {
@@ -75,90 +79,12 @@ describe('RuleDetailsFieldGroup', () => {
     expect(screen.getByText('Description')).toBeInTheDocument();
   });
 
-  it('renders the enabled field', () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByText('Enabled')).toBeInTheDocument();
-    expect(screen.getByRole('switch')).toBeInTheDocument();
-  });
-
-  it('renders the kind field', () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    // "Rule kind" appears in both label and legend (for screen readers)
-    expect(screen.getAllByText('Rule kind').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('Alert')).toBeInTheDocument();
-    expect(screen.getByText('Monitor')).toBeInTheDocument();
-  });
-
-  it('allows entering a name', async () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    const nameInput = screen.getByRole('textbox', { name: 'Name' });
-    await userEvent.type(nameInput, 'My Test Rule');
-
-    expect(nameInput).toHaveValue('My Test Rule');
-  });
-
-  it('allows toggling enabled state', async () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    const toggle = screen.getByRole('switch');
-    expect(toggle).toBeChecked();
-
-    await userEvent.click(toggle);
-
-    expect(toggle).not.toBeChecked();
-  });
-
-  it('allows switching rule kind', async () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    // Default is 'alert', so Alert button should be selected
-    const monitorButton = screen.getByText('Monitor');
-    await userEvent.click(monitorButton);
-
-    // The button group should now have Monitor selected
-    expect(monitorButton.closest('button')).toHaveClass('euiButtonGroupButton-isSelected');
-  });
-
-  it('renders with pre-filled values', () => {
+  it('renders with a pre-filled name', () => {
     const Wrapper = createFormWrapper({
       metadata: {
         name: 'Pre-filled Rule',
-        enabled: false,
+        enabled: true,
       },
-      kind: 'signal',
     });
 
     render(
@@ -167,10 +93,22 @@ describe('RuleDetailsFieldGroup', () => {
       </Wrapper>
     );
 
-    expect(screen.getByRole('textbox', { name: 'Name' })).toHaveValue('Pre-filled Rule');
-    // Monitor should be selected (signal kind displays as "Monitor")
-    expect(screen.getByText('Monitor').closest('button')).toHaveClass(
-      'euiButtonGroupButton-isSelected'
+    expect(screen.getByText('Pre-filled Rule')).toBeInTheDocument();
+  });
+
+  it('does not render enabled or kind fields', () => {
+    const Wrapper = createFormWrapper();
+
+    render(
+      <Wrapper>
+        <RuleDetailsFieldGroup />
+      </Wrapper>
     );
+
+    expect(screen.queryByText('Enabled')).not.toBeInTheDocument();
+    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    expect(screen.queryByText('Rule kind')).not.toBeInTheDocument();
+    expect(screen.queryByText('Alert')).not.toBeInTheDocument();
+    expect(screen.queryByText('Monitor')).not.toBeInTheDocument();
   });
 });
