@@ -350,6 +350,29 @@ const correlationEndpointTypeRt = t.union([
 
 const scopeRt = t.union([t.literal('transactions'), t.literal('exitSpans')]);
 
+/**
+ * Unified correlations API
+ *
+ * To run exit span latency correlations (backed by the `exitSpanLatencyCorrelations`
+ * chart type), call:
+ *
+ *  - `POST /internal/apm/correlations`
+ *  - with `type` set to `CorrelationEndpointType.LATENCY`
+ *  - and `scope` set to `'exitSpans'`
+ *
+ * Example request body:
+ *
+ * {
+ *   "type": "latency",
+ *   "scope": "exitSpans",
+ *   "start": "<from>",
+ *   "end": "<to>",
+ *   "kuery": "<optional KQL>",
+ *   "percentileThreshold": 95,
+ * }
+ *
+ * When `scope` is omitted, the API defaults to transaction-based correlations.
+ */
 const unifiedCorrelationsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/correlations',
   params: t.type({
