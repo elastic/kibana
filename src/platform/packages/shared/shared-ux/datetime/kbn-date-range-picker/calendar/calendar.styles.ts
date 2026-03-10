@@ -8,18 +8,29 @@
  */
 
 import { css } from '@emotion/react';
-import type { UseEuiTheme } from '@elastic/eui';
+import { euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 
 /**
  * Fixed container height is required for virtuoso to work correctly.
  */
 const CALENDAR_HEIGHT = 394;
 
-export const calendarStyles = ({ euiTheme }: UseEuiTheme) => {
+export const calendarStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
+
   const container = css`
     position: relative;
     height: ${CALENDAR_HEIGHT}px;
     flex-grow: 1;
+
+    [data-virtuoso-scroller] {
+      ${euiScrollBarStyles(euiThemeContext)}
+    }
+
+    [data-testid='virtuoso-item-list'] {
+      padding-left: ${euiTheme.size.base};
+      padding-right: ${euiTheme.size.base};
+    }
   `;
 
   const todayButton = css`
