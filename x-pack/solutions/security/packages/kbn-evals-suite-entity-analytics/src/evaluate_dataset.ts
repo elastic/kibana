@@ -189,24 +189,34 @@ export function createEvaluateDataset({
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({ messages: [{ message: input.question }] });
 
-          const [correctnessResult, groundednessResult] = await Promise.all([
-            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-              evaluators.correctnessAnalysis().evaluate({
-                input,
-                expected: output,
-                output: response,
-                metadata,
-              })
-            ),
-            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-              evaluators.groundednessAnalysis().evaluate({
-                input,
-                expected: output,
-                output: response,
-                metadata,
-              })
-            ),
-          ]);
+          let correctnessResult: { metadata?: unknown } | undefined;
+          let groundednessResult: { metadata?: unknown } | undefined;
+
+          try {
+            const [correctness, groundedness] = await Promise.all([
+              withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+                evaluators.correctnessAnalysis().evaluate({
+                  input,
+                  expected: output,
+                  output: response,
+                  metadata,
+                })
+              ),
+              withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+                evaluators.groundednessAnalysis().evaluate({
+                  input,
+                  expected: output,
+                  output: response,
+                  metadata,
+                })
+              ),
+            ]);
+            correctnessResult = correctness;
+            groundednessResult = groundedness;
+          } catch (err) {
+            // Judge model may return invalid tool call args (toolValidationError); continue without
+            // analysis so quantitative evaluators report "unavailable" instead of failing the test.
+          }
 
           return {
             errors: response.errors,
