@@ -123,9 +123,12 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('open row actions menu on first transaction', async () => {
+        await spaceTest.step('open row actions menu on transaction row', async () => {
           await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
-          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
+          await pageObjects.tracesExperience.clickRowAction(
+            RICH_TRACE.TRANSACTION_NAME,
+            'transactionsGroupTable'
+          );
         });
 
         await spaceTest.step('click Open in Discover in actions menu', async () => {
@@ -221,9 +224,12 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('open row actions menu on first transaction', async () => {
+        await spaceTest.step('open row actions menu on transaction row', async () => {
           await expect(page.testSubj.locator('transactionsGroupTable')).toBeVisible();
-          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
+          await pageObjects.tracesExperience.clickRowAction(
+            RICH_TRACE.TRANSACTION_NAME,
+            'transactionsGroupTable'
+          );
         });
 
         await spaceTest.step('click Open in Discover in actions menu', async () => {
@@ -367,7 +373,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click a span in the waterfall to open span flyout', async () => {
-          await page.getByText(RICH_TRACE.DB_SPAN_NAME).first().click();
+          await pageObjects.tracesExperience.clickWaterfallSpan(RICH_TRACE.DB_SPAN_NAME);
         });
 
         await spaceTest.step('click Open in Discover in span flyout', async () => {
@@ -418,7 +424,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click into first error group', async () => {
-          await page.getByText(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR).first().click();
+          await pageObjects.tracesExperience.clickTableLink(RICH_TRACE.ERRORS.TRANSACTION_DB_ERROR);
         });
 
         await spaceTest.step('click Open in Discover on error sample', async () => {
@@ -445,7 +451,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click into operation detail to view a trace sample', async () => {
-          await page.getByText(RICH_TRACE.DB_SPAN_NAME).first().click();
+          await pageObjects.tracesExperience.clickTableLink(RICH_TRACE.DB_SPAN_NAME);
         });
 
         await spaceTest.step('click Open in Discover button', async () => {
@@ -470,8 +476,8 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('open row actions menu on first service', async () => {
-          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
+        await spaceTest.step('open row actions menu on service row', async () => {
+          await pageObjects.tracesExperience.clickRowAction(RICH_TRACE.SERVICE_NAME);
         });
 
         await spaceTest.step('click Open traces in Discover in actions menu', async () => {
@@ -498,8 +504,8 @@ spaceTest.describe(
           });
         });
 
-        await spaceTest.step('open row actions menu on first service', async () => {
-          await page.testSubj.locator('apmManagedTableActionsCellButton').first().click();
+        await spaceTest.step('open row actions menu on service row', async () => {
+          await pageObjects.tracesExperience.clickRowAction(RICH_TRACE.SERVICE_NAME);
         });
 
         await spaceTest.step('click Open logs in Discover in actions menu', async () => {

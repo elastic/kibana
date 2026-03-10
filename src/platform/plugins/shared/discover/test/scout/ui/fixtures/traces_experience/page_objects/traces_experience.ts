@@ -19,8 +19,10 @@ export class TracesExperiencePage {
   public readonly flyout: TracesFlyout;
   public readonly grid: TracesGrid;
   public readonly charts: TracesCharts;
+  private readonly page: ScoutPage;
 
   constructor(page: ScoutPage) {
+    this.page = page;
     this.flyout = createTracesFlyout(page);
     this.grid = createTracesGrid();
     this.charts = createTracesCharts(page);
@@ -34,5 +36,23 @@ export class TracesExperiencePage {
   public async openOverviewTab(discover: PageObjects['discover'], rowIndex = 0) {
     await this.openDocumentFlyout(discover, rowIndex);
     await this.flyout.overviewTab.click();
+  }
+
+  public async clickRowAction(rowText: string, tableTestSubj?: string) {
+    const container = tableTestSubj ? this.page.testSubj.locator(tableTestSubj) : this.page;
+
+    await container
+      .locator('tr')
+      .filter({ hasText: rowText })
+      .locator('[data-test-subj="apmManagedTableActionsCellButton"]')
+      .click();
+  }
+
+  public async clickTableLink(text: string) {
+    await this.page.locator('table').getByText(text).click();
+  }
+
+  public async clickWaterfallSpan(spanName: string) {
+    await this.page.testSubj.locator('waterfall').getByText(spanName).click();
   }
 }
