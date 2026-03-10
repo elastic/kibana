@@ -237,11 +237,6 @@ export class UiamApiKeyProvisioningTask {
       const { provisioningStatusForSkippedRules, apiKeysToConvert } =
         classifyRulesForUiamProvisioning(rules);
 
-      this.logger.info(
-        `Found ${apiKeysToConvert.length} API keys to convert. ${provisioningStatusForSkippedRules.length} rules skipped. Has more to provision: ${hasMoreToProvision}.`,
-        { tags: TAGS }
-      );
-
       return {
         apiKeysToConvert,
         provisioningStatusForSkippedRules,
@@ -281,11 +276,6 @@ export class UiamApiKeyProvisioningTask {
 
       const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
         mapConvertResponseToResult(apiKeysToConvert, convertResponse);
-
-      this.logger.info(
-        `Successfully converted ${rulesWithUiamApiKeys.size} API keys. ${provisioningStatusForFailedConversions.length} conversions failed.`,
-        { tags: TAGS }
-      );
 
       return { rulesWithUiamApiKeys, provisioningStatusForFailedConversions };
     } catch (error) {
