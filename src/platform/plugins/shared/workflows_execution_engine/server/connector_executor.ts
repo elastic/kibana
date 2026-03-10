@@ -98,12 +98,7 @@ export class ConnectorExecutor {
     if (connectors.length === 0) {
       throw new Error(`Connector "${connectorNameOrId}" not found`);
     }
-
-    if (connectors.length > 1) {
-      throw new Error(
-        `Ambiguous connector name "${connectorNameOrId}": found ${matches.length} connectors with this name. Use the connector ID instead.`
-      );
-    }
+    // Do not throw if multiple connectors are found. We will use the first one.
 
     return connectors[0].id;
   }
