@@ -25,7 +25,6 @@ import {
 } from '../../../../common/content_management/v1/constants';
 
 const baseLinkSchema = {
-  id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the link' } })),
   label: schema.maybe(
     schema.string({ meta: { description: 'The label of the link to be displayed in the UI' } })
   ),
@@ -40,7 +39,7 @@ export const dashboardLinkSchema = schema.object(
     type: schema.literal(DASHBOARD_LINK_TYPE),
     options: schema.maybe(dashboardNavigationOptionsSchema),
   },
-  { unknowns: 'ignore' } // Allow legacy `order` prop to pass validation for bwc
+  { unknowns: 'ignore' } // Allow legacy props to pass validation for bwc
 );
 
 export const externalLinkOptionsSchema = schema.object(
@@ -70,7 +69,7 @@ export const externalLinkSchema = schema.object(
     destination: schema.string({ meta: { description: 'The external URL to link to' } }),
     options: schema.maybe(externalLinkOptionsSchema),
   },
-  { unknowns: 'ignore' } // Allow legacy `order` prop to pass validation for bwc
+  { unknowns: 'ignore' } // Allow legacy props to pass validation for bwc
 );
 
 export const linksArraySchema = schema.arrayOf(
@@ -99,9 +98,9 @@ export const linksSchema = serializedTitlesSchema.extends(
 );
 
 const baseLinkSavedObjectSchema = {
-  id: schema.string(),
   label: schema.maybe(schema.string()),
   // Deprecated, included in schema for BWC
+  id: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
 };
 

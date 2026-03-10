@@ -9,16 +9,8 @@
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { savedObjectToItem, itemToAttributes } from './transform_utils';
-import type { StoredLink, StoredLinksState, LinksState } from './types';
+import type { StoredLink, StoredLinksState, LinksState, ExternalLink } from './types';
 import { EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
-
-jest.mock('uuid', () => ({
-  v4: jest
-    .fn()
-    .mockReturnValueOnce('generated-id-1')
-    .mockReturnValueOnce('generated-id-2')
-    .mockReturnValueOnce('generated-id-3'),
-}));
 
 const makeSavedObject = (
   links: Array<StoredLink & { order?: number }>
@@ -34,14 +26,18 @@ describe('Links content management transform utils', () => {
     it('sorts links by order and removes the order property', () => {
       const result = savedObjectToItem(
         makeSavedObject([
-          { id: 'b', type: EXTERNAL_LINK_TYPE, destination: 'https://b.co', order: 2 },
-          { id: 'a', type: EXTERNAL_LINK_TYPE, destination: 'https://a.co', order: 0 },
-          { id: 'c', type: EXTERNAL_LINK_TYPE, destination: 'https://c.co', order: 1 },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://b.co', order: 2 },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://a.co', order: 0 },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://c.co', order: 1 },
         ])
       );
 
       const links = result.attributes.links!;
-      expect(links.map((l) => l.id)).toEqual(['a', 'c', 'b']);
+      expect(links.map((l) => l.destination)).toEqual([
+        'https://a.co',
+        'https://c.co',
+        'https://b.co',
+      ]);
       links.forEach((link) => {
         expect(link).not.toHaveProperty('order');
       });
@@ -51,14 +47,12 @@ describe('Links content management transform utils', () => {
       const result = savedObjectToItem(
         makeSavedObject([
           {
-            id: 'third',
             type: EXTERNAL_LINK_TYPE,
             destination: 'https://third.co',
             order: 1,
           },
-          { id: 'first', type: EXTERNAL_LINK_TYPE, destination: 'https://first.co' },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://first.co' },
           {
-            id: 'second',
             type: EXTERNAL_LINK_TYPE,
             destination: 'https://second.co',
           },
@@ -66,7 +60,11 @@ describe('Links content management transform utils', () => {
       );
 
       const links = result.attributes.links!;
-      expect(links.map((l) => l.id)).toEqual(['first', 'second', 'third']);
+      expect(links.map((l) => l.destination)).toEqual([
+        'https://first.co',
+        'https://second.co',
+        'https://third.co',
+      ]);
     });
   });
 
@@ -74,35 +72,22 @@ describe('Links content management transform utils', () => {
     it('sorts links by order and removes the order property', () => {
       const state = {
         links: [
-          { id: 'z', type: EXTERNAL_LINK_TYPE, destination: 'https://z.co', order: 3 },
-          { id: 'y', type: EXTERNAL_LINK_TYPE, destination: 'https://y.co', order: 1 },
-          { id: 'x', type: EXTERNAL_LINK_TYPE, destination: 'https://x.co', order: 2 },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://z.co', order: 3 },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://y.co', order: 1 },
+          { type: EXTERNAL_LINK_TYPE, destination: 'https://x.co', order: 2 },
         ],
       };
 
       const { attributes } = itemToAttributes(state as LinksState);
-      const links = attributes.links!;
-      expect(links.map((l) => l.id)).toEqual(['y', 'x', 'z']);
+      const links = attributes.links! as ExternalLink[];
+      expect(links.map((l) => l.destination)).toEqual([
+        'https://y.co',
+        'https://x.co',
+        'https://z.co',
+      ]);
       links.forEach((link) => {
         expect(link).not.toHaveProperty('order');
       });
-    });
-
-    it('generates an id for links that do not have one', () => {
-      const state: LinksState = {
-        links: [
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://no-id-1.co' },
-          { id: 'existing-id', type: EXTERNAL_LINK_TYPE, destination: 'https://has-id.co' },
-          { type: EXTERNAL_LINK_TYPE, destination: 'https://no-id-2.co' },
-        ],
-      };
-
-      const { attributes } = itemToAttributes(state);
-      const links = attributes.links!;
-
-      expect(links[0].id).toBe('generated-id-1');
-      expect(links[1].id).toBe('existing-id');
-      expect(links[2].id).toBe('generated-id-2');
     });
   });
 });

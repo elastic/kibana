@@ -10,7 +10,6 @@
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { omit } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import type { LinksItem } from '../../../../common/content_management';
 import type { Link, LinksState, StoredLink, StoredLinksState } from './types';
 import {
@@ -58,10 +57,7 @@ export function itemToAttributes(state: LinksState): {
   attributes: StoredLinksState;
   references: Reference[];
 } {
-  const transformedLinks = transformOrderedLinks<Link[]>(state.links ?? []).map((link) => ({
-    ...link,
-    id: link.id ?? uuidv4(),
-  }));
+  const transformedLinks = transformOrderedLinks<Link[]>(state.links ?? []);
   const { links, references } = extractReferences(transformedLinks ?? []);
   return {
     attributes: {

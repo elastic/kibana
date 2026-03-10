@@ -26,13 +26,12 @@ jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
 }));
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValueOnce('generated-id'),
+  v4: jest.fn().mockReturnValueOnce('generated-id-1').mockReturnValueOnce('generated-id-2'),
 }));
 
 describe('resolveLinkInfo', () => {
   it('resolves a dashboard link with no label', async () => {
     const link: Link = {
-      id: '1',
       type: DASHBOARD_LINK_TYPE,
       destination: '001',
     };
@@ -46,7 +45,6 @@ describe('resolveLinkInfo', () => {
 
   it('resolves a dashboard link with a label', async () => {
     const link: Link = {
-      id: '1',
       type: DASHBOARD_LINK_TYPE,
       destination: '001',
       label: 'My Dashboard',
@@ -61,7 +59,6 @@ describe('resolveLinkInfo', () => {
 
   it('adds an error for missing dashboard', async () => {
     const link: Link = {
-      id: '1',
       type: DASHBOARD_LINK_TYPE,
       destination: '404',
     };
@@ -75,20 +72,19 @@ describe('resolveLinkInfo', () => {
 });
 
 describe('resolveLinks', () => {
-  it('generates uuids for links wihtout ids', async () => {
+  it('generates uuids for links', async () => {
     const links: Link[] = [
       {
         type: DASHBOARD_LINK_TYPE,
         destination: '404',
       },
       {
-        id: '2',
         type: DASHBOARD_LINK_TYPE,
         destination: '404',
       },
     ];
     const resolvedLinks = await resolveLinks(links);
-    expect(resolvedLinks[0].id).toEqual('generated-id');
-    expect(resolvedLinks[1].id).toEqual('2');
+    expect(resolvedLinks[0].id).toEqual('generated-id-1');
+    expect(resolvedLinks[1].id).toEqual('generated-id-2');
   });
 });
