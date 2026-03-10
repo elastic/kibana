@@ -248,14 +248,29 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async waitForRequestToComplete() {
+    const hadStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
+    const initialStatusText = hadStatusBadge
+      ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
+      : '';
+    const hadOutput = await this.testSubjects.exists('consoleMonacoOutput');
+    const initialOutputText = hadOutput ? await this.getOutputText() : '';
+
     // Wait for a visual "request started" signal.
     await this.retry.try(async () => {
-      const started =
+      const loadingIndicatorsVisible =
         (await this.testSubjects.exists('consoleEditorContentSpinner')) ||
         (await this.testSubjects.exists('consoleRequestInProgressBadge'));
+      const hasStatusBadge = await this.testSubjects.exists('consoleResponseStatusBadge');
+      const currentStatusText = hasStatusBadge
+        ? await this.testSubjects.getVisibleText('consoleResponseStatusBadge')
+        : '';
+      const statusChanged = currentStatusText !== initialStatusText;
+      const hasOutput = await this.testSubjects.exists('consoleMonacoOutput');
+      const currentOutputText = hasOutput ? await this.getOutputText() : '';
+      const outputChanged = currentOutputText !== initialOutputText;
 
-      if (!started) {
-        throw new Error('Expected console request to enter loading state');
+      if (!loadingIndicatorsVisible && !statusChanged && !outputChanged) {
+        throw new Error('Expected console request to update the UI');
       }
     });
 

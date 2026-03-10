@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await PageObjects.console.skipTourIfExists();
+      await PageObjects.console.clearEditorText();
     });
 
     after(async () => {
@@ -37,14 +38,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Perform CCS Search in Console', () => {
-      before(async () => {
-        await PageObjects.console.clearEditorText();
-      });
       it('it should be able to access remote data', async () => {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
-
         await PageObjects.console.clickPlay();
 
         await PageObjects.console.waitForRequestToComplete();
