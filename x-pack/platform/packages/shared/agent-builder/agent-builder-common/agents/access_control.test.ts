@@ -11,6 +11,7 @@ import {
   hasAgentReadAccess,
   hasAgentWriteAccess,
 } from './access_control';
+import { agentBuilderDefaultAgentId } from './definition';
 import { AgentVisibility } from './visibility';
 import type { UserIdAndName } from '../base/users';
 
@@ -106,6 +107,28 @@ describe('canChangeAgentVisibility', () => {
         hasAgentVisibilityAccessOverride: false,
       })
     ).toBe(true);
+  });
+
+  test('returns false for the default agent even when user is owner', () => {
+    expect(
+      canChangeAgentVisibility({
+        agentId: agentBuilderDefaultAgentId,
+        owner,
+        currentUser,
+        hasAgentVisibilityAccessOverride: false,
+      })
+    ).toBe(false);
+  });
+
+  test('returns false for the default agent even with visibility access override', () => {
+    expect(
+      canChangeAgentVisibility({
+        agentId: agentBuilderDefaultAgentId,
+        owner,
+        currentUser: otherUser,
+        hasAgentVisibilityAccessOverride: true,
+      })
+    ).toBe(false);
   });
 });
 

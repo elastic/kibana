@@ -6,6 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import { agentBuilderDefaultAgentId } from './definition';
 import { AgentVisibility } from './visibility';
 
 export const isAgentOwner = ({
@@ -28,14 +29,20 @@ export const isAgentOwner = ({
 };
 
 export const canChangeAgentVisibility = ({
+  agentId,
   owner,
   currentUser,
   hasAgentVisibilityAccessOverride,
 }: {
+  agentId?: string;
   owner?: UserIdAndName;
   currentUser?: UserIdAndName | null;
   hasAgentVisibilityAccessOverride: boolean;
-}): boolean => hasAgentVisibilityAccessOverride || isAgentOwner({ owner, currentUser });
+}): boolean =>
+  // The default agent is a very special cookie, and we can't change its visibility
+  agentId === agentBuilderDefaultAgentId
+    ? false
+    : hasAgentVisibilityAccessOverride || isAgentOwner({ owner, currentUser });
 
 /** Legacy agents without a visibility field are treated as Public. */
 export const hasAgentReadAccess = ({

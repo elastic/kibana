@@ -272,6 +272,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             isCreateMode={isCreateMode}
             isFormDisabled={isFormDisabled || !canEditAgent}
             owner={agentState?.created_by}
+            agentId={editingAgentId}
           />
         ),
       },
@@ -338,6 +339,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       isCreateMode,
       isFormDisabled,
       canEditAgent,
+      editingAgentId,
       tools,
       skills,
       isLoading,

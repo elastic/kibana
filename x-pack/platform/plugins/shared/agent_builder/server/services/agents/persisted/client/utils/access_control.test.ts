@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentProperties } from '../storage';
 import {
   hasReadAccess,
@@ -254,6 +254,41 @@ describe('validateVisibilityUpdateAccess', () => {
         update: { visibility: AgentVisibility.Private },
         user: nonOwnerUser,
         hasAgentVisibilityAccessOverride: false,
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when changing visibility of the default agent even for owner', () => {
+    const source = {
+      ...baseSource,
+      id: agentBuilderDefaultAgentId,
+      visibility: AgentVisibility.Public,
+      created_by_id: ownerUser.id,
+      created_by_name: ownerUser.username,
+    };
+    expect(
+      validateVisibilityUpdateAccess({
+        source,
+        update: { visibility: AgentVisibility.Private },
+        user: ownerUser,
+        hasAgentVisibilityAccessOverride: false,
+      })
+    ).toBe(false);
+  });
+
+  it('returns false when changing visibility of the default agent even with override', () => {
+    const source = {
+      ...baseSource,
+      id: agentBuilderDefaultAgentId,
+      visibility: AgentVisibility.Public,
+      created_by_name: 'owner',
+    };
+    expect(
+      validateVisibilityUpdateAccess({
+        source,
+        update: { visibility: AgentVisibility.Shared },
+        user: nonOwnerUser,
+        hasAgentVisibilityAccessOverride: true,
       })
     ).toBe(false);
   });

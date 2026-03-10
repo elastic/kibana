@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  agentBuilderDefaultAgentId,
   AgentVisibility,
   VISIBILITY_ICON,
   canChangeAgentVisibility,
@@ -51,6 +52,7 @@ interface AgentSettingsTabProps {
   isCreateMode: boolean;
   isFormDisabled: boolean;
   owner?: UserIdAndName;
+  agentId?: string;
 }
 
 export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
@@ -59,6 +61,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isCreateMode,
   isFormDisabled,
   owner,
+  agentId,
 }) => {
   const { labels: existingLabels, isLoading: labelsLoading } = useAgentLabels();
   const {
@@ -68,10 +71,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
 
   const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
   const { hasAgentVisibilityAccessOverride } = useUiPrivileges();
+
   const canChangeVisibility =
     isExperimentalFeaturesEnabled &&
     (isCreateMode ||
       canChangeAgentVisibility({
+        agentId,
         owner,
         currentUser,
         hasAgentVisibilityAccessOverride,
@@ -418,7 +423,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 defaultMessage: 'Visibility',
               })}
               helpText={
-                !canChangeVisibility
+                agentId === agentBuilderDefaultAgentId
+                  ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDefaultAgentReason', {
+                      defaultMessage: 'The default agent is always visible to all users.',
+                    })
+                  : !canChangeVisibility
                   ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDisabledReason', {
                       defaultMessage: 'Only the owner or an administrator can change visibility.',
                     })

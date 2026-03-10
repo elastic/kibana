@@ -96,6 +96,7 @@ export const validateVisibilityUpdateAccess = ({
   return (
     !isVisibilityChange ||
     canChangeAgentVisibility({
+      agentId: source.id,
       owner: sourceToOwner(source),
       currentUser: user,
       hasAgentVisibilityAccessOverride,
