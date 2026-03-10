@@ -43,6 +43,14 @@ const OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   }
 );
 
+const IMPORTING_TO_OTHER_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
+  'xpack.securitySolution.baseValidator.importingToOtherSpaceNotAllowedMessage',
+  {
+    defaultMessage:
+      'Importing artifacts to a different space requires global artifact management privilege',
+  }
+);
+
 export const GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.noGlobalArtifactManagementMessage',
   {
@@ -51,12 +59,22 @@ export const GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE = i18n.translate(
   }
 );
 
-export const IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
+const IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.importingArtifactNotVisibleInCurrentSpace',
   {
-    defaultMessage: 'Cannot import artifact that is not visible in the current space',
+    defaultMessage: 'Importing artifacts that are not visible in the current space is not allowed',
   }
 );
+
+const IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID = (spaceIds: string[]): string =>
+  i18n.translate('xpack.securitySolution.baseValidator.invalidOwnerSpaceId', {
+    defaultMessage:
+      'Importing artifacts with invalid owner space IDs is not allowed. The following space {numberOfSpaces, plural, one {ID is} other {IDs are} } invalid or unaccessible by current user: {invalidSpaceIds}',
+    values: {
+      invalidSpaceIds: spaceIds.join(', '),
+      numberOfSpaces: spaceIds.length,
+    },
+  });
 
 const ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE = (spaceIds: string[]): string =>
   i18n.translate('xpack.securitySolution.baseValidator.cannotManageItemInCurrentSpace', {
@@ -282,10 +300,7 @@ export class BaseValidator {
       const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
       const activeSpaceId = await this.getActiveSpaceId();
 
-      if (
-        ownerSpaceIds.length > 1 ||
-        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== activeSpaceId)
-      ) {
+      if (ownerSpaceIds.some((spaceId) => spaceId !== activeSpaceId)) {
         throw new EndpointArtifactExceptionValidationError(
           `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
           403
@@ -300,46 +315,71 @@ export class BaseValidator {
       const activeSpaceId = await this.getActiveSpaceId();
 
       if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
-        const ownedInAnotherSpace =
-          ownerSpaceIds.length !== 0 && !ownerSpaceIds.includes(activeSpaceId);
+        await this.validateSpacesAreAccessible(ownerSpaceIds);
 
-        if (ownedInAnotherSpace && !isArtifactGlobal(item)) {
-          const assignedPolicyIds = getPolicyIdsFromArtifact(item);
-
-          const getAssignedPoliciesVisibleInCurrentSpace = async (): Promise<PackagePolicy[]> => {
-            const { packagePolicy, savedObjects } =
-              this.endpointAppContext.getInternalFleetServices(activeSpaceId);
-            const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
-
-            return packagePolicy.getByIDs(soClient, assignedPolicyIds, { ignoreMissing: true });
-          };
-
-          if (
-            // not assigned to any policy, so not visible in current space
-            assignedPolicyIds.length === 0 ||
-            // or none of the assigned policies are visible in current space
-            (await getAssignedPoliciesVisibleInCurrentSpace()).length === 0
-          ) {
-            throw new EndpointArtifactExceptionValidationError(
-              `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE}`,
-              403
-            );
-          }
+        if (!(await this.isArtifactVisibleInCurrentSpace(ownerSpaceIds, activeSpaceId, item))) {
+          throw new EndpointArtifactExceptionValidationError(
+            `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${IMPORTING_ARTIFACT_NOT_VISIBLE_IN_CURRENT_SPACE_NOT_ALLOWED_MESSAGE}`,
+            403
+          );
         }
 
         return;
       }
 
-      if (
-        ownerSpaceIds.length > 1 ||
-        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== activeSpaceId)
-      ) {
+      if (ownerSpaceIds.some((spaceId) => spaceId !== activeSpaceId)) {
         throw new EndpointArtifactExceptionValidationError(
-          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${OWNER_SPACE_ID_TAG_MANAGEMENT_NOT_ALLOWED_MESSAGE}`,
+          `${ENDPOINT_AUTHZ_ERROR_MESSAGE}. ${IMPORTING_TO_OTHER_SPACE_NOT_ALLOWED_MESSAGE}`,
           403
         );
       }
     }
+  }
+
+  private async validateSpacesAreAccessible(ownerSpaceIds: string[]) {
+    const accessibleSpacesIds = new Set(await this.getAccessibleSpaceIds());
+    const invalidSpaceIds = ownerSpaceIds.filter((spaceId) => !accessibleSpacesIds.has(spaceId));
+
+    if (invalidSpaceIds.length > 0) {
+      throw new EndpointArtifactExceptionValidationError(
+        IMPORTING_ARTIFACT_WITH_INVALID_OWNER_SPACE_ID(invalidSpaceIds),
+        403
+      );
+    }
+  }
+
+  private async isArtifactVisibleInCurrentSpace(
+    ownerSpaceIds: string[],
+    activeSpaceId: string,
+    item: ExceptionItemLikeOptions
+  ): Promise<boolean> {
+    if (ownerSpaceIds.includes(activeSpaceId) || isArtifactGlobal(item)) {
+      return true;
+    }
+
+    const assignedPolicyIds = getPolicyIdsFromArtifact(item);
+    if (assignedPolicyIds.length === 0) {
+      // not assigned to any policy while existing in another space, so not visible in current space
+      return false;
+    }
+
+    const { packagePolicy, savedObjects } =
+      this.endpointAppContext.getInternalFleetServices(activeSpaceId);
+
+    const soClient = savedObjects.createInternalScopedSoClient({ spaceId: activeSpaceId });
+
+    const assignedPackagePoliciesVisibleInCurrentSpace = await packagePolicy.getByIDs(
+      soClient,
+      assignedPolicyIds,
+      { ignoreMissing: true }
+    );
+
+    if (assignedPackagePoliciesVisibleInCurrentSpace.length > 0) {
+      // assigned to at least one policy visible in current space
+      return true;
+    }
+
+    return false;
   }
 
   protected wasOwnerSpaceIdTagsChanged(
@@ -358,6 +398,19 @@ export class BaseValidator {
     }
 
     return (await this.endpointAppContext.getActiveSpace(this.request)).id;
+  }
+
+  protected async getAccessibleSpaceIds(): Promise<string[]> {
+    if (!this.request) {
+      throw new EndpointArtifactExceptionValidationError(
+        'Unable to determine space id. Missing HTTP Request object',
+        500
+      );
+    }
+
+    const accessibleSpaces = await this.endpointAppContext.getAccessibleSpaces(this.request);
+
+    return accessibleSpaces.map((space) => space.id);
   }
 
   protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {

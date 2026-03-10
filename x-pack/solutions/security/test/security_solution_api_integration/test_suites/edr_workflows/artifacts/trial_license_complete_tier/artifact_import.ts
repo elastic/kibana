@@ -311,7 +311,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Management of "ownerSpaceId" tag requires global artifact management privilege',
+                              'EndpointArtifactError: Endpoint authorization failure. Importing artifacts to a different space requires global artifact management privilege',
                             status_code: 403,
                           },
                           item_id: 'wrong-item',
@@ -482,7 +482,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Cannot import artifact that is not visible in the current space',
+                              'EndpointArtifactError: Endpoint authorization failure. Importing artifacts that are not visible in the current space is not allowed',
                             status_code: 403,
                           },
                           item_id: 'not-visible-in-current-space-because-unassigned',
@@ -491,7 +491,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                         {
                           error: {
                             message:
-                              'EndpointArtifactError: Endpoint authorization failure. Cannot import artifact that is not visible in the current space',
+                              'EndpointArtifactError: Endpoint authorization failure. Importing artifacts that are not visible in the current space is not allowed',
                             status_code: 403,
                           },
                           item_id: 'not-visible-in-current-space-because-assigned-only-there',
@@ -513,8 +513,116 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
               });
 
               describe('when data is invalid', () => {
-                // todo do we need this? create allows this, and will use actual space ID instead
-                it('should not import per-policy artifacts with invalid space id', async () => {});
+                describe('when the space id does not exist', () => {
+                  it('should not import artifacts without global privilege based on missing privilege', async () => {
+                    await supertest[artifact.listId].all
+                      .post(`${EXCEPTION_LIST_URL}/_import`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .attach(
+                        'file',
+                        buildImportBuffer(artifact.listId, [
+                          {
+                            item_id: 'global-artifact-with-invalid-space-id',
+                            tags: [buildSpaceOwnerIdTag('i-dont-exist'), GLOBAL_ARTIFACT_TAG],
+                          },
+                          {
+                            item_id: 'per-policy-artifact-with-invalid-space-id',
+                            tags: [buildSpaceOwnerIdTag('i-dont-exist')],
+                          },
+                        ]),
+                        'import_data.ndjson'
+                      )
+                      .expect(200)
+                      .expect({
+                        errors: [
+                          {
+                            error: {
+                              message:
+                                'EndpointArtifactError: Endpoint authorization failure. Importing artifacts to a different space requires global artifact management privilege',
+                              status_code: 403,
+                            },
+                            item_id: 'global-artifact-with-invalid-space-id',
+                            list_id: artifact.listId,
+                          },
+                          {
+                            error: {
+                              message:
+                                'EndpointArtifactError: Endpoint authorization failure. Importing artifacts to a different space requires global artifact management privilege',
+                              status_code: 403,
+                            },
+                            item_id: 'per-policy-artifact-with-invalid-space-id',
+                            list_id: artifact.listId,
+                          },
+                        ],
+                        success: false,
+                        success_count: 1,
+                        success_exception_lists: true,
+                        success_count_exception_lists: 1,
+                        success_exception_list_items: false,
+                        success_count_exception_list_items: 0,
+                      } as ImportExceptionsResponseSchema);
+
+                    const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                    expect(items.length).toEqual(0);
+                  });
+
+                  it('should not import artifacts with global privilege', async () => {
+                    await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                      .post(`${EXCEPTION_LIST_URL}/_import`)
+                      .set('kbn-xsrf', 'true')
+                      .on('error', createSupertestErrorLogger(log))
+                      .attach(
+                        'file',
+                        buildImportBuffer(artifact.listId, [
+                          {
+                            item_id: 'global-artifact-with-invalid-space-id',
+                            tags: [buildSpaceOwnerIdTag('i-dont-exist-1'), GLOBAL_ARTIFACT_TAG],
+                          },
+                          {
+                            item_id: 'per-policy-artifact-with-invalid-space-id',
+                            tags: [
+                              buildSpaceOwnerIdTag('i-dont-exist-2'),
+                              buildSpaceOwnerIdTag('i-dont-exist-3'),
+                            ],
+                          },
+                        ]),
+                        'import_data.ndjson'
+                      )
+                      .expect(200)
+                      .expect({
+                        errors: [
+                          {
+                            error: {
+                              message:
+                                'EndpointArtifactError: Importing artifacts with invalid owner space IDs is not allowed. The following space ID is invalid or unaccessible by current user: i-dont-exist-1',
+                              status_code: 403,
+                            },
+                            item_id: 'global-artifact-with-invalid-space-id',
+                            list_id: artifact.listId,
+                          },
+                          {
+                            error: {
+                              message:
+                                'EndpointArtifactError: Importing artifacts with invalid owner space IDs is not allowed. The following space IDs are invalid or unaccessible by current user: i-dont-exist-2, i-dont-exist-3',
+                              status_code: 403,
+                            },
+                            item_id: 'per-policy-artifact-with-invalid-space-id',
+                            list_id: artifact.listId,
+                          },
+                        ],
+                        success: false,
+                        success_count: 1,
+                        success_exception_lists: true,
+                        success_count_exception_lists: 1,
+                        success_exception_list_items: false,
+                        success_count_exception_list_items: 0,
+                      } as ImportExceptionsResponseSchema);
+
+                    const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                    expect(items.length).toEqual(0);
+                  });
+                });
 
                 it('should import per-policy artifacts assigned to invalid policy ids and remove invalid ids', async () => {
                   await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
