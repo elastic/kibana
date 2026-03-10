@@ -5,3 +5,6 @@
  * 2.0.
  */
 export { resolveEarsUrl } from './url';
+export type { EarsParams } from './401_interceptor';
+export { handleEars401Error } from './401_interceptor';
+export { getEarsAccessToken } from './get_ears_access_token';

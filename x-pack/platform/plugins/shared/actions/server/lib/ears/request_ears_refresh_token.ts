@@ -8,37 +8,44 @@
 import axios from 'axios';
 import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
-import { request } from './axios_utils';
-import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { OAuthTokenResponse } from './request_oauth_token';
+import { request } from '../axios_utils';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import type { OAuthTokenResponse } from '../request_oauth_token';
 
-export interface EarsTokenRequestParams {
-  code: string;
-  pkceVerifier: string;
+export interface EarsRefreshTokenRequestParams {
+  refreshToken: string;
 }
 
 /**
- * Exchange an authorization code for tokens via the EARS token endpoint.
- *
- * EARS uses a JSON request body with `{ code, pkce_verifier }` — no grant_type,
- * no client credentials, and no redirect_uri.
+ * Derives the EARS refresh endpoint from the token URL by replacing `/token` with `/refresh`.
  */
-export async function requestEarsToken(
+export function getEarsRefreshUrl(tokenUrl: string): string {
+  return tokenUrl.replace(/\/token$/, '/refresh');
+}
+
+/**
+ * Refresh an access token via the EARS refresh endpoint.
+ *
+ * EARS uses a JSON request body with `{ refresh_token }` — no grant_type,
+ * no client credentials. The refresh endpoint is derived from the token URL
+ * by replacing `/token` with `/refresh`.
+ */
+export async function requestEarsRefreshToken(
   tokenUrl: string,
   logger: Logger,
-  params: EarsTokenRequestParams,
+  params: EarsRefreshTokenRequestParams,
   configurationUtilities: ActionsConfigurationUtilities
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
+  const refreshUrl = getEarsRefreshUrl(tokenUrl);
 
   const res = await request({
     axios: axiosInstance,
-    url: tokenUrl,
+    url: refreshUrl,
     method: 'post',
     logger,
     data: {
-      code: params.code,
-      pkce_verifier: params.pkceVerifier,
+      refresh_token: params.refreshToken,
     },
     headers: {
       'Content-Type': 'application/json',
@@ -57,7 +64,7 @@ export async function requestEarsToken(
     };
   } else {
     const errString = stableStringify(res.data);
-    logger.warn(`error thrown getting the access token from EARS ${tokenUrl}: ${errString}`);
+    logger.warn(`error thrown refreshing the access token from EARS ${refreshUrl}: ${errString}`);
     throw new Error(errString);
   }
 }

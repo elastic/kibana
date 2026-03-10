@@ -14,7 +14,8 @@ import type {
   GetTokenOpts,
   OAuthGetTokenOpts,
 } from '@kbn/connector-specs';
-import { resolveEarsUrl } from './ears';
+import type { AxiosErrorWithRetry } from './axios_utils';
+import { type EarsParams, resolveEarsUrl, handleEars401Error, getEarsAccessToken } from './ears';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -23,7 +24,6 @@ import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';
 import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_code_access_token';
-import { getEarsAccessToken } from './get_ears_access_token';
 import { getDeleteTokenAxiosInterceptor } from './delete_token_axios_interceptor';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
@@ -35,12 +35,6 @@ interface GetAxiosInstanceOpts {
 }
 
 type ValidatedSecrets = Record<string, unknown>;
-
-interface AxiosErrorWithRetry {
-  config: InternalAxiosRequestConfig & { _retry?: boolean };
-  response?: { status: number };
-  message: string;
-}
 
 interface OAuth2AuthCodeParams {
   clientId?: string;
@@ -117,73 +111,6 @@ async function handleOAuth401Error({
   logger.debug(`Token refreshed successfully for connectorId ${connectorId}. Retrying request.`);
 
   // Update request with the new token and retry
-  error.config.headers.Authorization = newAccessToken;
-  return axiosInstance.request(error.config);
-}
-
-interface EarsParams {
-  provider?: string;
-  tokenUrl?: string;
-}
-
-async function handleEars401Error({
-  error,
-  connectorId,
-  secrets,
-  connectorTokenClient,
-  logger,
-  configurationUtilities,
-  axiosInstance,
-  authMode,
-  profileUid,
-}: {
-  error: AxiosErrorWithRetry;
-  connectorId: string;
-  secrets: EarsParams;
-  connectorTokenClient: ConnectorTokenClientContract;
-  logger: Logger;
-  configurationUtilities: ActionsConfigurationUtilities;
-  axiosInstance: AxiosInstance;
-  authMode?: AuthMode;
-  profileUid?: string;
-}): Promise<AxiosInstance> {
-  if (error.config._retry) {
-    return Promise.reject(error);
-  }
-
-  error.config._retry = true;
-  logger.debug(`Attempting EARS token refresh for connectorId ${connectorId} after 401 error`);
-
-  const { provider, tokenUrl: rawTokenUrl } = secrets;
-  const derivedTokenPath = provider ? `/${provider}/oauth/token` : rawTokenUrl;
-  if (!derivedTokenPath) {
-    error.message =
-      'Authentication failed: Missing required EARS configuration (provider or tokenUrl).';
-    return Promise.reject(error);
-  }
-
-  const tokenUrl = resolveEarsUrl(derivedTokenPath, configurationUtilities.getEarsUrl());
-  const newAccessToken = await getEarsAccessToken({
-    connectorId,
-    logger,
-    configurationUtilities,
-    tokenUrl,
-    connectorTokenClient,
-    authMode,
-    profileUid,
-    forceRefresh: true,
-  });
-
-  if (!newAccessToken) {
-    error.message =
-      'Authentication failed: Unable to refresh access token via EARS. Please re-authorize the connector.';
-    return Promise.reject(error);
-  }
-
-  logger.debug(
-    `EARS token refreshed successfully for connectorId ${connectorId}. Retrying request.`
-  );
-
   error.config.headers.Authorization = newAccessToken;
   return axiosInstance.request(error.config);
 }

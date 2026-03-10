@@ -8,8 +8,8 @@
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { actionsConfigMock } from '../actions_config.mock';
-import { connectorTokenClientMock } from './connector_token_client.mock';
+import { actionsConfigMock } from '../../actions_config.mock';
+import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getEarsAccessToken } from './get_ears_access_token';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
 

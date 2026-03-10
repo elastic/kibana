@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AuthMode } from '@kbn/connector-specs';
-import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorTokenClientContract } from '../types';
+import type { ActionsConfigurationUtilities } from '../../actions_config';
+import type { ConnectorTokenClientContract } from '../../types';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
-import { getStoredTokenWithRefresh } from './get_stored_oauth_token_with_refresh';
+import { getStoredTokenWithRefresh } from '../get_stored_oauth_token_with_refresh';
 
 interface GetEarsAccessTokenOpts {
   connectorId: string;
