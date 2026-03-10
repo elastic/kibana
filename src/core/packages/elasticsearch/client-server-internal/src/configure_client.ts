@@ -68,19 +68,22 @@ export const configureClient = (
  */
 function instrumentCpsMetrics({ client }: { client: Client }) {
   const meter = metrics.getMeter('kibana.elasticsearch.cps');
-  const requestCountGlobalCounter = meter.createCounter('request.count', {
+  const requestCountGlobalCounter = meter.createCounter('kibana.elasticsearch.cps.request.count', {
     description: 'Total count of CPS-eligible Elasticsearch API requests (global aggregations)',
     unit: 'requests',
     valueType: ValueType.INT,
   });
 
-  const requestsByProjectCounter = meter.createCounter('requests.by_project', {
-    description: 'Count of CPS-routed requests per project (for per-project error rate)',
-    unit: 'requests',
-    valueType: ValueType.INT,
-  });
+  const requestsByProjectCounter = meter.createCounter(
+    'kibana.elasticsearch.cps.requests.by_project',
+    {
+      description: 'Count of CPS-routed requests per project (for per-project error rate)',
+      unit: 'requests',
+      valueType: ValueType.INT,
+    }
+  );
 
-  const adoptionCounter = meter.createCounter('adoption', {
+  const adoptionCounter = meter.createCounter('kibana.elasticsearch.cps.adoption', {
     description: 'Count of CPS-routed requests per project and region (for adoption tracking)',
     unit: 'requests',
     valueType: ValueType.INT,

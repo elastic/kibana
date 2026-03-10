@@ -28,11 +28,14 @@ const meter = metrics.getMeter('kibana.elasticsearch.cps');
 // Metric 4: Bypass detection with reason
 // This is the only metric created here because it's emitted synchronously in the request handler.
 // Other metrics (1-3) are emitted in the response phase and defined in configure_client.ts
-const requestWithoutRoutingCounter = meter.createCounter('request_without_routing.count', {
-  description: 'Count of Elasticsearch requests that bypassed CPS routing when CPS was enabled',
-  unit: 'requests',
-  valueType: ValueType.INT,
-});
+const requestWithoutRoutingCounter = meter.createCounter(
+  'kibana.elasticsearch.cps.request_without_routing.count',
+  {
+    description: 'Count of Elasticsearch requests that bypassed CPS routing when CPS was enabled',
+    unit: 'requests',
+    valueType: ValueType.INT,
+  }
+);
 
 /** @internal */
 export function getCpsRequestHandler(
