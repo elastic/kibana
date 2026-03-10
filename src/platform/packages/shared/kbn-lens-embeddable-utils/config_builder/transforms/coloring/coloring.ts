@@ -9,7 +9,6 @@
 
 import type { ColorMapping, ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { KbnPaletteId } from '@kbn/palettes';
-import { KbnPalette } from '@kbn/palettes';
 import type {
   AllColoringTypes,
   ColorByValueAbsolute,
@@ -22,7 +21,7 @@ import type {
 import type { SerializableValueType } from '../../schema/serializedValue';
 
 const LENS_DEFAULT_COLOR_BY_VALUE_RANGE_TYPE = 'percentage';
-const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = KbnPalette.Default;
+const LENS_DEFAULT_COLOR_MAPPING_PALETTE: KbnPaletteId = 'default';
 
 const LEGACY_TO_API_RANGE_NAMES: Record<'percent' | 'number', 'percentage' | 'absolute'> = {
   number: 'absolute',
