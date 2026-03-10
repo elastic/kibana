@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../content_management';
+import { DASHBOARD_LINK_TYPE } from '../../content_management';
 import { transformIn } from './transform_in';
 
 jest.mock('uuid', () => ({
@@ -60,34 +60,6 @@ describe('transformIn', () => {
             Object {
               "destinationRefName": "link_fb1b3fc7-6e12-4542-bcf5-c61ad77241c5_dashboard",
               "type": "dashboardLink",
-            },
-          ],
-          "title": "Custom title",
-        },
-      }
-    `);
-  });
-
-  test('should strip 9.3.0 properties from links', () => {
-    const byValueState = {
-      title: 'Custom title',
-      links: [
-        {
-          id: 'fb1b3fc7-6e12-4542-bcf5-c61ad77241c5',
-          order: 0,
-          type: EXTERNAL_LINK_TYPE as typeof EXTERNAL_LINK_TYPE,
-          destination: 'https://a.b.c.d.e.f.g',
-        },
-      ],
-    };
-    expect(transformIn(byValueState)).toMatchInlineSnapshot(`
-      Object {
-        "references": Array [],
-        "state": Object {
-          "links": Array [
-            Object {
-              "destination": "https://a.b.c.d.e.f.g",
-              "type": "externalLink",
             },
           ],
           "title": "Custom title",
