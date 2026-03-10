@@ -1465,6 +1465,23 @@ paths:
                     instructions:
                       description: Optional system instructions that define the agent behavior.
                       type: string
+                    skills:
+                      items:
+                        additionalProperties: false
+                        description: Skill selection configuration for the agent.
+                        type: object
+                        properties:
+                          skill_ids:
+                            description: Array of skill IDs. Use "*" to select all built-in skills.
+                            items:
+                              description: Skill ID to be available to the agent.
+                              type: string
+                            maxItems: 100
+                            type: array
+                        required:
+                          - skill_ids
+                      maxItems: 100
+                      type: array
                     tools:
                       items:
                         additionalProperties: false
@@ -1778,6 +1795,23 @@ paths:
                     instructions:
                       description: Updated system instructions that define the agent behavior.
                       type: string
+                    skills:
+                      items:
+                        additionalProperties: false
+                        description: Skill selection configuration for the agent.
+                        type: object
+                        properties:
+                          skill_ids:
+                            description: Array of skill IDs. Use "*" to select all built-in skills.
+                            items:
+                              description: Skill ID to be available to the agent.
+                              type: string
+                            maxItems: 100
+                            type: array
+                        required:
+                          - skill_ids
+                      maxItems: 100
+                      type: array
                     tools:
                       items:
                         additionalProperties: false
@@ -3313,7 +3347,7 @@ paths:
                       - name
                       - relativePath
                       - content
-                  maxItems: 20
+                  maxItems: 100
                   type: array
                 tool_ids:
                   default: []
@@ -3321,7 +3355,7 @@ paths:
                   items:
                     description: Tool ID from the tool registry.
                     type: string
-                  maxItems: 5
+                  maxItems: 100
                   type: array
               required:
                 - id
@@ -3452,14 +3486,14 @@ paths:
                       - name
                       - relativePath
                       - content
-                  maxItems: 20
+                  maxItems: 100
                   type: array
                 tool_ids:
                   description: Updated tool IDs from the tool registry.
                   items:
                     description: Updated tool ID.
                     type: string
-                  maxItems: 5
+                  maxItems: 100
                   type: array
       responses: {}
       summary: Update a skill
