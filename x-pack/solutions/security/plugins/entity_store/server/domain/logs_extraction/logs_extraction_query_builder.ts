@@ -159,10 +159,9 @@ export function buildLogsExtractionEsqlQuery({
   }
 
   // Perform the final merge of the fields between latest and recent data
-  parts.push(`| EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)}`);
-
-  // Perform some custom field evaluations, like type and name fallback
-  parts.push(`| EVAL ${customFieldEvalLogic(type, entityTypeFallback)}`);
+  // and some custom field evaluations, like type and name fallback
+  parts.push(`| EVAL ${mergedFieldStats(MAIN_ENTITY_ID_FIELD, fields)},
+              ${customFieldEvalLogic(type, entityTypeFallback)}`);
 
   // Rename the fields to the final names
   parts.push(`| RENAME

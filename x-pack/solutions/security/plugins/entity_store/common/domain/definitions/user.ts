@@ -34,6 +34,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         ],
       },
     ],
+    // Ranking mechanism for the identity field
     euidFields: [
       [{ field: 'user.email' }, { sep: '@' }, { field: 'entity.namespace' }],
       [{ field: 'user.id' }, { sep: '@' }, { field: 'entity.namespace' }],
@@ -85,8 +86,12 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
    */
   postAggFilter: {
     or: [
-      // if entity.id exists after look up join, data is already in the entity store
+      // If entity.id exists after look up join, data is already in the entity store
+      // Meaning an IDP-like event has already been processed.
+      // Any other event after creation can be used as *enrichment* (idp or not).
       { field: 'entity.id', exists: true },
+
+      // --- The below filters are the definition of an IDP-like events ---
 
       // or recent data (not stored) is asset kind (use includes to allow multiple values; CCS can ingest multiple values)
       { field: recentData('event.kind'), includes: 'asset' },
