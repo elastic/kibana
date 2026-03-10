@@ -22,8 +22,9 @@ import {
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
@@ -33,6 +34,7 @@ import {
   shouldComposeTree,
   filterStreamsByQuery,
   filterCollapsedStreamRows,
+  getLegacyLogsStatus,
 } from './utils';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
@@ -54,7 +56,7 @@ import {
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
-import { DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
+import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -68,10 +70,14 @@ export function StreamsTreeTable({
   loading,
   streams = [],
   canReadFailureStore = false,
+  wiredStreamsStatus,
+  openFlyout,
 }: {
   streams?: ListStreamDetail[];
   canReadFailureStore?: boolean;
   loading?: boolean;
+  wiredStreamsStatus?: WiredStreamsStatus;
+  openFlyout?: () => void;
 }) {
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
@@ -417,6 +423,12 @@ export function StreamsTreeTable({
                   >
                     <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
+                  {item.stream.name === LOGS_ROOT_STREAM_NAME && (
+                    <DeprecatedLogsBadge
+                      openFlyout={openFlyout}
+                      hasNewStreams={getLegacyLogsStatus(wiredStreamsStatus).hasNewStreams}
+                    />
+                  )}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
                 </EuiFlexGroup>
               </EuiFlexGroup>

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { Type, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
+import type { filterPolicies } from './user_activity_filters';
 
 type AppendersType = TypeOf<typeof appendersSchema>;
 
@@ -25,6 +26,25 @@ const defaultAppender: Map<string, AppendersType> = new Map([
   ],
 ]);
 
+type FilterPolicy = keyof typeof filterPolicies;
+
+const filterPolicySchema: Type<FilterPolicy> = schema.oneOf([
+  schema.literal('keep'),
+  schema.literal('drop'),
+]);
+
+/** Filters applied to user activity events (defaults to none). */
+const filtersSchema = schema.arrayOf(
+  schema.object({
+    actions: schema.arrayOf(schema.string(), { maxSize: 100 }),
+    policy: filterPolicySchema,
+  }),
+  { defaultValue: [], maxSize: 100 }
+);
+
+/** @internal */
+export type UserActivityFiltersType = TypeOf<typeof filtersSchema>;
+
 /**
  * Configuration schema for the User Activity Service.
  * Uses the same appenders schema as the core logging service.
@@ -34,6 +54,7 @@ const configSchema = schema.object({
   appenders: schema.mapOf(schema.string(), appendersSchema, {
     defaultValue: defaultAppender,
   }),
+  filters: filtersSchema,
 });
 
 /** @internal */

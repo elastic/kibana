@@ -26,6 +26,8 @@ export {
 export {
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
+  addMissingUiamKeyTagIfNeeded,
+  shouldAddMissingUiamKeyTag,
 } from './api_key_as_alert_attributes';
 export {
   injectReferencesIntoActions,

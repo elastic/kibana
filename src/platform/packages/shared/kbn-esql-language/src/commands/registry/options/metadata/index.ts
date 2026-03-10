@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import type { ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
+import { isColumn, isOptionNode } from '@elastic/esql';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommandOption, ESQLAstAllCommands } from '../../../../types';
 import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { isColumn, isOptionNode } from '../../../../ast/is';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 
 export const METADATA_FIELDS = [

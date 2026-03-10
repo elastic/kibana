@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from '../../parser';
-import { BasicPrettyPrinter } from '../../pretty_print';
+import { parse } from '@elastic/esql';
+import { BasicPrettyPrinter } from '@elastic/esql';
 import { getQueryForFields } from './get_query_for_fields';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 

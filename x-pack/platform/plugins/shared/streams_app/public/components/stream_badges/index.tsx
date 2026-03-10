@@ -23,6 +23,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 import { truncateText } from '../../util/truncate_text';
 
@@ -100,6 +101,45 @@ export function QueryStreamBadge() {
         defaultMessage: 'Query stream',
       })}
     </EuiBadge>
+  );
+}
+
+export function DeprecatedLogsBadge({
+  openFlyout,
+  hasNewStreams,
+}: {
+  openFlyout?: () => void;
+  hasNewStreams: boolean;
+}) {
+  const badge =
+    openFlyout && !hasNewStreams ? (
+      <EuiBadge
+        color="warning"
+        onClick={openFlyout}
+        onClickAriaLabel={i18n.translate('xpack.streams.badges.deprecatedLogs.ariaLabel', {
+          defaultMessage: 'The logs root stream is deprecated.',
+        })}
+      >
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    ) : (
+      <EuiBadge color="warning">
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    );
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.badges.deprecatedLogs.tooltip', {
+        defaultMessage: 'The logs root stream is deprecated.',
+      })}
+    >
+      {badge}
+    </EuiToolTip>
   );
 }
 
@@ -192,10 +232,12 @@ export function DiscoverBadgeButton({
       start: { share },
     },
   } = useKibana();
+  const { features } = useStreamsPrivileges();
   const esqlQuery = getDiscoverEsqlQuery({
     definition: stream,
     indexMode: Streams.ingest.all.Definition.is(stream) ? indexMode : undefined,
     includeMetadata: Streams.WiredStream.Definition.is(stream),
+    useViews: features.wiredStreamViews.enabled,
   });
   const useUrl = share.url.locators.useUrl;
 
@@ -237,5 +279,34 @@ export function DiscoverBadgeButton({
       size="xs"
       aria-label={ariaLabel}
     />
+  );
+}
+
+export function TimeSeriesBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      content={i18n.translate('xpack.streams.badges.timeSeries.description', {
+        defaultMessage:
+          'Time series streams are optimized for indexing metrics data and help you analyze a sequence of data points as a whole.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType="chartLine"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="timeSeriesBadge"
+      >
+        {i18n.translate('xpack.streams.badges.timeSeries.label', {
+          defaultMessage: 'Time series',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
   );
 }

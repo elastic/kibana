@@ -1098,7 +1098,15 @@
         "signature": [
           "{ readonly sort: ",
           "SortColumnTable",
-          "[]; readonly columns: (Pick<",
+          "[]; readonly filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; readonly title: string; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
@@ -1128,15 +1136,7 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly title: string; readonly filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; readonly viewMode: ",
+          " | undefined; type?: string | undefined; })[]; readonly viewMode: ",
           "ViewSelection",
           "; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly totalCount: number; readonly additionalFilters: Record<",
           "AlertPageFilterType",

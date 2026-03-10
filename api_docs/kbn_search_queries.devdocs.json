@@ -812,7 +812,7 @@
             "label": "embeddingType",
             "description": [],
             "signature": [
-              "\"dense_vector\" | \"sparse_vector\""
+              "\"sparse_vector\" | \"dense_vector\""
             ],
             "path": "x-pack/solutions/search/packages/kbn-search-queries/src/types.ts",
             "lineNumber": 31,

@@ -10,6 +10,8 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { SystemConnectorsMap } from '@kbn/workflows/common/constants';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
@@ -78,17 +80,27 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           step['connector-id']
         );
 
-      if (!connectorIdRendered) {
-        throw new Error(`Connector ID is required`);
+      let output: ActionTypeExecutorResult<unknown>;
+      if (connectorIdRendered) {
+        // Use regular connector with saved object
+        output = await this.connectorExecutor.execute({
+          connectorType: stepType,
+          connectorNameOrId: connectorIdRendered,
+          input: renderedInputs,
+          abortController: this.stepExecutionRuntime.abortController,
+        });
+      } else {
+        const systemConnectorActionTypeId = SystemConnectorsMap.get(`.${stepType}`);
+        if (systemConnectorActionTypeId) {
+          output = await this.connectorExecutor.executeSystemConnector({
+            connectorType: systemConnectorActionTypeId,
+            input: renderedInputs,
+            abortController: this.stepExecutionRuntime.abortController,
+          });
+        } else {
+          throw new Error(`Connector ID is required for connector type ${stepType}`);
+        }
       }
-
-      const output = await this.connectorExecutor.execute(
-        stepType,
-        connectorIdRendered,
-        renderedInputs,
-        step.spaceId,
-        this.stepExecutionRuntime.abortController
-      );
 
       const { data, status, message, serviceMessage } = output;
 

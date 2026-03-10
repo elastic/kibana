@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import { DefendInsightType, DefendInsightsResponse } from './common_attributes.gen';

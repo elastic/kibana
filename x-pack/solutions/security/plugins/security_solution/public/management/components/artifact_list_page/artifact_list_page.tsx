@@ -49,6 +49,8 @@ import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ArtifactImportFlyout } from './components/artifact_import_flyout';
+import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -96,21 +98,26 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
     allowCardDeleteAction = true,
     CardDecorator,
   }) => {
+    const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
+    );
     const { services } = useKibana();
     const { http } = services;
     const { state: routeState } = useLocation<ListPageRouteState | undefined>();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const toasts = useToasts();
     const isMounted = useIsMounted();
+
     const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
+    const isImportFlyoutOpened =
+      useIsImportFlyoutOpened(allowCardCreateAction) &&
+      areEndpointExceptionsMovedUnderManagementFFEnabled;
+
     const setUrlParams = useSetUrlParams();
     const {
       urlParams: { filter, includedPolicies },
     } = useUrlParams<ArtifactListPageUrlParams>();
     const { exportExceptionList } = useApi(http);
-    const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
-      'endpointExceptionsMovedUnderManagement'
-    );
 
     const {
       isPageInitializing,
@@ -277,6 +284,15 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
 
     const handleOnDownload = useCallback(() => setExportedData(undefined), []);
 
+    const handleImport = useCallback(() => setUrlParams({ show: 'import' }), [setUrlParams]);
+
+    const closeImportFlyout = useCallback(() => setUrlParams({ show: undefined }), [setUrlParams]);
+
+    const handleImportFlyoutOnSuccess = useCallback(() => {
+      closeImportFlyout();
+      refetchListData();
+    }, [closeImportFlyout, refetchListData]);
+
     const description = useMemo(() => {
       const subtitleText = labels.pageAboutInfo ? (
         <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
@@ -328,7 +344,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
                     key: 'ImportButton',
                     icon: 'importAction',
                     label: labels.pageImportButtonTitle,
-                    onClick: () => {},
+                    onClick: handleImport,
                     disabled: !allowCardCreateAction,
                   },
                   {
@@ -365,6 +381,15 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
           />
         )}
 
+        {isImportFlyoutOpened && (
+          <ArtifactImportFlyout
+            onCancel={closeImportFlyout}
+            onSuccess={handleImportFlyoutOnSuccess}
+            apiClient={apiClient}
+            labels={labels}
+          />
+        )}
+
         {selectedItemForDelete && (
           <ArtifactDeleteModal
             apiClient={apiClient}
@@ -379,10 +404,12 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
         {!doesDataExist ? (
           <NoDataEmptyState
             onAdd={handleOpenCreateFlyoutClick}
+            onImport={handleImport}
             titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
             titleLabel={labels.emptyStateTitle}
             aboutInfo={labels.emptyStateInfo}
             primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+            importButtonLabel={labels.emptyStateImportButtonLabel}
             backComponent={backButtonEmptyComponent}
             data-test-subj={getTestId('emptyState')}
             secondaryAboutInfo={secondaryPageInfo}
