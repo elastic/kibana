@@ -31,6 +31,17 @@ export class StreamsApp {
   public readonly saveRoutingRuleButton;
   public readonly concatFieldInput;
   public readonly concatLiteralInput;
+  public readonly createQueryStreamButton;
+  public readonly childStreamTypeSelector;
+  public readonly queryStreamFlyout;
+  public readonly queryStreamFlyoutSaveButton;
+  public readonly queryStreamCreatedSuccessToast;
+  public readonly childQueryStreamCreatedSuccessToast;
+  public readonly queryStreamUpdatedSuccessToast;
+  public readonly queryStreamDetailsQueryViewerCodeBlock;
+  public readonly deleteQueryStreamModalInput;
+  public readonly queryStreamDeletedSuccessToast;
+  public readonly queryStreamCreateErrorToast;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -66,6 +77,23 @@ export class StreamsApp {
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
     this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
     this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
+    this.createQueryStreamButton = this.page.getByTestId('streamsAppCreateQueryStreamButton');
+    this.childStreamTypeSelector = this.page.getByTestId('streamsAppChildStreamTypeSelector');
+    this.queryStreamFlyout = this.page.getByTestId('streamsAppQueryStreamFlyout');
+    this.queryStreamFlyoutSaveButton = this.page.getByTestId(
+      'streamsAppQueryStreamFlyoutSaveButton'
+    );
+    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated successfully');
+    this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
+      'queryStreamDetailsQueryViewerCodeBlock'
+    );
+    this.deleteQueryStreamModalInput = this.page.getByTestId(
+      'streamsAppDeleteStreamModalStreamNameInput'
+    );
+    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
   }
 
   async goto() {
@@ -1232,5 +1260,49 @@ export class StreamsApp {
 
   async fillConcatLiteralInput(value: string) {
     await this.concatLiteralInput.fill(value);
+  }
+
+  async clickCreateQueryStreamButton() {
+    await this.createQueryStreamButton.click();
+  }
+
+  async clickQueryStreamFlyoutSaveButton() {
+    await this.queryStreamFlyoutSaveButton.click();
+  }
+
+  async selectChildStreamType(type: 'Query' | 'Index') {
+    await this.childStreamTypeSelector.getByRole('button', { name: type }).click();
+  }
+
+  async clickQueryModeCreateQueryStreamButton() {
+    await this.page.getByTestId('streamsAppQueryModeCreateButton').click();
+  }
+
+  async clickQueryStreamFormCreateButton() {
+    await this.page.getByTestId('streamsAppQueryStreamFormCreateButton').click();
+  }
+
+  async clickQueryStreamLink(streamName: string) {
+    await this.page.getByTestId(`streamsAppQueryStreamEntryButton-${streamName}`).click();
+  }
+
+  async clickQueryStreamDetailsTab(tabName: string) {
+    await this.page.getByTestId(`queryStreamDetails-${tabName}-tab`).click();
+  }
+
+  async clickQueryStreamDetailsEditQueryButton() {
+    await this.page.getByTestId('queryStreamDetailsEditQueryButton').click();
+  }
+
+  async clickDeleteQueryStreamButton() {
+    await this.page.getByTestId('deleteQueryStreamButton').click();
+  }
+
+  async fillDeleteQueryStreamModalInput(value: string) {
+    await this.deleteQueryStreamModalInput.fill(value);
+  }
+
+  async clickDeleteQueryStreamModalDeleteButton() {
+    await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
   }
 }
