@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable, PassThrough } from 'stream';
+import { pipeline } from 'stream/promises';
 import type { ParsedPluginArchive } from '@kbn/agent-builder-common';
 import type { ZipArchive } from '../archive';
 
@@ -16,10 +18,15 @@ jest.mock('../archive', () => ({
 const mockParsePluginZipFile = jest.fn();
 jest.mock('../parsing', () => ({
   parsePluginZipFile: (...args: unknown[]) => mockParsePluginZipFile(...args),
-  PluginArchiveError: class extends Error {},
+  PluginArchiveError: class PluginArchiveError extends Error {
+    constructor(message: string) {
+      super(message);
+      this.name = 'PluginArchiveError';
+    }
+  },
 }));
 
-import { parsePluginFromFile } from './download_plugin';
+import { parsePluginFromFile, createSizeLimitTransform } from './download_plugin';
 
 describe('parsePluginFromFile', () => {
   let mockArchive: jest.Mocked<ZipArchive>;
@@ -76,5 +83,40 @@ describe('parsePluginFromFile', () => {
     await expect(parsePluginFromFile('/path/to/file.zip')).rejects.toThrow('sync error');
 
     expect(mockArchive.close).toHaveBeenCalled();
+  });
+});
+
+describe('createSizeLimitTransform', () => {
+  it('passes through data under the limit', async () => {
+    const transform = createSizeLimitTransform(100, 'http://example.com');
+    const input = Readable.from([Buffer.alloc(50), Buffer.alloc(30)]);
+    const output = new PassThrough();
+
+    const chunks: Buffer[] = [];
+    output.on('data', (chunk: Buffer) => chunks.push(chunk));
+
+    await pipeline(input, transform, output);
+
+    expect(Buffer.concat(chunks).length).toBe(80);
+  });
+
+  it('rejects when data exceeds the limit', async () => {
+    const transform = createSizeLimitTransform(100, 'http://example.com/big.zip');
+    const input = Readable.from([Buffer.alloc(60), Buffer.alloc(60)]);
+    const output = new PassThrough();
+
+    await expect(pipeline(input, transform, output)).rejects.toThrow(
+      /exceeds the maximum allowed size/
+    );
+  });
+
+  it('rejects when a single chunk exceeds the limit', async () => {
+    const transform = createSizeLimitTransform(50, 'http://example.com/huge.zip');
+    const input = Readable.from([Buffer.alloc(100)]);
+    const output = new PassThrough();
+
+    await expect(pipeline(input, transform, output)).rejects.toThrow(
+      /exceeds the maximum allowed size of 50 bytes/
+    );
   });
 });

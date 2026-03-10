@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { Readable } from 'stream';
+import { Readable, Transform } from 'stream';
 import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { pipeline } from 'stream/promises';
 import { createWriteStream, deleteFile, getSafePath } from '@kbn/fs';
@@ -108,6 +108,8 @@ export const parsePluginFromFile = async (filePath: string): Promise<ParsedPlugi
   }
 };
 
+const MAX_DOWNLOAD_BYTES = 50 * 1024 * 1024; // 50 MB, same as upload route
+
 const downloadToFile = async (url: string, fileName: string): Promise<string> => {
   const res = await fetch(url, { redirect: 'follow' });
 
@@ -121,10 +123,36 @@ const downloadToFile = async (url: string, fileName: string): Promise<string> =>
     throw new PluginArchiveError(`Empty response body when downloading from ${url}`);
   }
 
+  const contentLength = res.headers.get('content-length');
+  if (contentLength && parseInt(contentLength, 10) > MAX_DOWNLOAD_BYTES) {
+    throw new PluginArchiveError(
+      `Plugin archive from ${url} exceeds the maximum allowed size of ${MAX_DOWNLOAD_BYTES} bytes.`
+    );
+  }
+
   const { fullPath } = getSafePath(fileName, VOLUME);
   const readStream = Readable.fromWeb(res.body as WebReadableStream);
+  const sizeGuard = createSizeLimitTransform(MAX_DOWNLOAD_BYTES, url);
   const writeStream = createWriteStream(fileName, VOLUME);
-  await pipeline(readStream, writeStream);
+  await pipeline(readStream, sizeGuard, writeStream);
 
   return fullPath;
+};
+
+export const createSizeLimitTransform = (maxBytes: number, url: string): Transform => {
+  let bytesReceived = 0;
+  return new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      bytesReceived += chunk.length;
+      if (bytesReceived > maxBytes) {
+        callback(
+          new PluginArchiveError(
+            `Plugin archive from ${url} exceeds the maximum allowed size of ${maxBytes} bytes.`
+          )
+        );
+      } else {
+        callback(null, chunk);
+      }
+    },
+  });
 };
