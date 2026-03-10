@@ -31,6 +31,7 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '../../../../../../../common/types/storage';
+import { ProjectRouting } from './components/project_routing/project_routing';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();
@@ -56,15 +57,21 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     FROZEN_TIER_PREFERENCE.EXCLUDE
   );
 
+  const [projectRouting, setProjectRouting] = useState<string | null>(
+    jobCreator.projectRouting ?? null
+  );
+
   async function loadChart() {
     setLoadingData(true);
     try {
+      // TODO loadEventRateChart should refresh if projectRouting changes
       const resp = await chartLoader.loadEventRateChart(
         jobCreator.start,
         jobCreator.end,
         chartInterval.getInterval().asMilliseconds(),
         jobCreator.runtimeMappings ?? undefined,
-        jobCreator.datafeedConfig.indices_options
+        jobCreator.datafeedConfig.indices_options,
+        jobCreator.projectRouting ?? undefined
       );
       setEventRateChartData(resp);
     } catch (error) {
@@ -104,7 +111,13 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       start: jobCreator.start,
       end: jobCreator.end,
     });
-  }, [jobCreator, jobCreatorUpdated]);
+
+    if (jobCreator.projectRouting !== projectRouting) {
+      setProjectRouting(jobCreator.projectRouting ?? null);
+      loadChart();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreator, jobCreatorUpdated, projectRouting]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
     if (range.start !== null && range.end !== null) {
@@ -153,6 +166,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             showAxis={true}
             loading={loadingData}
           />
+
+          <ProjectRouting />
 
           <WizardNav
             next={() =>

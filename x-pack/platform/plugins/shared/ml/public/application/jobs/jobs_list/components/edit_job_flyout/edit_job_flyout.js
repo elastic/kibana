@@ -66,6 +66,7 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: '',
       datafeedFrequency: '',
       datafeedScrollSize: '',
+      datafeedProjectRouting: undefined,
       jobModelMemoryLimitValidationError: '',
       jobGroupsValidationError: '',
       isValidJobDetails: true,
@@ -117,6 +118,7 @@ export class EditJobFlyoutUI extends Component {
         'datafeedQueryDelay',
         'datafeedFrequency',
         'datafeedScrollSize',
+        'datafeedProjectRouting',
       ])
     );
   }
@@ -178,6 +180,7 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: hasDatafeed ? datafeedConfig.query_delay : '',
       datafeedFrequency: hasDatafeed ? frequency : '',
       datafeedScrollSize: hasDatafeed ? +datafeedConfig.scroll_size : null,
+      datafeedProjectRouting: hasDatafeed ? datafeedConfig.project_routing : undefined,
     });
   }
 
@@ -273,6 +276,7 @@ export class EditJobFlyoutUI extends Component {
       datafeedQueryDelay: this.state.datafeedQueryDelay,
       datafeedFrequency: this.state.datafeedFrequency,
       datafeedScrollSize: this.state.datafeedScrollSize,
+      datafeedProjectRouting: this.state.datafeedProjectRouting,
       customUrls: this.state.jobCustomUrls,
     };
 
@@ -329,6 +333,7 @@ export class EditJobFlyoutUI extends Component {
         datafeedQueryDelay,
         datafeedFrequency,
         datafeedScrollSize,
+        datafeedProjectRouting,
         jobGroupsValidationError,
         jobModelMemoryLimitValidationError,
         isValidJobDetails,
@@ -389,6 +394,7 @@ export class EditJobFlyoutUI extends Component {
               jobBucketSpan={jobBucketSpan}
               setDatafeed={this.setDatafeed}
               datafeedRunning={datafeedRunning}
+              datafeedProjectRouting={datafeedProjectRouting}
             />
           ),
         },

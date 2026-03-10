@@ -523,6 +523,7 @@ export function mlApiProvider(httpService: HttpService) {
       end,
       jobOverrides,
       estimateModelMemory,
+      projectRouting,
     }: {
       moduleId: string;
       prefix?: string;
@@ -535,6 +536,7 @@ export function mlApiProvider(httpService: HttpService) {
       end?: number;
       jobOverrides?: Array<Partial<Job>>;
       estimateModelMemory?: boolean;
+      projectRouting?: string;
     }) {
       const body = JSON.stringify({
         prefix,
@@ -547,6 +549,7 @@ export function mlApiProvider(httpService: HttpService) {
         end,
         jobOverrides,
         estimateModelMemory,
+        projectRouting,
       });
 
       return httpService.http<DataRecognizerConfigResponse>({

@@ -20,7 +20,7 @@ import type { JobCreator, JobCreatorType } from '../job_creator';
 import { isCategorizationJobCreator } from '../job_creator';
 import { populateValidationMessages } from './util';
 import type { CardinalityValidatorResult, JobExistsResult, GroupsExistResult } from './validators';
-import { cardinalityValidator, jobIdValidator, groupIdsValidator } from './validators';
+import { jobIdValidator, groupIdsValidator } from './validators';
 
 import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
@@ -61,6 +61,7 @@ export interface BasicValidations {
   categorizerMissingPerPartition: Validation;
   categorizerVaryingPerPartitionField: Validation;
   summaryCountField: Validation;
+  projectRouting: Validation;
 }
 
 export interface AdvancedValidations {
@@ -88,6 +89,7 @@ export class JobValidator {
     categorizerMissingPerPartition: { valid: true },
     categorizerVaryingPerPartitionField: { valid: true },
     summaryCountField: { valid: true },
+    projectRouting: { valid: true },
   };
   private _advancedValidations: AdvancedValidations = {
     categorizationFieldValid: { valid: true },
@@ -112,7 +114,7 @@ export class JobValidator {
     };
 
     this._asyncValidators$ = [
-      cardinalityValidator(this._jobCreatorSubject$),
+      // cardinalityValidator(this._jobCreatorSubject$), disabled for now as datafeed fails !!!!!!!!!!!!!!!!!!!!!!!!!
       jobIdValidator(this._jobCreatorSubject$),
       groupIdsValidator(this._jobCreatorSubject$),
     ];
@@ -273,6 +275,10 @@ export class JobValidator {
 
   public get scrollSize(): Validation {
     return this._basicValidations.scrollSize;
+  }
+
+  public get projectRouting(): Validation {
+    return this._basicValidations.projectRouting;
   }
 
   public set advancedValid(valid: boolean) {

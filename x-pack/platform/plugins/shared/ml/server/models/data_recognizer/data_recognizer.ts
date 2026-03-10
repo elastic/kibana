@@ -56,6 +56,7 @@ import { resultsServiceProvider } from '../results_service';
 import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
 import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { MLSavedObjectService } from '../../saved_objects';
+import type { ServerlessInfo } from '../../types';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -140,7 +141,8 @@ export class DataRecognizer {
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest,
-    compatibleModuleType: CompatibleModule | null
+    compatibleModuleType: CompatibleModule | null,
+    serverless: ServerlessInfo
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -148,7 +150,7 @@ export class DataRecognizer {
     this._dataViewsService = dataViewsService;
     this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
-    this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
+    this._jobsService = jobServiceProvider(mlClusterClient, mlClient, serverless);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
     this._compatibleModuleType = compatibleModuleType;
@@ -553,7 +555,8 @@ export class DataRecognizer {
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
     estimateModelMemory?: boolean,
-    applyToAllSpaces: boolean = false
+    applyToAllSpaces: boolean = false,
+    projectRouting?: string
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
@@ -625,6 +628,9 @@ export class DataRecognizer {
       if (typeof query === 'object' && query !== null) {
         moduleConfig.datafeeds.forEach((df) => {
           df.config.query = query;
+          if (projectRouting !== undefined) {
+            df.config.project_routing = projectRouting;
+          }
         });
       }
       saveResults.datafeeds = await this._saveDatafeeds(moduleConfig.datafeeds);
@@ -1499,7 +1505,8 @@ export function dataRecognizerFactory(
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  serverless: ServerlessInfo
 ) {
   return new DataRecognizer(
     client,
@@ -1508,7 +1515,8 @@ export function dataRecognizerFactory(
     dataViewsService,
     mlSavedObjectService,
     request,
-    compatibleModuleType
+    compatibleModuleType,
+    serverless
   );
 }
 

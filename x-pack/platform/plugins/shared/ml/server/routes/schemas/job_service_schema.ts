@@ -21,6 +21,7 @@ export const categorizationFieldValidationSchema = {
   analyzer: schema.any(),
   runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
+  projectRouting: schema.maybe(schema.string()),
 };
 
 export const basicChartSchema = {
@@ -35,6 +36,7 @@ export const basicChartSchema = {
   splitFieldValue: schema.nullable(schema.string()),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
   indicesOptions: schema.maybe(indicesOptionsSchema),
+  projectRouting: schema.maybe(schema.string()),
 };
 
 export const populationChartSchema = {
@@ -49,6 +51,7 @@ export const populationChartSchema = {
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
   runtimeMappings: schema.maybe(runtimeMappingsSchema),
   indicesOptions: schema.maybe(indicesOptionsSchema),
+  projectRouting: schema.maybe(schema.string()),
 };
 
 export const datafeedIdsSchema = schema.object({

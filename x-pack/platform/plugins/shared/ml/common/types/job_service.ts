@@ -40,6 +40,7 @@ export interface BucketSpanEstimatorData {
   timeField?: string;
   runtimeMappings?: RuntimeMappings;
   indicesOptions?: IndicesOptions;
+  projectRouting?: string;
 }
 
 export interface BulkCreateResults {

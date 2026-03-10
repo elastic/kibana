@@ -230,6 +230,7 @@ export class MlServerPlugin
       this.serverless
     );
 
+    // should this contain serverless?
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
       routeGuard: new RouteGuard(
@@ -249,15 +250,15 @@ export class MlServerPlugin
 
     // Register Anomaly Detection routes
     if (this.enabledFeatures.ad) {
-      annotationRoutes(routeInit, plugins.security);
+      annotationRoutes(routeInit, this.serverless, plugins.security);
       calendars(routeInit);
       dataFeedRoutes(routeInit);
-      dataRecognizer(routeInit, this.compatibleModuleType);
+      dataRecognizer(routeInit, this.compatibleModuleType, this.serverless);
       filtersRoutes(routeInit);
-      jobAuditMessagesRoutes(routeInit);
+      jobAuditMessagesRoutes(routeInit, this.serverless);
       jobRoutes(routeInit);
-      jobServiceRoutes(routeInit);
-      resultsServiceRoutes(routeInit);
+      jobServiceRoutes(routeInit, this.serverless);
+      resultsServiceRoutes(routeInit, this.serverless);
       jobValidationRoutes(routeInit);
     }
 
@@ -286,7 +287,7 @@ export class MlServerPlugin
       resolveMlCapabilities,
       serverless: this.serverless,
     });
-    notificationsRoutes(routeInit);
+    notificationsRoutes(routeInit, this.serverless);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
