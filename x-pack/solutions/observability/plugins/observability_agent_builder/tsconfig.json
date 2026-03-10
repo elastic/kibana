@@ -49,6 +49,9 @@
     "@kbn/slo-schema",
     "@kbn/apm-types-shared",
     "@kbn/observability-utils-server",
+    "@kbn/product-doc-common",
+    "@kbn/inference-tracing",
+    "@kbn/llm-tasks-plugin",
   ],
   "exclude": ["target/**/*"]
 }
