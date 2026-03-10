@@ -13,6 +13,7 @@ import {
   updateWatchlistRoute,
 } from './management/routes';
 import { registerEntitySourceRoutes } from './management/routes/entity_sources';
+import { registerWatchlistEntitiesRoutes } from './entities/routes/register_watchlist_entities_routes';
 
 export const registerWatchlistRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
   createWatchlistRoute(router, logger);
@@ -20,4 +21,5 @@ export const registerWatchlistRoutes = ({ router, logger }: EntityAnalyticsRoute
   listWatchlistsRoute(router, logger);
   updateWatchlistRoute(router, logger);
   registerEntitySourceRoutes(router, logger);
+  registerWatchlistEntitiesRoutes(router, logger);
 };

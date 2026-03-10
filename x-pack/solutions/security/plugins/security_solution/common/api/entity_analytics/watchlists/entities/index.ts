@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './management';
-export * as WatchlistDataSources from './data_source';
-export * as WatchlistEntities from './entities';
+export * from './add.gen';

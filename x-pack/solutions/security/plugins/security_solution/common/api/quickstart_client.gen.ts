@@ -385,6 +385,11 @@ import type {
   UpdateWatchlistEntitySourceResponse,
 } from './entity_analytics/watchlists/data_source/update.gen';
 import type {
+  AddWatchlistEntitiesRequestParamsInput,
+  AddWatchlistEntitiesRequestBodyInput,
+  AddWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/add.gen';
+import type {
   CreateWatchlistRequestBodyInput,
   CreateWatchlistResponse,
 } from './entity_analytics/watchlists/management/create.gen';
@@ -559,6 +564,22 @@ export class Client {
   constructor(options: ClientOptions) {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
+  }
+  async addWatchlistEntities(props: AddWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API AddWatchlistEntities`);
+    return this.kbnClient
+      .request<AddWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/entities',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
     * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
@@ -3478,6 +3499,10 @@ If the specified entity already exists, it is updated with the provided values. 
   }
 }
 
+export interface AddWatchlistEntitiesProps {
+  params: AddWatchlistEntitiesRequestParamsInput;
+  body: AddWatchlistEntitiesRequestBodyInput;
+}
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }

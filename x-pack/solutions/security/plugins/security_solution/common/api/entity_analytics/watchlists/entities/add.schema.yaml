@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Entities Add Schema
+  description: Schema for assigning entities to a watchlist.
+  version: '2023-10-31'
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/entities:
+    post:
+      operationId: AddWatchlistEntities
+      x-codegen-enabled: true
+      summary: Assign entities to a watchlist
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+      responses:
+        '200':
+          description: Entities added to watchlist
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - added
+                  - failed
+                properties:
+                  added:
+                    type: integer
+                    minimum: 0
+                  failed:
+                    type: integer
+                    minimum: 0
