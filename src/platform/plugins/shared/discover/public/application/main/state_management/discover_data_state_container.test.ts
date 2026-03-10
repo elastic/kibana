@@ -200,12 +200,7 @@ describe('test getDataStateContainer', () => {
       );
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: true,
-            breakdownField: true,
-            hideChart: false,
-          },
+          resetDefaultProfileState: ['columns', 'rowHeight', 'breakdownField'],
         })
       );
 
@@ -219,10 +214,7 @@ describe('test getDataStateContainer', () => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: 'none',
       });
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['message', 'extension']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toEqual(3);
@@ -252,12 +244,7 @@ describe('test getDataStateContainer', () => {
       );
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: false,
-            rowHeight: false,
-            breakdownField: false,
-            hideChart: false,
-          },
+          resetDefaultProfileState: 'none',
         })
       );
       dataState.data$.totalHits$.next({
@@ -269,10 +256,7 @@ describe('test getDataStateContainer', () => {
         expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
       });
       expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
-        hideChart: false,
+        fields: 'none',
       });
       expect(stateContainer.getCurrentTab().appState.columns).toEqual(['default_column']);
       expect(stateContainer.getCurrentTab().appState.rowHeight).toBeUndefined();

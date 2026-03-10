@@ -94,12 +94,7 @@ export const buildEsqlFetchSubscribe = ({
         if (indexPatternChanged) {
           internalState.dispatch(
             injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-              resetDefaultProfileState: {
-                columns: true,
-                rowHeight: true,
-                breakdownField: true,
-                hideChart: true,
-              },
+              resetDefaultProfileState: 'all',
             })
           );
         }
@@ -163,12 +158,7 @@ export const buildEsqlFetchSubscribe = ({
     if (!indexPatternChanged && allColumnsChanged) {
       internalState.dispatch(
         injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-          resetDefaultProfileState: {
-            columns: true,
-            rowHeight: false,
-            breakdownField: false,
-            hideChart: false,
-          },
+          resetDefaultProfileState: ['columns'],
         })
       );
     }

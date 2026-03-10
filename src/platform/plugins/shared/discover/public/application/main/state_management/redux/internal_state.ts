@@ -305,13 +305,13 @@ export const internalStateSlice = createSlice({
     setResetDefaultProfileState: {
       prepare: (
         payload: TabActionPayload<{
-          resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>;
+          resetDefaultProfileState: TabState['resetDefaultProfileState']['fields'];
         }>
       ) => ({
         payload: {
           ...payload,
           resetDefaultProfileState: {
-            ...payload.resetDefaultProfileState,
+            fields: payload.resetDefaultProfileState,
             resetId: uuidv4(),
           },
         },

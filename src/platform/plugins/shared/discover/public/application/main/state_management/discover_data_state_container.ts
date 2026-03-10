@@ -478,12 +478,7 @@ export function getDataStateContainer({
               // is done so refetches don't reset the state again
               internalState.dispatch(
                 injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-                  resetDefaultProfileState: {
-                    columns: false,
-                    rowHeight: false,
-                    breakdownField: false,
-                    hideChart: false,
-                  },
+                  resetDefaultProfileState: 'none',
                 })
               );
             },

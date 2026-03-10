@@ -31,10 +31,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
+          fields: ['breakdownField'],
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -45,10 +42,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: true,
-          hideChart: false,
+          fields: ['breakdownField'],
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -60,10 +54,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: true,
+          fields: ['hideChart'],
         },
         dataView: dataViewWithTimefieldMock,
       }).getPreFetchState();
@@ -74,10 +65,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: 'none',
         },
         dataView: emptyDataView,
       }).getPreFetchState();
@@ -91,10 +79,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: true,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: ['columns'],
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -118,10 +103,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: true,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: ['columns'],
         },
         dataView: emptyDataView,
       }).getPostFetchState({
@@ -148,10 +130,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: true,
-          breakdownField: false,
-          hideChart: false,
+          fields: ['rowHeight'],
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
@@ -168,10 +147,7 @@ describe('getDefaultProfileState', () => {
         scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
-          columns: false,
-          rowHeight: false,
-          breakdownField: false,
-          hideChart: false,
+          fields: 'none',
         },
         dataView: dataViewWithTimefieldMock,
       }).getPostFetchState({
