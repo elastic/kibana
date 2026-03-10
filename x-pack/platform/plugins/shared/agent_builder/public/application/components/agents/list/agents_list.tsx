@@ -85,12 +85,17 @@ const canCurrentUserEditAgent = ({
   hasAgentVisibilityAccessOverride: boolean;
   isCurrentUserLoading: boolean;
 }) => {
-  if (agent.readonly || !manageAgents || isCurrentUserLoading) {
+  if (agent.readonly || !manageAgents) {
     return false;
   }
 
+  // When experimental visibility is off, ignore loading/visibility and allow edit (legacy behaviour).
   if (!experimentalFeaturesEnabled) {
     return true;
+  }
+
+  if (isCurrentUserLoading) {
+    return false;
   }
 
   return hasAgentWriteAccess({
