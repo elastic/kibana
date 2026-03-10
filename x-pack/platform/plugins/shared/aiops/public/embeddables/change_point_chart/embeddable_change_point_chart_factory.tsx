@@ -26,7 +26,7 @@ import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, EMPTY, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
 import { getChangePointDetectionComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import {
@@ -166,9 +166,14 @@ export const getChangePointChartEmbeddableFactory = (
 
           const reload$ = useMemo(
             () =>
-              fetch$(api).pipe(
-                skipWhile((fetchContext) => !fetchContext.isReload),
-                map((fetchContext) => Date.now())
+              merge(
+                fetch$(api).pipe(
+                  skipWhile((fetchContext) => !fetchContext.isReload),
+                  map(() => Date.now())
+                ),
+                (pluginStart.cps?.cpsManager?.getProjectRouting$() ?? EMPTY).pipe(
+                  map(() => Date.now())
+                )
               ),
             []
           );
