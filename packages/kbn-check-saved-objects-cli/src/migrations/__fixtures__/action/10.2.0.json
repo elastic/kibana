@@ -11,7 +11,8 @@
       },
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
-      "isSystemAction": false
+      "isSystemAction": false,
+      "authMode": "shared"
     },
     {
       "name": "ServiceNow Connector",
@@ -24,7 +25,8 @@
       },
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
-      "isSystemAction": false
+      "isSystemAction": false,
+      "authMode": "shared"
     },
     {
       "name": "Slack Connector without authType",
@@ -35,7 +37,8 @@
       },
       "secrets": "eyJlbmNyeXB0ZWQiOiJ0cnVlIn0=",
       "isPreconfigured": false,
-      "isSystemAction": false
+      "isSystemAction": false,
+      "authMode": "shared"
     },
     {
       "name": "Email Connector",
