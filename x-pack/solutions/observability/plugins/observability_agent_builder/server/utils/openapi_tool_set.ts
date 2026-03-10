@@ -5,235 +5,152 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
 import type { OpenAPIV3 } from 'openapi-types';
 import type {
-  ToolDefinitions,
-  ToolDefinition,
-} from '@kbn/inference-common/src/chat_complete/tools';
-import type { ToolSchema } from '@kbn/inference-common/src/chat_complete/tool_schema';
+  ToolSchema,
+  ToolSchemaType,
+} from '@kbn/inference-common/src/chat_complete/tool_schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-export type OperationObject = OpenAPIV3.OperationObject<{
+export type OperationObject = OpenAPIV3.OperationObject & {
   path: string;
   method: OpenAPIV3.HttpMethods;
   endpoint: string;
-}>;
+};
 
 type ToolHandler = (
-  args: any,
+  args: Record<string, unknown>,
   esClient: IScopedClusterClient
-) => Promise<{ response?: any; consoleRequest: string; error?: string }>;
+) => Promise<{ response?: unknown; consoleRequest: string; error?: string }>;
 
 export interface Tool {
-  name: string;
-  description: string;
-  schema: ToolSchema;
-  handler: ToolHandler;
+  readonly name: string;
+  readonly description: string;
+  readonly schema: ToolSchema;
+  readonly handler: ToolHandler;
 }
 
-class RestApiTool {
-  private readonly operation: OperationObject;
-  private readonly name: string;
-  private readonly description: string;
-  private readonly schema: ToolSchema;
-  private readonly handler: ToolHandler;
-  constructor(operation: OperationObject) {
-    this.operation = operation;
-    this.name = this.getOperationName(operation);
-    this.description = this.getOperationDescription(operation);
-    this.schema = this.getOperationSchema(operation);
-    this.handler = this.getOperationHandler(operation);
+const buildName = (operation: OperationObject): string => {
+  if (operation.operationId) {
+    return operation.operationId;
   }
-  buildHttpRequestFromOperation(
-    operation: OperationObject,
-    args: Record<string, any>
-  ): {
-    path: string;
-    method: string;
-    query: Record<string, string>;
-  } {
-    let path = operation.path;
-    const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
-    const pathParams = parameters.filter((p) => p.in === 'path');
-    for (const p of pathParams) {
-      if (!args[p.name] && p.required) {
-        throw new Error(`Missing required path param: ${p.name}`);
-      }
-      path = path.replace(`{${p.name}}`, encodeURIComponent(args[p.name]));
+  return `${operation.method.toLowerCase()}_${operation.path}`;
+};
+
+const buildDescription = (operation: OperationObject): string => {
+  return `${operation.method.toUpperCase()} ${operation.path} - ${operation.description} - ${
+    operation.summary
+  }`;
+};
+
+const buildSchema = (operation: OperationObject): ToolSchema => {
+  const properties: Record<string, ToolSchemaType> = {};
+  const required: string[] = [];
+  const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
+  for (const param of parameters) {
+    const schema = param.schema as OpenAPIV3.SchemaObject;
+    if (schema.type === 'array') {
+      properties[param.name] = {
+        type: 'array',
+        items: { type: 'string' },
+      };
+    } else {
+      properties[param.name] = {
+        type: schema.type as 'string',
+        description: param.description,
+      };
     }
+    if (param.required) required.push(param.name);
+  }
+  return { type: 'object', properties, required };
+};
 
-    const queryParams = parameters.filter((p) => p.in === 'query');
-    const query: Record<string, string> = {};
-    for (const p of queryParams) {
-      if (args[p.name] != null) query[p.name] = args[p.name];
+const buildHttpRequest = (
+  operation: OperationObject,
+  args: Record<string, unknown>
+): { path: string; method: string; query: Record<string, string> } => {
+  let path = operation.path;
+  const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
+  const pathParams = parameters.filter((p) => p.in === 'path');
+  for (const p of pathParams) {
+    if (!args[p.name] && p.required) {
+      throw new Error(`Missing required path param: ${p.name}`);
     }
-    return {
-      path,
-      method: operation.method,
-      query,
-    };
+    path = path.replace(`{${p.name}}`, encodeURIComponent(String(args[p.name])));
   }
 
-  formatConsoleRequest(operation: OperationObject, args: Record<string, any>): string {
-    const { path, method, query } = this.buildHttpRequestFromOperation(operation, args);
-    return `${method.toUpperCase()} ${path}${
-      Object.keys(query).length
-        ? '?' +
-          Object.entries(query)
-            .map(([k, v]) => `${k}=${v}`)
-            .join('&')
-        : ''
-    }`;
+  const queryParams = parameters.filter((p) => p.in === 'query');
+  const query: Record<string, string> = {};
+  for (const p of queryParams) {
+    if (args[p.name] != null) query[p.name] = String(args[p.name]);
   }
-  getOperationHandler(operation: OperationObject): ToolHandler {
-    return async (args, esClient) => {
-      const { path, method, query } = this.buildHttpRequestFromOperation(operation, args);
+  return { path, method: operation.method, query };
+};
 
-      // equivalent command for debugging
-      const consoleRequest = this.formatConsoleRequest(operation, args);
+const formatConsoleRequest = (
+  operation: OperationObject,
+  args: Record<string, unknown>
+): string => {
+  const { path, method, query } = buildHttpRequest(operation, args);
+  const queryString = Object.entries(query)
+    .map(([k, v]) => `${k}=${v}`)
+    .join('&');
+  return `${method.toUpperCase()} ${path}${queryString ? `?${queryString}` : ''}`;
+};
 
-      try {
-        const response = await esClient.asCurrentUser.transport.request({
-          method,
-          path,
-          querystring: Object.keys(query).length ? query : undefined,
-        });
+const buildHandler = (operation: OperationObject): ToolHandler => {
+  return async (args, esClient) => {
+    const { path, method, query } = buildHttpRequest(operation, args);
+    const consoleRequest = formatConsoleRequest(operation, args);
 
-        return {
-          response,
-          consoleRequest,
-        };
-      } catch (error) {
-        return { error: error.message, consoleRequest };
-      }
-    };
-  }
+    try {
+      const response = await esClient.asCurrentUser.transport.request({
+        method,
+        path,
+        querystring: Object.keys(query).length ? query : undefined,
+      });
 
-  getOperationName(operation: OperationObject): string {
-    if (operation.operationId) {
-      return operation.operationId;
+      return { response, consoleRequest };
+    } catch (error) {
+      return { error: error.message, consoleRequest };
     }
-    return `${operation.method.toLowerCase()}_${operation.path}`;
-  }
-  getOperationDescription(operation: OperationObject): string {
-    return `${operation.method.toUpperCase()} ${operation.path} - ${operation.description} - ${
-      operation.summary
-    }`;
-  }
-  getOperationSchema(operation: OperationObject): ToolSchema {
-    const properties: Record<string, any> = {};
-    const required: string[] = [];
-    const parameters = operation.parameters as OpenAPIV3.ParameterObject[];
-    for (const param of parameters) {
-      const schema = param.schema as OpenAPIV3.SchemaObject;
-      if (schema.type === 'array') {
-        properties[param.name] = {
-          type: 'array',
-          items: {
-            type: 'string',
-          },
-        };
-      } else {
-        properties[param.name] = {
-          type: schema.type,
-          description: param.description,
-        };
-      }
-      if (param.required) required.push(param.name);
-    }
-    const schema: ToolSchema = {
-      type: 'object',
-      properties,
-      required,
-    };
-    return schema;
-  }
+  };
+};
 
-  getToolDefinition(): ToolDefinition {
-    return {
-      description: this.description,
-      schema: this.schema,
-    };
-  }
-
-  getOperation(): OperationObject {
-    return this.operation;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-  getMethod(): string {
-    return this.operation.method;
-  }
-  getHandler(): ToolHandler {
-    return this.handler;
-  }
-  getTool(): Tool {
-    return {
-      handler: this.handler,
-      name: this.name,
-      description: this.description,
-      schema: this.schema,
-    };
-  }
-}
+const createTool = (operation: OperationObject): Tool => ({
+  name: buildName(operation),
+  description: buildDescription(operation),
+  schema: buildSchema(operation),
+  handler: buildHandler(operation),
+});
 
 export class OpenAPIToolSet {
-  private readonly operations: OperationObject[];
-  private readonly tools: RestApiTool[];
-  constructor({ operations }: { operations: OperationObject[] }) {
-    this.operations = operations;
-    this.tools = this.parse(operations);
-  }
+  private readonly toolsByName: Map<string, Tool>;
+  private readonly operationsByName: Map<string, OperationObject>;
 
-  private parse(operations: OperationObject[]): RestApiTool[] {
-    const tools: RestApiTool[] = [];
+  constructor(operations: OperationObject[]) {
+    this.toolsByName = new Map();
+    this.operationsByName = new Map();
     for (const operation of operations) {
-      tools.push(new RestApiTool(operation));
+      const tool = createTool(operation);
+      this.toolsByName.set(tool.name, tool);
+      this.operationsByName.set(tool.name, operation);
     }
-    return tools;
   }
 
   getTools(): Tool[] {
-    return this.tools.map((tool) => tool.getTool());
-  }
-
-  getToolDefinitions(): ToolDefinitions {
-    return this.tools.reduce<ToolDefinitions>((acc: ToolDefinitions, tool: RestApiTool) => {
-      acc[tool.getName()] = tool.getToolDefinition();
-      return acc;
-    }, {});
-  }
-
-  getTool(operationId: string): RestApiTool | undefined {
-    return this.tools.find((tool) => tool.getName() === operationId);
-  }
-
-  getToolHandler(operationId: string): ToolHandler | undefined {
-    return this.tools.find((tool) => tool.getName() === operationId)?.getHandler();
+    return [...this.toolsByName.values()];
   }
 
   getToolOperation(operationId: string): OperationObject | undefined {
-    return this.tools.find((tool) => tool.getName() === operationId)?.getOperation();
+    return this.operationsByName.get(operationId);
   }
 
-  formatConsoleRequest(operationId: string, args: Record<string, any>) {
-    const tool = this.tools.find((t) => t.getName() === operationId);
-    if (!tool) {
+  formatConsoleRequest(operationId: string, args: Record<string, unknown>): string {
+    const operation = this.operationsByName.get(operationId);
+    if (!operation) {
       throw new Error(`No tool found for operationId: ${operationId}`);
     }
-    return tool.formatConsoleRequest(tool.getOperation(), args);
-  }
-
-  getToolName(operationId: string): string | undefined {
-    return this.tools.find((tool) => tool.getName() === operationId)?.getName();
-  }
-  getToolMethod(operationId: string): string | undefined {
-    return this.tools.find((tool) => tool.getName() === operationId)?.getMethod();
-  }
-  getToolPath(operationId: string): string | undefined {
-    return this.tools.find((tool) => tool.getName() === operationId)?.getOperation().path;
+    return formatConsoleRequest(operation, args);
   }
 }

@@ -92,7 +92,7 @@ const isDangerousOperation = (
  * binding the Elasticsearch client to the tool's handler.
  */
 const toLangchainTool = (tool: Tool, esClient: IScopedClusterClient) => {
-  return toTool(async (args) => tool.handler(args, esClient), {
+  return toTool(async (args) => tool.handler(args as Record<string, unknown>, esClient), {
     name: tool.name,
     description: tool.description,
     schema: tool.schema,
@@ -213,9 +213,9 @@ export const createElasticsearchToolGraph = async ({
       });
     }
 
-    const openApiToolSet = new OpenAPIToolSet({
-      operations: (resumedState as StateManagerType).openapiSpecs as OperationObject[],
-    });
+    const openApiToolSet = new OpenAPIToolSet(
+      (resumedState as StateManagerType).openapiSpecs as OperationObject[]
+    );
 
     return new Command({
       update: {
@@ -277,7 +277,7 @@ export const createElasticsearchToolGraph = async ({
 
     const openapiSpecs = result.documents.map((doc) => JSON.parse(doc.content));
 
-    const openApiToolSet = new OpenAPIToolSet({ operations: openapiSpecs });
+    const openApiToolSet = new OpenAPIToolSet(openapiSpecs);
 
     const tools = openApiToolSet.getTools();
 
