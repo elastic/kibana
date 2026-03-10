@@ -25,7 +25,7 @@ export const calendarStyles = ({ euiTheme }: UseEuiTheme) => {
   const todayButton = css`
     background: ${euiTheme.colors.backgroundBasePlain};
     bottom: ${euiTheme.size.s};
-    box-shadow: ${euiTheme.shadows.m.down};
+    box-shadow: ${euiTheme.shadows.l.down};
     left: 50%;
     position: absolute;
     transform: translateX(-50%);
