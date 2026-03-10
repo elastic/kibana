@@ -30,17 +30,14 @@ const baseLinkSchema = {
   ),
 };
 
-export const dashboardLinkSchema = schema.object(
-  {
-    ...baseLinkSchema,
-    destination: schema.string({
-      meta: { description: 'Linked dashboard saved object id' },
-    }),
-    type: schema.literal(DASHBOARD_LINK_TYPE),
-    options: schema.maybe(dashboardNavigationOptionsSchema),
-  },
-  { unknowns: 'ignore' } // Allow legacy props to pass validation for bwc
-);
+export const dashboardLinkSchema = schema.object({
+  ...baseLinkSchema,
+  destination: schema.string({
+    meta: { description: 'Linked dashboard saved object id' },
+  }),
+  type: schema.literal(DASHBOARD_LINK_TYPE),
+  options: schema.maybe(dashboardNavigationOptionsSchema),
+});
 
 export const externalLinkOptionsSchema = schema.object(
   {
@@ -62,15 +59,12 @@ export const externalLinkOptionsSchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const externalLinkSchema = schema.object(
-  {
-    ...baseLinkSchema,
-    type: schema.literal(EXTERNAL_LINK_TYPE),
-    destination: schema.string({ meta: { description: 'The external URL to link to' } }),
-    options: schema.maybe(externalLinkOptionsSchema),
-  },
-  { unknowns: 'ignore' } // Allow legacy props to pass validation for bwc
-);
+export const externalLinkSchema = schema.object({
+  ...baseLinkSchema,
+  type: schema.literal(EXTERNAL_LINK_TYPE),
+  destination: schema.string({ meta: { description: 'The external URL to link to' } }),
+  options: schema.maybe(externalLinkOptionsSchema),
+});
 
 export const linksArraySchema = schema.arrayOf(
   schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
