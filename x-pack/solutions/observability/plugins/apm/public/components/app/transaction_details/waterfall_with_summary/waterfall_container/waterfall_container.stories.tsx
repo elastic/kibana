@@ -86,10 +86,11 @@ export const Example: StoryFn<any> = () => {
     maxTraceItems: 5000,
   };
 
-  const entryTransaction = dedot(
-    traceDocs[0]! as unknown as Record<string, unknown>,
-    {}
-  ) as unknown as Transaction;
+  const firstTraceDoc = traceDocs[0];
+  if (!firstTraceDoc) {
+    throw new Error('Expected at least one trace document');
+  }
+  const entryTransaction = firstTraceDoc as unknown as Transaction;
   const waterfall = getWaterfall({ traceItems, entryTransaction });
 
   return (

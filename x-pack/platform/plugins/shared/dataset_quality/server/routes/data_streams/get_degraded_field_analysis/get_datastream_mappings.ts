@@ -46,7 +46,7 @@ export async function getDataStreamMapping({
   const fieldMapping = fieldPresent
     ? {
         type: mapping?.type,
-        ignore_above: 'ignore_above' in mapping ? mapping.ignore_above : undefined,
+        ...('ignore_above' in mapping ? { ignore_above: mapping.ignore_above } : {}),
       }
     : undefined;
 

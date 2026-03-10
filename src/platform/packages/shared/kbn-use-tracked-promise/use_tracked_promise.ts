@@ -273,9 +273,10 @@ export type PromiseState<ResolvedValue, RejectedValue = unknown> =
   | PendingPromiseState<ResolvedValue>
   | SettledPromiseState<ResolvedValue, RejectedValue>;
 
-export const isRejectedPromiseState = (
-  promiseState: PromiseState<unknown, unknown>
-): promiseState is RejectedPromiseState<unknown, unknown> => promiseState.state === 'rejected';
+export const isRejectedPromiseState = <ResolvedValue, RejectedValue>(
+  promiseState: PromiseState<ResolvedValue, RejectedValue>
+): promiseState is RejectedPromiseState<ResolvedValue, RejectedValue> =>
+  promiseState.state === 'rejected';
 
 interface CancelablePromise<ResolvedValue> {
   cancel: () => void;

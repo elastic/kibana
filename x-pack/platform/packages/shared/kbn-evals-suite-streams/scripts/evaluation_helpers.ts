@@ -98,7 +98,7 @@ export async function getConnectors(): Promise<string[]> {
     }
     throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
-  return (data as Array<{ id: string }>).map((c) => c.id);
+  return Array.isArray(data) ? (data as Array<{ id: string }>).map((c) => c.id) : [];
 }
 
 export function extractMessages(

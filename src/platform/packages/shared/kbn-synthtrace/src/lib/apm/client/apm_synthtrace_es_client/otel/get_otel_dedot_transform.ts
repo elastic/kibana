@@ -51,10 +51,19 @@ export function getOtelDedotTransform(keepFlattenedFields: boolean = false) {
 
         // these remain flattened
         target.attributes = attributes;
-        target.resource = (target.resource as Record<string, unknown>) || {};
-        (target.resource as Record<string, unknown>).attributes = resourceAttributes;
-        target.scope = (target.scope as Record<string, unknown>) || {};
-        (target.scope as Record<string, unknown>).attributes = scopeAttributes;
+        const resource =
+          typeof target.resource === 'object' && target.resource !== null
+            ? (target.resource as Record<string, unknown>)
+            : {};
+        resource.attributes = resourceAttributes;
+        target.resource = resource;
+
+        const scope =
+          typeof target.scope === 'object' && target.scope !== null
+            ? (target.scope as Record<string, unknown>)
+            : {};
+        scope.attributes = scopeAttributes;
+        target.scope = scope;
       }
 
       delete target.meta;
@@ -63,7 +72,10 @@ export function getOtelDedotTransform(keepFlattenedFields: boolean = false) {
         ts !== undefined &&
         (typeof ts === 'string' || typeof ts === 'number' || ts instanceof Date)
       ) {
-        target['@timestamp'] = new Date(ts).toISOString();
+        const parsedTs = new Date(ts);
+        if (!Number.isNaN(parsedTs.valueOf())) {
+          target['@timestamp'] = parsedTs.toISOString();
+        }
       }
 
       callback(null, target);

@@ -64,8 +64,13 @@ export async function resolveKibanaUrl(kibanaHostname: string, log?: ToolingLog)
     log?.debug(`No dev mode base path detected, using: ${kibanaHostname}`);
     return kibanaHostname;
   } catch (error: unknown) {
-    const { code, message } = error as { code?: string; message?: string };
-    log?.debug(`Could not detect base path (${code || message}), using: ${kibanaHostname}`);
+    const errorObj = typeof error === 'object' && error !== null ? error : undefined;
+    const code =
+      errorObj && 'code' in errorObj && typeof (errorObj as Record<string, unknown>).code === 'string'
+        ? ((errorObj as Record<string, unknown>).code as string)
+        : undefined;
+    const message = error instanceof Error ? error.message : String(error);
+    log?.debug(`Could not detect base path (${code ?? message}), using: ${kibanaHostname}`);
     return kibanaHostname;
   }
 }

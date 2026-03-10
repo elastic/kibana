@@ -16,10 +16,10 @@ export function getNumberOpt(
   defaultValue: number
 ): number {
   const v = opts?.[key];
-  if (typeof v === 'number' && !isNaN(v)) return v;
+  if (typeof v === 'number' && Number.isFinite(v)) return v;
   if (typeof v === 'string') {
-    const n = parseInt(v, 10);
-    return !isNaN(n) ? n : defaultValue;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : defaultValue;
   }
   return defaultValue;
 }
@@ -34,7 +34,11 @@ export function getBooleanOpt(
 ): boolean {
   const v = opts?.[key];
   if (typeof v === 'boolean') return v;
-  if (typeof v === 'string') return v.toLowerCase() === 'true';
+  if (typeof v === 'string') {
+    const normalized = v.trim().toLowerCase();
+    if (normalized === 'true') return true;
+    if (normalized === 'false') return false;
+  }
   return defaultValue;
 }
 

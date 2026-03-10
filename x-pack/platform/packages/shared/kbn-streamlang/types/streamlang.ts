@@ -55,7 +55,12 @@ export const isConditionBlockSchema = (obj: unknown): obj is StreamlangCondition
 // Cheap check that bypasses having to do full schema checks.
 // This is useful for quickly identifying condition blocks without full recursive validation.
 export const isConditionBlock = (obj: unknown): obj is StreamlangConditionBlock => {
-  return typeof obj === 'object' && obj !== null && 'condition' in obj && !('action' in obj);
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    Object.hasOwn(obj, 'condition') &&
+    !Object.hasOwn(obj, 'action')
+  );
 };
 
 /**

@@ -48,8 +48,10 @@ async function generatorToArray(
         );
       } else if (chunk && typeof chunk === 'object' && 'serialize' in chunk) {
         arr.push(...(chunk as { serialize: () => Record<string, unknown>[] }).serialize());
-      } else {
+      } else if (chunk && typeof chunk === 'object') {
         arr.push(chunk as Record<string, unknown>);
+      } else {
+        throw new Error(`Unexpected generator chunk shape: ${typeof chunk}`);
       }
     }
     return arr;

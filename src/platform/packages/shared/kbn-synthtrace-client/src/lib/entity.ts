@@ -22,7 +22,7 @@ export class Entity<TFields extends Fields> {
     Object.keys(defaults).forEach((key) => {
       const fieldName = key as keyof TFields;
 
-      if (!(fieldName in this.fields)) {
+      if (!Object.prototype.hasOwnProperty.call(this.fields, fieldName)) {
         this.fields[fieldName] = defaults[fieldName] as TFields[keyof TFields];
       }
     });

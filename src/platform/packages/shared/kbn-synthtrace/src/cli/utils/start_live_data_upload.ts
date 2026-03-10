@@ -96,9 +96,13 @@ export async function startLiveDataUpload({
       typeof message === 'object' &&
       message !== null &&
       'status' in message &&
-      message.status === 'done'
+      message.status === 'done' &&
+      'workerId' in message &&
+      typeof (message as Record<string, unknown>).workerId === 'string' &&
+      'indicesToRefresh' in message &&
+      Array.isArray((message as Record<string, unknown>).indicesToRefresh)
     ) {
-      const { workerId, indicesToRefresh } = message as unknown as {
+      const { workerId, indicesToRefresh } = message as {
         workerId: string;
         indicesToRefresh: string[];
       };

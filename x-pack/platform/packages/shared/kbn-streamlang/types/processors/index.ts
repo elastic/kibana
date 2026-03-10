@@ -801,7 +801,10 @@ export const processorTypes: ProcessorType[] = (
     baseSchema = baseSchema._def.options![0]!;
   }
 
-  return baseSchema.shape!.action!.value as ProcessorType;
+  if (!baseSchema.shape?.action?.value) {
+    throw new Error('Unable to extract action from processor schema');
+  }
+  return baseSchema.shape.action.value as ProcessorType;
 });
 
 /**
