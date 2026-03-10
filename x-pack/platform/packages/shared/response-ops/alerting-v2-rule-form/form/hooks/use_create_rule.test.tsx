@@ -59,11 +59,11 @@ describe('useCreateRule', () => {
   // Note: empty condition field is omitted from the payload
   const expectedApiPayload = {
     kind: 'signal',
-    time_field: '@timestamp',
     metadata: {
       name: 'Test Rule',
       labels: ['tag1', 'tag2'],
     },
+    time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
     evaluation: {
       query: {
@@ -362,11 +362,11 @@ describe('useCreateRule', () => {
     // Note: empty condition field is omitted from the payload
     const expectedPayload = {
       kind: 'signal',
-      time_field: 'event.timestamp',
       metadata: {
         name: 'Complex Rule',
         labels: ['production', 'critical'],
       },
+      time_field: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
       evaluation: {
         query: {

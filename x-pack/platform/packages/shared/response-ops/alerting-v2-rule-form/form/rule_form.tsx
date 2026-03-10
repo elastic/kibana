@@ -23,6 +23,7 @@ import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
 import { useCreateRule } from './hooks/use_create_rule';
+import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
 
 export interface RuleFormProps {
@@ -48,6 +49,8 @@ export interface RuleFormProps {
   includeSubmission?: boolean;
   submitLabel?: React.ReactNode;
   cancelLabel?: React.ReactNode;
+  /** When provided, the form operates in edit mode and uses PATCH instead of POST on submission. */
+  ruleId?: string;
 }
 
 interface SubmissionButtonsProps {
@@ -106,8 +109,9 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
  * Inner content component that renders the appropriate form based on edit mode.
  *
  * When an external `onSubmit` is provided, form submission delegates to it.
- * Otherwise, the component uses `useCreateRule` internally to persist the rule
- * via the API and calls `onSuccess` after a successful save.
+ * Otherwise, the component uses `useCreateRule` or `useUpdateRule` internally
+ * (depending on whether `ruleId` is present) to persist the rule via the API
+ * and calls `onSuccess` after a successful save.
  */
 const RuleFormContent: React.FC<RuleFormProps> = ({
   onSubmit: externalOnSubmit,
@@ -120,6 +124,7 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
   onCancel,
   submitLabel,
   cancelLabel,
+  ruleId,
 }) => {
   const { reset } = useFormContext<FormValues>();
   const services = useRuleFormServices();
@@ -127,18 +132,26 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
   const { http, notifications } = services;
   const [editMode, setEditMode] = useState<EditMode>('form');
 
-  // Internal submission via useCreateRule — always initialised so hooks are stable,
-  // but only used when no external onSubmit is provided.
+  // Internal submission hooks — always initialised so hooks are stable,
+  // but only the appropriate one is used when no external onSubmit is provided.
   const { createRule, isLoading: isCreating } = useCreateRule({
     http,
     notifications,
     onSuccess,
   });
 
+  const { updateRule, isLoading: isUpdating } = useUpdateRule({
+    http,
+    notifications,
+    ruleId: ruleId ?? '',
+    onSuccess,
+  });
+
   // Resolve the effective submit handler: external callback takes precedence,
-  // otherwise fall back to the internal createRule mutation.
-  const onSubmit = externalOnSubmit ?? createRule;
-  const isSubmitting = externalIsSubmitting || isCreating;
+  // otherwise use updateRule for edits (ruleId present) or createRule for new rules.
+  const internalSubmit = ruleId ? updateRule : createRule;
+  const onSubmit = externalOnSubmit ?? internalSubmit;
+  const isSubmitting = externalIsSubmitting || isCreating || isUpdating;
 
   const handleModeChange = useCallback(
     (newMode: EditMode) => {

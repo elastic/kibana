@@ -53,3 +53,10 @@ export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+export {
+  mapFormValuesToRuleRequest,
+  mapFormValuesToCreateRequest,
+  mapFormValuesToUpdateRequest,
+  mapRuleResponseToFormValues,
+} from './utils/rule_request_mappers';
+export type { RuleRequestCommon } from './utils/rule_request_mappers';

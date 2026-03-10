@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import type { FormValues } from './types';
 import { RuleForm } from './rule_form';
@@ -36,6 +36,13 @@ export interface StandaloneRuleFormProps {
   includeSubmission?: boolean;
   submitLabel?: React.ReactNode;
   cancelLabel?: React.ReactNode;
+  /**
+   * Optional initial form values to populate the form with (e.g. when editing an existing rule).
+   * These are shallow-merged over the query-derived defaults.
+   */
+  initialValues?: Partial<FormValues>;
+  /** When provided, the form operates in edit mode and uses PATCH instead of POST on submission. */
+  ruleId?: string;
 }
 
 /**
@@ -47,6 +54,7 @@ export interface StandaloneRuleFormProps {
  * When `onSubmit` is provided, form submission delegates to that callback.
  * When `onSubmit` is omitted and `includeSubmission` is true, the form
  * automatically persists the rule via the API and calls `onSuccess` afterwards.
+ * If `ruleId` is provided the internal submission uses PATCH (update) instead of POST (create).
  *
  * Uses react-hook-form's `defaultValues` for static initialization.
  * Time field is auto-selected by TimeFieldSelect based on available date fields.
@@ -64,8 +72,40 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
   onCancel,
   submitLabel,
   cancelLabel,
+  initialValues,
+  ruleId,
 }) => {
-  const defaultValues = useFormDefaults({ query });
+  const queryDefaults = useFormDefaults({ query });
+
+  const defaultValues = useMemo<FormValues>(
+    () => ({
+      ...queryDefaults,
+      ...initialValues,
+      metadata: {
+        ...queryDefaults.metadata,
+        ...initialValues?.metadata,
+      },
+      schedule: {
+        ...queryDefaults.schedule,
+        ...initialValues?.schedule,
+      },
+      evaluation: {
+        ...queryDefaults.evaluation,
+        query: {
+          ...queryDefaults.evaluation.query,
+          ...initialValues?.evaluation?.query,
+        },
+      },
+      ...(initialValues?.grouping !== undefined ? { grouping: initialValues.grouping } : {}),
+      ...(initialValues?.recoveryPolicy !== undefined
+        ? { recoveryPolicy: initialValues.recoveryPolicy }
+        : {}),
+      ...(initialValues?.stateTransition !== undefined
+        ? { stateTransition: initialValues.stateTransition }
+        : {}),
+    }),
+    [queryDefaults, initialValues]
+  );
 
   const methods = useForm<FormValues>({
     mode: 'onBlur',
@@ -86,6 +126,7 @@ export const StandaloneRuleForm: React.FC<StandaloneRuleFormProps> = ({
         onCancel={onCancel}
         submitLabel={submitLabel}
         cancelLabel={cancelLabel}
+        ruleId={ruleId}
       />
     </FormProvider>
   );

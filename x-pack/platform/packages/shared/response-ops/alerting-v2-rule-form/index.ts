@@ -27,6 +27,14 @@ export { RuleResultsPreview } from './form';
 // Context - for consumers who need custom integrations
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
 
+// Mappers
+export {
+  mapFormValuesToRuleRequest,
+  mapFormValuesToCreateRequest,
+  mapFormValuesToUpdateRequest,
+  mapRuleResponseToFormValues,
+} from './form';
+
 // Types
 export type {
   FormValues,
@@ -35,6 +43,7 @@ export type {
   RuleFormServices,
   RuleFormMeta,
   RuleFormLayout,
+  RuleRequestCommon,
 } from './form';
 
 export type {

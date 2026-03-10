@@ -9,34 +9,35 @@ import { useMutation } from '@kbn/react-query';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../types';
-import { mapFormValuesToCreateRequest } from '../utils/rule_request_mappers';
+import { mapFormValuesToUpdateRequest } from '../utils/rule_request_mappers';
 
-interface UseCreateRuleProps {
+interface UseUpdateRuleProps {
   http: HttpStart;
   notifications: NotificationsStart;
+  ruleId: string;
   onSuccess?: () => void;
 }
 
-export const useCreateRule = ({ http, notifications, onSuccess }: UseCreateRuleProps) => {
+export const useUpdateRule = ({ http, notifications, ruleId, onSuccess }: UseUpdateRuleProps) => {
   const mutation = useMutation(
     (formValues: FormValues) => {
-      return http.post<RuleResponse>('/internal/alerting/v2/rule', {
-        body: JSON.stringify(mapFormValuesToCreateRequest(formValues)),
+      return http.patch<RuleResponse>(`/internal/alerting/v2/rule/${encodeURIComponent(ruleId)}`, {
+        body: JSON.stringify(mapFormValuesToUpdateRequest(formValues)),
       });
     },
     {
       onSuccess: (data: RuleResponse) => {
-        notifications.toasts.addSuccess(`Rule '${data.metadata.name}' was created successfully`);
+        notifications.toasts.addSuccess(`Rule '${data.metadata.name}' was updated successfully`);
         onSuccess?.();
       },
       onError: (error: Error) => {
-        notifications.toasts.addDanger(`Error creating rule: ${error.message}`);
+        notifications.toasts.addDanger(`Error updating rule: ${error.message}`);
       },
     }
   );
 
   return {
     ...mutation,
-    createRule: mutation.mutate,
+    updateRule: mutation.mutate,
   };
 };
