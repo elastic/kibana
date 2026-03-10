@@ -23,6 +23,23 @@ export const inferenceSettingsAllRole: Role = {
   },
 };
 
+export const inferenceSettingsFeatureRole: Role = {
+  name: 'inference_settings_test_feature',
+  privileges: {
+    elasticsearch: {
+      indices: [{ names: ['*'], privileges: ['all'] }],
+    },
+    kibana: [
+      {
+        feature: {
+          searchInferenceEndpoints: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const inferenceSettingsNoAccessRole: Role = {
   name: 'inference_settings_test_no_access',
   privileges: {
@@ -42,6 +59,7 @@ export const inferenceSettingsNoAccessRole: Role = {
 
 export const ROLES = {
   ALL: inferenceSettingsAllRole,
+  FEATURE: inferenceSettingsFeatureRole,
   NO_ACCESS: inferenceSettingsNoAccessRole,
 };
 

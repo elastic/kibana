@@ -206,6 +206,47 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('feature-privileged user', function () {
+      afterEach(async () => {
+        await supertestWithoutAuth
+          .put(API_PATH)
+          .send({ features: [] })
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.FEATURE.username, USERS.FEATURE.password)
+          .expect(200);
+      });
+
+      it('GET should return 200', async () => {
+        const { body } = await supertestWithoutAuth
+          .get(API_PATH)
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.FEATURE.username, USERS.FEATURE.password)
+          .expect(200);
+
+        expect(body.data).toBeDefined();
+      });
+
+      it('PUT should return 200', async () => {
+        const settings = {
+          features: [
+            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+          ],
+        };
+
+        const { body } = await supertestWithoutAuth
+          .put(API_PATH)
+          .send(settings)
+          .set('kbn-xsrf', 'xxx')
+          .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
+          .auth(USERS.FEATURE.username, USERS.FEATURE.password)
+          .expect(200);
+
+        expect(body.data.features).toEqual(settings.features);
+      });
+    });
+
     describe('unauthorized user', function () {
       it('GET should return 403', async () => {
         await supertestWithoutAuth

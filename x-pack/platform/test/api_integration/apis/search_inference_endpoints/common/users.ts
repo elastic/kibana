@@ -14,6 +14,12 @@ export const inferenceSettingsAllUser: User = {
   roles: [ROLES.ALL.name],
 };
 
+export const inferenceSettingsFeatureUser: User = {
+  username: 'inference_settings_test_feature',
+  password: 'password',
+  roles: [ROLES.FEATURE.name],
+};
+
 export const inferenceSettingsNoAccessUser: User = {
   username: 'inference_settings_test_no_access',
   password: 'password',
@@ -22,6 +28,7 @@ export const inferenceSettingsNoAccessUser: User = {
 
 export const USERS = {
   ALL: inferenceSettingsAllUser,
+  FEATURE: inferenceSettingsFeatureUser,
   NO_ACCESS: inferenceSettingsNoAccessUser,
 };
 
