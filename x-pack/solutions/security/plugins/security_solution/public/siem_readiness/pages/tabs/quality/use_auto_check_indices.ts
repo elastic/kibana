@@ -244,7 +244,9 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
         });
 
         // Process the check result and save to backend
-        if (checkResult && checkResult.partitionedFieldMetadata && !checkResult.error) {
+        // Type cast to bypass TypeScript's control flow analysis confusion with callbacks
+        const result = checkResult as CheckResult | null;
+        if (result && result.partitionedFieldMetadata && !result.error) {
           // Fetch actual stats for this index
           const { sizeInBytes, docsCount } = await fetchIndexStats(
             http,
@@ -255,9 +257,9 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
           const storageResult = formatStorageResult({
             batchId,
             indexName,
-            pattern: checkResult.pattern,
+            pattern: result.pattern,
             isCheckAll: true,
-            partitionedFieldMetadata: checkResult.partitionedFieldMetadata,
+            partitionedFieldMetadata: result.partitionedFieldMetadata,
             sizeInBytes,
             docsCount,
           });
