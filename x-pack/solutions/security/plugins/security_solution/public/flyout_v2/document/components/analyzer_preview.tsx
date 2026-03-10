@@ -54,8 +54,15 @@ export const AnalyzerPreview = memo(
 
     const alertIndices = useMemo(() => {
       const ruleIndices = getFieldValue(hit, ALERT_RULE_INDICES) as string[];
-      const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as { index: string };
-      const ruleParametersIndices = ruleParameters ? [ruleParameters.index] : [];
+      const ruleParameters = getFieldValue(hit, ALERT_RULE_PARAMETERS) as {
+        index: string | string[];
+      };
+      const ruleParametersIndices =
+        ruleParameters && ruleParameters.index
+          ? Array.isArray(ruleParameters.index)
+            ? ruleParameters.index
+            : [ruleParameters.index]
+          : [];
       return ruleIndices?.length > 0 ? ruleIndices : ruleParametersIndices;
     }, [hit]);
     const indices = alertIndices.length > 0 ? alertIndices : dataViewIndices;
