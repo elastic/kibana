@@ -367,20 +367,25 @@ export class DiscoverApp {
    * scrolling only keeps a subset of rows in the DOM at any time.
    */
   async expectDocTableToContainText(text: string) {
+    // 200px per step × 50 steps = 10 000px of total scroll coverage,
+    // enough for grids with hundreds of rows at default row height (~34px).
+    const SCROLL_STEP_PX = 200;
+    const MAX_SCROLL_STEPS = 50;
+
     const docTable = this.page.testSubj.locator('discoverDocTable');
     await expect(docTable).toBeVisible();
 
     const grid = docTable.locator('.euiDataGrid__virtualized');
     await grid.evaluate((el) => el.scrollTo(0, 0));
 
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < MAX_SCROLL_STEPS; i++) {
       if ((await docTable.textContent())?.includes(text)) return;
 
-      const atBottom = await grid.evaluate((el) => {
+      const atBottom = await grid.evaluate((el, step) => {
         if (el.scrollTop + el.clientHeight >= el.scrollHeight) return true;
-        el.scrollBy(0, 200);
+        el.scrollBy(0, step);
         return false;
-      });
+      }, SCROLL_STEP_PX);
       if (atBottom) break;
     }
 
