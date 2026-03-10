@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
@@ -16,6 +16,7 @@ export interface RuleFormServices {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   notifications: NotificationsStart;
+  application: ApplicationStart;
 }
 
 const RuleFormServicesContext = createContext<RuleFormServices | undefined>(undefined);

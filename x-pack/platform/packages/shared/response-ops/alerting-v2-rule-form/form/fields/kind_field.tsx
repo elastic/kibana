@@ -41,9 +41,9 @@ export const KindField: React.FC = () => {
           helpText={i18n.translate('xpack.alertingV2.ruleForm.kindHelpText', {
             defaultMessage: 'Choose whether this rule creates monitors or alerts.',
           })}
-          fullWidth
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <div ref={ref}>
             <EuiButtonGroup

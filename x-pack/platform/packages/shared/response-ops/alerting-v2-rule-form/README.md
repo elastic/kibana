@@ -1,12 +1,12 @@
 # @kbn/alerting-v2-rule-form
 
-This package provides UI components for creating and editing v2 alerting rules with queries.
+This package provides UI components for creating and editing v2 alerting rules with ES|QL queries.
 
 ## Quick Start
 
 ### For Discover Integration
 
-Use `DynamicRuleFormFlyout` when the form needs to react to external query changes:
+Use `DynamicRuleFormFlyout` when the form needs to react to external query changes. The query editor is hidden since the query is controlled externally:
 
 ```tsx
 import { DynamicRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
@@ -24,7 +24,7 @@ function MyComponent({ services, query, onClose }) {
 
 ### For Plugin Integration
 
-Use `StandaloneRuleFormFlyout` for a classic flyout where the user controls everything:
+Use `StandaloneRuleFormFlyout` for a classic flyout where the user controls everything, including the ES|QL query via a built-in editor:
 
 ```tsx
 import { StandaloneRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
@@ -34,8 +34,29 @@ function MyComponent({ services, initialQuery, onClose }) {
     <StandaloneRuleFormFlyout
       services={services}
       query={initialQuery}
-      defaultTimeField="@timestamp"
       onClose={onClose}
+    />
+  );
+}
+```
+
+### For Page Integration with Internal Submission
+
+Use `StandaloneRuleForm` with `includeSubmission` to let the form handle the API call internally:
+
+```tsx
+import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
+
+function CreateRulePage({ services, onSuccess, onCancel }) {
+  return (
+    <StandaloneRuleForm
+      query="FROM logs-*"
+      services={services}
+      includeSubmission
+      includeYaml
+      onSuccess={onSuccess}
+      onCancel={onCancel}
+      submitLabel="Create rule"
     />
   );
 }
@@ -45,12 +66,13 @@ function MyComponent({ services, initialQuery, onClose }) {
 
 The package uses a composable architecture with multiple layers:
 
-| Export | Use Case |
-|--------|----------|
-| `DynamicRuleFormFlyout` | Complete flyout that syncs with external query changes (Discover) |
-| `StandaloneRuleFormFlyout` | Complete flyout with static initialization (plugins) |
-| `RuleFormFlyout` + `DynamicRuleForm` | Composable pattern for custom flyout behavior |
-| `RuleFormFlyout` + `StandaloneRuleForm` | Composable pattern for custom flyout behavior |
+| Export | Query Editor | Use Case |
+|--------|--------------|----------|
+| `DynamicRuleFormFlyout` | Hidden | Complete flyout that syncs with external query changes (Discover) |
+| `StandaloneRuleFormFlyout` | Visible | Complete flyout with static initialization and editable query (plugins) |
+| `RuleFormFlyout` + `DynamicRuleForm` | Hidden | Composable pattern for custom flyout behavior |
+| `RuleFormFlyout` + `StandaloneRuleForm` | Visible | Composable pattern for custom flyout behavior |
+| `StandaloneRuleForm` with `includeSubmission` | Visible | Standalone form that handles API call internally |
 
 ## Composable Pattern
 
@@ -61,18 +83,15 @@ For advanced customization, use the composable pattern with the base `RuleFormFl
 ```tsx
 import { RuleFormFlyout, DynamicRuleForm } from '@kbn/alerting-v2-rule-form';
 
-function DiscoverRuleFlyout({ services, query, onClose }) {
+function DiscoverRuleFlyout({ services, query, onClose, onSubmit }) {
   return (
     <RuleFormFlyout
-      services={{
-        http: services.http,
-        notifications: services.notifications,
-      }}
       onClose={onClose}
       push={true}
     >
       <DynamicRuleForm
         query={query}
+        onSubmit={onSubmit}
         services={{
           http: services.http,
           data: services.data,
@@ -93,19 +112,15 @@ The `DynamicRuleForm` uses react-hook-form's `values` prop with `resetOptions: {
 ```tsx
 import { RuleFormFlyout, StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
 
-function PluginRuleFlyout({ services, initialQuery, onClose }) {
+function PluginRuleFlyout({ services, initialQuery, onClose, onSubmit }) {
   return (
     <RuleFormFlyout
-      services={{
-        http: services.http,
-        notifications: services.notifications,
-      }}
       onClose={onClose}
       push={true}
     >
       <StandaloneRuleForm
         query={initialQuery}
-        defaultTimeField="@timestamp"
+        onSubmit={onSubmit}
         services={{
           http: services.http,
           data: services.data,
@@ -123,18 +138,27 @@ The `StandaloneRuleForm` uses react-hook-form's `defaultValues` for static initi
 
 ```typescript
 interface FormValues {
-  kind: 'signal' | 'alert';
-  name: string;
-  description: string;
-  tags: string[];
-  schedule: {
-    custom: string; // Duration string like '5m', '1h'
+  kind: RuleKind;
+  metadata: {
+    name: string;
+    enabled: boolean;
+    description?: string;
+    owner?: string;
+    labels?: string[];
   };
-  enabled: boolean;
-  query: string;
   timeField: string;
-  lookbackWindow: string; // Duration string
-  groupingKey: string[]; // Columns to group alerts by
+  schedule: {
+    every: string;    // Duration string like '5m', '1h'
+    lookback: string; // Duration string
+  };
+  evaluation: {
+    query: {
+      base: string;   // The ES|QL query
+    };
+  };
+  grouping?: {
+    fields: string[]; // Columns to group alerts by
+  };
 }
 ```
 
@@ -147,7 +171,7 @@ All flyout components require:
 | `http` | Core HTTP service for rule creation API |
 | `data` | Data plugin for query column fetching |
 | `dataViews` | Data views plugin for time field options |
-| `notifications` | For success/error toasts |
+| `notifications` | For success/error toasts (required for flyouts, optional for forms when using `includeSubmission`) |
 
 ## Development
 

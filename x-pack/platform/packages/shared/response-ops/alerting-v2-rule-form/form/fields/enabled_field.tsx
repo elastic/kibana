@@ -28,6 +28,7 @@ export const EnabledField: React.FC = () => {
           })}
           isInvalid={!!error}
           error={error?.message}
+          fullWidth
         >
           <EuiSwitch
             label={
