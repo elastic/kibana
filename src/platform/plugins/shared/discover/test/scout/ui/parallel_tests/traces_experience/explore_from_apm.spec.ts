@@ -390,6 +390,69 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'Transaction Detail - Latency correlations "Open in Discover" opens traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: {
+              ...APM_TIME_RANGE,
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
+              transactionType: 'request',
+            },
+          });
+        });
+
+        await spaceTest.step('switch to Latency correlations tab', async () => {
+          await page.testSubj.locator('apmLatencyCorrelationsTabButton').click();
+        });
+
+        await spaceTest.step('click Open in Discover on latency correlations', async () => {
+          await page.testSubj.locator('apmLatencyCorrelationsOpenInDiscoverButton').click();
+        });
+
+        await spaceTest.step('verify Discover traces experience columns', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+        });
+      }
+    );
+
+    spaceTest(
+      'Transaction Detail - Failed transactions correlations "Open in Discover" opens traces experience',
+      async ({ page, pageObjects }) => {
+        await spaceTest.step('navigate to APM transaction detail', async () => {
+          await page.gotoApp(`apm/services/${RICH_TRACE.SERVICE_NAME}/transactions/view`, {
+            params: {
+              ...APM_TIME_RANGE,
+              transactionName: RICH_TRACE.TRANSACTION_NAME,
+              transactionType: 'request',
+            },
+          });
+        });
+
+        await spaceTest.step('switch to Failed transactions correlations tab', async () => {
+          await page.testSubj.locator('apmFailedTransactionsCorrelationsTabButton').click();
+        });
+
+        await spaceTest.step(
+          'click Open in Discover on failed transactions correlations',
+          async () => {
+            await page.testSubj.locator('apmFailedCorrelationsViewInDiscoverButton').click();
+          }
+        );
+
+        await spaceTest.step('verify Discover traces experience columns', async () => {
+          await pageObjects.discover.waitForDocTableRendered();
+          for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
+            await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
+          }
+        });
+      }
+    );
+
+    spaceTest(
       'Errors - Failed transaction rate chart "Open in Discover" opens traces experience',
       async ({ page, pageObjects }) => {
         await spaceTest.step('navigate to APM errors page', async () => {
