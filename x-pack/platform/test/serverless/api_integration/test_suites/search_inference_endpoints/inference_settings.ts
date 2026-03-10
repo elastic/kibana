@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
             features: [
               {
                 feature_id: 'agent_builder',
-                endpoint_ids: ['.anthropic-claude-3.7-sonnet'],
+                endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }],
               },
             ],
           };
@@ -79,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should overwrite existing settings', async () => {
           const initialSettings = {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           };
 
@@ -87,8 +87,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           const updatedSettings = {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-4.6-opus'] },
-              { feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-4.6-opus' }] },
+              { feature_id: 'attack_discovery', endpoints: [{ id: '.eis-claude-3.7-sonnet' }] },
             ],
           };
 
@@ -100,8 +100,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should persist settings across GET requests', async () => {
           const settings = {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
-              { feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
+              { feature_id: 'attack_discovery', endpoints: [{ id: '.eis-claude-3.7-sonnet' }] },
             ],
           };
 
@@ -119,19 +119,22 @@ export default function ({ getService }: FtrProviderContext) {
             .put(API_PATH)
             .send({
               features: [
-                { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a'] },
-                { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-b'] },
+                { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-a' }] },
+                { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-b' }] },
               ],
             })
             .expect(400);
         });
 
-        it('should reject duplicate endpoint_ids within a feature', async () => {
+        it('should reject duplicate endpoints within a feature', async () => {
           await adminSupertest
             .put(API_PATH)
             .send({
               features: [
-                { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a', '.endpoint-a'] },
+                {
+                  feature_id: 'agent_builder',
+                  endpoints: [{ id: '.endpoint-a' }, { id: '.endpoint-a' }],
+                },
               ],
             })
             .expect(400);
@@ -141,16 +144,16 @@ export default function ({ getService }: FtrProviderContext) {
           await adminSupertest
             .put(API_PATH)
             .send({
-              features: [{ feature_id: '', endpoint_ids: ['.endpoint-a'] }],
+              features: [{ feature_id: '', endpoints: [{ id: '.endpoint-a' }] }],
             })
             .expect(400);
         });
 
-        it('should reject empty endpoint_ids array', async () => {
+        it('should reject empty endpoints array', async () => {
           await adminSupertest
             .put(API_PATH)
             .send({
-              features: [{ feature_id: 'agent_builder', endpoint_ids: [] }],
+              features: [{ feature_id: 'agent_builder', endpoints: [] }],
             })
             .expect(400);
         });
@@ -175,7 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('PUT should return 200', async () => {
         const settings = {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         };
 
@@ -195,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(API_PATH)
           .send({
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           })
           .expect(403);

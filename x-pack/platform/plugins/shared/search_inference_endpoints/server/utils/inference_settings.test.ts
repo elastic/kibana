@@ -20,7 +20,7 @@ describe('Inference Settings utils', () => {
         updated_at: '2025-01-02T00:00:00Z',
         attributes: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         },
         references: [],
@@ -38,7 +38,7 @@ describe('Inference Settings utils', () => {
         },
         data: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         },
       });
@@ -64,8 +64,8 @@ describe('Inference Settings utils', () => {
     it('should return empty array for valid settings', () => {
       const attrs: InferenceSettingsAttributes = {
         features: [
-          { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
-          { feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] },
+          { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
+          { feature_id: 'attack_discovery', endpoints: [{ id: '.eis-claude-3.7-sonnet' }] },
         ],
       };
 
@@ -79,8 +79,8 @@ describe('Inference Settings utils', () => {
     it('should detect duplicate feature_id values', () => {
       const attrs: InferenceSettingsAttributes = {
         features: [
-          { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a'] },
-          { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-b'] },
+          { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-a' }] },
+          { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-b' }] },
         ],
       };
 
@@ -89,21 +89,29 @@ describe('Inference Settings utils', () => {
       expect(errors[0]).toContain('Duplicate feature_id values: agent_builder');
     });
 
-    it('should detect duplicate endpoint_ids within a feature', () => {
+    it('should detect duplicate endpoints within a feature', () => {
       const attrs: InferenceSettingsAttributes = {
-        features: [{ feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a', '.endpoint-a'] }],
+        features: [
+          {
+            feature_id: 'agent_builder',
+            endpoints: [{ id: '.endpoint-a' }, { id: '.endpoint-a' }],
+          },
+        ],
       };
 
       const errors = validateInferenceSettings(attrs);
       expect(errors).toHaveLength(1);
-      expect(errors[0]).toContain('Duplicate endpoint_ids in feature "agent_builder"');
+      expect(errors[0]).toContain('Duplicate endpoints in feature "agent_builder"');
     });
 
     it('should detect multiple validation errors', () => {
       const attrs: InferenceSettingsAttributes = {
         features: [
-          { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a', '.endpoint-a'] },
-          { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-b'] },
+          {
+            feature_id: 'agent_builder',
+            endpoints: [{ id: '.endpoint-a' }, { id: '.endpoint-a' }],
+          },
+          { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-b' }] },
         ],
       };
 

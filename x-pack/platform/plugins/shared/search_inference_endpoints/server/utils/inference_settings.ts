@@ -39,13 +39,14 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
   }
 
   for (const feature of attrs.features) {
-    const duplicateEndpointIds = feature.endpoint_ids.filter(
-      (id, index) => feature.endpoint_ids.indexOf(id) !== index
+    const endpointIds = feature.endpoints.map((e) => e.id);
+    const duplicateEndpointIds = endpointIds.filter(
+      (id, index) => endpointIds.indexOf(id) !== index
     );
     if (duplicateEndpointIds.length > 0) {
       errors.push(
-        i18n.translate('xpack.searchInferenceEndpoints.settings.duplicateEndpointIds', {
-          defaultMessage: 'Duplicate endpoint_ids in feature "{featureId}": {ids}',
+        i18n.translate('xpack.searchInferenceEndpoints.settings.duplicateEndpoints', {
+          defaultMessage: 'Duplicate endpoints in feature "{featureId}": {ids}',
           values: {
             featureId: feature.feature_id,
             ids: [...new Set(duplicateEndpointIds)].join(', '),

@@ -11,10 +11,12 @@ export const inferenceSettingsSchemaV1 = schema.object({
   features: schema.arrayOf(
     schema.object({
       feature_id: schema.string({ minLength: 1, maxLength: 256 }),
-      endpoint_ids: schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
-        minSize: 1,
-        maxSize: 30,
-      }),
+      endpoints: schema.arrayOf(
+        schema.object({
+          id: schema.string({ minLength: 1, maxLength: 256 }),
+        }),
+        { minSize: 1, maxSize: 30 }
+      ),
     }),
     { maxSize: 30 }
   ),

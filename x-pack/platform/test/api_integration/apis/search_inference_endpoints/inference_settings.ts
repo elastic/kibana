@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
             features: [
               {
                 feature_id: 'agent_builder',
-                endpoint_ids: ['.anthropic-claude-3.7-sonnet'],
+                endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }],
               },
             ],
           };
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should overwrite existing settings', async () => {
           const initialSettings = {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           };
 
@@ -97,8 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           const updatedSettings = {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-4.6-opus'] },
-              { feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-4.6-opus' }] },
+              { feature_id: 'attack_discovery', endpoints: [{ id: '.eis-claude-3.7-sonnet' }] },
             ],
           };
 
@@ -116,8 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should persist settings across GET requests', async () => {
           const settings = {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
-              { feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
+              { feature_id: 'attack_discovery', endpoints: [{ id: '.eis-claude-3.7-sonnet' }] },
             ],
           };
 
@@ -146,8 +146,8 @@ export default function ({ getService }: FtrProviderContext) {
             .put(API_PATH)
             .send({
               features: [
-                { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a'] },
-                { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-b'] },
+                { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-a' }] },
+                { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-b' }] },
               ],
             })
             .set('kbn-xsrf', 'xxx')
@@ -156,12 +156,15 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
         });
 
-        it('should reject duplicate endpoint_ids within a feature', async () => {
+        it('should reject duplicate endpoints within a feature', async () => {
           await supertestWithoutAuth
             .put(API_PATH)
             .send({
               features: [
-                { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a', '.endpoint-a'] },
+                {
+                  feature_id: 'agent_builder',
+                  endpoints: [{ id: '.endpoint-a' }, { id: '.endpoint-a' }],
+                },
               ],
             })
             .set('kbn-xsrf', 'xxx')
@@ -174,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestWithoutAuth
             .put(API_PATH)
             .send({
-              features: [{ feature_id: '', endpoint_ids: ['.endpoint-a'] }],
+              features: [{ feature_id: '', endpoints: [{ id: '.endpoint-a' }] }],
             })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
@@ -182,11 +185,11 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(400);
         });
 
-        it('should reject empty endpoint_ids array', async () => {
+        it('should reject empty endpoints array', async () => {
           await supertestWithoutAuth
             .put(API_PATH)
             .send({
-              features: [{ feature_id: 'agent_builder', endpoint_ids: [] }],
+              features: [{ feature_id: 'agent_builder', endpoints: [] }],
             })
             .set('kbn-xsrf', 'xxx')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSION)
@@ -231,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('PUT should return 200', async () => {
         const settings = {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         };
 
@@ -262,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
           .put(API_PATH)
           .send({
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           })
           .set('kbn-xsrf', 'xxx')
@@ -309,7 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('settings saved in one space should not be visible in another', async () => {
         const settingsA = {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         };
 
@@ -334,7 +337,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('settings saved in one space should be readable from the same space', async () => {
         const settingsA = {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         };
 
@@ -359,12 +362,14 @@ export default function ({ getService }: FtrProviderContext) {
       it('each space should maintain its own independent settings', async () => {
         const settingsA = {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         };
 
         const settingsB = {
-          features: [{ feature_id: 'attack_discovery', endpoint_ids: ['.eis-claude-3.7-sonnet'] }],
+          features: [
+            { feature_id: 'attack_discovery', endpoints: [{ id: '.eis-claude-3.7-sonnet' }] },
+          ],
         };
 
         await supertestWithoutAuth

@@ -62,7 +62,7 @@ describe('Inference Settings API', () => {
         updated_at: '2025-01-02T00:00:00Z',
         attributes: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         },
         references: [],
@@ -83,7 +83,7 @@ describe('Inference Settings API', () => {
           },
           data: {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           },
         },
@@ -240,7 +240,9 @@ describe('Inference Settings API', () => {
 
     it('should upsert settings and return response', async () => {
       const settingsAttrs = {
-        features: [{ feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] }],
+        features: [
+          { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
+        ],
       };
 
       mockSOClient.create.mockResolvedValue({
@@ -276,7 +278,7 @@ describe('Inference Settings API', () => {
         mockRouter.shouldValidate({
           body: {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           },
         });
@@ -285,23 +287,23 @@ describe('Inference Settings API', () => {
       it('should reject an empty feature_id', () => {
         mockRouter.shouldThrow({
           body: {
-            features: [{ feature_id: '', endpoint_ids: ['.endpoint-a'] }],
+            features: [{ feature_id: '', endpoints: [{ id: '.endpoint-a' }] }],
           },
         });
       });
 
-      it('should reject empty endpoint_ids array', () => {
+      it('should reject empty endpoints array', () => {
         mockRouter.shouldThrow({
           body: {
-            features: [{ feature_id: 'agent_builder', endpoint_ids: [] }],
+            features: [{ feature_id: 'agent_builder', endpoints: [] }],
           },
         });
       });
 
-      it('should reject an empty endpoint_ids string', () => {
+      it('should reject an empty endpoint id string', () => {
         mockRouter.shouldThrow({
           body: {
-            features: [{ feature_id: 'agent_builder', endpoint_ids: [''] }],
+            features: [{ feature_id: 'agent_builder', endpoints: [{ id: '' }] }],
           },
         });
       });
@@ -313,7 +315,7 @@ describe('Inference Settings API', () => {
       it('should accept features at exactly maxSize (30)', () => {
         const features = Array.from({ length: 30 }, (_, i) => ({
           feature_id: `feature_${i}`,
-          endpoint_ids: ['.endpoint-a'],
+          endpoints: [{ id: '.endpoint-a' }],
         }));
         mockRouter.shouldValidate({ body: { features } });
       });
@@ -321,25 +323,25 @@ describe('Inference Settings API', () => {
       it('should reject features exceeding maxSize', () => {
         const features = Array.from({ length: 31 }, (_, i) => ({
           feature_id: `feature_${i}`,
-          endpoint_ids: ['.endpoint-a'],
+          endpoints: [{ id: '.endpoint-a' }],
         }));
         mockRouter.shouldThrow({ body: { features } });
       });
 
-      it('should accept endpoint_ids at exactly maxSize (30)', () => {
-        const endpointIds = Array.from({ length: 30 }, (_, i) => `.endpoint-${i}`);
+      it('should accept endpoints at exactly maxSize (30)', () => {
+        const endpoints = Array.from({ length: 30 }, (_, i) => ({ id: `.endpoint-${i}` }));
         mockRouter.shouldValidate({
           body: {
-            features: [{ feature_id: 'agent_builder', endpoint_ids: endpointIds }],
+            features: [{ feature_id: 'agent_builder', endpoints }],
           },
         });
       });
 
-      it('should reject endpoint_ids exceeding maxSize', () => {
-        const endpointIds = Array.from({ length: 31 }, (_, i) => `.endpoint-${i}`);
+      it('should reject endpoints exceeding maxSize', () => {
+        const endpoints = Array.from({ length: 31 }, (_, i) => ({ id: `.endpoint-${i}` }));
         mockRouter.shouldThrow({
           body: {
-            features: [{ feature_id: 'agent_builder', endpoint_ids: endpointIds }],
+            features: [{ feature_id: 'agent_builder', endpoints }],
           },
         });
       });
@@ -347,7 +349,7 @@ describe('Inference Settings API', () => {
       it('should accept feature_id at exactly maxLength (256)', () => {
         mockRouter.shouldValidate({
           body: {
-            features: [{ feature_id: 'a'.repeat(256), endpoint_ids: ['.endpoint-a'] }],
+            features: [{ feature_id: 'a'.repeat(256), endpoints: [{ id: '.endpoint-a' }] }],
           },
         });
       });
@@ -355,23 +357,23 @@ describe('Inference Settings API', () => {
       it('should reject feature_id exceeding maxLength', () => {
         mockRouter.shouldThrow({
           body: {
-            features: [{ feature_id: 'a'.repeat(257), endpoint_ids: ['.endpoint-a'] }],
+            features: [{ feature_id: 'a'.repeat(257), endpoints: [{ id: '.endpoint-a' }] }],
           },
         });
       });
 
-      it('should accept endpoint_id at exactly maxLength (256)', () => {
+      it('should accept endpoint id at exactly maxLength (256)', () => {
         mockRouter.shouldValidate({
           body: {
-            features: [{ feature_id: 'agent_builder', endpoint_ids: ['a'.repeat(256)] }],
+            features: [{ feature_id: 'agent_builder', endpoints: [{ id: 'a'.repeat(256) }] }],
           },
         });
       });
 
-      it('should reject endpoint_id exceeding maxLength', () => {
+      it('should reject endpoint id exceeding maxLength', () => {
         mockRouter.shouldThrow({
           body: {
-            features: [{ feature_id: 'agent_builder', endpoint_ids: ['a'.repeat(257)] }],
+            features: [{ feature_id: 'agent_builder', endpoints: [{ id: 'a'.repeat(257) }] }],
           },
         });
       });
@@ -381,8 +383,8 @@ describe('Inference Settings API', () => {
       await mockRouter.callRoute({
         body: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a'] },
-            { feature_id: 'agent_builder', endpoint_ids: ['.endpoint-b'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-a' }] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.endpoint-b' }] },
           ],
         },
       });
@@ -400,10 +402,15 @@ describe('Inference Settings API', () => {
       });
     });
 
-    it('should reject duplicate endpoint_ids within a feature', async () => {
+    it('should reject duplicate endpoints within a feature', async () => {
       await mockRouter.callRoute({
         body: {
-          features: [{ feature_id: 'agent_builder', endpoint_ids: ['.endpoint-a', '.endpoint-a'] }],
+          features: [
+            {
+              feature_id: 'agent_builder',
+              endpoints: [{ id: '.endpoint-a' }, { id: '.endpoint-a' }],
+            },
+          ],
         },
       });
 
@@ -413,7 +420,7 @@ describe('Inference Settings API', () => {
           message: 'Invalid inference settings',
           attributes: {
             errors: expect.arrayContaining([
-              expect.stringContaining('Duplicate endpoint_ids in feature "agent_builder"'),
+              expect.stringContaining('Duplicate endpoints in feature "agent_builder"'),
             ]),
           },
         },
@@ -436,7 +443,7 @@ describe('Inference Settings API', () => {
       await mockRouter.callRoute({
         body: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         },
       });
@@ -469,7 +476,7 @@ describe('Inference Settings API', () => {
       await mockRouter.callRoute({
         body: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         },
       });
@@ -488,7 +495,9 @@ describe('Inference Settings API', () => {
 
     it('should use hidden types client', async () => {
       const settingsAttrs = {
-        features: [{ feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] }],
+        features: [
+          { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
+        ],
       };
 
       mockSOClient.create.mockResolvedValue({
@@ -515,7 +524,7 @@ describe('Inference Settings API', () => {
       await mockRouter.callRoute({
         body: {
           features: [
-            { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+            { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
           ],
         },
       });
@@ -534,7 +543,7 @@ describe('Inference Settings API', () => {
         mockRouter.callRoute({
           body: {
             features: [
-              { feature_id: 'agent_builder', endpoint_ids: ['.anthropic-claude-3.7-sonnet'] },
+              { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           },
         })

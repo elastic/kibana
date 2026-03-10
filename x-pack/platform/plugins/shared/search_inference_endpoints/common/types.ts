@@ -19,9 +19,13 @@ export interface SearchInferenceEndpointsConfigType {
   };
 }
 
+export interface InferenceEndpointSetting {
+  id: string;
+}
+
 interface InferenceFeatureSetting {
   feature_id: string;
-  endpoint_ids: string[];
+  endpoints: InferenceEndpointSetting[];
 }
 
 export interface InferenceSettingsAttributes {
