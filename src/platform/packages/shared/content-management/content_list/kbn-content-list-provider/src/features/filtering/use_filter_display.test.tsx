@@ -13,6 +13,7 @@ import { ContentListProvider } from '../../context';
 import type { ContentListProviderProps } from '../../context';
 import type { FindItemsResult, FindItemsParams } from '../../datasource';
 import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
 import { useFilterDisplay } from './use_filter_display';
 
 describe('useFilterDisplay', () => {
@@ -27,6 +28,16 @@ describe('useFilterDisplay', () => {
     getTagList: () => [
       { id: 'tag-1', name: 'Production', description: '', color: '#FF0000', managed: false },
     ],
+  };
+
+  const mockFavoritesService: FavoritesClientPublic = {
+    getFavorites: async () => ({ favoriteIds: [], favoriteMetadata: {} as Record<string, never> }),
+    addFavorite: async ({ id }: { id: string }) => ({ favoriteIds: [id] }),
+    removeFavorite: async () => ({ favoriteIds: [] }),
+    isAvailable: async () => true,
+    getFavoriteType: () => 'mock',
+    reportAddFavoriteClick: () => {},
+    reportRemoveFavoriteClick: () => {},
   };
 
   const createWrapper = (props?: Partial<ContentListProviderProps>) => {
@@ -112,6 +123,35 @@ describe('useFilterDisplay', () => {
     });
   });
 
+  describe('hasStarred', () => {
+    it('returns true when favorites service is provided', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper({ services: { favorites: mockFavoritesService } }),
+      });
+
+      expect(result.current.hasStarred).toBe(true);
+    });
+
+    it('returns false when no favorites service is provided', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.hasStarred).toBe(false);
+    });
+
+    it('returns false when starred is explicitly disabled even with service', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper({
+          features: { starred: false },
+          services: { favorites: mockFavoritesService },
+        }),
+      });
+
+      expect(result.current.hasStarred).toBe(false);
+    });
+  });
+
   describe('hasFilters', () => {
     it('returns true when sorting is available', () => {
       const { result } = renderHook(() => useFilterDisplay(), {
@@ -132,7 +172,18 @@ describe('useFilterDisplay', () => {
       expect(result.current.hasFilters).toBe(true);
     });
 
-    it('returns false when neither sorting nor tags are available', () => {
+    it('returns true when starred is available', () => {
+      const { result } = renderHook(() => useFilterDisplay(), {
+        wrapper: createWrapper({
+          features: { sorting: false },
+          services: { favorites: mockFavoritesService },
+        }),
+      });
+
+      expect(result.current.hasFilters).toBe(true);
+    });
+
+    it('returns false when neither sorting, tags, nor starred are available', () => {
       const { result } = renderHook(() => useFilterDisplay(), {
         wrapper: createWrapper({ features: { sorting: false } }),
       });
