@@ -124,8 +124,8 @@ function buildTextBasedState(
           );
         }
 
-        // Only set format when the user had explicitly configured it on the form-based column.
-        // If it was default (no user override), leave column.params.format unset so it stays default.
+        // GenericIndexPatternColumn doesn't declare params on all variants (e.g. field-based columns),
+        // but at runtime many have params.format. Cast to a minimal shape so we can safely read it.
         const originalCol = layer.columns[sourceColumn.id] as
           | { params?: { format?: ValueFormatConfig } }
           | undefined;
@@ -135,6 +135,8 @@ function buildTextBasedState(
             originalCol.params.format !== undefined
         );
 
+        // Only set format when the user had explicitly configured it on the form-based column.
+        // If it was default (no user override), leave column.params.format unset so it stays default.
         if (hadUserFormat) {
           let format = sourceColumn.format;
           if (!format?.id && sourceColumn.sourceField && indexPattern?.fieldFormatMap) {
