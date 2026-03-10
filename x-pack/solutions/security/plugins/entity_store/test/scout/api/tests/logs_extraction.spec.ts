@@ -17,7 +17,7 @@ import {
 } from '../fixtures/entity_extraction_expected';
 import { forceLogExtraction, ingestDoc, searchDocById } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
@@ -55,7 +55,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient }) => {
-    const expectedResultCount = 22;
+    const expectedResultCount = 19;
 
     const extractionResponse = await apiClient.post(
       ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
@@ -106,7 +106,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
     expect(extractionResponse.body.pages).toBe(1);
-    expect(extractionResponse.body.count).toBe(20);
+    expect(extractionResponse.body.count).toBe(24);
 
     const entities = await esClient.search({
       index: '.entities.v2.latest.security_default',
@@ -121,7 +121,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       size: 1000, // a lot just to be sure we are not capping it
     });
 
-    expect(entities.hits.hits).toHaveLength(20);
+    expect(entities.hits.hits).toHaveLength(24);
     // it's deterministic because of the MD5 id
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedUserEntities);
@@ -203,6 +203,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Ingest a document without sub_type
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:00:00Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         name: 'latest-test-name',
@@ -219,14 +220,14 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(firstExtractionResponse.statusCode).toBe(200);
     expect(firstExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const beforeSubType = await searchDocById(esClient, 'user:latest-test');
+    const beforeSubType = await searchDocById(esClient, 'user:latest-test@okta');
 
     expect(beforeSubType.hits.hits).toHaveLength(1);
     expect(beforeSubType.hits.hits[0]._version).toBe(1);
     expect(beforeSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:00:00.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
       },
@@ -235,6 +236,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Add sub_type to the document
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:01:00Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-1', 'hash-2'],
@@ -254,13 +256,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(secondExtractionResponse.statusCode).toBe(200);
     expect(secondExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const afterSubType = await searchDocById(esClient, 'user:latest-test');
+    const afterSubType = await searchDocById(esClient, 'user:latest-test@okta');
     expect(afterSubType.hits.hits).toHaveLength(1);
     expect(afterSubType.hits.hits[0]._version).toBe(2);
     expect(afterSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:01:00.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 1',
@@ -271,6 +273,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Update sub_type in between documents with null values
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:01Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         entity: {
@@ -281,6 +284,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:02Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-3', 'hash-4'],
@@ -292,6 +296,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:03Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-1', 'hash-3'], // add duplicated hashes
@@ -303,6 +308,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
 
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:04Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         hash: ['hash-5'],
@@ -322,13 +328,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(thirdExtractionResponse.statusCode).toBe(200);
     expect(thirdExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const updatedSubType = await searchDocById(esClient, 'user:latest-test');
+    const updatedSubType = await searchDocById(esClient, 'user:latest-test@okta');
     expect(updatedSubType.hits.hits).toHaveLength(1);
     expect(updatedSubType.hits.hits[0]._version).toBe(3);
     expect(updatedSubType.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:02:04.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
@@ -339,6 +345,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // Make sure latest is not overwritten from the document if not changed
     await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:03:00Z',
+      event: { kind: 'asset', module: 'okta' },
       user: {
         id: 'latest-test',
         domain: 'example.com',
@@ -356,13 +363,13 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     expect(fourthExtractionResponse.statusCode).toBe(200);
     expect(fourthExtractionResponse.body).toMatchObject({ count: 1 });
 
-    const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test');
+    const updatedLatestDomain = await searchDocById(esClient, 'user:latest-test@okta');
     expect(updatedLatestDomain.hits.hits).toHaveLength(1);
     expect(updatedLatestDomain.hits.hits[0]._version).toBe(4);
     expect(updatedLatestDomain.hits.hits[0]._source).toMatchObject({
       '@timestamp': '2026-02-13T11:03:00.000Z',
       entity: {
-        id: 'user:latest-test',
+        id: 'user:latest-test@okta',
         type: 'Identity',
         name: 'latest-test-name',
         sub_type: 'Sub Type 3',
@@ -384,6 +391,121 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       },
     });
   });
+
+  apiTest(
+    'Should store user entities from both IDP and non-IDP sources with and without existing latest',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-03-01T10:00:00Z';
+      const to = '2026-03-01T12:00:00Z';
+
+      // 1. IDP entity (asset kind) without existing entity in latest → extracted!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:01:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'postagg-idp-nolatest',
+          name: 'IDP NoLatest',
+        },
+      });
+      const ext1 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext1.statusCode).toBe(200);
+      const hit1 = await searchDocById(esClient, 'user:postagg-idp-nolatest@okta');
+      expect(hit1.hits.hits).toHaveLength(1);
+      expect(hit1.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-nolatest@okta',
+          type: 'Identity',
+          name: 'IDP NoLatest',
+        },
+      });
+
+      // 2. IDP entity (asset kind) with existing entity in latest → extracted and updated!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:02:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'postagg-idp-inlatest',
+          name: 'IDP InLatest',
+        },
+      });
+      await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:03:00Z',
+        event: { kind: 'asset', module: 'okta' },
+        user: {
+          id: 'postagg-idp-inlatest',
+          name: 'IDP InLatest Updated',
+        },
+      });
+      const ext2 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext2.statusCode).toBe(200);
+      const hit2 = await searchDocById(esClient, 'user:postagg-idp-inlatest@okta');
+      expect(hit2.hits.hits).toHaveLength(1);
+      expect(hit2.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-inlatest@okta',
+          type: 'Identity',
+          name: 'IDP InLatest Updated',
+        },
+      });
+
+      // 3. Non-IDP entity without existing entity in latest → not extracted!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:04:00Z',
+        event: { kind: 'random-kind', module: 'okta' },
+        user: {
+          id: 'postagg-nonidp-nolatest',
+          name: 'NonIDP NoLatest',
+        },
+      });
+      const ext3 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext3.statusCode).toBe(200);
+      const hit3 = await searchDocById(esClient, 'user:postagg-nonidp-nolatest@okta');
+      expect(hit3.hits.hits).toHaveLength(0);
+
+      // 4. NonIDP entity (iam/user) with existing entity in latest → extracted and updated!
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:05:00Z',
+        event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-nonidp-inlatest',
+          name: 'NonIDP InLatest',
+        },
+      });
+      const ext4 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext4.statusCode).toBe(200);
+      const hit4 = await searchDocById(esClient, 'user:postagg-nonidp-inlatest@active_directory');
+      expect(hit4.hits.hits).toHaveLength(1);
+      expect(hit4.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-nonidp-inlatest@active_directory',
+          type: 'Identity',
+          name: 'NonIDP InLatest',
+        },
+      });
+
+      await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:06:00Z',
+        event: { kind: 'not-idp-kind', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-nonidp-inlatest',
+          name: 'NonIDP InLatest Updated',
+        },
+      });
+      const ext5 = await forceLogExtraction(apiClient, defaultHeaders, 'user', from, to);
+      expect(ext5.statusCode).toBe(200);
+      const hit5 = await searchDocById(esClient, 'user:postagg-nonidp-inlatest@active_directory');
+      expect(hit5.hits.hits).toHaveLength(1);
+      expect(hit5.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-nonidp-inlatest@active_directory',
+          type: 'Identity',
+          name: 'NonIDP InLatest Updated',
+        },
+      });
+    }
+  );
 
   apiTest(
     'Should store _source as nested objects after ingest pipeline',

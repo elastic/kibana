@@ -57,13 +57,17 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   return String(fieldInObject);
 }
 
+export function getCompositionFields(composition: EuidAttribute[]): string[] {
+  return composition.filter(isEuidField).map((attr) => attr.field);
+}
+
 export function getFieldsToBeFilteredOn(
   doc: any,
   euidFields: EuidAttribute[][]
 ): { values: FieldValue; rankingPosition: number } {
   for (let i = 0; i < euidFields.length; i++) {
-    const composedFields = euidFields[i];
-    const fieldAttrs = composedFields.filter(isEuidField);
+    const composition = euidFields[i];
+    const fieldAttrs = composition.filter(isEuidField);
     const composedFieldValues = fieldAttrs.reduce(
       (acc, attr) => ({
         ...acc,
@@ -84,9 +88,7 @@ export function getFieldsToBeFilteredOut(
   fieldsToBeFilteredOn: { values: FieldValue; rankingPosition: number }
 ): string[] {
   const euidFieldsBeforeRanking = euidFields.slice(0, fieldsToBeFilteredOn.rankingPosition);
-  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap((composedFields) =>
-    composedFields.filter(isEuidField).map((attr) => attr.field)
-  );
+  const fieldsNotInTheId = euidFieldsBeforeRanking.flatMap(getCompositionFields);
 
   const toFilterOut: string[] = [];
   for (const field of fieldsNotInTheId) {
@@ -102,5 +104,5 @@ export function isEuidField(attr: EuidAttribute) {
 }
 
 export function isEuidSeparator(attr: EuidAttribute) {
-  return 'separator' in attr;
+  return 'sep' in attr;
 }
