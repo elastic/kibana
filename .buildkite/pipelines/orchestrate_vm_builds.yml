@@ -1,17 +1,21 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/buildkite/pipeline-schema/refs/heads/main/schema.json
 steps:
-  - trigger: kibana-vm-images
+  - name: "Build base image"
+    trigger: kibana-vm-images
     build:
       meta_data:
         env:
           IMAGES_CONFIG: kibana/base_image.yml
-  - trigger: kibana-vm-images
+  - name: "Build packages layer"
+    trigger: kibana-vm-images
     build:
       meta_data:
         env:
           IMAGES_CONFIG: kibana/packages_layer.yml
           BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml"
-  - trigger: kibana-vm-images
+
+  - name: "Build image cache"
+    trigger: kibana-vm-images
     build:
       meta_data:
         env:
