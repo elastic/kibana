@@ -156,6 +156,7 @@ const ESQLEditorInternal = function ESQLEditor({
   queryStats,
   openVisorOnSourceCommands,
   enableResourceBrowser = false,
+  approximateResultsControl,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -1382,6 +1383,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
+        approximateResultsControl={approximateResultsControl}
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
         {...editorMessages}

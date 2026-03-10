@@ -13,7 +13,11 @@ import { EsqlPlugin, type EsqlPluginStart } from './plugin';
 export { ESQLLangEditor } from './create_editor';
 export { ESQLMenu, EsqlEditorActionsProvider } from './lazy_esql_menu';
 export { useESQLQueryStats } from './hooks/use_esql_query_stats';
-export type { ESQLEditorProps, DataErrorsControl } from '@kbn/esql-editor';
+export type {
+  ApproximateResultsControl,
+  ESQLEditorProps,
+  DataErrorsControl,
+} from '@kbn/esql-editor';
 export type { EsqlPluginStart };
 
 export function plugin(initContext: PluginInitializerContext) {

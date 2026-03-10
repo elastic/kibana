@@ -20,13 +20,14 @@ import React, { memo, useCallback, useState } from 'react';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { ESQLQueryStats as QueryStats } from '@kbn/esql-types';
-import type { DataErrorsControl, ESQLEditorDeps } from '../types';
+import type { ApproximateResultsControl, DataErrorsControl, ESQLEditorDeps } from '../types';
 import type { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { HistoryAndStarredQueriesTabs } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
 import { ESQLQueryStats } from './query_stats';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
+import { FastResultsToggle } from './fast_results_toggle';
 
 interface EditorFooterProps {
   styles: {
@@ -49,6 +50,7 @@ interface EditorFooterProps {
   isSpaceReduced?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
+  approximateResultsControl?: ApproximateResultsControl;
   starredQueriesService: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
 }
@@ -75,6 +77,7 @@ export const EditorFooter = memo(function EditorFooter({
   warnings,
   onErrorClick,
   dataErrorsControl,
+  approximateResultsControl,
   starredQueriesService,
   queryStats,
 }: EditorFooterProps) {
@@ -109,6 +112,9 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
               {queryStats && <ESQLQueryStats queryStats={queryStats} />}
+              {approximateResultsControl && (
+                <FastResultsToggle approximateResultsControl={approximateResultsControl} />
+              )}
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
                   isPopoverOpen={isErrorPopoverOpen}
