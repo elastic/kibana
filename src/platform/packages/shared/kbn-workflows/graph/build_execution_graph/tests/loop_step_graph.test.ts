@@ -109,6 +109,48 @@ describe('convertToWorkflowGraph', () => {
         'exitTimeoutZone_foreachStep',
       ]);
     });
+
+    it('should configure both timeout zone nodes correctly when loop-level and iteration-timeout are set', () => {
+      const workflowDefinition = {
+        steps: [
+          {
+            name: 'foreachStep',
+            type: 'foreach',
+            foreach: '[1,2,3]',
+            timeout: '60s',
+            'iteration-timeout': '5s',
+            steps: [
+              {
+                name: 'innerStep',
+                type: 'slack',
+                connectorId: 'slack',
+                with: { message: 'hello' },
+              } as ConnectorStep,
+            ],
+          } as ForEachStep,
+        ],
+      } as Partial<WorkflowYaml>;
+
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
+
+      const outerTimeoutNode = executionGraph.node('enterTimeoutZone_foreachStep');
+      expect(outerTimeoutNode).toEqual({
+        id: 'enterTimeoutZone_foreachStep',
+        type: 'enter-timeout-zone',
+        stepId: 'foreachStep',
+        stepType: 'step_level_timeout',
+        timeout: '60s',
+      });
+
+      const iterationTimeoutNode = executionGraph.node('enterTimeoutZone_iteration_foreachStep');
+      expect(iterationTimeoutNode).toEqual({
+        id: 'enterTimeoutZone_iteration_foreachStep',
+        type: 'enter-timeout-zone',
+        stepId: 'iteration_foreachStep',
+        stepType: 'step_level_timeout',
+        timeout: '5s',
+      });
+    });
   });
 
   describe('foreach with iteration-on-failure', () => {
