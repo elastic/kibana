@@ -68,6 +68,9 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
     priority: {
       type: 'integer',
     },
+    cost: {
+      type: 'integer',
+    },
     // NO NEED TO BE INDEXED
     // apiKey: {
     //   type: 'binary',

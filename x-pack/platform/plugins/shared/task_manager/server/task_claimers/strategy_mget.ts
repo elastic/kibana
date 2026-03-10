@@ -46,7 +46,7 @@ import {
 
 import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
-import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
+import { selectTasksByCapacity, getTaskCost } from './lib/task_selector_by_capacity';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 
@@ -153,7 +153,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
-    const taskCost = definitions.get(task.taskType)?.cost ?? TaskCost.Normal;
+    const taskCost = getTaskCost(task, definitions);
     if (capacityAccumulator + taskCost <= initialCapacity) {
       tasksToRun.push(task);
       capacityAccumulator += taskCost;
