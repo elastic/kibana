@@ -561,9 +561,7 @@ describe('MicrosoftTeams', () => {
           ],
         }
       );
-      expect(mockContext.log.debug).toHaveBeenCalledWith(
-        'Microsoft Teams searching messages: "project update"'
-      );
+      expect(mockContext.log.debug).toHaveBeenCalledWith('Microsoft Teams searching messages');
       expect(result).toEqual(mockResponse.data);
     });
 

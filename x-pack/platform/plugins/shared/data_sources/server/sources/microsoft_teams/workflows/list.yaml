@@ -23,7 +23,7 @@ inputs:
   - name: user_id
     type: string
     required: false
-    description: "User ID (required for app-only auth via client credentials)"
+    description: "User ID for app-only auth via client credentials. Leave blank when using delegated auth (bearer token)."
   - name: channel_id
     type: string
     required: false
@@ -35,7 +35,7 @@ inputs:
   - name: top
     type: number
     required: false
-    description: "Number of items to return (max 50)"
+    description: "Number of items to return (max 50; default: 20)"
 steps:
   - name: list-joined-teams
     type: microsoft-teams.listJoinedTeams
@@ -57,6 +57,26 @@ steps:
       teamId: "${{ inputs.team_id }}"
       channelId: "${{ inputs.channel_id }}"
       top: ${{ inputs.top }}
+  - name: map-channel-messages
+    type: data.map
+    if: "${{ inputs.list_action == 'listChannelMessages' and inputs.team_id and inputs.channel_id }}"
+    items: ${{ steps['list-channel-messages'].output }}
+    with:
+      fields:
+        value:
+          $map: { items: "${{ item.value }}", item: "msg" }
+          id: "${{ msg.id }}"
+          messageType: "${{ msg.messageType }}"
+          createdDateTime: "${{ msg.createdDateTime }}"
+          from: "${{ msg.from }}"
+          body: "${{ msg.body }}"
+          webUrl: "${{ msg.webUrl }}"
+          subject: "${{ msg.subject }}"
+          # attachments: "${{ msg.attachments }}"
+          # mentions: "${{ msg.mentions }}"
+          # reactions: "${{ msg.reactions }}"
+          # replyToId: "${{ msg.replyToId }}"
+          # importance: "${{ msg.importance }}"
   - name: list-chats
     type: microsoft-teams.listChats
     if: "${{ inputs.list_action == 'listChats' }}"
@@ -71,3 +91,23 @@ steps:
     with:
       chatId: "${{ inputs.chat_id }}"
       top: ${{ inputs.top }}
+  - name: map-chat-messages
+    type: data.map
+    if: "${{ inputs.list_action == 'listChatMessages' and inputs.chat_id }}"
+    items: ${{ steps['list-chat-messages'].output }}
+    with:
+      fields:
+        value:
+          $map: { items: "${{ item.value }}", item: "msg" }
+          id: "${{ msg.id }}"
+          messageType: "${{ msg.messageType }}"
+          createdDateTime: "${{ msg.createdDateTime }}"
+          from: "${{ msg.from }}"
+          body: "${{ msg.body }}"
+          webUrl: "${{ msg.webUrl }}"
+          subject: "${{ msg.subject }}"
+          # attachments: "${{ msg.attachments }}"
+          # mentions: "${{ msg.mentions }}"
+          # reactions: "${{ msg.reactions }}"
+          # replyToId: "${{ msg.replyToId }}"
+          # importance: "${{ msg.importance }}"

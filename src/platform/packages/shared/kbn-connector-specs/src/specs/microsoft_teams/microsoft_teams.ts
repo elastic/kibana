@@ -10,6 +10,31 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import {
+  ListJoinedTeamsInputSchema,
+  ListChannelsInputSchema,
+  ListChannelMessagesInputSchema,
+  ListChatsInputSchema,
+  ListChatMessagesInputSchema,
+  SearchMessagesInputSchema,
+} from './types';
+import type {
+  ListJoinedTeamsInput,
+  ListChannelsInput,
+  ListChannelMessagesInput,
+  ListChatsInput,
+  ListChatMessagesInput,
+  SearchMessagesInput,
+} from './types';
+
+export {
+  ListJoinedTeamsInputSchema,
+  ListChannelsInputSchema,
+  ListChannelMessagesInputSchema,
+  ListChatsInputSchema,
+  ListChatMessagesInputSchema,
+  SearchMessagesInputSchema,
+} from './types';
 
 /**
  * Returns the base path for user-scoped Microsoft Graph API endpoints.
@@ -18,9 +43,6 @@ import type { ConnectorSpec } from '../../connector_spec';
  */
 const userPath = (userId?: string): string => (userId ? `/users/${userId}` : '/me');
 
-/**
- * Common output schema for Microsoft Graph API responses that return a collection.
- */
 const GraphCollectionOutputSchema = z.object({
   value: z.array(z.any()).describe('Array of items returned from the API'),
   '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
@@ -70,6 +92,19 @@ export const MicrosoftTeams: ConnectorSpec = {
         overrides: {
           meta: {
             scope: { hidden: true },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    'Replace {tenant-id} with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token',
+                }
+              ),
+            },
           },
         },
       },
@@ -80,18 +115,10 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/user-list-joinedteams
     listJoinedTeams: {
       isTool: true,
-      input: z
-        .object({
-          userId: z
-            .string()
-            .optional()
-            .describe('User ID (required for app-only auth via client credentials)'),
-        })
-        .optional(),
+      input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
-      handler: async (ctx, input) => {
-        const typedInput = input as { userId?: string } | undefined;
-        const base = userPath(typedInput?.userId);
+      handler: async (ctx, input: ListJoinedTeamsInput) => {
+        const base = userPath(input?.userId);
         ctx.log.debug('Microsoft Teams listing joined teams');
         const response = await ctx.client.get(
           `https://graph.microsoft.com/v1.0${base}/joinedTeams`,
@@ -108,15 +135,12 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list
     listChannels: {
       isTool: true,
-      input: z.object({
-        teamId: z.string().describe('The ID of the team'),
-      }),
+      input: ListChannelsInputSchema,
       output: GraphCollectionOutputSchema,
-      handler: async (ctx, input) => {
-        const typedInput = input as { teamId: string };
-        ctx.log.debug(`Microsoft Teams listing channels for team ${typedInput.teamId}`);
+      handler: async (ctx, input: ListChannelsInput) => {
+        ctx.log.debug(`Microsoft Teams listing channels for team ${input.teamId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/teams/${typedInput.teamId}/channels`,
+          `https://graph.microsoft.com/v1.0/teams/${input.teamId}/channels`,
           {
             params: {
               $select: 'id,displayName,description,createdDateTime,membershipType,webUrl',
@@ -130,26 +154,17 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/channel-list-messages
     listChannelMessages: {
       isTool: true,
-      input: z.object({
-        teamId: z.string().describe('The ID of the team'),
-        channelId: z.string().describe('The ID of the channel'),
-        top: z.number().optional().describe('Number of messages to return (max 50)'),
-      }),
+      input: ListChannelMessagesInputSchema,
       output: GraphCollectionOutputSchema,
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          teamId: string;
-          channelId: string;
-          top?: number;
-        };
+      handler: async (ctx, input: ListChannelMessagesInput) => {
         ctx.log.debug(
-          `Microsoft Teams listing messages for channel ${typedInput.channelId} in team ${typedInput.teamId}`
+          `Microsoft Teams listing messages for channel ${input.channelId} in team ${input.teamId}`
         );
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/teams/${typedInput.teamId}/channels/${typedInput.channelId}/messages`,
+          `https://graph.microsoft.com/v1.0/teams/${input.teamId}/channels/${input.channelId}/messages`,
           {
             params: {
-              ...(typedInput.top !== undefined && { $top: typedInput.top }),
+              ...(input.top !== undefined && { $top: input.top }),
             },
           }
         );
@@ -160,22 +175,15 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list
     listChats: {
       isTool: true,
-      input: z.object({
-        userId: z
-          .string()
-          .optional()
-          .describe('User ID (required for app-only auth via client credentials)'),
-        top: z.number().optional().describe('Number of chats to return (max 50)'),
-      }),
+      input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
-      handler: async (ctx, input) => {
-        const typedInput = input as { userId?: string; top?: number };
-        const base = userPath(typedInput.userId);
+      handler: async (ctx, input: ListChatsInput) => {
+        const base = userPath(input.userId);
         ctx.log.debug('Microsoft Teams listing chats');
         const response = await ctx.client.get(`https://graph.microsoft.com/v1.0${base}/chats`, {
           params: {
             $select: 'id,topic,createdDateTime,lastUpdatedDateTime,chatType,webUrl',
-            ...(typedInput.top !== undefined && { $top: typedInput.top }),
+            ...(input.top !== undefined && { $top: input.top }),
           },
         });
         return response.data;
@@ -185,19 +193,15 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/api/chat-list-messages
     listChatMessages: {
       isTool: true,
-      input: z.object({
-        chatId: z.string().describe('The ID of the chat'),
-        top: z.number().optional().describe('Number of messages to return (max 50)'),
-      }),
+      input: ListChatMessagesInputSchema,
       output: GraphCollectionOutputSchema,
-      handler: async (ctx, input) => {
-        const typedInput = input as { chatId: string; top?: number };
-        ctx.log.debug(`Microsoft Teams listing messages for chat ${typedInput.chatId}`);
+      handler: async (ctx, input: ListChatMessagesInput) => {
+        ctx.log.debug(`Microsoft Teams listing messages for chat ${input.chatId}`);
         const response = await ctx.client.get(
-          `https://graph.microsoft.com/v1.0/chats/${typedInput.chatId}/messages`,
+          `https://graph.microsoft.com/v1.0/chats/${input.chatId}/messages`,
           {
             params: {
-              ...(typedInput.top !== undefined && { $top: typedInput.top }),
+              ...(input.top !== undefined && { $top: input.top }),
             },
           }
         );
@@ -208,14 +212,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     // https://learn.microsoft.com/en-us/graph/search-concept-chat-messages
     searchMessages: {
       isTool: true,
-      input: z.object({
-        query: z
-          .string()
-          .describe('Search query (supports KQL syntax, e.g. "from:bob sent>2024-01-01")'),
-        from: z.number().optional().describe('Offset for pagination'),
-        size: z.number().optional().describe('Number of results to return (max 25)'),
-        enableTopResults: z.boolean().optional().describe('Sort results by relevance'),
-      }),
+      input: SearchMessagesInputSchema,
       output: z
         .object({
           value: z
@@ -229,31 +226,24 @@ export const MicrosoftTeams: ConnectorSpec = {
             .describe('Search response containers'),
         })
         .describe('Microsoft Graph Search API response'),
-      handler: async (ctx, input) => {
-        const typedInput = input as {
-          query: string;
-          from?: number;
-          size?: number;
-          enableTopResults?: boolean;
-        };
-
+      handler: async (ctx, input: SearchMessagesInput) => {
         const searchRequest = {
           requests: [
             {
               entityTypes: ['chatMessage'],
               query: {
-                queryString: typedInput.query,
+                queryString: input.query,
               },
-              ...(typedInput.from !== undefined && { from: typedInput.from }),
-              ...(typedInput.size !== undefined && { size: typedInput.size }),
-              ...(typedInput.enableTopResults !== undefined && {
-                enableTopResults: typedInput.enableTopResults,
+              ...(input.from !== undefined && { from: input.from }),
+              ...(input.size !== undefined && { size: input.size }),
+              ...(input.enableTopResults !== undefined && {
+                enableTopResults: input.enableTopResults,
               }),
             },
           ],
         };
 
-        ctx.log.debug(`Microsoft Teams searching messages: ${JSON.stringify(typedInput.query)}`);
+        ctx.log.debug('Microsoft Teams searching messages');
         const response = await ctx.client.post(
           'https://graph.microsoft.com/v1.0/search/query',
           searchRequest
