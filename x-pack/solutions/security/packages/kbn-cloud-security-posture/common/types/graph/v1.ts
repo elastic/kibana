@@ -54,6 +54,8 @@ export type RelationshipNodeDataModel = TypeOf<typeof relationshipNodeDataSchema
 
 export type EdgeDataModel = TypeOf<typeof edgeDataSchema>;
 
+export type ConnectorNodeType = 'label' | 'relationship';
+
 export type NodeDataModel =
   | EntityNodeDataModel
   | GroupNodeDataModel

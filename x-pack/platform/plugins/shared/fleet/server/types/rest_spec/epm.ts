@@ -7,7 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
+import {
+  DeprecationInfoSchema,
+  ExperimentalDataStreamFeaturesSchema,
+} from '../models/package_policy';
+import { OtelCollectorConfigSchema } from '../models';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -154,6 +158,7 @@ export const PackageInfoSchema = schema
     description: schema.maybe(schema.string()),
     title: schema.string(),
     icons: schema.maybe(schema.arrayOf(PackageIconSchema, { maxSize: 10 })),
+    deprecated: schema.maybe(DeprecationInfoSchema),
     conditions: schema.maybe(
       schema.object({
         kibana: schema.maybe(schema.object({ version: schema.maybe(schema.string()) })),
@@ -163,6 +168,7 @@ export const PackageInfoSchema = schema
             capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
           })
         ),
+        deprecated: schema.maybe(DeprecationInfoSchema),
       })
     ),
     release: schema.maybe(
@@ -333,6 +339,7 @@ export const GetInputsResponseSchema = schema.oneOf([
       }),
       { maxSize: 10000 }
     ),
+    ...OtelCollectorConfigSchema,
   }),
 ]);
 

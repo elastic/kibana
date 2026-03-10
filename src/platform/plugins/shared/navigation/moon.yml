@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/router-utils'
   - '@kbn/split-button'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -48,6 +49,7 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/**/*.ts
     - '!target/**/*'
 tasks:
   jest:

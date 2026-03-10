@@ -155,7 +155,7 @@ async function extractAzureCloudConnectorSecrets(
   const schema = getCredentialSchema('azure');
   const tenantIdKeys = getAllVarKeys(schema.fields.tenantId);
   const clientIdKeys = getAllVarKeys(schema.fields.clientId);
-  const connectorIdKeys = getAllVarKeys(schema.fields.azureCredentialsCloudConnectorId);
+  const connectorIdKeys = getAllVarKeys(schema.fields.azure_credentials_cloud_connector_id);
 
   // Look for Azure vars using schema-defined keys
   const tenantIdVar = findFirstVarEntry(vars, tenantIdKeys);

@@ -15,13 +15,16 @@ import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
   getForEachStepSchema,
-  getHttpStepSchema,
   getIfStepSchema,
   getMergeStepSchema,
   getOnFailureStepSchema,
   getParallelStepSchema,
+  getTriggerSchema,
+  getWhileStepSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
@@ -36,11 +39,13 @@ export function getStepId(stepName: string): string {
 
 export function generateYamlSchemaFromConnectors(
   connectors: ConnectorContractUnion[],
+  /** Registered custom trigger type ids for YAML schema validation (e.g. example.custom_trigger) */
+  triggers: string[] = [],
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
   loose: boolean = false
-) {
+): z.ZodType {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
@@ -55,33 +60,36 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  // For strict mode, extend WorkflowSchemaBase (without transform) and apply the same transform as WorkflowSchema
-  return WorkflowSchemaBase.extend({
-    settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
-    steps: z.array(recursiveStepSchema),
-  }).transform((data) => {
-    // Transform inputs from legacy array format to JSON Schema format (same logic as WorkflowSchema)
-    let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
-    if (data.inputs) {
-      if (
-        'properties' in data.inputs &&
-        typeof data.inputs === 'object' &&
-        !Array.isArray(data.inputs)
-      ) {
-        normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
-      } else if (Array.isArray(data.inputs)) {
-        normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
-      }
-    }
-
-    // Return the data with normalized inputs, preserving all other fields as-is
-    const { inputs: _, ...rest } = data;
-    return {
-      ...rest,
-      version: '1' as const,
-      ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
-    };
+  const triggerSchema = getTriggerSchema(triggers);
+  const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
+    triggers: z.array(triggerSchema).min(1),
   });
+
+  return workflowBaseWithTriggers
+    .extend({
+      settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
+      steps: z.array(recursiveStepSchema),
+    })
+    .transform((data) => {
+      let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+      if (data.inputs) {
+        if (
+          'properties' in data.inputs &&
+          typeof data.inputs === 'object' &&
+          !Array.isArray(data.inputs)
+        ) {
+          normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+        } else if (Array.isArray(data.inputs)) {
+          normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+        }
+      }
+      const { inputs: _, ...rest } = data;
+      return {
+        ...rest,
+        version: '1' as const,
+        ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+      };
+    });
 }
 
 function createRecursiveStepSchema(
@@ -94,10 +102,10 @@ function createRecursiveStepSchema(
     // Create step schemas with the recursive reference
     // Use the same stepSchema reference to maintain consistency
     const forEachSchema = getForEachStepSchema(stepSchema, loose);
+    const whileSchema = getWhileStepSchema(stepSchema, loose);
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
-    const httpSchema = getHttpStepSchema(stepSchema, loose);
 
     const connectorSchemas = connectors.map((c) =>
       generateStepSchemaForConnector(c, stepSchema, loose)
@@ -111,12 +119,14 @@ function createRecursiveStepSchema(
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
       forEachSchema,
+      whileSchema,
       ifSchema,
       parallelSchema,
       mergeSchema,
       WaitStepSchema,
       DataSetStepSchema,
-      httpSchema,
+      WorkflowExecuteStepSchema,
+      WorkflowExecuteAsyncStepSchema,
       ...connectorSchemas,
       ...aliasSchemas,
     ]);

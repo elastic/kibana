@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/config-schema'
   - '@kbn/ui-actions-plugin'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/content-management-utils'
   - '@kbn/field-formats-plugin'
@@ -47,6 +46,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/control-group-renderer'
   - '@kbn/utility-types'
+  - '@kbn/esql-language'
 tags:
   - plugin
   - prod

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { setStubKibanaServices as setupPresentationPanelServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -62,6 +62,7 @@ describe('embeddable renderer', () => {
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: expect.any(String),
@@ -85,6 +86,7 @@ describe('embeddable renderer', () => {
     );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi: expect.any(Object),
         uuid: '12345',
@@ -104,6 +106,7 @@ describe('embeddable renderer', () => {
     render(<EmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith({
+        initializeDrilldownsManager: expect.any(Function),
         initialState: { bork: 'blorp?' },
         parentApi,
         uuid: expect.any(String),

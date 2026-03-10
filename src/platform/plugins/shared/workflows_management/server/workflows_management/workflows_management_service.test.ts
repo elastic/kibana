@@ -15,6 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
+import { z } from '@kbn/zod/v4';
 import { WorkflowsService } from './workflows_management_service';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
@@ -31,6 +32,7 @@ describe('WorkflowsService', () => {
       description: 'A test workflow',
       enabled: true,
       tags: ['test'],
+      triggerTypes: [] as string[],
       yaml: 'name: Test Workflow\nenabled: true',
       definition: { name: 'Test Workflow', enabled: true },
       createdBy: 'test-user',
@@ -113,6 +115,9 @@ describe('WorkflowsService', () => {
         getUnsecuredActionsClient: mockGetActionsClient,
         getActionsClientWithRequest: mockGetActionsClientWithRequest,
       },
+      workflowsExtensions: {
+        getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
+      },
     });
 
     service = new WorkflowsService(mockLogger, getCoreStart, getPluginsStart);
@@ -178,6 +183,56 @@ describe('WorkflowsService', () => {
         statusCode: 500,
         message: 'Server error',
       });
+    });
+  });
+
+  describe('getWorkflowsSubscribedToTrigger', () => {
+    it('should return enabled workflows in space that have the trigger type', async () => {
+      const workflowWithTrigger = {
+        _id: 'workflow-with-trigger',
+        _source: {
+          ...mockWorkflowDocument._source,
+          triggerTypes: ['manual', 'cases.updated'],
+          name: 'Case workflow',
+        },
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [workflowWithTrigger], total: { value: 1 } },
+      } as any);
+
+      const result = await service.getWorkflowsSubscribedToTrigger('cases.updated', 'default');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 'workflow-with-trigger',
+        name: 'Case workflow',
+        enabled: true,
+      });
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { term: { spaceId: 'default' } },
+                { term: { enabled: true } },
+                { term: { triggerTypes: 'cases.updated' } },
+              ],
+              must_not: [{ exists: { field: 'deleted_at' } }],
+            },
+          },
+          size: 1000,
+        })
+      );
+    });
+
+    it('should return empty array when no workflows are subscribed', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      } as any);
+
+      const result = await service.getWorkflowsSubscribedToTrigger('unknown.trigger', 'default');
+
+      expect(result).toEqual([]);
     });
   });
 
@@ -2160,7 +2215,7 @@ steps:
   });
 
   describe('getWorkflowExecution', () => {
-    it('should return workflow execution with steps', async () => {
+    it('should return workflow execution with steps, excluding I/O by default', async () => {
       // Mock the get call for execution (using direct GET by ID)
       const mockExecutionGetResponse = {
         _id: 'execution-1',
@@ -2211,17 +2266,15 @@ steps:
         id: 'execution-1',
       });
 
-      // Verify the step executions search call
+      // Verify the step executions search call (includeInput/includeOutput default to false)
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         query: {
-          bool: {
-            must: [{ match: { workflowRunId: 'execution-1' } }, { term: { spaceId: 'default' } }],
-          },
+          match: { workflowRunId: 'execution-1' },
         },
+        _source: { excludes: ['input', 'output'] },
         sort: 'startedAt:desc',
-        from: 0,
-        size: 1000,
+        size: 10000,
       });
     });
 
@@ -2308,6 +2361,9 @@ steps:
         actions: {
           getUnsecuredActionsClient: mockGetActionsClient,
           getActionsClientWithRequest: mockGetActionsClientWithRequest,
+        },
+        workflowsExtensions: {
+          getAllTriggerDefinitions: jest.fn().mockReturnValue([]),
         },
       });
 
@@ -2599,6 +2655,25 @@ steps:
         featureId: expect.any(String),
         includeSystemActionTypes: false,
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    const mockRequest = {} as any;
+
+    it('should resolve the schema and delegate to validateWorkflowYaml', async () => {
+      const mockSchema = z.object({ name: z.string() });
+      jest.spyOn(service, 'getWorkflowZodSchema').mockResolvedValue(mockSchema);
+
+      const result = await service.validateWorkflow('name: Test', 'my-space', mockRequest);
+
+      expect(service.getWorkflowZodSchema).toHaveBeenCalledWith(
+        { loose: false },
+        'my-space',
+        mockRequest
+      );
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([]);
     });
   });
 });

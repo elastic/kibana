@@ -16,10 +16,10 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import {
   ESQLVariableType,
   type ESQLControlVariable,
-  type ESQLControlState,
   type ControlTriggerSource,
   TelemetryControlCancelledReason,
 } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
@@ -39,10 +39,13 @@ interface Context {
   queryString: string;
   variableType: ESQLVariableType;
   esqlVariables: ESQLControlVariable[];
-  onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
+  onSaveControl?: (
+    controlState: OptionsListESQLControlState,
+    updatedQuery: string
+  ) => Promise<void>;
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
-  initialState?: ESQLControlState;
+  initialState?: OptionsListESQLControlState;
   parentApi?: unknown;
   triggerSource?: ControlTriggerSource;
 }

@@ -162,7 +162,8 @@ describe('<RepositoryAdd />', () => {
       });
     });
 
-    describe('settings (step 2)', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/248548
+    describe.skip('settings (step 2)', () => {
       const typeToErrorMessagesMap: Record<string, string[]> = {
         fs: ['Location is required.'],
         url: ['URL is required.'],

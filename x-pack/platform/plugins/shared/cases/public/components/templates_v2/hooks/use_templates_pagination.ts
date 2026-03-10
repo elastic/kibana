@@ -7,10 +7,10 @@
 
 import { useCallback, useMemo } from 'react';
 import type { CriteriaWithPagination, Pagination } from '@elastic/eui';
-import type { Template } from '../../../../common/types/domain/template/v1';
 import type {
   TemplatesFindRequest,
   TemplateSortField,
+  TemplateListItem,
 } from '../../../../common/types/api/template/v1';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
@@ -39,7 +39,7 @@ export const useTemplatesPagination = ({
   );
 
   const onTableChange = useCallback(
-    ({ page, sort }: CriteriaWithPagination<Template>) => {
+    ({ page, sort }: CriteriaWithPagination<TemplateListItem>) => {
       const newParams: Partial<TemplatesFindRequest> = {};
 
       if (sort) {

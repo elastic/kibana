@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActorRef, Snapshot } from 'xstate5';
+import type { ActorRef, Snapshot } from 'xstate';
 import type { IToasts } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SampleDocument } from '@kbn/streams-schema';

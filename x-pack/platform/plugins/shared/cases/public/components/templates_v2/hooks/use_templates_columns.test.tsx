@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 
 import { TestProviders } from '../../../common/mock';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useTemplatesColumns } from './use_templates_columns';
 
 describe('useTemplatesColumns', () => {
@@ -147,5 +149,63 @@ describe('useTemplatesColumns', () => {
 
     // Columns should be recalculated when callbacks change
     expect(result.current.columns).not.toBe(firstRenderColumns);
+  });
+
+  describe('fieldCount column render', () => {
+    const getFieldCountColumn = () => {
+      const { result } = renderHook(() => useTemplatesColumns(defaultProps), { wrapper });
+      return result.current.columns.find(
+        (col) => 'field' in col && col.field === 'fieldCount'
+      ) as EuiTableFieldDataColumnType<TemplateListItem>;
+    };
+
+    const baseTemplate: TemplateListItem = {
+      templateId: 't-1',
+      name: 'Test',
+      owner: 'securitySolution',
+      definition: '',
+      templateVersion: 1,
+      deletedAt: null,
+      author: 'test-user',
+      fieldSearchMatches: false,
+    };
+
+    it('shows beacon when fieldSearchMatches is true', () => {
+      const column = getFieldCountColumn();
+      const template = { ...baseTemplate, fieldCount: 3, fieldSearchMatches: true };
+      render(<>{column.render!(3, template)}</>);
+
+      expect(screen.getByTestId('template-column-fields-search-match')).toBeInTheDocument();
+    });
+
+    it('does not show beacon when fieldSearchMatches is false', () => {
+      const column = getFieldCountColumn();
+      const template = { ...baseTemplate, fieldCount: 3, fieldSearchMatches: false };
+      render(<>{column.render!(3, template)}</>);
+
+      expect(screen.queryByTestId('template-column-fields-search-match')).not.toBeInTheDocument();
+    });
+
+    it('shows the field count number', () => {
+      const column = getFieldCountColumn();
+      const template = { ...baseTemplate, fieldCount: 5 };
+      render(<>{column.render!(5, template)}</>);
+
+      expect(screen.getByTestId('template-column-fields')).toHaveTextContent('5');
+    });
+
+    it('shows beacon alongside tooltip when fieldNames are present', () => {
+      const column = getFieldCountColumn();
+      const template = {
+        ...baseTemplate,
+        fieldCount: 2,
+        fieldNames: ['severity', 'hostname'],
+        fieldSearchMatches: true,
+      };
+      render(<>{column.render!(2, template)}</>);
+
+      expect(screen.getByTestId('template-column-fields-search-match')).toBeInTheDocument();
+      expect(screen.getByTestId('template-column-fields')).toHaveTextContent('2');
+    });
   });
 });

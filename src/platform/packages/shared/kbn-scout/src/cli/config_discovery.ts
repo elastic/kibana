@@ -276,10 +276,12 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  * Scout tests, filters them based on deployment target tags, and optionally saves
  * or validates the results.
  *
- * The command supports three deployment targets:
+ * The command supports five deployment targets:
  * - 'all': Finds configs with deployment-agnostic tags
- * - 'mki': Finds configs with serverless-only tags
- * - 'ech': Finds configs with stateful-only tag
+ * - 'local': Finds configs with @local-* tags (local stateful + local serverless)
+ * - 'local-stateful-only': Finds configs with @local-stateful-* tags only
+ * - 'mki': Finds configs with @cloud-serverless-* tags
+ * - 'ech': Finds configs with @cloud-stateful-* tags
  *
  * Output formats:
  * - Standard: Lists modules grouped by plugin/package with their configs and tags
@@ -297,8 +299,10 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
   Options:
     --target <target>         Filter configs by deployment target:
                               - 'all': deployment-agnostic tags (default)
-                              - 'mki': serverless-only tags
-                              - 'ech': stateful-only tags
+                              - 'local': @local-* tags (local stateful + local serverless)
+                              - 'local-stateful-only': @local-stateful-* tags only
+                              - 'mki': @cloud-serverless-* tags
+                              - 'ech': @cloud-stateful-* tags
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -309,8 +313,17 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
     # Discover all deployment-agnostic configs
     node scripts/scout discover-playwright-configs
 
-    # Discover serverless-only configs
+    # Discover configs for local targets (@local-*)
+    node scripts/scout discover-playwright-configs --target local
+
+    # Discover only local stateful configs (@local-stateful-*)
+    node scripts/scout discover-playwright-configs --target local-stateful-only
+
+    # Discover cloud serverless configs (@cloud-serverless-*)
     node scripts/scout discover-playwright-configs --target mki
+
+    # Discover cloud stateful configs (@cloud-stateful-*)
+    node scripts/scout discover-playwright-configs --target ech
 
     # Discover local custom-server configs only
     node scripts/scout discover-playwright-configs --include-custom-servers

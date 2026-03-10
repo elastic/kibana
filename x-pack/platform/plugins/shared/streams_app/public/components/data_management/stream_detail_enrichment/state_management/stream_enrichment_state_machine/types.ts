@@ -76,6 +76,12 @@ export interface StreamEnrichmentContextType {
   // Validation errors for processors (namespace, reserved fields, type mismatches)
   validationErrors: Map<string, StreamlangValidationError[]>;
   fieldTypesByProcessor: Map<string, Map<string, FieldType>>;
+  /**
+   * Tracks whether the current condition filter was applied automatically by the UI
+   * (e.g. right after creating a condition block). If set, some user actions (save/cancel
+   * processor edits) will clear the filter for convenience.
+   */
+  autoSelectedConditionId?: string;
 }
 
 export type StreamEnrichmentEvent =
@@ -106,8 +112,10 @@ export type StreamEnrichmentEvent =
   | { type: 'mode.resetSimulator' }
   | { type: 'simulation.reset' }
   | { type: 'simulation.updateSteps'; steps: StreamlangStepWithUIAttributes[] }
+  | { type: 'simulation.filterByConditionAuto'; conditionId: string }
   | { type: 'simulation.filterByCondition'; conditionId: string }
   | { type: 'simulation.clearConditionFilter' }
+  | { type: 'simulation.clearAutoConditionFilter' }
   // Step events forwarded to interactive mode machine
   | {
       type: 'step.addProcessor';

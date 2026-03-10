@@ -60,6 +60,9 @@ export const getILMRatios = (
   if (!value) return undefined;
 
   const orderedPhases = orderIlmPhases(value.phases);
+
+  if (orderedPhases.length === 0) return undefined;
+
   const totalDuration = parseDurationInSeconds(last(orderedPhases)!.min_age);
 
   return orderedPhases.map((phase, index, phases) => {

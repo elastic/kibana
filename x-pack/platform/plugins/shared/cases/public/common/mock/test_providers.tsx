@@ -33,6 +33,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
 import type { CasesPublicStartDependencies } from '../../types';
+import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -42,6 +43,7 @@ interface TestProviderProps {
   releasePhase?: ReleasePhase;
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry?: UnifiedAttachmentTypeRegistry;
   license?: ILicense;
   services?: CasesPublicStartDependencies;
   queryClient?: QueryClient;
@@ -87,6 +89,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   releasePhase,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
   license,
   coreStart,
   services,
@@ -128,12 +131,19 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     []
   );
 
+  const defaultUnifiedAttachmentTypeRegistry = useMemo(
+    () => new UnifiedAttachmentTypeRegistry(),
+    []
+  );
+
   const casesProviderValue: CasesContextProps = useMemo(
     () => ({
       externalReferenceAttachmentTypeRegistry:
         externalReferenceAttachmentTypeRegistry ?? defaultExternalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry:
         persistableStateAttachmentTypeRegistry ?? defaultPersistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry:
+        unifiedAttachmentTypeRegistry ?? defaultUnifiedAttachmentTypeRegistry,
       features,
       owner: owner ?? mockedTestProvidersOwner,
       permissions: permissions ?? defaultPermissions,
@@ -145,6 +155,8 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       defaultPermissions,
       defaultPersistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry,
+      defaultUnifiedAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       features,
       getFilesClientFinal,
       owner,

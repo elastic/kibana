@@ -75,6 +75,31 @@ export function timeRangeToDisplayText(
 }
 
 /**
+ * Converts a parsed TimeRange into a fully formatted date string,
+ * always rendering both start and end as absolute dates in the given format.
+ */
+export function timeRangeToFullFormattedText(
+  timeRange: TimeRange,
+  options?: TimeRangeTransformOptions
+): string {
+  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, dateFormat = DEFAULT_DATE_FORMAT } =
+    options ?? {};
+
+  if (timeRange.isInvalid) {
+    return timeRange.value;
+  }
+
+  const formattedStart = timeRange.startDate
+    ? formatAbsoluteInstant(timeRange.startDate, dateFormat)
+    : timeRange.start;
+  const formattedEnd = timeRange.endDate
+    ? formatAbsoluteInstant(timeRange.endDate, dateFormat)
+    : timeRange.end;
+
+  return `${formattedStart} ${delimiter.trim()} ${formattedEnd}`;
+}
+
+/**
  * Formats a single date instant for display.
  * Converts date math to natural language where possible.
  */
@@ -100,9 +125,10 @@ function formatDateInstant(dateString: string, date: Date | null, dateFormat: st
 }
 
 /**
- * Parses date math like "now-7m" or "now+3d/d" into parts
+ * Parses date math like "now-7m" or "now+3d/d" into parts.
+ * Returns `null` for values that are not relative date math (absolute dates, bare `now`, rounding-only).
  */
-function dateMathToRelativeParts(
+export function dateMathToRelativeParts(
   value: string
 ): { count: number; unit: string; isFuture: boolean; round?: string } | null {
   const match = value.match(/^now([+-])(\d+)([smhdwMy])(\/[smhdwMy])?$/);

@@ -135,7 +135,7 @@ export function Waterfall({
             ? 'position: relative;'
             : `
             position: sticky;
-            top: calc(var(--euiFixedHeadersOffset, 0) + ${serviceBadgesHeight}px);`}
+            top: calc(var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) + ${serviceBadgesHeight}px);`}
           z-index: ${euiTheme.levels.menu};
           background-color: ${euiTheme.colors.emptyShade};
           border-bottom: 1px solid ${euiTheme.colors.mediumShade};

@@ -1,3 +1,5 @@
+name: Assign issues to project by label
+
 on:
   issues:
     types: [labeled, unlabeled]

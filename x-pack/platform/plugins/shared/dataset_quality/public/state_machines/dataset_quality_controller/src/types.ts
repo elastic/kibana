@@ -5,19 +5,8 @@
  * 2.0.
  */
 
-import type { DoneInvokeEvent } from 'xstate';
-import type {
-  DataStreamDocsStat,
-  DatasetUserPrivileges,
-  NonAggregatableDatasets,
-} from '../../../../common/api_types';
-import type {
-  DataStreamDetails,
-  DataStreamStat,
-  DataStreamStatServiceResponse,
-  DataStreamStatType,
-  GetDataStreamsTypesPrivilegesResponse,
-} from '../../../../common/data_streams_stats';
+import type { DataStreamDocsStat, DatasetUserPrivileges } from '../../../../common/api_types';
+import type { DataStreamStat, DataStreamStatType } from '../../../../common/data_streams_stats';
 import type { Integration } from '../../../../common/data_streams_stats/integration';
 import type {
   DataStreamType,
@@ -59,6 +48,7 @@ export interface WithDataStreamStats {
 
 export interface WithTotalDocs {
   totalDocsStats: DictionaryType<DataStreamDocsStat>;
+  loadedTotalDocsTypes: DataStreamType[];
 }
 
 export interface WithDegradedDocs {
@@ -188,11 +178,5 @@ export type DatasetQualityControllerEvent =
       type: 'UPDATE_FAILURE_STORE';
       dataStream: DataStreamStat;
     }
-  | DoneInvokeEvent<GetDataStreamsTypesPrivilegesResponse>
-  | DoneInvokeEvent<DataStreamDocsStat[]>
-  | DoneInvokeEvent<NonAggregatableDatasets>
-  | DoneInvokeEvent<DataStreamDetails>
-  | DoneInvokeEvent<DataStreamStatServiceResponse>
-  | DoneInvokeEvent<Integration>
-  | DoneInvokeEvent<boolean | null>
-  | DoneInvokeEvent<Error>;
+  | { type: 'SAVE_TOTAL_DOCS_STATS'; data: DataStreamDocsStat[]; dataStreamType: DataStreamType }
+  | { type: 'NOTIFY_TOTAL_DOCS_STATS_FAILED'; error: Error };

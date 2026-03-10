@@ -33,6 +33,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
 import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
+import { UserActivityService } from '@kbn/core-user-activity-server-internal';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
@@ -95,6 +96,7 @@ export class Server {
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
+  private readonly userActivity: UserActivityService;
   private readonly executionContext: ExecutionContextService;
   private readonly prebootService: PrebootService;
   private readonly pricing: PricingService;
@@ -124,6 +126,11 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
+    const serviceVersion =
+      env.packageInfo.buildFlavor === 'serverless'
+        ? env.packageInfo.buildShaShort
+        : env.packageInfo.version;
+    this.loggingSystem.setGlobalContext({ service: { version: serviceVersion } });
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
@@ -151,6 +158,7 @@ export class Server {
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
     this.deprecations = new DeprecationsService(core);
+    this.userActivity = new UserActivityService(core);
     this.executionContext = new ExecutionContextService(core);
     this.prebootService = new PrebootService(core);
     this.pricing = new PricingService(core);
@@ -294,9 +302,14 @@ export class Server {
 
     const injectionSetup = this.injection.setup();
 
+    const loggingSetup = this.logging.setup();
+
+    const userActivitySetup = this.userActivity.setup({ logging: loggingSetup });
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
+      userActivity: userActivitySetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -329,8 +342,6 @@ export class Server {
       savedObjectsStartPromise: this.savedObjectsStartPromise,
       changedDeprecatedConfigPath$: this.configService.getDeprecatedConfigPath$(),
     });
-
-    const loggingSetup = this.logging.setup();
 
     const deprecationsSetup = await this.deprecations.setup({
       http: httpSetup,
@@ -406,6 +417,7 @@ export class Server {
       logging: loggingSetup,
       metrics: metricsSetup,
       deprecations: deprecationsSetup,
+      userActivity: userActivitySetup,
       coreUsageData: coreUsageDataSetup,
       pricing: pricingSetup,
       userSettings: userSettingsServiceSetup,
@@ -456,6 +468,7 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
+    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
@@ -485,6 +498,9 @@ export class Server {
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
+    httpStart.setRedactedSessionIdGetter((request) =>
+      securityStart.authc.getRedactedSessionId(request)
+    );
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,
@@ -515,6 +531,7 @@ export class Server {
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
+      userActivity: userActivityStart,
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
@@ -525,7 +542,8 @@ export class Server {
 
     this.coreApp.start(this.coreStart);
 
-    await this.plugins.start(this.coreStart);
+    const { contracts } = await this.plugins.start(this.coreStart);
+    this.coreStart._plugins = contracts;
 
     await this.http.start();
 

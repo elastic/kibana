@@ -15,9 +15,9 @@ import {
   getLensRuntimeStateMock,
   createUnifiedSearchApi,
   getLensInternalApiMock,
-  mockDynamicActionsManager,
 } from '../mocks';
 import { createEmptyLensState } from '../helper';
+import { mockDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 const DATAVIEW_ID = 'myDataView';
 
 jest.mock('../../app_plugin/show_underlying_data', () => {
@@ -67,7 +67,7 @@ function setupActionsApi(
         nowProvider: { ...services.data.nowProvider, get: jest.fn(() => new Date()) },
       },
     },
-    mockDynamicActionsManager()
+    mockDrilldownsManager()
   );
   return api;
 }
@@ -76,16 +76,16 @@ describe('Dashboard actions', () => {
   describe('Drilldowns', () => {
     it('should expose drilldowns for DSL based visualization', async () => {
       const api = setupActionsApi();
-      expect(api.enhancements).toBeDefined();
+      expect(api.setDrilldowns).toBeDefined();
     });
 
-    it('should not expose drilldowns for ES|QL chart types', async () => {
+    it('should expose drilldowns for ES|QL chart types', async () => {
       const api = setupActionsApi(
         createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
           esql: 'FROM index',
         })
       );
-      expect(api.enhancements).toBeUndefined();
+      expect(api.setDrilldowns).toBeDefined();
     });
   });
 

@@ -8,7 +8,7 @@
 import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { AssignArgs } from 'xstate5';
+import type { AssignArgs } from 'xstate';
 import type {
   CustomSamplesDataSource,
   EnrichmentDataSource,
@@ -129,6 +129,7 @@ export function getUpsertFields(context: StreamEnrichmentContextType): FieldDefi
 }
 
 export const spawnDataSource = <
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
   dataSource: EnrichmentDataSource,

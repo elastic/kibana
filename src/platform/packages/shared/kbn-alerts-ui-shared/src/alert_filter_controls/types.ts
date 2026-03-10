@@ -16,7 +16,7 @@ export type FilterUrlFormat = Record<
   string,
   Pick<
     OptionsListDSLControlState,
-    'selectedOptions' | 'title' | 'fieldName' | 'existsSelected' | 'exclude'
+    'selected_options' | 'title' | 'field_name' | 'exists_selected' | 'exclude'
   >
 >;
 
@@ -25,7 +25,7 @@ export interface FilterContextType {
   addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterControlConfig = Omit<OptionsListDSLControlState, 'dataViewId'> & {
+export type FilterControlConfig = Omit<OptionsListDSLControlState, 'data_view_id'> & {
   /*
    * Determines the presence and order of a control
    * */

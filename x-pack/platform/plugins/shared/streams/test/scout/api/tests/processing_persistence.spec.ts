@@ -14,17 +14,27 @@ apiTest.describe(
   'Stream data processing - persistence API (CRUD)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    const streamNamePrefix = 'logs.pp';
+    // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.pp`;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type ApiClient = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type CookieHeader = any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    type StreamResponse = any;
 
     // Helper to create a stream and get its definition
     async function createAndGetStream(
-      apiClient: any,
-      cookieHeader: any,
+      apiClient: ApiClient,
+      cookieHeader: CookieHeader,
       streamName: string,
       condition: { field: string; eq: string }
-    ): Promise<{ success: boolean; stream?: any; error?: string }> {
-      const forkResponse = await apiClient.post('api/streams/logs/_fork', {
+    ): Promise<{ success: boolean; stream?: StreamResponse; error?: string }> {
+      const forkResponse = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: streamName },
@@ -59,7 +69,7 @@ apiTest.describe(
     }
 
     // Helper to extract writeable ingest config
-    function getWriteableIngest(streamResponse: any): any {
+    function getWriteableIngest(streamResponse: StreamResponse): StreamResponse {
       const ingest = streamResponse.stream.ingest;
       const { updated_at: _, ...processingWithoutUpdatedAt } = ingest.processing || {};
       return {

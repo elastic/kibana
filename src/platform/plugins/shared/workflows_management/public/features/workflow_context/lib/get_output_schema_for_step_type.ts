@@ -10,6 +10,7 @@
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
+import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 import { stepSchemas } from '../../../../common/step_schemas';
 
 export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
@@ -44,6 +45,11 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
       return z.unknown();
     }
     return connector.outputSchema;
+  }
+
+  const structuralSchema = structuralStepOutputSchemas[node.stepType];
+  if (structuralSchema) {
+    return structuralSchema;
   }
 
   // Fallback to unknown if not found

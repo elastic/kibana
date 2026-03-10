@@ -62,7 +62,6 @@ dependsOn:
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/reporting-export-types-pdf-common'
   - '@kbn/code-editor'
-  - '@kbn/presentation-containers'
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
   - '@kbn/search-types'

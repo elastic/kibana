@@ -8,30 +8,159 @@
  */
 
 import { useEffect, useRef } from 'react';
+import type { MutableRefObject } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
-import { isPair, isScalar } from 'yaml';
+import { isPair, isScalar, parseDocument } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import { isTriggerType } from '@kbn/workflows';
 import { getTriggerNodesWithType } from '../../../../../common/lib/yaml';
+import { triggerSchemas } from '../../../../trigger_schemas';
+
+/** Marker class for custom (registered) triggers */
+export const CUSTOM_TRIGGER_INLINE_CLASS = 'custom-trigger-inline';
+
+/** Sanitized trigger id for use as CSS class (dots → hyphens). Exported so dynamic icon CSS uses the same class. */
+export const triggerTypeToCssClass = (triggerType: string): string =>
+  triggerType.replace(/\./g, '-');
+
+const getTriggerIcon = (triggerType: string): { className: string } => {
+  if (isTriggerType(triggerType)) {
+    return { className: triggerType };
+  }
+  return { className: `ct-${triggerTypeToCssClass(triggerType)}` };
+};
+
+function resolveDocument(
+  model: monaco.editor.ITextModel,
+  doc: Document | null | undefined
+): Document | null {
+  if (doc?.contents) return doc;
+  const value = model.getValue();
+  if (!value?.trim()) return null;
+  try {
+    const parsed = parseDocument(value, { keepSourceTokens: true });
+    return parsed?.contents ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function isRegisteredCustomTrigger(triggerType: string): boolean {
+  const registeredIds = triggerSchemas.getRegisteredIds();
+  return registeredIds.includes(triggerType);
+}
+
+function tryCreateTriggerDecoration(
+  model: monaco.editor.ITextModel,
+  triggerNode: ReturnType<typeof getTriggerNodesWithType>[number]
+): monaco.editor.IModelDeltaDecoration | null {
+  const typePair = triggerNode.items.find(
+    (item): item is Pair<Scalar, Scalar> =>
+      isPair(item) && isScalar(item.key) && isScalar(item.value) && item.key.value === 'type'
+  );
+  const valueScalar = typePair?.value;
+  const triggerType = valueScalar?.value;
+  if (typeof triggerType !== 'string' || triggerType.length < 3 || !valueScalar) return null;
+
+  const typeRange = valueScalar.range;
+  if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) return null;
+
+  const { className } = getTriggerIcon(triggerType);
+  if (!className) return null;
+
+  const isCustomTrigger = !isTriggerType(triggerType);
+  if (isCustomTrigger && !isRegisteredCustomTrigger(triggerType)) return null;
+
+  const inlineClasses = isCustomTrigger
+    ? `type-inline-highlight ${CUSTOM_TRIGGER_INLINE_CLASS} type-${className}`
+    : `type-inline-highlight type-${className}`;
+
+  const valueStartOffset = typeRange[1];
+  const valueEndOffset = typeRange[2];
+  const startPosition = model.getPositionAt(valueStartOffset);
+  const endPosition = model.getPositionAt(valueEndOffset);
+  const currentLineContent = model.getLineContent(startPosition.lineNumber);
+  const trimmedLine = currentLineContent.trimStart();
+  if (!trimmedLine.startsWith('type:') && !trimmedLine.startsWith('- type:')) return null;
+
+  let targetLineNumber = startPosition.lineNumber;
+  let lineContent = model.getLineContent(targetLineNumber);
+  let typeIndex = lineContent.indexOf(triggerType);
+  if (typeIndex === -1 && endPosition.lineNumber !== startPosition.lineNumber) {
+    targetLineNumber = endPosition.lineNumber;
+    lineContent = model.getLineContent(targetLineNumber);
+    typeIndex = lineContent.indexOf(triggerType);
+  }
+  const actualStartColumn = typeIndex !== -1 ? typeIndex + 1 : startPosition.column;
+  const actualEndColumn =
+    typeIndex !== -1 ? typeIndex + triggerType.length + 1 : endPosition.column;
+
+  return {
+    range: {
+      startLineNumber: targetLineNumber,
+      startColumn: actualStartColumn,
+      endLineNumber: targetLineNumber,
+      endColumn: actualEndColumn,
+    },
+    options: {
+      inlineClassName: inlineClasses,
+      stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+    },
+  };
+}
+
+function applyDecorationsToCollection(
+  editor: monaco.editor.IStandaloneCodeEditor,
+  collectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>,
+  decorations: monaco.editor.IModelDeltaDecoration[]
+): void {
+  if (collectionRef.current) {
+    collectionRef.current.set(decorations);
+    return;
+  }
+  if (decorations.length > 0) {
+    try {
+      collectionRef.current = editor.createDecorationsCollection(decorations);
+    } catch {
+      setTimeout(() => {
+        if (editor && decorations.length > 0) {
+          collectionRef.current = editor.createDecorationsCollection(decorations);
+        }
+      }, 10);
+    }
+  }
+}
+
+/**
+ * Apply trigger type decorations
+ */
+export function applyTriggerTypeDecorations(
+  editor: monaco.editor.IStandaloneCodeEditor,
+  collectionRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>,
+  doc?: Document | null
+): void {
+  const model = editor.getModel();
+  if (!model) return;
+
+  const docToUse = resolveDocument(model, doc);
+  if (!docToUse) {
+    if (collectionRef.current) collectionRef.current.set([]);
+    return;
+  }
+
+  const triggerNodes = getTriggerNodesWithType(docToUse);
+  const decorations = triggerNodes
+    .map((node) => tryCreateTriggerDecoration(model, node))
+    .filter((dec): dec is monaco.editor.IModelDeltaDecoration => dec !== null);
+
+  applyDecorationsToCollection(editor, collectionRef, decorations);
+}
 
 interface UseTriggerTypeDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
   yamlDocument: Document | null;
   isEditorMounted: boolean;
 }
-
-// Helper function to get trigger icon class
-const getTriggerIcon = (triggerType: string): { className: string } => {
-  switch (triggerType) {
-    case 'alert':
-      return { className: 'alert' };
-    case 'scheduled':
-      return { className: 'scheduled' };
-    case 'manual':
-      return { className: 'manual' };
-    default:
-      return { className: triggerType };
-  }
-};
 
 export const useTriggerTypeDecorations = ({
   editor,
@@ -40,135 +169,45 @@ export const useTriggerTypeDecorations = ({
 }: UseTriggerTypeDecorationsProps) => {
   const triggerTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const contentDisposableRef = useRef<monaco.IDisposable | null>(null);
+  const applyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const DEBOUNCE_MS = 200;
 
   useEffect(() => {
-    if (!isEditorMounted || !editor || !yamlDocument) {
-      return;
-    }
-
     const timeoutId = setTimeout(() => {
+      if (!isEditorMounted || !editor || !yamlDocument) {
+        return;
+      }
+
       const model = editor.getModel();
       if (!model) return;
 
-      // Clear existing trigger decorations
-      if (triggerTypeDecorationCollectionRef.current) {
-        triggerTypeDecorationCollectionRef.current.clear();
-        triggerTypeDecorationCollectionRef.current = null;
+      contentDisposableRef.current?.dispose();
+      contentDisposableRef.current = null;
+
+      applyTriggerTypeDecorations(editor, triggerTypeDecorationCollectionRef, yamlDocument);
+
+      contentDisposableRef.current = model.onDidChangeContent(() => {
+        if (applyDebounceRef.current) clearTimeout(applyDebounceRef.current);
+        applyDebounceRef.current = setTimeout(() => {
+          applyDebounceRef.current = null;
+          applyTriggerTypeDecorations(editor, triggerTypeDecorationCollectionRef);
+        }, DEBOUNCE_MS);
+      });
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (applyDebounceRef.current) {
+        clearTimeout(applyDebounceRef.current);
+        applyDebounceRef.current = null;
       }
-
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-
-      // Find all triggers with type
-      const triggerNodes = getTriggerNodesWithType(yamlDocument);
-
-      for (const triggerNode of triggerNodes) {
-        const typePair = triggerNode.items.find(
-          (item): item is Pair<Scalar, Scalar> =>
-            isPair(item) && isScalar(item.key) && isScalar(item.value) && item.key.value === 'type'
-        );
-        if (!typePair?.value?.value) {
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        const triggerType = typePair.value.value;
-
-        if (typeof triggerType !== 'string') {
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        // Skip decoration for very short trigger types to avoid false matches
-        if (triggerType.length < 3) {
-          // eslint-disable-next-line no-continue
-          continue; // Skip this iteration
-        }
-
-        const typeRange = typePair.value.range;
-
-        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) {
-          // eslint-disable-next-line no-continue
-          continue;
-        }
-
-        // Get icon and class based on trigger type
-        const { className } = getTriggerIcon(triggerType);
-
-        if (className) {
-          // typeRange format: [startOffset, valueStartOffset, endOffset]
-          const valueStartOffset = typeRange[1]; // Start of the value (after quotes if present)
-          const valueEndOffset = typeRange[2]; // End of the value
-
-          // Convert character offsets to Monaco positions
-          const startPosition = model.getPositionAt(valueStartOffset);
-          const endPosition = model.getPositionAt(valueEndOffset);
-
-          // Get the line content to check if "type:" is at the beginning
-          const currentLineContent = model.getLineContent(startPosition.lineNumber);
-          const trimmedLine = currentLineContent.trimStart();
-
-          // Check if this line contains "type:" (after whitespace and optional dash for array items)
-          if (!trimmedLine.startsWith('type:') && !trimmedLine.startsWith('- type:')) {
-            // eslint-disable-next-line no-continue
-            continue; // Skip this decoration
-          }
-
-          // Try to find the trigger type in the start position line first
-          let targetLineNumber = startPosition.lineNumber;
-          let lineContent = model.getLineContent(targetLineNumber);
-          let typeIndex = lineContent.indexOf(triggerType);
-
-          // If not found on start line, check end line
-          if (typeIndex === -1 && endPosition.lineNumber !== startPosition.lineNumber) {
-            targetLineNumber = endPosition.lineNumber;
-            lineContent = model.getLineContent(targetLineNumber);
-            typeIndex = lineContent.indexOf(triggerType);
-          }
-
-          let actualStartColumn;
-          let actualEndColumn;
-          if (typeIndex !== -1) {
-            // Found the trigger type in the line
-            actualStartColumn = typeIndex + 1; // +1 for 1-based indexing
-            actualEndColumn = typeIndex + triggerType.length + 1; // +1 for 1-based indexing
-          } else {
-            // Fallback to calculated position
-            targetLineNumber = startPosition.lineNumber;
-            actualStartColumn = startPosition.column;
-            actualEndColumn = endPosition.column;
-          }
-
-          // Background highlighting for trigger types
-          const decorationsToAdd = [
-            // Background highlighting on the trigger type text
-            {
-              range: {
-                startLineNumber: targetLineNumber,
-                startColumn: actualStartColumn,
-                endLineNumber: targetLineNumber,
-                endColumn: actualEndColumn,
-              },
-              options: {
-                inlineClassName: `type-inline-highlight type-${className}`,
-                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              },
-            },
-          ];
-
-          decorations.push(...decorationsToAdd);
-        }
-      }
-
-      if (decorations.length > 0) {
-        triggerTypeDecorationCollectionRef.current =
-          editor.createDecorationsCollection(decorations);
-      }
-    }, 100); // Small delay to avoid multiple rapid executions
-
-    return () => clearTimeout(timeoutId);
+      contentDisposableRef.current?.dispose();
+      contentDisposableRef.current = null;
+    };
   }, [isEditorMounted, yamlDocument, editor]);
 
-  // Return ref for cleanup purposes
   return {
     decorationCollectionRef: triggerTypeDecorationCollectionRef,
   };

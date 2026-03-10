@@ -9,7 +9,8 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { createToolIdMappings, toolToLangchain } from '@kbn/agent-builder-genai-utils/langchain';
 import { reverseMap } from '@kbn/agent-builder-genai-utils/langchain/tools';
 import { LRUCache } from 'lru-cache';
-import type { AgentEventEmitterFn } from '@kbn/agent-builder-server';
+import type { AgentEventEmitterFn, ExecutableTool } from '@kbn/agent-builder-server';
+import type { ToolReturnSummarizerFn } from '@kbn/agent-builder-server/tools/builtin';
 import type {
   ToolManager as IToolManager,
   ToolManagerParams,
@@ -36,6 +37,7 @@ export class ToolManager implements IToolManager {
   private staticTools: Map<ToolName, StructuredTool> = new Map<ToolName, StructuredTool>();
   private dynamicTools: LRUCache<ToolName, StructuredTool>;
   private toolIdMappings: Map<string, string>;
+  private executableTools: Map<string, ExecutableTool> = new Map<string, ExecutableTool>();
   private eventEmitter?: AgentEventEmitterFn;
 
   constructor(params: ToolManagerParams) {
@@ -49,6 +51,12 @@ export class ToolManager implements IToolManager {
     this.eventEmitter = eventEmitter;
   }
 
+  /**
+   * Adds tools to the tool manager.
+   * Supports both executable tools and browser API tools.
+   * @param input - The tool input configuration (executable or browser)
+   * @param options - Optional configuration for tool storage (static vs dynamic)
+   */
   public async addTools(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
     const { dynamic = false } = options;
 
@@ -57,8 +65,11 @@ export class ToolManager implements IToolManager {
 
     if (input.type === 'executable') {
       const tools = Array.isArray(input.tools) ? input.tools : [input.tools];
-      const toolIdMapping = createToolIdMappings(tools);
+      for (const tool of tools) {
+        this.executableTools.set(tool.id, tool);
+      }
 
+      const toolIdMapping = createToolIdMappings(tools);
       langchainTools = await Promise.all(
         tools.map((tool) =>
           toolToLangchain({
@@ -83,29 +94,63 @@ export class ToolManager implements IToolManager {
 
     langchainTools.forEach((langchainTool) => {
       const { name } = langchainTool;
-      // TODO: Check if tool already exists in the store
+      if (this.staticTools.has(name)) {
+        /**
+         * If tool already exists as static tool, don't need to add it again.
+         * Dynamic tools are re-added to update LRU eviction.
+         */
+        return;
+      }
       if (dynamic) {
         this.dynamicTools.set(name, langchainTool);
       } else {
+        this.dynamicTools.delete(name);
         this.staticTools.set(name, langchainTool);
       }
     });
   }
 
+  /**
+   * Lists all tools in the tool manager.
+   * @returns an array of all tools (static and dynamic)
+   */
   public list(): StructuredTool[] {
     return [...this.staticTools.values(), ...this.dynamicTools.values()];
   }
 
+  /**
+   * Records the use of a tool, marking it as recently used.
+   * This affects LRU eviction for dynamic tools.
+   * @param langchainToolName - The name of the LangChain tool to record usage for.
+   */
   public recordToolUse(langchainToolName: ToolName): void {
     if (this.dynamicTools.has(langchainToolName)) {
       this.dynamicTools.get(langchainToolName);
     }
   }
 
+  /**
+   * Gets the tool id mapping.
+   * Maps LangChain tool names to internal tool IDs.
+   * @returns the tool id mapping
+   */
   public getToolIdMapping(): Map<string, string> {
     return this.toolIdMappings;
   }
 
+  /**
+   * Gets the summarizer function for a tool by its internal tool ID.
+   * Returns undefined if the tool is not found or has no summarizer.
+   */
+  public getSummarizer(toolId: string): ToolReturnSummarizerFn | undefined {
+    return this.executableTools.get(toolId)?.summarizeToolReturn;
+  }
+
+  /**
+   * Gets the internal tool IDs of all dynamic tools currently in the tool manager.
+   * Returns internal tool IDs (not LangChain names) for persistence.
+   * @returns array of internal tool IDs
+   */
   public getDynamicToolIds(): string[] {
     const internalToolIds: string[] = [];
     for (const tool of this.dynamicTools.values()) {

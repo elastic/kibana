@@ -16,6 +16,7 @@ import type {
 import {
   EuiBadgeGroup,
   EuiBadge,
+  EuiBeacon,
   EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
@@ -26,15 +27,16 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { Template } from '../../../../common/types/domain/template/v1';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { getEmptyCellValue } from '../../empty_value';
 import * as i18n from '../../templates/translations';
 import { LINE_CLAMP } from '../constants';
 
 type TemplatesColumns =
-  | EuiTableActionsColumnType<Template>
-  | EuiTableComputedColumnType<Template>
-  | EuiTableFieldDataColumnType<Template>;
+  | EuiTableActionsColumnType<TemplateListItem>
+  | EuiTableComputedColumnType<TemplateListItem>
+  | EuiTableFieldDataColumnType<TemplateListItem>;
 
 const getLineClampedCss = css`
   text-overflow: ellipsis;
@@ -243,13 +245,28 @@ export const useTemplatesColumns = ({
         name: i18n.COLUMN_FIELDS,
         sortable: true,
         align: 'right',
-        render: (fieldCount: number | undefined, template: Template) => {
+        render: (fieldCount: number | undefined, template: TemplateListItem) => {
           if (fieldCount == null) {
             return getEmptyCellValue();
           }
 
           const fieldNames = template.fieldNames;
-          const content = <span data-test-subj="template-column-fields">{fieldCount}</span>;
+          const content = (
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <span data-test-subj="template-column-fields">{fieldCount}</span>
+              </EuiFlexItem>
+              {template.fieldSearchMatches && (
+                <EuiFlexItem grow={false}>
+                  <EuiBeacon
+                    data-test-subj="template-column-fields-search-match"
+                    size={6}
+                    color="subdued"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
 
           if (fieldNames && fieldNames.length > 0) {
             return (

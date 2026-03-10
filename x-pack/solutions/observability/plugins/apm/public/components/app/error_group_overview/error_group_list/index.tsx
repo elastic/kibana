@@ -93,7 +93,7 @@ export function ErrorGroupList({
 
   const { core } = useApmPluginContext();
 
-  const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
+  const isTableSearchBarEnabled = core?.uiSettings?.get<boolean>(apmEnableTableSearchBar, true);
 
   const { offset, rangeFrom, rangeTo } = query;
 
@@ -187,7 +187,7 @@ export function ErrorGroupList({
               serviceName={serviceName}
               query={{
                 ...query,
-                kuery: `error.exception.type:"${type}"`,
+                kuery: `error.exception.type:"${type}" OR error.type:"${type}"`,
               }}
             >
               {type}

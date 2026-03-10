@@ -7,6 +7,7 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
+import { Agent } from 'undici';
 
 import {
   createSAMLResponse,
@@ -114,6 +115,8 @@ const checkUiamAccessToken = async (accessToken: string) =>
       Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({}),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
   });
 
 const checkUiamRefreshToken = async (refreshToken: string) =>
@@ -125,4 +128,6 @@ const checkUiamRefreshToken = async (refreshToken: string) =>
       [ES_CLIENT_AUTHENTICATION_HEADER]: MOCK_IDP_UIAM_SHARED_SECRET,
     },
     body: JSON.stringify({ refresh_token: refreshToken }),
+    // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+    dispatcher: new Agent({ connect: { rejectUnauthorized: false } }),
   });

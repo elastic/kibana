@@ -16,22 +16,26 @@ interface LifecyclePhaseButtonProps {
   euiTheme: EuiThemeComputed;
   isDelete: boolean;
   isPopoverOpen: boolean;
+  isBeingEdited?: boolean;
   label: string;
   onClick: () => void;
   phaseColor?: string;
   size?: string;
   testSubjPrefix?: string;
+  isEditLifecycleFlyoutOpen?: boolean;
 }
 
 export const LifecyclePhaseButton = ({
   euiTheme,
   isDelete,
   isPopoverOpen,
+  isBeingEdited = false,
   label,
   onClick,
   phaseColor,
   size,
   testSubjPrefix,
+  isEditLifecycleFlyoutOpen = false,
 }: LifecyclePhaseButtonProps) => {
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
 
@@ -60,7 +64,7 @@ export const LifecyclePhaseButton = ({
       css={getInteractivePanelStyles({
         euiTheme,
         backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
-        isPopoverOpen,
+        isPopoverOpen: isPopoverOpen || isBeingEdited,
         minHeight: '48px',
         ...(isDelete
           ? {
@@ -80,7 +84,15 @@ export const LifecyclePhaseButton = ({
           style={{ width: '100%', height: '100%' }}
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type="trash" data-test-subj={`${prefix}dataLifecycle-delete-icon`} />
+            <EuiIcon
+              size="m"
+              type="trash"
+              aria-hidden={true}
+              data-test-subj={`${prefix}dataLifecycle-delete-icon`}
+              title={i18n.translate('xpack.streams.streamDetailLifecycle.deletePhase.iconTitle', {
+                defaultMessage: 'Delete phase',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
@@ -94,26 +106,29 @@ export const LifecyclePhaseButton = ({
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
               maxWidth: '100%',
+              fontWeight: euiTheme.font.weight.semiBold,
             }}
           >
-            <b>{capitalize(label)}</b>
+            {capitalize(label)}
           </EuiText>
-          {size && (
-            <EuiText
-              size="xs"
-              color={euiTheme.colors.plainDark}
-              data-test-subj={`${prefix}lifecyclePhase-${label}-size`}
-              title={size}
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                maxWidth: '100%',
-              }}
-            >
-              {size}
-            </EuiText>
-          )}
+          <EuiText
+            size="xs"
+            color={euiTheme.colors.plainDark}
+            data-test-subj={
+              size && !isEditLifecycleFlyoutOpen
+                ? `${prefix}lifecyclePhase-${label}-size`
+                : undefined
+            }
+            title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              maxWidth: '100%',
+            }}
+          >
+            {size && !isEditLifecycleFlyoutOpen ? size : null}
+          </EuiText>
         </EuiFlexGroup>
       )}
     </EuiPanel>

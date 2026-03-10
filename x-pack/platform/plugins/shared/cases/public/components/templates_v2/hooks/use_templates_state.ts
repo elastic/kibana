@@ -7,21 +7,23 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import type { EuiBasicTableProps, EuiTableSelectionType } from '@elastic/eui';
-import type { Template } from '../../../../common/types/domain/template/v1';
-import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
+import type {
+  TemplatesFindRequest,
+  TemplateListItem,
+} from '../../../../common/types/api/template/v1';
 import { useSyncedQueryParams } from './use_synced_query_params';
 
 interface UseTemplatesStateReturn {
   queryParams: TemplatesFindRequest;
   setQueryParams: (queryParam: Partial<TemplatesFindRequest>) => void;
-  sorting: EuiBasicTableProps<Template>['sorting'];
-  selectedTemplates: Template[];
-  selection: EuiTableSelectionType<Template>;
+  sorting: EuiBasicTableProps<TemplateListItem>['sorting'];
+  selectedTemplates: TemplateListItem[];
+  selection: EuiTableSelectionType<TemplateListItem>;
   deselectTemplates: () => void;
 }
 
 export const useTemplatesState = (): UseTemplatesStateReturn => {
-  const [selectedTemplates, setSelectedTemplates] = useState<Template[]>([]);
+  const [selectedTemplates, setSelectedTemplates] = useState<TemplateListItem[]>([]);
   const { queryParams, setQueryParams: setSyncedQueryParams } = useSyncedQueryParams();
 
   const setQueryParams = useCallback(
@@ -36,7 +38,7 @@ export const useTemplatesState = (): UseTemplatesStateReturn => {
     setSelectedTemplates([]);
   }, []);
 
-  const sorting: EuiBasicTableProps<Template>['sorting'] = useMemo(
+  const sorting: EuiBasicTableProps<TemplateListItem>['sorting'] = useMemo(
     () => ({
       sort: {
         field: queryParams.sortField,
@@ -46,7 +48,7 @@ export const useTemplatesState = (): UseTemplatesStateReturn => {
     [queryParams.sortField, queryParams.sortOrder]
   );
 
-  const selection: EuiTableSelectionType<Template> = useMemo(
+  const selection: EuiTableSelectionType<TemplateListItem> = useMemo(
     () => ({
       onSelectionChange: setSelectedTemplates,
       selected: selectedTemplates,

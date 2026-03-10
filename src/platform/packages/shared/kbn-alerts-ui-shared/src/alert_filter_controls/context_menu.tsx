@@ -65,11 +65,11 @@ export const FilterGroupContextMenu = () => {
           ...COMMON_OPTIONS_LIST_CONTROL_INPUTS,
           // option List controls will handle an invalid dataview
           // & display an appropriate message
-          dataViewId: dataViewId ?? '',
+          data_view_id: dataViewId ?? '',
           ...control,
-          displaySettings: {
-            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.displaySettings,
-            ...control.displaySettings,
+          display_settings: {
+            ...COMMON_OPTIONS_LIST_CONTROL_INPUTS.display_settings,
+            ...control.display_settings,
           },
         },
         String(counter)

@@ -5,5 +5,3 @@ fileGroups:
   default:
     - '**/*'
   production: [ ]
-
-tasks: {}

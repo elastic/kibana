@@ -54,7 +54,6 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const [searchValue, setSearchValue] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [selectedItems, setSelectedItems] = useState<string[]>(selectedSources);
   const [selectedIntegrations, setSelectedIntegrations] = useState<string[]>([]);
   const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
   const [isIntegrationPopoverOpen, setIsIntegrationPopoverOpen] = useState(false);
@@ -67,10 +66,8 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       setSelectedIntegrations([]);
       setSearchValue('');
       setIsIntegrationPopoverOpen(false);
-      // Pre-select sources that are already in the query
-      setSelectedItems(selectedSources);
     }
-  }, [isOpen, selectedSources]);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isFilterPopoverOpen) {
@@ -145,7 +142,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     return allSources.map((source) => ({
       key: source.name,
       label: source.name,
-      checked: selectedItems.includes(source.name) ? ('on' as const) : undefined,
+      checked: selectedSources.includes(source.name) ? ('on' as const) : undefined,
       append: <EuiTextColor color="subdued">{getSourceTypeLabel(source.type)}</EuiTextColor>,
       data: {
         type: source.type,
@@ -153,7 +150,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         title: source.title,
       },
     }));
-  }, [allSources, selectedItems]);
+  }, [allSources, selectedSources]);
 
   const filteredOptions = useMemo(() => {
     let filtered = options;
@@ -192,16 +189,10 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
       const key = changedOption.key as string;
       const isAdding = changedOption.checked === 'on';
-      const newSelected = isAdding
-        ? selectedItems.includes(key)
-          ? selectedItems
-          : [...selectedItems, key]
-        : selectedItems.filter((o) => o !== key);
 
-      setSelectedItems(newSelected);
       onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
     },
-    [onSelect, selectedItems]
+    [onSelect]
   );
 
   const handleTypeFilterChange = (

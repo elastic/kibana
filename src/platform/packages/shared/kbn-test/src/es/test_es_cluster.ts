@@ -165,7 +165,26 @@ export interface CreateTestEsClusterOptions {
    * Files to mount inside ES containers
    */
   files?: string[];
+  /**
+   * Secure settings files to add to the ES keystore via `elasticsearch-keystore add-file`.
+   * Each entry is a `setting_name=/path/to/file` string.
+   */
+  secureFiles?: string[];
 }
+
+/**
+ * Resolves a transport port suitable for Docker (single numeric port).
+ * Falls back to TEST_ES_TRANSPORT_PORT (taking the first port from a range like '9300-9400'),
+ * matching the existing behavior in esTestConfig.getTransportPort().
+ */
+const resolveTransportPort = (transportPort: number | string | undefined): number | undefined => {
+  const raw = transportPort ?? esTestConfig.getTransportPort();
+  if (typeof raw === 'number') {
+    return raw;
+  }
+  const parsed = parseInt(String(raw).split('-')[0], 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+};
 
 export function createTestEsCluster<
   Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
@@ -190,6 +209,7 @@ export function createTestEsCluster<
     transportPort,
     onEarlyExit,
     files,
+    secureFiles,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -238,7 +258,10 @@ export function createTestEsCluster<
       const second = 1000;
       const minute = second * 60;
 
-      return esFrom === 'snapshot' ? 3 * minute : 6 * minute;
+      if (esFrom === 'snapshot' || esFrom === 'docker') {
+        return 3 * minute;
+      }
+      return 6 * minute;
     }
 
     async start() {
@@ -258,6 +281,19 @@ export function createTestEsCluster<
         }));
       } else if (esFrom === 'snapshot') {
         ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
+      } else if (esFrom === 'docker') {
+        await firstNode.runDockerSnapshot({
+          port,
+          password,
+          license: testLicense,
+          esArgs: customEsArgs,
+          ssl,
+          name: `es-${clusterName}`,
+          background: true,
+          kill: true,
+          transportPort: resolveTransportPort(transportPort),
+        });
+        return;
       } else if (esFrom === 'serverless') {
         if (!esServerlessOptions) {
           throw new Error(
@@ -282,6 +318,11 @@ export function createTestEsCluster<
         installPath = esFrom;
       } else {
         throw new Error(`unknown option esFrom "${esFrom}"`);
+      }
+
+      if (secureFiles?.length) {
+        const pairs = secureFiles.map((kv) => kv.split('=').map((v) => v.trim()));
+        await firstNode.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
       }
 
       // Collect promises so we can run them in parallel

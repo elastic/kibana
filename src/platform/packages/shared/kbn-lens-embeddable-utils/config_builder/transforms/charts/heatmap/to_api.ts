@@ -60,6 +60,7 @@ function getGridConfigProps(
         value: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
+      ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
@@ -67,6 +68,7 @@ function getGridConfigProps(
         value: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
+      ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
     },
   };
 }

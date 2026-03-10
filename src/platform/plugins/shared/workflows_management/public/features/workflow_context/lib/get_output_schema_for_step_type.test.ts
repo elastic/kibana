@@ -138,6 +138,68 @@ describe('getOutputSchemaForStepType', () => {
     );
   });
 
+  describe('structural step nodes', () => {
+    it('should return conditionResult schema for enter-if node', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'if',
+        type: 'enter-if' as const,
+        exitNodeId: 'exit-id',
+        configuration: {},
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+      const parsed = result.safeParse({ conditionResult: true });
+
+      expect(parsed.success).toBe(true);
+      expect(parsed.data).toEqual({ conditionResult: true });
+    });
+
+    it('should return conditionResult schema for exit-if node', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'if',
+        type: 'exit-if' as const,
+        startNodeId: 'enter-id',
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+      const parsed = result.safeParse({ conditionResult: false });
+
+      expect(parsed.success).toBe(true);
+      expect(parsed.data).toEqual({ conditionResult: false });
+    });
+
+    it('should resolve structural schema by stepType regardless of node type', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'if',
+        type: 'exit-then-branch' as const,
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+      const parsed = result.safeParse({ conditionResult: true });
+
+      expect(parsed.success).toBe(true);
+    });
+
+    it('should fall through to z.unknown() for structural nodes without a registered schema', () => {
+      const mockNode = {
+        id: 'test-id',
+        stepId: 'test-step-id',
+        stepType: 'retry',
+        type: 'enter-retry' as const,
+      };
+
+      const result = getOutputSchemaForStepType(mockNode as any);
+
+      expect(result.def.type).toBe('unknown');
+    });
+  });
+
   describe('fallback behavior', () => {
     it('should return z.unknown() for unknown step types', () => {
       // Map is empty, connector not found

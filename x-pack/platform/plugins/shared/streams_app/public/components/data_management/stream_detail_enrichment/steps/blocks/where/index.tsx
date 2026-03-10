@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from '@xstate5/react';
+import { useSelector } from '@xstate/react';
 import React, { useEffect, useRef } from 'react';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import useToggle from 'react-use/lib/useToggle';

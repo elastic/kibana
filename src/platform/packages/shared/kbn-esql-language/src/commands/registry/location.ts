@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression, isOptionNode } from '../../ast/is';
-import { within } from '../../ast/location';
-import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
-import { Walker } from '../../ast/walker';
+import { isFunctionExpression, isOptionNode } from '@elastic/esql';
+import { within, Walker } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '@elastic/esql/types';
 import { Location } from './types';
+import { isTimeseriesSourceCommand } from '../definitions/utils/timeseries_check';
 
 const commandOptionNameToLocation: Record<string, Location> = {
   eval: Location.EVAL,
@@ -28,8 +28,10 @@ const commandOptionNameToLocation: Record<string, Location> = {
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
+  mmr: Location.MMR,
   rerank: Location.RERANK,
   'join:on': Location.JOIN,
+  'mmr:on': Location.MMR,
   'rerank:on': Location.RERANK,
 };
 
@@ -67,7 +69,7 @@ export function getLocationInfo(
   ast: ESQLAst,
   withinAggFunction: boolean
 ): { id: Location; displayName: string } {
-  if (withinAggFunction && ast[0].name === 'ts') {
+  if (withinAggFunction && isTimeseriesSourceCommand(ast)) {
     return {
       id: Location.STATS_TIMESERIES,
       displayName: 'agg_function_in_timeseries_context',

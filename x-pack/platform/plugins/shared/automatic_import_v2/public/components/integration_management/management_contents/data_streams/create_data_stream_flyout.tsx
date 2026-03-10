@@ -126,8 +126,8 @@ const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
 export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ onClose }) => {
   const styles = useLayoutStyles();
   const { integrationId: currentIntegrationId } = useParams<{ integrationId?: string }>();
-  // React Query has a cache but needs to integration ID to find it.
-  const { integration } = useGetIntegrationById(currentIntegrationId);
+
+  const { integration, refetch: refetchIntegration } = useGetIntegrationById(currentIntegrationId);
   const { form, formData } = useIntegrationForm();
 
   const { indices, isLoading: isLoadingIndices } = useFetchIndices();
@@ -157,7 +157,6 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       })),
     ];
 
-    // Filter Indices logic here
     return rawOptions.filter((option) => option.value !== '' && !option.value?.startsWith('.'));
   }, [indices]);
 
@@ -220,8 +219,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const isIntegrationFieldsValid =
     !!formData?.title?.trim() && !!formData?.description?.trim() && !!formData?.connectorId?.trim();
 
+  const existingDataStreamNames = useMemo(
+    () => new Set((integration?.dataStreams ?? []).map((ds) => ds.title.toLowerCase())),
+    [integration?.dataStreams]
+  );
+
+  const hasDuplicateDataStreamName =
+    !!formData?.dataStreamTitle?.trim() &&
+    existingDataStreamNames.has(formData.dataStreamTitle.trim().toLowerCase());
+
   const isDataStreamFieldsValid =
     !!formData?.dataStreamTitle?.trim() &&
+    !hasDuplicateDataStreamName &&
     formData?.dataCollectionMethod != null &&
     formData.dataCollectionMethod.length > 0;
 
@@ -282,6 +291,9 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       ...(formData.logo ? { logo: formData.logo } : {}),
       dataStreams: [newDataStream],
     });
+
+    refetchIntegration();
+    onClose();
   }, [
     formData,
     createUpdateIntegrationMutation,
@@ -291,6 +303,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     logSample,
     selectedIndex,
     uploadedFileName,
+    refetchIntegration,
+    onClose,
   ]);
 
   return (

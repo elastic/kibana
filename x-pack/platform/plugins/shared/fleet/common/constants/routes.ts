@@ -167,6 +167,7 @@ export const AGENT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/agents`,
   INFO_PATTERN: `${API_ROOT}/agents/{agentId}`,
   UPDATE_PATTERN: `${API_ROOT}/agents/{agentId}`,
+  EFFECTIVE_CONFIG_PATTERN: `${API_ROOT}/agents/{agentId}/effective_config`,
   BULK_UPDATE_AGENT_TAGS_PATTERN: `${API_ROOT}/agents/bulk_update_agent_tags`,
   DELETE_PATTERN: `${API_ROOT}/agents/{agentId}`,
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,

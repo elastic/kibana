@@ -49,6 +49,7 @@ tags:
   - prod
   - group-search
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - common/**/*
@@ -56,4 +57,16 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - '!target/**/*'
-tasks: {}
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

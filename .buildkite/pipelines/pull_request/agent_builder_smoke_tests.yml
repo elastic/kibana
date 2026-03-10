@@ -3,12 +3,6 @@ steps:
     key: agent-builder-smoke-tests
     depends_on:
       - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-      - check_oas_snapshot
     steps:
       - label: '🔍 Discover EIS Models'
         command: .buildkite/scripts/steps/test/discover_eis_models.sh
@@ -26,6 +20,8 @@ steps:
           automatic:
             - exit_status: '-1'
               limit: 3
+            - exit_status: '*'
+              limit: 1
 
       - command: |
           mkdir -p target

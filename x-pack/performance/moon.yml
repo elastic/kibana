@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/synthtrace-client'
   - '@kbn/test-suites-src'
   - '@kbn/ftr-common-functional-services'
+  - '@kbn/monaco'
 tags:
   - test-helper
   - package

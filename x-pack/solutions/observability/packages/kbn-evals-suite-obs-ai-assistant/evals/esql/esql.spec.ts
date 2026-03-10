@@ -1266,7 +1266,7 @@ evaluate.describe('ES|QL query generation', { tag: tags.serverless.observability
             {
               input: {
                 question:
-                  'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page',
+                  'From employees, I want to sort the documents by compensation, and then return 10 results per page, and then see the second page',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1326,7 +1326,7 @@ evaluate.describe('ES|QL query generation', { tag: tags.serverless.observability
             {
               input: {
                 question:
-                  'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page. Do not execute the query.',
+                  'From employees, I want to sort the documents by compensation, and then return 10 results per page, and then see the second page. Do not execute the query.',
               },
               output: {
                 criteria: createEsqlCriteria({

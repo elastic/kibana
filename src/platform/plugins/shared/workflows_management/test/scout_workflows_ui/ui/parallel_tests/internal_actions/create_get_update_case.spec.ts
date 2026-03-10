@@ -30,7 +30,8 @@ const getCaseOwner = (projectType: string | undefined) => {
   return 'securitySolution';
 };
 
-test.describe(
+// FLAKY: https://github.com/elastic/kibana/issues/254006
+test.describe.skip(
   'InternalActions/Cases',
   {
     tag: [

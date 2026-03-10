@@ -16,8 +16,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Template } from '../../../../common/types/domain/template/v1';
+import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useCasesCreateTemplateNavigation } from '../../../common/navigation/hooks';
+import { useCasesTemplatesBreadcrumbs } from '../../use_breadcrumbs';
 import * as i18n from '../../templates/translations';
 import { useTemplatesColumns } from '../hooks/use_templates_columns';
 import { useTemplatesState } from '../hooks/use_templates_state';
@@ -34,6 +35,7 @@ import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_p
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 
 export const AllTemplatesPage: React.FC = () => {
+  useCasesTemplatesBreadcrumbs();
   const { euiTheme } = useEuiTheme();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
@@ -80,7 +82,7 @@ export const AllTemplatesPage: React.FC = () => {
   });
 
   const tableRowProps = useCallback(
-    (template: Template) => ({
+    (template: TemplateListItem) => ({
       'data-test-subj': `templates-table-row-${template.templateId}`,
     }),
     []

@@ -11,7 +11,6 @@ import type {
   AtomicGraphNode,
   DataSetGraphNode,
   ElasticsearchGraphNode,
-  HttpGraphNode,
   KibanaGraphNode,
   WaitGraphNode,
 } from './nodes/base';
@@ -21,7 +20,12 @@ import type {
   ExitConditionBranchNode,
   ExitIfNode,
 } from './nodes/branching_nodes';
-import type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
+import type {
+  EnterForeachNode,
+  EnterWhileNode,
+  ExitForeachNode,
+  ExitWhileNode,
+} from './nodes/loop_nodes';
 import type {
   EnterContinueNode,
   EnterNormalPathNode,
@@ -44,8 +48,6 @@ export const isElasticsearch = (node: GraphNodeUnion): node is ElasticsearchGrap
 export const isKibana = (node: GraphNodeUnion): node is KibanaGraphNode =>
   node.type.startsWith('kibana.');
 
-export const isHttp = (node: GraphNodeUnion): node is HttpGraphNode => node.type === 'http';
-
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
 
 export const isDataSet = (node: GraphNodeUnion): node is DataSetGraphNode =>
@@ -66,6 +68,12 @@ export const isEnterForeach = (node: GraphNodeUnion): node is EnterForeachNode =
 
 export const isExitForeach = (node: GraphNodeUnion): node is ExitForeachNode =>
   node.type === 'exit-foreach';
+
+export const isEnterWhile = (node: GraphNodeUnion): node is EnterWhileNode =>
+  node.type === 'enter-while';
+
+export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
+  node.type === 'exit-while';
 
 export const isEnterRetry = (node: GraphNodeUnion): node is EnterRetryNode =>
   node.type === 'enter-retry';
@@ -102,3 +110,12 @@ export const isEnterStepTimeoutZone = (node: GraphNodeUnion): node is EnterTimeo
 
 export const isExitStepTimeoutZone = (node: GraphNodeUnion): node is ExitTimeoutZoneNode =>
   node.type === 'exit-timeout-zone' && node.stepType !== 'workflow_level_timeout';
+
+/**
+ * Returns true for step types whose inner steps have guaranteed execution
+ * before certain fields (e.g. `condition`) are evaluated, making inner step
+ * outputs available for autocomplete suggestions.
+ *
+ * Currently applies to `while` (do-while semantics: body runs before condition).
+ */
+export const shouldSuggestInnerSteps = (node: GraphNodeUnion): boolean => isEnterWhile(node);

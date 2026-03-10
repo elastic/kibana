@@ -30,7 +30,7 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsqlQuery } from '@kbn/esql-language';
+import { EsqlQuery } from '@elastic/esql';
 import useDebounce from 'react-use/lib/useDebounce';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
@@ -308,7 +308,6 @@ export const EsqlQueryExpression: React.FC<
           }}
           warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
-          hideRunQueryText
           hideRunQueryButton
           isLoading={isLoading}
           editorIsInline

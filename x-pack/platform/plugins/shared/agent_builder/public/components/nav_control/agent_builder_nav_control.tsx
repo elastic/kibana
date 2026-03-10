@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
-import { RobotIcon } from '../../application/components/common/icons/robot';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
 
 const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
@@ -29,7 +28,7 @@ export function AgentBuilderNavControl() {
 
   const { show: hasShowPrivilege } = useUiPrivileges();
 
-  const toggleFlyout = useCallback(() => {
+  const toggleSidebar = useCallback(() => {
     agentBuilder.toggleConversationFlyout();
   }, [agentBuilder]);
 
@@ -54,10 +53,10 @@ export function AgentBuilderNavControl() {
     (event: KeyboardEvent) => {
       if (isSemicolon(event) && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        toggleFlyout();
+        toggleSidebar();
       }
     },
-    [toggleFlyout]
+    [toggleSidebar]
   );
 
   if (!hasShowPrivilege) {
@@ -96,13 +95,13 @@ export function AgentBuilderNavControl() {
         <AgentBuilderButton
           aria-label={buttonLabel}
           onClick={() => {
-            toggleFlyout();
+            toggleSidebar();
           }}
           color="primary"
           size="s"
           fullWidth={false}
           minWidth={0}
-          iconType={RobotIcon}
+          iconType="productAgent"
         >
           <FormattedMessage
             id="xpack.agentBuilder.navControl.linkLabel"
@@ -114,9 +113,12 @@ export function AgentBuilderNavControl() {
   );
 }
 
-const buttonLabel = i18n.translate('xpack.agentBuilder.navControl.openTheAgentBuilderFlyoutLabel', {
-  defaultMessage: 'Open Agent Builder',
-});
+const buttonLabel = i18n.translate(
+  'xpack.agentBuilder.navControl.openTheAgentBuilderSidebarLabel',
+  {
+    defaultMessage: 'Open Agent Builder',
+  }
+);
 
 const shortcutLabel = i18n.translate('xpack.agentBuilder.navControl.keyboardShortcutTooltip', {
   values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },

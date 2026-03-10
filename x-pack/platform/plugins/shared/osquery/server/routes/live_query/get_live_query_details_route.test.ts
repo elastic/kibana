@@ -55,6 +55,8 @@ describe('getLiveQueryDetailsRoute', () => {
         actionDetails: {
           _source: {
             action_id: 'action-1',
+            user_id: 'test-user',
+            user_profile_uid: 'u_test-profile-uid',
             queries: [
               {
                 action_id: 'query-1',
@@ -117,6 +119,8 @@ describe('getLiveQueryDetailsRoute', () => {
       body: {
         data: expect.objectContaining({
           action_id: 'action-1',
+          user_id: 'test-user',
+          user_profile_uid: 'u_test-profile-uid',
           status: 'completed',
           queries: [
             expect.objectContaining({

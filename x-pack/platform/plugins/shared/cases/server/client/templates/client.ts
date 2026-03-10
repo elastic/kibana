@@ -26,6 +26,8 @@ export interface TemplatesSubClient {
   createTemplate(input: CreateTemplateInput): Promise<SavedObject<Template>>;
   updateTemplate(templateId: string, input: UpdateTemplateInput): Promise<SavedObject<Template>>;
   deleteTemplate(templateId: string): Promise<void>;
+  getTags(): Promise<string[]>;
+  getAuthors(): Promise<string[]>;
 }
 
 /**
@@ -40,10 +42,13 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
     getAllTemplates: (params: TemplatesFindRequest) => templatesService.getAllTemplates(params),
     getTemplate: (templateId: string, version?: string) =>
       templatesService.getTemplate(templateId, version),
-    createTemplate: (input: CreateTemplateInput) => templatesService.createTemplate(input),
+    createTemplate: (input: CreateTemplateInput) =>
+      templatesService.createTemplate(input, clientArgs.user.username ?? 'unknown'),
     updateTemplate: (templateId: string, input: UpdateTemplateInput) =>
       templatesService.updateTemplate(templateId, input),
     deleteTemplate: (templateId: string) => templatesService.deleteTemplate(templateId),
+    getTags: () => templatesService.getTags(),
+    getAuthors: () => templatesService.getAuthors(),
   };
 
   return Object.freeze(templatesSubClient);

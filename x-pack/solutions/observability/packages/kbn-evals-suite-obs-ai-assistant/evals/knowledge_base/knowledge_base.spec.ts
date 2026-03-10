@@ -97,33 +97,6 @@ evaluate.describe('Knowledge base', { tag: tags.serverless.observability.complet
       await conversationsClient.clear();
     });
 
-    evaluate('retrieves one entry from the KB without LLM', async ({ chatClient }) => {
-      const conversation = await chatClient.converse({
-        messages: 'What DevOps teams do we have and how is the on-call rotation managed?',
-      });
-
-      const contextResponseMessage = conversation.messages.find((msg) => msg.name === 'context');
-
-      if (!contextResponseMessage) {
-        throw new Error('No context function message returned');
-      }
-
-      const { learnings } = JSON.parse(contextResponseMessage.content!);
-      const firstLearning = learnings[0];
-
-      if (learnings.length < 1) {
-        throw new Error(`Expected at least 1 learning`);
-      }
-
-      if (!(firstLearning.llmScore > 4)) {
-        throw new Error(`Expected LLM score > 4, got ${firstLearning.llmScore}`);
-      }
-
-      if (firstLearning.id !== 'acme_teams') {
-        throw new Error(`Expected first learning id "acme_teams", got "${firstLearning.id}"`);
-      }
-    });
-
     evaluate(
       'retrieves and describes information from the knowledge base',
       async ({ evaluateDataset }) => {

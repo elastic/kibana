@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import type { Cookie } from 'tough-cookie';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { GetCaseUsersResponseRt } from '@kbn/cases-plugin/common/types/api';
+import type { Client } from '@elastic/elasticsearch';
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 import { securitySolutionOnlyAllSpacesRole } from '../../../../common/lib/authentication/roles';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -41,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const kibanaServer = getService('kibanaServer');
+  const esClient: Client = getService('es');
 
   // Use simple image data URL to match server side validation of image type
   const IMAGE_URL_TEST =
@@ -53,12 +56,42 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('no profiles', () => {
       it('returns the users correctly without profile ids', async () => {
-        const postedCase = await createCase(supertest, getPostCaseRequest());
+        // We need an API key without security or API privileges to ensure that requests
+        // will not be able to retrieve profile information
+        const roleDescriptors: Record<string, SecurityRoleDescriptor> = {
+          some_role: {
+            indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
+            applications: [
+              {
+                application: 'kibana-.kibana',
+                privileges: ['*'],
+                resources: ['*'],
+              },
+            ],
+          },
+        };
+        const apiKey = await esClient.security.createApiKey({
+          name: `No profile key`,
+          role_descriptors: roleDescriptors,
+        });
+        const headers = {
+          Authorization: `apikey ${Buffer.from(`${apiKey.id}:${apiKey.api_key}`).toString(
+            'base64'
+          )}`,
+        };
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest(),
+          200,
+          null,
+          headers
+        );
         await changeCaseTitle({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           version: postedCase.version,
           title: 'new title',
+          headers,
         });
 
         const { participants, assignees, unassignedUsers, reporter } = await getCaseUsers({
@@ -67,9 +100,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(participants).to.eql([
-          { user: { username: 'elastic', full_name: null, email: null } },
+          { user: { username: 'system_indices_superuser', full_name: null, email: null } },
         ]);
-        expect(reporter).to.eql({ user: { username: 'elastic', full_name: null, email: null } });
+        expect(reporter).to.eql({
+          user: { username: 'system_indices_superuser', full_name: null, email: null },
+        });
         expect(assignees).to.eql([]);
         expect(unassignedUsers).to.eql([]);
       });

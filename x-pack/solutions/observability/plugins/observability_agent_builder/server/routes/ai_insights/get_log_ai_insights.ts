@@ -7,23 +7,32 @@
 
 import moment from 'moment';
 import type { Observable } from 'rxjs';
-import type { ChatCompletionEvent, InferenceClient } from '@kbn/inference-common';
+import type {
+  ChatCompletionEvent,
+  InferenceClient,
+  InferenceConnector,
+} from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import dedent from 'dedent';
-import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
+import type {
+  ObservabilityAgentBuilderCoreSetup,
+  ObservabilityAgentBuilderPluginSetupDependencies,
+} from '../../types';
 import { getLogDocumentById, type LogDocument } from './get_log_document_by_id';
-import { getCorrelatedLogsForLogEntry } from '../../tools/get_correlated_logs/handler';
+import { getToolHandler as getTraces } from '../../tools/get_traces/handler';
 import { isWarningOrAbove } from '../../utils/warning_and_above_log_filter';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 import { createAiInsightResult, type AiInsightResult } from './types';
 
 export interface GetLogAiInsightsParams {
   core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   index: string;
   id: string;
   inferenceClient: InferenceClient;
   connectorId: string;
+  connector: InferenceConnector;
   request: KibanaRequest;
   esClient: IScopedClusterClient;
   logger: Logger;
@@ -31,11 +40,13 @@ export interface GetLogAiInsightsParams {
 
 export async function getLogAiInsights({
   core,
+  plugins,
   index,
   id,
   esClient,
   inferenceClient,
   connectorId,
+  connector,
   request,
   logger,
 }: GetLogAiInsightsParams): Promise<AiInsightResult> {
@@ -51,6 +62,7 @@ export async function getLogAiInsights({
 
   const context = await fetchLogContext({
     core,
+    plugins,
     logger,
     esClient,
     index,
@@ -67,11 +79,12 @@ export async function getLogAiInsights({
     request,
   });
 
-  return createAiInsightResult(context, events$);
+  return createAiInsightResult(context, connector, events$);
 }
 
 async function fetchLogContext({
   core,
+  plugins,
   logger,
   esClient,
   index,
@@ -79,6 +92,7 @@ async function fetchLogContext({
   logEntry,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies;
   logger: Logger;
   esClient: IScopedClusterClient;
   index: string;
@@ -104,31 +118,32 @@ async function fetchLogContext({
     </LogEntryFields>
   `);
 
-  let correlatedLogsResult;
   try {
-    const { sequences } = await getCorrelatedLogsForLogEntry({
+    const { traces } = await getTraces({
       core,
+      plugins,
       logger,
       esClient,
       index,
       start: windowStart,
       end: windowEnd,
-      logId: id,
+      kqlFilter: `_id: ${id}`,
+      maxTraces: 10,
+      maxDocsPerTrace: 100,
     });
-    correlatedLogsResult = sequences[0];
-  } catch (error) {
-    logger.debug(`Failed to fetch correlated logs: ${error.message}`);
-  }
-
-  if (correlatedLogsResult?.logs?.length) {
-    context += dedent(`
-      <CorrelatedLogSequence>
+    const trace = traces[0];
+    if (trace) {
+      context += dedent(`
+      <TraceDocuments>
       Time window: ${windowStart} to ${windowEnd}
       \`\`\`json
-      ${JSON.stringify(correlatedLogsResult, null, 2)}
+      ${JSON.stringify(trace, null, 2)}
       \`\`\`
-      </CorrelatedLogSequence>
+      </TraceDocuments>
     `);
+    }
+  } catch (error) {
+    logger.debug(`Failed to fetch traces: ${error.message}`);
   }
 
   return context;

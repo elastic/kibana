@@ -124,6 +124,7 @@ const createMockCasesClient = () => ({
         definition: input.definition,
         templateVersion: 1,
         deletedAt: null,
+        author: 'unknown',
       };
 
       mockTemplates.push(newTemplate);
@@ -151,6 +152,7 @@ const createMockCasesClient = () => ({
           definition: input.definition,
           templateVersion: latestVersion + 1,
           deletedAt: null,
+          author: 'unknown',
         };
 
         mockTemplates.push(updatedTemplate);
@@ -166,6 +168,16 @@ const createMockCasesClient = () => ({
           template.deletedAt = deletedAt;
         }
       });
+    }),
+    getTags: jest.fn(async () => {
+      const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
+      const tags = nonDeleted.flatMap((t) => t.tags ?? []);
+      return [...new Set(tags)].sort();
+    }),
+    getAuthors: jest.fn(async () => {
+      const nonDeleted = mockTemplates.filter((t) => t.deletedAt === null);
+      const authors = nonDeleted.map((t) => t.author).filter(Boolean);
+      return [...new Set(authors)].sort();
     }),
   },
 });
@@ -228,6 +240,176 @@ describe('Template Routes', () => {
       expect(body.templates).toHaveLength(2);
       expect(body.templates).toEqual(
         expect.not.arrayContaining([expect.objectContaining({ templateId: 'template-3' })])
+      );
+    });
+
+    it('passes all query params to the cases client', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: {
+          page: 2,
+          perPage: 5,
+          sortField: 'name',
+          sortOrder: 'desc',
+          search: 'test-query',
+          tags: 'security',
+          author: 'alice',
+          isDeleted: true,
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith({
+        page: 2,
+        perPage: 5,
+        sortField: 'name',
+        sortOrder: 'desc',
+        search: 'test-query',
+        tags: ['security'],
+        author: ['alice'],
+        isDeleted: true,
+      });
+    });
+
+    it('coerces tags and author from comma-separated strings to arrays', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: {
+          page: 1,
+          perPage: 10,
+          isDeleted: false,
+          tags: ['security', 'network'],
+          author: ['alice', 'bob'],
+        },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: ['security', 'network'],
+          author: ['alice', 'bob'],
+        })
+      );
+    });
+
+    it('sends empty arrays for tags and author when they are not provided', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tags: [],
+          author: [],
+        })
+      );
+    });
+
+    it('coerces string isDeleted "true" to boolean true', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: 'true' },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isDeleted: true,
+        })
+      );
+    });
+
+    it('coerces page and perPage from string to number', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const request = {
+        query: { page: '2', perPage: '25', isDeleted: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response });
+
+      expect(casesClient.templates.getAllTemplates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          page: 2,
+          perPage: 25,
+        })
+      );
+    });
+
+    it('filters out invalid templates and logs warning', async () => {
+      const context = createMockContext();
+      const casesClient = await (await context.cases).getCasesClient();
+      const logger = { warn: jest.fn(), error: jest.fn(), info: jest.fn(), debug: jest.fn() };
+
+      const invalidDefinition = yaml.dump({
+        name: 'Invalid Template',
+        fields: [
+          {
+            control: 'INVALID_CONTROL',
+            name: 'test_field',
+            type: 'keyword',
+          },
+        ],
+      });
+
+      const validTemplate: Template = {
+        templateId: 'valid-template',
+        name: 'Valid Template',
+        owner: 'securitySolution',
+        definition: validDefinition,
+        templateVersion: 1,
+        deletedAt: null,
+      };
+
+      const invalidTemplate: Template = {
+        templateId: 'invalid-template',
+        name: 'Invalid Template',
+        owner: 'securitySolution',
+        definition: invalidDefinition,
+        templateVersion: 1,
+        deletedAt: null,
+      };
+
+      casesClient.templates.getAllTemplates.mockResolvedValueOnce({
+        templates: [validTemplate, invalidTemplate],
+        page: 1,
+        perPage: 10,
+        total: 2,
+      });
+
+      const request = {
+        query: { page: 1, perPage: 10, isDeleted: false },
+      };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await getTemplatesRoute.handler({ context, request, response, logger });
+
+      const body = response.ok.mock.calls[0][0].body;
+      expect(body.templates).toHaveLength(1);
+      expect(body.templates[0].templateId).toBe('valid-template');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Skipping invalid template "Invalid Template"')
       );
     });
   });
@@ -317,6 +499,7 @@ describe('Template Routes', () => {
         definition: validDefinition,
         templateVersion: 2,
         deletedAt: null,
+        author: 'alice',
       });
 
       const context = createMockContext();

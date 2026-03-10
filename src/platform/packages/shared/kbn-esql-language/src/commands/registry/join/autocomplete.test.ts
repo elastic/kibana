@@ -214,7 +214,7 @@ describe('JOIN Autocomplete', () => {
         autocomplete
       );
       const indices: string[] = suggestions
-        .filter((s) => s.detail === 'Index')
+        .filter((s) => s.detail === 'Lookup')
         .map(({ label }) => label)
         .sort();
       const aliases: string[] = suggestions

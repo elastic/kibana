@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { PublicStepRegistry } from './step_registry';
 import type { PublicStepDefinition } from './types';
@@ -14,6 +15,7 @@ import type { PublicStepDefinition } from './types';
 const stepId = 'custom.myStep';
 const defaultDefinition: PublicStepDefinition = {
   id: stepId,
+  category: StepCategory.Kibana,
   label: 'My Custom Step',
   description: 'A custom step implementation',
   icon: jest.fn(),
@@ -106,6 +108,98 @@ describe('PublicStepRegistry', () => {
     it('should return an empty array when no definition is registered', () => {
       const all = registry.getAll();
       expect(all).toEqual([]);
+    });
+  });
+
+  describe('register with async loader', () => {
+    it('should resolve loader and add definition to registry', async () => {
+      registry.register(() => Promise.resolve(defaultDefinition));
+
+      expect(registry.has(stepId)).toBe(false);
+      await registry.whenReady();
+      expect(registry.has(stepId)).toBe(true);
+      expect(registry.get(stepId)).toEqual(defaultDefinition);
+    });
+
+    it('should throw when resolved definition duplicates an existing step type ID', async () => {
+      registry.register(defaultDefinition);
+      const loader = () => Promise.resolve({ ...defaultDefinition, label: 'Other' });
+
+      registry.register(loader);
+
+      await expect(registry.whenReady()).rejects.toThrow(
+        'Step definition for type "custom.myStep" is already registered'
+      );
+    });
+
+    it('whenReady() should resolve after all loaders have settled', async () => {
+      const def1: PublicStepDefinition = { ...defaultDefinition, id: 'custom.step1' };
+      const def2: PublicStepDefinition = { ...defaultDefinition, id: 'custom.step2' };
+      let resolve1!: (d: PublicStepDefinition) => void;
+      let resolve2!: (d: PublicStepDefinition) => void;
+      const promise1 = new Promise<PublicStepDefinition>((r) => {
+        resolve1 = r;
+      });
+      const promise2 = new Promise<PublicStepDefinition>((r) => {
+        resolve2 = r;
+      });
+
+      registry.register(() => promise1);
+      registry.register(() => promise2);
+
+      const readyPromise = registry.whenReady();
+      expect(registry.getAll()).toHaveLength(0);
+
+      resolve1(def1);
+      await Promise.resolve();
+      expect(registry.getAll()).toHaveLength(1);
+
+      resolve2(def2);
+      await readyPromise;
+      expect(registry.getAll()).toHaveLength(2);
+    });
+
+    it('should support mixed sync and async registration', async () => {
+      const syncDef: PublicStepDefinition = { ...defaultDefinition, id: 'custom.sync' };
+      const asyncDef: PublicStepDefinition = { ...defaultDefinition, id: 'custom.async' };
+
+      registry.register(syncDef);
+      registry.register(() => Promise.resolve(asyncDef));
+
+      expect(registry.has('custom.sync')).toBe(true);
+      expect(registry.has('custom.async')).toBe(false);
+
+      await registry.whenReady();
+
+      expect(registry.get('custom.sync')).toEqual(syncDef);
+      expect(registry.get('custom.async')).toEqual(asyncDef);
+      expect(registry.getAll()).toHaveLength(2);
+    });
+
+    it('should throw when loader resolves with undefined', async () => {
+      registry.register(() => Promise.resolve(undefined as unknown as PublicStepDefinition));
+
+      await expect(registry.whenReady()).rejects.toThrow('Step definition is not loaded correctly');
+    });
+
+    it('should throw when loader resolves with null', async () => {
+      registry.register(() => Promise.resolve(null as unknown as PublicStepDefinition));
+
+      await expect(registry.whenReady()).rejects.toThrow('Step definition is not loaded correctly');
+    });
+
+    it('should reject whenReady() when loader rejects', async () => {
+      const loadError = new Error('Failed to load step module');
+      registry.register(() => Promise.reject(loadError));
+
+      await expect(registry.whenReady()).rejects.toThrow('Failed to load step module');
+    });
+  });
+
+  describe('whenReady', () => {
+    it('should resolve immediately when no pending loaders', async () => {
+      registry.register(defaultDefinition);
+      await expect(registry.whenReady()).resolves.toBeUndefined();
     });
   });
 });

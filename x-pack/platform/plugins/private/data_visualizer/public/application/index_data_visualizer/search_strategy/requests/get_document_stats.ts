@@ -40,6 +40,7 @@ export const getDocumentCountStats = async (
     runtimeFieldMap,
     searchQuery,
     intervalMs,
+    projectRouting,
   } = params;
 
   // Probability = 1 represents no sampling
@@ -96,6 +97,7 @@ export const getDocumentCountStats = async (
     ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     track_total_hits: trackTotalHits,
     size: 0,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   });
   const firstResp = await search
     .search(

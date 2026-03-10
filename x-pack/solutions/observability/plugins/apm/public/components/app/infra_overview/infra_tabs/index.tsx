@@ -24,7 +24,7 @@ const INITIAL_STATE = {
 };
 
 export function InfraTabs() {
-  const { serviceName } = useApmServiceContext();
+  const { serviceName, agentName } = useApmServiceContext();
   const history = useHistory();
   const {
     query: { environment, kuery, rangeFrom, rangeTo, detailTab },
@@ -42,12 +42,13 @@ export function InfraTabs() {
               kuery,
               start,
               end,
+              agentName,
             },
           },
         });
       }
     },
-    [environment, kuery, serviceName, start, end]
+    [environment, kuery, agentName, serviceName, start, end]
   );
 
   const { containerIds, podNames, hostNames } = data;
@@ -56,6 +57,7 @@ export function InfraTabs() {
     containerIds,
     podNames,
     hostNames,
+    agentName,
     start,
     end,
   });

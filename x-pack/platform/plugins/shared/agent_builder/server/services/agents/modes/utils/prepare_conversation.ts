@@ -232,7 +232,7 @@ export const prepareConversation = async ({
       }
 
       try {
-        const typeReadonly = definition.isReadonly ?? true;
+        const typeReadonly = definition.isReadonly ?? false;
         const isReadonly = typeReadonly || attachment.readonly === true;
         if (!isReadonly) {
           return undefined;

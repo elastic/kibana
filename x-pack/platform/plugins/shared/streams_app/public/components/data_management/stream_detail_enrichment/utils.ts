@@ -13,9 +13,12 @@ import type {
   JoinProcessor,
   LowercaseProcessor,
   MathProcessor,
+  NetworkDirectionProcessor,
   ProcessorType,
   RedactProcessor,
   ReplaceProcessor,
+  SplitProcessor,
+  SortProcessor,
   StreamlangConditionBlockWithUIAttributes,
   StreamlangDSL,
   StreamlangProcessorDefinition,
@@ -34,7 +37,7 @@ import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
 import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
-import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
@@ -55,10 +58,13 @@ import type {
   LowercaseFormState,
   ManualIngestPipelineFormState,
   MathFormState,
+  NetworkDirectionFormState,
   ProcessorFormState,
   RedactFormState,
   ReplaceFormState,
   SetFormState,
+  SplitFormState,
+  SortFormState,
   TrimFormState,
   UppercaseFormState,
 } from './types';
@@ -80,7 +86,10 @@ export const SPECIALISED_TYPES = [
   'lowercase',
   'trim',
   'join',
+  'split',
+  'sort',
   'concat',
+  'network_direction',
 ];
 
 interface FormStateDependencies {
@@ -273,6 +282,24 @@ const defaultJoinProcessorFormState = (): JoinFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultSplitProcessorFormState = (): SplitFormState => ({
+  action: 'split' as const,
+  from: '',
+  separator: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultSortProcessorFormState = (): SortFormState => ({
+  action: 'sort' as const,
+  from: '',
+  order: 'asc',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultMathProcessorFormState = (): MathFormState => ({
   action: 'math' as const,
   expression: '',
@@ -286,6 +313,17 @@ const defaultConcatProcessorFormState = (): ConcatFormState => ({
   action: 'concat' as const,
   from: [],
   to: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState => ({
+  action: 'network_direction' as const,
+  source_ip: '',
+  destination_ip: '',
+  internal_networks: [],
+  target_field: 'attributes.network.direction',
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
@@ -316,7 +354,10 @@ const defaultProcessorFormStateByType: Record<
   trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
   join: defaultJoinProcessorFormState,
+  split: defaultSplitProcessorFormState,
+  sort: defaultSortProcessorFormState,
   concat: defaultConcatProcessorFormState,
+  network_direction: defaultNetworkDirectionProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -351,6 +392,24 @@ export const getFormStateFromActionStep = (
     };
   }
 
+  if (step.action === 'network_direction') {
+    const clone: NetworkDirectionFormState = structuredClone({
+      ...omit(step, 'internal_networks', 'internal_networks_field'),
+    });
+
+    if ('internal_networks' in step) {
+      clone.internal_networks = step.internal_networks?.map((internalNetwork) => ({
+        value: internalNetwork,
+      }));
+    }
+
+    if ('internal_networks_field' in step) {
+      clone.internal_networks_field = step.internal_networks_field;
+    }
+
+    return clone;
+  }
+
   if (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
@@ -364,6 +423,8 @@ export const getFormStateFromActionStep = (
     step.action === 'lowercase' ||
     step.action === 'trim' ||
     step.action === 'join' ||
+    step.action === 'split' ||
+    step.action === 'sort' ||
     step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
@@ -376,6 +437,7 @@ export const getFormStateFromActionStep = (
     const { customIdentifier, parentId, ...restStep } = step;
     return configDrivenProcessors[
       step.action as ConfigDrivenProcessorType
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ].convertProcessorToFormState(restStep as any);
   }
 
@@ -661,6 +723,39 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'split') {
+      const { from, separator, to, ignore_failure, ignore_missing, preserve_trailing } = formState;
+      return {
+        processorDefinition: {
+          action: 'split',
+          from,
+          separator,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          preserve_trailing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SplitProcessor,
+      };
+    }
+
+    if (formState.action === 'sort') {
+      const { from, order, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'sort',
+          from,
+          order,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as SortProcessor,
+      };
+    }
+
     if (formState.action === 'concat') {
       const { from, to, ignore_failure, ignore_missing } = formState;
       return {
@@ -676,9 +771,33 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'network_direction') {
+      const { source_ip, destination_ip, target_field, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'network_direction',
+          source_ip,
+          destination_ip,
+          internal_networks:
+            'internal_networks' in formState
+              ? formState.internal_networks?.map((internalNetwork) => internalNetwork.value)
+              : undefined,
+          internal_networks_field:
+            'internal_networks_field' in formState ? formState.internal_networks_field : undefined,
+          target_field,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as NetworkDirectionProcessor,
+      };
+    }
+
     if (configDrivenProcessors[formState.action]) {
       return {
         processorDefinition: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
           description,
         },
@@ -778,13 +897,9 @@ export const getValidSteps = (
         return false;
       }
 
-      // Valid but has no children (compilation of this step would be pointless)
-      const hasChildren = steps.some((s) => s.parentId === step.customIdentifier);
-      if (!hasChildren) {
-        return false;
-      }
-
-      // Valid where block with children
+      // Valid where block.
+      // Note: even if it has no children, we still allow it to participate in simulation.
+      // The server injects a simulation-only noop processor for each condition so we can track match rates.
       validSteps.push(step);
       return true;
     } else {

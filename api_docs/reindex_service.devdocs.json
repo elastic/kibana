@@ -468,7 +468,7 @@
             "label": "flow",
             "description": [],
             "signature": [
-              "\"reindex\" | \"all\" | \"readonly\""
+              "\"reindex\" | \"readonly\" | \"all\""
             ],
             "path": "x-pack/platform/plugins/private/reindex_service/common/types.ts",
             "lineNumber": 16,

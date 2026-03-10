@@ -61,7 +61,8 @@ const renderForm = (options: RenderFormOptions = {}) => {
   );
 };
 
-describe('Inference Services', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253331
+describe.skip('Inference Services', () => {
   // Reset cloned providers before each test to prevent mutation pollution
   beforeEach(() => {
     mockClonedProviders = JSON.parse(JSON.stringify(mockProviders));

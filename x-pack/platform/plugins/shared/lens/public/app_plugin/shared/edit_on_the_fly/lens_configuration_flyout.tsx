@@ -32,6 +32,7 @@ import {
   useLensDispatch,
   selectHideTextBasedEditor,
 } from '../../../state_management';
+import { serializeVisualizationToSave } from '../../../state_management/shared_logic';
 import {
   EXPRESSION_BUILD_ERROR_ID,
   getAbsoluteDateRange,
@@ -108,19 +109,35 @@ export function LensEditConfigurationFlyout({
   const attributesChanged = useMemo<boolean>(() => {
     if (isNewPanel) return true;
 
+    const datasource = datasourceMap[datasourceId];
+
+    const rawState = datasourceStates[datasourceId].state;
+    const currentPersistable = rawState ? datasource.getPersistableState(rawState) : null;
+
     const previousAttrs = previousAttributes.current;
+    const previousDsState = previousAttrs.state.datasourceStates[datasourceId];
+    // Only textBased stores private state (e.g. indexPatternRefs) in attributes; normalize to persistable for comparison.
+    // formBased attributes are already persistable and getPersistableState expects private state.
+    let previousPersistable: typeof currentPersistable = null;
+    if (previousDsState) {
+      previousPersistable =
+        datasourceId === 'textBased'
+          ? datasource.getPersistableState(previousDsState)
+          : {
+              state: previousDsState,
+              references: previousAttrs.references,
+            };
+    }
+
     const datasourceStatesAreSame =
-      datasourceStates[datasourceId].state && previousAttrs.state.datasourceStates[datasourceId]
-        ? datasourceMap[datasourceId].isEqual(
-            previousAttrs.state.datasourceStates[datasourceId],
-            previousAttrs.references,
-            datasourceStates[datasourceId].state,
-            // Extract references from the current state as they contain resolved data view IDs
-            // We cannot use attributes.references because they may contain stale data view IDs from when the panel was initially loaded
-            datasourceMap[datasourceId].getPersistableState(datasourceStates[datasourceId].state)
-              .references
-          )
-        : false;
+      currentPersistable != null &&
+      previousPersistable != null &&
+      datasource.isEqual(
+        previousPersistable.state,
+        previousPersistable.references,
+        currentPersistable.state,
+        currentPersistable.references
+      );
 
     if (!datasourceStatesAreSame) return true;
 
@@ -205,12 +222,29 @@ export function LensEditConfigurationFlyout({
     setESQLQueryState(state);
   }, []);
 
-  const onApply = useCallback(() => {
+  const onApply = useCallback(async () => {
     if (visualization.activeId == null || !currentAttributes) {
       return;
     }
+
+    let attributesToSave: TypedLensSerializedState['attributes'];
+    try {
+      // Run the apply callback first so auto-save operations (e.g. linked annotations)
+      // complete before the visualization is persisted via saveByRef.
+      const updatedAttributes = await onApplyCallback?.(currentAttributes);
+      attributesToSave = updatedAttributes ?? currentAttributes;
+    } catch (err) {
+      coreStart.notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.translate('xpack.lens.config.applyError', {
+          defaultMessage: 'Failed to apply changes',
+        }),
+      });
+      return;
+    }
+
     if (savedObjectId) {
-      saveByRef?.(currentAttributes);
+      const serializedAttrs = serializeVisualizationToSave(attributesToSave, activeVisualization);
+      saveByRef?.(serializedAttrs);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -227,8 +261,6 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(currentAttributes);
-    // Remove the user's preferred chart type from sessionStorage
     deleteUserChartTypeFromSessionStorage();
     closeFlyout?.();
   }, [
@@ -239,6 +271,7 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     currentAttributes,
+    coreStart.notifications.toasts,
     saveByRef,
     updateByRefInput,
   ]);
@@ -475,20 +508,26 @@ export function LensEditConfigurationFlyout({
         layerTabs={layerTabs}
       >
         <>
+          {/* Flex container for the flyout content layout.
+              Enables proper scroll behavior where accordion headers stay fixed
+              and only the accordion content areas scroll independently. */}
           <EuiFlexGroup
             css={css`
               block-size: 100%;
+              /* Reset min-block-size to allow flex items to shrink below content size */
               .euiFlexItem,
               .euiAccordion,
               .euiAccordion__triggerWrapper,
               .euiAccordion__childWrapper {
                 min-block-size: 0;
               }
+              /* Make accordions flex containers to enable content scrolling */
               .euiAccordion {
                 display: flex;
                 flex: 1;
                 flex-direction: column;
               }
+              /* When accordion is open, its content area takes remaining space */
               .euiAccordion-isOpen {
                 .euiAccordion__childWrapper {
                   // Override euiAccordion__childWrapper blockSize only when ES|QL mode is enabled
@@ -496,6 +535,8 @@ export function LensEditConfigurationFlyout({
                   flex: 1;
                 }
               }
+              /* Scrollable accordion content area with custom scrollbar styling.
+                 pointer-events handling allows drag-drop to work outside content bounds. */
               .euiAccordion__childWrapper {
                 ${euiScrollBarStyles(euiTheme)}
                 overflow-y: auto !important;
@@ -507,6 +548,7 @@ export function LensEditConfigurationFlyout({
                   pointer-events: auto;
                 }
               }
+              /* Advanced options nested accordion should not scroll independently */
               .lnsIndexPatternDimensionEditor-advancedOptions {
                 .euiAccordion__childWrapper {
                   flex: none;
@@ -517,6 +559,7 @@ export function LensEditConfigurationFlyout({
             direction="column"
             gutterSize="none"
           >
+            {/* Container for ES|QL editor - fixed height, doesn't grow */}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 css={css`
@@ -529,6 +572,7 @@ export function LensEditConfigurationFlyout({
                 ref={editorContainer}
               />
             </EuiFlexItem>
+            {/* Visualization parameters accordion - grows when open to fill available space */}
             <EuiFlexItem
               grow={isLayerAccordionOpen ? 1 : false}
               css={css`

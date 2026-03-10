@@ -11,11 +11,14 @@ import type { SetupStateType } from '../../../common/setup';
 import type { RegisterServicesParams } from '../register_services';
 import { cloudSetupState } from './cloud_setup_state';
 import { selfManagedSetupState } from './self_managed_setup_state';
+import type { ServerlessSetupStateType } from '../../../common/serverless_setup';
+import { serverlessSetupState } from './serverless_setup_state';
 
 export interface SetupStateParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
+  isServerless?: boolean;
 }
 
 export async function getSetupState({
@@ -25,7 +28,10 @@ export async function getSetupState({
   logger,
   soClient,
   spaceId,
-}: RegisterServicesParams & SetupStateParams): Promise<CloudSetupStateType | SetupStateType> {
+  isServerless,
+}: RegisterServicesParams & SetupStateParams): Promise<
+  CloudSetupStateType | SetupStateType | ServerlessSetupStateType
+> {
   const kibanaInternalProfilingESClient = createProfilingEsClient({
     esClient: esClient.asInternalUser,
     useDefaultAuth: false,
@@ -34,6 +40,19 @@ export async function getSetupState({
     esClient: esClient.asCurrentUser,
     useDefaultAuth: false,
   });
+
+  if (isServerless) {
+    return {
+      type: 'serverless',
+      setupState: await serverlessSetupState({
+        client: kibanaInternalProfilingESClient,
+        clientWithProfilingAuth: profilingESClient,
+        logger,
+        soClient,
+        spaceId: spaceId ?? DEFAULT_SPACE_ID,
+      }),
+    };
+  }
 
   const isCloudEnabled = deps.cloud?.isCloudEnabled;
   if (isCloudEnabled) {

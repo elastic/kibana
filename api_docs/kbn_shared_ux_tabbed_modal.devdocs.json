@@ -134,7 +134,7 @@
             "signature": [
               "(props: { state: S; dispatch: ",
               "IDispatchFunction",
-              "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "; }) => React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
             "lineNumber": 59,

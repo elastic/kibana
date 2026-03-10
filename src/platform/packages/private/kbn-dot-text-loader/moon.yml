@@ -23,17 +23,7 @@ tags:
   - dev
   - group-platform
   - private
-  - jest-unit-tests
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+fileGroups:
+  src:
+    - index.js
+tasks: {}

@@ -117,20 +117,17 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(getWorkflowWithLoopYaml(workflowName));
 
-    // Navigate to the nested hello_world_step in the editor
-    await page.getByText('enabled: false').click();
-    await page.keyboard.press('PageDown');
-    await page.getByText('name: hello_world_step').click();
-    await page.getByText('name: hello_world_step').click();
-    await page.keyboard.press('End');
+    // Navigate to the step and click the inline "run step" button.
+    // navigateToYamlLine waits for the run-step button to appear, which
+    // confirms the debounced YAML computation has completed.
+    await pageObjects.workflowEditor.setCursorToText('name: hello_world_step');
+    await page.testSubj.click('workflowRunStep');
 
-    // Click the inline "run step" button
-    const runStepButton = page.testSubj.locator('workflowRunStep');
-    await expect(runStepButton).toBeVisible();
-    await runStepButton.click();
-
-    // Set custom context in the test step modal and execute
-    await pageObjects.workflowEditor.setTestStepInputs({ execution: { isTestRun: false } });
+    // Set custom context in the test step modal and execute§
+    await pageObjects.workflowEditor.setTestStepInputs({
+      execution: { isTestRun: false },
+      foreach: { item: { '@timestamp': 'now' } },
+    });
     await page.testSubj.click('workflowSubmitStepRun');
 
     await pageObjects.workflowExecution.waitForExecutionView();
@@ -144,7 +141,7 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await helloWorldSteps.click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
-      'Test run: false'
+      'Test run: false, timestamp: now'
     );
   });
 });

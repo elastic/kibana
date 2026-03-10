@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import type { InsightsResult } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import type { TaskResult } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
+import type { InsightImpactLevel, TaskResult } from '@kbn/streams-schema';
+import {
+  insightCoreSchema,
+  insightImpactLevelSchema,
+  insightMetaSchema,
+  insightSchema,
+  type Insight,
+} from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
+import type {
+  InsightsDiscoveryTaskParams,
+  InsightsDiscoveryTaskResult,
+} from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
@@ -19,7 +28,7 @@ import { handleTaskAction } from '../../../utils/task_helpers';
 
 /* Insights Discovery Task */
 
-export type InsightsTaskResult = TaskResult<InsightsResult>;
+export type InsightsTaskResult = TaskResult<InsightsDiscoveryTaskResult>;
 
 const insightsTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_insights/_task',
@@ -41,6 +50,10 @@ const insightsTaskRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
+      streamNames: z
+        .array(z.string())
+        .describe('List of stream names to generate insights for.')
+        .optional(),
     }),
   }),
   handler: async ({
@@ -74,6 +87,7 @@ const insightsTaskRoute = createServerRoute({
 
                 return {
                   connectorId,
+                  streamNames: body.streamNames,
                 };
               })(),
               request,
@@ -81,7 +95,7 @@ const insightsTaskRoute = createServerRoute({
           } as const)
         : ({ action: body.action } as const);
 
-    return handleTaskAction<InsightsDiscoveryTaskParams, InsightsResult>({
+    return handleTaskAction<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>({
       taskClient,
       taskId: STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE,
       ...actionParams,
@@ -107,13 +121,181 @@ const insightsStatusRoute = createServerRoute({
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    return taskClient.getStatus<InsightsDiscoveryTaskParams, InsightsResult>(
+    return taskClient.getStatus<InsightsDiscoveryTaskParams, InsightsDiscoveryTaskResult>(
       STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE
     );
+  },
+});
+
+const listInsightsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_insights',
+  options: {
+    access: 'internal',
+    summary: 'List all insights',
+    description: 'Fetches all persisted insights with optional filters',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z.object({
+      impact: z
+        .union([insightImpactLevelSchema, z.array(insightImpactLevelSchema)])
+        .optional()
+        .describe('Filter by impact level(s). Can be a single value or comma-separated values.'),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ insights: Insight[]; total: number }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const filters: { impact?: InsightImpactLevel[] } = {};
+    if (params.query.impact) {
+      // Support both array and comma-separated string
+      filters.impact = Array.isArray(params.query.impact)
+        ? params.query.impact
+        : (params.query.impact.split(',') as InsightImpactLevel[]);
+    }
+
+    return insightClient.list(filters);
+  },
+});
+
+const getInsightRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_insights/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Get a single insight',
+    description: 'Fetches a single insight by ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ insight: Insight }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const insight = await insightClient.get(params.path.id);
+    return { insight };
+  },
+});
+
+/** Save body: insight without id (id comes from path). */
+const saveInsightBodySchema = insightCoreSchema.and(insightMetaSchema.omit({ id: true }));
+
+const saveInsightRoute = createServerRoute({
+  endpoint: 'PUT /internal/streams/_insights/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Save an insight',
+    description: 'Creates or updates a persisted insight by ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    body: saveInsightBodySchema,
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ insight: Insight }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const insight = await insightClient.upsert({
+      ...params.body,
+      id: params.path.id,
+    });
+    return { insight };
+  },
+});
+
+const deleteInsightRoute = createServerRoute({
+  endpoint: 'DELETE /internal/streams/_insights/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Delete an insight',
+    description: 'Deletes an existing insight by ID',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return await insightClient.delete(params.path.id);
+  },
+});
+
+const bulkInsightsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/_insights/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk operations on insights',
+    description: 'Perform bulk save or delete operations on insights',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      operations: z.array(
+        z.union([
+          z.object({
+            index: insightSchema,
+          }),
+          z.object({
+            delete: z.object({ id: z.string() }),
+          }),
+        ])
+      ),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const { insightClient, licensing, uiSettingsClient } = await getScopedClients({ request });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    return await insightClient.bulk(params.body.operations);
   },
 });
 
 export const internalInsightsRoutes = {
   ...insightsTaskRoute,
   ...insightsStatusRoute,
+  ...listInsightsRoute,
+  ...getInsightRoute,
+  ...saveInsightRoute,
+  ...deleteInsightRoute,
+  ...bulkInsightsRoute,
 };

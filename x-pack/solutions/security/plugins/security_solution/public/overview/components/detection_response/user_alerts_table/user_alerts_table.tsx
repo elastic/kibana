@@ -57,16 +57,16 @@ export const UserAlertsTable = React.memo(({ signalIndexName }: UserAlertsTableP
       openAlertsPageWithFilters([
         {
           title: i18n.OPEN_IN_ALERTS_TITLE_USERNAME,
-          selectedOptions: [userName],
-          fieldName: 'user.name',
+          selected_options: [userName],
+          field_name: 'user.name',
         },
 
         ...(severity
           ? [
               {
                 title: i18n.OPEN_IN_ALERTS_TITLE_SEVERITY,
-                selectedOptions: [severity],
-                fieldName: ALERT_SEVERITY,
+                selected_options: [severity],
+                field_name: ALERT_SEVERITY,
               },
             ]
           : []),

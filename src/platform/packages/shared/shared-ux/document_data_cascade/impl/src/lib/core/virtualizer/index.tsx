@@ -13,10 +13,13 @@ import { useVirtualizer, defaultRangeExtractor, type VirtualItem } from '@tansta
 import type { GroupNode } from '../../../store_provider';
 
 type UseVirtualizerOptions = Parameters<typeof useVirtualizer>[0];
-type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
+export type UseVirtualizerReturnType = ReturnType<typeof useVirtualizer>;
 
 export interface CascadeVirtualizerProps<G extends GroupNode>
-  extends Pick<UseVirtualizerOptions, 'getScrollElement' | 'overscan'> {
+  extends Pick<
+    UseVirtualizerOptions,
+    'getScrollElement' | 'overscan' | 'initialOffset' | 'initialRect'
+  > {
   rows: Row<G>[];
   /**
    * setting a value of true causes the active group root row
@@ -24,6 +27,11 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
    */
   enableStickyGroupHeader: boolean;
   estimatedRowHeight?: number;
+  /**
+   * Called whenever the virtualizer updates (scroll, range, size, etc.).
+   * Used to conduit values into external state (e.g. public API store).
+   */
+  onStateChange?: (instance: UseVirtualizerReturnType) => void;
 }
 
 export interface UseVirtualizedRowScrollStateStoreOptions {
@@ -168,6 +176,9 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
   estimatedRowHeight = 0,
   rows,
   getScrollElement,
+  onStateChange,
+  initialOffset,
+  initialRect,
 }: CascadeVirtualizerProps<G>): CascadeVirtualizerReturnValue => {
   const virtualizedRowsSizeCacheRef = useRef<Map<number, number>>(new Map());
 
@@ -197,14 +208,27 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
       getScrollElement,
       overscan,
       rangeExtractor,
+      initialOffset,
+      initialRect,
       onChange: (rowVirtualizerInstance) => {
         // @ts-expect-error -- the itemsSizeCache property does exist,
         // but it not included in the type definition because it is marked as a private property,
         // see {@link https://github.com/TanStack/virtual/blob/v3.13.2/packages/virtual-core/src/index.ts#L360}
         virtualizedRowsSizeCacheRef.current = rowVirtualizerInstance.itemSizeCache;
+        // propagate virtualizer state changes
+        onStateChange?.(rowVirtualizerInstance);
       },
     }),
-    [estimatedRowHeight, getScrollElement, overscan, rangeExtractor, rows.length]
+    [
+      estimatedRowHeight,
+      getScrollElement,
+      initialOffset,
+      initialRect,
+      overscan,
+      rangeExtractor,
+      rows.length,
+      onStateChange,
+    ]
   );
 
   const virtualizerImpl = useVirtualizer(virtualizerOptions);

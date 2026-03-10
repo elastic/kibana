@@ -54,6 +54,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import type { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/context_menu';
+import type { AlertFormatter } from '@kbn/alerts-ui-shared/src/common/types';
 import type { Case } from './apis/bulk_get_cases';
 import type { ItemsSelectionState } from './components/tags/items/types';
 
@@ -116,6 +117,8 @@ export interface Ecs {
  *
  * We don't use the full cases service interface to avoid circular dependencies
  */
+export type CasesOwner = 'securitySolution' | 'observability' | 'cases';
+
 export interface CasesService {
   ui: {
     getCasesContext: () => FC<any>;
@@ -126,7 +129,7 @@ export interface CasesService {
   };
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
-    canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
+    canUseCases: (owners: CasesOwner[]) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
     getObservablesFromEcs: (ecsArray: any[][]) => Observable[];
   };
@@ -217,7 +220,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
   /**
    * A boolean expression or list of ids to refine the alerts search query
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   /**
    * The sort configuration.
    *
@@ -331,6 +334,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     RenderContext<AC> &
       AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
   >;
+  /**
+   * Get the alert formatter for a specific rule type.
+   * Used to generate "View in App" links for individual alerts.
+   */
+  getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
   /**
    * Additional toolbar controls render function
    */
@@ -503,6 +511,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'casesConfiguration'
     | 'openLinksInNewTab'
     | 'isMutedAlertsEnabled'
+    | 'getAlertFormatter'
   >,
   | 'columns'
   | 'pageIndex'
@@ -553,7 +562,7 @@ export interface PublicAlertsDataGridProps
    */
   casesConfiguration?: {
     featureId: string;
-    owner: Parameters<CasesService['helpers']['canUseCases']>[0];
+    owner: CasesOwner[];
     appId?: string;
     syncAlerts?: boolean;
     extractObservables?: boolean;
@@ -592,7 +601,7 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
   onToggleColumn: (columnId: string) => void;
   onResetColumns: () => void;
   onColumnResize?: EuiDataGridOnColumnResizeHandler;
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>;
   showInspectButton?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
   /**
@@ -623,6 +632,11 @@ export type AlertActionsProps<AC extends AdditionalContext = AdditionalContext> 
        * Implement this to resolve your app's specific alert page path, return null to avoid showing the link
        */
       resolveAlertPagePath?: (alertId: string, currentPageId: string) => string | null;
+      /**
+       * Get the alert formatter for a specific rule type.
+       * Used to generate "View in App" links for individual alerts.
+       */
+      getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
     };
 
 export interface BulkActionsConfig {
