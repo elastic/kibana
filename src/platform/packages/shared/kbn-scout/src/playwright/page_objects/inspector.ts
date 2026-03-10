@@ -10,27 +10,38 @@
 import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
 
+export type InspectorView = 'Requests' | 'Data';
+
+const VIEW_CHOOSER_TEST_SUBJECTS: Record<InspectorView, string> = {
+  Requests: 'inspectorViewChooserRequests',
+  Data: 'inspectorViewChooserData',
+};
+
 export class Inspector {
   public readonly panel: Locator;
   public readonly closeButton: Locator;
   public readonly viewChooser: Locator;
-  public readonly requestsView: Locator;
-  public readonly statisticsTab: Locator;
-  public readonly requestTab: Locator;
-  public readonly responseTab: Locator;
-  public readonly requestTimestamp: Locator;
-  public readonly requestCodeViewer: Locator;
+
+  public readonly requests: {
+    readonly statisticsTab: Locator;
+    readonly requestTab: Locator;
+    readonly responseTab: Locator;
+    readonly timestamp: Locator;
+    readonly codeViewer: Locator;
+  };
 
   constructor(private readonly page: ScoutPage) {
     this.panel = page.testSubj.locator('inspectorPanel');
     this.closeButton = page.testSubj.locator('euiFlyoutCloseButton');
     this.viewChooser = page.testSubj.locator('inspectorViewChooser');
-    this.requestsView = page.testSubj.locator('inspectorViewChooserRequests');
-    this.statisticsTab = page.testSubj.locator('inspectorRequestDetailStatistics');
-    this.requestTab = page.testSubj.locator('inspectorRequestDetailRequest');
-    this.responseTab = page.testSubj.locator('inspectorRequestDetailResponse');
-    this.requestTimestamp = page.testSubj.locator('inspector.statistics.requestTimestamp');
-    this.requestCodeViewer = page.testSubj.locator('inspectorRequestCodeViewerContainer');
+
+    this.requests = {
+      statisticsTab: page.testSubj.locator('inspectorRequestDetailStatistics'),
+      requestTab: page.testSubj.locator('inspectorRequestDetailRequest'),
+      responseTab: page.testSubj.locator('inspectorRequestDetailResponse'),
+      timestamp: page.testSubj.locator('inspector.statistics.requestTimestamp'),
+      codeViewer: page.testSubj.locator('inspectorRequestCodeViewerContainer'),
+    };
   }
 
   async open() {
@@ -45,11 +56,11 @@ export class Inspector {
 
   async getRequestTimestamp(): Promise<string> {
     await this.panel.waitFor({ state: 'visible' });
-    return this.requestTimestamp.innerText();
+    return this.requests.timestamp.innerText();
   }
 
-  async switchToRequestsView() {
+  async switchToView(view: InspectorView) {
     await this.viewChooser.click();
-    await this.requestsView.click();
+    await this.page.testSubj.locator(VIEW_CHOOSER_TEST_SUBJECTS[view]).click();
   }
 }

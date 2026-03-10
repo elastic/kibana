@@ -49,19 +49,19 @@ spaceTest.describe(
         });
 
         await spaceTest.step('switch to Requests view and verify statistics', async () => {
-          await inspector.switchToRequestsView();
-          await expect(inspector.statisticsTab).toBeVisible();
-          await expect(inspector.requestTimestamp).toBeVisible();
+          await inspector.switchToView('Requests');
+          await expect(inspector.requests.statisticsTab).toBeVisible();
+          await expect(inspector.requests.timestamp).toBeVisible();
         });
 
         await spaceTest.step('view request details', async () => {
-          await inspector.requestTab.click();
-          await expect(inspector.requestCodeViewer).toBeVisible();
+          await inspector.requests.requestTab.click();
+          await expect(inspector.requests.codeViewer).toBeVisible();
         });
 
         await spaceTest.step('view response details', async () => {
-          await inspector.responseTab.click();
-          await expect(inspector.requestCodeViewer).toBeVisible();
+          await inspector.requests.responseTab.click();
+          await expect(inspector.requests.codeViewer).toBeVisible();
         });
 
         await spaceTest.step('close inspector', async () => {
