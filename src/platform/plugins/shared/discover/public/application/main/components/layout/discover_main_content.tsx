@@ -18,7 +18,6 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { TableHiddenBar } from '../../../../components/table_hidden_bar';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
@@ -147,7 +146,7 @@ export const DiscoverMainContent = ({
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
-  const showDataTable = useAppStateSelector((state) => !state.hideDataTable);
+  const showDataTable = useAppStateSelector((state) => !state.hideDataTable || state.hideChart);
 
   return (
     <Droppable
@@ -177,22 +176,7 @@ export const DiscoverMainContent = ({
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : null}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL && !showDataTable ? (
-            <EuiFlexItem grow={false}>
-              <TableHiddenBar
-                stateContainer={stateContainer}
-                panelsToggle={
-                  React.isValidElement(panelsToggle)
-                    ? React.cloneElement(panelsToggle, {
-                        renderedFor: 'tabs',
-                        isChartAvailable,
-                      })
-                    : undefined
-                }
-              />
-            </EuiFlexItem>
-          ) : null}
-          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL && showDataTable ? (
             <>
               <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <FieldStatisticsTab
@@ -205,7 +189,7 @@ export const DiscoverMainContent = ({
               />
             </>
           ) : null}
-          {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
+          {viewMode === VIEW_MODE.PATTERN_LEVEL && showDataTable ? (
             <PatternAnalysisTab
               dataView={dataView}
               stateContainer={stateContainer}

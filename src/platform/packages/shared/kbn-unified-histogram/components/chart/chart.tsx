@@ -282,7 +282,7 @@ export function UnifiedHistogramChart({
   };
 
   if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
-    if (!isChartAvailable) {
+    if (!isChartAvailable || !chartVisible) {
       return null;
     }
 

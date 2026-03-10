@@ -9,6 +9,7 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
@@ -75,72 +76,80 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
 
   const isInsideHistogram = renderedFor === 'histogram';
   const isInsideDiscoverContent = !isInsideHistogram;
-  const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
-
-  // Chart toggle: only in histogram toolbar (chart section).
-  // When chart is collapsed, the toggle stays in the collapsed chart bar
-  const showChartToggle = isInsideHistogram;
+  // const isInTabsContext = renderedFor === 'tabs' || renderedFor === 'root';
+  const isActualChartAvailable = isChartAvailable || renderedFor === 'histogram';
 
   // Table toggle: only in tabs context when in document view and chart is available,
   // since collapsing the table requires a chart to expand into
-  const showTableToggle =
-    isInTabsContext && viewMode === VIEW_MODE.DOCUMENT_LEVEL && isChartAvailable;
+  // const showTableToggle = isChartAvailable;
 
   const buttons = [
-    ...((isInsideHistogram && isSidebarCollapsed) ||
-    (isInsideDiscoverContent && isSidebarCollapsed && !isChartAvailable)
-      ? [
-          {
-            label: i18n.translate('discover.panelsToggle.showSidebarButton', {
-              defaultMessage: 'Show sidebar',
-            }),
-            iconType: 'transitionLeftIn',
-            'data-test-subj': 'dscShowSidebarButton',
-            'aria-expanded': !isSidebarCollapsed,
-            'aria-controls': 'discover-sidebar',
-            onClick: () => sidebarToggleState?.toggle?.(false),
-          },
-        ]
-      : []),
-    ...(showChartToggle
-      ? [
-          {
-            label: isChartHidden
-              ? i18n.translate('discover.panelsToggle.showChartButton', {
-                  defaultMessage: 'Show chart',
-                })
-              : i18n.translate('discover.panelsToggle.hideChartButton', {
-                  defaultMessage: 'Hide chart',
-                }),
-            iconType: isChartHidden ? 'transitionTopIn' : 'transitionTopOut',
-            'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
-            'aria-expanded': !isChartHidden,
-            'aria-controls': 'unifiedHistogramCollapsablePanel',
-            onClick: onToggleChart,
-          },
-        ]
-      : []),
-    ...(showTableToggle
-      ? [
-          {
-            label: isTableHidden
-              ? i18n.translate('discover.panelsToggle.showTableButton', {
-                  defaultMessage: 'Show table',
-                })
-              : i18n.translate('discover.panelsToggle.hideTableButton', {
-                  defaultMessage: 'Hide table',
-                }),
-            iconType: isTableHidden ? 'transitionTopOut' : 'transitionTopIn',
-            'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
-            'aria-expanded': !isTableHidden,
-            'aria-controls': 'discoverDocTable',
-            onClick: onToggleTable,
-          },
-        ]
-      : []),
+    {
+      label: i18n.translate('discover.panelsToggle.showSidebarButton', {
+        defaultMessage: 'Show sidebar',
+      }),
+      iconType: 'listBullet',
+      'data-test-subj': 'dscShowSidebarButton',
+      'aria-expanded': !isSidebarCollapsed,
+      'aria-controls': 'discover-sidebar',
+      onClick: () => sidebarToggleState?.toggle?.(!sidebarToggleState.isCollapsed),
+      css: css`
+        .euiIcon {
+          opacity: ${sidebarToggleState?.isCollapsed ? 0.3 : 1};
+        }
+      `,
+    },
+    {
+      label: isChartHidden
+        ? i18n.translate('discover.panelsToggle.showChartButton', {
+            defaultMessage: 'Show chart',
+          })
+        : i18n.translate('discover.panelsToggle.hideChartButton', {
+            defaultMessage: 'Hide chart',
+          }),
+      iconType: isChartHidden ? 'chartBarVertical' : 'chartBarVertical',
+      'data-test-subj': isChartHidden ? 'dscShowHistogramButton' : 'dscHideHistogramButton',
+      'aria-expanded': !isChartHidden,
+      'aria-controls': 'unifiedHistogramCollapsablePanel',
+      onClick: onToggleChart,
+      disabled: (isTableHidden && !isChartHidden) || !isActualChartAvailable,
+      css: css`
+        .euiIcon {
+          opacity: ${isChartHidden || !isActualChartAvailable ? 0.3 : 1};
+        }
+      `,
+    },
+
+    {
+      label: isTableHidden
+        ? i18n.translate('discover.panelsToggle.showTableButton', {
+            defaultMessage: 'Show table',
+          })
+        : i18n.translate('discover.panelsToggle.hideTableButton', {
+            defaultMessage: 'Hide table',
+          }),
+      iconType: isTableHidden ? 'table' : 'table',
+      'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
+      'aria-expanded': !isTableHidden,
+      'aria-controls': 'discoverDocTable',
+      onClick: onToggleTable,
+      disabled: isChartHidden || !isActualChartAvailable,
+      css: css`
+        .euiIcon {
+          opacity: ${isTableHidden && isActualChartAvailable ? 0.3 : 1};
+        }
+      `,
+    },
   ];
 
   if (!buttons.length) {
+    return null;
+  }
+  if (isInsideDiscoverContent && !isChartHidden && isChartAvailable) {
+    return null;
+  }
+
+  if (isInsideHistogram && (isChartHidden || !isActualChartAvailable)) {
     return null;
   }
 

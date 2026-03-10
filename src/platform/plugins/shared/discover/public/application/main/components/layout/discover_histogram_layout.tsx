@@ -24,7 +24,9 @@ export const DiscoverHistogramLayout = ({
   panelsToggle,
   ...mainContentProps
 }: DiscoverMainContentProps) => {
-  const hideDataTable = useAppStateSelector((state) => Boolean(state.hideDataTable));
+  const hideDataTable = useAppStateSelector(
+    (state) => Boolean(state.hideDataTable) && !Boolean(state.hideChart)
+  );
   const chartPortalNode = useCurrentChartPortalNode();
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const { localStorageKeyPrefix, layoutPropsMap } = useCurrentTabRuntimeState(
