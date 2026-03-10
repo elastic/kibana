@@ -36,7 +36,6 @@ export const getProposedChangesStyles = () => css`
   .wfDiffLine {
     display: flex;
     background-color: rgba(238, 76, 72, 0.1);
-    text-decoration: line-through;
     opacity: 0.7;
   }
 
@@ -58,7 +57,7 @@ export const getProposedChangesStyles = () => css`
       0px 10px 20px 0px rgba(43, 57, 79, 0.08);
     position: absolute;
     right: 24px;
-    bottom: 4px;
+    top: 0;
     z-index: 10;
     pointer-events: auto;
   }

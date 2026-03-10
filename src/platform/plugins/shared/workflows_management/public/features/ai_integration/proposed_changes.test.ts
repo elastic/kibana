@@ -58,7 +58,9 @@ const createMockEditor = () => {
       letterSpacing: 0,
       fontWeight: 'normal',
     }),
-    getLayoutInfo: jest.fn().mockReturnValue({ contentLeft: 64 }),
+    getLayoutInfo: jest
+      .fn()
+      .mockReturnValue({ contentLeft: 64, contentWidth: 800, verticalScrollbarWidth: 10 }),
     getPosition: jest.fn().mockReturnValue({ lineNumber: 5 }),
     revealLineInCenter: jest.fn(),
     pushUndoStop: jest.fn(),

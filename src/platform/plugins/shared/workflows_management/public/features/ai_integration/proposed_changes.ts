@@ -252,13 +252,11 @@ export class ProposalManager {
     container.className = 'wfDiffContainer';
 
     const fontInfo = editor.getOption(monaco.editor.EditorOption.fontInfo);
-    const { contentLeft } = editor.getLayoutInfo();
     container.style.fontFamily = fontInfo.fontFamily;
     container.style.fontSize = `${fontInfo.fontSize}px`;
     container.style.lineHeight = `${fontInfo.lineHeight}px`;
     container.style.letterSpacing = `${fontInfo.letterSpacing}px`;
     container.style.fontWeight = fontInfo.fontWeight;
-    container.style.paddingLeft = `${contentLeft}px`;
 
     wrapper.appendChild(container);
 
@@ -332,7 +330,7 @@ export class ProposalManager {
     wrapper.appendChild(pill);
 
     const afterLineNumber = change.startLine - 1;
-    const heightInLines = hasOriginalContent ? Math.max(originalLines.length + 1, 2) : 2;
+    const heightInLines = hasOriginalContent ? originalLines.length : 1;
 
     let viewZoneId = '';
     editor.changeViewZones((accessor) => {
