@@ -7,7 +7,15 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { persistLeads, formatLeadForResponse } from './generate_leads';
+import {
+  persistLeads,
+  formatLeadForResponse,
+  getEntityStoreLatestIndex,
+  fetchAllEntityStoreRecords,
+  entityRecordToLeadEntity,
+  ENTITY_PAGE_SIZE,
+  ENTITY_SOURCE_FIELDS,
+} from './generate_leads';
 import type { FormattedLead } from './generate_leads';
 import type { Lead } from '../types';
 
@@ -201,6 +209,132 @@ describe('generate_leads helpers', () => {
       };
       expect(bulkCall.body[0].index?._id).toBe('aaa');
       expect(bulkCall.body[2].index?._id).toBe('bbb');
+    });
+  });
+
+  describe('getEntityStoreLatestIndex', () => {
+    it('returns the V2 unified index for the default namespace', () => {
+      expect(getEntityStoreLatestIndex('default')).toBe('.entities.v2.latest.security_default');
+    });
+
+    it('returns the V2 unified index for a custom namespace', () => {
+      expect(getEntityStoreLatestIndex('my-space')).toBe('.entities.v2.latest.security_my-space');
+    });
+  });
+
+  describe('entityRecordToLeadEntity', () => {
+    it('extracts type and name from the entity field', () => {
+      const record = { entity: { id: 'euid-1', name: 'alice', type: 'user' } } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.type).toBe('user');
+      expect(result.name).toBe('alice');
+      expect(result.record).toBe(record);
+    });
+
+    it('falls back to entity.id when entity.name is missing', () => {
+      const record = { entity: { id: 'euid-host-1', type: 'host' } } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.name).toBe('euid-host-1');
+      expect(result.type).toBe('host');
+    });
+
+    it('falls back to EUID for name and "unknown" for type when only entity.id is present', () => {
+      const record = { entity: { id: 'euid-only' } } as never;
+      const result = entityRecordToLeadEntity(record);
+
+      expect(result.type).toBe('unknown');
+      expect(result.name).toBe('euid-only');
+    });
+  });
+
+  describe('fetchAllEntityStoreRecords', () => {
+    const logger = loggingSystemMock.createLogger();
+    let esClient: ReturnType<
+      typeof elasticsearchClientMock.createScopedClusterClient
+    >['asCurrentUser'];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    });
+
+    it('queries the V2 unified entity store index', async () => {
+      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
+
+      await fetchAllEntityStoreRecords(esClient, 'default', logger);
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.entities.v2.latest.security_default',
+        })
+      );
+    });
+
+    it('includes _source filtering and ignore_unavailable', async () => {
+      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
+
+      await fetchAllEntityStoreRecords(esClient, 'default', logger);
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: ENTITY_SOURCE_FIELDS,
+          ignore_unavailable: true,
+          size: ENTITY_PAGE_SIZE,
+        })
+      );
+    });
+
+    it('accumulates entities across paginated responses', async () => {
+      const page1Hits = Array.from({ length: ENTITY_PAGE_SIZE }, (_, i) => ({
+        _source: { entity: { id: `e-${i}`, name: `entity-${i}`, type: 'user' } },
+        sort: [i, `id-${i}`],
+      }));
+      const page2Hits = [
+        {
+          _source: { entity: { id: 'e-last', name: 'entity-last', type: 'host' } },
+          sort: [ENTITY_PAGE_SIZE, 'id-last'],
+        },
+      ];
+
+      esClient.search
+        .mockResolvedValueOnce({ hits: { hits: page1Hits } } as never)
+        .mockResolvedValueOnce({ hits: { hits: page2Hits } } as never);
+
+      const results = await fetchAllEntityStoreRecords(esClient, 'default', logger);
+
+      expect(results).toHaveLength(ENTITY_PAGE_SIZE + 1);
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+
+      const secondCall = esClient.search.mock.calls[1][0] as { search_after: unknown[] };
+      expect(secondCall.search_after).toEqual([ENTITY_PAGE_SIZE - 1, `id-${ENTITY_PAGE_SIZE - 1}`]);
+    });
+
+    it('returns empty array and logs a warning on search failure', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('index_not_found'));
+
+      const results = await fetchAllEntityStoreRecords(esClient, 'default', logger);
+
+      expect(results).toEqual([]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to fetch entity records')
+      );
+    });
+
+    it('skips hits without _source', async () => {
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: { entity: { id: 'e1', name: 'alice', type: 'user' } }, sort: [1, 'a'] },
+            { _source: undefined, sort: [2, 'b'] },
+          ],
+        },
+      } as never);
+
+      const results = await fetchAllEntityStoreRecords(esClient, 'default', logger);
+
+      expect(results).toHaveLength(1);
     });
   });
 });

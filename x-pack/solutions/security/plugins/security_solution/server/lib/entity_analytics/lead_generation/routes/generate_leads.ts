@@ -35,13 +35,13 @@ import { createBehavioralAnalysisModule } from '../observation_modules/alert_ana
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity, Lead } from '../types';
 
-const ENTITY_PAGE_SIZE = 1000;
+export const ENTITY_PAGE_SIZE = 1000;
 
 /**
  * Fields retrieved from Entity Store records. Limits memory footprint by
  * excluding large nested fields that observation modules do not need.
  */
-const ENTITY_SOURCE_FIELDS = [
+export const ENTITY_SOURCE_FIELDS = [
   '@timestamp',
   'entity.name',
   'entity.type',
@@ -194,45 +194,48 @@ export const generateLeadsRoute = (
 };
 
 // ---------------------------------------------------------------------------
-// Entity Store fetching — paginated via search_after to handle large deployments
+// Entity Store V2 fetching — paginated via search_after
+//
+// V2 stores all entity types (user, host, service, …) in a single unified
+// index: `.entities.v2.latest.security_{namespace}`.  This mirrors the pattern
+// used by the entity store plugin (getLatestEntitiesIndexName) but avoids a
+// cross-plugin import since that helper is not part of the public API.
 // ---------------------------------------------------------------------------
 
-const fetchAllEntityStoreRecords = async (
+export const getEntityStoreLatestIndex = (namespace: string): string =>
+  `.entities.v2.latest.security_${namespace}`;
+
+export const fetchAllEntityStoreRecords = async (
   esClient: ElasticsearchClient,
   spaceId: string,
   logger: Logger
 ): Promise<Entity[]> => {
   const results: Entity[] = [];
+  const index = getEntityStoreLatestIndex(spaceId);
+  let searchAfter: FieldValue[] | undefined;
 
-  for (const entityType of ['user', 'host'] as const) {
-    const index = `.entities.v1.latest.security_${entityType}_${spaceId}`;
-    let searchAfter: FieldValue[] | undefined;
+  while (true) {
+    try {
+      const resp = await esClient.search<Entity>({
+        index,
+        size: ENTITY_PAGE_SIZE,
+        ignore_unavailable: true,
+        _source: ENTITY_SOURCE_FIELDS,
+        sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+        query: { match_all: {} },
+      });
 
-    while (true) {
-      try {
-        const resp = await esClient.search<Entity>({
-          index,
-          size: ENTITY_PAGE_SIZE,
-          ignore_unavailable: true,
-          _source: ENTITY_SOURCE_FIELDS,
-          sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
-          ...(searchAfter ? { search_after: searchAfter } : {}),
-          query: { match_all: {} },
-        });
-
-        const hits = resp.hits.hits;
-        for (const hit of hits) {
-          if (hit._source) results.push(hit._source);
-        }
-
-        if (hits.length < ENTITY_PAGE_SIZE) break;
-        searchAfter = hits[hits.length - 1].sort as FieldValue[];
-      } catch (error) {
-        logger.warn(
-          `[LeadGeneration] Failed to fetch ${entityType} records from "${index}": ${error}`
-        );
-        break;
+      const hits = resp.hits.hits;
+      for (const hit of hits) {
+        if (hit._source) results.push(hit._source);
       }
+
+      if (hits.length < ENTITY_PAGE_SIZE) break;
+      searchAfter = hits[hits.length - 1].sort as FieldValue[];
+    } catch (error) {
+      logger.warn(`[LeadGeneration] Failed to fetch entity records from "${index}": ${error}`);
+      break;
     }
   }
 
@@ -243,14 +246,12 @@ const fetchAllEntityStoreRecords = async (
 // Entity conversion
 // ---------------------------------------------------------------------------
 
-const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
-  const entityField = (record as Record<string, unknown>).entity as
-    | { name?: string; type?: string }
-    | undefined;
+export const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
+  const { entity: entityField } = record;
   return {
     record,
     type: entityField?.type ?? 'unknown',
-    name: entityField?.name ?? 'unknown',
+    name: entityField?.name ?? entityField?.id ?? 'unknown',
   };
 };
 

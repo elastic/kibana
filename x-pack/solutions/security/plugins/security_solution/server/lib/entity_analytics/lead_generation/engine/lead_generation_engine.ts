@@ -17,6 +17,7 @@ import type {
   ObservationModule,
 } from '../types';
 import { DEFAULT_ENGINE_CONFIG } from '../types';
+import { entityToKey } from '../observation_modules/utils';
 import { llmSynthesizeLeadContent } from './llm_synthesize';
 
 // ---------------------------------------------------------------------------
@@ -722,5 +723,3 @@ const buildRecommendations = (group: ScoredEntity[], observations: Observation[]
 
   return recommendations.slice(0, 5);
 };
-
-const entityToKey = (entity: LeadEntity): string => `${entity.type}:${entity.name}`;

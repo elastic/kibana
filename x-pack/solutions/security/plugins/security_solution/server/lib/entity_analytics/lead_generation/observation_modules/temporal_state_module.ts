@@ -8,8 +8,6 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import { makeObservation, extractIsPrivileged } from './utils';
-import { getEntitiesSnapshotIndexPattern } from '../../entity_store/utils/entity_utils';
-import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -20,7 +18,14 @@ const MODULE_NAME = 'Temporal State Analysis';
 const MODULE_PRIORITY = 9;
 const MODULE_WEIGHT = 0.25;
 
-const SUPPORTED_ENTITY_TYPES: EntityTypeOpenAPI[] = ['user', 'host'];
+const SUPPORTED_ENTITY_TYPES = ['user', 'host'] as const;
+
+/**
+ * V2 history snapshots are stored in a single unified index per namespace
+ * (not per entity type). Pattern matches all date-hour suffixed indices.
+ */
+const getEntityStoreHistoryPattern = (namespace: string): string =>
+  `.entities.v2.history.security_${namespace}*`;
 
 // ---------------------------------------------------------------------------
 // Temporal State Analysis Module
@@ -85,11 +90,12 @@ const fetchPrivilegeEscalations = async (
   const privilegedEntities = entities.filter(extractIsPrivileged);
   if (privilegedEntities.length === 0) return escalated;
 
+  const historyPattern = getEntityStoreHistoryPattern(spaceId);
+
   for (const entityType of SUPPORTED_ENTITY_TYPES) {
     const ofType = privilegedEntities.filter((e) => e.type === entityType);
     if (ofType.length > 0) {
       const names = ofType.map((e) => e.name);
-      const historyPattern = getEntitiesSnapshotIndexPattern(entityType, spaceId);
 
       try {
         const response = await esClient.search({
@@ -98,11 +104,16 @@ const fetchPrivilegeEscalations = async (
           ignore_unavailable: true,
           allow_no_indices: true,
           query: {
-            bool: { filter: [{ terms: { [`${entityType}.name`]: names } }] },
+            bool: {
+              filter: [
+                { term: { 'entity.type': entityType } },
+                { terms: { 'entity.name': names } },
+              ],
+            },
           },
           aggs: {
             by_entity: {
-              terms: { field: `${entityType}.name`, size: names.length },
+              terms: { field: 'entity.name', size: names.length },
               aggs: {
                 oldest_snapshot: {
                   top_hits: {
