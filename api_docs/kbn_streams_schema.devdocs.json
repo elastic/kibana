@@ -830,7 +830,7 @@
           ") => string | undefined"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/get_discover_esql_query.ts",
-        "lineNumber": 27,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -848,7 +848,7 @@
               "GetDiscoverEsqlQueryOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/get_discover_esql_query.ts",
-            "lineNumber": 53,
+            "lineNumber": 59,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -1472,6 +1472,68 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.getWiredStreamViewQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getWiredStreamViewQuery",
+        "description": [
+          "\nGenerates the ES|QL view query for a wired stream.\nThe query targets the stream's own data plus the ES|QL views of its direct children,\nso that each view in the hierarchy includes data from downstream children transitively."
+        ],
+        "signature": [
+          "(streamName: string, directChildrenNames: string[]) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getWiredStreamViewQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "streamName",
+            "description": [
+              "- The wired stream name (e.g. 'logs.otel')"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.getWiredStreamViewQuery.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "directChildrenNames",
+            "description": [
+              "- Names of the stream's direct children (from routing destinations)"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/query/view_name.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The ES|QL FROM query for the view"
+        ],
         "initialIsOpen": false
       },
       {
