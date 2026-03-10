@@ -8,6 +8,6 @@
 export interface UserIdAndName {
   /** profile UUID */
   id?: string;
-  /** username (may be missing for legacy documents with only created_by_id) */
-  username?: string;
+  /** username */
+  username: string;
 }

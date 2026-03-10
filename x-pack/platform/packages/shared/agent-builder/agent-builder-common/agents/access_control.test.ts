@@ -59,10 +59,12 @@ describe('isAgentOwner', () => {
     );
   });
 
-  test("returns false when owner has username but current user doesn't (ownership requires both id or both username)", () => {
+  test('returns false when owner has username only and current user has different username', () => {
     const ownerWithUsernameOnly: UserIdAndName = { username: 'alice' };
-    const userWithIdOnly: UserIdAndName = { id: 'user-id' };
-    expect(isAgentOwner({ owner: ownerWithUsernameOnly, currentUser: userWithIdOnly })).toBe(false);
+    const userWithDifferentUsername: UserIdAndName = { id: 'user-id', username: 'bob' };
+    expect(
+      isAgentOwner({ owner: ownerWithUsernameOnly, currentUser: userWithDifferentUsername })
+    ).toBe(false);
   });
 });
 
