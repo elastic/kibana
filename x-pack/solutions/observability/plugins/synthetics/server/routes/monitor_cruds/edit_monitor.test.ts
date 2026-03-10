@@ -7,6 +7,7 @@
 
 import { syncEditedMonitor } from './edit_monitor';
 import type { SavedObject } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitor,
@@ -54,6 +55,10 @@ describe('syncEditedMonitor', () => {
   syntheticsService.editConfig = jest.fn();
   syntheticsService.getMaintenanceWindows = jest.fn();
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
@@ -78,7 +83,70 @@ describe('syncEditedMonitor', () => {
       '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
       expect.objectContaining({
         enabled: true,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  it('passes package policy references when monitor has private locations', async () => {
+    const monitorWithPrivateLocation = {
+      ...editedMonitor,
+      locations: [
+        { id: 'loc-1', label: 'loc-1', agentPolicyId: 'agent-1', isServiceManaged: false },
+      ],
+    } as unknown as SyntheticsMonitor;
+
+    (serverMock.authSavedObjectsClient?.update as jest.Mock).mockResolvedValue({
+      id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      type: 'synthetics-monitor',
+      attributes: {},
+      references: [],
+    });
+
+    routeContext.syntheticsMonitorClient.editMonitors = jest.fn().mockResolvedValue({
+      failedPolicyUpdates: [],
+      publicSyncErrors: [],
+    });
+
+    await syncEditedMonitor({
+      normalizedMonitor: monitorWithPrivateLocation,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext,
+      spaceId: 'test-space',
+    });
+
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.any(Object),
+      expect.objectContaining({
+        references: [
+          {
+            id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
+            name: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d-loc-1',
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
       })
+    );
+  });
+
+  it('does not pass references when monitor has no private locations', async () => {
+    // editedMonitor only has a service-managed (public) location
+    await syncEditedMonitor({
+      normalizedMonitor: editedMonitor,
+      decryptedPreviousMonitor:
+        previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecretsAttributes>,
+      routeContext,
+      spaceId: 'test-space',
+    });
+
+    expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
+      'synthetics-monitor',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
+      expect.any(Object),
+      expect.objectContaining({ references: undefined })
     );
   });
 });
