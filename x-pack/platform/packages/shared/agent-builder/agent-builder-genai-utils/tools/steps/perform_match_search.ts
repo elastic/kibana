@@ -157,7 +157,7 @@ const extractSnippetsBatch = async ({
 
   const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | EVAL doc = MV_DEDUPE(${mvAppendExpr}) | EVAL snippets = TOP_SNIPPETS(doc, "${escapedTerm}", {"num_snippets": ${snippetCount}, "num_words": ${numWords}}) | MV_EXPAND snippets | KEEP _id, snippets`;
 
-  logger.info(`TOP_SNIPPETS batch query for ${docIds.length} docs: ${esqlQuery}`);
+  logger.debug(`TOP_SNIPPETS batch query for ${docIds.length} docs: ${esqlQuery}`);
 
   const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
 
@@ -200,7 +200,7 @@ const rerankDocuments = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<string[]> => {
-  logger.info(`rerankDocuments called with ${docIds.length} docs, resultSize=${resultSize}`);
+  logger.debug(`rerankDocuments called with ${docIds.length} docs, resultSize=${resultSize}`);
   if (docIds.length === 0) return [];
 
   const fieldPaths = fields.map((f) => f.path);
@@ -211,10 +211,10 @@ const rerankDocuments = async ({
 
   const esqlQuery = `FROM ${index} METADATA _id | WHERE _id IN (${idList}) | EVAL rerank_input = MV_CONCAT(MV_DEDUPE(${mvAppendExpr}), " ") | RERANK "${escapedTerm}" ON rerank_input WITH {"inference_id": "${rerankInferenceID}"} | KEEP _id | LIMIT ${resultSize}`;
 
-  logger.info(`RERANK candidate docs query: ${esqlQuery}`);
+  logger.debug(`RERANK candidate docs query: ${esqlQuery}`);
 
   const esqlResponse = await executeEsql({ query: esqlQuery, esClient });
-  logger.info(`RERANK candidate docs response: ${JSON.stringify(esqlResponse)}`);
+  logger.debug(`RERANK candidate docs response: ${JSON.stringify(esqlResponse)}`);
 
   return esqlResponse.values.map((row) => row[0]).filter((v): v is string => typeof v === 'string');
 };
@@ -302,7 +302,7 @@ const rerankAllSnippets = async ({
     }
     docScored.sort((a, b) => b.score - a.score);
     const topSnippets = docScored.slice(0, numSnippets).map((s) => s.snippet);
-    logger.info(
+    logger.debug(
       `RERANK snippets for doc="${docId}": ${count} candidates -> ${topSnippets.length} returned`
     );
     result.set(docId, topSnippets);
@@ -328,7 +328,7 @@ export const performMatchSearch = async ({
 }): Promise<PerformMatchSearchResponse> => {
   const searchRequest = buildSearchRequest({ index, term, fields, size });
 
-  logger.info(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
+  logger.debug(`Elasticsearch search request: ${JSON.stringify(searchRequest, null, 2)}`);
 
   let response;
   try {
@@ -343,7 +343,7 @@ export const performMatchSearch = async ({
   }
 
   let hitOrder = response.hits.hits.map((hit) => hit._id!);
-  logger.info(
+  logger.debug(
     `Search returned ${hitOrder.length} hits: [${hitOrder.join(
       ', '
     )}], rerankCandidateDocs=${rerankCandidateDocs}, useSnippets=${useSnippets}`
@@ -351,7 +351,7 @@ export const performMatchSearch = async ({
 
   if (rerankCandidateDocs) {
     const originalOrder = hitOrder;
-    logger.info(`Entering RERANK candidate docs block with ${hitOrder.length} docs`);
+    logger.debug(`Entering RERANK candidate docs block with ${hitOrder.length} docs`);
     try {
       hitOrder = await rerankDocuments({
         docIds: hitOrder,
@@ -362,7 +362,7 @@ export const performMatchSearch = async ({
         esClient,
         logger,
       });
-      logger.info(
+      logger.debug(
         `RERANK candidate docs: before=[${originalOrder.join(', ')}] after=[${hitOrder.join(', ')}]`
       );
     } catch (error) {
