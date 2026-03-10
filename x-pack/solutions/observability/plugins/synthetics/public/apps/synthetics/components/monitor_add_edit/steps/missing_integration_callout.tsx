@@ -6,18 +6,21 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMonitorIntegrationHealth } from '../../common/hooks/use_monitor_integration_health';
+import { getStatusLabel } from '../../common/hooks/status_labels';
 
 export const MissingIntegrationCallout = ({ configId }: { configId: string }) => {
-  const { hasMissingIntegrations, resetMonitor, isResetting } = useMonitorIntegrationHealth({
-    configIds: [configId],
-  });
+  const { hasMissingIntegrations, getMissingStatuses, resetMonitor, isResetting } =
+    useMonitorIntegrationHealth({
+      configIds: [configId],
+    });
 
   const [resetSuccess, setResetSuccess] = useState(false);
 
   const isMissing = hasMissingIntegrations(configId);
+  const missingStatuses = getMissingStatuses(configId);
 
   const handleReset = useCallback(async () => {
     await resetMonitor(configId);
@@ -52,7 +55,22 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
         iconType="warning"
         data-test-subj="syntheticsMissingIntegrationCallout"
       >
-        <p>{CALLOUT_DESCRIPTION}</p>
+        {missingStatuses.length > 0 && (
+          <EuiText size="s">
+            <ul>
+              {missingStatuses.map((s) => {
+                const label = getStatusLabel(s.status);
+                return (
+                  <li key={s.locationId}>
+                    <strong>{s.locationLabel}</strong>
+                    {label ? `: ${label}` : ''}
+                  </li>
+                );
+              })}
+            </ul>
+          </EuiText>
+        )}
+        <EuiSpacer size="s" />
         <EuiButton
           data-test-subj="syntheticsMissingIntegrationResetButton"
           color="warning"
@@ -70,14 +88,6 @@ export const MissingIntegrationCallout = ({ configId }: { configId: string }) =>
 const CALLOUT_TITLE = i18n.translate('xpack.synthetics.missingIntegration.callout.title', {
   defaultMessage: 'Missing Fleet integration',
 });
-
-const CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.missingIntegration.callout.description',
-  {
-    defaultMessage:
-      'This monitor is missing its Fleet package policy on one or more private locations. The monitor will not run until the integration is restored. Click "Reset monitor" to recreate the policy.',
-  }
-);
 
 const RESET_BUTTON_LABEL = i18n.translate('xpack.synthetics.missingIntegration.resetButton', {
   defaultMessage: 'Reset monitor',

@@ -12,14 +12,15 @@ import {
   getMonitorListPageStateWithDefaults,
   selectMonitorListState,
 } from '../../../state';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, LocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { fetchMonitorHealthAction, selectMonitorHealth } from '../../../state/monitor_health';
-import { LocationHealthStatusValue } from '../../../state/monitor_health/models';
 
 export interface MonitorIntegrationStatus {
   configId: string;
   locationId: string;
+  locationLabel: string;
   policyId: string;
+  status: LocationHealthStatusValue;
   isMissing: boolean;
 }
 
@@ -34,6 +35,7 @@ interface UseMonitorIntegrationHealthReturn {
   resetMonitor: (configId: string) => Promise<void>;
   resetMonitors: (configIds: string[]) => Promise<void>;
   hasMissingIntegrations: (configId: string) => boolean;
+  getMissingStatuses: (configId: string) => MonitorIntegrationStatus[];
   getMissingCount: () => number;
   getMissingCountForLocation: (locationId: string) => number;
   getMissingConfigIdsForLocation: (locationId: string) => string[];
@@ -92,7 +94,9 @@ export const useMonitorIntegrationHealth = (
       const locationStatuses: MonitorIntegrationStatus[] = monitor.locations.map((loc) => ({
         configId: monitor.configId,
         locationId: loc.locationId,
+        locationLabel: loc.locationLabel,
         policyId: loc.policyId,
+        status: loc.status,
         isMissing: loc.status !== LocationHealthStatusValue.Healthy,
       }));
       map.set(monitor.configId, locationStatuses);
@@ -105,6 +109,14 @@ export const useMonitorIntegrationHealth = (
     (configId: string): boolean => {
       const entries = statuses.get(configId);
       return entries?.some((s) => s.isMissing) ?? false;
+    },
+    [statuses]
+  );
+
+  const getMissingStatuses = useCallback(
+    (configId: string): MonitorIntegrationStatus[] => {
+      const entries = statuses.get(configId);
+      return entries?.filter((s) => s.isMissing) ?? [];
     },
     [statuses]
   );
@@ -163,6 +175,7 @@ export const useMonitorIntegrationHealth = (
     resetMonitor,
     resetMonitors,
     hasMissingIntegrations,
+    getMissingStatuses,
     getMissingCount,
     getMissingCountForLocation,
     getMissingConfigIdsForLocation,

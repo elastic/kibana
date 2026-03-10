@@ -39,6 +39,7 @@ import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_integration_health';
+import { getStatusLabel } from '../../../common/hooks/status_labels';
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
@@ -60,7 +61,7 @@ export function useMonitorListColumns({
   const { space } = useKibanaSpace();
 
   const { alertStatus, updateAlertEnabledState } = useMonitorAlertEnable();
-  const { hasMissingIntegrations } = useMonitorIntegrationHealth();
+  const { hasMissingIntegrations, getMissingStatuses } = useMonitorIntegrationHealth();
 
   const isActionLoading = (fields: EncryptedSyntheticsSavedMonitor) => {
     return alertStatus(fields[ConfigKey.CONFIG_ID]) === FETCH_STATUS.LOADING;
@@ -85,14 +86,26 @@ export function useMonitorListColumns({
       }),
       sortable: true,
       render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
-        const isMissing = hasMissingIntegrations(monitor[ConfigKey.CONFIG_ID]);
+        const configId = monitor[ConfigKey.CONFIG_ID];
+        const isMissing = hasMissingIntegrations(configId);
+        const missingStatuses = getMissingStatuses(configId);
+        const tooltipContent =
+          missingStatuses.length > 0
+            ? missingStatuses
+                .map(
+                  (s) =>
+                    `${s.locationLabel}: ${getStatusLabel(s.status) ?? MISSING_INTEGRATION_BADGE}`
+                )
+                .join('\n')
+            : MISSING_INTEGRATION_BADGE;
+
         return (
           <span>
             <MonitorDetailsLink monitor={monitor} />
             {isMissing && (
               <>
                 {' '}
-                <EuiToolTip content={MISSING_INTEGRATION_TOOLTIP}>
+                <EuiToolTip content={tooltipContent}>
                   <EuiIcon
                     type="warning"
                     color="warning"
@@ -392,10 +405,3 @@ const MISSING_INTEGRATION_BADGE = i18n.translate(
   }
 );
 
-const MISSING_INTEGRATION_TOOLTIP = i18n.translate(
-  'xpack.synthetics.management.monitorList.missingIntegration.tooltip',
-  {
-    defaultMessage:
-      'This monitor is missing its Fleet package policy on one or more private locations and will not run until reset.',
-  }
-);
