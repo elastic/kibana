@@ -8,7 +8,12 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { AuthMode, GetTokenOpts, OAuthGetTokenOpts } from '@kbn/connector-specs';
+import type {
+  AuthMode,
+  EarsGetTokenOpts,
+  GetTokenOpts,
+  OAuthGetTokenOpts,
+} from '@kbn/connector-specs';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
@@ -317,11 +322,14 @@ export const getAxiosInstanceWithAuth = ({
             if (!connectorTokenClient) {
               throw new Error('ConnectorTokenClient is required for EARS OAuth flow');
             }
+            // todo: think about how to get rid of the implicit connection between authTypeId and opts.kind
+            // todo: might be better to to have separate opts types for the 3 different auth types
+            const earsOpts = opts as EarsGetTokenOpts;
             return await getEarsAccessToken({
               connectorId,
               logger,
               configurationUtilities,
-              tokenUrl: resolveEarsUrl(opts.tokenUrl, configurationUtilities.getEarsUrl()),
+              tokenUrl: resolveEarsUrl(earsOpts.tokenUrl, configurationUtilities.getEarsUrl()),
               connectorTokenClient,
               authMode,
               profileUid,

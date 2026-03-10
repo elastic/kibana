@@ -52,6 +52,7 @@ export const Ears: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
+        kind: 'ears',
         tokenUrl: `/${secret.provider}/oauth/token`,
         scope: secret.scope,
       });
