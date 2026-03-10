@@ -13,21 +13,23 @@ import type {
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
+  StepStabilityLevel,
   WorkflowStepExecutionDto,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
+import { getBuiltInStepDefinition } from '../spec/builtin_step_definitions';
 import type {
   BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   MergeStep,
   ParallelStep,
   Step,
   WaitStep,
+  WhileStep,
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
@@ -85,11 +87,11 @@ export function isCancelableStatus(status: ExecutionStatus) {
 
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
-export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
 export const isForeachStep = (step: Step): step is ForEachStep => step.type === 'foreach';
+export const isWhileStep = (step: Step): step is WhileStep => step.type === 'while';
 export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
 export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
 export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';
@@ -111,3 +113,6 @@ export const isHttpMethod = (method: string): method is HttpMethod =>
 
 export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
   BuiltInStepProperties.includes(property as BuiltInStepProperty);
+
+export const getBuiltInStepStability = (type: string): StepStabilityLevel | undefined =>
+  getBuiltInStepDefinition(type)?.stability;

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { SOURCES_TYPES } from '@kbn/esql-types';
-import type { ESQLAstAllCommands } from '../../../types';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { isSubQuery, isSource } from '@elastic/esql';
 import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../complete_items';
 import {
   getSourcesFromCommands,
@@ -21,7 +22,6 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { isSubQuery, isSource } from '../../../ast/is';
 import { esqlCommandRegistry } from '../../../..';
 import {
   getIndicesBrowserSuggestion,

@@ -52,6 +52,7 @@ jest.mock('react-redux', () => {
 const panelContextValue = {
   eventId: 'event id',
   dataFormattedForFieldBrowser: [],
+  searchHit: { _index: 'test', _id: 'test-id' },
 } as unknown as DocumentDetailsContext;
 
 const mockGlobalStateWithSavedTimeline: State = {
@@ -131,9 +132,20 @@ describe('NotesDetails', () => {
       },
     });
 
+    const contextValue = {
+      ...panelContextValue,
+      searchHit: {
+        _index: 'test',
+        _id: 'test-id',
+        fields: {
+          'kibana.alert.rule.uuid': ['rule-uuid'],
+        },
+      },
+    } as unknown as DocumentDetailsContext;
+
     const { getByText } = render(
       <TestProviders store={store}>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <NotesDetails />
         </DocumentDetailsContext.Provider>
       </TestProviders>

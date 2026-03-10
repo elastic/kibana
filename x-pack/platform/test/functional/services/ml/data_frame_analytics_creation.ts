@@ -726,7 +726,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertInitialCloneJobConfigStep(job: DataFrameAnalyticsConfig) {
-      const jobType = Object.keys(job.analysis)[0];
+      const jobType = Object.keys(job.analysis!)[0];
       const jobTypeAttribute = `mlAnalyticsCreation-${jobType}-option`;
       await this.assertJobTypeSelection(jobTypeAttribute);
       if (isClassificationAnalysis(job.analysis) || isRegressionAnalysis(job.analysis)) {
@@ -741,7 +741,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     async assertInitialCloneJobAdditionalOptionsStep(
       analysis: DataFrameAnalyticsConfig['analysis']
     ) {
-      const jobType = Object.keys(analysis)[0];
+      const jobType = Object.keys(analysis!)[0];
       if (isClassificationAnalysis(analysis) || isRegressionAnalysis(analysis)) {
         // @ts-ignore
         await this.assertPredictionFieldNameValue(analysis[jobType].prediction_field_name);

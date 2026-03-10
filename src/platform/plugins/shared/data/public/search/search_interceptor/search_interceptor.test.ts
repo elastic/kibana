@@ -33,7 +33,6 @@ import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { getMockSearchConfig } from '../../../config.mock';
 import type { ICPSManager } from '@kbn/cps-utils';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
 
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
@@ -2242,13 +2241,13 @@ describe('SearchInterceptor', () => {
   });
 
   describe('project_routing parameter handling', () => {
-    const createMockCPSManager = (
-      projectRouting: string | undefined,
-      access: ProjectRoutingAccess = ProjectRoutingAccess.EDITABLE
-    ): ICPSManager =>
+    const createMockCPSManager = (projectRouting: string | undefined): ICPSManager =>
       ({
-        getProjectRouting: jest.fn().mockReturnValue(projectRouting),
-        getProjectPickerAccess: jest.fn().mockReturnValue(access),
+        getProjectRouting: jest
+          .fn()
+          .mockImplementation(
+            (passedProjectRouting?: string) => passedProjectRouting ?? projectRouting
+          ),
       } as unknown as ICPSManager);
 
     const getSearchInterceptor = (overrides?: Partial<SearchInterceptorDeps>) => {
@@ -2276,7 +2275,7 @@ describe('SearchInterceptor', () => {
     });
 
     describe('ESQL_ASYNC_SEARCH_STRATEGY', () => {
-      test('User passes "_alias:*" with global "_alias:_origin" - does not send to ES', async () => {
+      test('User passes "_alias:*" with global "_alias:_origin" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
           getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
@@ -2292,10 +2291,10 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.projectRouting).toBeUndefined();
+        expect(requestBody.projectRouting).toBe('_alias:*');
       });
 
-      test('User passes "_alias:*" with global "_alias:*" - does not send to ES', async () => {
+      test('User passes "_alias:*" with global "_alias:*" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
           getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
         });
@@ -2311,7 +2310,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.projectRouting).toBeUndefined();
+        expect(requestBody.projectRouting).toBe('_alias:*');
       });
 
       test('User passes "_alias:_origin" with global "_alias:_origin" - sends to ES', async () => {
@@ -2368,7 +2367,7 @@ describe('SearchInterceptor', () => {
         expect(requestBody.projectRouting).toBe('_alias:_origin');
       });
 
-      test('User passes nothing with global "_alias:*" - does not send to ES', async () => {
+      test('User passes nothing with global "_alias:*" - sends global to ES', async () => {
         searchInterceptor = getSearchInterceptor({
           getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:*')),
         });
@@ -2381,7 +2380,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.projectRouting).toBeUndefined();
+        expect(requestBody.projectRouting).toBe('_alias:*');
       });
 
       test('User passes nothing with global undefined - does not send to ES', async () => {
@@ -2419,7 +2418,7 @@ describe('SearchInterceptor', () => {
     });
 
     describe('ENHANCED_ES_SEARCH_STRATEGY', () => {
-      test('User passes "_alias:*" with global "_alias:_origin" - does not send to ES', async () => {
+      test('User passes "_alias:*" with global "_alias:_origin" - sends to ES', async () => {
         searchInterceptor = getSearchInterceptor({
           getCPSManager: jest.fn().mockReturnValue(createMockCPSManager('_alias:_origin')),
         });
@@ -2435,7 +2434,7 @@ describe('SearchInterceptor', () => {
           mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
         )[1];
         const requestBody = JSON.parse(requestOptions.body as string);
-        expect(requestBody.projectRouting).toBeUndefined();
+        expect(requestBody.projectRouting).toBe('_alias:*');
       });
 
       test('User passes "_alias:_origin" with global "_alias:*" - sends to ES', async () => {

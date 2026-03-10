@@ -28,6 +28,8 @@ import {
   LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
 
+type TitleFontWeightString = Extract<TitleFontWeight, string>;
+
 /** Get default layout config based on primary metric position */
 const getDefaultLayoutConfig = (
   primaryMetricPosition: PrimaryMetricPosition,
@@ -61,6 +63,10 @@ export function MetricAppearanceSettings({
 }) {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
+  const titleWeightValue: TitleFontWeightString =
+    state.titleWeight === 'normal' || state.titleWeight === 'bold'
+      ? state.titleWeight
+      : (LENS_METRIC_STATE_DEFAULTS.titleWeight as TitleFontWeightString);
 
   const disabledStates = {
     subtitle: !!state.breakdownByAccessor,
@@ -155,7 +161,7 @@ export function MetricAppearanceSettings({
           label={i18n.translate('xpack.lens.metric.appearancePopover.fontWeight', {
             defaultMessage: 'Font weight',
           })}
-          value={state.titleWeight ?? LENS_METRIC_STATE_DEFAULTS.titleWeight}
+          value={titleWeightValue}
           options={fontWeightOptions}
           onChange={(id) => {
             setState({
@@ -340,7 +346,7 @@ const iconPositionOptions: Array<EuiButtonGroupOptionProps & { id: IconPosition 
   },
 ];
 
-const fontWeightOptions: Array<EuiButtonGroupOptionProps & { id: TitleFontWeight }> = [
+const fontWeightOptions: Array<EuiButtonGroupOptionProps & { id: TitleFontWeightString }> = [
   {
     id: 'normal',
     label: i18n.translate('xpack.lens.metric.appearancePopover.regular', {

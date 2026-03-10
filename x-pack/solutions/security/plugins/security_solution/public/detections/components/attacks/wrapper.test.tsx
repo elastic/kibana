@@ -13,6 +13,7 @@ import {
   SKELETON_TEST_ID,
   Wrapper,
 } from './wrapper';
+import { UNINITIALIZED_DATA_VIEW_EMPTY_STATE_TEST_ID } from './uninitialized_empty_state/uninitialized_data_view_empty_state';
 import { TestProviders } from '../../../common/mock';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
@@ -102,13 +103,17 @@ describe('<Wrapper />', () => {
       );
     });
 
-    it('should render an error if the dataView status is ready but it has no indices', async () => {
+    it('should render the uninitialized empty state if the dataView status is ready but it has no indices', async () => {
+      const mockDataView = {
+        ...dataView,
+        getName: jest.fn().mockReturnValue('My Data View'),
+        getIndexPattern: jest.fn().mockReturnValue('my-pattern-*'),
+        getRuntimeMappings: jest.fn(),
+        hasMatchedIndices: jest.fn().mockReturnValue(false),
+      };
+
       (useDataView as jest.Mock).mockReturnValue({
-        dataView: {
-          ...dataView,
-          getRuntimeMappings: jest.fn(),
-          hasMatchedIndices: jest.fn().mockReturnValue(false),
-        },
+        dataView: mockDataView,
         status: 'ready',
       });
 
@@ -119,9 +124,10 @@ describe('<Wrapper />', () => {
       );
 
       expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to retrieve the data view'
-      );
+      expect(screen.queryByTestId(DATA_VIEW_ERROR_TEST_ID)).not.toBeInTheDocument();
+      expect(
+        await screen.findByTestId(UNINITIALIZED_DATA_VIEW_EMPTY_STATE_TEST_ID)
+      ).toBeInTheDocument();
     });
 
     it('should render the content', async () => {

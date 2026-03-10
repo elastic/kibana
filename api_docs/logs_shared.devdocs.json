@@ -2159,7 +2159,7 @@
               "Filter",
               ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
               "Filter",
-              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
@@ -2225,7 +2225,7 @@
               "GetStoppedPartitionResult",
               ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
               "GetDatafeedResultsChartDataResult",
-              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
@@ -2235,7 +2235,7 @@
               },
               " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
               "QueryDslQueryContainer",
-              " | undefined): ",
+              "): ",
               "Observable",
               "<",
               "ExplorerChartsData",

@@ -423,7 +423,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             data-test-subj={getTestId('platforms-input')}
             isInvalid={hasPlatformError && hasPlatformBeenChanged}
             fullWidth
-            options={SUPPORTED_HOST_OS_TYPE.map((platform) => ({
+            options={SUPPORTED_HOST_OS_TYPE.toSorted().map((platform) => ({
               label: OS_TITLES[platform],
             }))}
             selectedOptions={selectedPlatforms}

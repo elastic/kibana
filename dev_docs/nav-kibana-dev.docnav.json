@@ -660,9 +660,6 @@
           "id": "kibTelemetryPluginApi"
         },
         {
-          "id": "kibUiActionsEnhancedPluginApi"
-        },
-        {
           "id": "kibUiActionsPluginApi"
         },
         {

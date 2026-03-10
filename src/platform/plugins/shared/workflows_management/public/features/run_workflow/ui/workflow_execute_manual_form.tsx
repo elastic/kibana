@@ -15,10 +15,11 @@ import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
 import {
   applyInputDefaults,
-  makeWorkflowInputsValidator,
   normalizeInputsToJsonSchema,
 } from '@kbn/workflows/spec/lib/input_conversion';
 import type { z } from '@kbn/zod/v4';
+import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
+import { buildInputsZodValidator } from '../../../../common/lib/json_schema_to_zod';
 import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 interface WorkflowExecuteManualFormProps {
@@ -27,48 +28,6 @@ interface WorkflowExecuteManualFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
-}
-
-/**
- * Generates a sample object from a JSON Schema
- */
-function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
-  if (schema.default !== undefined) {
-    return schema.default;
-  }
-
-  switch (schema.type) {
-    case 'string':
-      return schema.format === 'email' ? 'user@example.com' : 'string';
-    case 'number':
-      return 0;
-    case 'integer':
-      return 0;
-    case 'boolean':
-      return false;
-    case 'array': {
-      const items = schema.items as JSONSchema7 | undefined;
-      if (items) {
-        return [generateSampleFromJsonSchema(items)];
-      }
-      return [];
-    }
-    case 'object': {
-      const sample: Record<string, unknown> = {};
-      if (schema.properties) {
-        for (const [key, propSchema] of Object.entries(schema.properties)) {
-          const prop = propSchema as JSONSchema7;
-          const isRequired = schema.required?.includes(key) ?? false;
-          if (isRequired || prop.default !== undefined) {
-            sample[key] = generateSampleFromJsonSchema(prop);
-          }
-        }
-      }
-      return sample;
-    }
-    default:
-      return undefined;
-  }
 }
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
@@ -106,7 +65,7 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(definition?.inputs),
+    () => buildInputsZodValidator(normalizeInputsToJsonSchema(definition?.inputs)),
     [definition?.inputs]
   );
 

@@ -15,6 +15,7 @@ import { otelSendotlp } from '../fixtures/synthtrace/otel_sendotlp';
 import { adserviceEdot } from '../fixtures/synthtrace/adservice_edot';
 import { mobileServices } from '../fixtures/synthtrace/mobile_services';
 import { awsLambda } from '../fixtures/synthtrace/aws_lambda';
+import { azureFunctions } from '../fixtures/synthtrace/azure_functions';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 
@@ -78,6 +79,14 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(awsLambdaData);
     log.info('AWS Lambda service data indexed');
+
+    // Generate Azure Functions service data for cold start chart tests
+    const azureFunctionsData = azureFunctions({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(azureFunctionsData);
+    log.info('Azure Functions service data indexed');
 
     log.info('Cleaning up APM ML indices before running the APM tests');
     const jobs = await esClient.ml.getJobs();

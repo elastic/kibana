@@ -75,7 +75,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(core?.uiSettings);
 
   return (
     <>
