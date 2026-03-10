@@ -21,16 +21,16 @@ export interface StepExecuteManualFormProps {
   value: string;
   onChange: (value: string) => void;
   errors: string | null;
-  inputsJsonSchema?: z.core.JSONSchema.BaseSchema;
+  contextJsonSchema?: z.core.JSONSchema.BaseSchema;
 }
 
 export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
-  ({ value, onChange, errors, inputsJsonSchema }) => {
+  ({ value, onChange, errors, contextJsonSchema }) => {
     // Hook Monaco on mount to register the schema for validation + suggestions
     const mountedOnce = useRef(false);
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
-        if (!inputsJsonSchema || mountedOnce.current) return;
+        if (!contextJsonSchema || mountedOnce.current) return;
         mountedOnce.current = true;
 
         try {
@@ -44,7 +44,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
               {
                 uri: SCHEMA_URI, // schema URI
                 fileMatch: [currentModel?.uri.toString() ?? ''], // bind to this specific model URI
-                schema: inputsJsonSchema,
+                schema: contextJsonSchema,
               },
             ],
           });
@@ -52,7 +52,7 @@ export const StepExecuteManualForm = React.memo<StepExecuteManualFormProps>(
           // Monaco setup failed - fall back to basic JSON editing
         }
       },
-      [inputsJsonSchema]
+      [contextJsonSchema]
     );
 
     return (

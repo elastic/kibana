@@ -46,7 +46,7 @@ export interface StepExecuteHistoricalFormProps {
   /** Step id when not from editor focus (e.g. from replay); used for useWorkflowStepExecutions and labels */
   stepId: string;
   /** JSON Schema for the step inputs */
-  inputsJsonSchema?: z.core.JSONSchema.BaseSchema;
+  contextJsonSchema?: z.core.JSONSchema.BaseSchema;
 }
 
 export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormProps>(
@@ -58,7 +58,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     initialStepExecutionId,
     initialWorkflowRunId,
     stepId,
-    inputsJsonSchema,
+    contextJsonSchema,
   }) => {
     const { euiTheme } = useEuiTheme();
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(
@@ -197,7 +197,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     const mountedOnce = useRef(false);
     const handleMount = useCallback(
       (editor: monaco.editor.IStandaloneCodeEditor) => {
-        if (!inputsJsonSchema || mountedOnce.current) return;
+        if (!contextJsonSchema || mountedOnce.current) return;
         mountedOnce.current = true;
 
         try {
@@ -211,7 +211,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
               {
                 uri: SCHEMA_URI, // schema URI
                 fileMatch: [currentModel?.uri.toString() ?? ''], // bind to this specific model URI
-                schema: inputsJsonSchema,
+                schema: contextJsonSchema,
               },
             ],
           });
@@ -219,7 +219,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
           // Monaco setup failed - fall back to basic JSON editing
         }
       },
-      [inputsJsonSchema]
+      [contextJsonSchema]
     );
 
     return (

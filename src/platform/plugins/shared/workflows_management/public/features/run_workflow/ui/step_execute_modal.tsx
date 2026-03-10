@@ -74,28 +74,23 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
   }) => {
     useWorkflowsMonacoTheme();
     const { euiTheme } = useEuiTheme();
-    const initialInputs = useMemo(
-      () => initialcontextOverride.stepContext.inputs ?? {},
-      [initialcontextOverride.stepContext.inputs]
+    const stepContextOverride = useMemo(
+      () => initialcontextOverride.stepContext ?? {},
+      [initialcontextOverride.stepContext]
     );
     const [selectedTab, setSelectedTab] = useState<StepInputTab>(
       initialTab ?? (initialStepExecutionId ? 'historical' : 'manual')
     );
     const [inputsJson, setInputsJson] = React.useState<string>(
-      JSON.stringify(initialInputs, null, 2)
+      JSON.stringify(stepContextOverride, null, 2)
     );
-    const [stepInputs, setStepInputs] = useState<Record<string, unknown>>(initialInputs);
+    const [stepInputs, setStepInputs] = useState<Record<string, unknown>>(stepContextOverride);
     const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
 
-    const inputsJsonSchema = useMemo(() => {
-      if (
-        initialcontextOverride.schema instanceof z.ZodObject &&
-        initialcontextOverride.schema.shape.inputs
-      ) {
-        return z.toJSONSchema(initialcontextOverride.schema.shape.inputs, { target: 'draft-7' });
-      }
-      return undefined;
-    }, [initialcontextOverride.schema]);
+    const contextJsonSchema = useMemo(
+      () => z.toJSONSchema(initialcontextOverride.schema, { target: 'draft-7' }),
+      [initialcontextOverride.schema]
+    );
 
     const modalTitleId = useGeneratedHtmlId();
 
@@ -118,12 +113,12 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
 
     const handleChangeTab = useCallback(
       (tab: StepInputTab) => {
-        setInputsJson(JSON.stringify(initialInputs, null, 2));
-        setStepInputs(initialInputs);
+        setInputsJson(JSON.stringify(stepContextOverride, null, 2));
+        setStepInputs(stepContextOverride);
         setExecutionInputErrors(null);
         setSelectedTab(tab);
       },
-      [initialInputs]
+      [stepContextOverride]
     );
 
     const handleSubmit = useCallback(() => {
@@ -227,7 +222,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                   value={inputsJson}
                   onChange={handleInputChange}
                   errors={executionInputErrors}
-                  inputsJsonSchema={inputsJsonSchema}
+                  contextJsonSchema={contextJsonSchema}
                 />
               )}
               {selectedTab === 'historical' && (
@@ -239,7 +234,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
                   initialStepExecutionId={initialStepExecutionId ?? undefined}
                   initialWorkflowRunId={initialWorkflowRunId ?? undefined}
                   stepId={stepId}
-                  inputsJsonSchema={inputsJsonSchema}
+                  contextJsonSchema={contextJsonSchema}
                 />
               )}
             </EuiFlexItem>
