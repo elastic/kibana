@@ -144,7 +144,7 @@ export function getActionOptions(
         description: i18n.translate('workflows.actionsMenu.dataSetDescription', {
           defaultMessage: 'Define or compute variables to use in your workflow',
         }),
-        iconType: 'tableOfContents',
+        iconType: 'database',
       },
     ],
   };

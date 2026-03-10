@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,
@@ -28,6 +28,7 @@ export type SkillsDirectoryStructure = Directory<{
     platform: FileDirectory<{
       dashboard: FileDirectory;
       visualization: FileDirectory;
+      workflows: FileDirectory;
     }>;
     observability: FileDirectory<{}>;
     security: FileDirectory<{
@@ -36,6 +37,7 @@ export type SkillsDirectoryStructure = Directory<{
       }>;
       entities: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
+      ml: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

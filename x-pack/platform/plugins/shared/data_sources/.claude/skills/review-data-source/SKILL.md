@@ -84,6 +84,20 @@ validation against the vendor API.
 - **Icon**: Data source has an icon (ConnectorIconsMap entry and, if custom, spec icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
 
+#### Docs quality checks
+
+If the PR includes documentation changes in `docs/reference/connectors-kibana/`, run the following skills on each
+connector doc file. These require skills from https://github.com/elastic/elastic-docs-skills — if any are
+unavailable, tell the user to install them (`curl -sSL https://raw.githubusercontent.com/elastic/elastic-docs-skills/main/install.sh | bash`).
+
+1. **`docs-check-style`** — Elastic style guide compliance. Flag violations.
+2. **`crosslink-validator`** — Validate cross-links resolve. Flag broken links.
+3. **`frontmatter-audit`** — Check `applies_to`, `description`, `navigation_title` completeness.
+4. **`content-type-checker`** — Verify page follows correct content type guidelines.
+5. **`applies-to-tagging`** — Validate `applies_to` tags match connector availability.
+
+Report documentation issues alongside code issues.
+
 ### Naming and conventions
 
 - Directory and file names follow repo conventions (e.g. snake_case for dirs/files; camelCase for TS exports)
