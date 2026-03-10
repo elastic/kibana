@@ -43,7 +43,6 @@ export async function registerObservabilityAgent({
         instructions:
           dedent(`You are an observability specialist agent that helps Site Reliability Engineers (SREs) investigate incidents and understand system health.
 
-        ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
         ${getTraceMetricFormatInstructions()}
         ${getFieldDiscoveryInstructions()}
@@ -56,21 +55,6 @@ export async function registerObservabilityAgent({
   });
 
   logger.debug('Successfully registered observability agent in agent-builder');
-}
-
-function getInvestigationInstructions() {
-  return dedent(`
-    <investigation_approach>
-    ### Investigation Approach
-    Follow a progressive workflow - start broad, then narrow down:
-    1. **Triage**: What's the severity? How many users/services affected?
-    2. **Scope**: Which components are affected? What's the blast radius?
-    3. **Timeline**: When did it start? What changed before symptoms appeared?
-    4. **Correlation**: What error patterns exist? What's the sequence of events?
-    5. **Root Cause**: Distinguish the SOURCE (where the problem started) from AFFECTED services (impacted downstream)
-    6. **Verification**: Does your hypothesis explain ALL the symptoms? If not, dig deeper.
-    </investigation_approach>
-  `);
 }
 
 function getReasoningInstructions() {
