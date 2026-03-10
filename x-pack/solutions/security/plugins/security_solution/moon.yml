@@ -281,6 +281,8 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-rendering-browser'
+  - '@kbn/anonymization-plugin'
+  - '@kbn/anonymization-common'
 tags:
   - plugin
   - prod
