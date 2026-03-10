@@ -64,6 +64,11 @@ export const i18nStrings = {
         defaultMessage: 'Endpoints',
       }),
     },
+    artifacts: {
+      title: i18n.translate('securitySolutionPackages.navLinks.assets.artifacts', {
+        defaultMessage: 'Artifacts',
+      }),
+    },
     integrationsCallout: {
       title: i18n.translate('securitySolutionPackages.navLinks.assets.integrationsCallout.title', {
         defaultMessage: 'Integrations',

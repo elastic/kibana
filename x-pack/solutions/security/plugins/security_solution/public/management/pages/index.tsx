@@ -30,20 +30,15 @@ import {
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
-import { TrustedAppsContainer } from './trusted_apps';
 import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { EventFiltersContainer } from './event_filters';
 import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
-import { BlocklistContainer } from './blocklist';
 import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
-import { TrustedDevicesContainer } from './trusted_devices';
-import { EndpointExceptionsContainer } from './endpoint_exceptions';
 import { ScriptsLibraryContainer } from './scripts_library';
+import { ArtifactsPage } from './artifacts';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -56,41 +51,6 @@ const PolicyTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.policies}>
     <PolicyContainer />
     <SpyRoute pageName={SecurityPageName.policies} />
-  </TrackApplicationView>
-);
-
-const EndpointExceptionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.endpointExceptions}>
-    <EndpointExceptionsContainer />
-    <SpyRoute pageName={SecurityPageName.endpointExceptions} />
-  </TrackApplicationView>
-);
-
-const TrustedAppTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.trustedApps}>
-    <TrustedAppsContainer />
-    <SpyRoute pageName={SecurityPageName.trustedApps} />
-  </TrackApplicationView>
-);
-
-const TrustedDevicesTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.trustedDevices}>
-    <TrustedDevicesContainer />
-    <SpyRoute pageName={SecurityPageName.trustedDevices} />
-  </TrackApplicationView>
-);
-
-const EventFilterTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.eventFilters}>
-    <EventFiltersContainer />
-    <SpyRoute pageName={SecurityPageName.eventFilters} />
-  </TrackApplicationView>
-);
-
-const HostIsolationExceptionsTelemetry = () => (
-  <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
-    <HostIsolationExceptionsContainer />
-    <SpyRoute pageName={SecurityPageName.hostIsolationExceptions} />
   </TrackApplicationView>
 );
 
@@ -173,35 +133,35 @@ export const ManagementContainer = memo(() => {
       {endpointExceptionsMovedUnderManagement && (
         <PrivilegedRoute
           path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
-          component={EndpointExceptionsTelemetry}
+          component={ArtifactsPage}
           hasPrivilege={canReadEndpointExceptions}
         />
       )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
-        component={TrustedAppTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadTrustedApplications}
       />
       {trustedDevicesEnabled && (
         <PrivilegedRoute
           path={MANAGEMENT_ROUTING_TRUSTED_DEVICES_PATH}
-          component={TrustedDevicesTelemetry}
+          component={ArtifactsPage}
           hasPrivilege={canReadTrustedDevices}
         />
       )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
-        component={EventFilterTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadEventFilters}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
-        component={HostIsolationExceptionsTelemetry}
+        component={ArtifactsPage}
         hasPrivilege={canReadHostIsolationExceptions}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
-        component={BlocklistContainer}
+        component={ArtifactsPage}
         hasPrivilege={canReadBlocklist}
       />
       <PrivilegedRoute
