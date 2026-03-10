@@ -42,13 +42,17 @@ export const AgentOnboardingPanel: FunctionComponent = () => {
     );
   }
 
-  const installCommand = data
+  const installSkillCommand = data
+    ? `curl ${data.skillInstallScriptUrl} -so install_agent_skill.sh && bash install_agent_skill.sh --kibana-url=${data.kibanaUrl}`
+    : undefined;
+
+  const runOnboardingCommand = data
     ? [
-        'claude /plugin marketplace add elastic/agent-skills-sandbox',
-        '',
-        `export ES_ONBOARDING_KEY=${data.apiKeyEncoded}`,
+        `export ES_SHIPPER_KEY=${data.shipperApiKeyEncoded}`,
+        `export ES_VERIFICATION_KEY=${data.verificationApiKeyEncoded}`,
         `export ES_HOST=${data.elasticsearchUrl}`,
         `export KIBANA_URL=${data.kibanaUrl}`,
+        `export ELASTIC_STACK_VERSION=${data.stackVersion}`,
         '',
         'claude "help me onboard elastic"',
       ].join('\n')
@@ -93,11 +97,45 @@ export const AgentOnboardingPanel: FunctionComponent = () => {
           },
           {
             title: i18n.translate(
-              'xpack.observability_onboarding.agentOnboardingPanel.runOnboardingLabel',
-              { defaultMessage: 'Run the onboarding command in your terminal' }
+              'xpack.observability_onboarding.agentOnboardingPanel.installSkillLabel',
+              { defaultMessage: 'Download the onboarding skill' }
             ),
             status: 'incomplete',
-            children: installCommand ? (
+            children: installSkillCommand ? (
+              <>
+                <EuiText>
+                  <p>
+                    {i18n.translate(
+                      'xpack.observability_onboarding.agentOnboardingPanel.installSkillDescription',
+                      {
+                        defaultMessage:
+                          'Run the following command to download the Elastic Observability onboarding skill for Claude Code:',
+                      }
+                    )}
+                  </p>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="text"
+                  data-test-subj="observabilityOnboardingAgentSkillInstallSnippet"
+                >
+                  {installSkillCommand}
+                </EuiCodeBlock>
+                <EuiSpacer />
+                <CopyToClipboardButton textToCopy={installSkillCommand} fill={false} />
+              </>
+            ) : (
+              <EuiSkeletonText lines={3} />
+            ),
+          },
+          {
+            title: i18n.translate(
+              'xpack.observability_onboarding.agentOnboardingPanel.runOnboardingLabel',
+              { defaultMessage: 'Start the AI-guided onboarding' }
+            ),
+            status: 'incomplete',
+            children: runOnboardingCommand ? (
               <>
                 <EuiText>
                   <p>
@@ -105,7 +143,7 @@ export const AgentOnboardingPanel: FunctionComponent = () => {
                       'xpack.observability_onboarding.agentOnboardingPanel.runOnboardingDescription',
                       {
                         defaultMessage:
-                          'Copy and paste the following commands into your terminal. Claude will auto-detect your environment, propose a setup plan, and install the right collector for your systems.',
+                          'Set the environment variables and start Claude Code. It will auto-detect your environment, propose a setup plan, and install the right collector for your systems.',
                       }
                     )}
                   </p>
@@ -116,10 +154,10 @@ export const AgentOnboardingPanel: FunctionComponent = () => {
                   language="text"
                   data-test-subj="observabilityOnboardingAgentOnboardingPanelCodeSnippet"
                 >
-                  {installCommand}
+                  {runOnboardingCommand}
                 </EuiCodeBlock>
                 <EuiSpacer />
-                <CopyToClipboardButton textToCopy={installCommand} fill />
+                <CopyToClipboardButton textToCopy={runOnboardingCommand} fill />
                 <EuiSpacer size="l" />
                 <EuiText size="s" color="subdued">
                   <p>
