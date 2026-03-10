@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useRef, useMemo, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -137,19 +137,27 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
   const { createRule, isLoading: isCreating } = useCreateRule({
     http,
     notifications,
-    onSuccess,
   });
 
   const { updateRule, isLoading: isUpdating } = useUpdateRule({
     http,
     notifications,
     ruleId: ruleId ?? '',
-    onSuccess,
   });
+
+  // Keep a stable ref so the internalSubmit callback doesn't re-create on every render
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
 
   // Resolve the effective submit handler: external callback takes precedence,
   // otherwise use updateRule for edits (ruleId present) or createRule for new rules.
-  const internalSubmit = ruleId ? updateRule : createRule;
+  const internalSubmit = useCallback(
+    (values: FormValues) => {
+      const mutate = ruleId ? updateRule : createRule;
+      mutate(values, { onSuccess: onSuccessRef.current });
+    },
+    [ruleId, createRule, updateRule]
+  );
   const onSubmit = externalOnSubmit ?? internalSubmit;
   const isSubmitting = externalIsSubmitting || isCreating || isUpdating;
 

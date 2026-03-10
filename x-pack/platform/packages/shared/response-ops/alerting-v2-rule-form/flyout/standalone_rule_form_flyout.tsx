@@ -43,11 +43,10 @@ const StandaloneRuleFormFlyoutInner: React.FC<StandaloneRuleFormFlyoutProps> = (
   const { createRule, isLoading } = useCreateRule({
     http: services.http,
     notifications: services.notifications,
-    onSuccess: onClose ?? (() => {}),
   });
 
   const handleSubmit = (values: FormValues) => {
-    createRule(values);
+    createRule(values, { onSuccess: onClose });
   };
 
   return (
