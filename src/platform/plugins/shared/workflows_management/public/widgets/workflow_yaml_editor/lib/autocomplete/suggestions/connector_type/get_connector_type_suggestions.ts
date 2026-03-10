@@ -280,7 +280,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
     },
   ];
 
-  const stepTypes = stepSchemas.map(({ schema, description, icon, ...rest }) => {
+  const stepTypes = stepSchemas.map(({ schema, description, icon, loopOnly = false }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
     const stepType = typeField.def.values[0]; // Get the literal value from z.literal()
@@ -289,7 +289,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
       type: stepType,
       description,
       icon,
-      ...('loopOnly' in rest && { loopOnly: (rest as { loopOnly?: boolean }).loopOnly }),
+      loopOnly,
     };
   });
 
