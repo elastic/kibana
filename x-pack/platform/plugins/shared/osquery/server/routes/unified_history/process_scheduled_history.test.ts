@@ -6,10 +6,11 @@
  */
 
 import {
-  extractPackIdFromBucket,
   resolvePackFilterForKuery,
   processScheduledHistory,
+  getPacksForSpace,
   ScheduledExecutionBucket,
+  PackSO,
 } from './process_scheduled_history';
 
 const createMockBucket = (
@@ -28,112 +29,86 @@ const createMockBucket = (
     ...overrides,
   } as ScheduledExecutionBucket);
 
+const createMockPackSO = (overrides: Partial<PackSO> = {}): PackSO => ({
+  id: 'pack-1',
+  attributes: {
+    name: 'Test Pack',
+    queries: [
+      {
+        schedule_id: 'schedule-1',
+        name: 'uptime',
+        id: 'q1',
+        query: 'SELECT * FROM uptime',
+      },
+    ],
+  } as PackSO['attributes'],
+  ...overrides,
+});
+
 describe('process_scheduled_history', () => {
-  describe('extractPackIdFromBucket', () => {
-    it('returns pack_id from pack_id_hit when present', () => {
-      const bucket = createMockBucket({
-        pack_id_hit: {
-          hits: {
-            hits: [{ _source: { pack_id: 'pack-123' } }],
-          },
-        },
+  describe('getPacksForSpace', () => {
+    it('fetches all packs and maps to PackSO shape', async () => {
+      const mockFind = jest.fn().mockResolvedValue({
+        saved_objects: [
+          { id: 'pack-1', attributes: { name: 'Pack 1', queries: [] } },
+          { id: 'pack-2', attributes: { name: 'Pack 2', queries: [] } },
+        ],
       });
-      expect(extractPackIdFromBucket(bucket)).toBe('pack-123');
-    });
+      const mockClient = { find: mockFind } as never;
 
-    it('returns undefined when pack_id_hit is absent', () => {
-      const bucket = createMockBucket();
-      expect(extractPackIdFromBucket(bucket)).toBeUndefined();
-    });
+      const result = await getPacksForSpace(mockClient);
 
-    it('returns undefined when pack_id_hit has no hits', () => {
-      const bucket = createMockBucket({
-        pack_id_hit: { hits: { hits: [] } },
-      });
-      expect(extractPackIdFromBucket(bucket)).toBeUndefined();
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ id: 'pack-1', attributes: { name: 'Pack 1', queries: [] } });
+      expect(mockFind).toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 1000 })
+      );
     });
   });
 
   describe('resolvePackFilterForKuery', () => {
-    it('returns packIds when pack name matches', async () => {
-      const packObjects = [
-        { id: 'pack-1', attributes: { name: 'uptime pack', queries: [] } },
-        { id: 'pack-2', attributes: { name: 'uptime checks', queries: [] } },
+    it('returns packIds when pack name matches', () => {
+      const packSOs: PackSO[] = [
+        { id: 'pack-1', attributes: { name: 'uptime pack', queries: [] } as PackSO['attributes'] },
+        {
+          id: 'pack-2',
+          attributes: { name: 'uptime checks', queries: [] } as PackSO['attributes'],
+        },
       ];
-      const mockFind = jest.fn().mockResolvedValueOnce({ saved_objects: packObjects });
-      const mockClient = {
-        find: mockFind,
-        bulkGet: jest.fn(),
-      } as never;
 
-      const result = await resolvePackFilterForKuery(mockClient, 'uptime');
+      const result = resolvePackFilterForKuery(packSOs, 'uptime');
 
       expect(result.packIds).toEqual(['pack-1', 'pack-2']);
-      expect(mockFind).toHaveBeenCalledTimes(1);
     });
 
-    it('returns scheduleIds when query matches', async () => {
-      const mockClient = {
-        find: jest.fn().mockResolvedValueOnce({
-          saved_objects: [
-            {
-              id: 'pack-1',
-              attributes: {
-                name: 'My Pack',
-                queries: [
-                  { schedule_id: 'sched-1', name: 'uptime', id: 'q1', query: 'select 1' },
-                  { schedule_id: 'sched-2', name: 'os', id: 'q2', query: 'select 2' },
-                ],
-              },
-            },
-          ],
-        }),
-        bulkGet: jest.fn(),
-      } as never;
+    it('returns scheduleIds when query matches', () => {
+      const packSOs: PackSO[] = [
+        {
+          id: 'pack-1',
+          attributes: {
+            name: 'My Pack',
+            queries: [
+              { schedule_id: 'sched-1', name: 'uptime', id: 'q1', query: 'select 1' },
+              { schedule_id: 'sched-2', name: 'os', id: 'q2', query: 'select 2' },
+            ],
+          } as PackSO['attributes'],
+        },
+      ];
 
-      const result = await resolvePackFilterForKuery(mockClient, 'uptime');
+      const result = resolvePackFilterForKuery(packSOs, 'uptime');
 
       expect(result.scheduleIds).toContain('sched-1');
     });
   });
 
   describe('processScheduledHistory', () => {
-    it('maps buckets to ScheduledHistoryRow', async () => {
-      const bucket = createMockBucket({
-        pack_id_hit: {
-          hits: {
-            hits: [{ _source: { pack_id: 'pack-1' } }],
-          },
-        },
-      });
+    it('maps buckets to ScheduledHistoryRow using pack lookup', () => {
+      const bucket = createMockBucket();
+      const packSOs = [createMockPackSO()];
 
-      const mockBulkGet = jest.fn().mockResolvedValue({
-        saved_objects: [
-          {
-            id: 'pack-1',
-            attributes: {
-              name: 'Test Pack',
-              queries: [
-                {
-                  schedule_id: 'schedule-1',
-                  name: 'uptime',
-                  id: 'q1',
-                  query: 'SELECT * FROM uptime',
-                },
-              ],
-            },
-          },
-        ],
-      });
-
-      const mockClient = {
-        find: jest.fn(),
-        bulkGet: mockBulkGet,
-      } as never;
-
-      const result = await processScheduledHistory({
+      const result = processScheduledHistory({
         scheduledBuckets: [bucket],
-        spaceScopedClient: mockClient,
+        packSOs,
         spaceId: 'default',
       });
 
@@ -151,18 +126,29 @@ describe('process_scheduled_history', () => {
       expect(result[0].packName).toBe('Test Pack');
     });
 
-    it('returns empty array when no buckets', async () => {
-      const mockBulkGet = jest.fn();
-      const mockClient = { find: jest.fn(), bulkGet: mockBulkGet } as never;
-
-      const result = await processScheduledHistory({
+    it('returns empty array when no buckets', () => {
+      const result = processScheduledHistory({
         scheduledBuckets: [],
-        spaceScopedClient: mockClient,
+        packSOs: [],
         spaceId: 'default',
       });
 
       expect(result).toHaveLength(0);
-      expect(mockBulkGet).not.toHaveBeenCalled();
+    });
+
+    it('resolves names even without pack_id in response docs', () => {
+      const bucket = createMockBucket();
+      const packSOs = [createMockPackSO()];
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs,
+        spaceId: 'default',
+      });
+
+      expect(result[0].queryName).toBe('uptime');
+      expect(result[0].packName).toBe('Test Pack');
+      expect(result[0].packId).toBe('pack-1');
     });
   });
 });

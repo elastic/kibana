@@ -111,9 +111,6 @@ export const buildScheduledResponsesQuery = ({
             error_count: {
               filter: { exists: { field: 'error' } },
             },
-            pack_id_hit: {
-              top_hits: { size: 1, _source: { includes: ['pack_id'] } },
-            },
           },
         },
       },

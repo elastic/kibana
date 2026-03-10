@@ -93,17 +93,6 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(subAggs.max_timestamp).toEqual({ max: { field: '@timestamp' } });
     });
-
-    test('includes pack_id_hit top_hits sub-aggregation', () => {
-      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId });
-      const aggs = result.body.aggs as Record<string, unknown>;
-      const scheduledExec = aggs.scheduled_executions as Record<string, unknown>;
-      const subAggs = scheduledExec.aggs as Record<string, unknown>;
-
-      expect(subAggs.pack_id_hit).toEqual({
-        top_hits: { size: 1, _source: { includes: ['pack_id'] } },
-      });
-    });
   });
 
   describe('base filters', () => {

@@ -28,6 +28,7 @@ import { mergeRows } from './merge_rows';
 import { decodeCursor, encodeCursor, computePaginationCursors } from './cursor_utils';
 import { processLiveHistory } from './process_live_history';
 import {
+  getPacksForSpace,
   resolvePackFilterForKuery,
   processScheduledHistory,
   type ScheduledAggregations,
@@ -116,10 +117,16 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             request
           );
 
+          // Fetch all packs once — used for both kuery filtering and
+          // resolving query names on scheduled rows.
+          const packSOs = includeScheduled
+            ? await getPacksForSpace(spaceScopedClient)
+            : [];
+
           let packIdsForQuery: string[] | undefined;
           let scheduleIdsForQuery: string[] | undefined;
           if (kuery && includeScheduled) {
-            const resolved = await resolvePackFilterForKuery(spaceScopedClient, kuery);
+            const resolved = resolvePackFilterForKuery(packSOs, kuery);
             packIdsForQuery = resolved.packIds;
             scheduleIdsForQuery = resolved.scheduleIds;
           }
@@ -200,9 +207,9 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             ?.scheduled_executions;
           const scheduledBuckets = scheduledAgg?.buckets ?? [];
 
-          const allScheduledRows = await processScheduledHistory({
+          const allScheduledRows = processScheduledHistory({
             scheduledBuckets,
-            spaceScopedClient,
+            packSOs,
             spaceId,
           });
 

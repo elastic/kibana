@@ -21,11 +21,6 @@ export interface ScheduledExecutionBucket {
   total_rows: { value: number };
   success_count: { doc_count: number };
   error_count: { doc_count: number };
-  pack_id_hit?: {
-    hits: {
-      hits: Array<{ _source?: { pack_id?: string } }>;
-    };
-  };
 }
 
 export interface ScheduledAggregations {
@@ -39,25 +34,35 @@ export interface ResolvePackFilterResult {
   scheduleIds?: string[];
 }
 
-export const extractPackIdFromBucket = (bucket: ScheduledExecutionBucket): string | undefined =>
-  bucket.pack_id_hit?.hits?.hits?.[0]?._source?.pack_id;
+export type PackSO = { id: string; attributes: PackSavedObject };
 
-const kueryMatches = (kuery: string, value: string | undefined): boolean =>
-  !!value && value.toLowerCase().includes(kuery.toLowerCase());
-
-export const resolvePackFilterForKuery = async (
-  spaceScopedClient: SavedObjectsClientContract,
-  kuery: string
-): Promise<ResolvePackFilterResult> => {
-  const packIds = new Set<string>();
-  const scheduleIds = new Set<string>();
-
+/**
+ * Fetches all pack saved objects for the current space.
+ * Note: perPage capped at 1000 — sufficient for expected pack volumes.
+ * If deployments exceed this limit, implement pagination here.
+ */
+export const getPacksForSpace = async (
+  spaceScopedClient: SavedObjectsClientContract
+): Promise<PackSO[]> => {
   const allPacks = await spaceScopedClient.find<PackSavedObject>({
     type: packSavedObjectType,
     perPage: 1000,
   });
 
-  for (const so of allPacks.saved_objects) {
+  return allPacks.saved_objects.map((so) => ({ id: so.id, attributes: so.attributes }));
+};
+
+const kueryMatches = (kuery: string, value: string | undefined): boolean =>
+  !!value && value.toLowerCase().includes(kuery.toLowerCase());
+
+export const resolvePackFilterForKuery = (
+  packSOs: PackSO[],
+  kuery: string
+): ResolvePackFilterResult => {
+  const packIds = new Set<string>();
+  const scheduleIds = new Set<string>();
+
+  for (const so of packSOs) {
     if (kueryMatches(kuery, so.attributes.name)) {
       packIds.add(so.id);
     }
@@ -83,38 +88,20 @@ export const resolvePackFilterForKuery = async (
 
 export interface ProcessScheduledHistoryParams {
   scheduledBuckets: ScheduledExecutionBucket[];
-  spaceScopedClient: SavedObjectsClientContract;
+  packSOs: PackSO[];
   spaceId: string;
 }
 
-export const processScheduledHistory = async ({
+export const processScheduledHistory = ({
   scheduledBuckets,
-  spaceScopedClient,
+  packSOs,
   spaceId,
-}: ProcessScheduledHistoryParams): Promise<ScheduledHistoryRow[]> => {
-  const bucketPackIds = scheduledBuckets
-    .map(extractPackIdFromBucket)
-    .filter((id): id is string => !!id);
-  const uniquePackIds = [...new Set(bucketPackIds)];
-
-  let packSOs: Array<{ id: string; attributes: PackSavedObject }>;
-  if (uniquePackIds.length > 0) {
-    const bulkResult = await spaceScopedClient.bulkGet<PackSavedObject>(
-      uniquePackIds.map((id) => ({ id, type: packSavedObjectType }))
-    );
-    packSOs = bulkResult.saved_objects
-      .filter((so) => !so.error)
-      .map((so) => ({ id: so.id, attributes: so.attributes }));
-  } else {
-    packSOs = [];
-  }
-
+}: ProcessScheduledHistoryParams): ScheduledHistoryRow[] => {
   const packLookup = buildPackLookup(packSOs, spaceId);
 
   return scheduledBuckets.map((bucket) => {
     const scheduleId = bucket.key[0];
     const executionCount = bucket.key[1];
-    const bucketPackId = extractPackIdFromBucket(bucket);
     const packContext = packLookup.get(scheduleId);
 
     return {
@@ -126,7 +113,7 @@ export const processScheduledHistory = async ({
       queryName: packContext?.queryName,
       source: 'Scheduled' as const,
       packName: packContext?.packName,
-      packId: packContext?.packId ?? bucketPackId,
+      packId: packContext?.packId,
       spaceId,
       agentCount: bucket.agent_count.value,
       successCount: bucket.success_count.doc_count,
