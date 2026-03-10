@@ -34,7 +34,8 @@ const openOverviewTab = async (
   await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
 };
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/256841
+spaceTest.describe.skip(
   'Traces in Discover - Overview tab content and actions',
   {
     tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
