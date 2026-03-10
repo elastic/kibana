@@ -20,6 +20,13 @@ const PUBLIC_API_HEADERS = {
 
 /** Root wired stream to fork children from (guaranteed after enablement). */
 const WIRED_ROOT_STREAM = 'logs.otel';
+/**
+ * Root streams are selectively immutable. In particular, updating `wired.fields`
+ * on the root stream is rejected by the Streams API. For "high in hierarchy"
+ * amplification tests that need mutable fields, we create a scale parent under
+ * the root and hang the large hierarchy below it.
+ */
+const WIRED_SCALE_PARENT_STREAM = `${WIRED_ROOT_STREAM}.perf_parent`;
 
 const INTERNAL_API_HEADERS = {
   'kbn-xsrf': 'streams-perf-test',
@@ -56,6 +63,28 @@ function isAlreadyExistsConflict(error: unknown): boolean {
 function isLockContentionError(error: unknown): boolean {
   const err = error as { response?: { status?: number } };
   return err?.response?.status === 422;
+}
+
+/** HTTP 500 where the body indicates a request timeout (backend finished too late). */
+function isRequestTimeoutError(error: unknown): boolean {
+  const err = error as { response?: { status?: number; data?: { message?: string } } };
+  return (
+    err?.response?.status === 500 && /request timed out/i.test(err?.response?.data?.message ?? '')
+  );
+}
+
+/** Quick probe to check whether a stream already exists. */
+async function checkStreamExists(kibanaServer: KibanaServer, streamName: string): Promise<boolean> {
+  try {
+    await kibanaServer.request({
+      path: `/api/streams/${streamName}`,
+      method: 'GET',
+      headers: PUBLIC_API_HEADERS,
+    });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function sleep(ms: number): Promise<void> {
@@ -289,6 +318,23 @@ export async function createWiredStreamHierarchy(kibanaServer: KibanaServer, log
   log.info('Wired stream hierarchy created');
 }
 
+async function ensureScaleParentStream(kibanaServer: KibanaServer, log: ToolingLog): Promise<void> {
+  const exists = await checkStreamExists(kibanaServer, WIRED_SCALE_PARENT_STREAM);
+  if (exists) return;
+
+  log.info(
+    `Creating scale parent stream ${WIRED_SCALE_PARENT_STREAM} under ${WIRED_ROOT_STREAM}...`
+  );
+  await forkStream(
+    kibanaServer,
+    WIRED_ROOT_STREAM,
+    WIRED_SCALE_PARENT_STREAM,
+    'resource.attributes.service.name',
+    'perf-parent'
+  );
+  log.info(`Scale parent stream created: ${WIRED_SCALE_PARENT_STREAM}`);
+}
+
 /** Setup for the streams listing page journey. */
 export async function setupListingPageData(
   kibanaServer: KibanaServer,
@@ -317,19 +363,20 @@ const DEFAULT_WIRED_HIERARCHY_COUNT = 100;
 async function createLargeWiredHierarchyViaFork(
   kibanaServer: KibanaServer,
   log: ToolingLog,
+  parentStreamName: string,
   count: number
 ) {
-  log.info(`Creating ${count} wired child streams via serial fork...`);
+  log.info(`Creating ${count} wired child streams under ${parentStreamName} via serial fork...`);
 
   for (let i = 1; i <= count; i++) {
-    const childName = `${WIRED_ROOT_STREAM}.perf_child_${String(i).padStart(4, '0')}`;
+    const childName = `${parentStreamName}.perf_child_${String(i).padStart(4, '0')}`;
     const conditionValue = `perf-service-${i}`;
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         await forkStream(
           kibanaServer,
-          WIRED_ROOT_STREAM,
+          parentStreamName,
           childName,
           'resource.attributes.service.name',
           conditionValue
@@ -355,7 +402,7 @@ async function createLargeWiredHierarchyViaFork(
     }
   }
 
-  log.info(`Finished creating ${count} wired child streams via fork`);
+  log.info(`Finished creating ${count} wired child streams under ${parentStreamName} via fork`);
 }
 
 /**
@@ -455,13 +502,18 @@ async function uploadContentPack(
 }
 
 /** Update root routing after batched imports. */
-async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, count: number) {
-  log.info(`Updating root stream routing to include all ${count} children...`);
+async function updateRootRouting(
+  kibanaServer: KibanaServer,
+  log: ToolingLog,
+  rootStreamName: string,
+  count: number
+) {
+  log.info(`Updating ${rootStreamName} routing to include all ${count} children...`);
 
   const allRouting = [];
   for (let i = 1; i <= count; i++) {
     allRouting.push({
-      destination: `${WIRED_ROOT_STREAM}.perf_child_${String(i).padStart(4, '0')}`,
+      destination: `${rootStreamName}.perf_child_${String(i).padStart(4, '0')}`,
       where: { field: 'resource.attributes.service.name', eq: `perf-service-${i}` },
       status: 'enabled' as const,
     });
@@ -469,11 +521,11 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
 
   // Root streams cannot use `inherit` for lifecycle/failure_store.
   const response = await kibanaServer.request<{ ingest: Record<string, unknown> }>({
-    path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
+    path: `/api/streams/${rootStreamName}/_ingest`,
     method: 'GET',
     headers: PUBLIC_API_HEADERS,
   });
-  log.info('Fetched current root stream ingest settings');
+  log.info(`Fetched current ingest settings for ${rootStreamName}`);
 
   const currentIngest = response.data;
   const { processing, settings, lifecycle, failure_store, wired } = currentIngest.ingest as {
@@ -489,7 +541,7 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       await kibanaServer.request({
-        path: `/api/streams/${WIRED_ROOT_STREAM}/_ingest`,
+        path: `/api/streams/${rootStreamName}/_ingest`,
         method: 'PUT',
         headers: PUBLIC_API_HEADERS,
         body: {
@@ -517,7 +569,7 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
     }
   }
 
-  log.info(`Root stream routing updated with ${count} routing rules`);
+  log.info(`${rootStreamName} routing updated with ${count} routing rules`);
 }
 
 /**
@@ -527,13 +579,14 @@ async function updateRootRouting(kibanaServer: KibanaServer, log: ToolingLog, co
 async function createLargeWiredHierarchyViaImport(
   kibanaServer: KibanaServer,
   log: ToolingLog,
+  rootStreamName: string,
   count: number
 ) {
   const IMPORT_BATCH_SIZE = 50;
   const totalBatches = Math.ceil(count / IMPORT_BATCH_SIZE);
 
   log.info(
-    `Creating ${count} wired child streams via content import ` +
+    `Creating ${count} wired child streams under ${rootStreamName} via content import ` +
       `(${totalBatches} batches of up to ${IMPORT_BATCH_SIZE})...`
   );
 
@@ -565,10 +618,11 @@ async function createLargeWiredHierarchyViaImport(
         `archive ${Math.round(archiveBuffer.length / 1024)} KB, importing...`
     );
 
+    const probeChild = `${rootStreamName}.perf_child_${String(batchStart).padStart(4, '0')}`;
     let lastError: unknown;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        await uploadContentPack(kibanaServer, WIRED_ROOT_STREAM, archiveBuffer, {
+        await uploadContentPack(kibanaServer, rootStreamName, archiveBuffer, {
           objects: { all: {} },
         });
         lastError = undefined;
@@ -576,14 +630,32 @@ async function createLargeWiredHierarchyViaImport(
       } catch (err) {
         lastError = err;
         if (isAlreadyExistsConflict(err)) {
-          // A previous attempt (that timed out or errored) already created these
-          // streams. Retrying will never succeed, so treat the batch as done.
           log.warning(
             `  Batch ${batchIndex + 1}/${totalBatches}: streams already exist ` +
               `(prior attempt likely succeeded before timeout), continuing`
           );
           lastError = undefined;
           break;
+        }
+        if (isRequestTimeoutError(err)) {
+          const exists = await checkStreamExists(kibanaServer, probeChild);
+          if (exists) {
+            log.warning(
+              `  Batch ${batchIndex + 1}/${totalBatches}: HTTP 500 timeout but ` +
+                `${probeChild} exists, treating as done`
+            );
+            lastError = undefined;
+            break;
+          }
+          if (attempt < MAX_RETRIES) {
+            const delay = RETRY_BASE_DELAY_MS * attempt;
+            log.warning(
+              `  Batch ${batchIndex + 1}/${totalBatches}: HTTP 500 timeout and ` +
+                `${probeChild} not found, retrying in ${delay}ms...`
+            );
+            await sleep(delay);
+            continue;
+          }
         }
         if ((isConflictError(err) || isLockContentionError(err)) && attempt < MAX_RETRIES) {
           const code = isLockContentionError(err) ? 422 : 409;
@@ -607,9 +679,11 @@ async function createLargeWiredHierarchyViaImport(
     }
   }
 
-  await updateRootRouting(kibanaServer, log, count);
+  await updateRootRouting(kibanaServer, log, rootStreamName, count);
 
-  log.info(`Finished creating ${count} wired child streams via batched content import`);
+  log.info(
+    `Finished creating ${count} wired child streams under ${rootStreamName} via batched content import`
+  );
 }
 
 /**
@@ -634,9 +708,9 @@ export async function createLargeWiredHierarchy(
   log.info(`Raised cluster.max_shards_per_node to ${maxShardsPerNode}`);
 
   if (strategy === 'fork') {
-    await createLargeWiredHierarchyViaFork(kibanaServer, log, count);
+    await createLargeWiredHierarchyViaFork(kibanaServer, log, WIRED_ROOT_STREAM, count);
   } else {
-    await createLargeWiredHierarchyViaImport(kibanaServer, log, count);
+    await createLargeWiredHierarchyViaImport(kibanaServer, log, WIRED_ROOT_STREAM, count);
   }
 }
 
@@ -659,7 +733,21 @@ export async function setupLargeWiredHierarchy(
   }
 
   await enableStreams(kibanaServer, log);
-  await createLargeWiredHierarchy(kibanaServer, es, log, options);
+
+  // For at-scale hierarchy amplification tests, use a mutable non-root parent stream.
+  await ensureScaleParentStream(kibanaServer, log);
+  const { count = DEFAULT_WIRED_HIERARCHY_COUNT, strategy = 'import' } = options;
+  const maxShardsPerNode = count * 4;
+  await es.cluster.putSettings({
+    persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
+  });
+  log.info(`Raised cluster.max_shards_per_node to ${maxShardsPerNode}`);
+
+  if (strategy === 'fork') {
+    await createLargeWiredHierarchyViaFork(kibanaServer, log, WIRED_SCALE_PARENT_STREAM, count);
+  } else {
+    await createLargeWiredHierarchyViaImport(kibanaServer, log, WIRED_SCALE_PARENT_STREAM, count);
+  }
 }
 
 const CHILD_STREAM = `${WIRED_ROOT_STREAM}.child1`;

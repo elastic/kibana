@@ -25,16 +25,20 @@ export const journey = new Journey({
   })
   .step('Configure new field mapping', async ({ page, inputDelays }) => {
     const comboBox = page.locator(subj('streamsAppSchemaEditorAddFieldFlyoutFieldName'));
-    await comboBox.locator('input[role="combobox"]').click();
-    await comboBox
-      .locator('input[role="combobox"]')
-      .type('attributes.perf_test_field', { delay: inputDelays.TYPING });
+    const comboInput = comboBox.locator('input[role="combobox"]');
+    await comboInput.click();
+    await comboInput.pressSequentially('attributes.perf_scale_new_field', {
+      delay: inputDelays.TYPING,
+    });
     await page.keyboard.press('Enter');
 
     await page.click(subj('streamsAppFieldFormTypeSelect'));
     await page.click(subj('option-type-keyword'));
   })
   .step('Add field mapping', async ({ page }) => {
+    await page.waitForSelector(`${subj('streamsAppSchemaEditorAddFieldButton')}:not([disabled])`, {
+      timeout: 30000,
+    });
     await page.click(subj('streamsAppSchemaEditorAddFieldButton'));
     await page.waitForSelector(subj('streamsAppSchemaEditorAddFieldFlyoutCloseButton'), {
       state: 'detached',
