@@ -216,11 +216,14 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       try {
         // Track the current save promise to wait for it before proceeding to next index
         let currentSavePromise: Promise<void> | null = null;
-        let checkResult: {
-          partitionedFieldMetadata: PartitionedFieldMetadata | null;
-          pattern: string;
-          error: string | null;
-        } | null = null;
+        let checkResult:
+          | {
+              partitionedFieldMetadata: PartitionedFieldMetadata | null;
+              pattern: string;
+              error: string | null;
+            }
+          | null
+          | undefined = null;
 
         await checkIndex({
           abortController: abortController.current,
