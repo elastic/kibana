@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import { executeDashboardOperations, type DashboardOperation } from './operations';
+import { executeDashboardOperations } from './operations';
+import type { DashboardOperation } from './operation_schemas';
 
 const createMockLogger = (): Logger =>
   ({

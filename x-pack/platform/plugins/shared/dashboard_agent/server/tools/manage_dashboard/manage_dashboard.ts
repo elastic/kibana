@@ -28,7 +28,8 @@ import {
   resolvePanelsFromAttachments,
   type VisualizationFailure,
 } from './utils';
-import { dashboardOperationSchema, executeDashboardOperations } from './operations';
+import { executeDashboardOperations } from './operations';
+import { dashboardOperationSchema } from './operation_schemas';
 import { getDataViewsServiceFactory } from '../../kibana_services';
 import { resolveControlDataViewId as resolveControlDataViewIdFromInput } from './data_view_id_resolver';
 
