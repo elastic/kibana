@@ -87,7 +87,9 @@ export function generateOtelcolConfig(
             : {}),
         };
 
-        otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        if (Object.keys(attributesTransform).length > 0) {
+          otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+        }
 
         if (stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true) {
           if (!otelConfig?.connectors) {
@@ -215,15 +217,10 @@ function generateOTelAttributesTransform(
   let transformStatements: Record<string, any> = {};
 
   if (dynamicSignalTypes && streamPipelines) {
-    // When dynamic_signal_types is true, extract signal types from pipeline IDs
-    // and generate transforms for each. This allows the collector to route data
-    // to the appropriate datastreams based on the pipelines configured in the policy.
-    const signalTypes = extractSignalTypesFromPipelines(streamPipelines);
-    // Generate transforms for each signal type found in pipelines
-    signalTypes.forEach((signalType) => {
-      const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
-      Object.assign(transformStatements, typeTransforms);
-    });
+    // When dynamic_signal_types is true, skip routing transforms entirely.
+    // The ES exporter handles routing based on scope.name, explicit data_stream.*
+    // payload attributes, and signal type.
+    return {};
   } else {
     // Default: single signal type from stream.data_stream.type
     transformStatements = generateOtelTypeTransforms(type, dataset, namespace);

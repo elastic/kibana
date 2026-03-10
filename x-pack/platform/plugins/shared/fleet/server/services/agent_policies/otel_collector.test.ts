@@ -787,117 +787,39 @@ describe('generateOtelcolConfig', () => {
       ],
     ]);
 
-    it('should generate transform with multiple signal type statements when dynamic_signal_types is true', () => {
+    it('should not generate routing transform when dynamic_signal_types is true', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
       const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
 
-      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
-        log_statements: [
-          {
-            context: 'log',
-            statements: [
-              'set(attributes["data_stream.type"], "logs")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        metric_statements: [
-          {
-            context: 'datapoint',
-            statements: [
-              'set(attributes["data_stream.type"], "metrics")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        trace_statements: [
-          {
-            context: 'span',
-            statements: [
-              'set(attributes["data_stream.type"], "traces")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-          {
-            context: 'spanevent',
-            statements: [
-              'set(attributes["data_stream.type"], "logs")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        profile_statements: [
-          {
-            context: 'profile',
-            statements: [
-              'set(attributes["data_stream.type"], "profiles")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
+      // No routing transform processor should be present
+      expect(
+        result.processors?.['transform/test-multi-signal-stream-id-1-routing']
+      ).toBeUndefined();
+
+      // Pipeline processors should not include routing transform
+      Object.values(result.service?.pipelines ?? {}).forEach((pipeline) => {
+        expect(pipeline.processors ?? []).not.toContain(
+          'transform/test-multi-signal-stream-id-1-routing'
+        );
       });
     });
 
-    it('should generate transform with multiple signal type statements when dynamic_signal_types is true and pipelines have simple names', () => {
+    it('should not generate routing transform when dynamic_signal_types is true and pipelines have simple names', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes2];
       const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
 
-      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
-        log_statements: [
-          {
-            context: 'log',
-            statements: [
-              'set(attributes["data_stream.type"], "logs")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        metric_statements: [
-          {
-            context: 'datapoint',
-            statements: [
-              'set(attributes["data_stream.type"], "metrics")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        trace_statements: [
-          {
-            context: 'span',
-            statements: [
-              'set(attributes["data_stream.type"], "traces")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-          {
-            context: 'spanevent',
-            statements: [
-              'set(attributes["data_stream.type"], "logs")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        profile_statements: [
-          {
-            context: 'profile',
-            statements: [
-              'set(attributes["data_stream.type"], "profiles")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
+      expect(
+        result.processors?.['transform/test-multi-signal-stream-id-1-routing']
+      ).toBeUndefined();
+
+      Object.values(result.service?.pipelines ?? {}).forEach((pipeline) => {
+        expect(pipeline.processors ?? []).not.toContain(
+          'transform/test-multi-signal-stream-id-1-routing'
+        );
       });
     });
 
-    it('should generate transform with only specified signal types when pipelines have subset', () => {
+    it('should not generate routing transform when dynamic_signal_types is true with subset of pipelines', () => {
       const baseStream = otelInputWithMultipleSignalTypes.streams?.[0];
       if (!baseStream) {
         throw new Error('Test data is invalid');
@@ -925,32 +847,15 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithSubsetSignalTypes];
       const result = generateOtelcolConfig(inputs, defaultOutput, packageInfoCache);
 
-      expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
-        log_statements: [
-          {
-            context: 'log',
-            statements: [
-              'set(attributes["data_stream.type"], "logs")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-        metric_statements: [
-          {
-            context: 'datapoint',
-            statements: [
-              'set(attributes["data_stream.type"], "metrics")',
-              'set(attributes["data_stream.dataset"], "multidataset")',
-              'set(attributes["data_stream.namespace"], "default")',
-            ],
-          },
-        ],
-      });
-      // Should not have trace_statements
       expect(
-        result.processors?.['transform/test-multi-signal-stream-id-1-routing']?.trace_statements
+        result.processors?.['transform/test-multi-signal-stream-id-1-routing']
       ).toBeUndefined();
+
+      Object.values(result.service?.pipelines ?? {}).forEach((pipeline) => {
+        expect(pipeline.processors ?? []).not.toContain(
+          'transform/test-multi-signal-stream-id-1-routing'
+        );
+      });
     });
 
     it('should fall back to single signal type when dynamic_signal_types is false', () => {
