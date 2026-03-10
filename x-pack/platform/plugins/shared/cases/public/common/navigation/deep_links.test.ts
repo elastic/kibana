@@ -8,7 +8,7 @@
 import { getCasesDeepLinks } from './deep_links';
 
 describe('getCasesDeepLinks', () => {
-  it('it returns the deep links', () => {
+  it('it returns the deep links without templates by default', () => {
     const deepLinks = getCasesDeepLinks({});
     expect(deepLinks).toEqual({
       id: 'cases',
@@ -29,7 +29,7 @@ describe('getCasesDeepLinks', () => {
     });
   });
 
-  it('it returns the deep links with a different base bath', () => {
+  it('it returns the deep links with a different base path', () => {
     const deepLinks = getCasesDeepLinks({ basePath: '/test' });
     expect(deepLinks).toEqual({
       id: 'cases',
@@ -157,5 +157,37 @@ describe('getCasesDeepLinks', () => {
         },
       ],
     });
+  });
+
+  it('it includes templates link when templatesEnabled is true', () => {
+    const deepLinks = getCasesDeepLinks({ templatesEnabled: true });
+    expect(deepLinks).toEqual({
+      id: 'cases',
+      path: '/cases',
+      title: 'Cases',
+      deepLinks: [
+        {
+          id: 'cases_create',
+          path: '/cases/create',
+          title: 'Create',
+        },
+        {
+          id: 'cases_configure',
+          path: '/cases/configure',
+          title: 'Settings',
+        },
+        {
+          id: 'cases_templates',
+          path: '/cases/templates',
+          title: 'Templates',
+        },
+      ],
+    });
+  });
+
+  it('it excludes templates link when templatesEnabled is false', () => {
+    const deepLinks = getCasesDeepLinks({ templatesEnabled: false });
+    expect(deepLinks.deepLinks).toHaveLength(2);
+    expect(deepLinks.deepLinks.map((link) => link.id)).toEqual(['cases_create', 'cases_configure']);
   });
 });

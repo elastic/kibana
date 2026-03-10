@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/unified-data-table'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
