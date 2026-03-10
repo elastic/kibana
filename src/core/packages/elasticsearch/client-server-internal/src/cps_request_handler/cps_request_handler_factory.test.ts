@@ -11,6 +11,7 @@ import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { PROJECT_ROUTING_ORIGIN, PROJECT_ROUTING_ALL, getSpaceNPRE } from '@kbn/cps-server-utils';
+import { loggerMock } from '@kbn/logging-mocks';
 import { getRequestHandlerFactory } from './cps_request_handler_factory';
 
 const makeSearchParams = (body?: Record<string, unknown>): TransportRequestParams => ({
@@ -20,24 +21,11 @@ const makeSearchParams = (body?: Record<string, unknown>): TransportRequestParam
   body: body ?? {},
 });
 
-// Mock logger for all tests
-const createMockLogger = (): jest.Mocked<Logger> => ({
-  info: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
-  trace: jest.fn(),
-  fatal: jest.fn(),
-  log: jest.fn(),
-  get: jest.fn(() => createMockLogger()),
-  isLevelEnabled: jest.fn((level) => true),
-});
-
 describe('getRequestHandlerFactory', () => {
   let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
-    mockLogger = createMockLogger();
+    mockLogger = loggerMock.create();
   });
 
   describe('without request (internal user)', () => {

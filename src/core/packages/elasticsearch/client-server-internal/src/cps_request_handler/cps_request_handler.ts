@@ -101,11 +101,9 @@ export function getCpsRequestHandler(
     }
     (options.context as any).cpsRoutingContext = routingContext;
 
-    // Log Event 1: cps.request.routed (info level)
-    // Emitted for ALL requests
     const requestId = (options as any).id ?? (options as any).requestId ?? 'unknown';
 
-    log.info('CPS request routed', {
+    log.debug('CPS request routed', {
       event: {
         kind: 'metric',
         category: ['web', 'api'],
@@ -146,8 +144,7 @@ export function getCpsRequestHandler(
           bypass_reason: bypassReason,
         });
 
-        // Log Event 2: cps.request.bypassed (warn level)
-        log.warn('CPS routing bypassed', {
+        log.debug('CPS routing bypassed', {
           event: {
             kind: 'alert',
             category: ['web', 'security'],
@@ -158,7 +155,6 @@ export function getCpsRequestHandler(
             bypass_reason: bypassReason,
             is_cps_enabled: true,
             project_id: null,
-            region: getRegion(),
             request_id: requestId,
             route_path: request?.path ?? 'unknown',
             request_path: params.path ?? 'unknown',
@@ -170,13 +166,16 @@ export function getCpsRequestHandler(
           },
         } as any);
       } else {
-        // Informational bypass (e.g., api_does_not_support_routing)
         log.debug('CPS routing not applicable', {
+          event: {
+            kind: 'event',
+            category: ['web', 'api'],
+          },
           cps: {
             api_name: name ?? 'unknown',
             bypass_reason: bypassReason,
           },
-        } as any);
+        });
       }
     }
   };
