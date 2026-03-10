@@ -17,7 +17,11 @@ export const OSQUERY_ACTIONS_INDEX = `${ACTIONS_INDEX}-*`;
 export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
 export const ACTION_RESPONSES_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
 
+export const RESULTS_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.results`;
+
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
+
+export const OSQUERY_SCHEDULED_INPUT_TYPE = 'osquery_scheduled';
 
 export const CASE_ATTACHMENT_TYPE_ID = 'osquery';
 
