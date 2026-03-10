@@ -49,7 +49,6 @@ export class ProposalManager {
   private decorationCollections = new Map<string, monaco.editor.IEditorDecorationsCollection>();
   private options: ProposalManagerOptions = {};
   private bulkBar: HTMLDivElement | null = null;
-  private bulkBarCountEl: HTMLSpanElement | null = null;
   private bulkBarSpacerZoneId: string | null = null;
 
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
@@ -221,16 +220,12 @@ export class ProposalManager {
   }
 
   private updateBulkBar(): void {
-    const count = this.proposals.size;
-    if (count === 0) {
+    if (this.proposals.size === 0) {
       this.removeBulkBar();
       return;
     }
     if (!this.bulkBar) {
       this.createBulkBar();
-    }
-    if (this.bulkBarCountEl) {
-      this.bulkBarCountEl.textContent = `${count} pending change${count !== 1 ? 's' : ''}`;
     }
   }
 
@@ -244,17 +239,15 @@ export class ProposalManager {
     const bar = document.createElement('div');
     bar.className = 'wfDiffBulkBar';
 
-    const countSpan = document.createElement('span');
-    countSpan.className = 'wfDiffBulkCount';
-    bar.appendChild(countSpan);
-    this.bulkBarCountEl = countSpan;
-
     const acceptAllBtn = document.createElement('button');
     acceptAllBtn.className = 'wfDiffAcceptBtn';
     acceptAllBtn.appendChild(parseSvgIcon(ICON_SVG_CHECK));
     const acceptAllLabel = document.createElement('span');
-    acceptAllLabel.textContent = 'Accept All';
+    acceptAllLabel.textContent = 'Accept all';
     acceptAllBtn.appendChild(acceptAllLabel);
+    const acceptKbd = document.createElement('kbd');
+    acceptKbd.textContent = 'Tab';
+    acceptAllBtn.appendChild(acceptKbd);
     acceptAllBtn.addEventListener('mousedown', (e) => e.stopPropagation());
     acceptAllBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -267,8 +260,11 @@ export class ProposalManager {
     rejectAllBtn.className = 'wfDiffDeclineBtn';
     rejectAllBtn.appendChild(parseSvgIcon(ICON_SVG_CROSS));
     const rejectAllLabel = document.createElement('span');
-    rejectAllLabel.textContent = 'Reject All';
+    rejectAllLabel.textContent = 'Decline all';
     rejectAllBtn.appendChild(rejectAllLabel);
+    const rejectKbd = document.createElement('kbd');
+    rejectKbd.textContent = 'Esc';
+    rejectAllBtn.appendChild(rejectKbd);
     rejectAllBtn.addEventListener('mousedown', (e) => e.stopPropagation());
     rejectAllBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -298,7 +294,6 @@ export class ProposalManager {
     if (this.bulkBar) {
       this.bulkBar.remove();
       this.bulkBar = null;
-      this.bulkBarCountEl = null;
 
       if (this.editor && this.bulkBarSpacerZoneId) {
         const zoneId = this.bulkBarSpacerZoneId;
