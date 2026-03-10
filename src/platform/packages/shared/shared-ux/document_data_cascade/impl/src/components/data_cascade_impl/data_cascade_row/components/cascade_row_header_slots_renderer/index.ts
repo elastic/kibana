@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CascadeRowPrimitive, CascadeRowHeaderPrimitive } from './cascade_row';
-export { CascadeRowHeaderSlotsScrollSyncProvider } from './components/cascade_row_header_slots_renderer';
-export { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
+export { CascadeRowHeaderSlotsRenderer } from './cascade_row_header_slots_renderer';
+export { RowHeaderSlotsScrollSyncProvider as CascadeRowHeaderSlotsScrollSyncProvider } from './row_header_slots_scroll_sync';
