@@ -14,6 +14,7 @@ import {
 } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_LOGS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
 import type { GetLogsToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_logs/tool';
+import { uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
@@ -196,10 +197,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const groups = [
-        ...new Set(results[0].data.histogram.flatMap((b) => (b.groups ?? []).map((e) => e.group))),
-      ].sort();
+      const groups = uniq(results[0].data.histogram.map((b) => b.group)).sort();
       expect(groups).to.eql(['error', 'info', 'warn']);
+
+      const topValues = results[0].data.topValues['log.level'].map((b) => b.value).sort();
+      expect(topValues).to.eql(['error', 'info', 'warn']);
     });
 
     it('limits sample count with limit parameter', async () => {

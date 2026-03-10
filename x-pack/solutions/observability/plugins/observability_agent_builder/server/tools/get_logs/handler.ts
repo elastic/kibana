@@ -38,11 +38,7 @@ interface GetLogsParams {
 }
 
 export interface GetLogsResult {
-  histogram: Array<{
-    bucket: string;
-    count: number;
-    entries?: Array<{ count: number; group: string }>;
-  }>;
+  histogram: Array<{ bucket: string; count: number; group?: string }>;
   totalCount: number;
   samples: Array<{ _id?: string; _index?: string; [key: string]: unknown }>;
   categories: Array<{
