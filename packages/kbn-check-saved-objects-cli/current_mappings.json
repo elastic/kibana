@@ -1433,8 +1433,7 @@
   },
   "entity-store-global-state": {
     "dynamic": false,
-    "properties": {
-    }
+    "properties": {}
   },
   "epm-packages": {
     "dynamic": false,
@@ -1529,8 +1528,8 @@
         "properties": {}
       },
       "pending_upgrade_review": {
-        "enabled": false,
-        "type": "object"
+        "dynamic": false,
+        "properties": {}
       },
       "previous_version": {
         "type": "keyword"
