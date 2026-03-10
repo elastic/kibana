@@ -30,7 +30,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const retryService = getService('retry');
   const detectionsApi = getService('detectionsApi');
 
-  describe('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/256891
+  describe.skip('@ess @serverless @skipInServerlessMKI Install prebuilt rules from EPR', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
