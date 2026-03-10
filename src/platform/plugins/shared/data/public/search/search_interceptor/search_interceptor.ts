@@ -494,7 +494,7 @@ export class SearchInterceptor {
     // at that point, exclude all params when request.id is defined (polling phase)
     const paramsToUse = request.id
       ? // TODO 30s
-        { dropNullColumns: params?.dropNullColumns, wait_for_completion_timeout: '10s' }
+        { dropNullColumns: params?.dropNullColumns, wait_for_completion_timeout: '30s' }
       : params || {};
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
