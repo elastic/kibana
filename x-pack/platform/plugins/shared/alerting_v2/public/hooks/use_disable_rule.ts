@@ -31,6 +31,7 @@ export function useDisableRule() {
       },
       onSuccess: (_data, { id }) => {
         queryClient.invalidateQueries({ queryKey: ruleKeys.detail(id), exact: false });
+        queryClient.invalidateQueries({ queryKey: ruleKeys.lists(), exact: false });
         notifications?.toasts.addSuccess({
           title: i18n.translate('xpack.alertingV2.ruleDetails.ruleDisableSuccess', {
             defaultMessage: 'Rule disabled',

@@ -26,6 +26,7 @@ export const useDeleteRule = () => {
         })
       );
       queryClient.invalidateQueries(ruleKeys.lists());
+      queryClient.invalidateQueries(ruleKeys.details());
     },
     onError: () => {
       toasts.addDanger(
