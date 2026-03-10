@@ -28,21 +28,20 @@ describe('EntityRetriever', () => {
   });
 
   describe('fetchAllEntities', () => {
-    it('fetches entities from user, host, and service indices', async () => {
+    it('fetches entities from the V2 unified index', async () => {
       const userRecord = createMockEntityRecord('user', 'alice');
       const hostRecord = createMockEntityRecord('host', 'server-01');
       const serviceRecord = createMockEntityRecord('service', 'web-api');
 
-      esClient.search
-        .mockResolvedValueOnce({
-          hits: { hits: [{ _source: userRecord, sort: ['2025-01-01', 'id1'] }] },
-        } as never)
-        .mockResolvedValueOnce({
-          hits: { hits: [{ _source: hostRecord, sort: ['2025-01-01', 'id2'] }] },
-        } as never)
-        .mockResolvedValueOnce({
-          hits: { hits: [{ _source: serviceRecord, sort: ['2025-01-01', 'id3'] }] },
-        } as never);
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: userRecord, sort: ['2025-01-01', 'id1'] },
+            { _source: hostRecord, sort: ['2025-01-01', 'id2'] },
+            { _source: serviceRecord, sort: ['2025-01-01', 'id3'] },
+          ],
+        },
+      } as never);
 
       const result = await retriever.fetchAllEntities();
 
@@ -54,22 +53,12 @@ describe('EntityRetriever', () => {
       expect(result[2].type).toBe('service');
       expect(result[2].name).toBe('web-api');
 
-      expect(esClient.search).toHaveBeenCalledTimes(3);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: expect.stringContaining('security_user_default'),
+          index: '.entities.v2.latest.security_default',
           ignore_unavailable: true,
           query: { match_all: {} },
-        })
-      );
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: expect.stringContaining('security_host_default'),
-        })
-      );
-      expect(esClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          index: expect.stringContaining('security_service_default'),
         })
       );
     });
@@ -95,53 +84,38 @@ describe('EntityRetriever', () => {
       ];
 
       esClient.search
-        .mockResolvedValueOnce({ hits: { hits: batch1 } } as never) // user page 1
-        .mockResolvedValueOnce({ hits: { hits: batch2 } } as never) // user page 2
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never) // host
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never); // service
+        .mockResolvedValueOnce({ hits: { hits: batch1 } } as never)
+        .mockResolvedValueOnce({ hits: { hits: batch2 } } as never);
 
       const result = await retriever.fetchAllEntities();
 
       expect(result).toHaveLength(1001);
-      expect(esClient.search).toHaveBeenCalledTimes(4);
+      expect(esClient.search).toHaveBeenCalledTimes(2);
 
       const secondCall = esClient.search.mock.calls[1][0] as Record<string, unknown>;
       expect(secondCall.search_after).toEqual(['2025-01-01', 'id-999']);
     });
 
-    it('continues to the next entity type when one fails', async () => {
-      esClient.search
-        .mockRejectedValueOnce(new Error('user index not found'))
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              { _source: createMockEntityRecord('host', 'server-01'), sort: ['2025-01-01', 'id'] },
-            ],
-          },
-        } as never)
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never); // service
+    it('returns empty array when index query fails', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('index not found'));
 
       const result = await retriever.fetchAllEntities();
 
-      expect(result).toHaveLength(1);
-      expect(result[0].type).toBe('host');
+      expect(result).toEqual([]);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to fetch user records')
+        expect.stringContaining('Failed to fetch entity records')
       );
     });
 
     it('skips records without _source', async () => {
-      esClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              { _source: createMockEntityRecord('user', 'alice'), sort: ['ts', 'id1'] },
-              { _source: undefined, sort: ['ts', 'id2'] },
-            ],
-          },
-        } as never)
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never) // host
-        .mockResolvedValueOnce({ hits: { hits: [] } } as never); // service
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: createMockEntityRecord('user', 'alice'), sort: ['ts', 'id1'] },
+            { _source: undefined, sort: ['ts', 'id2'] },
+          ],
+        },
+      } as never);
 
       const result = await retriever.fetchAllEntities();
 
@@ -151,7 +125,7 @@ describe('EntityRetriever', () => {
   });
 
   describe('fetchEntitiesByName', () => {
-    it('fetches specific entities by type and name', async () => {
+    it('fetches specific entities by type and name from V2 index', async () => {
       const record = createMockEntityRecord('user', 'bob');
 
       esClient.search.mockResolvedValueOnce({
@@ -167,24 +141,21 @@ describe('EntityRetriever', () => {
 
       expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: { bool: { filter: [{ terms: { 'user.name': ['bob'] } }] } },
+          index: '.entities.v2.latest.security_default',
         })
       );
     });
 
-    it('groups entities by type for efficient querying', async () => {
-      esClient.search
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              { _source: createMockEntityRecord('user', 'alice') },
-              { _source: createMockEntityRecord('user', 'bob') },
-            ],
-          },
-        } as never)
-        .mockResolvedValueOnce({
-          hits: { hits: [{ _source: createMockEntityRecord('host', 'server-01') }] },
-        } as never);
+    it('fetches mixed entity types in a single query', async () => {
+      esClient.search.mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: createMockEntityRecord('user', 'alice') },
+            { _source: createMockEntityRecord('user', 'bob') },
+            { _source: createMockEntityRecord('host', 'server-01') },
+          ],
+        },
+      } as never);
 
       const result = await retriever.fetchEntitiesByName([
         { entityType: 'user', entityName: 'alice' },
@@ -193,7 +164,7 @@ describe('EntityRetriever', () => {
       ]);
 
       expect(result).toHaveLength(3);
-      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
     });
 
     it('returns empty array when input is empty', async () => {
@@ -203,20 +174,17 @@ describe('EntityRetriever', () => {
       expect(esClient.search).not.toHaveBeenCalled();
     });
 
-    it('logs warning and continues when a query fails', async () => {
-      esClient.search.mockRejectedValueOnce(new Error('index missing')).mockResolvedValueOnce({
-        hits: { hits: [{ _source: createMockEntityRecord('host', 'srv') }] },
-      } as never);
+    it('logs warning and returns empty when query fails', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('index missing'));
 
       const result = await retriever.fetchEntitiesByName([
         { entityType: 'user', entityName: 'alice' },
         { entityType: 'host', entityName: 'srv' },
       ]);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('srv');
+      expect(result).toEqual([]);
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to fetch user records by name')
+        expect.stringContaining('Failed to fetch entities by name')
       );
     });
   });
@@ -243,6 +211,15 @@ describe('EntityRetriever', () => {
 
       expect(result.type).toBe('unknown');
       expect(result.name).toBe('unknown');
+    });
+
+    it('falls back to entity.id (EUID) when name is missing', () => {
+      const result = entityRecordToLeadEntity({
+        entity: { type: 'host', id: 'euid-abc-123' },
+      } as never);
+
+      expect(result.type).toBe('host');
+      expect(result.name).toBe('euid-abc-123');
     });
   });
 });

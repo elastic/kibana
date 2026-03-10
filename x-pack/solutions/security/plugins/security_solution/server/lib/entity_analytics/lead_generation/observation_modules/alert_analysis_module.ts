@@ -196,7 +196,7 @@ const alertSubAggs = () => ({
   top_5_alerts: {
     top_hits: {
       size: 5,
-      sort: [{ 'kibana.alert.risk_score': { order: 'desc' } }],
+      sort: [{ 'kibana.alert.risk_score': { order: 'desc' as const } }],
       _source: false,
       fields: [
         'kibana.alert.severity',
@@ -208,6 +208,8 @@ const alertSubAggs = () => ({
   },
 });
 
+const ALERT_ENTITY_TYPES = ['user', 'host', 'service'] as const;
+
 const fetchAlertSummariesForEntities = async (
   esClient: ElasticsearchClient,
   alertsIndexPattern: string,
@@ -216,12 +218,18 @@ const fetchAlertSummariesForEntities = async (
 ): Promise<Map<string, AlertSummary>> => {
   const result = new Map<string, AlertSummary>();
 
-  const userNames = entities.filter((e) => e.type === 'user').map((e) => e.name);
-  const hostNames = entities.filter((e) => e.type === 'host').map((e) => e.name);
-  const entityTerms: Array<Record<string, unknown>> = [
-    ...(userNames.length > 0 ? [{ terms: { 'user.name': userNames } }] : []),
-    ...(hostNames.length > 0 ? [{ terms: { 'host.name': hostNames } }] : []),
-  ];
+  const namesByType: Record<string, string[]> = {};
+  for (const e of entities) {
+    if (ALERT_ENTITY_TYPES.includes(e.type as (typeof ALERT_ENTITY_TYPES)[number])) {
+      const list = namesByType[e.type] ?? [];
+      list.push(e.name);
+      namesByType[e.type] = list;
+    }
+  }
+
+  const entityTerms: Array<Record<string, unknown>> = Object.entries(namesByType)
+    .filter(([, names]) => names.length > 0)
+    .map(([type, names]) => ({ terms: { [`${type}.name`]: names } }));
   if (entityTerms.length === 0) return result;
 
   try {
@@ -240,14 +248,17 @@ const fetchAlertSummariesForEntities = async (
           must_not: [{ exists: { field: 'kibana.alert.building_block_type' } }],
         },
       },
-      aggs: {
-        by_user: { terms: { field: 'user.name', size: entities.length }, aggs: alertSubAggs() },
-        by_host: { terms: { field: 'host.name', size: entities.length }, aggs: alertSubAggs() },
-      },
+      aggs: Object.fromEntries(
+        Object.keys(namesByType).map((type) => [
+          `by_${type}`,
+          { terms: { field: `${type}.name`, size: entities.length }, aggs: alertSubAggs() },
+        ])
+      ),
     });
 
-    parseEntityBuckets(response.aggregations?.by_user, 'user', result);
-    parseEntityBuckets(response.aggregations?.by_host, 'host', result);
+    for (const type of Object.keys(namesByType)) {
+      parseEntityBuckets(response.aggregations?.[`by_${type}`], type, result);
+    }
   } catch (error) {
     logger.warn(`[${MODULE_ID}] Failed to fetch alert summaries: ${error}`);
   }

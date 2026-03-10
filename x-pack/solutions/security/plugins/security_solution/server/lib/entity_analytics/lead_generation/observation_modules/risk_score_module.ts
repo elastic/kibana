@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import { makeObservation, getEntityField, groupEntitiesByType } from './utils';
+import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -272,7 +273,7 @@ const fetchTimeSeriesRiskScores = async (
     const names = group.map((e) => e.name);
     try {
       const response = await esClient.search({
-        index: `risk-score.risk-score-${spaceId}`,
+        index: getRiskScoreTimeSeriesIndex(spaceId),
         size: 0,
         ignore_unavailable: true,
         allow_no_indices: true,

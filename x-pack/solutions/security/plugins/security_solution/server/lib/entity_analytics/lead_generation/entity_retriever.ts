@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
-import { getEntitiesIndexName } from '../entity_store/utils/entity_utils';
 import type { LeadEntity } from './types';
 
 // ---------------------------------------------------------------------------
@@ -15,7 +15,43 @@ import type { LeadEntity } from './types';
 // ---------------------------------------------------------------------------
 
 const ENTITY_PAGE_SIZE = 1000;
-const SUPPORTED_ENTITY_TYPES = ['user', 'host', 'service'] as const;
+
+/**
+ * Fields retrieved from Entity Store records. Limits memory footprint by
+ * excluding large nested fields that observation modules do not need.
+ */
+const ENTITY_SOURCE_FIELDS = [
+  '@timestamp',
+  'entity.name',
+  'entity.type',
+  'entity.id',
+  'entity.risk',
+  'entity.attributes',
+  'entity.behaviors',
+  'entity.lifecycle',
+  'entity.relationships',
+  'user.name',
+  'user.id',
+  'user.email',
+  'user.full_name',
+  'user.roles',
+  'user.domain',
+  'host.name',
+  'host.id',
+  'host.hostname',
+  'host.ip',
+  'host.os.name',
+  'host.domain',
+  'service.name',
+  'asset.criticality',
+];
+
+/**
+ * Entity Store V2 stores all entity types in a single unified index per
+ * namespace: `.entities.v2.latest.security_{namespace}`.
+ */
+const getEntityStoreLatestIndex = (namespace: string): string =>
+  `.entities.v2.latest.security_${namespace}`;
 
 // ---------------------------------------------------------------------------
 // Entity Retriever
@@ -32,7 +68,7 @@ export interface EntityRetrieverDeps {
 }
 
 export interface EntityRetriever {
-  /** Fetch all user, host, and service entities from Entity Store V2 (paginated via search_after). */
+  /** Fetch all entities from Entity Store V2 (paginated via search_after). */
   fetchAllEntities(): Promise<LeadEntity[]>;
 
   /** Fetch specific entities by type and name. */
@@ -48,40 +84,38 @@ export const createEntityRetriever = ({
 }: EntityRetrieverDeps): EntityRetriever => ({
   async fetchAllEntities(): Promise<LeadEntity[]> {
     const records: Entity[] = [];
+    const index = getEntityStoreLatestIndex(spaceId);
+    let searchAfter: FieldValue[] | undefined;
 
-    for (const entityType of SUPPORTED_ENTITY_TYPES) {
-      const index = getEntitiesIndexName(entityType, spaceId);
-      let searchAfter: unknown[] | undefined;
+    while (true) {
+      try {
+        const resp = await esClient.search<Entity>({
+          index,
+          size: ENTITY_PAGE_SIZE,
+          ignore_unavailable: true,
+          _source: ENTITY_SOURCE_FIELDS,
+          sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
+          ...(searchAfter ? { search_after: searchAfter } : {}),
+          query: { match_all: {} },
+        });
 
-      while (true) {
-        try {
-          const resp = await esClient.search<Entity>({
-            index,
-            size: ENTITY_PAGE_SIZE,
-            ignore_unavailable: true,
-            sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
-            ...(searchAfter ? { search_after: searchAfter } : {}),
-            query: { match_all: {} },
-          });
-
-          const hits = resp.hits.hits;
-          for (const hit of hits) {
-            if (hit._source) records.push(hit._source);
-          }
-
-          if (hits.length < ENTITY_PAGE_SIZE) break;
-          searchAfter = hits[hits.length - 1].sort as unknown[];
-        } catch (error) {
-          logger.warn(
-            `[LeadGeneration][EntityRetriever] Failed to fetch ${entityType} records from "${index}": ${error}`
-          );
-          break;
+        const hits = resp.hits.hits;
+        for (const hit of hits) {
+          if (hit._source) records.push(hit._source);
         }
+
+        if (hits.length < ENTITY_PAGE_SIZE) break;
+        searchAfter = hits[hits.length - 1].sort as FieldValue[];
+      } catch (error) {
+        logger.warn(
+          `[LeadGeneration][EntityRetriever] Failed to fetch entity records from "${index}": ${error}`
+        );
+        break;
       }
     }
 
     logger.debug(
-      `[LeadGeneration][EntityRetriever] Fetched ${records.length} entity records across ${SUPPORTED_ENTITY_TYPES.length} types`
+      `[LeadGeneration][EntityRetriever] Fetched ${records.length} entity records from V2 unified index`
     );
 
     return records.map(entityRecordToLeadEntity);
@@ -92,6 +126,8 @@ export const createEntityRetriever = ({
   ): Promise<LeadEntity[]> {
     if (entities.length === 0) return [];
 
+    const index = getEntityStoreLatestIndex(spaceId);
+
     const byType = new Map<string, string[]>();
     for (const { entityType, entityName } of entities) {
       const existing = byType.get(entityType) ?? [];
@@ -99,30 +135,34 @@ export const createEntityRetriever = ({
       byType.set(entityType, existing);
     }
 
+    const shouldClauses = [...byType.entries()].map(([entityType, names]) => ({
+      bool: {
+        filter: [
+          { term: { 'entity.type': entityType } },
+          { terms: { [`${entityType}.name`]: names } },
+        ],
+      },
+    }));
+
     const records: Entity[] = [];
-    for (const [entityType, names] of byType.entries()) {
-      const index = getEntitiesIndexName(entityType, spaceId);
+    try {
+      const resp = await esClient.search<Entity>({
+        index,
+        size: entities.length,
+        ignore_unavailable: true,
+        _source: ENTITY_SOURCE_FIELDS,
+        query: {
+          bool: { should: shouldClauses, minimum_should_match: 1 },
+        },
+      });
 
-      try {
-        const resp = await esClient.search<Entity>({
-          index,
-          size: names.length,
-          ignore_unavailable: true,
-          query: {
-            bool: {
-              filter: [{ terms: { [`${entityType}.name`]: names } }],
-            },
-          },
-        });
-
-        for (const hit of resp.hits.hits) {
-          if (hit._source) records.push(hit._source);
-        }
-      } catch (error) {
-        logger.warn(
-          `[LeadGeneration][EntityRetriever] Failed to fetch ${entityType} records by name from "${index}": ${error}`
-        );
+      for (const hit of resp.hits.hits) {
+        if (hit._source) records.push(hit._source);
       }
+    } catch (error) {
+      logger.warn(
+        `[LeadGeneration][EntityRetriever] Failed to fetch entities by name from "${index}": ${error}`
+      );
     }
 
     logger.debug(
@@ -140,14 +180,15 @@ export const createEntityRetriever = ({
 /**
  * Convert an Entity Store V2 record into a LeadEntity, extracting the
  * convenience `type` and `name` fields from the nested `entity` object.
+ * Falls back to `entity.id` (EUID) when `entity.name` is absent.
  */
 export const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
   const entityField = (record as Record<string, unknown>).entity as
-    | { name?: string; type?: string }
+    | { name?: string; type?: string; id?: string }
     | undefined;
   return {
     record,
     type: entityField?.type ?? 'unknown',
-    name: entityField?.name ?? 'unknown',
+    name: entityField?.name ?? entityField?.id ?? 'unknown',
   };
 };

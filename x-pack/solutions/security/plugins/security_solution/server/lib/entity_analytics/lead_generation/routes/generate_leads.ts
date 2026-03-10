@@ -25,6 +25,7 @@ import {
 } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
+import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
@@ -33,8 +34,6 @@ import { createTemporalStateModule } from '../observation_modules/temporal_state
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
 import { createEntityRetriever } from '../entity_retriever';
 import type { Lead } from '../types';
-
-const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
 
 const GenerateLeadsRequestBody = z.object({
   connectorId: z.string().optional(),
@@ -118,7 +117,7 @@ export const generateLeadsRoute = (
             createBehavioralAnalysisModule({
               esClient,
               logger,
-              alertsIndexPattern: ALERTS_INDEX_PATTERN,
+              alertsIndexPattern: getAlertsIndex(spaceId),
             })
           );
 
@@ -223,7 +222,7 @@ const persistLeads = async (
     // Delete leads from previous runs — only after the new ones are searchable
     await esClient.deleteByQuery({
       index: indexName,
-      body: { query: { bool: { must_not: [{ term: { executionId } }] } } },
+      query: { bool: { must_not: [{ term: { executionId } }] } },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,

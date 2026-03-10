@@ -8,6 +8,8 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod';
 
 import {
   GET_LEADS_URL,
@@ -16,6 +18,26 @@ import {
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { LeadStaleness } from '../types';
+
+const MAX_PAGE_SIZE = 200;
+
+const GetLeadsQueryParams = z.object({
+  size: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).optional().default(50),
+  from: z.coerce.number().int().min(0).optional().default(0),
+});
+
+const STALENESS_THRESHOLDS = {
+  fresh: 24 * 60 * 60 * 1000,
+  stale: 72 * 60 * 60 * 1000,
+};
+
+const computeStaleness = (timestamp: string): LeadStaleness => {
+  const ageMs = Date.now() - new Date(timestamp).getTime();
+  if (ageMs <= STALENESS_THRESHOLDS.fresh) return 'fresh';
+  if (ageMs <= STALENESS_THRESHOLDS.stale) return 'stale';
+  return 'expired';
+};
 
 export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -31,10 +53,14 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
-        validate: {},
+        validate: {
+          request: {
+            query: buildRouteValidationWithZod(GetLeadsQueryParams),
+          },
+        },
       },
 
-      async (context, _request, response): Promise<IKibanaResponse> => {
+      async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -42,23 +68,37 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
           const spaceId = getSpaceId();
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
+          const { size, from } = request.query;
           const adhocIndex = getLeadsIndexName(spaceId, 'adhoc');
           const scheduledIndex = getLeadsIndexName(spaceId, 'scheduled');
 
           let leads: unknown[] = [];
+          let total = 0;
 
           try {
             const resp = await esClient.search({
               index: `${adhocIndex},${scheduledIndex}`,
-              size: 50,
-              sort: [{ timestamp: { order: 'desc' } }],
+              size,
+              from,
+              track_total_hits: true,
+              sort: [{ priority: { order: 'desc' } }, { timestamp: { order: 'desc' } }],
               query: { match_all: {} },
               ignore_unavailable: true,
             });
 
+            total =
+              typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total?.value ?? 0;
+
             leads = resp.hits.hits
               .map((hit) => hit._source)
-              .filter((doc): doc is Record<string, unknown> => doc != null);
+              .filter((doc): doc is Record<string, unknown> => doc != null)
+              .map((doc) => ({
+                ...doc,
+                staleness:
+                  typeof doc.timestamp === 'string'
+                    ? computeStaleness(doc.timestamp)
+                    : doc.staleness,
+              }));
           } catch (searchError) {
             logger.debug(`[LeadGeneration] Leads indices not available yet: ${searchError}`);
           }
@@ -66,7 +106,9 @@ export const getLeadsRoute = (router: EntityAnalyticsRoutesDeps['router'], logge
           return response.ok({
             body: {
               leads,
-              total: leads.length,
+              total,
+              size,
+              from,
             },
           });
         } catch (e) {
