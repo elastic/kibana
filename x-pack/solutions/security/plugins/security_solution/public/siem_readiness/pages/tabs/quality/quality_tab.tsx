@@ -32,6 +32,7 @@ import { QualityWarningPrompt } from './quality_warning_prompt';
 import { buildQualityCaseDescription, getQualityCaseTitle } from './quality_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
 import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
+import { isQualityIncompatible } from '../../../hooks/visibility_status_utils';
 
 const DATA_QUALITY_CASE_TAGS = ['siem-readiness', 'data-quality', 'ecs-compatibility'];
 
@@ -74,7 +75,9 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
         return {
           ...index,
-          status: incompatibleCount > 0 ? ('incompatible' as const) : ('healthy' as const),
+          status: isQualityIncompatible(incompatibleCount)
+            ? ('incompatible' as const)
+            : ('healthy' as const),
           incompatibleFieldCount: incompatibleCount,
           checkedAt: result?.checkedAt,
         };
@@ -111,7 +114,9 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<IndexInfoWithStatus>) => {
-    const hasIncompatibleFields = category.items.some((item) => item.incompatibleFieldCount > 0);
+    const hasIncompatibleFields = category.items.some((item) =>
+      isQualityIncompatible(item.incompatibleFieldCount)
+    );
     const status = hasIncompatibleFields ? 'Actions required' : 'Healthy';
     const statusColor = hasIncompatibleFields ? 'warning' : 'success';
 
@@ -121,7 +126,9 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
     );
 
     const affectedIndices = new Set(
-      category.items.filter((item) => item.incompatibleFieldCount > 0).map((item) => item.indexName)
+      category.items
+        .filter((item) => isQualityIncompatible(item.incompatibleFieldCount))
+        .map((item) => item.indexName)
     ).size;
 
     const totalDataSources = category.items.length;

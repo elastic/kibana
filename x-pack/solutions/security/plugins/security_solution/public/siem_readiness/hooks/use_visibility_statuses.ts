@@ -19,6 +19,12 @@ import type {
   PipelineStats,
   RetentionResponse,
 } from '@kbn/siem-readiness';
+import {
+  isCriticalFailureRate,
+  isQualityIncompatible,
+  isRetentionNonCompliant,
+  hasMissingIntegrations,
+} from './visibility_status_utils';
 
 export type VisibilityStatus = 'healthy' | 'actionsRequired' | 'noData';
 
@@ -32,14 +38,6 @@ interface VisibilityStatuses {
 interface RuleIntegrationCoverage {
   missingIntegrations?: string[];
 }
-
-/**
- * Check if the failure rate is critical (>= 1%)
- */
-const isCriticalFailureRate = (failedDocsCount: number, docsCount: number): boolean => {
-  if (docsCount === 0) return false;
-  return (failedDocsCount / docsCount) * 100 >= 1;
-};
 
 /**
  * Build a map of index name to category for quick lookup
@@ -69,8 +67,8 @@ const computeCoverageStatus = (
 
   if (!hasCategories && !hasDetectionRules) return 'noData';
 
-  const hasMissingIntegrations =
-    hasDetectionRules && Boolean(ruleIntegrationCoverage?.missingIntegrations?.length);
+  const hasMissing =
+    hasDetectionRules && hasMissingIntegrations(ruleIntegrationCoverage?.missingIntegrations);
 
   const hasMissingData =
     hasCategories &&
@@ -82,7 +80,7 @@ const computeCoverageStatus = (
       return totalDocs === 0;
     });
 
-  return hasMissingIntegrations || hasMissingData ? 'actionsRequired' : 'healthy';
+  return hasMissing || hasMissingData ? 'actionsRequired' : 'healthy';
 };
 
 /**
@@ -106,7 +104,7 @@ const computeQualityStatus = (
       category.indices.forEach((index) => {
         hasData = true;
         const result = qualityMap.get(index.indexName);
-        if (result && result.incompatibleFieldCount > 0) {
+        if (result && isQualityIncompatible(result.incompatibleFieldCount)) {
           hasIncompatible = true;
         }
       });
@@ -174,7 +172,7 @@ const computeRetentionStatus = (
         );
         if (matchingRetention) {
           hasRelevantData = true;
-          if (matchingRetention.status === 'non-compliant') {
+          if (isRetentionNonCompliant(matchingRetention.status)) {
             hasNonCompliant = true;
           }
         }

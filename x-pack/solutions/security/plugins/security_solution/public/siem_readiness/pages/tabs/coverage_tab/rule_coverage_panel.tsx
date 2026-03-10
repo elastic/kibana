@@ -26,6 +26,7 @@ import { useBasePath } from '../../../../common/lib/kibana';
 import { AllRuleCoveragePanel } from './rule_coverage_panels/all_rules';
 import { MitreAttackRuleCoveragePanel } from './rule_coverage_panels/mitre_attack_rules';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import { hasMissingIntegrations as checkMissingIntegrations } from '../../../hooks/visibility_status_utils';
 
 const ELASTIC_INTEGRATIONS_DOCS_URL =
   'https://www.elastic.co/guide/en/kibana/current/connect-to-elasticsearch.html';
@@ -119,8 +120,8 @@ export const RuleCoveragePanel: React.FC = () => {
   const missingIntegrationAssociatedRulesCount =
     (getDetectionRules.data?.data?.length || 0) - installedIntegrationAssociatedRulesCount;
 
-  const hasMissingIntegrations = Boolean(
-    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations?.length
+  const hasMissingIntegrations = checkMissingIntegrations(
+    installedIntegrationRules.ruleIntegrationCoverage?.missingIntegrations
   );
 
   return (
