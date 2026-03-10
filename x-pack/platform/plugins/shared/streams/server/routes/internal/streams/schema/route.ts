@@ -167,7 +167,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -328,7 +331,10 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
