@@ -7,7 +7,10 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  ISavedObjectsRepository,
+} from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
 import type { SmlIndexAction, SmlContext } from './types';
@@ -218,4 +221,3 @@ class SmlIndexerImpl implements SmlIndexer {
     }
   }
 }
-

@@ -68,9 +68,7 @@ class SmlCrawlerImpl implements SmlCrawler {
         await this.cleanupStaleConcreteIndices(esClient);
         this.cleanupDone = true;
       } catch (error) {
-        this.logger.warn(
-          `SML crawler: stale index cleanup failed: ${(error as Error).message}`
-        );
+        this.logger.warn(`SML crawler: stale index cleanup failed: ${(error as Error).message}`);
       }
     }
 
@@ -273,8 +271,7 @@ class SmlCrawlerImpl implements SmlCrawler {
     let processedCount = 0;
     let errorCount = 0;
     const stateAckOps: Array<
-      | { index: { _id: string; document: SmlCrawlerStateDocument } }
-      | { delete: { _id: string } }
+      { index: { _id: string; document: SmlCrawlerStateDocument } } | { delete: { _id: string } }
     > = [];
 
     for (const hit of pendingItems) {
@@ -497,7 +494,9 @@ class SmlCrawlerImpl implements SmlCrawler {
         const hits = response.hits.hits;
         for (const hit of hits) {
           if (hit._source) {
-            allDocs.push(normalizeStateDocument(hit._source as SmlCrawlerStateDocument & { space_id?: string }));
+            allDocs.push(
+              normalizeStateDocument(hit._source as SmlCrawlerStateDocument & { space_id?: string })
+            );
           }
         }
 
@@ -510,7 +509,9 @@ class SmlCrawlerImpl implements SmlCrawler {
       }
     } catch (error) {
       this.logger.warn(
-        `SML crawler: failed to load crawler state for type '${attachmentType}': ${(error as Error).message}`
+        `SML crawler: failed to load crawler state for type '${attachmentType}': ${
+          (error as Error).message
+        }`
       );
       return [];
     }

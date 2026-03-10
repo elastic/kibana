@@ -55,7 +55,8 @@ export const registerSmlCrawlerTaskDefinition = ({
               return { state: {} };
             }
 
-            const { crawler, registry, elasticsearch, savedObjects, logger } = await getCrawlerDeps();
+            const { crawler, registry, elasticsearch, savedObjects, logger } =
+              await getCrawlerDeps();
 
             logger.info(`SML crawler task starting for type '${attachmentType}'`);
 

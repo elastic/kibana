@@ -8,10 +8,6 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { visualizationSmlType } from './visualization';
 
-export const registerSmlTypes = ({
-  agentBuilder,
-}: {
-  agentBuilder: AgentBuilderPluginSetup;
-}) => {
+export const registerSmlTypes = ({ agentBuilder }: { agentBuilder: AgentBuilderPluginSetup }) => {
   agentBuilder.sml.registerType(visualizationSmlType);
 };
