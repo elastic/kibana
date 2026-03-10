@@ -19,6 +19,7 @@ import type {
   ElasticsearchClientConfig,
   ElasticsearchClient,
 } from '@kbn/core-elasticsearch-server';
+import { KBN_PROJECT_ROUTING_HEADER } from '@kbn/cps-server-utils';
 import { getRequestHandlerFactory } from './cps_request_handler';
 import { ClusterClient } from './cluster_client';
 import type { OnRequestHandler } from './create_transport';
@@ -386,6 +387,56 @@ describe('ClusterClient', () => {
         onRequest.get()({} as never, params, {}, logger);
 
         expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
+      });
+
+      it("reads routing from the kbn-project-routing header when projectRouting is 'request-header'", () => {
+        const onRequest = captureTransportOnRequest();
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        const request = httpServerMock.createKibanaRequest({
+          headers: { [KBN_PROJECT_ROUTING_HEADER]: '_alias:*' },
+        });
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'request-header',
+        }).asCurrentUser;
+
+        const params = makeSearchParams();
+        onRequest.get()({} as never, params, {});
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:*');
+      });
+
+      it("falls back to '_alias:_origin' when projectRouting is 'request-header' but header is absent", () => {
+        const onRequest = captureTransportOnRequest();
+
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
+
+        const request = httpServerMock.createKibanaRequest();
+        client = clusterClient.asScoped(request, {
+          projectRouting: 'request-header',
+        }).asCurrentUser;
+
+        const params = makeSearchParams();
+        onRequest.get()({} as never, params, {});
+
+        expect((params.body as Record<string, unknown>).project_routing).toBe('_alias:_origin');
       });
 
       // Note: child() clients that do NOT override Transport inherit the parent's routing

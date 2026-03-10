@@ -27,6 +27,7 @@ import type {
   OriginOnlyRouting,
   SpaceNPRERouting,
   AllProjectsRouting,
+  RequestHeaderRouting,
 } from '@kbn/core-elasticsearch-server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-server-internal';
@@ -48,13 +49,21 @@ import type { AgentFactoryProvider } from './agent_manager';
 const noop = () => undefined;
 
 /**
+ * Discriminated union of routing options passed to {@link OnRequestHandlerFactory}.
+ * Each variant carries exactly the data needed for that routing mode.
+ * @internal
+ */
+export type FactoryRoutingOpts =
+  | { projectRouting: 'origin-only' }
+  | { projectRouting: 'all' }
+  | { projectRouting: 'space'; request: ScopeableUrlRequest }
+  | { projectRouting: 'request-header'; request: ScopeableRequest };
+
+/**
  * A factory that produces an {@link OnRequestHandler}, which can be bound to a request context.
  * @internal
  */
-export type OnRequestHandlerFactory = (opts: {
-  projectRouting: 'origin-only' | 'all' | ScopeableUrlRequest;
-  logger: Logger;
-}) => OnRequestHandler;
+export type OnRequestHandlerFactory = (opts: FactoryRoutingOpts & { logger: Logger }) => OnRequestHandler;
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
@@ -128,6 +137,7 @@ export class ClusterClient implements ICustomClusterClient {
   }
 
   asScoped(request: ScopeableUrlRequest, opts: SpaceNPRERouting): IScopedClusterClient;
+  asScoped(request: ScopeableRequest, opts: RequestHeaderRouting): IScopedClusterClient;
   asScoped(
     request: ScopeableRequest,
     opts?: OriginOnlyRouting | AllProjectsRouting
@@ -137,15 +147,20 @@ export class ClusterClient implements ICustomClusterClient {
       const scopedHeaders = this.getScopedHeaders(request);
       const { projectRouting } = opts;
 
+      let factoryOpts: FactoryRoutingOpts;
+      if (projectRouting === 'space') {
+        factoryOpts = { projectRouting: 'space', request: request as ScopeableUrlRequest };
+      } else if (projectRouting === 'request-header') {
+        factoryOpts = { projectRouting: 'request-header', request };
+      } else {
+        factoryOpts = { projectRouting };
+      }
+
       const transportClass = createTransport({
         scoped: true,
         getExecutionContext: this.getExecutionContext,
         getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
-        onRequest: this.onRequestHandlerFactory({
-          projectRouting:
-            projectRouting === 'space' ? (request as ScopeableUrlRequest) : projectRouting,
-          logger: this.logger,
-        }),
+        onRequest: this.onRequestHandlerFactory({ ...factoryOpts, logger: this.logger }),
         logger: this.logger,
       });
 

@@ -19,3 +19,11 @@ export const PROJECT_ROUTING = {
 } as const;
 
 export type ProjectRoutingValue = (typeof PROJECT_ROUTING)[keyof typeof PROJECT_ROUTING];
+
+/**
+ * HTTP header name used to propagate the CPS `project_routing` value from the browser to
+ * Kibana server-side route handlers. App developers set this header on outgoing HTTP requests
+ * (via the Kibana HTTP client) and opt in on the server by calling
+ * `esClient.asScoped(request, { projectRouting: 'request-header' })`.
+ */
+export const KBN_PROJECT_ROUTING_HEADER = 'kbn-project-routing' as const;
