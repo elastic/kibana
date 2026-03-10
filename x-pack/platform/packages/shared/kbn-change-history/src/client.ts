@@ -41,6 +41,7 @@ export interface IChangeHistoryClient {
   log(change: ObjectChange, opts: LogChangeHistoryOptions): Promise<void>;
   logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): Promise<void>;
   getHistory(
+    spaceId: string,
     objectType: string,
     objectId: string,
     opts?: GetChangeHistoryOptions
@@ -223,6 +224,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
   /**
    * Get the change history of an object.
+   * @param spaceId - The kibana space Id where this object exists
    * @param objectType - The type of the object.
    * @param objectId - The ID of the object.
    * @param opts - The options for the history query.
@@ -235,6 +237,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @throws An error if the data stream is not initialized, or if an error occurs while getting the history.
    */
   async getHistory(
+    spaceId: string,
     objectType: string,
     objectId: string,
     opts?: GetChangeHistoryOptions
@@ -256,6 +259,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       { 'event.id': { order: 'desc' } },
     ];
     const history = await client.search<Record<string, ChangeHistoryDocument>>({
+      space: spaceId,
       query: { bool: { filter } },
       sort: opts?.sort ?? defaultSort,
       size: opts?.size ?? DEFAULT_RESULT_SIZE,

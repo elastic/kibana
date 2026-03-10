@@ -31,9 +31,9 @@ There is also an `opts` object that contains the `action` that took place, and r
 
 When `change.before` is provided, a diff is computed (using the optional custom `diffDocCalculation` or a default).
 
-**Query history** with `getHistory(objectType, objectId, opts?)`:
+**Query history** with `getHistory(spaceId, objectType, objectId, opts?)`:
 
-- Returns change documents for the given object `type` and `id`, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`.
+- Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`.
 
 All persisted documents follow the same schema (see below).
 
@@ -71,8 +71,9 @@ All persisted documents follow the same schema (see below).
     - `diffDocCalculation` a diff function `(opts) => ChangeTrackingDiff`; when omitted, a default diff is used.
     - `refresh` an optional indicator to force ES shard refresh after changes (affects performance)
 
-- **`getHistory(objectType, objectId, opts?)`**
+- **`getHistory(spaceId, objectType, objectId, opts?)`**
   - Returns a promise with `{ startDate?, total, items }`.
+  - `spaceId` — The Kibana space ID where the object exists (used to scope the search).
   - Filters by `object.type` and `object.id`.
   - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100), `transportOpts`.
   - Results are sorted by `object.sequence` (if available), then `@timestamp`, and `event.id` as the tie-breaker.
@@ -141,6 +142,7 @@ const client = new ChangeHistoryClient({
 
 // During plugin `start()` phase
 await client.initialize(elasticsearchClient);
+const spaceId = 'default';
 
 // When user makes a change
 const change: ObjectChange = {
@@ -155,7 +157,7 @@ await client.log(change, {
 });
 
 // When reading history for an object
-const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
+const { startDate, total, items } = await client.getHistory('spaceId', 'alerting-rule', ruleId);
 console.log(
   `Change tracking started on ${startDate}, we have ${total} items, latest change at: \n${JSON.stringify(items[0]?.['@timestamp'])}`
 );
@@ -178,7 +180,7 @@ await client.log(change, {
 });
 
 // Read history for an object
-const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
+const { startDate, total, items } = await client.getHistory(spaceId, 'alerting-rule', ruleId);
 const { object } = items.shift();
 console.log(
   `We have just updated the following fields: \n${object.fields?.changed}`
@@ -266,7 +268,7 @@ await client.log(change, {
 ### Querying with filters and pagination
 
 ```ts
-const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId, {
+const { startDate, total, items } = await client.getHistory(spaceId, 'alerting-rule', ruleId, {
   additionalFilters: [{ range: { '@timestamp': { lt: '2026-01-01' } } }],
   size: 50,
   from: 0,

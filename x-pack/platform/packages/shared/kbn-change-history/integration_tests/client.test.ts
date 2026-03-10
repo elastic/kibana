@@ -14,6 +14,7 @@ import { createTestEsCluster } from '@kbn/test';
 import { ChangeHistoryClient } from '..';
 import type { ChangeHistoryDocument, ObjectChange } from '..';
 
+const KIBANA_SPACE = 'default';
 const TEST_MODULE = 'test-module';
 const TEST_DATASET = 'test-dataset';
 const DATA_STREAM_NAME = `.kibana-change-history-${TEST_MODULE}-${TEST_DATASET}`;
@@ -83,7 +84,7 @@ describe('ChangeHistoryClient', () => {
       expect(ds).toHaveLength(1);
       expect(ds[0].name).toBe(DATA_STREAM_NAME);
 
-      const result = await client.getHistory('rule', 'any-id');
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'any-id');
       expect(result.total).toBe(0);
       expect(result.items).toEqual([]);
     });
@@ -114,7 +115,7 @@ describe('ChangeHistoryClient', () => {
         logger,
         kibanaVersion: '1.0.0',
       });
-      await expect(() => client.getHistory('rule', 'id-1')).rejects.toThrow(
+      await expect(() => client.getHistory(KIBANA_SPACE, 'rule', 'id-1')).rejects.toThrow(
         'Data stream not initialized'
       );
     });
@@ -143,7 +144,7 @@ describe('ChangeHistoryClient', () => {
       };
       await client.log(change, { ...defaultLogOpts, spaceId: 'default' });
 
-      const result = await client.getHistory('rule', 'id-1');
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'id-1');
       expect(result.total).toBe(1);
       expect(result.items.length).toBe(1);
       const doc = result.items[0] as ChangeHistoryDocument;
@@ -180,7 +181,7 @@ describe('ChangeHistoryClient', () => {
       ];
       await client.logBulk(changes, { ...defaultLogOpts, spaceId: 'default' });
 
-      const resultA = await client.getHistory('rule', 'id-a');
+      const resultA = await client.getHistory(KIBANA_SPACE, 'rule', 'id-a');
       expect(resultA.total).toBe(2);
       expect(resultA.items.length).toBe(2);
       expect((resultA.items[0] as ChangeHistoryDocument).object.snapshot).toEqual({
@@ -190,7 +191,7 @@ describe('ChangeHistoryClient', () => {
         name: 'Rule A',
       });
 
-      const resultB = await client.getHistory('rule', 'id-b');
+      const resultB = await client.getHistory(KIBANA_SPACE, 'rule', 'id-b');
       expect(resultB.total).toBe(1);
       expect((resultB.items[0] as ChangeHistoryDocument).object.snapshot).toEqual({
         name: 'Rule B',
@@ -220,7 +221,7 @@ describe('ChangeHistoryClient', () => {
       };
       await client.log(change, { ...defaultLogOpts, spaceId: 'default' });
 
-      const result = await client.getHistory('rule', 'diff-id');
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'diff-id');
       expect(result.total).toBe(1);
       const doc = result.items[0] as ChangeHistoryDocument;
       expect(doc.object.fields.changed).toBeDefined();
@@ -265,7 +266,7 @@ describe('ChangeHistoryClient', () => {
         },
       });
 
-      const result = await client.getHistory('rule', 'masked-id');
+      const result = await client.getHistory(KIBANA_SPACE, 'rule', 'masked-id');
       expect(result.total).toBe(1);
       const doc = result.items[0] as ChangeHistoryDocument;
 
