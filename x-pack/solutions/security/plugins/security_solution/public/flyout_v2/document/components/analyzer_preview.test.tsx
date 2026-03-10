@@ -107,6 +107,24 @@ describe('<AnalyzerPreview />', () => {
     });
   });
 
+  it('should use all rule parameters indices when provided as an array', async () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': {
+        index: ['rule-parameters-index-1', 'rule-parameters-index-2'],
+      },
+    });
+    const wrapper = renderAnalyzerPreview(hit);
+
+    expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
+      documentId: 'eventId',
+      indices: ['rule-parameters-index-1', 'rule-parameters-index-2'],
+    });
+
+    await waitFor(() => {
+      expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
   it('should use ancestor id as document id when shouldUseAncestor is true', async () => {
     const hit = createMockHit({
       'kibana.alert.rule.indices': ['rule-indices'],
