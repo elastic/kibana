@@ -14,6 +14,8 @@
       "features",
       "spaces",
       "data",
+      "dataViews",
+      "esql",
       "security",
       "encryptedSavedObjects",
       "workflowsManagement"

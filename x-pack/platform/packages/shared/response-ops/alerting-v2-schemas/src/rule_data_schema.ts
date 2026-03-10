@@ -84,6 +84,12 @@ const recoveryPolicySchema = z
     query: z
       .object({
         base: esqlQuerySchema.optional().describe('Base ES|QL query for recovery.'),
+        condition: z
+          .string()
+          .min(1)
+          .max(5000)
+          .optional()
+          .describe('Recovery condition (WHERE clause) applied to the base query.'),
       })
       .strict()
       .optional()
