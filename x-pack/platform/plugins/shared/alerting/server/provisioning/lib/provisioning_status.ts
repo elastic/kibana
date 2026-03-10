@@ -59,7 +59,8 @@ export interface BulkUpdateResultItem {
 export interface ProvisioningStatusWritePayload {
   skipped: Array<ProvisioningStatusDocs>;
   failedConversions: Array<ProvisioningStatusDocs>;
-  updated: Array<ProvisioningStatusDocs>;
+  completed: Array<ProvisioningStatusDocs>;
+  failed: Array<ProvisioningStatusDocs>;
 }
 
 export interface ProvisioningStatusCounts {
@@ -77,15 +78,13 @@ export interface ProvisioningStatusCounts {
 export const prepareProvisioningStatusWrite = (
   payload: ProvisioningStatusWritePayload
 ): { docs: Array<ProvisioningStatusDocs>; counts: ProvisioningStatusCounts } => {
-  const { skipped, failedConversions, updated } = payload;
-  const docs = [...skipped, ...failedConversions, ...updated];
+  const { skipped, failedConversions, completed, failed } = payload;
+  const docs = [...skipped, ...failedConversions, ...completed, ...failed];
   const counts: ProvisioningStatusCounts = {
     skipped: skipped.length,
     failedConversions: failedConversions.length,
-    completed: updated.filter((d) => d.attributes.status === UiamApiKeyProvisioningStatus.COMPLETED)
-      .length,
-    failed: updated.filter((d) => d.attributes.status === UiamApiKeyProvisioningStatus.FAILED)
-      .length,
+    completed: completed.length,
+    failed: failed.length,
     total: docs.length,
   };
   return { docs, counts };
@@ -113,27 +112,36 @@ export const createStatusFromBulkUpdateResult = (
 });
 
 export interface StatusDocsAndOrphanedKeysResult {
-  statusDocs: Array<ProvisioningStatusDocs>;
+  provisioningStatusForCompletedRules: Array<ProvisioningStatusDocs>;
+  provisioningStatusForFailedRules: Array<ProvisioningStatusDocs>;
   orphanedUiamApiKeys: string[];
 }
 
 /**
- * Builds status docs from bulk update results and collects UIAM API keys for rules that failed to update (orphaned).
+ * Builds status docs from bulk update results (split into completed/failed) and collects UIAM API keys for rules that failed to update (orphaned).
  */
 export const statusDocsAndOrphanedKeysFromBulkUpdate = (
   savedObjects: Array<BulkUpdateResultItem>,
   rulesWithUiamApiKeys: Map<string, UiamApiKeyByRuleId>
 ): StatusDocsAndOrphanedKeysResult => {
-  const statusDocs: Array<ProvisioningStatusDocs> = [];
+  const provisioningStatusForCompletedRules: Array<ProvisioningStatusDocs> = [];
+  const provisioningStatusForFailedRules: Array<ProvisioningStatusDocs> = [];
   const orphanedUiamApiKeys: string[] = [];
   for (const so of savedObjects) {
-    statusDocs.push(createStatusFromBulkUpdateResult(so));
+    const statusDoc = createStatusFromBulkUpdateResult(so);
     if (so.error) {
+      provisioningStatusForFailedRules.push(statusDoc);
       const uiamApiKey = rulesWithUiamApiKeys.get(so.id)?.uiamApiKey;
       if (uiamApiKey) {
         orphanedUiamApiKeys.push(uiamApiKey);
       }
+    } else {
+      provisioningStatusForCompletedRules.push(statusDoc);
     }
   }
-  return { statusDocs, orphanedUiamApiKeys };
+  return {
+    provisioningStatusForCompletedRules,
+    provisioningStatusForFailedRules,
+    orphanedUiamApiKeys,
+  };
 };

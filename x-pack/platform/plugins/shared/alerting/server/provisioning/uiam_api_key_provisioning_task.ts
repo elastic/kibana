@@ -182,13 +182,15 @@ export class UiamApiKeyProvisioningTask {
     const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
       await this.convertApiKeys(apiKeysToConvert, context);
 
-    const provisioningStatusForUpdatedRules = await this.updateRules(rulesWithUiamApiKeys, context);
+    const { provisioningStatusForCompletedRules, provisioningStatusForFailedRules } =
+      await this.updateRules(rulesWithUiamApiKeys, context);
 
     await this.updateProvisioningStatus(
       {
         skipped: provisioningStatusForSkippedRules,
-        updated: provisioningStatusForUpdatedRules,
         failedConversions: provisioningStatusForFailedConversions,
+        completed: provisioningStatusForCompletedRules,
+        failed: provisioningStatusForFailedRules,
       },
       context
     );
@@ -201,27 +203,6 @@ export class UiamApiKeyProvisioningTask {
       };
     }
     return { state: nextState };
-  };
-
-  private updateProvisioningStatus = async (
-    payload: ProvisioningStatusWritePayload,
-    context: ProvisioningRunContext
-  ): Promise<void> => {
-    const { docs, counts } = prepareProvisioningStatusWrite(payload);
-    if (docs.length === 0) {
-      return;
-    }
-    try {
-      await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
-      this.logger.info(
-        `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
-        { tags: TAGS }
-      );
-    } catch (e) {
-      this.logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
-        error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
-      });
-    }
   };
 
   private getApiKeysToConvert = async (
@@ -289,15 +270,26 @@ export class UiamApiKeyProvisioningTask {
   private updateRules = async (
     rulesWithUiamApiKeys: Map<string, UiamApiKeyByRuleId>,
     context: ProvisioningRunContext
-  ): Promise<Array<ProvisioningStatusDocs>> => {
+  ): Promise<{
+    provisioningStatusForCompletedRules: Array<ProvisioningStatusDocs>;
+    provisioningStatusForFailedRules: Array<ProvisioningStatusDocs>;
+  }> => {
+    const empty = {
+      provisioningStatusForCompletedRules: [] as Array<ProvisioningStatusDocs>,
+      provisioningStatusForFailedRules: [] as Array<ProvisioningStatusDocs>,
+    };
     if (rulesWithUiamApiKeys.size === 0) {
-      return [];
+      return empty;
     }
     const ruleUpdates = buildRuleUpdatesForUiam(Array.from(rulesWithUiamApiKeys.values()));
     try {
       const bulkRuleUpdateResponse = await context.unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
 
-      const { statusDocs, orphanedUiamApiKeys } = statusDocsAndOrphanedKeysFromBulkUpdate(
+      const {
+        provisioningStatusForCompletedRules,
+        provisioningStatusForFailedRules,
+        orphanedUiamApiKeys,
+      } = statusDocsAndOrphanedKeysFromBulkUpdate(
         bulkRuleUpdateResponse.saved_objects,
         rulesWithUiamApiKeys
       );
@@ -310,7 +302,7 @@ export class UiamApiKeyProvisioningTask {
         );
       }
 
-      return statusDocs;
+      return { provisioningStatusForCompletedRules, provisioningStatusForFailedRules };
     } catch (error) {
       this.logger.error(`Error bulk updating rules with UIAM API keys: ${getErrorMessage(error)}`, {
         error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
@@ -322,6 +314,27 @@ export class UiamApiKeyProvisioningTask {
         context.savedObjectsClient
       );
       throw error;
+    }
+  };
+
+  private updateProvisioningStatus = async (
+    payload: ProvisioningStatusWritePayload,
+    context: ProvisioningRunContext
+  ): Promise<void> => {
+    const { docs, counts } = prepareProvisioningStatusWrite(payload);
+    if (docs.length === 0) {
+      return;
+    }
+    try {
+      await context.savedObjectsClient.bulkCreate(docs, { overwrite: true });
+      this.logger.info(
+        `Wrote provisioning status: ${counts.total} total (${counts.skipped} skipped, ${counts.failedConversions} failed conversions, ${counts.completed} completed, ${counts.failed} failed updates).`,
+        { tags: TAGS }
+      );
+    } catch (e) {
+      this.logger.error(`Error writing provisioning status: ${getErrorMessage(e)}`, {
+        error: { stack_trace: e instanceof Error ? e.stack : undefined, tags: TAGS },
+      });
     }
   };
 }
