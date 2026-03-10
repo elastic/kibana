@@ -64,9 +64,7 @@ function getTimeRangeInstructions() {
     <time_range>
     ### Time Range
     The screen context attachment contains the user's currently selected time range (e.g. "Time range: now-15m to now").
-    Always pass this as the \`start\` and \`end\` parameters when calling tools, unless the user explicitly specifies a different time period.
-    Do not omit \`start\` and \`end\` — tools have inconsistent defaults, and omitting them leads to data from mismatched time windows being combined in a single answer.
-    If the user asks to compare with a previous period (e.g. "compared to yesterday"), you may query outside the selected range for that specific comparison.
+    When a time range is available from screen context or the user's explicit request, always pass it as the \`start\` and \`end\` parameters to tool calls — do not rely on tool defaults when explicit time context is available.
     </time_range>
   `);
 }
