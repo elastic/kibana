@@ -19,14 +19,18 @@ import {
   canAcceptMoreArgs,
   hasVariadicSignature,
 } from '../../../signature_analysis';
-import { checkFunctionInvocationComplete, getFunctionDefinition } from '../../../functions';
+import { getFunctionDefinition } from '../../../functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';
 import { dispatchOperators } from '../operators/dispatcher';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
-import { normalizePreferredExpressionTypes } from '../utils';
+import {
+  getIncompleteOperatorReason,
+  normalizePreferredExpressionTypes,
+  type IncompleteOperatorReason,
+} from '../utils';
 
 /**
  * Suggests completions after an operator (e.g., field = |, field IN |)
@@ -52,7 +56,8 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
   const getExprType = (expression: ESQLAstItem) =>
     getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
 
-  const { complete, reason } = checkFunctionInvocationComplete(rightmostOperator, getExprType);
+  const reason = getIncompleteOperatorReason(rightmostOperator, getExprType);
+  const complete = reason === undefined;
 
   if (complete) {
     return handleCompleteOperator(ctx, rightmostOperator, getExprType);
@@ -154,7 +159,7 @@ async function handleIncompleteOperator(
   ctx: ExpressionContext,
   operator: ESQLFunction,
   getExprType: (expression: ESQLAstItem) => SupportedDataType | 'unknown',
-  reason?: 'tooFewArgs' | 'wrongTypes'
+  reason?: IncompleteOperatorReason
 ): Promise<ISuggestionItem[]> {
   const { innerText, options } = ctx;
   const builder = new SuggestionBuilder(ctx);

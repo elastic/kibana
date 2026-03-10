@@ -20,8 +20,8 @@ import {
 interface SignatureInput {
   signatures: Signature[];
   paramDefinitions?: FunctionParameter[];
-  firstArgumentType?: string;
-  firstValueType?: string;
+  firstArgumentType?: SupportedDataType | 'unknown';
+  firstValueType?: SupportedDataType | 'unknown';
   currentParameterIndex: number;
   hasMoreMandatoryArgs?: boolean;
 }
@@ -56,25 +56,6 @@ export function canAcceptMoreArgs(state: SignatureInput): boolean {
   }
 
   return !isAtMaxParams(state) && maxParams(state.signatures) > 0;
-}
-
-/** Checks whether the current param position accepts a given type. */
-export function isCurrentTypeCompatible(
-  state: SignatureInput,
-  givenType: SupportedDataType | 'unknown',
-  givenIsLiteral: boolean
-): boolean {
-  const paramDefs = state.paramDefinitions ?? [];
-
-  if (paramDefs.length > 0) {
-    return paramDefs.some((def) => argMatchesParamType(givenType, def.type, givenIsLiteral, false));
-  }
-
-  if (hasVariadicSignature(state.signatures) && state.firstArgumentType) {
-    return argMatchesParamType(givenType, state.firstArgumentType, givenIsLiteral, false);
-  }
-
-  return false;
 }
 
 /** Checks a candidate expression against the current param position. */
@@ -148,15 +129,13 @@ export function getAcceptedParamTypes(state: SignatureInput): FunctionParameterT
     return ['any'];
   }
 
-  if (areParamsHomogeneous(state.signatures) && state.firstArgumentType === 'boolean') {
+  const isHomogeneous = areParamsHomogeneous(state.signatures);
+
+  if (isHomogeneous && state.firstArgumentType === 'boolean') {
     return ['any'];
   }
 
-  if (
-    areParamsHomogeneous(state.signatures) &&
-    state.firstArgumentType &&
-    state.firstArgumentType !== 'unknown'
-  ) {
+  if (isHomogeneous && state.firstArgumentType && state.firstArgumentType !== 'unknown') {
     return textualOrSingle(state.firstArgumentType);
   }
 
@@ -191,7 +170,7 @@ export function isTypeAcceptedAtPosition(
     return argMatchesParamType(expressionType, param.type, effectiveIsLiteral, false);
   }
 
-  return isCurrentTypeCompatible(state, expressionType, expressionIsLiteral);
+  return doesParamAcceptType(state, expressionType, expressionIsLiteral);
 }
 
 /** Reads the `mapParams` hint from function signatures. */

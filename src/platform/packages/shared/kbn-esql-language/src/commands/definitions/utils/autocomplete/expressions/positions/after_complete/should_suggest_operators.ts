@@ -31,6 +31,10 @@ export interface OperatorRuleContext {
   ctx: ExpressionContext;
 }
 
+interface EvaluatedOperatorRuleContext extends OperatorRuleContext {
+  isHomogeneous: boolean;
+}
+
 export interface OperatorDecision {
   shouldSuggest: boolean;
   allowedOperators?: string[];
@@ -39,8 +43,16 @@ export interface OperatorDecision {
 
 /** Determines whether operators should be suggested for the current context. */
 export function shouldSuggestOperators(context: OperatorRuleContext): OperatorDecision {
+  const evaluatedContext: EvaluatedOperatorRuleContext = {
+    ...context,
+    isHomogeneous: !!(
+      context.functionParameterContext &&
+      areParamsHomogeneous(context.functionParameterContext.signatures)
+    ),
+  };
+
   for (const rule of rules) {
-    const decision = rule(context);
+    const decision = rule(evaluatedContext);
 
     if (decision !== null) {
       return decision;
@@ -51,7 +63,7 @@ export function shouldSuggestOperators(context: OperatorRuleContext): OperatorDe
   return { shouldSuggest: true, reason: 'fallback' };
 }
 
-type Rule = (context: OperatorRuleContext) => OperatorDecision | null;
+type Rule = (context: EvaluatedOperatorRuleContext) => OperatorDecision | null;
 
 // Rules are evaluated in order. The first rule that returns a decision (non-null) wins.
 // Order matters: specific rules must come before general rules to avoid being shadowed.
@@ -126,8 +138,7 @@ const rules: Rule[] = [
     // Special case: for homogeneous functions at first parameter, check if ANY signature accepts boolean
     // (not just validSignatures which may be filtered by current field type)
     const isFirstParamOfHomogeneous =
-      areParamsHomogeneous(functionParameterContext.signatures) &&
-      functionParameterContext.currentParameterIndex === 0;
+      ctx.isHomogeneous && functionParameterContext.currentParameterIndex === 0;
 
     if (isFirstParamOfHomogeneous) {
       const allSignatures = functionParameterContext.functionDefinition?.signatures;
@@ -207,7 +218,7 @@ const rules: Rule[] = [
       return null;
     }
 
-    if (!areParamsHomogeneous(functionParameterContext.signatures)) {
+    if (!ctx.isHomogeneous) {
       return null;
     }
 
@@ -265,7 +276,7 @@ const rules: Rule[] = [
       return null;
     }
 
-    if (!areParamsHomogeneous(functionParameterContext.signatures)) {
+    if (!ctx.isHomogeneous) {
       return null;
     }
 
@@ -344,10 +355,7 @@ const rules: Rule[] = [
     }
 
     // Do not constrain the first parameter for homogeneous functions
-    if (
-      areParamsHomogeneous(functionParameterContext.signatures) &&
-      functionParameterContext.currentParameterIndex === 0
-    ) {
+    if (ctx.isHomogeneous && functionParameterContext.currentParameterIndex === 0) {
       return null;
     }
 

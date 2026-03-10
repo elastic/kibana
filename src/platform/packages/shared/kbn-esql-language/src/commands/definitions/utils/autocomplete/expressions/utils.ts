@@ -7,21 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLFunction } from '@elastic/esql/types';
+import { isLiteral } from '@elastic/esql';
+import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { ICommandContext, ISuggestionItem } from '../../../../registry/types';
 import { getFunctionDefinition } from '../..';
 import { EDITOR_MARKER } from '../../../constants';
 import { resolveArgumentTypes } from '../../expressions';
+import type { SupportedDataType } from '../../../types';
 import {
   getMatchingSignatures,
+  getMaxMinNumberOfParams,
   getParamAtPosition,
   getParamDefsAtPosition,
 } from '../../signature_analysis';
+import { removeFinalUnknownIdentiferArg } from '../../shared';
 import type { PreferredExpressionType } from './types';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
+export type IncompleteOperatorReason = 'tooFewArgs' | 'wrongTypes';
 
 /** IN, NOT IN, IS NULL, IS NOT NULL operators requiring special autocomplete handling */
 export const specialOperators = [...inOperators, ...nullCheckOperators];
@@ -123,6 +128,54 @@ export function buildExpressionFunctionParameterContext(
     currentParameterIndex: argIndex,
     validSignatures,
   };
+}
+
+/**
+ * Explains why an operator invocation is not yet complete for autocomplete purposes.
+ */
+export function getIncompleteOperatorReason(
+  operator: ESQLFunction,
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+): IncompleteOperatorReason | undefined {
+  const fnDefinition = getFunctionDefinition(operator.name);
+
+  if (!fnDefinition) {
+    return 'tooFewArgs';
+  }
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
+  const { min, max } = getMaxMinNumberOfParams(fnDefinition.signatures);
+  const hasValidArity = cleanedArgs.length >= min && cleanedArgs.length <= max;
+
+  if (!hasValidArity) {
+    return 'tooFewArgs';
+  }
+
+  if (
+    operator.incomplete &&
+    (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')
+  ) {
+    return 'tooFewArgs';
+  }
+
+  if (
+    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
+    Array.isArray(operator.args[1]) &&
+    !operator.args[1].length
+  ) {
+    return 'tooFewArgs';
+  }
+
+  const givenTypes = operator.args.map((arg) => getExpressionType(arg));
+  const literalMask = operator.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
+  const hasCorrectTypes =
+    getMatchingSignatures(fnDefinition.signatures, givenTypes, literalMask, true).length > 0;
+
+  if (!hasCorrectTypes) {
+    return 'wrongTypes';
+  }
+
+  return undefined;
 }
 
 /**

@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getParamAtPosition, getParamDefsAtPosition, getMaxMinNumberOfParams } from './arity';
+export {
+  getParamAtPosition,
+  getParamDefsAtPosition,
+  getMaxMinNumberOfParams,
+  matchesArity,
+} from './arity';
 
 export {
   argMatchesParamType,
@@ -28,7 +33,6 @@ export {
   isAtRepeatingValuePosition,
   isAmbiguousPosition,
   canAcceptMoreArgs,
-  isCurrentTypeCompatible,
   doesParamAcceptType,
   getCompatibleParamDefs,
   getAcceptedParamTypes,
