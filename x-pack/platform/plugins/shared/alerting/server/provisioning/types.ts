@@ -58,6 +58,6 @@ export interface GetApiKeysToConvertResult {
 }
 
 export interface ConvertApiKeysResult {
-  rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId>;
+  rulesWithUiamApiKeys: Map<string, UiamApiKeyByRuleId>;
   provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs>;
 }

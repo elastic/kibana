@@ -20,7 +20,6 @@ import {
   type LatestTaskStateSchema,
 } from './uiam_api_key_provisioning_task_state';
 import {
-  createFailedConversionStatus,
   createStatusFromBulkUpdateResult,
   createProvisioningRunContext,
   classifyRuleForUiamProvisioning,
@@ -28,6 +27,7 @@ import {
   getErrorMessage,
   getExcludeRulesFilter,
   buildRuleUpdatesForUiam,
+  mapConvertResponseToResult,
 } from './lib';
 import type {
   ProvisioningRunContext,
@@ -282,14 +282,13 @@ export class UiamApiKeyProvisioningTask {
   ): Promise<ConvertApiKeysResult> => {
     if (apiKeysToConvert.length === 0) {
       return {
-        rulesWithUiamApiKeys: [],
+        rulesWithUiamApiKeys: new Map(),
         provisioningStatusForFailedConversions: [],
       };
     }
 
-    const keys = apiKeysToConvert.map(({ attributes }) => attributes.apiKey!);
-
     try {
+      const keys = apiKeysToConvert.map(({ attributes }) => attributes.apiKey!);
       const convertResponse = await context.uiamConvert(keys);
       if (convertResponse === null) {
         throw new Error('License required for the UIAM convert API is not enabled');
@@ -301,31 +300,11 @@ export class UiamApiKeyProvisioningTask {
         );
       }
 
-      const rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId> = [];
-      const provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs> = [];
-
-      for (let i = 0; i < convertResponse.results.length && i < apiKeysToConvert.length; i++) {
-        const item = convertResponse.results[i];
-        const { ruleId, attributes, version } = apiKeysToConvert[i];
-        if (item.status === 'success') {
-          rulesWithUiamApiKeys.push({
-            ruleId,
-            uiamApiKey: Buffer.from(`${item.id}:${item.key}`).toString('base64'),
-            attributes,
-            version,
-          });
-        } else if (item.status === 'failed') {
-          provisioningStatusForFailedConversions.push(
-            createFailedConversionStatus(
-              ruleId,
-              `Error generating UIAM API key for the rule with ID ${ruleId}: ${item.message}`
-            )
-          );
-        }
-      }
+      const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
+        mapConvertResponseToResult(apiKeysToConvert, convertResponse);
 
       this.logger.info(
-        `Successfully converted ${rulesWithUiamApiKeys.length} API keys. ${provisioningStatusForFailedConversions.length} conversions failed.`,
+        `Successfully converted ${rulesWithUiamApiKeys.size} API keys. ${provisioningStatusForFailedConversions.length} conversions failed.`,
         { tags: TAGS }
       );
 
@@ -339,26 +318,23 @@ export class UiamApiKeyProvisioningTask {
   };
 
   private updateRules = async (
-    rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId>,
+    rulesWithUiamApiKeys: Map<string, UiamApiKeyByRuleId>,
     context: ProvisioningRunContext
   ): Promise<Array<ProvisioningStatusDocs>> => {
-    if (rulesWithUiamApiKeys.length === 0) {
+    if (rulesWithUiamApiKeys.size === 0) {
       return [];
     }
-    const ruleUpdates = buildRuleUpdatesForUiam(rulesWithUiamApiKeys);
+    const ruleUpdates = buildRuleUpdatesForUiam(Array.from(rulesWithUiamApiKeys.values()));
     try {
       const bulkRuleUpdateResponse = await context.unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
 
-      const uiamApiKeyByRuleId = new Map(
-        rulesWithUiamApiKeys.map((r) => [r.ruleId, r.uiamApiKey] as const)
-      );
       const statusDocs: Array<ProvisioningStatusDocs> = [];
       const orphanedUiamApiKeys: string[] = [];
 
       for (const so of bulkRuleUpdateResponse.saved_objects) {
         statusDocs.push(createStatusFromBulkUpdateResult(so));
         if (so.error) {
-          const uiamApiKey = uiamApiKeyByRuleId.get(so.id);
+          const uiamApiKey = rulesWithUiamApiKeys.get(so.id)?.uiamApiKey;
           if (uiamApiKey) {
             orphanedUiamApiKeys.push(uiamApiKey);
           }
@@ -378,7 +354,7 @@ export class UiamApiKeyProvisioningTask {
       this.logger.error(`Error bulk updating rules with UIAM API keys: ${getErrorMessage(error)}`, {
         error: { stack_trace: error instanceof Error ? error.stack : undefined, tags: TAGS },
       });
-      const orphanedUiamApiKeys = rulesWithUiamApiKeys.map((r) => r.uiamApiKey);
+      const orphanedUiamApiKeys = Array.from(rulesWithUiamApiKeys.values(), (r) => r.uiamApiKey);
       await bulkMarkApiKeysForInvalidation(
         { apiKeys: orphanedUiamApiKeys },
         this.logger,
