@@ -8,10 +8,9 @@
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import type { TriggerMatchResult } from './types';
-import { isExperimentalFeaturesEnabled } from '../../../../../utils/is_experimental_features_enabled';
 import { InlineActionPopover } from './inline_action_popover';
 import { useInlineActionsMenuAnchor } from './use_inline_actions_menu_anchor';
-import { useKibana } from '../../../../../hooks/use_kibana';
+import { useExperimentalFeatures } from '../../../../../hooks/use_experimental_features';
 
 const containerStyles = css`
   position: relative;
@@ -41,14 +40,12 @@ export const InlineActionsContainer: React.FC<InlineActionsContainerProps> = ({
     containerRef,
   });
 
-  const {
-    services: { settings },
-  } = useKibana();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
   return (
     <div ref={containerRef} css={containerStyles} data-test-subj={dataTestSubj}>
       {children}
-      {isExperimentalFeaturesEnabled(settings.client) && (
+      {isExperimentalFeaturesEnabled && (
         <InlineActionPopover
           triggerMatch={triggerMatch}
           onClose={onClose}

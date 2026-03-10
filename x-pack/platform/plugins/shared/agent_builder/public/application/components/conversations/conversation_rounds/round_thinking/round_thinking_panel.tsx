@@ -19,8 +19,8 @@ import React, { useState, useMemo } from 'react';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { isExperimentalFeaturesEnabled } from '../../../../utils/is_experimental_features_enabled';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { RoundFlyout } from './round_flyout';
 import { TraceFlyout } from './trace_flyout';
 import { RoundSteps } from './steps/round_steps';
@@ -64,7 +64,7 @@ export const RoundThinkingPanel = ({
   const [showTraceFlyout, setShowTraceFlyout] = useState(false);
 
   const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
-  const isExperimentalEnabled = isExperimentalFeaturesEnabled(services.uiSettings);
+  const isExperimentalEnabled = useExperimentalFeatures();
 
   const traceId = useMemo(() => {
     const id = rawRound.trace_id;

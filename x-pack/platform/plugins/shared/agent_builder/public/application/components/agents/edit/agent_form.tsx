@@ -35,6 +35,7 @@ import {
   filterToolsBySelection,
   hasAgentWriteAccess,
   type AgentDefinition,
+  type SkillSelection,
 } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -57,10 +58,11 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
+import { SkillsTab } from './tabs/skills_tab';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
-import { isExperimentalFeaturesEnabled } from '../../../utils/is_experimental_features_enabled';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -87,9 +89,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
-  const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.uiSettings);
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
-  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -144,17 +146,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     isSubmitting,
     submit,
     tools,
+    skills,
     error,
   } = useAgentEdit({
     editingAgentId,
-    experimentalFeaturesEnabled,
     onSaveSuccess,
     onSaveError,
   });
 
   const canEditAgent = !manageAgents
     ? false
-    : !experimentalFeaturesEnabled
+    : !isExperimentalFeaturesEnabled
     ? true
     : hasAgentWriteAccess({
         visibility: agentState?.visibility,
@@ -239,6 +241,23 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     return filterToolsBySelection(tools, agentTools).length;
   }, [tools, agentTools]);
 
+  const agentSkills = watch('configuration.skills') as SkillSelection[] | undefined;
+  const activeSkillsCount = useMemo(() => {
+    const effectiveSelection =
+      agentSkills && agentSkills.length > 0 ? agentSkills : [{ skill_ids: ['*'] }];
+    const hasWildcard = effectiveSelection.some((s) => s.skill_ids.includes('*'));
+    if (hasWildcard) {
+      const builtinCount = skills.filter((s) => s.readonly).length;
+      const explicitIds = new Set(
+        effectiveSelection.flatMap((s) => s.skill_ids.filter((id) => id !== '*'))
+      );
+      const explicitUserCount = skills.filter((s) => !s.readonly && explicitIds.has(s.id)).length;
+      return builtinCount + explicitUserCount;
+    }
+    const explicitIds = new Set(effectiveSelection.flatMap((s) => s.skill_ids));
+    return skills.filter((skill) => explicitIds.has(skill.id)).length;
+  }, [skills, agentSkills]);
+
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
       {
@@ -282,6 +301,36 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      ...(isExperimentalFeaturesEnabled
+        ? [
+            {
+              id: 'skills',
+              name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+                defaultMessage: 'Skills',
+              }),
+              content: (
+                <SkillsTab
+                  control={control}
+                  skills={skills}
+                  isLoading={isLoading}
+                  isFormDisabled={isFormDisabled || !manageAgents}
+                />
+              ),
+              append: (
+                <EuiNotificationBadge
+                  color="subdued"
+                  css={css`
+                    block-size: 20px;
+                    min-inline-size: ${euiTheme.size.l};
+                    padding: 0 ${euiTheme.size.xs};
+                  `}
+                >
+                  {activeSkillsCount}
+                </EuiNotificationBadge>
+              ),
+            },
+          ]
+        : []),
     ],
     [
       control,
@@ -290,10 +339,14 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       isFormDisabled,
       canEditAgent,
       tools,
+      skills,
       isLoading,
       euiTheme,
       activeToolsCount,
       agentState?.created_by,
+      activeSkillsCount,
+      manageAgents,
+      isExperimentalFeaturesEnabled,
     ]
   );
 

@@ -39,7 +39,7 @@ import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
-import { isExperimentalFeaturesEnabled } from '../../../../utils/is_experimental_features_enabled';
+import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import { VISIBILITY_LABELS } from '../../../../utils/visibility_i18n';
@@ -64,15 +64,12 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const experimentalFeaturesEnabled = useMemo(
-    () => isExperimentalFeaturesEnabled(uiSettings),
-    [uiSettings]
-  );
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
-  const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
   const { hasAgentVisibilityAccessOverride } = useUiPrivileges();
   const canChangeVisibility =
-    experimentalFeaturesEnabled &&
+    isExperimentalFeaturesEnabled &&
     (isCreateMode ||
       canChangeAgentVisibility({
         owner,
@@ -274,7 +271,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               <EuiIcon type="tag" aria-hidden={true} />
               <EuiTitle size="xs">
                 <h2 id="organization-access-section-title">
-                  {experimentalFeaturesEnabled
+                  {isExperimentalFeaturesEnabled
                     ? i18n.translate(
                         'xpack.agentBuilder.agents.form.settings.organizationAccessTitle',
                         { defaultMessage: 'Organization' }
@@ -289,14 +286,14 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               {i18n.translate(
                 'xpack.agentBuilder.agents.form.settings.organizationAccessDescription',
                 {
-                  defaultMessage: experimentalFeaturesEnabled
+                  defaultMessage: isExperimentalFeaturesEnabled
                     ? 'Use labels to organize agents and visibility to control who can view and edit.'
                     : 'Use labels to organize and filter agents.',
                 }
               )}
             </EuiText>
             <EuiSpacer size="s" />
-            {experimentalFeaturesEnabled && (
+            {isExperimentalFeaturesEnabled && (
               <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
                 <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
                   <EuiTitle size="xxs">
@@ -415,7 +412,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             />
           </EuiFormRow>
 
-          {experimentalFeaturesEnabled && (
+          {isExperimentalFeaturesEnabled && (
             <EuiFormRow
               label={i18n.translate('xpack.agentBuilder.agents.form.visibilityLabel', {
                 defaultMessage: 'Visibility',
