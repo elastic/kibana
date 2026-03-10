@@ -9,6 +9,11 @@
 
 import { mockPersistedLogFactory } from '@kbn/kql/public/components/query_string_input/query_string_input.test.mocks';
 
+jest.mock('@kbn/esql/public/kibana_services', () => ({
+  useKibanaServices: jest.fn(() => ({})),
+  untilPluginStartServicesReady: jest.fn(() => new Promise(() => {})),
+}));
+
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor, within } from '@testing-library/react';

@@ -2,8 +2,6 @@
 navigation_title: "Notion"
 type: reference
 description: "Use the Notion connector to search pages and databases, retrieve content, and query databases in your Notion workspace."
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/notion-action-type.html
 applies_to:
   stack: preview 9.3
   serverless: preview

@@ -55,9 +55,7 @@ export const getLinksEmbeddableFactory = () => {
         ? await loadFromLibrary(savedObjectId)
         : (initialState as LinksState);
 
-      const titleManager = initializeTitleManager(initialState, {
-        borderlessByDefault: intialLinksState.layout === LINKS_HORIZONTAL_LAYOUT,
-      });
+      const titleManager = initializeTitleManager(initialState);
 
       const isByReference = savedObjectId !== undefined;
 
