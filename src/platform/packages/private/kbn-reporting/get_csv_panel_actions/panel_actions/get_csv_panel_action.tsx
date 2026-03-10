@@ -7,52 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
-import {
-  AnalyticsServiceStart,
-  CoreSetup,
-  CoreStart,
-  I18nStart,
-  NotificationsSetup,
-} from '@kbn/core/public';
-import { DataPublicPluginStart, type SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { CoreSetup, CoreStart, NotificationsSetup } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { type SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { PublishesSavedSearch, HasTimeRange } from '@kbn/discover-plugin/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
   apiPublishesSavedSearch,
-  PublishesSavedSearch,
-  HasTimeRange,
 } from '@kbn/discover-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type {
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  HasType,
+  PublishesTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
   apiPublishesTitle,
-  CanAccessViewMode,
-  EmbeddableApiContext,
   getInheritedViewMode,
-  HasType,
   type PublishesSavedObjectId,
-  PublishesTitle,
   type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
-import {
-  getSearchCsvJobParams,
-  CsvSearchModeParams,
-} from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
+import type { CsvSearchModeParams } from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
+import { getSearchCsvJobParams } from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
-import { LocatorParams } from '@kbn/reporting-common/types';
+import type { LocatorParams } from '@kbn/reporting-common/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
@@ -64,10 +60,7 @@ type StartServices = [
   Pick<
     CoreStart,
     // required for modules that render React
-    | 'analytics'
-    | 'i18n'
-    | 'theme'
-    | 'userProfile'
+    | 'rendering'
     // used extensively in Reporting share panel action
     | 'application'
     | 'uiSettings'
@@ -86,8 +79,6 @@ interface Params {
 interface ExecutionParams {
   searchModeParams: CsvSearchModeParams;
   title: string;
-  analytics: AnalyticsServiceStart;
-  i18nStart: I18nStart;
 }
 
 type GetCsvActionApi = HasType &
@@ -158,8 +149,11 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const license = await firstValueFrom(licensing.license$);
     const licenseHasCsvReporting = checkLicense(license.check('reporting', 'basic')).showLinks;
 
+    const capabilities = application.capabilities;
     // NOTE: For historical reasons capability identifier is called `downloadCsv. It can not be renamed.
-    const capabilityHasCsvReporting = application.capabilities.dashboard_v2?.downloadCsv === true;
+    const capabilityHasCsvReporting =
+      capabilities.dashboard_v2?.downloadCsv === true ||
+      capabilities.reportingLegacy?.generateReport === true;
     if (!licenseHasCsvReporting || !capabilityHasCsvReporting) {
       return false;
     }
@@ -168,7 +162,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   };
 
   private executeGenerate = async (params: ExecutionParams) => {
-    const [startServices] = await firstValueFrom(this.startServices$);
+    const [{ rendering }] = await firstValueFrom(this.startServices$);
     const { searchModeParams, title } = params;
     const { reportType, decoratedJobParams } = getSearchCsvJobParams({
       apiClient: this.apiClient,
@@ -182,7 +176,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
         if (job) {
           this.notifications.toasts.addSuccess({
             title: this.i18nStrings.generate.toasts.success.title,
-            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, startServices),
+            text: toMountPoint(this.i18nStrings.generate.toasts.success.body, rendering),
             'data-test-subj': 'csvReportStarted',
           });
         }
@@ -226,10 +220,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       return;
     }
 
-    const [{ i18n: i18nStart, analytics }] = await firstValueFrom(this.startServices$);
-
     const title = embeddable.title$.getValue() ?? '';
-    const executionParamsCommon = { title, i18nStart, analytics };
 
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
     const searchSource = getSearchSource({
@@ -239,7 +230,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
 
     if (this.isEsqlMode(savedSearch)) {
       return this.executeGenerate({
-        ...executionParamsCommon,
+        title,
         searchModeParams: {
           isEsqlMode: true,
           locatorParams: [
@@ -253,7 +244,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     }
 
     return this.executeGenerate({
-      ...executionParamsCommon,
+      title,
       searchModeParams: { isEsqlMode: false, searchSource, columns },
     });
   };

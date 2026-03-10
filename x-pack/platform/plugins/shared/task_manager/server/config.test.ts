@@ -13,6 +13,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -22,6 +23,10 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
         },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
@@ -71,6 +76,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -80,6 +86,10 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
         },
         "kibanas_per_partition": 2,
         "max_attempts": 3,
@@ -127,6 +137,7 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "allow_reading_invalid_state": true,
+        "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
         "claim_strategy": "mget",
         "discovery": Object {
@@ -136,6 +147,10 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "invalidate_api_key_task": Object {
+          "interval": "5m",
+          "removalDelay": "1h",
         },
         "kibanas_per_partition": 2,
         "max_attempts": 3,

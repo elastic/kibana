@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as uuid from 'uuid';
 import type { IEvent, IEventLogger, InternalFields } from '@kbn/event-log-plugin/server';
 import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -16,7 +17,7 @@ import type { AlertInstanceState, RuleExecutionStatus } from '../../types';
 import { createAlertEventLogRecordObject } from '../create_alert_event_log_record_object';
 import type { RuleRunMetrics } from '../rule_run_metrics_store';
 import { Gap } from '../rule_gaps/gap';
-import type { GapBase } from '../rule_gaps/types';
+import type { GapBase } from '../../application/gaps/types';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -198,7 +199,7 @@ export class AlertingEventLogger {
       },
       message: `rule execution start: "${ruleData.id}"`,
     };
-    this.eventLogger.logEvent(executeStartEvent);
+    this.logEventWithFixedUuid(executeStartEvent);
   }
 
   public getStartAndDuration(): { start?: Date; duration?: string | number } {
@@ -321,7 +322,7 @@ export class AlertingEventLogger {
       updateEvent(executeTimeoutEvent, { backfill });
     }
 
-    this.eventLogger.logEvent(executeTimeoutEvent);
+    this.logEventWithFixedUuid(executeTimeoutEvent);
   }
 
   public logAlert(alert: AlertOpts) {
@@ -329,7 +330,7 @@ export class AlertingEventLogger {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.eventLogger.logEvent(
+    this.logEventWithFixedUuid(
       createAlertRecord(this.context, this.ruleData, this.relatedSavedObjects, alert)
     );
   }
@@ -339,7 +340,7 @@ export class AlertingEventLogger {
       throw new Error('AlertingEventLogger not initialized');
     }
 
-    this.eventLogger.logEvent(
+    this.logEventWithFixedUuid(
       createActionExecuteRecord(this.context, this.ruleData, this.relatedSavedObjects, action)
     );
   }
@@ -392,7 +393,7 @@ export class AlertingEventLogger {
       updateEvent(this.event, { backfill });
     }
 
-    this.eventLogger.logEvent(this.event);
+    this.logEventWithFixedUuid(this.event);
   }
 
   public reportGap({
@@ -408,10 +409,11 @@ export class AlertingEventLogger {
     }
 
     const gapToReport = new Gap({
+      ruleId: this.ruleData.id,
       range: gap,
     });
 
-    this.eventLogger.logEvent(
+    this.logEventWithFixedUuid(
       createGapRecord(this.context, this.ruleData, this.relatedSavedObjects, gapToReport.toObject())
     );
   }
@@ -436,6 +438,10 @@ export class AlertingEventLogger {
         internalFields: doc.internalFields,
       }))
     );
+  }
+
+  private logEventWithFixedUuid(event: IEvent) {
+    this.eventLogger.logEvent(event, uuid.v4());
   }
 }
 

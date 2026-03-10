@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core/server';
-import { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
+import type { ApiConfig, AttackDiscovery } from '@kbn/elastic-assistant-common';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 
 import dateMath from '@kbn/datemath';
+import type { AttackDiscoveryScheduleInfo } from '../../../lib/telemetry/event_based_telemetry';
 import {
   ATTACK_DISCOVERY_ERROR_EVENT,
   ATTACK_DISCOVERY_SUCCESS_EVENT,
@@ -23,7 +24,7 @@ export const reportAttackDiscoveryGenerationSuccess = ({
   durationMs,
   end,
   hasFilter,
-  schedule,
+  scheduleInfo,
   size,
   start,
   telemetry,
@@ -34,10 +35,7 @@ export const reportAttackDiscoveryGenerationSuccess = ({
   durationMs: number;
   end?: string;
   hasFilter: boolean;
-  schedule?: {
-    id: string;
-    interval: string;
-  };
+  scheduleInfo?: AttackDiscoveryScheduleInfo;
   size: number;
   start?: string;
   telemetry: AnalyticsServiceSetup;
@@ -59,22 +57,19 @@ export const reportAttackDiscoveryGenerationSuccess = ({
     isDefaultDateRange,
     model: apiConfig.model,
     provider: apiConfig.provider,
-    schedule,
+    scheduleInfo,
   });
 };
 
 export const reportAttackDiscoveryGenerationFailure = ({
   apiConfig,
   errorMessage,
-  schedule,
+  scheduleInfo,
   telemetry,
 }: {
   apiConfig: ApiConfig;
   errorMessage: string;
-  schedule?: {
-    id: string;
-    interval: string;
-  };
+  scheduleInfo?: AttackDiscoveryScheduleInfo;
   telemetry: AnalyticsServiceSetup;
 }) => {
   telemetry.reportEvent(ATTACK_DISCOVERY_ERROR_EVENT.eventType, {
@@ -82,7 +77,7 @@ export const reportAttackDiscoveryGenerationFailure = ({
     errorMessage,
     model: apiConfig.model,
     provider: apiConfig.provider,
-    schedule,
+    scheduleInfo,
   });
 };
 

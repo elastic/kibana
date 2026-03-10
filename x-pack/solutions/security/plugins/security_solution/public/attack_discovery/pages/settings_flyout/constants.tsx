@@ -6,3 +6,7 @@
  */
 
 export const MIN_FLYOUT_WIDTH = 448; // px
+
+export const SETTINGS_TAB_ID = 'settings';
+
+export const SCHEDULE_TAB_ID = 'schedule';

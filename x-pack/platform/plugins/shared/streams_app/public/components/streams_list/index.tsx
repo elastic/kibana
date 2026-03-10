@@ -20,42 +20,58 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { Streams, getSegments, isDescendantOf, isRootStreamDefinition } from '@kbn/streams-schema';
+import {
+  Streams,
+  getSegments,
+  isDescendantOf,
+  isRootStreamDefinition,
+  getDiscoverEsqlQuery,
+} from '@kbn/streams-schema';
+import type { estypes } from '@elastic/elasticsearch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
-import { getIndexPatterns } from '../../util/hierarchy_helpers';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+
+export interface StreamListItem {
+  stream: Streams.all.Definition;
+  data_stream?: estypes.IndicesDataStream;
+}
 
 export interface StreamTree {
   name: string;
   type: 'wired' | 'root' | 'classic';
   stream: Streams.all.Definition;
+  data_stream?: estypes.IndicesDataStream;
   children: StreamTree[];
 }
 
-export function asTrees(streams: Streams.all.Definition[]) {
+export function asTrees(items: StreamListItem[]) {
   const trees: StreamTree[] = [];
-  const sortedStreams = streams
+  const sortedItems = items
     .slice()
-    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
+    .sort((a, b) => getSegments(a.stream.name).length - getSegments(b.stream.name).length);
 
-  sortedStreams.forEach((stream) => {
+  sortedItems.forEach((item) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
     // traverse the tree following the prefix of the current name.
     // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
-    while ((existingNode = currentTree.find((node) => isDescendantOf(node.name, stream.name)))) {
+    while (
+      (existingNode = currentTree.find((node) => isDescendantOf(node.name, item.stream.name)))
+    ) {
       currentTree = existingNode.children;
     }
 
     if (!existingNode) {
       const newNode: StreamTree = {
-        name: stream.name,
+        name: item.stream.name,
         children: [],
-        stream,
-        type: Streams.UnwiredStream.Definition.is(stream)
+        stream: item.stream,
+        data_stream: item.data_stream,
+        type: Streams.ClassicStream.Definition.is(item.stream)
           ? 'classic'
-          : isRootStreamDefinition(stream)
+          : isRootStreamDefinition(item.stream)
           ? 'root'
           : 'wired',
       };
@@ -71,7 +87,7 @@ export function StreamsList({
   query,
   showControls,
 }: {
-  streams: Streams.all.Definition[] | undefined;
+  streams: StreamListItem[] | undefined;
   query?: string;
   showControls: boolean;
 }) {
@@ -83,8 +99,8 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item))
-      .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
+      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item.stream))
+      .filter((item) => !query || item.stream.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
   const treeView = useMemo(() => asTrees(filteredItems), [filteredItems]);
@@ -108,7 +124,7 @@ export function StreamsList({
                   iconType="fold"
                   size="s"
                   onClick={() =>
-                    setCollapsed(Object.fromEntries(items.map((item) => [item.name, true])))
+                    setCollapsed(Object.fromEntries(items.map((item) => [item.stream.name, true])))
                   }
                 >
                   {i18n.translate('xpack.streams.streamsTable.collapseAll', {
@@ -168,24 +184,33 @@ function StreamNode({
       start: { share },
     },
   } = useKibana();
+  const { features } = useStreamsPrivileges();
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
     [share.url.locators]
   );
 
   const discoverUrl = useMemo(() => {
-    const indexPatterns = getIndexPatterns(node.stream);
+    if (!discoverLocator) {
+      return undefined;
+    }
 
-    if (!discoverLocator || !indexPatterns) {
+    const esqlQuery = getDiscoverEsqlQuery({
+      definition: node.stream,
+      indexMode: node.data_stream?.index_mode,
+      useViews: features.wiredStreamViews.enabled,
+    });
+
+    if (!esqlQuery) {
       return undefined;
     }
 
     return discoverLocator.getRedirectUrl({
       query: {
-        esql: `FROM ${indexPatterns.join(', ')}`,
+        esql: esqlQuery,
       },
     });
-  }, [discoverLocator, node]);
+  }, [discoverLocator, node, features.wiredStreamViews.enabled]);
 
   return (
     <EuiFlexGroup
@@ -255,6 +280,7 @@ function StreamNode({
             content={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
               defaultMessage: 'Open in new tab',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="streamsAppStreamNodeButton"
@@ -270,6 +296,7 @@ function StreamNode({
             content={i18n.translate('xpack.streams.streamsTable.openInDiscover', {
               defaultMessage: 'Open in Discover',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="streamsAppStreamNodeButton"
@@ -284,6 +311,7 @@ function StreamNode({
             content={i18n.translate('xpack.streams.streamsTable.management', {
               defaultMessage: 'Management',
             })}
+            disableScreenReaderOutput
           >
             <EuiButtonIcon
               data-test-subj="streamsAppStreamNodeButton"
@@ -292,7 +320,7 @@ function StreamNode({
                 defaultMessage: 'Management',
               })}
               href={router.link('/{key}/management/{tab}', {
-                path: { key: node.name, tab: 'route' },
+                path: { key: node.name, tab: 'partitioning' },
               })}
             />
           </EuiToolTip>
@@ -302,7 +330,11 @@ function StreamNode({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             {node.children.map((child, index) => (
-              <NestedView key={child.name} last={index === node.children.length - 1}>
+              <NestedView
+                key={child.name}
+                last={index === node.children.length - 1}
+                first={index === 0}
+              >
                 <StreamNode node={child} collapsed={collapsed} setCollapsed={setCollapsed} />
               </NestedView>
             ))}

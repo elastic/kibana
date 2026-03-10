@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import {
@@ -22,17 +22,18 @@ import {
   concatMap,
   takeUntil,
 } from 'rxjs';
-import { CliArgs } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Log, CliLog } from './log';
+import type { Log } from './log';
+import { CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
 import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
-import { CliDevConfig } from './config';
+import type { CliDevConfig } from './config';
 
 // signal that emits undefined once a termination signal has been sent
 const exitSignal$ = new Rx.ReplaySubject<undefined>(1);
@@ -244,8 +245,10 @@ export class CliDevMode {
     }
 
     this.subscription.add(
-      this.optimizer.run$
+      // the same pattern as: `kibana/packages/kbn-cli-dev-mode/src/dev_server.ts`
+      Rx.concat([undefined], this.watcher.optimizerShouldRestart$())
         .pipe(
+          switchMap(() => this.optimizer.run$),
           // stop the optimizer as soon as we get an exit signal
           takeUntil(exitSignal$)
         )

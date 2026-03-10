@@ -9,12 +9,17 @@
 
 import React, { Fragment } from 'react';
 
-import type { FieldDefinition, CategoryCounts } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  CategoryCounts,
+  UnsavedFieldChanges,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 import { FieldCategories } from '@kbn/management-settings-components-field-category';
-import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
+import type { OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -41,9 +46,7 @@ export interface FormProps {
 export const Form = (props: FormProps) => {
   const { fields, isSavingEnabled, categoryCounts, onClearQuery, scope } = props;
 
-  const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
-    {}
-  );
+  const [unsavedChanges, setUnsavedChanges] = React.useState<UnsavedFieldChanges>({});
 
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -64,11 +67,11 @@ export const Form = (props: FormProps) => {
     setUnsavedChanges({});
   };
 
-  const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved, scope });
+  const saveChanges = useSave({ clearChanges: clearAllUnsaved });
 
   const saveAll = async () => {
     setIsLoading(true);
-    await saveChanges(scopeUnsavedChanges);
+    await saveChanges(unsavedChanges);
     setIsLoading(false);
   };
 
@@ -79,7 +82,14 @@ export const Form = (props: FormProps) => {
       return;
     }
 
-    setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
+    setUnsavedChanges({
+      ...unsavedChanges,
+      [id]: {
+        ...change,
+        scope,
+        needsReload: fields.find((field) => field.id === id)?.requiresPageReload ?? false,
+      },
+    });
   };
 
   const categorizedFields = categorizeFields(fields);

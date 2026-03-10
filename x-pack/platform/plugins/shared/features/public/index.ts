@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { FeaturesPlugin, FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
+import type { PluginInitializer } from '@kbn/core/public';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
+import { FeaturesPlugin } from './plugin';
 
 export type {
   KibanaFeatureConfig,
@@ -14,7 +15,7 @@ export type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '../common';
-export { KibanaFeature, KibanaFeatureScope } from '../common';
+export { KibanaFeature } from '../common';
 
 export type { FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 

@@ -4,69 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
-import { isEqual } from 'lodash';
-import { TimeRange } from '@kbn/es-query';
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_streams_app_bar';
 import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
-export interface StreamsAppSearchBarProps {
-  query?: string;
-  onQueryChange?: (payload: { query: string }) => void;
-  onQuerySubmit?: (payload: { query: string }) => void;
-  placeholder?: string;
-  dataViews?: DataView[];
-  showSubmitButton?: boolean;
-  showDatePicker?: boolean;
-}
+export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
 
-// if the absolute time stays the same
-function needsRefresh(left: TimeRange, right: TimeRange) {
-  const forceNow = new Date();
-  const leftAbsolute = getAbsoluteTimeRange(left, { forceNow });
-  const rightAbsolute = getAbsoluteTimeRange(right, { forceNow });
-
-  return isEqual(leftAbsolute, rightAbsolute);
-}
-
-export function StreamsAppSearchBar({
-  onQueryChange,
-  onQuerySubmit,
-  query,
-  placeholder,
-  dataViews,
-  showDatePicker = false,
-  showSubmitButton = true,
-}: StreamsAppSearchBarProps) {
-  const { timeState, setTime, refresh } = useTimefilter();
-
-  function refreshOrSetTime(next: TimeRange) {
-    if (needsRefresh(timeState.timeRange, next)) {
-      refresh();
-    } else {
-      setTime(next);
-    }
-  }
+export function StreamsAppSearchBar({ onQuerySubmit, ...props }: StreamsAppSearchBarProps) {
+  const { rangeFrom, rangeTo } = useTimeRange();
+  const { updateTimeRange } = useTimeRangeUpdate();
+  const { refresh } = useTimefilter();
 
   return (
     <UncontrolledStreamsAppSearchBar
-      onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
+      onQuerySubmit={({ dateRange, query }, isUpdate) => {
         if (dateRange) {
-          refreshOrSetTime(dateRange);
+          updateTimeRange(dateRange);
         }
-        onQuerySubmit?.({ query: nextQuery });
+        if (!isUpdate) {
+          refresh();
+        }
+        onQuerySubmit?.({ dateRange, query }, isUpdate);
       }}
-      onQueryChange={({ query: nextQuery }) => {
-        onQueryChange?.({ query: nextQuery });
-      }}
-      query={query}
-      showSubmitButton={showSubmitButton}
-      dateRangeFrom={showDatePicker ? timeState.timeRange.from : undefined}
-      dateRangeTo={showDatePicker ? timeState.timeRange.to : undefined}
-      placeholder={placeholder}
-      dataViews={dataViews}
+      dateRangeFrom={rangeFrom}
+      dateRangeTo={rangeTo}
+      {...props}
     />
   );
 }

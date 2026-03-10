@@ -54,6 +54,13 @@ var IGNORE_WARNINGS = [
     message:
       'The URL https://github.com:crypto-browserify/browserify-rsa.git is invalid. Future versions of Node.js will throw an error.',
   },
+  // cliui has a malformed repository URL in its package.json
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0170',
+    message:
+      'The URL git+ssh://git@github.com:isaacs/cliui is invalid. Future versions of Node.js will throw an error.',
+  },
   // supertest in HTTP2 mode uses 0.0.0.0 as the server's name
   {
     name: 'DeprecationWarning',
@@ -75,6 +82,30 @@ var IGNORE_WARNINGS = [
     name: 'Warning',
     message:
       "Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.",
+  },
+  // from node_modules/node-fetch, fix available but requires es modules, or yarn resolution on whatwg-url
+  // from node_modules/tough-cookie < 5.  fix requires yarn resolution
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0040',
+    message: 'The `punycode` module is deprecated. Please use a userland alternative instead.',
+  },
+  // from node_modules/http-proxy, no fix available
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0060',
+    message: 'The `util._extend` API is deprecated. Please use Object.assign() instead.',
+  },
+  // EBT is currently referencing a non-existing entry file https://github.com/elastic/ebt/blob/main/package.json#L7
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0128',
+    messageContains: '@elastic/ebt/package.json',
+  },
+  // YAML parser warning when testing invalid YAML with collection values as keys
+  {
+    messageContains:
+      'Keys with collection values will be stringified due to JS Object restrictions',
   },
 ];
 

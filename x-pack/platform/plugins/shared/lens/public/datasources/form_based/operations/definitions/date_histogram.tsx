@@ -10,6 +10,7 @@ import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiCode,
@@ -17,47 +18,37 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
+import type {
   AggFunctionsMapping,
   AggParamOption,
   IndexPatternAggRestrictions,
-  search,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
+import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   extendedBoundsToAst,
   intervalOptions,
   getCalculateAutoTimeExpression,
+  splitStringInterval,
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { DateRange } from '../../../../../common/types';
-import { IndexPattern } from '../../../../types';
+import type {
+  DateHistogramIndexPatternColumn,
+  IndexPattern,
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
 import { updateColumnParam } from '../layer_helpers';
-import { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
-import { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
-
-export interface DateHistogramIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: 'date_histogram';
-  params: {
-    interval: string;
-    ignoreTimeRange?: boolean;
-    includeEmptyRows?: boolean;
-    dropPartials?: boolean;
-  };
-}
 
 function getMultipleDateHistogramsErrorMessage(
   layer: FormBasedLayer,
@@ -113,26 +104,28 @@ function getTimeZoneAndInterval(
   };
 }
 
-export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
-  if (interval !== 'm' && interval.endsWith('m')) {
-    return interval.replace('m', ' minutes');
+const ESQL_UNIT_MAP: Record<string, [string, string]> = {
+  ms: ['millisecond', 'milliseconds'],
+  s: ['second', 'seconds'],
+  m: ['minute', 'minutes'],
+  h: ['hour', 'hours'],
+  d: ['day', 'days'],
+  w: ['week', 'weeks'],
+  M: ['month', 'months'],
+  y: ['year', 'years'],
+};
+
+function mapToEsqlInterval(interval: string) {
+  const parsed = splitStringInterval(interval);
+  if (!parsed) return '1 hour';
+  const { value, unit } = parsed;
+  const n = value;
+  const pair = ESQL_UNIT_MAP[unit];
+  if (pair) {
+    const word = n === 1 ? pair[0] : pair[1];
+    return `${n} ${word}`;
   }
-  switch (interval) {
-    case '1M':
-      return '1 month';
-    case 'd':
-      return '1d';
-    case 'h':
-      return '1h';
-    case 'm':
-      return '1 minute';
-    case 's':
-      return '1s';
-    case 'ms':
-      return '1ms';
-    default:
-      return interval;
-  }
+  return interval;
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -146,6 +139,7 @@ export const dateHistogramOperation: OperationDefinition<
   }),
   input: 'field',
   priority: 5, // Highest priority level used
+  scale: () => 'interval',
   operationParams: [{ name: 'interval', type: 'string', required: false }],
   getErrorMessage: (layer, columnId, indexPattern) => [
     ...getInvalidFieldMessage(layer, columnId, indexPattern),
@@ -189,7 +183,6 @@ export const dateHistogramOperation: OperationDefinition<
       operationType: 'date_histogram',
       sourceField: field.name,
       isBucketed: true,
-      scale: 'interval',
       params: {
         interval: columnParams?.interval ?? autoInterval,
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
@@ -242,16 +235,16 @@ export const dateHistogramOperation: OperationDefinition<
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
     const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
 
-    if (interval === 'auto') {
-      return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-        dateRange,
-        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-      )})`;
-    }
-    return `BUCKET(${sanitazeESQLInput(column.sourceField)}, ${mapToEsqlInterval(
-      dateRange,
-      interval
-    )})`;
+    const resolvedInterval =
+      interval === 'auto'
+        ? mapToEsqlInterval(
+            calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
+          )
+        : mapToEsqlInterval(interval);
+
+    return {
+      template: `BUCKET(${esql.col(column.sourceField)}, ${resolvedInterval})`,
+    };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(column, indexPattern);
@@ -424,7 +417,7 @@ export const dateHistogramOperation: OperationDefinition<
                       }}
                       position="top"
                       size="s"
-                      type="questionInCircle"
+                      type="question"
                     />
                   </EuiText>
                 }

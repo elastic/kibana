@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import type {
   CoreSetup,
@@ -25,22 +24,28 @@ import { errors } from '@elastic/elasticsearch';
 import { AGENTS_PREFIX, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { getAgentsByKuery } from '../services/agents';
 import { unenrollBatch } from '../services/agents/unenroll_action_runner';
-import { agentPolicyService, auditLoggingService } from '../services';
+import { agentPolicyService, appContextService, auditLoggingService } from '../services';
+import type { AgentPolicy } from '../types';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
-const INTERVAL = '10m';
+const DEFAULT_INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
 const POLICIES_BATCHSIZE = 500;
+
+interface UnenrollInactiveAgentsTaskConfig {
+  taskInterval?: string;
+}
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
   unenrollBatchSize?: number;
+  config: UnenrollInactiveAgentsTaskConfig;
 }
 
 interface UnenrollInactiveAgentsTaskStartContract {
@@ -50,14 +55,15 @@ interface UnenrollInactiveAgentsTaskStartContract {
 export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private unenrollBatchSize: number;
+  private taskInterval: string;
 
   constructor(setupContract: UnenrollInactiveAgentsTaskSetupContract) {
-    const { core, taskManager, logFactory, unenrollBatchSize } = setupContract;
+    const { core, taskManager, logFactory, unenrollBatchSize, config } = setupContract;
     this.logger = logFactory.get(this.taskId);
     this.unenrollBatchSize =
       unenrollBatchSize !== undefined ? unenrollBatchSize : UNENROLLMENT_BATCHSIZE;
+    this.taskInterval = config.taskInterval ?? DEFAULT_INTERVAL;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -68,9 +74,7 @@ export class UnenrollInactiveAgentsTask {
             run: async () => {
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              this.abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
@@ -84,7 +88,9 @@ export class UnenrollInactiveAgentsTask {
     }
 
     this.wasStarted = true;
-    this.logger.info(`[UnenrollInactiveAgentsTask] Started with interval of [${INTERVAL}]`);
+    this.logger.info(
+      `[UnenrollInactiveAgentsTask] Started with interval of [${this.taskInterval}]`
+    );
 
     try {
       await taskManager.ensureScheduled({
@@ -92,7 +98,7 @@ export class UnenrollInactiveAgentsTask {
         taskType: TYPE,
         scope: SCOPE,
         schedule: {
-          interval: INTERVAL,
+          interval: this.taskInterval,
         },
         state: {},
         params: { version: VERSION },
@@ -106,8 +112,21 @@ export class UnenrollInactiveAgentsTask {
     return `${TYPE}:${VERSION}`;
   }
 
+  // function marked public to allow testing
+  // find inactive agents enrolled on selected policies
+  // check that the time since last checkin was longer than unenroll_timeout
+  public getAgentsQuery(agentPolicies: AgentPolicy[]): string {
+    return `(${AGENTS_PREFIX}.policy_id:${agentPolicies
+      .map((policy) => {
+        // @ts-ignore-next-line
+        const inactivityThreshold = Date.now() - policy.unenroll_timeout * 1000;
+        return `"${policy.id}" and (${AGENTS_PREFIX}.last_checkin < ${inactivityThreshold})`;
+      })
+      .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
+  }
+
   private endRun(msg: string = '') {
-    this.logger.info(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[UnenrollInactiveAgentsTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public async unenrollInactiveAgents(
@@ -125,10 +144,11 @@ export class UnenrollInactiveAgentsTask {
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: policiesKuery,
       perPage: POLICIES_BATCHSIZE,
+      spaceId: '*',
     });
     for await (const agentPolicyPageResults of agentPolicyFetcher) {
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Found "${agentPolicyPageResults.length}" agent policies with unenroll_timeout > 0`
+        `[UnenrollInactiveAgentsTask] Found ${agentPolicyPageResults.length} agent policies with unenroll_timeout > 0`
       );
       if (!agentPolicyPageResults.length) {
         this.endRun('Found no policies to process');
@@ -136,12 +156,10 @@ export class UnenrollInactiveAgentsTask {
       }
 
       // find inactive agents enrolled on above policies
+      // check that the time since last checkin was longer than unenroll_timeout
       // limit batch size to UNENROLLMENT_BATCHSIZE to avoid scale issues
-      const kuery = `(${AGENTS_PREFIX}.policy_id:${agentPolicyPageResults
-        .map((policy) => `"${policy.id}"`)
-        .join(' or ')}) and ${AGENTS_PREFIX}.status: inactive`;
       const res = await getAgentsByKuery(esClient, soClient, {
-        kuery,
+        kuery: this.getAgentsQuery(agentPolicyPageResults),
         showInactive: true,
         page: 1,
         perPage: this.unenrollBatchSize,
@@ -158,7 +176,7 @@ export class UnenrollInactiveAgentsTask {
         return;
       }
       this.logger.debug(
-        `[UnenrollInactiveAgentsTask] Found "${res.agents.length}" inactive agents to unenroll. Attempting unenrollment`
+        `[UnenrollInactiveAgentsTask] Found ${res.agents.length} inactive agents to unenroll. Attempting unenrollment`
       );
       const unenrolledBatch = await unenrollBatch(soClient, esClient, res.agents, {
         revoke: true,
@@ -187,11 +205,11 @@ export class UnenrollInactiveAgentsTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
       await this.unenrollInactiveAgents(esClient, soClient);

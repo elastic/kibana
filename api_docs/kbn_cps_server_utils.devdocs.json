@@ -1,0 +1,112 @@
+{
+  "id": "@kbn/cps-server-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.getSpaceNPRE",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "getSpaceNPRE",
+        "description": [
+          "\nGet the NPRE for a given space ID or a request carrying a URL.\n\nWhen a request object is provided, the space is extracted from the URL pathname.\n\n**Assumption**: this function assumes that the server base path is `/` (the\ndefault). If Kibana is configured with a custom `server.basePath`, the base\npath prefix will not be stripped before matching the space segment, causing\nthe function to always fall back to the default space. CPS is a\nServerless-only feature and Serverless deployments always run at the root\npath, so this is not a practical concern today.\n"
+        ],
+        "signature": [
+          "(spaceIdOrRequest: string | { url: URL; }) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-server-utils",
+            "id": "def-server.getSpaceNPRE.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "spaceIdOrRequest",
+            "description": [
+              "- The space ID string, or an object with a `url: URL` property"
+            ],
+            "signature": [
+              "string | { url: URL; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-cps-server-utils/src/get_space_npre.ts",
+            "lineNumber": 30,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The NPRE"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.PROJECT_ROUTING_ALL",
+        "type": "string",
+        "tags": [],
+        "label": "PROJECT_ROUTING_ALL",
+        "description": [
+          "\nProject routing expression that allows requests across all projects."
+        ],
+        "signature": [
+          "\"_alias:*\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/constants.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cps-server-utils",
+        "id": "def-server.PROJECT_ROUTING_ORIGIN",
+        "type": "string",
+        "tags": [],
+        "label": "PROJECT_ROUTING_ORIGIN",
+        "description": [
+          "\nProject routing expression that restricts requests to the origin project only."
+        ],
+        "signature": [
+          "\"_alias:_origin\""
+        ],
+        "path": "src/platform/packages/shared/kbn-cps-server-utils/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

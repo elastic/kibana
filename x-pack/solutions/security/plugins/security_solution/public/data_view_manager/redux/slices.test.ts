@@ -7,13 +7,13 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
-  sharedDataViewManagerSlice,
   createDataViewSelectionSlice,
-  initialSharedState,
   initialScopeState,
+  initialSharedState,
+  sharedDataViewManagerSlice,
 } from './slices';
 import { selectDataViewAsync } from './actions';
-import { DataViewManagerScopeName } from '../constants';
+import { PageScope } from '../constants';
 
 describe('slices', () => {
   describe('dataViewSelectionSlice', () => {});
@@ -100,7 +100,7 @@ describe('slices', () => {
 
     describe('state transitions', () => {
       it('should set status to loading when init is called', () => {
-        const state = reducer(initialSharedState, actions.init());
+        const state = reducer(initialSharedState, actions.init([]));
 
         expect(state.status).toBe('loading');
       });
@@ -114,7 +114,7 @@ describe('slices', () => {
   });
 
   describe('createDataViewSelectionSlice', () => {
-    const testScope = DataViewManagerScopeName.default;
+    const testScope = PageScope.default;
     const { reducer, actions } = createDataViewSelectionSlice(testScope);
 
     describe('setSelectedDataView', () => {
@@ -142,7 +142,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: [testScope],
+            scope: testScope,
           })
         );
 
@@ -154,7 +154,7 @@ describe('slices', () => {
           initialScopeState,
           selectDataViewAsync({
             id: '1',
-            scope: [DataViewManagerScopeName.analyzer],
+            scope: PageScope.analyzer,
           })
         );
 

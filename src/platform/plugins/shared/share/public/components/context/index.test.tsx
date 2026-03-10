@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useShareTabsContext, useShareContext } from '.';
+import { useShareTypeContext, useShareContext } from '.';
 
 describe('share menu context', () => {
   describe('useShareContext', () => {
@@ -21,7 +21,7 @@ describe('share menu context', () => {
 
   describe('useShareTabsContext', () => {
     it('throws an error if used outside of ShareMenuProvider tree', () => {
-      expect(() => renderHook(() => useShareTabsContext('embed'))).toThrow(
+      expect(() => renderHook(() => useShareTypeContext('embed'))).toThrow(
         /^Failed to call `useShareContext` because the context from ShareMenuProvider is missing./
       );
     });

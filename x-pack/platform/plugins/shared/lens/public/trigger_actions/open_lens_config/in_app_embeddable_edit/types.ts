@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import type { TypedLensByValueInput } from '../../../react_embeddable/types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { TypedLensByValueInput } from '@kbn/lens-common';
 
 export interface LensChartLoadEvent {
   /**
@@ -33,4 +33,6 @@ export interface InlineEditLensEmbeddableContext {
   // custom container element, use in case you need to render outside a flyout
   // in that case, the styling is responsibility of the consumer
   container?: HTMLElement | null;
+
+  applyButtonLabel?: string;
 }

@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { useTableSeverity, SelectSeverity, SEVERITY_OPTIONS } from './select_severity';
+export {
+  useTableSeverity,
+  SelectSeverity,
+  SelectSeverityUI,
+  getSeverityRangeDisplay,
+  type TableSeverityPageUrlState,
+  type TableSeverity,
+  type TableSeverityState,
+} from './select_severity';

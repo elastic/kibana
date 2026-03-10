@@ -22,13 +22,13 @@ export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             openDetailsPanel={() => {}}
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
-            isLinkEnabled
+            isPreviewMode={false}
             entityType={EntityType.user}
           />
         </div>
@@ -37,37 +37,17 @@ export const Default: StoryFn = () => {
   );
 };
 
-export const LinkEnabledInPreviewMode: StoryFn = () => {
+export const InPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
+        <div css={{ maxWidth: '300px' }}>
           <FlyoutRiskSummary
             riskScoreData={{ ...mockRiskScoreState, data: [] }}
             queryId={'testQuery'}
             recalculatingScore={false}
             openDetailsPanel={() => {}}
-            isLinkEnabled
             isPreviewMode
-            entityType={EntityType.user}
-          />
-        </div>
-      </TestProvider>
-    </StorybookProviders>
-  );
-};
-
-export const LinkDisabled: StoryFn = () => {
-  return (
-    <StorybookProviders>
-      <TestProvider>
-        <div style={{ maxWidth: '300px' }}>
-          <FlyoutRiskSummary
-            riskScoreData={{ ...mockRiskScoreState, data: [] }}
-            queryId={'testQuery'}
-            recalculatingScore={false}
-            openDetailsPanel={() => {}}
-            isLinkEnabled={false}
             entityType={EntityType.user}
           />
         </div>

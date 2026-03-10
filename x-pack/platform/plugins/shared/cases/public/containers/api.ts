@@ -25,6 +25,9 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
+  FindCasesContainingAllAlertsResponse,
+  BulkAddObservablesRequest,
+  FindCasesContainingAllDocumentsRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -59,6 +62,7 @@ import {
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseSimilarCasesUrl,
+  getBulkCreateObservablesUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -67,6 +71,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -103,8 +108,10 @@ import {
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
   constructCustomFieldsFilter,
+  decodeFindAllAttachedAlertsResponse,
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
   caseId,
@@ -184,6 +191,20 @@ export const getSingleCaseMetrics = async (
   );
 };
 
+export const findCasesByAttachmentId = async (documentIds: string[], caseIds: string[]) => {
+  const response = await KibanaServices.get().http.fetch<FindCasesContainingAllAlertsResponse>(
+    `${INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        documentIds,
+        caseIds,
+      } as FindCasesContainingAllDocumentsRequest),
+    }
+  );
+  return decodeFindAllAttachedAlertsResponse(response);
+};
+
 export const findCaseUserActions = async (
   caseId: string,
   params: {
@@ -259,6 +280,8 @@ export const getCases = async ({
     owner: [],
     category: [],
     customFields: {},
+    from: DEFAULT_FROM_DATE,
+    to: DEFAULT_TO_DATE,
   },
   queryParams = {
     page: 1,
@@ -287,6 +310,8 @@ export const getCases = async ({
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
     ...constructCustomFieldsFilter(filterOptions.customFields),
+    ...(filterOptions.from ? { from: filterOptions.from } : {}),
+    ...(filterOptions.to ? { to: filterOptions.to } : {}),
     ...queryParams,
   };
 
@@ -641,6 +666,21 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
+};
+
+export const bulkPostObservables = async (
+  request: BulkAddObservablesRequest,
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getBulkCreateObservablesUrl(request.caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ caseId: request.caseId, observables: request.observables }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

@@ -7,7 +7,7 @@
 
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type {
   UseAlertDocumentAnalyzerSchemaParams,
   UseAlertDocumentAnalyzerSchemaResult,
@@ -16,7 +16,7 @@ import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_sc
 import { useHttp } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('@tanstack/react-query');
+jest.mock('@kbn/react-query');
 
 describe('useAlertPrevalenceFromProcessTree', () => {
   let hookResult: RenderHookResult<
@@ -47,6 +47,10 @@ describe('useAlertPrevalenceFromProcessTree', () => {
       })
     );
 
+    expect(useQuery).toHaveBeenCalledWith(
+      ['getAlertPrevalenceSchema', 'documentId', ''],
+      expect.any(Function)
+    );
     expect(hookResult.result.current.loading).toEqual(true);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.id).toEqual(null);
@@ -69,10 +73,14 @@ describe('useAlertPrevalenceFromProcessTree', () => {
     hookResult = renderHook(() =>
       useAlertDocumentAnalyzerSchema({
         documentId: 'documentId',
-        indices: [],
+        indices: ['b', 'a'],
       })
     );
 
+    expect(useQuery).toHaveBeenCalledWith(
+      ['getAlertPrevalenceSchema', 'documentId', 'a,b'],
+      expect.any(Function)
+    );
     expect(hookResult.result.current.loading).toEqual(false);
     expect(hookResult.result.current.error).toEqual(false);
     expect(hookResult.result.current.id).toEqual('id');

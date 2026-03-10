@@ -5,6 +5,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
   <span>
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <a
         class="euiLink emotion-euiLink-primary"
@@ -20,6 +21,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     , 
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <a
         class="euiLink emotion-euiLink-primary"
@@ -35,6 +37,7 @@ exports[`CertMonitors renders expected elements for valid props 1`] = `
     , 
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
     >
       <a
         class="euiLink emotion-euiLink-primary"

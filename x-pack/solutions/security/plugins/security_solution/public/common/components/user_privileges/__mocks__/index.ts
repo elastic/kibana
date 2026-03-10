@@ -9,10 +9,11 @@ import type { UserPrivilegesState } from '../user_privileges_context';
 import { initialUserPrivilegesState } from '../user_privileges_context';
 import { getEndpointPrivilegesInitialStateMock } from '../endpoint/mocks';
 
-export const getUserPrivilegesMockDefaultValue = () => {
+export const getUserPrivilegesMockDefaultValue = (overrides: Partial<UserPrivilegesState> = {}) => {
   const mockedPrivileges: UserPrivilegesState = {
     ...initialUserPrivilegesState(),
-    endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
+    ...overrides,
+    endpointPrivileges: getEndpointPrivilegesInitialStateMock(overrides.endpointPrivileges),
   };
 
   return mockedPrivileges;

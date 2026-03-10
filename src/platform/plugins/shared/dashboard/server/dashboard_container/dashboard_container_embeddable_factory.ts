@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import {
   createExtract,
   createInject,
-} from '../../common/dashboard_container/persistable_state/dashboard_container_references';
+} from '../dashboard_saved_object/migrations/migrate_extract_panel_references/dashboard_container_references';
 
 export const dashboardPersistableStateServiceFactory = (
   persistableStateService: EmbeddablePersistableStateService

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { handleCSV } from './csv';
-import { ESProcessorItem } from '../../../common';
-import { DocTemplate } from '../../util/pipeline';
+import type { ESProcessorItem } from '../../../common';
+import type { DocTemplate } from '../../util/pipeline';
 
 interface SimpleCSVPipelineSimulationParams {
   pipeline: { processors: ESProcessorItem[] };

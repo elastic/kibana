@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../embeddable/slo/overview/constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../../common/embeddables/overview/constants';
 
 export function useSloListActions({
   slo,
@@ -28,7 +28,7 @@ export function useSloListActions({
   };
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
-    ({ dashboardId, newTitle, newDescription }) => {
+    async ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
       const embeddableInput = {
         title: newTitle,
@@ -39,14 +39,14 @@ export function useSloListActions({
       };
 
       const state = {
-        serializedState: { rawState: embeddableInput },
+        serializedState: embeddableInput,
         type: SLO_OVERVIEW_EMBEDDABLE_ID,
       };
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-        state,
+      stateTransfer.navigateToWithEmbeddablePackages('dashboards', {
+        state: [state],
         path,
       });
     },

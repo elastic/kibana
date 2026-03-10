@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { invert } from 'lodash/fp';
 import { v4 } from 'uuid';
 

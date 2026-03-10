@@ -29,7 +29,8 @@
     ],
     "optionalPlugins": [
       "securitySolutionEss",
-      "automaticImport"
+      "automaticImport",
+      "usageApi"
     ]
   }
 }

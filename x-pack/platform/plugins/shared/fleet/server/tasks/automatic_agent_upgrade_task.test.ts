@@ -13,7 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
-import { agentPolicyService, appContextService } from '../services';
+import { agentPolicyService, appContextService, licenseService } from '../services';
 import {
   fetchAllAgentsByKuery,
   getAgentsByKuery,
@@ -106,6 +106,8 @@ describe('AutomaticAgentUpgradeTask', () => {
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
 
   beforeEach(() => {
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
     mockContract = createAppContextStartContractMock();
     appContextService.start(mockContract);
     mockCore = coreSetupMock();
@@ -123,6 +125,7 @@ describe('AutomaticAgentUpgradeTask', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(licenseService, 'isEnterprise').mockClear();
   });
 
   describe('Task lifecycle', () => {
@@ -147,7 +150,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance });
+      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
       return taskRunner.run();
     };
 
@@ -181,6 +184,14 @@ describe('AutomaticAgentUpgradeTask', () => {
       expect(mockAgentPolicyService.fetchAllAgentPolicies).not.toHaveBeenCalled();
     });
 
+    it('Should exit if the license is not at least Enterprise', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
+
+      await runTask();
+
+      expect(mockAgentPolicyService.fetchAllAgentPolicies).not.toHaveBeenCalled();
+    });
+
     it('Should upgrade eligible agents', async () => {
       const agents = generateAgents(10);
       mockedGetAgentsByKuery
@@ -193,7 +204,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 3),
@@ -217,7 +228,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 2), // As theres already one upgrading, and 30% of 11 is 3, we only want two items to be sent for upgrade
@@ -241,7 +252,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 2),
@@ -278,7 +289,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: activeAgents.slice(0, 3),
@@ -286,7 +297,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).not.toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         { agents: uninstalledAgents, version: '8.18.0' }
       );
@@ -359,7 +370,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 30),
@@ -400,7 +411,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 3),
@@ -436,7 +447,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: firstAgentsBatch,
@@ -445,7 +456,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: secondAgentsBatch.slice(0, 4),
@@ -514,11 +525,12 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
-        expect.anything(),
+        undefined,
         expect.anything(),
         {
           agents: agents.slice(0, 1),
           version: '8.18.0',
+          force: true,
         }
       );
     });

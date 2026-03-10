@@ -13,7 +13,7 @@
 // implementation from the data plugin.
 
 import _ from 'lodash';
-import { DataView } from './data_view';
+import type { DataView } from './data_view';
 
 /**
  * Takes a hit, merges it with whatever stored/scripted fields, and with the metaFields

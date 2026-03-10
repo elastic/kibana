@@ -35,7 +35,6 @@ import { serviceMapRouteRepository } from '../service_map/route';
 import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
 import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
 import { customLinkRouteRepository } from '../settings/custom_link/route';
-import { labsRouteRepository } from '../settings/labs/route';
 import { sourceMapsRouteRepository } from '../source_maps/route';
 import { spanLinksRouteRepository } from '../span_links/route';
 import { storageExplorerRouteRepository } from '../storage_explorer/route';
@@ -43,7 +42,6 @@ import { suggestionsRouteRepository } from '../suggestions/route';
 import { timeRangeMetadataRoute } from '../time_range_metadata/route';
 import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
-import { servicesEntitiesRoutesRepository } from '../entities/services/routes';
 import { spanLatencyDistributionRouteRepository } from '../span_latency_distribution/route';
 
 function getTypedGlobalApmServerRouteRepository() {
@@ -57,7 +55,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...observabilityOverviewRouteRepository,
     ...serviceMapRouteRepository,
     ...serviceRouteRepository,
-    ...servicesEntitiesRoutesRepository,
     ...serviceGroupRouteRepository,
     ...suggestionsRouteRepository,
     ...traceRouteRepository,
@@ -79,7 +76,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...infrastructureRouteRepository,
     ...debugTelemetryRoute,
     ...timeRangeMetadataRoute,
-    ...labsRouteRepository,
     ...agentExplorerRouteRepository,
     ...mobileRouteRepository,
     ...diagnosticsRepository,

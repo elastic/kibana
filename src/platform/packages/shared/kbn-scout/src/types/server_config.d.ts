@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UrlParts } from '@kbn/test';
+import type { UrlParts } from '@kbn/test';
 
 export interface ScoutServerConfig {
   serverless?: boolean;
@@ -23,7 +23,9 @@ export interface ScoutServerConfig {
     files: string[];
     serverArgs: string[];
     ssl: boolean;
+    secureFiles?: string[];
   };
+  esServerlessOptions?: { uiam: boolean };
   kbnTestServer: {
     env: any;
     buildArgs: string[];

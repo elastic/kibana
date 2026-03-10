@@ -6,6 +6,7 @@
  */
 
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { test } from './fixtures/base_page';
 import { assertEnv } from '../lib/assert_env';
@@ -17,11 +18,15 @@ test.beforeEach(async ({ page }) => {
 test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOverviewPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 
+  const isLogsEssentialsMode = process.env.LOGS_ESSENTIALS_MODE === 'true';
   const fileName = 'code_snippet_otel_host.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
 
   await onboardingHomePage.selectHostUseCase();
   await onboardingHomePage.selectOtelHostQuickstart();
+
+  const osName = process.env.OS_NAME || os.platform();
+  await otelHostFlowPage.selectPlatform(osName);
 
   await otelHostFlowPage.copyCollectorDownloadSnippetToClipboard();
   const collectorDownloadSnippet = (await page.evaluate(
@@ -47,6 +52,16 @@ test('Otel Host', async ({ page, onboardingHomePage, otelHostFlowPage, hostsOver
    */
   await page.waitForTimeout(3 * 60000);
 
-  await otelHostFlowPage.clickHostsOverviewCTA();
-  await hostsOverviewPage.assertCpuPercentageNotEmpty();
+  if (!isLogsEssentialsMode) {
+    await otelHostFlowPage.clickHostsOverviewCTA();
+    const hostname = os.hostname();
+    await hostsOverviewPage.assertHostCpuNotEmpty(hostname);
+  } else {
+    await otelHostFlowPage.clickLogsExplorationCTA();
+
+    const { DiscoverValidationPage } = await import('./pom/pages/discover_validation.page');
+    const discoverValidation = new DiscoverValidationPage(page);
+    await discoverValidation.waitForDiscoverToLoad();
+    await discoverValidation.assertHasAnyLogData();
+  }
 });

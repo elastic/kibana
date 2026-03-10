@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
+import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { GraphWorkspaceSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';

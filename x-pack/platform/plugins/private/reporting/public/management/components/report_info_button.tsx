@@ -7,8 +7,9 @@
 
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent } from 'react';
-import { Job } from '@kbn/reporting-public/job';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import type { Job } from '@kbn/reporting-public/job';
 
 interface Props {
   job: Job;
@@ -40,7 +41,7 @@ export const ReportInfoButton: FunctionComponent<Props> = ({ job, onClick }) => 
     <EuiToolTip position="top" content={message}>
       <EuiButtonEmpty
         onClick={onClick}
-        iconType="iInCircle"
+        iconType="info"
         color="primary"
         data-test-subj="reportInfoButton"
         aria-label={showReportInfoCopy}

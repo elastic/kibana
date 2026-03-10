@@ -50,6 +50,7 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://v2.keajs.
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
 Jest tests can be run from the root kibana directory, however, since the tests take so long to run you will likely want to apply the appropriate Jest configuration file to test only your changes. For example:
+
 - `x-pack/solutions/search/plugins/enterprise_search/common/jest.config.js`
 - `x-pack/solutions/search/plugins/enterprise_search/public/jest.config.js`
 - `x-pack/solutions/search/plugins/enterprise_search/server/jest.config.js`
@@ -77,23 +78,24 @@ sh jest.sh public/applications/shared/flash_messages/flash_messages_logic.test.t
 
 #### Kibana FTR tests
 
-FTR configs for stateful search solution are listed in `.buildkite/ftr_search_stateful_configs.yml`, the main set of functional tests for this plugin are in the [x-pack/test/functional_search](../../../../test/functional_search/) suite of tests.
+FTR configs for stateful search solution are listed in `.buildkite/ftr_search_stateful_configs.yml`, the main set of functional tests for this plugin are in the [x-pack/solutions/search/test/functional_search](../../../../test/functional_search/) suite of tests.
 
 These can be run from the root of the Kibana folder with the following command:
 
 ```shell
-node scripts/functional_tests --config=x-pack/test/functional_search/config.ts --bail --quiet
+node scripts/functional_tests --config=x-pack/solutions/search/test/functional_search/config.ts --bail --quiet
 ```
 
 Or if you are updating the tests it can be easier to run the server first so you can re-run the tests many times:
 
 ```shell
-node scripts/functional_tests_server --config=x-pack/test/functional_search/config.ts
+node scripts/functional_tests_server --config=x-pack/solutions/search/test/functional_search/config.ts
 ```
+
 One this commands is finished starting the server you run the tests by opening another terminal and running:
 
 ```shell
-node scripts/functional_test_runner --config=x-pack/test/functional_search/config.ts
+node scripts/functional_test_runner --config=x-pack/solutions/search/test/functional_search/config.ts
 ```
 
 These scripts can be used with any FTR config.

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './get_rule_params';
+export type * from './get_rule_params';

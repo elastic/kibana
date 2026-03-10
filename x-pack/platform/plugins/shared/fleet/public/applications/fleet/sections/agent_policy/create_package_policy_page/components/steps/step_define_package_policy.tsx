@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect, useMemo } from 'react';
+import React, { memo, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -25,17 +25,24 @@ import {
   EuiIconTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-
 import styled from 'styled-components';
 
+import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
+import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
+import {
+  useGetEpmDatastreams,
+  useStartServices,
+  useVarGroupCloudConnector,
+} from '../../../../../hooks';
 
-import { isAdvancedVar } from '../../services';
+import { isAdvancedVar, shouldShowVar, isVarRequiredByVarGroup } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
 
-import { PackagePolicyInputVarField } from './components';
+import { ExperimentalFeaturesService } from '../../../../../services';
+
+import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
 
 // on smaller screens, fields should be displayed in one column
@@ -56,6 +63,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   submitAttempted: boolean;
   isEditPage?: boolean;
   noAdvancedToggle?: boolean;
+  isAgentlessSelected?: boolean;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -66,25 +74,69 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     submitAttempted,
     noAdvancedToggle = false,
     isEditPage = false,
+    isAgentlessSelected = false,
   }) => {
-    const { docLinks } = useStartServices();
+    const { docLinks, cloud } = useStartServices();
+    const { enableVarGroups } = ExperimentalFeaturesService.get();
+
+    const varGroups =
+      enableVarGroups && packageInfo.var_groups ? packageInfo.var_groups : undefined;
 
     // Form show/hide states
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(noAdvancedToggle);
 
-    // Package-level vars
-    const requiredVars: RegistryVarsEntry[] = [];
-    const advancedVars: RegistryVarsEntry[] = [];
-
-    if (packageInfo.vars) {
-      packageInfo.vars.forEach((varDef) => {
-        if (isAdvancedVar(varDef)) {
-          advancedVars.push(varDef);
-        } else {
-          requiredVars.push(varDef);
-        }
+    const { selections: varGroupSelections, handleSelectionChange: handleVarGroupSelectionChange } =
+      useVarGroupSelections({
+        varGroups,
+        savedSelections: packagePolicy.var_group_selections,
+        isAgentlessEnabled: isAgentlessSelected,
+        onSelectionsChange: updatePackagePolicy,
+        packagePolicy,
       });
-    }
+
+    const {
+      isSelected: isCloudConnectorSelected,
+      cloudProvider,
+      iacTemplateUrl,
+      cloudConnectorVars,
+      handleCloudConnectorUpdate,
+    } = useVarGroupCloudConnector({
+      varGroups,
+      varGroupSelections,
+      updatePackagePolicy,
+    });
+
+    // Package-level vars, filtered by var_group visibility
+    // and hiding deprecated vars on new installations
+    const { requiredVars, advancedVars } = useMemo(() => {
+      const _requiredVars: RegistryVarsEntry[] = [];
+      const _advancedVars: RegistryVarsEntry[] = [];
+
+      if (packageInfo.vars) {
+        packageInfo.vars.forEach((varDef) => {
+          if (cloudConnectorVars.has(varDef.name) || (!isEditPage && !!varDef.deprecated)) {
+            return;
+          }
+
+          // Check if var should be shown based on var_group selections
+          if (
+            varGroups &&
+            varGroups.length > 0 &&
+            !shouldShowVar(varDef.name, varGroups, varGroupSelections)
+          ) {
+            return; // Skip this var, it's hidden by var_group selection
+          }
+
+          if (isAdvancedVar(varDef, varGroups, varGroupSelections)) {
+            _advancedVars.push(varDef);
+          } else {
+            _requiredVars.push(varDef);
+          }
+        });
+      }
+
+      return { requiredVars: _requiredVars, advancedVars: _advancedVars };
+    }, [packageInfo.vars, varGroups, varGroupSelections, cloudConnectorVars, isEditPage]);
 
     // Outputs
     const {
@@ -141,6 +193,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         {isManaged && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicy.stepConfigure.managedReadonly"
@@ -184,6 +237,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 }
               >
                 <EuiFieldText
+                  isInvalid={!!validationResults.name}
                   fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.name}
@@ -219,6 +273,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 error={validationResults.description}
               >
                 <EuiFieldText
+                  isInvalid={!!validationResults.description}
                   fullWidth
                   readOnly={isManaged}
                   value={packagePolicy.description}
@@ -232,11 +287,47 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
               </EuiFormRow>
             </EuiFlexItem>
 
+            {/* Var Group Selectors */}
+            {varGroups?.map((varGroup) => (
+              <EuiFlexItem key={varGroup.name}>
+                <VarGroupSelector
+                  varGroup={varGroup}
+                  selectedOptionName={varGroupSelections[varGroup.name]}
+                  onSelectionChange={handleVarGroupSelectionChange}
+                  isAgentlessEnabled={isAgentlessSelected}
+                  disabled={isEditPage && isCloudConnectorSelected}
+                />
+              </EuiFlexItem>
+            ))}
+
+            {/* Cloud Connector Setup - shown when a cloud connector option is selected */}
+            {isCloudConnectorSelected && cloudProvider && (
+              <EuiFlexItem>
+                <CloudConnectorSetup
+                  newPolicy={packagePolicy}
+                  packageInfo={packageInfo}
+                  updatePolicy={handleCloudConnectorUpdate}
+                  isEditPage={isEditPage}
+                  hasInvalidRequiredVars={submitAttempted && !!validationResults?.vars}
+                  cloud={cloud}
+                  cloudProvider={cloudProvider}
+                  templateName={packageInfo.name}
+                  iacTemplateUrl={iacTemplateUrl}
+                  accountType="single-account"
+                />
+              </EuiFlexItem>
+            )}
+
             {/* Required vars */}
             {requiredVars.map((varDef) => {
               const { name: varName, type: varType } = varDef;
               if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
               const value = packagePolicy.vars[varName].value;
+              const requiredByVarGroup = isVarRequiredByVarGroup(
+                varName,
+                varGroups,
+                varGroupSelections
+              );
 
               return (
                 <EuiFlexItem key={varName}>
@@ -257,6 +348,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     errors={validationResults?.vars?.[varName] ?? []}
                     forceShowErrors={submitAttempted}
                     isEditPage={isEditPage}
+                    isRequiredByVarGroup={requiredByVarGroup}
                   />
                 </EuiFlexItem>
               );
@@ -308,63 +400,20 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 >
                   {/* Namespace  */}
                   <EuiFlexItem>
-                    <EuiFormRow
-                      isInvalid={!!validationResults.namespace}
-                      error={validationResults.namespace}
-                      label={
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
-                          defaultMessage="Namespace"
-                        />
-                      }
-                      helpText={
-                        isEditPage && packageInfo.type === 'input' ? (
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditNamespaceHelpLabel"
-                            defaultMessage="The namespace cannot be changed for this integration. Create a new integration policy to use a different namespace."
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLabel"
-                            defaultMessage="Change the default namespace inherited from the parent agent policy. This setting changes the name of the integration's data stream. {learnMore}."
-                            values={{
-                              learnMore: (
-                                <EuiLink
-                                  href={docLinks.links.fleet.datastreamsNamingScheme}
-                                  target="_blank"
-                                >
-                                  {i18n.translate(
-                                    'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceHelpLearnMoreLabel',
-                                    { defaultMessage: 'Learn more' }
-                                  )}
-                                </EuiLink>
-                              ),
-                            }}
-                          />
-                        )
-                      }
-                    >
-                      <EuiComboBox
-                        data-test-subj="packagePolicyNamespaceInput"
-                        noSuggestions
-                        placeholder={namespacePlaceholder}
-                        isDisabled={isEditPage && packageInfo.type === 'input'}
-                        singleSelection={true}
-                        selectedOptions={
-                          packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
-                        }
-                        onCreateOption={(newNamespace: string) => {
-                          updatePackagePolicy({
-                            namespace: newNamespace,
-                          });
-                        }}
-                        onChange={(newNamespaces: Array<{ label: string }>) => {
-                          updatePackagePolicy({
-                            namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                          });
-                        }}
-                      />
-                    </EuiFormRow>
+                    <NamespaceComboBox
+                      namespace={packagePolicy.namespace || ''}
+                      placeholder={namespacePlaceholder}
+                      isEditPage={isEditPage}
+                      packageType={packageInfo.type}
+                      validationError={validationResults.namespace}
+                      docLinks={docLinks}
+                      onNamespaceChange={(newNamespace: string) => {
+                        updatePackagePolicy({
+                          namespace: newNamespace,
+                        });
+                      }}
+                      data-test-subj="packagePolicyNamespaceInput"
+                    />
                   </EuiFlexItem>
 
                   {/* Output */}
@@ -462,6 +511,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <EuiComboBox
+                        isInvalid={validationResults?.additional_datastreams_permissions !== null}
                         selectedOptions={selectedDatastreamOptions}
                         options={datastreamsOptions}
                         onChange={(val) => {
@@ -491,6 +541,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     const { name: varName, type: varType } = varDef;
                     if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
                     const value = packagePolicy.vars![varName].value;
+                    const requiredByVarGroup = isVarRequiredByVarGroup(
+                      varName,
+                      varGroups,
+                      varGroupSelections
+                    );
                     return (
                       <EuiFlexItem key={varName}>
                         <PackagePolicyInputVarField
@@ -510,6 +565,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           errors={validationResults?.vars?.[varName] ?? []}
                           forceShowErrors={submitAttempted}
                           isEditPage={isEditPage}
+                          isRequiredByVarGroup={requiredByVarGroup}
                         />
                       </EuiFlexItem>
                     );

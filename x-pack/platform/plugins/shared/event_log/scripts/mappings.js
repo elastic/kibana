@@ -94,6 +94,13 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
+          deletion: {
+            properties: {
+              num_deleted: {
+                type: 'long',
+              },
+            },
+          },
           rule: {
             properties: {
               consumer: {
@@ -132,6 +139,15 @@ exports.EcsCustomPropertyMappings = {
                     type: 'long',
                   },
                   in_progress_duration_ms: {
+                    type: 'long',
+                  },
+                  deleted: {
+                    type: 'boolean',
+                  },
+                  updated_at: {
+                    type: 'date',
+                  },
+                  failed_auto_fill_attempts: {
                     type: 'long',
                   },
                 },
@@ -235,6 +251,9 @@ exports.EcsCustomPropertyMappings = {
                         type: 'long',
                       },
                       total_enrichment_duration_ms: {
+                        type: 'long',
+                      },
+                      update_alerts_duration_ms: {
                         type: 'long',
                       },
                     },
@@ -352,6 +371,65 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      gap_auto_fill: {
+        properties: {
+          execution: {
+            properties: {
+              status: {
+                type: 'keyword',
+              },
+              start: {
+                type: 'date',
+              },
+              end: {
+                type: 'date',
+              },
+              duration_ms: {
+                type: 'long',
+              },
+              rule_ids: {
+                type: 'keyword',
+              },
+              task_params: {
+                properties: {
+                  name: {
+                    type: 'keyword',
+                  },
+                  num_retries: {
+                    type: 'long',
+                  },
+                  gap_fill_range: {
+                    type: 'keyword',
+                  },
+                  interval: {
+                    type: 'keyword',
+                  },
+                  max_backfills: {
+                    type: 'long',
+                  },
+                },
+              },
+              results: {
+                type: 'nested',
+                properties: {
+                  rule_id: {
+                    type: 'keyword',
+                  },
+                  processed_gaps: {
+                    type: 'long',
+                  },
+                  status: {
+                    type: 'keyword',
+                  },
+                  error: {
+                    type: 'keyword',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   },
 };
@@ -388,4 +466,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'kibana.alert.rule.gap.in_progress_intervals',
   'kibana.alert.rule.gap.filled_intervals',
   'kibana.alert.rule.gap.unfilled_intervals',
+  'kibana.gap_auto_fill.execution.rule_ids',
 ];

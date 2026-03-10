@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/profiling-data-access-plugin",
   "owner": [
-    "@elastic/obs-ux-infra_services-team"
+    "@elastic/obs-presentation-team"
   ],
   "group": "observability",
   "visibility": "private",

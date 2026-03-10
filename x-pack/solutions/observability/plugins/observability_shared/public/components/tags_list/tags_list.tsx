@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import type { MouseEvent } from 'react';
+import React, { useState } from 'react';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
+import type { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
 
 export interface TagsListProps {
   onClick?: (tag: string) => void;
@@ -17,7 +25,10 @@ export interface TagsListProps {
   color?: EuiBadgeProps['color'];
   ignoreEmpty?: boolean;
   disableExpand?: boolean;
+  prependChildren?: React.ReactNode;
 }
+
+const MININUM_TAGS_TO_DISPLAY = 3;
 
 const getFilterLabel = (tag: string) => {
   return i18n.translate('xpack.observabilityShared.getFilterLabel.filter', {
@@ -31,10 +42,11 @@ const getFilterLabel = (tag: string) => {
 const TagsList = ({
   ignoreEmpty,
   tags,
-  numberOfTagsToDisplay = 3,
+  numberOfTagsToDisplay = MININUM_TAGS_TO_DISPLAY,
   onClick,
   color = 'hollow',
   disableExpand = false,
+  prependChildren,
 }: TagsListProps) => {
   const [toDisplay, setToDisplay] = useState(numberOfTagsToDisplay);
 
@@ -52,7 +64,8 @@ const TagsList = ({
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="xs" style={{ maxWidth: 400 }} alignItems="baseline">
+    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 400 }} alignItems="center">
+      {prependChildren}
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
         <EuiFlexItem key={tag} grow={false}>
@@ -69,17 +82,12 @@ const TagsList = ({
               onClickAriaLabel={getFilterLabel(tag)}
               color={color}
               className="eui-textTruncate"
-              style={{ maxWidth: 120 }}
+              css={{ maxWidth: 120 }}
             >
               {tag}
             </EuiBadge>
           ) : (
-            <EuiBadge
-              key={tag}
-              color={color}
-              className="eui-textTruncate"
-              style={{ maxWidth: 120 }}
-            >
+            <EuiBadge key={tag} color={color} className="eui-textTruncate" css={{ maxWidth: 120 }}>
               {tag}
             </EuiBadge>
           )}
@@ -98,8 +106,8 @@ const TagsList = ({
               </>
             }
           >
-            <EuiBadge
-              color={color}
+            <EuiButtonEmpty
+              size="xs"
               onClick={() => {
                 if (disableExpand) {
                   return;
@@ -109,28 +117,35 @@ const TagsList = ({
               onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation(); // stops propagation of metric onElementClick
               }}
-              onClickAriaLabel={EXPAND_TAGS_LABEL}
+              aria-label={EXPAND_TAGS_LABEL}
+              data-test-subj="expand-tags"
             >
-              +{tags.length - toDisplay}
-            </EuiBadge>
+              {i18n.translate('xpack.observabilityShared.tagsList.showMore', {
+                defaultMessage: '+ {count} more',
+                values: { count: tags.length - toDisplay },
+              })}
+            </EuiButtonEmpty>
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      {toDisplay > 3 && (
-        <EuiFlexItem key={tags.length - 3} grow={false}>
+      {toDisplay > MININUM_TAGS_TO_DISPLAY && (
+        <EuiFlexItem key={tags.length - MININUM_TAGS_TO_DISPLAY} grow={false}>
           <EuiToolTip content={COLLAPSE_TAGS_LABEL} key={toDisplay}>
-            <EuiBadge
-              color={color}
+            <EuiButtonEmpty
+              size="xs"
               onClick={() => {
-                setToDisplay(3);
+                setToDisplay(MININUM_TAGS_TO_DISPLAY);
               }}
               onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation(); // stops propagation of metric onElementClick
               }}
-              onClickAriaLabel={COLLAPSE_TAGS_LABEL}
+              aria-label={COLLAPSE_TAGS_LABEL}
+              data-test-subj="collapse-tags"
             >
-              -{tags.length - 3}
-            </EuiBadge>
+              {i18n.translate('xpack.observabilityShared.tagsList.showLess', {
+                defaultMessage: 'Show less',
+              })}
+            </EuiButtonEmpty>
           </EuiToolTip>
         </EuiFlexItem>
       )}

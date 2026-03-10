@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { DataUsageConfigType } from '../server/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataUsagePublicSetup {}
@@ -25,20 +25,4 @@ export interface DataUsageStartDependencies {
   share: SharePluginStart;
 }
 
-const schemaObject = schema.object({
-  /**
-   * For internal use. A list of string values (comma delimited) that will enable experimental
-   * type of functionality that is not yet released. Valid values for this settings need to
-   * be defined in:
-   * `x-pack/plugins/dataUsage/common/experimental_features.ts`
-   * under the `allowedExperimentalValues` object
-   *
-   * @example
-   * xpack.dataUsage.enableExperimental: ['someFeature']
-   */
-  enableExperimental: schema.arrayOf(schema.string(), {
-    defaultValue: () => [],
-  }),
-});
-
-export type DataUsagePublicConfigType = TypeOf<typeof schemaObject>;
+export type DataUsagePublicConfigType = Pick<DataUsageConfigType, 'enableExperimental'>;

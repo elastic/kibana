@@ -23,7 +23,11 @@ export const ChatPrompt = ({ isLoading }: { isLoading: boolean }) => {
         <EuiFieldText
           data-test-subj="searchPlaygroundChatQuestionFieldText"
           prepend="{query}"
-          {...field}
+          name={field.name}
+          onBlur={field.onBlur}
+          onChange={field.onChange}
+          value={field.value}
+          inputRef={field.ref}
           fullWidth
           placeholder={i18n.translate(
             'xpack.searchPlayground.searchMode.queryView.chatQuestion.placeholder',

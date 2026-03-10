@@ -43,8 +43,9 @@ export interface PlainTextEmail {
   };
 }
 
-export interface AttachmentEmail extends PlainTextEmail {
+export interface AttachmentEmail extends Omit<PlainTextEmail, 'to'> {
   attachments: Attachment[];
+  to?: string[];
   bcc?: string[];
   cc?: string[];
   spaceId: string;

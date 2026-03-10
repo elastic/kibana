@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { useRestorableRef } from '../../../restorable_state';
 
 /**
  * Toggle button props
@@ -37,6 +38,14 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
   buttonSize,
   onChange,
 }) => {
+  const isSidebarCollapsedRef = useRestorableRef('isCollapsed', isSidebarCollapsed, {
+    shouldStoreDefaultValueRightAway: true, // otherwise, it would re-initialize with the localStorage value which might
+  });
+
+  useEffect(() => {
+    isSidebarCollapsedRef.current = isSidebarCollapsed;
+  }, [isSidebarCollapsed, isSidebarCollapsedRef]);
+
   return (
     <div data-test-subj={dataTestSubj}>
       <IconButtonGroup

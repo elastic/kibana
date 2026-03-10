@@ -15,10 +15,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormAppend,
   EuiFormRow,
-  EuiIcon,
+  EuiIconTip,
   EuiTitle,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -99,17 +99,18 @@ export function Configuration({ onCreate, onCancel }: Props) {
                 onChange={(e) => setDuration(e.target.value)}
                 isInvalid={!isDurationValid}
                 append={
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
-                      {
-                        defaultMessage:
-                          'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
-                      }
-                    )}
-                  >
-                    <EuiIcon type="questionInCircle" />
-                  </EuiToolTip>
+                  <EuiFormAppend>
+                    <EuiIconTip
+                      content={i18n.translate(
+                        'xpack.slo.burnRateEmbeddable.configuration.durationTooltip',
+                        {
+                          defaultMessage:
+                            'Duration must be in the format of [value][unit], for example 5m, 3h, or 6d',
+                        }
+                      )}
+                      type="question"
+                    />
+                  </EuiFormAppend>
                 }
               />
             </EuiFormRow>

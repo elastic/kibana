@@ -5,21 +5,25 @@
  * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
+import type { MockRouter } from './__mocks__/routes.mock';
 import {
   createMockRouter,
-  MockRouter,
   routeHandlerContextMock,
   savedObjectsClient,
 } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
-jest.mock('../lib/es_version_precheck', () => ({
-  versionCheckHandlerWrapper: <P, Q, B>(handler: RequestHandler<P, Q, B>) => handler,
+jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({
+  versionCheckHandlerWrapper:
+    () =>
+    <P, Q, B>(handler: RequestHandler<P, Q, B>) =>
+      handler,
 }));
 
 const JOB_ID = 'job_id';
@@ -38,6 +42,7 @@ describe('ML snapshots APIs', () => {
       },
       router: mockRouter,
       lib: { handleEsError },
+      current: { major: 8 },
     };
     registerMlSnapshotRoutes(routeDependencies);
   }

@@ -9,8 +9,8 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { OpsgenieConnectorTypeId, OpsgenieSubActions } from '../../../common';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
+import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/opsgenie/constants';
 
 let connectorTypeModel: ConnectorTypeModel;
 
@@ -18,7 +18,7 @@ beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(OpsgenieConnectorTypeId);
+  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }
@@ -26,20 +26,20 @@ beforeAll(() => {
 
 describe('connectorTypeRegistry.get() works', () => {
   it('sets the id field in the connector type static data to the correct opsgenie value', () => {
-    expect(connectorTypeModel.id).toEqual(OpsgenieConnectorTypeId);
+    expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
 describe('opsgenie action params validation', () => {
   it('results in no errors when the action params are valid for creating an alert', async () => {
     const actionParams = {
-      subAction: OpsgenieSubActions.CreateAlert,
+      subAction: SUB_ACTION.CreateAlert,
       subActionParams: {
         message: 'hello',
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],
@@ -50,13 +50,13 @@ describe('opsgenie action params validation', () => {
 
   it('results in no errors when the action params are valid for closing an alert', async () => {
     const actionParams = {
-      subAction: OpsgenieSubActions.CloseAlert,
+      subAction: SUB_ACTION.CloseAlert,
       subActionParams: {
         alias: '123',
       },
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],
@@ -67,11 +67,11 @@ describe('opsgenie action params validation', () => {
 
   it('sets the message error when the message is missing for creating an alert', async () => {
     const actionParams = {
-      subAction: OpsgenieSubActions.CreateAlert,
+      subAction: SUB_ACTION.CreateAlert,
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': ['Message is required.'],
         'subActionParams.alias': [],
@@ -82,11 +82,11 @@ describe('opsgenie action params validation', () => {
 
   it('sets the alias error when the alias is missing for closing an alert', async () => {
     const actionParams = {
-      subAction: OpsgenieSubActions.CloseAlert,
+      subAction: SUB_ACTION.CloseAlert,
       subActionParams: {},
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': ['Alias is required.'],
@@ -100,7 +100,7 @@ describe('opsgenie action params validation', () => {
       jsonEditorError: true,
     };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         'subActionParams.message': [],
         'subActionParams.alias': [],

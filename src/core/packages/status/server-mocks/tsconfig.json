@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -15,6 +15,7 @@
     "@kbn/core-status-server",
     "@kbn/core-status-server-internal",
     "@kbn/core-status-common",
+    "@kbn/lazy-object",
   ],
   "exclude": [
     "target/**/*",

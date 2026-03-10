@@ -1,0 +1,29 @@
+{
+  "description": "Security: Windows - Looks for rare powershell scripts that may indicate execution of malware, or persistence mechanisms.",
+  "groups": ["windows", "powershell", "security"],
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare powershell scripts via hash.",
+        "function": "rare",
+        "by_field_name": "powershell.file.script_block_hash",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["host.name", "user.name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "256mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-windows-v3",
+    "security_app_display_name": "Rare Powershell Script",
+    "managed": true,
+    "job_revision": 4
+  }
+}

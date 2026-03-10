@@ -10,6 +10,7 @@
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-server';
 import type { CapabilitiesStart } from '@kbn/core-capabilities-server';
 import type { InternalDeprecationsServiceStart } from '@kbn/core-deprecations-server-internal';
+import type { InternalUserActivityServiceStart } from '@kbn/core-user-activity-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
 import type { InternalExecutionContextStart } from '@kbn/core-execution-context-server-internal';
@@ -22,6 +23,9 @@ import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-server-internal';
+import type { PricingServiceStart } from '@kbn/core-pricing-server';
+import type { InternalCoreDiServiceStart } from '@kbn/core-di-internal';
+import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 
 /**
  * @internal
@@ -39,7 +43,12 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
+  userActivity: InternalUserActivityServiceStart;
   customBranding: CustomBrandingStart;
   security: InternalSecurityServiceStart;
   userProfile: InternalUserProfileServiceStart;
+  pricing: PricingServiceStart;
+  injection: InternalCoreDiServiceStart;
+  dataStreams: DataStreamsStart;
+  _plugins?: Map<string, any>;
 }

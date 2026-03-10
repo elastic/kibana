@@ -16,8 +16,8 @@ import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getDefaultQueryAnnotation } from '@kbn/event-annotation-common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FramePublicAPI, Visualization } from '@kbn/lens-common';
 import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
-import type { FramePublicAPI, Visualization } from '../../../types';
 import { isHorizontalChart } from '../state_helpers';
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {

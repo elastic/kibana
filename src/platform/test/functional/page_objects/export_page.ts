@@ -19,12 +19,25 @@ export class ExportPageObject extends FtrService {
     return await this.testSubjects.exists('exportTopNavButton');
   }
 
+  async exportButtonMissingOrFail() {
+    await this.testSubjects.missingOrFail('exportTopNavButton', { timeout: 1000 });
+  }
+
   async clickExportTopNavButton() {
-    return this.testSubjects.click('exportTopNavButton');
+    // First check if export button is directly visible
+    if (await this.testSubjects.exists('exportTopNavButton')) {
+      return await this.testSubjects.click('exportTopNavButton');
+    }
+
+    // If not visible, try the overflow menu
+    if (await this.testSubjects.exists('app-menu-overflow-button')) {
+      await this.testSubjects.click('app-menu-overflow-button');
+      return await this.testSubjects.click('exportTopNavButton');
+    }
   }
 
   async isExportPopoverOpen() {
-    return await this.testSubjects.exists('exportPopover');
+    return await this.testSubjects.exists('exportPopoverPanel');
   }
 
   async isPopoverItemEnabled(label: string) {
@@ -35,14 +48,20 @@ export class ExportPageObject extends FtrService {
     return isEnabled;
   }
 
-  async clickPopoverItem(label: string) {
+  async clickPopoverItem(
+    label: string,
+    exportPopoverOpener: () => Promise<void> = this.clickExportTopNavButton.bind(this)
+  ) {
     this.log.debug(`clickPopoverItem label: ${label}`);
 
     await this.retry.waitFor('ascertain that export popover is open', async () => {
-      const isExportPopoverOpen = await this.isExportPopoverOpen();
+      let isExportPopoverOpen = await this.isExportPopoverOpen();
+
       if (!isExportPopoverOpen) {
-        await this.clickExportTopNavButton();
+        await exportPopoverOpener();
+        isExportPopoverOpen = await this.isExportPopoverOpen();
       }
+
       return isExportPopoverOpen;
     });
 
@@ -54,9 +73,15 @@ export class ExportPageObject extends FtrService {
   }
 
   async closeExportFlyout() {
-    if (await this.isExportFlyoutOpen()) {
-      await this.testSubjects.click('exportFlyoutCloseButton');
+    const closeButtonSubj = 'exportFlyoutCloseButton';
+    const isExportFlyoutOpen = await this.testSubjects.exists(closeButtonSubj);
+
+    if (!isExportFlyoutOpen) {
+      return; // It was already closed
     }
+
+    await this.testSubjects.click(closeButtonSubj);
+    await this.testSubjects.waitForDeleted(closeButtonSubj);
   }
 
   async getExportAssetTextButton() {

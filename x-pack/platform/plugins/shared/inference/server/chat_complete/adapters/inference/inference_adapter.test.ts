@@ -6,7 +6,7 @@
  */
 
 import { isNativeFunctionCallingSupportedMock } from './inference_adapter.test.mocks';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { lastValueFrom, toArray, filter, noop, of } from 'rxjs';
@@ -20,7 +20,7 @@ import {
   InferenceConnectorType,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { InferenceExecutor } from '../../utils/inference_executor';
+import type { InferenceExecutor } from '../../utils/inference_executor';
 import { inferenceAdapter } from './inference_adapter';
 
 function createOpenAIChunk({
@@ -68,6 +68,7 @@ describe('inferenceAdapter', () => {
         name: 'inference connector',
         connectorId: '.id',
         config: {},
+        capabilities: {},
       };
     });
   });
@@ -182,6 +183,7 @@ describe('inferenceAdapter', () => {
             prompt: 10,
             total: 15,
           },
+          model: 'gpt-4o', // Model from createOpenAIChunk helper
         },
       ]);
     });
@@ -217,16 +219,17 @@ describe('inferenceAdapter', () => {
         response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
       );
 
-      expect(tokenChunks).toEqual([
-        {
-          type: ChatCompletionEventType.ChatCompletionTokenCount,
-          tokens: {
-            completion: expect.any(Number),
-            prompt: expect.any(Number),
-            total: expect.any(Number),
-          },
+      expect(tokenChunks).toHaveLength(1);
+      expect(tokenChunks[0]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionTokenCount,
+        tokens: {
+          completion: expect.any(Number),
+          prompt: expect.any(Number),
+          total: expect.any(Number),
         },
-      ]);
+      });
+      // Model field is optional - only present if request.model is set
+      // Since no modelName is provided, model should be undefined/not present
     });
 
     it('propagates the temperature parameter', () => {

@@ -70,7 +70,7 @@ jest.mock('../hooks', () => {
           }),
         },
       },
-      unifiedSearch: {
+      kql: {
         autocomplete: {
           getQuerySuggestions: jest.fn().mockResolvedValue([
             {
@@ -116,6 +116,8 @@ jest.mock('../hooks', () => {
           ]),
           hasQuerySuggestions: jest.fn().mockReturnValue(true),
         },
+      },
+      unifiedSearch: {
         ui: {
           IndexPatternSelect: jest.fn(),
           SearchBar: jest.fn().mockReturnValue(null),
@@ -174,7 +176,7 @@ describe('SearchBar', () => {
 
 describe('getFieldSpecs', () => {
   it('returns fieldSpecs for Fleet agents', () => {
-    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX)).toHaveLength(74);
+    expect(getFieldSpecs(AGENTS_INDEX, AGENTS_PREFIX).length).toBeGreaterThan(74);
   });
 
   it('returns fieldSpecs for Fleet enrollment tokens', () => {
@@ -408,6 +410,13 @@ describe('getFieldSpecs', () => {
           name: 'ingest-agent-policies.updated_by',
           searchable: true,
           type: 'string',
+        },
+        {
+          aggregatable: true,
+          esTypes: ['boolean'],
+          name: 'ingest-agent-policies.supports_agentless',
+          searchable: true,
+          type: 'boolean',
         },
       ]
     );

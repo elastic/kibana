@@ -7,21 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Dispatch, useCallback, useMemo } from 'react';
+import type { Dispatch } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
+import type {
   EuiBasicTableColumn,
-  EuiButton,
-  EuiInMemoryTable,
   CriteriaWithPagination,
   SearchFilterConfig,
   Direction,
   Query,
   Search,
-  type EuiTableSelectionType,
+  EuiTableSelectionType,
+} from '@elastic/eui';
+import {
+  EuiButton,
+  EuiInMemoryTable,
   useEuiTheme,
   EuiCode,
   EuiText,
+  EuiLiveAnnouncer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
@@ -48,7 +52,7 @@ import {
   UserFilterContextProvider,
   NULL_USER as USER_FILTER_NULL_USER,
 } from './user_filter_panel';
-import { TabbedTableFilter } from './tabbed_filter';
+import { FavoritesFilterButton } from './favorites_filter_panel';
 
 type State<T extends UserContentCommonSchema> = Pick<
   TableListViewState<T>,
@@ -168,6 +172,17 @@ export function Table<T extends UserContentCommonSchema>({
     }
   }, [deleteItems, dispatch, tableItemsRowActions]);
 
+  const selectionAnnouncement = useMemo(() => {
+    if (selectedIds.length === 0) return '';
+    return i18n.translate('contentManagement.tableList.listing.selectionAnnouncement', {
+      defaultMessage: '{count} {entityName} selected. Delete button is now available.',
+      values: {
+        count: selectedIds.length,
+        entityName: selectedIds.length === 1 ? entityName : entityNamePlural,
+      },
+    });
+  }, [selectedIds.length, entityName, entityNamePlural]);
+
   const {
     isPopoverOpen,
     closePopover,
@@ -224,11 +239,29 @@ export function Table<T extends UserContentCommonSchema>({
       : null;
   }, [createdByEnabled]);
 
+  const favoritesFilterButton = useMemo<SearchFilterConfig | null>(() => {
+    if (!favoritesEnabled) return null;
+
+    return {
+      type: 'custom_component',
+      component: () => {
+        return (
+          <FavoritesFilterButton
+            isFavoritesOnly={tableFilter.favorites}
+            onToggleFavorites={() => {
+              onFilterChange({ favorites: !tableFilter.favorites });
+            }}
+          />
+        );
+      },
+    };
+  }, [favoritesEnabled, tableFilter.favorites, onFilterChange]);
+
   const searchFilters = useMemo(() => {
-    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel].filter(
+    return [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton].filter(
       (f: SearchFilterConfig | null): f is SearchFilterConfig => Boolean(f)
     );
-  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel]);
+  }, [tableSortSelectFilter, tagFilterPanel, userFilterPanel, favoritesFilterButton]);
 
   const search = useMemo((): Search => {
     const showHint = !!searchQuery.error && searchQuery.error.containsForbiddenChars;
@@ -329,16 +362,6 @@ export function Table<T extends UserContentCommonSchema>({
       ? true // by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves, but sorting is still enabled
       : { sort: tableSort };
 
-  const favoritesFilter =
-    favoritesEnabled && !favoritesError ? (
-      <TabbedTableFilter
-        selectedTabId={tableFilter.favorites ? 'favorite' : 'all'}
-        onSelectedTabChanged={(newTab) => {
-          onFilterChange({ favorites: newTab === 'favorite' });
-        }}
-      />
-    ) : undefined;
-
   return (
     <UserFilterContextProvider
       enabled={createdByEnabled}
@@ -360,13 +383,14 @@ export function Table<T extends UserContentCommonSchema>({
         totalActiveFilters={totalActiveFilters}
         clearTagSelection={clearTagSelection}
       >
+        <EuiLiveAnnouncer>{selectionAnnouncement}</EuiLiveAnnouncer>
         <EuiInMemoryTable<T>
           itemId="id"
           items={visibleItems}
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          message={noItemsMessage}
+          noItemsMessage={noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
@@ -376,7 +400,6 @@ export function Table<T extends UserContentCommonSchema>({
           rowHeader="attributes.title"
           tableCaption={tableCaption}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
-          childrenBetween={favoritesFilter}
         />
       </TagFilterContextProvider>
     </UserFilterContextProvider>

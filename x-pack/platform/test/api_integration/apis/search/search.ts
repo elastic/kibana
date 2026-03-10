@@ -10,7 +10,7 @@ import { parse as parseCookie } from 'tough-cookie';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 import { verifyErrorResponse } from '@kbn/test-suites-src/api_integration/apis/search/verify_error';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -63,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -89,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -116,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -159,6 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -196,6 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -258,6 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -277,6 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -298,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -373,10 +381,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('rollup', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/hybrid/rollup');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/hybrid/rollup');
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/hybrid/rollup');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/hybrid/rollup');
       });
 
       it('should return 400 if rollup search is called without index', async () => {
@@ -478,6 +486,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},
@@ -519,6 +528,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send({
             params: {
+              index: 'search-api-test',
               body: {
                 query: {
                   match_all: {},

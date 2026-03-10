@@ -17,7 +17,7 @@
 // interface.  What's interesting is that these guards compile to checking the `type`
 // property of the object-- just as we did before-- but with the benefit of Typescript.
 
-import {
+import type {
   ArrayUnsavedFieldChange,
   BooleanUnsavedFieldChange,
   ColorUnsavedFieldChange,

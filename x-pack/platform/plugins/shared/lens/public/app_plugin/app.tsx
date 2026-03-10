@@ -8,30 +8,37 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
-import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
-import { LensAppProps, LensAppServices } from './types';
+import type {
+  LensAppState,
+  LensAppServices,
+  LensDocument,
+  AddUserMessages,
+  EditorFrameInstance,
+  UserMessagesGetter,
+  LensInspector,
+} from '@kbn/lens-common';
+import type { Simplify } from '@kbn/chart-expressions-common';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { LensAppProps } from './types';
 import { LensTopNavMenu } from './lens_top_nav';
-import { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
-import { LensDocument } from '../persistence/saved_object_store';
 
 import {
   setState,
   applyChanges,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
   selectSavedObjectFormat,
   updateIndexPatterns,
+  updateVisualizationState,
   selectActiveDatasourceId,
   selectFramePublicAPI,
   selectIsManaged,
 } from '../state_management';
 import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
-import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common/constants';
 import { isLensEqual } from './lens_document_equality';
 import {
@@ -41,6 +48,7 @@ import {
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
   isLegacyEditorEmbeddable,
@@ -48,17 +56,28 @@ import {
   useNavigateBackToApp,
   useShortUrlService,
 } from './app_helpers';
+import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
 
 export type SaveProps = Simplify<
   Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;
   }
 >;
+
+// Helper to determine if we're coming from a specific dashboard/canvas view (not from library list)
+function isComingFromContainerView(incomingState?: LensAppProps['incomingState']): boolean {
+  return Boolean(
+    incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
+      !incomingState.originatingPath.includes('/list/')
+  );
+}
 
 export function App({
   history,
@@ -69,14 +88,15 @@ export function App({
   incomingState,
   redirectToOrigin,
   setHeaderActionMenu,
-  datasourceMap,
-  visualizationMap,
   contextOriginatingApp,
   topNavMenuEntryGenerators,
   initialContext,
   coreStart,
 }: LensAppProps) {
+  const confirmModalTitleId = useGeneratedHtmlId();
   const lensAppServices = useKibana<LensAppServices>().services;
+
+  const { datasourceMap, visualizationMap } = useEditorFrameService();
 
   const {
     data,
@@ -289,6 +309,31 @@ export function App({
   const runSave = useCallback(
     async (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+
+      if (visualization.activeId === 'lnsXY') {
+        try {
+          const updatedVizState = await saveUpdatedLinkedAnnotationsToLibrary(
+            visualization.state,
+            lensAppServices.eventAnnotationService
+          );
+          if (updatedVizState !== visualization.state) {
+            dispatch(
+              updateVisualizationState({
+                visualizationId: visualization.activeId,
+                newState: updatedVizState,
+              })
+            );
+          }
+        } catch (err) {
+          notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+            title: i18n.translate('xpack.lens.app.saveLinkedAnnotationsError', {
+              defaultMessage: 'Failed to save linked annotation changes',
+            }),
+          });
+          return;
+        }
+      }
+
       const prevVisState =
         persistedDoc?.visualizationType === visualization.activeId
           ? persistedDoc?.state.visualization
@@ -346,6 +391,7 @@ export function App({
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
+      notifications.toasts,
     ]
   );
 
@@ -439,6 +485,7 @@ export function App({
       >
         <LensTopNavMenu
           initialInput={initialInput}
+          incomingState={incomingState}
           redirectToOrigin={redirectToOrigin}
           getIsByValueMode={getIsByValueMode}
           onAppLeave={onAppLeave}
@@ -446,8 +493,6 @@ export function App({
           setIsSaveModalVisible={setIsSaveModalVisible}
           setHeaderActionMenu={setHeaderActionMenu}
           indicateNoData={indicateNoData}
-          datasourceMap={datasourceMap}
-          visualizationMap={visualizationMap}
           title={persistedDoc?.title}
           lensInspector={lensInspector}
           currentDoc={currentDoc}
@@ -478,7 +523,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isLinkedToOriginatingApp
+            isComingFromContainerView(incomingState) || initialContextIsEmbedded
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }
@@ -509,10 +554,12 @@ export function App({
       )}
       {shouldShowGoBackToVizEditorModal && (
         <EuiConfirmModal
-          maxWidth={600}
+          aria-labelledby={confirmModalTitleId}
           title={i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
           })}
+          titleProps={{ id: confirmModalTitleId }}
+          maxWidth={600}
           onCancel={closeGoBackToVizEditorModal}
           onConfirm={navigateToVizEditor}
           cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {

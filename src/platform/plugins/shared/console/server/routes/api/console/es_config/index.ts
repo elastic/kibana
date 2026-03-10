@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
-import { RouteDependencies } from '../../..';
+import type { EsConfigApiResponse } from '../../../../../common/types/api_responses';
+import { stripCredentialsFromUrl } from '../../../../lib/utils';
+import type { RouteDependencies } from '../../..';
 
-export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
+export const registerEsConfigRoute = ({ router, services, proxy }: RouteDependencies): void => {
   router.get(
     {
       path: '/api/console/es_config',
@@ -24,16 +25,26 @@ export const registerEsConfigRoute = ({ router, services }: RouteDependencies): 
     },
     async (ctx, req, res) => {
       const cloudUrl = services.esLegacyConfigService.getCloudUrl();
+
+      // Always get the actual proxy hosts for allHosts
+      const legacyConfig = await proxy.readLegacyESConfig();
+      const { hosts } = legacyConfig;
+      const sanitizedHosts = hosts.map(stripCredentialsFromUrl);
+
       if (cloudUrl) {
-        const body: EsConfigApiResponse = { host: cloudUrl };
+        const body: EsConfigApiResponse = {
+          host: stripCredentialsFromUrl(cloudUrl),
+          // Use actual proxy hosts, not cloudUrl
+          allHosts: sanitizedHosts,
+        };
 
         return res.ok({ body });
       }
-      const {
-        hosts: [host],
-      } = await services.esLegacyConfigService.readConfig();
 
-      const body: EsConfigApiResponse = { host };
+      const body: EsConfigApiResponse = {
+        host: sanitizedHosts[0],
+        allHosts: sanitizedHosts,
+      };
 
       return res.ok({ body });
     }

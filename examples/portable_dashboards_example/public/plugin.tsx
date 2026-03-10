@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
 import img from './portable_dashboard_image.png';
 
@@ -25,6 +27,8 @@ export interface StartDeps {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   navigation: NavigationPublicPluginStart;
+  uiActions: UiActionsStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -54,9 +58,11 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
   }
 
   public async start(core: CoreStart, deps: StartDeps) {
-    deps.dashboard.registerDashboardPanelPlacementSetting(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
-      width: 48,
-      height: 12,
+    deps.presentationUtil.registerPanelPlacementSettings(FILTER_DEBUGGER_EMBEDDABLE_ID, () => ({
+      placementSettings: {
+        width: 48,
+        height: 12,
+      },
     }));
   }
 

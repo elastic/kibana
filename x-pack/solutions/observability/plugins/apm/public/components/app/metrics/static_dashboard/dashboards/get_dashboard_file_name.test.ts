@@ -85,6 +85,12 @@ const vanillaOtelSdk = [
     telemetrySdkLanguage: 'android',
     filename: 'otel_native-otel_other-android',
   },
+  {
+    agentName: 'opentelemetry/go',
+    telemetrySdkName: undefined,
+    telemetrySdkLanguage: undefined,
+    filename: 'classic_apm-otel_other-go',
+  },
 ];
 const noFilenameCases = [
   {

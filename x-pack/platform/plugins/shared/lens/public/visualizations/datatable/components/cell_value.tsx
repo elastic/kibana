@@ -6,16 +6,18 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { makeHighContrastColor } from '@elastic/eui';
+import { EuiLink, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
-import { PaletteOutput } from '@kbn/coloring';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { RawValue } from '@kbn/data-plugin/common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
-import { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
@@ -34,6 +36,7 @@ export const createGridCell = (
     const formatter = formatters[columnId];
     const rawValue: RawValue = table?.rows[rowIndex]?.[columnId];
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
+    const { euiTheme } = useEuiTheme();
     const {
       oneClickFilter,
       colorMode = 'none',
@@ -74,6 +77,18 @@ export const createGridCell = (
     }, [rawValue, columnId, setCellProps, colorMode, palette, colorMapping, isExpanded]);
 
     if (filterOnClick) {
+      const backgroundColor = getCellColor(columnId, palette, colorMapping)(rawValue);
+      const linkColor = euiTheme.colors.link;
+
+      // Only adjust the color for colorMode: cell
+      const adjustedLinkColor =
+        colorMode === 'cell' && backgroundColor
+          ? makeHighContrastColor(
+              isDarkMode ? euiTheme.colors.highlight : linkColor, // preferred foreground color
+              4.5 // WCAG AA contrast ratio (default in EUI)
+            )(backgroundColor)
+          : linkColor;
+
       return (
         <div
           data-test-subj="lnsTableCellContent"
@@ -83,6 +98,7 @@ export const createGridCell = (
           })}
         >
           <EuiLink
+            style={{ color: adjustedLinkColor }}
             onClick={() => {
               handleFilterClick?.(columnId, rawValue, colIndex, rowIndex);
             }}

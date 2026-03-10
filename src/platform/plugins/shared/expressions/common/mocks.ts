@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
-import { ExecutionContext } from './execution/types';
+import type { Adapters } from '@kbn/inspector-plugin/common';
+import type { ExecutionContext } from './execution/types';
 
 export const createMockExecutionContext = <
   ExtraContext extends object = object,

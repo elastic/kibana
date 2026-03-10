@@ -11,25 +11,28 @@ import { contentManagementMock } from '@kbn/content-management-plugin/public/moc
 import { coreMock } from '@kbn/core/public/mocks';
 import { type Query } from '@kbn/es-query';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
-import {
+import type {
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { EmbeddableStateTransfer } from '.';
+import { BehaviorSubject, of } from 'rxjs';
+import type { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
-import {
+import type {
   EmbeddableSetup,
   EmbeddableSetupDependencies,
   EmbeddableStart,
   EmbeddableStartDependencies,
 } from './types';
+import type { DrilldownActionState, DrilldownsManager } from './drilldowns/types';
+import type { SerializedDrilldowns } from '../server';
 
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
@@ -40,26 +43,26 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
     getIncomingEditorState: jest.fn(),
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
-    navigateToWithEmbeddablePackage: jest.fn(),
+    navigateToWithEmbeddablePackages: jest.fn(),
   };
 };
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
+    registerDrilldown: jest.fn(),
     registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
-    registerEnhancement: jest.fn(),
+    registerLegacyURLTransform: jest.fn(),
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    telemetry: jest.fn(),
-    extract: jest.fn(),
-    inject: jest.fn(),
-    getAllMigrations: jest.fn(),
+    getAddFromLibraryComponent: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
+    getLegacyURLTransform: jest.fn(),
+    hasLegacyURLTransform: jest.fn(),
   };
   return startContract;
 };
@@ -120,3 +123,26 @@ export const setStubKibanaServices = () => {
     contentManagement: contentManagementMock.createStartContract(),
   });
 };
+
+export function mockDrilldownsManager(): DrilldownsManager {
+  return {
+    api: {
+      drilldowns$: new BehaviorSubject<DrilldownActionState[]>([]),
+      setDrilldowns: jest.fn(),
+    },
+    cleanup: jest.fn(),
+    comparators: {
+      drilldowns: jest.fn(),
+    },
+    anyStateChange$: of(),
+    getLatestState: jest.fn(),
+    reinitializeState: jest.fn(),
+  };
+}
+
+export async function mockInitializeDrilldownsManager(
+  embeddableUuid: string,
+  state: SerializedDrilldowns
+): Promise<DrilldownsManager> {
+  return mockDrilldownsManager();
+}

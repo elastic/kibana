@@ -7,7 +7,7 @@
 
 import { reduce, map } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { GlobalSearchRouter } from '../types';
+import type { GlobalSearchRouter } from '../types';
 import { GlobalSearchFindError } from '../../common/errors';
 
 export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
@@ -29,7 +29,7 @@ export const registerInternalFindRoute = (router: GlobalSearchRouter) => {
           }),
           options: schema.maybe(
             schema.object({
-              preference: schema.maybe(schema.string()),
+              preference: schema.maybe(schema.string({ maxLength: 64 })),
             })
           ),
         }),

@@ -47,7 +47,7 @@ export interface SearchAlertsParams {
   /**
    * ES query to perform on the affected alert indices
    */
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   /**
    * The alert document fields to include in the response
    */
@@ -69,6 +69,10 @@ export interface SearchAlertsParams {
    */
   pageSize: number;
   /**
+   * Force using the default context, otherwise use the AlertQueryContext
+   */
+  skipAlertsQueryContext?: boolean;
+  /**
    * The minimum score to apply to the query
    */
   minScore?: number;
@@ -84,6 +88,7 @@ export interface SearchAlertsResult {
   ecsAlertsData: unknown[];
   total: number;
   querySnapshot?: EsQuerySnapshot;
+  error?: Error;
 }
 
 /**
@@ -131,6 +136,7 @@ export const searchAlerts = ({
           const total = parseTotalHits(rawResponse);
           const alerts = parseAlerts(rawResponse);
           const { oldAlertsData, ecsAlertsData } = transformToLegacyFormat(alerts);
+          const alertsError = parseFailure(rawResponse);
 
           return {
             alerts,
@@ -139,17 +145,19 @@ export const searchAlerts = ({
             total,
             querySnapshot: {
               request: response?.inspect?.dsl ?? [],
+              // @ts-expect-error upgrade typescript v5.9.3
               response: [JSON.stringify(rawResponse)] ?? [],
             },
+            error: alertsError,
           };
         }),
         catchError((error) => {
-          data.search.showError(error);
           return of({
             alerts: [],
             oldAlertsData: [],
             ecsAlertsData: [],
             total: 0,
+            error,
           });
         })
       )
@@ -185,6 +193,18 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
     }
     return acc;
   }, []);
+
+/**
+ * Extract failures from the raw response
+ */
+const parseFailure = (
+  rawResponse: RuleRegistrySearchResponse['rawResponse']
+): Error | undefined => {
+  const failures = rawResponse._shards.failures ?? [];
+  return failures.length && failures[0].reason.reason
+    ? new Error(failures[0].reason.reason)
+    : undefined;
+};
 
 /**
  * Transforms the alerts to legacy formats (will be removed)

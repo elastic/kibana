@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import type { InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
+import { otelReservedFields } from '@kbn/streams-schema';
 import { addAliasesForNamespacedFields, baseMappings, baseFields } from './logs_layer';
 
 describe('logs_layer', () => {
+  describe('baseMappings and otelReservedFields sync', () => {
+    it('should have baseMappings keys match otelReservedFields', () => {
+      const baseMappingsKeys = Object.keys(baseMappings).sort();
+      const reservedFieldsSorted = [...otelReservedFields].sort();
+
+      expect(baseMappingsKeys).toEqual(reservedFieldsSorted);
+    });
+  });
   describe('addAliasesForNamespacedFields', () => {
     let mockStreamDefinition: Streams.WiredStream.Definition;
     let mockInheritedFields: InheritedFieldDefinition;
@@ -22,6 +31,8 @@ describe('logs_layer', () => {
             fields: {
               'resource.attributes.host.name': { type: 'keyword' },
               'attributes.transaction.id': { type: 'keyword' },
+              // this is a semconv field that has a different ECS equivalent
+              'resource.attributes.host.arch': { type: 'keyword' },
               'regular.field': { type: 'keyword' },
             },
           },
@@ -57,6 +68,18 @@ describe('logs_layer', () => {
         alias_for: 'resource.attributes.service.name',
       });
 
+      expect(result['host.architecture']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+
+      expect(result['host.arch']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+
       expect(result.data).toEqual({
         type: 'keyword',
         from: 'grandparent-stream',
@@ -80,9 +103,50 @@ describe('logs_layer', () => {
       expect(result['regular.field']).toBeUndefined();
     });
 
-    it('should include aliases from base mappings', () => {
-      // Use real base mappings and base fields
-      const result = addAliasesForNamespacedFields(mockStreamDefinition, {
+    it('should prioritize the ECS equivalent alias over the original field if both are mapped', () => {
+      const result = addAliasesForNamespacedFields(
+        {
+          ...mockStreamDefinition,
+          ingest: {
+            ...mockStreamDefinition.ingest,
+            wired: {
+              ...mockStreamDefinition.ingest.wired,
+              fields: {
+                ...mockStreamDefinition.ingest.wired.fields,
+                'resource.attributes.host.architecture': { type: 'keyword' },
+              },
+            },
+          },
+        },
+        {
+          ...mockInheritedFields,
+        }
+      );
+
+      expect(result['host.architecture']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+      expect(result['host.arch']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'resource.attributes.host.arch',
+      });
+    });
+
+    it('should include aliases from base mappings for legacy logs streams', () => {
+      // Test for legacy 'logs' root stream
+      const logsStreamDefinition = {
+        name: 'logs.child',
+        ingest: {
+          wired: {
+            fields: {},
+          },
+        },
+      } as unknown as Streams.WiredStream.Definition;
+
+      const result = addAliasesForNamespacedFields(logsStreamDefinition, {
         ...mockInheritedFields,
       });
 
@@ -108,6 +172,55 @@ describe('logs_layer', () => {
         type: 'match_only_text',
         alias_for: 'body.text',
         from: 'logs',
+      });
+    });
+
+    it('should add OTEL base mapping aliases with correct root for logs.otel streams', () => {
+      const otelStreamDefinition = {
+        name: 'logs.otel.child',
+        ingest: {
+          wired: {
+            fields: {},
+          },
+        },
+      } as unknown as Streams.WiredStream.Definition;
+
+      const result = addAliasesForNamespacedFields(otelStreamDefinition, {});
+
+      // Check for base alias mappings with logs.otel as parent
+      Object.entries(baseMappings).forEach(([key, mapping]) => {
+        if (mapping.type === 'alias' && mapping.path) {
+          expect(result[key]).toEqual({
+            type: baseFields[mapping.path].type,
+            alias_for: mapping.path,
+            from: 'logs.otel',
+          });
+        }
+      });
+
+      // Verify specific examples
+      expect(result['log.level']).toEqual({
+        type: 'keyword',
+        alias_for: 'severity_text',
+        from: 'logs.otel',
+      });
+
+      expect(result.message).toEqual({
+        type: 'match_only_text',
+        alias_for: 'body.text',
+        from: 'logs.otel',
+      });
+
+      expect(result['trace.id']).toEqual({
+        type: 'keyword',
+        alias_for: 'trace_id',
+        from: 'logs.otel',
+      });
+
+      expect(result['span.id']).toEqual({
+        type: 'keyword',
+        alias_for: 'span_id',
+        from: 'logs.otel',
       });
     });
 
@@ -153,7 +266,9 @@ describe('logs_layer', () => {
               routing: [],
             },
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            failure_store: { inherit: {} },
           },
         },
         conflictingFields

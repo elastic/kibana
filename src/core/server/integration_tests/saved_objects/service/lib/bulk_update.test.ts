@@ -14,10 +14,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsType, SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../../migrations/jest_matchers';
-import {
-  getKibanaMigratorTestKit,
-  startElasticsearch,
-} from '../../migrations/kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'bulk_update.test.log');
@@ -73,7 +70,6 @@ describe('SOR - bulk_update API', () => {
       management: {
         importableAndExportable: true,
       },
-      switchToModelVersionAt: '8.10.0',
       modelVersions: versionMap,
     };
   };
@@ -117,7 +113,6 @@ describe('SOR - bulk_update API', () => {
       management: {
         importableAndExportable: true,
       },
-      switchToModelVersionAt: '8.10.0',
       modelVersions: versionOtherMap,
     };
   };
@@ -134,7 +129,6 @@ describe('SOR - bulk_update API', () => {
       management: {
         importableAndExportable: true,
       },
-      switchToModelVersionAt: '8.10.0',
       modelVersions: {},
     };
   };

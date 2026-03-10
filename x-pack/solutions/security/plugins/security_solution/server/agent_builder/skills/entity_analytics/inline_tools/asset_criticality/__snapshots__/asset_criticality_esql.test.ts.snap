@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`assetCriticalityDynamicInlineToolHandler should modify additional context when entity store v2 is enabled 1`] = `
+"
+        This is a set of rules that you must follow strictly:
+        * The criticality value is stored in the field 'criticality_level'.,
+        * When searching the asset criticality of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE ((host.entity.id IS NOT NULL AND host.entity.id != \\"\\") OR (host.id IS NOT NULL AND host.id != \\"\\") OR (host.name IS NOT NULL AND host.name != \\"\\") OR (host.hostname IS NOT NULL AND host.hostname != \\"\\"))'\\""
+`;
+
+exports[`assetCriticalityDynamicInlineToolHandler should return asset criticality message with ESQL query when asset criticality index exists 1`] = `
+"
+        This is a set of rules that you must follow strictly:
+        * The criticality value is stored in the field 'criticality_level'.,
+        * When searching the asset criticality of an entity of type 'host', you must **ALWAYS** use exact and entire filter: \\"'WHERE host.name IS NOT NULL'\\""
+`;
+
+exports[`assetCriticalityDynamicInlineToolHandler should return generic security solution message when asset criticality index does not exist 1`] = `"Asset criticality index does not exist for this space."`;

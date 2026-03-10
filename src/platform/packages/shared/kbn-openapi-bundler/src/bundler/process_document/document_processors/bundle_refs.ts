@@ -14,12 +14,12 @@ import { hasProp } from '../../../utils/has_prop';
 import { isChildContext } from '../is_child_context';
 import { insertRefByPointer } from '../../../utils/insert_by_json_pointer';
 import { inlineRef } from './utils/inline_ref';
-import { ResolvedRef } from '../../ref_resolver/resolved_ref';
-import { Document } from '../../document';
-import { DocumentNode, RefNode } from '../types/node';
-import { TraverseDocumentContext, TraverseRootDocumentContext } from '../types/context';
-import { DocumentNodeProcessor } from './types/document_node_processor';
-import { TraverseDocumentNodeContext } from './types/traverse_document_node_context';
+import type { ResolvedRef } from '../../ref_resolver/resolved_ref';
+import type { Document } from '../../document';
+import type { DocumentNode, RefNode } from '../types/node';
+import type { TraverseDocumentContext, TraverseRootDocumentContext } from '../types/context';
+import type { DocumentNodeProcessor } from './types/document_node_processor';
+import type { TraverseDocumentNodeContext } from './types/traverse_document_node_context';
 
 /**
  * Node processor to bundle and conditionally dereference document references.

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type {
   BrowserUrlService,
   SharePluginSetup,
   SharePluginStart,
 } from '@kbn/share-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import { BehaviorSubject, combineLatest, type Subscription } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -31,7 +31,6 @@ import {
   TopNFunctionsLocatorDefinition,
   ServiceOverviewLocatorDefinition,
   TransactionDetailsByNameLocatorDefinition,
-  ServiceEntityLocatorDefinition,
   TransactionDetailsByTraceIdLocatorDefinition,
   type AssetDetailsFlyoutLocator,
   type AssetDetailsLocator,
@@ -43,26 +42,23 @@ import {
   type ServiceOverviewLocator,
   type TransactionDetailsByNameLocator,
   type MetricsExplorerLocator,
-  type ServiceEntityLocator,
   type TransactionDetailsByTraceIdLocator,
-  type EntitiesInventoryLocator,
-  EntitiesInventoryLocatorDefinition,
 } from '../common';
-import { updateGlobalNavigation } from './services/update_global_navigation';
-import {
-  DependencyOverviewLocator,
-  DependencyOverviewLocatorDefinition,
-} from '../common/locators/apm/dependency_overview_locator';
+import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
+import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+
+export const OBSERVABILITY_AGENT_ID = 'observability.agent';
+export const OBSERVABILITY_SESSION_TAG = 'observability';
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
 
 export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
-  cases: CasesPublicStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
@@ -87,14 +83,14 @@ interface ObservabilitySharedLocators {
     dependencyOverview: DependencyOverviewLocator;
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
-    serviceEntity: ServiceEntityLocator;
   };
-  entitiesInventory: EntitiesInventoryLocator;
 }
 
 export class ObservabilitySharedPlugin implements Plugin {
   private readonly navigationRegistry = createNavigationRegistry();
   private isSidebarEnabled$: BehaviorSubject<boolean>;
+  private appChangeSubscription?: Subscription;
+  private lastIsObservabilityApp?: boolean;
 
   constructor() {
     this.isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
@@ -118,13 +114,15 @@ export class ObservabilitySharedPlugin implements Plugin {
 
   public start(core: CoreStart, plugins: ObservabilitySharedStart) {
     const { application } = core;
+    const { agentBuilder } = plugins;
+
+    this.setupObservabilityAgentDefault(application, agentBuilder);
 
     const PageTemplate = createLazyObservabilityPageTemplate({
       currentAppId$: application.currentAppId$,
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
-      guidedOnboardingApi: plugins.guidedOnboarding?.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart: core }),
       isSidebarEnabled$: this.isSidebarEnabled$,
     });
@@ -139,7 +137,50 @@ export class ObservabilitySharedPlugin implements Plugin {
     };
   }
 
-  public stop() {}
+  public stop() {
+    this.appChangeSubscription?.unsubscribe();
+  }
+
+  /**
+   * Sets up the Observability Agent as the default AI agent when navigating to Observability apps.
+   * Subscribes to app changes and configures the AI flyout accordingly.
+   */
+  private setupObservabilityAgentDefault(
+    application: CoreStart['application'],
+    agentBuilder: AgentBuilderPluginStart | undefined
+  ) {
+    if (!agentBuilder) {
+      return;
+    }
+
+    this.appChangeSubscription = combineLatest([
+      application.currentAppId$,
+      application.applications$,
+    ]).subscribe(([currentAppId, registeredApps]) => {
+      if (!currentAppId) {
+        return;
+      }
+
+      const currentApp = registeredApps.get(currentAppId);
+      const isObservabilityApp =
+        currentApp?.category?.id === DEFAULT_APP_CATEGORIES.observability.id;
+
+      if (isObservabilityApp === this.lastIsObservabilityApp) {
+        return;
+      }
+      this.lastIsObservabilityApp = isObservabilityApp;
+
+      if (isObservabilityApp) {
+        agentBuilder.setConversationFlyoutActiveConfig({
+          agentId: OBSERVABILITY_AGENT_ID,
+          sessionTag: OBSERVABILITY_SESSION_TAG,
+          newConversation: false,
+        });
+      } else {
+        agentBuilder.clearConversationFlyoutActiveConfig?.();
+      }
+    });
+  }
 
   private createLocators(urlService: BrowserUrlService): ObservabilitySharedLocators {
     return {
@@ -166,9 +207,7 @@ export class ObservabilitySharedPlugin implements Plugin {
         transactionDetailsByTraceId: urlService.locators.create(
           new TransactionDetailsByTraceIdLocatorDefinition()
         ),
-        serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
-      entitiesInventory: urlService.locators.create(new EntitiesInventoryLocatorDefinition()),
     };
   }
 }

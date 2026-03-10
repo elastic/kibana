@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { openConnectionDetails, OpenConnectionDetailsParams } from './open_connection_details';
+import type { OpenConnectionDetailsParams } from './open_connection_details';
+import { openConnectionDetails } from './open_connection_details';
 import { getGlobalDependencies } from './global';
 
-export type OpenWiredConnectionDetailsParams = Partial<Omit<OpenConnectionDetailsParams, 'start'>>;
+type OpenWiredConnectionDetailsProps = Omit<OpenConnectionDetailsParams['props'], 'start'>;
+export type OpenWiredConnectionDetailsParams = Partial<
+  Omit<{ props: OpenWiredConnectionDetailsProps }, 'start'>
+>;
 
 export const openWiredConnectionDetails = async (params: OpenWiredConnectionDetailsParams = {}) => {
   const start = getGlobalDependencies().start;

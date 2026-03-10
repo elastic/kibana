@@ -5,15 +5,17 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import React, { useMemo } from 'react';
-import { DatasetQualityController } from '../../controller/dataset_quality';
+import { DATASET_QUALITY_ALL_SIGNALS_ID } from '../../../common/constants';
+import type { DatasetQualityController } from '../../controller/dataset_quality';
 import SummaryPanelProvider from '../../hooks/use_summary_panel';
-import { ITelemetryClient } from '../../services/telemetry';
-import { DatasetQualityStartDeps } from '../../types';
+import type { ITelemetryClient } from '../../services/telemetry';
+import type { DatasetQualityStartDeps } from '../../types';
 import { useKibanaContextForPluginProvider } from '../../utils';
-import { DatasetQualityContext, DatasetQualityContextValue } from './context';
+import type { DatasetQualityContextValue } from './context';
+import { DatasetQualityContext } from './context';
 import EmptyStateWrapper from './empty_state/empty_state';
 import Filters from './filters/filters';
 import Header from './header';
@@ -43,8 +45,11 @@ export const DatasetQuality = ({
     () => ({
       service: controller.service,
       telemetryClient,
+      isDatasetQualityAllSignalsAvailable: core.pricing.isFeatureAvailable(
+        DATASET_QUALITY_ALL_SIGNALS_ID
+      ),
     }),
-    [controller.service, telemetryClient]
+    [controller.service, telemetryClient, core.pricing]
   );
 
   return (

@@ -18,12 +18,13 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
-import type { PackageInfo, PackageMetadata } from '../../../../../types';
+import type { PackageInfo, PackageMetadata, RegistryPolicyTemplate } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
   useGetPackagePoliciesQuery,
@@ -41,8 +42,15 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
 import { KeepPoliciesUpToDateSwitch } from '../components';
 import { useChangelog } from '../hooks';
+
+import { ExperimentalFeaturesService } from '../../../../../services';
+
+import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
+
+import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
@@ -51,6 +59,7 @@ import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
+import { RollbackButton } from './rollback_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -85,17 +94,20 @@ interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  isCustomPackage: boolean;
+  integrationInfo?: RegistryPolicyTemplate;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage, integrationInfo }: Props) => {
     const authz = useAuthz();
+    const canInstallPackages = authz.integrations.installPackages;
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isBreakingChangesUnderstood, setIsBreakingChangesUnderstood] = useState(false);
     const [isBreakingChangesFlyoutOpen, setIsBreakingChangesFlyoutOpen] = useState(false);
-
+    const { enablePackageRollback } = ExperimentalFeaturesService.get();
     const toggleChangelogModal = useCallback(() => {
       setIsChangelogModalOpen(!isChangelogModalOpen);
     }, [isChangelogModalOpen]);
@@ -242,6 +254,8 @@ export const SettingsPage: React.FC<Props> = memo(
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
+              <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+              <DeprecatedFeaturesCallout packageInfo={packageInfo} />
               {installedVersion !== null && (
                 <div>
                   <EuiTitle>
@@ -318,6 +332,8 @@ export const SettingsPage: React.FC<Props> = memo(
                       <p>
                         <UpdateButton
                           {...packageInfo}
+                          name={packageInfo.name}
+                          title={wrapTitleWithDeprecated({ packageInfo })}
                           version={latestVersion}
                           agentPolicyIds={agentPolicyIds}
                           packagePolicyIds={packagePolicyIds}
@@ -350,25 +366,47 @@ export const SettingsPage: React.FC<Props> = memo(
                         </h4>
                       </EuiTitle>
                       <EuiSpacer size="s" />
-                      <p>
-                        <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageInstallDescription"
-                          defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
-                          values={{
-                            title,
-                          }}
-                        />
-                      </p>
-                      <EuiFlexGroup>
-                        <EuiFlexItem grow={false}>
+                      {canInstallPackages ? (
+                        <>
                           <p>
-                            <InstallButton
-                              {...packageInfo}
-                              disabled={packageMetadata?.has_policies}
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.packageInstallDescription"
+                              defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
+                              values={{
+                                title,
+                              }}
                             />
                           </p>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                          <EuiFlexGroup>
+                            <EuiFlexItem grow={false}>
+                              <p>
+                                <InstallButton
+                                  {...packageInfo}
+                                  disabled={packageMetadata?.has_policies}
+                                />
+                              </p>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
+                      ) : (
+                        <EuiCallOut
+                          announceOnMount
+                          color="warning"
+                          iconType="lock"
+                          data-test-subj="installPermissionCallout"
+                          title={
+                            <FormattedMessage
+                              id="xpack.fleet.integrations.settings.installPermissionRequiredTitle"
+                              defaultMessage="Permission required"
+                            />
+                          }
+                        >
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.installPermissionRequired"
+                            defaultMessage="You do not have permission to install this integration. Contact your administrator."
+                          />
+                        </EuiCallOut>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -441,10 +479,45 @@ export const SettingsPage: React.FC<Props> = memo(
                                   ? packageInfo.installationInfo.install_source
                                   : ''
                               }
+                              isCustomPackage={isCustomPackage}
                             />
                           </div>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      {enablePackageRollback && (
+                        <>
+                          <EuiFlexGroup direction="column" gutterSize="m">
+                            <EuiFlexItem>
+                              <EuiTitle>
+                                <h4>
+                                  <FormattedMessage
+                                    id="xpack.fleet.integrations.settings.packageRollbackTitle"
+                                    defaultMessage="Rollback"
+                                  />
+                                </h4>
+                              </EuiTitle>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <FormattedMessage
+                                id="xpack.fleet.integrations.settings.packageRollbackDescription"
+                                defaultMessage="Rollback integration to the previous version."
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <div>
+                                <BulkActionContextProvider>
+                                  <RollbackButton
+                                    packageInfo={packageInfo}
+                                    isCustomPackage={isCustomPackage}
+                                  />
+                                </BulkActionContextProvider>
+                              </div>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="l" />
+                        </>
+                      )}
                     </>
                   )}
                 </div>

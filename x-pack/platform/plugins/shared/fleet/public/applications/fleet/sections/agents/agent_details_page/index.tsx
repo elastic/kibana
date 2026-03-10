@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -13,8 +13,11 @@ import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { OutputsForAgentPolicy } from '../../../../../../server/types';
+
 import type { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { FLEET_ROUTING_PATHS } from '../../../constants';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../common/services/version_specific_policies_utils';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
@@ -23,8 +26,13 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
+  sendGetAgentTagsForRq,
+  useAgentlessResources,
+  useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
+
+import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
 import {
@@ -40,6 +48,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const { showAgentless } = useAgentlessResources();
   const {
     isLoading,
     isInitialRequest,
@@ -56,10 +65,17 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     isLoading: isAgentPolicyLoading,
     data: agentPolicyData,
     sendRequest: sendAgentPolicyRequest,
-  } = useGetOneAgentPolicy(agentData?.item?.policy_id);
+  } = useGetOneAgentPolicy(
+    agentData?.item?.policy_id
+      ? removeVersionSuffixFromPolicyId(agentData.item.policy_id)
+      : undefined
+  );
+
+  const { data: outputsData } = useGetInfoOutputsForPolicy(agentPolicyData?.item?.id);
 
   const {
     application: { navigateToApp },
+    notifications,
   } = useStartServices();
   const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
@@ -71,13 +87,22 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
-  const host = agentData?.item?.local_metadata?.host;
+  const isAgentlessAgent = agentPolicyData?.item.supports_agentless;
+  const agent =
+    agentData?.item && (isAgentlessAgent ? showAgentless : true) ? agentData.item : null;
+  const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" href={getHref('agent_list')} flush="left" size="xs">
+          <EuiButtonEmpty
+            iconType="arrowLeft"
+            href={getHref('agent_list')}
+            flush="left"
+            size="xs"
+            aria-label="View all agents"
+          >
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
@@ -108,16 +133,44 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [host, agentId, getHref, isInitialRequest, isLoading]
   );
 
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+
+  const [allTags, setAllTags] = useState<string[]>();
+
+  useEffect(() => {
+    // Fetch all tags when the component mounts
+    const fetchTags = async () => {
+      try {
+        const agentTagsResponse = await sendGetAgentTagsForRq({
+          showInactive: agent?.status === 'inactive',
+        });
+        const newAllTags = agentTagsResponse?.items ?? [];
+        setAllTags(newAllTags);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.agentList.errorFetchingTagsTitle', {
+            defaultMessage: 'Error fetching tags',
+          }),
+        });
+      }
+    };
+
+    if (agent?.active) {
+      fetchTags();
+    }
+  }, [setAllTags, notifications, agent]);
+
   const headerRightContent = useMemo(
     () =>
-      agentData && agentData.item ? (
+      agent ? (
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s" direction="row">
             {!isAgentPolicyLoading && (
               <EuiFlexItem grow={false}>
                 <AgentDetailsActionMenu
-                  agent={agentData.item}
+                  agent={agent}
                   agentPolicy={agentPolicyData?.item}
                   assignFlyoutOpenByDefault={openReassignFlyoutOpenByDefault}
                   onCancelReassign={
@@ -125,6 +178,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                       ? reassignCancelClickHandler
                       : undefined
                   }
+                  onAddRemoveTagsClick={(button) => {
+                    setTagsPopoverButton(button);
+                    setShowTagsAddRemove(!showTagsAddRemove);
+                  }}
                 />
               </EuiFlexItem>
             )}
@@ -199,8 +256,31 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             }
             error={error}
           />
-        ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
+        ) : agent ? (
+          <>
+            <AgentDetailsPageContent
+              agent={agent}
+              agentPolicy={agentPolicyData?.item}
+              outputs={outputsData?.item}
+            />
+            {showTagsAddRemove && (
+              <TagsAddRemove
+                agentId={agent?.id!}
+                allTags={allTags ?? []}
+                selectedTags={agent?.tags ?? []}
+                button={tagsPopoverButton!}
+                onTagsUpdated={(tagsToAdd: string[]) => {
+                  sendAgentRequest();
+                  if (tagsToAdd.length > 0) {
+                    setAllTags([...new Set([...(allTags ?? []), ...tagsToAdd])].sort());
+                  }
+                }}
+                onClosePopover={() => {
+                  setShowTagsAddRemove(false);
+                }}
+              />
+            )}
+          </>
         ) : (
           <Error
             title={
@@ -225,7 +305,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = ({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = ({ agent, agentPolicy, outputs }) => {
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -256,7 +337,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} outputs={outputs} />;
         }}
       />
     </Routes>

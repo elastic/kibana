@@ -8,7 +8,9 @@
  */
 
 import { groups } from './groups.json';
-import { BuildkiteStep, expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
+import { TestSuiteType } from './constants';
+import type { BuildkiteStep } from '#pipeline-utils';
+import { expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -54,6 +56,7 @@ function getTestSuitesFromJson(json: string) {
   const testSuites: Array<
     | { type: 'group'; key: string; count: number }
     | { type: 'ftrConfig'; ftrConfig: string; count: number }
+    | { type: 'scoutConfig'; scoutConfig: string; count: number }
   > = [];
   for (const item of parsed) {
     if (typeof item !== 'object' || item === null) {
@@ -66,8 +69,8 @@ function getTestSuitesFromJson(json: string) {
     }
 
     const type = item.type;
-    if (type !== 'ftrConfig' && type !== 'group') {
-      fail(`testSuite.type must be either "ftrConfig" or "group"`);
+    if (type !== 'ftrConfig' && type !== 'scoutConfig' && type !== 'group') {
+      fail(`testSuite.type must be either "ftrConfig" or "scoutConfig" or "group"`);
     }
 
     if (item.type === 'ftrConfig') {
@@ -79,6 +82,20 @@ function getTestSuitesFromJson(json: string) {
       testSuites.push({
         type: 'ftrConfig',
         ftrConfig,
+        count,
+      });
+      continue;
+    }
+
+    if (item.type === 'scoutConfig') {
+      const scoutConfig = item.scoutConfig;
+      if (typeof scoutConfig !== 'string') {
+        fail(`testSuite.scoutConfig must be a string`);
+      }
+
+      testSuites.push({
+        type: 'scoutConfig',
+        scoutConfig,
         count,
       });
       continue;
@@ -99,6 +116,7 @@ function getTestSuitesFromJson(json: string) {
 }
 
 const testSuites = getTestSuitesFromJson(configJson);
+const hasScoutSuites = testSuites.some((t) => t.type === 'scoutConfig' && t.count > 0);
 
 const totalJobs = testSuites.reduce((acc, t) => acc + t.count, BASE_JOBS);
 
@@ -130,6 +148,19 @@ steps.push({
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
+if (hasScoutSuites) {
+  steps.push({
+    command: '.buildkite/scripts/steps/test/scout/discover_playwright_configs.sh',
+    label: 'Discover Scout Playwright configs',
+    agents: expandAgentQueue('n2-4-spot'),
+    key: 'scout_playwright_configs',
+    timeout_in_minutes: 30,
+    retry: {
+      automatic: [{ exit_status: '-1', limit: 3 }],
+    },
+  });
+}
+
 let suiteIndex = 0;
 for (const testSuite of testSuites) {
   if (testSuite.count <= 0) {
@@ -142,7 +173,7 @@ for (const testSuite of testSuites) {
       env: {
         FTR_CONFIG: testSuite.ftrConfig,
       },
-      key: `ftr-suite-${suiteIndex++}`,
+      key: `${TestSuiteType.FTR}-${suiteIndex++}`,
       label: `${testSuite.ftrConfig}`,
       parallelism: testSuite.count,
       concurrency,
@@ -151,7 +182,31 @@ for (const testSuite of testSuites) {
       agents: expandAgentQueue('n2-4-spot'),
       depends_on: 'build',
       timeout_in_minutes: 150,
-      cancel_on_build_failing: true,
+      retry: {
+        automatic: [{ exit_status: '-1', limit: 3 }],
+      },
+    });
+    continue;
+  }
+
+  if (testSuite.type === 'scoutConfig') {
+    const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
+
+    steps.push({
+      command: `.buildkite/scripts/steps/test/scout/flaky_configs.sh`,
+      env: {
+        SCOUT_CONFIG: testSuite.scoutConfig,
+        SCOUT_REPORTER_ENABLED: 'true',
+      },
+      key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
+      label: `${testSuite.scoutConfig}`,
+      parallelism: testSuite.count,
+      concurrency,
+      concurrency_group: process.env.UUID,
+      concurrency_method: 'eager',
+      agents: expandAgentQueue(usesParallelWorkers ? 'n2-8-spot' : 'n2-4-spot'),
+      depends_on: hasScoutSuites ? ['build', 'scout_playwright_configs'] : 'build',
+      timeout_in_minutes: 60,
       retry: {
         automatic: [{ exit_status: '-1', limit: 3 }],
       },
@@ -173,14 +228,13 @@ for (const testSuite of testSuites) {
         command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
         label: group.name,
         agents: expandAgentQueue(agentQueue),
-        key: `cypress-suite-${suiteIndex++}`,
+        key: `${TestSuiteType.CYPRESS}-${suiteIndex++}`,
         depends_on: 'build',
         timeout_in_minutes: 150,
         parallelism: testSuite.count,
         concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
-        cancel_on_build_failing: true,
         retry: {
           automatic: [{ exit_status: '-1', limit: 3 }],
         },
@@ -192,30 +246,6 @@ for (const testSuite of testSuites) {
           // The security solution cypress tests don't recognize CLI_NUMBER and CLI_COUNT, they use `BUILDKITE_PARALLEL_JOB_COUNT` and `BUILDKITE_PARALLEL_JOB`, which cannot be overridden here.
           // Use `RUN_ALL_TESTS` to make Security Solution Cypress tests run all tests instead of a subset.
           RUN_ALL_TESTS: 'true',
-        },
-      });
-      break;
-    case 'elastic_synthetics':
-      const synthGroup = groups.find((g) => g.key === testSuite.key);
-      if (!synthGroup) {
-        throw new Error(
-          `Group configuration was not found in groups.json for the following synthetics suite: {${suiteName}}.`
-        );
-      }
-      steps.push({
-        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
-        label: synthGroup.name,
-        agents: expandAgentQueue('n2-4-spot'),
-        key: `synthetics-suite-${suiteIndex++}`,
-        depends_on: 'build',
-        timeout_in_minutes: 30,
-        parallelism: testSuite.count,
-        concurrency,
-        concurrency_group: process.env.UUID,
-        concurrency_method: 'eager',
-        cancel_on_build_failing: true,
-        retry: {
-          automatic: [{ exit_status: '-1', limit: 3 }],
         },
       });
       break;

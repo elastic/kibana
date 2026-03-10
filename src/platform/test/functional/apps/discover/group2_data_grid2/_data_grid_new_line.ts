@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const INDEX_NAME = 'newline';
 const VALUE_WITH_NEW_LINES = "Newline!\nHere's a newline.\nHere's a newline again.";

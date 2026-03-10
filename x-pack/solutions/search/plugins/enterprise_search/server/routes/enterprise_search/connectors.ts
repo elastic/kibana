@@ -8,9 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { AgentlessConnectorsInfraService } from '@kbn/content-connectors-plugin/server/services';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
+import type { ConnectorStatus, FilteringRule } from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -29,7 +30,7 @@ import {
   updateFilteringDraft,
 } from '@kbn/search-connectors';
 
-import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 import {
   isResourceNotFoundException,
@@ -537,7 +538,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
               rule: schema.string(),
               updated_at: schema.string(),
               value: schema.string(),
-            })
+            }),
+            { maxSize: 1000 }
           ),
         }),
         params: schema.object({
@@ -582,7 +584,8 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
                 rule: schema.string(),
                 updated_at: schema.string(),
                 value: schema.string(),
-              })
+              }),
+              { maxSize: 1000 }
             ),
           })
         ),
@@ -1080,7 +1083,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
 
         const savedObjects = _core.savedObjects;
 
-        const agentPolicyService = start.fleet!.agentPolicyService;
+        const agentlessPoliciesService = start.fleet!.agentlessPoliciesService;
         const packagePolicyService = start.fleet!.packagePolicyService;
         const agentService = start.fleet!.agentService;
 
@@ -1090,7 +1093,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           soClient,
           client.asCurrentUser,
           packagePolicyService,
-          agentPolicyService,
+          agentlessPoliciesService,
           agentService,
           log
         );
@@ -1117,6 +1120,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
           },
           headers: { 'content-type': 'application/json' },
         });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         return createError({
           errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,

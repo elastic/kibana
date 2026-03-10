@@ -19,16 +19,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiBetaBadge,
   EuiProgress,
   EuiText,
   EuiHealth,
   EuiSuperDatePicker,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useUserData } from '../../../../detections/components/user_info';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
-import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -40,6 +37,9 @@ import { getStatusLabel } from './utils';
 import { GapStatusFilter } from './status_filter';
 import { useFindGapsForRule } from '../../api/hooks/use_find_gaps_for_rule';
 import { FillGap } from './fill_gap';
+import { FillRuleGapsButton } from './fill_rule_gaps_button';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+
 const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
@@ -62,7 +62,22 @@ const getGapsTableColumns = (hasCRUDPermissions: boolean, ruleId: string, enable
           tooltipContent={i18n.GAPS_TABLE_STATUS_LABEL_TOOLTIP}
         />
       ),
-      render: (value: GapStatus) => getStatusLabel(value),
+      render: (value: GapStatus, gap: Gap) => {
+        const status = getStatusLabel(value);
+        if (gap.failed_auto_fill_attempts != null && gap.failed_auto_fill_attempts > 0) {
+          return (
+            <EuiToolTip
+              content={i18n.GAPS_FAILED_AUTO_FILL_ATTEMPTS_TOOLTIP(gap.failed_auto_fill_attempts)}
+            >
+              <EuiHealth color="danger" data-test-subj="auto-fill-failed-attempts-indicator">
+                {status}
+              </EuiHealth>
+            </EuiToolTip>
+          );
+        }
+
+        return status;
+      },
       width: '10%',
     },
     {
@@ -175,9 +190,8 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: 'now-24h',
     end: 'now',
   });
-  const [{ canUserCRUD }] = useUserData();
   const { timelines } = useKibana().services;
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);
@@ -212,7 +226,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
-  const columns = getGapsTableColumns(hasCRUDPermissions, ruleId, enabled);
+  const columns = getGapsTableColumns(canEditRules, ruleId, enabled);
 
   const onRefreshCallback = () => {
     refetch();
@@ -265,12 +279,11 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
         <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <HeaderSection title={'Gaps'} subtitle={'Rule gaps'} />
-            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <GapStatusFilter selectedItems={selectedStatuses} onChange={handleStatusChange} />
             </EuiFlexItem>
@@ -290,6 +303,11 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
                 />
               </DatePickerEuiFlexItem>
             </EuiFlexItem>
+            {canEditRules && (
+              <EuiFlexItem grow={false}>
+                <FillRuleGapsButton ruleId={ruleId} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

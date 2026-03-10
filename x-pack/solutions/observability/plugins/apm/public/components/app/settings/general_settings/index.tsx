@@ -9,7 +9,6 @@ import { EuiSpacer } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import {
-  apmLabsButton,
   apmServiceGroupMaxNumberOfServices,
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
@@ -19,7 +18,7 @@ import {
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
+  apmProgressiveLoading,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -43,12 +42,11 @@ const SETTINGS_KEYS = [
   defaultApmServiceEnvironment,
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
-  apmLabsButton,
+  apmProgressiveLoading,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableTableSearchBar,
   apmEnableServiceInventoryTableSearchBar,
-  apmEnableServiceMapApiV2,
 ];
 
 function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {

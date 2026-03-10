@@ -11,6 +11,7 @@ import React, { useState, useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { makeRegEx } from '@kbn/kibana-utils-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 
 interface AddFilterProps {
@@ -26,12 +27,41 @@ const sourcePlaceholder = i18n.translate(
 );
 
 export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
-  const [filter, setFilter] = useState<string>('');
+  const [filter, setFilter] = useState('');
+  const [isInvalid, setIsInvalid] = useState(false);
+
+  const isAddButtonDisabled = filter.length === 0 || isInvalid;
 
   const onAddButtonClick = useCallback(() => {
     onAddFilter(filter);
     setFilter('');
   }, [filter, onAddFilter]);
+
+  const onInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.trim();
+      setFilter(value);
+    },
+    [setFilter]
+  );
+
+  const onInputBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+
+    if (value.length === 0) {
+      setIsInvalid(true);
+      return;
+    }
+
+    try {
+      // test value is not important, just that the created regex is able to compile
+      makeRegEx(value).test('');
+      setIsInvalid(false);
+    } catch (_) {
+      setIsInvalid(true);
+      return;
+    }
+  }, []);
 
   return (
     <EuiFlexGroup>
@@ -40,14 +70,16 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
           fullWidth
           value={filter}
           data-test-subj="fieldFilterInput"
-          onChange={(e) => setFilter(e.target.value.trim())}
+          isInvalid={isInvalid}
+          onBlur={onInputBlur}
+          onChange={onInputChange}
           placeholder={sourcePlaceholder}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButton
           data-test-subj="addFieldFilterButton"
-          isDisabled={filter.length === 0}
+          isDisabled={isAddButtonDisabled}
           onClick={onAddButtonClick}
         >
           <FormattedMessage

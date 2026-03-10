@@ -19,6 +19,7 @@ import type {
   AggregationRequest,
   EndpointFields,
   HostAggEsItem,
+  HostBucketItem,
   HostBuckets,
   HostItem,
   HostValue,
@@ -64,15 +65,8 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
     return {
       host_ip: {
         terms: {
-          script: {
-            // We might be able to remove this when PR is fixed in Elasticsearch: https://github.com/elastic/elasticsearch/issues/72276
-            // Currently we cannot use "value_type" with an aggregation when we have a mapping conflict which is why this painless script exists
-            // See public ticket: https://github.com/elastic/kibana/pull/78912
-            // See private ticket: https://github.com/elastic/security-team/issues/333
-            // for more details on the use cases and causes of the conflicts and why this is here.
-            source: "doc['host.ip']",
-            lang: 'painless',
-          },
+          field: 'host.ip',
+          value_type: 'ip',
           size: 10,
           order: {
             timestamp: Direction.desc,
@@ -132,7 +126,8 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     : fieldName.replace(/\./g, '_');
 
   if (has(`${aggField}.buckets`, bucket)) {
-    return getFirstItem(get(`${aggField}`, bucket));
+    const buckets = get(`${aggField}.buckets`, bucket);
+    return buckets.length > 0 ? buckets.map((item: HostBucketItem) => item.key) : null;
   } else if (fieldName === 'endpoint.id') {
     return get('endpoint_id.value.buckets[0].key', bucket) || null;
   } else if (has(aggField, bucket)) {

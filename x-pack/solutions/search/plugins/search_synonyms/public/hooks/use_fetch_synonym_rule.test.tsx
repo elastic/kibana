@@ -8,7 +8,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 const mockHttpGet = jest.fn();
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn().mockImplementation(async ({ queryFn, opts }) => {
     try {
       const res = await queryFn();

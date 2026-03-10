@@ -38,7 +38,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CREATE_CONNECTOR_PLUGIN } from '../../../../../common/constants';
 import { NewConnectorLogic } from '../../../new_index/method_connector/new_connector_logic';
 
-import { SelfManagePreference } from '../create_connector';
+import type { SelfManagePreference } from '../create_connector';
 
 const CLI_LABEL = i18n.translate(
   'xpack.contentConnectors.createConnector.manualConfiguration.cliLabel',

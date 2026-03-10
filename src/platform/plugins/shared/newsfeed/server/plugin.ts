@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Plugin } from '@kbn/core/server';
+import type { Plugin } from '@kbn/core/server';
 
 export class NewsfeedPlugin implements Plugin {
   public setup() {}

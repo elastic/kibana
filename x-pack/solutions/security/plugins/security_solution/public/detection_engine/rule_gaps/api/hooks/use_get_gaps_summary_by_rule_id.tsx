@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getGapsSummaryByRuleIds } from '../api';
 import type { GapRangeValue } from '../../constants';
 import { getGapRange } from './utils';

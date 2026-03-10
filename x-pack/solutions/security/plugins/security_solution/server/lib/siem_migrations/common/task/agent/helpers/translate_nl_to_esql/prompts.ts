@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+
+export const NL_TO_ESQL_TRANSLATION_PROMPT = ChatPromptTemplate.fromMessages([
+  [
+    `system`,
+    `You are a helpful assistant that translates Natural language queries into ESQL queries.
+
+Try to translate to ESQL as much as possible. Keep in mind below when translating ESQL.
+
+- Make assumptions on the fields based on ECS mapping if no explicit mapping is provided.
+- If the query is asking to search for something in event payload, source payload and no specific field is mentioned, use KQL or QSTR command to search in the entire payload. For example, if instruction is search for "malware*" in event payload when use KQL command like so: \`where kql\("malware*"\)\`.
+- Correctness and completeness of the translation is more important than the performance of the query.
+- If even 20% of the detection logic can be translated, provide the ESQL query for that part and explain in the summary which parts of the query were not translated and why.
+- If not even 20% of the detection logic can be translated, you must:
+  - Provide a summary of the reasons why it cannot be translated.
+  - NOT provide any dummy/example or simple ESQL query.
+- Use LOOKUP JOIN to enrich data with lookup indices.
+- Never add quotes or backticks to index names. This also applied to lookup index names
+
+See the example output below for formatting.
+
+<example_output>
+
+Esql Query:
+\`\`\`esql
+<ESQL_QUERY_HERE>
+\`\`\`
+
+
+## Translation Summary
+This is going to be a detailed summary of the translation process, including any challenges faced during the translation and how they were overcome. If the query could not be translated, explain why in detail here.
+
+</example_output>
+`,
+  ],
+  [
+    'user',
+    `Translate the following Natural Language query into an ESQL query.\n
+    ---
+    \n
+    {nl_query}
+    \n
+    ------------
+    \n`,
+  ],
+]);
+
+export const NL_TO_ESQL_INDEX_PATTERN_PROMPT = ChatPromptTemplate.fromMessages<{
+  index_pattern?: string;
+}>([
+  [
+    'system',
+    `When translating a Natural Language query into an ESQL query,  give preference to below provided index pattern. Its fields metadata is also provided. Use that information to guide your translation.
+     If you do not find any fields, use ECS fields names.
+
+
+    Index Pattern: {index_pattern}
+    Fields Metadata: {fields_metadata}
+`,
+  ],
+]);

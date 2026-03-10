@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action as ReduxAction } from 'redux';
+import type { Action as ReduxAction } from 'redux';
 import { createAction } from 'redux-actions';
 
 export const setLoadingActionType = 'setResolvedLoading';

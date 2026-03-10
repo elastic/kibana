@@ -8,7 +8,7 @@
  */
 
 export { Defer, defer } from './defer';
-export { fieldWildcardMatcher, fieldWildcardFilter } from './field_wildcard';
+export { fieldWildcardMatcher, fieldWildcardFilter, makeRegEx } from './field_wildcard';
 export { of } from './of';
 export type {
   BaseState,
@@ -38,6 +38,7 @@ export {
   useContainerSelector,
   useContainerState,
   createStateContainer,
+  defaultFreeze,
 } from './state_containers';
 export type { KibanaServerError } from './errors';
 export {
@@ -49,7 +50,7 @@ export {
   InvalidJSONProperty,
   DuplicateField,
 } from './errors';
-export { AbortError, abortSignalToPromise } from './abort_utils';
+export { AbortError, AbortReason, abortSignalToPromise } from './abort_utils';
 export type { Get, Set } from './create_getter_setter';
 export { createGetterSetter } from './create_getter_setter';
 export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';

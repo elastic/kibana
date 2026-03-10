@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   RoleCredentials,
   CookieCredentials,
   SupertestWithoutAuthProviderType,
   SamlAuthProviderType,
 } from '@kbn/ftr-common-functional-services';
-import { Test } from 'supertest';
-import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+import type { Test } from 'supertest';
+import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export interface RequestHeadersOptions {
   useCookieHeader?: boolean;

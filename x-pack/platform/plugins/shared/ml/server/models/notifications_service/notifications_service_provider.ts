@@ -45,7 +45,7 @@ export class NotificationsService {
 
   /**
    * Provides entity IDs per type for the current space.
-   * @private
+   * @internal
    */
   private async _getEntityIdsPerType() {
     const [adJobIds, dfaJobIds, modelIds] = await Promise.all([

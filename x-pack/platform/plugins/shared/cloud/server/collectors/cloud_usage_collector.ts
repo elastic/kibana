@@ -16,7 +16,9 @@ export interface CloudUsageCollectorConfig {
   deploymentId: string | undefined;
   projectId: string | undefined;
   projectType: string | undefined;
+  productTier: string | undefined;
   orchestratorTarget: string | undefined;
+  organizationInTrial: boolean | undefined;
 }
 
 interface CloudUsage {
@@ -28,6 +30,7 @@ interface CloudUsage {
   deploymentId?: string;
   projectId?: string;
   projectType?: string;
+  productTier?: string;
   orchestratorTarget?: string;
 }
 
@@ -43,7 +46,9 @@ export function createCloudUsageCollector(
     deploymentId,
     projectId,
     projectType,
+    productTier,
     orchestratorTarget,
+    organizationInTrial,
   } = config;
   const trialEndDateMs = trialEndDate ? new Date(trialEndDate).getTime() : undefined;
   return usageCollection.makeUsageCollector<CloudUsage>({
@@ -81,6 +86,10 @@ export function createCloudUsageCollector(
         type: 'keyword',
         _meta: { description: 'The Serverless Project type' },
       },
+      productTier: {
+        type: 'keyword',
+        _meta: { description: 'The Serverless Product Tier' },
+      },
       orchestratorTarget: {
         type: 'keyword',
         _meta: { description: 'The Orchestrator Target where it is deployed (canary/non-canary)' },
@@ -92,10 +101,15 @@ export function createCloudUsageCollector(
         isElasticStaffOwned,
         organizationId,
         trialEndDate,
-        ...(trialEndDateMs ? { inTrial: Date.now() <= trialEndDateMs } : {}),
+        ...(organizationInTrial
+          ? { inTrial: true }
+          : trialEndDateMs
+          ? { inTrial: Date.now() <= trialEndDateMs }
+          : {}),
         deploymentId,
         projectId,
         projectType,
+        productTier,
         orchestratorTarget,
       };
     },

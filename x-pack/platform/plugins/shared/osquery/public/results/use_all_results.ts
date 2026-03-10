@@ -5,95 +5,81 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { lastValueFrom } from 'rxjs';
-import type { InspectResponse } from '../common/helpers';
-import { generateTablePaginationOptions, getInspectResponse } from '../common/helpers';
 import { useKibana } from '../common/lib/kibana';
-import type {
-  ResultEdges,
-  ResultsRequestOptions,
-  ResultsStrategyResponse,
-  Direction,
-} from '../../common/search_strategy';
-import { OsqueryQueries } from '../../common/search_strategy';
+import type { ResultEdges, Direction, ResultsStrategyResponse } from '../../common/search_strategy';
+import { API_VERSIONS } from '../../common/constants';
 
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
-export interface ResultsArgs {
-  results: ResultEdges;
+interface ResultsArgs {
+  edges: ResultEdges;
   id: string;
-  inspect: InspectResponse;
-  isInspected: boolean;
-  totalCount: number;
+  total: number;
+  columns: string[];
 }
 
 interface UseAllResults {
   actionId: string;
+  liveQueryActionId?: string;
   activePage: number;
   startDate?: string;
   limit: number;
   sort: Array<{ field: string; direction: Direction }>;
   kuery?: string;
-  skip?: boolean;
   isLive?: boolean;
 }
 
 export const useAllResults = ({
   actionId,
+  liveQueryActionId,
   activePage,
   startDate,
   limit,
   sort,
   kuery,
-  skip = false,
   isLive = false,
 }: UseAllResults) => {
-  const { data } = useKibana().services;
+  const { http } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useQuery(
-    ['allActionResults', { actionId, activePage, limit, sort }],
-    async () => {
-      const responseData = await lastValueFrom(
-        data.search.search<ResultsRequestOptions, ResultsStrategyResponse>(
-          {
-            actionId,
-            startDate,
-            factoryQueryType: OsqueryQueries.results,
-            kuery,
-            pagination: generateTablePaginationOptions(activePage, limit),
-            sort,
+  return useQuery<{ data: ResultsStrategyResponse }, Error, ResultsArgs>(
+    ['allActionResults', { actionId, liveQueryActionId, activePage, limit, sort }],
+    () =>
+      http.get<{ data: ResultsStrategyResponse }>(
+        `/api/osquery/live_queries/${liveQueryActionId}/results/${actionId}`,
+        {
+          version: API_VERSIONS.public.v1,
+          query: {
+            page: activePage,
+            pageSize: limit,
+            ...(sort.length > 0 && {
+              sort: sort[0].field,
+              sortOrder: sort[0].direction,
+            }),
+            ...(kuery && { kuery }),
+            ...(startDate && { startDate }),
           },
-          {
-            strategy: 'osquerySearchStrategy',
-          }
-        )
-      );
-
-      if (!responseData?.edges?.length && responseData?.total) {
-        throw new Error('Empty edges while positive totalCount');
-      }
-
-      return {
-        ...responseData,
-        columns: Object.keys(
-          (responseData.edges?.length && responseData.edges[0].fields) || {}
-        ).sort(),
-        inspect: getInspectResponse(responseData, {} as InspectResponse),
-      };
-    },
+        }
+      ),
     {
+      select: (response) => ({
+        id: actionId,
+        total: response.data.total ?? 0,
+        edges: response.data.edges ?? [],
+        columns: Object.keys(
+          (response.data.edges?.length && response.data.edges[0].fields) || {}
+        ).sort(),
+      }),
       keepPreviousData: true,
       refetchInterval: isLive ? 5000 : false,
-      enabled: !skip,
       onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
         setErrorToast(error, {
-          title: i18n.translate('xpack.osquery.results.fetchError', {
-            defaultMessage: 'Error while fetching results',
+          title: i18n.translate('xpack.osquery.live_query_results.fetchError', {
+            defaultMessage: 'Error while fetching live query results',
           }),
         }),
     }

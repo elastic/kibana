@@ -40,7 +40,7 @@ describe('Policy Mac Event Collection Card', () => {
 
     expect(
       getByTestId(testSubj.optionsContainer).querySelectorAll('input[type="checkbox"]')
-    ).toHaveLength(4);
+    ).toHaveLength(5);
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
@@ -63,8 +63,9 @@ describe('Policy Mac Event Collection Card', () => {
             'Event collection' +
             'Operating system' +
             'Mac ' +
-            '4 / 4 event collections enabled' +
+            '5 / 5 event collections enabled' +
             'Events' +
+            'DNS' +
             'File' +
             'Process' +
             'Network' +
@@ -86,8 +87,9 @@ describe('Policy Mac Event Collection Card', () => {
             'Event collection' +
             'Operating system' +
             'Mac ' +
-            '3 / 4 event collections enabled' +
+            '4 / 5 event collections enabled' +
             'Events' +
+            'DNS' +
             'File' +
             'Process' +
             'Network' +

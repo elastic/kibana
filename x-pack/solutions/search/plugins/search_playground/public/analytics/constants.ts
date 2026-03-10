@@ -34,4 +34,6 @@ export enum AnalyticsEvents {
   setupSearchPageLoaded = 'search_setup_page_loaded',
   viewCodeFlyoutOpened = 'view_code_flyout_opened',
   viewCodeLanguageChange = 'view_code_language_change',
+  viewCostTransparencyTour = 'view_cost_transparency_tour',
+  closedCostTransparencyTour = 'closed_cost_transparency_tour',
 }

@@ -12,7 +12,7 @@ import { securityLink } from '../links';
 export const createCasesNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
-  renderAs: 'item',
+  icon: 'briefcase',
   children: [
     {
       id: SecurityPageName.caseCreate,

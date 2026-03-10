@@ -10,12 +10,13 @@ import { EuiButtonIcon, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { Streams } from '@kbn/streams-schema';
 import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { SchemaEditorFlyout } from './flyout';
 import { useSchemaEditorContext } from './schema_editor_context';
-import { SchemaField } from './types';
-import { UnpromoteFieldModal } from './unpromote_field_modal';
+import type { SchemaField } from './types';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getGeoPointSuggestion } from './utils';
 
 export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const context = useKibana();
@@ -30,20 +31,45 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const panels = useMemo(() => {
-    const { onFieldUnmap, onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
+    const {
+      onFieldUpdate,
+      onAddField,
+      stream,
+      withFieldSimulation,
+      fields,
+      enableGeoPointSuggestions,
+    } = schemaEditorContext;
 
     let actions = [];
 
-    const openFlyout = (props: { isEditingByDefault: boolean } = { isEditingByDefault: false }) => {
+    const openFlyout = (
+      props: { isEditingByDefault?: boolean; applyGeoPointSuggestion?: boolean } = {},
+      targetField: SchemaField = field
+    ) => {
+      if (!Streams.ingest.all.Definition.is(stream)) {
+        return;
+      }
       const overlay = core.overlays.openFlyout(
         toMountPoint(
           <StreamsAppContextProvider context={context}>
             <SchemaEditorFlyout
-              field={field}
+              field={targetField}
               onClose={() => overlay.close()}
-              onSave={onFieldUpdate}
+              onStage={(stagedField) => {
+                const exists = fields.some((f) => f.name === stagedField.name);
+                if (exists) {
+                  onFieldUpdate(stagedField);
+                } else if (onAddField) {
+                  onAddField(stagedField);
+                } else {
+                  onFieldUpdate(stagedField);
+                }
+              }}
               stream={stream}
               withFieldSimulation={withFieldSimulation}
+              fields={fields}
+              enableGeoPointSuggestions={enableGeoPointSuggestions}
+              onGoToField={handleGoToField}
               {...props}
             />
           </StreamsAppContextProvider>,
@@ -51,20 +77,14 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
         ),
         { maxWidth: 500 }
       );
-    };
 
-    const openUnpromoteModal = () => {
-      const overlay = core.overlays.openModal(
-        toMountPoint(
-          <UnpromoteFieldModal
-            field={field}
-            onClose={() => overlay.close()}
-            onFieldUnmap={onFieldUnmap}
-          />,
-          core
-        ),
-        { maxWidth: 500 }
-      );
+      function handleGoToField(fieldName: string) {
+        overlay.close();
+        const targetFieldObj = fields.find((f) => f.name === fieldName);
+        if (targetFieldObj) {
+          openFlyout({}, targetFieldObj);
+        }
+      }
     };
 
     const viewFieldAction = {
@@ -88,7 +108,13 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             name: i18n.translate('xpack.streams.actions.unpromoteFieldLabel', {
               defaultMessage: 'Unmap field',
             }),
-            onClick: openUnpromoteModal,
+            onClick: () => {
+              onFieldUpdate({
+                name: field.name,
+                parent: field.parent,
+                status: 'unmapped',
+              } as SchemaField);
+            },
           },
         ];
         break;
@@ -102,6 +128,24 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
             onClick: () => openFlyout({ isEditingByDefault: true }),
           },
         ];
+
+        if (enableGeoPointSuggestions !== false) {
+          const geoSuggestion = getGeoPointSuggestion({
+            fieldName: field.name,
+            fields,
+            streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
+          });
+
+          if (geoSuggestion) {
+            actions.push({
+              name: i18n.translate('xpack.streams.actions.mapAsGeoFieldLabel', {
+                defaultMessage: 'Map as geo field',
+              }),
+              onClick: () =>
+                openFlyout({ isEditingByDefault: true, applyGeoPointSuggestion: true }),
+            });
+          }
+        }
         break;
       case 'inherited':
         actions = [viewFieldAction];

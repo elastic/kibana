@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { PageTitle } from '../../../../components/page_title';
 import { CreateDataViewButton } from '../../../../components/create_data_view_button';
 import {
   useMlKibana,
@@ -56,9 +57,13 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
     <div data-test-subj="mlPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
         <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
-            defaultMessage="Select data view or saved Discover session"
+          <PageTitle
+            title={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.selectDataViewOrSavedSearch"
+                defaultMessage="Select data view or saved Discover session"
+              />
+            }
           />
         </MlPageHeader>
         <EuiPanel hasShadow={false} hasBorder>

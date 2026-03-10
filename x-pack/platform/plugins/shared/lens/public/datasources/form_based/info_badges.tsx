@@ -8,9 +8,9 @@
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FormBasedLayer } from '../..';
+import type { FramePublicAPI, VisualizationInfo } from '@kbn/lens-common';
+import type { FormBasedLayer } from '../..';
 import { InfoBadge } from '../../shared_components/info_badges/info_badge';
-import { FramePublicAPI, VisualizationInfo } from '../../types';
 import { getSamplingValue } from './utils';
 
 export function ReducedSamplingSectionEntries({

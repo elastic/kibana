@@ -9,6 +9,8 @@ import { filter, map, omit } from 'lodash';
 
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+
+import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { FindPacksRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
@@ -17,8 +19,9 @@ import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
+import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const findPackRoute = (router: IRouter) => {
+export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
     .get({
       access: 'public',
@@ -42,10 +45,12 @@ export const findPackRoute = (router: IRouter) => {
         },
       },
       async (context, request, response) => {
-        const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
+        const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
+          osqueryContext,
+          request
+        );
 
-        const soClientResponse = await savedObjectsClient.find<PackSavedObject>({
+        const soClientResponse = await spaceScopedClient.find<PackSavedObject>({
           type: packSavedObjectType,
           page: request.query.page ?? 1,
           perPage: request.query.pageSize ?? 20,

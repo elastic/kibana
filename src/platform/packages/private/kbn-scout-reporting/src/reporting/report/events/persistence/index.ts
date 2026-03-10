@@ -11,15 +11,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Client as ESClient } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
-import {
-  SCOUT_REPORTER_ES_API_KEY,
-  SCOUT_REPORTER_ES_URL,
-  SCOUT_REPORTER_ES_VERIFY_CERTS,
-  SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
-} from '@kbn/scout-info';
-import { getValidatedESClient } from '../../../../helpers/elasticsearch';
-import { ScoutReportEvent } from '../event';
+import type { Client as ESClient } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import { SCOUT_TEST_EVENTS_DATA_STREAM_NAME } from '@kbn/scout-info';
+import type { ScoutReportEvent } from '../event';
 import * as componentTemplates from './component_templates';
 import * as indexTemplates from './index_templates';
 
@@ -114,23 +108,28 @@ export class ScoutReportDataStream {
     await this.es.index({ index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME, document: event });
   }
 
-  async addEventsFromFile(eventLogPath: string) {
-    // Make the given event log path absolute
-    eventLogPath = path.resolve(eventLogPath);
+  async addEventsFromFile(...eventLogPaths: string[]) {
+    // Normalize the given event log paths to absolute paths
+    const paths: string[] = eventLogPaths.map((p) => path.resolve(p));
 
-    const events = async function* () {
-      const lineReader = readline.createInterface({
-        input: fs.createReadStream(eventLogPath),
-        crlfDelay: Infinity,
-      });
+    const events = async function* (): AsyncGenerator<string> {
+      for (const filePath of paths) {
+        const lineReader = readline.createInterface({
+          input: fs.createReadStream(filePath),
+          crlfDelay: Infinity,
+        });
 
-      for await (const line of lineReader) {
-        yield line;
+        for await (const line of lineReader) {
+          yield line;
+        }
       }
     };
 
     this.log.info(
-      `Uploading events from file ${eventLogPath} to data stream '${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}'`
+      [
+        `Uploading events from ${paths.length} file(s) to data stream '${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}':`,
+        ...paths.map((filePath) => `- ${filePath}`),
+      ].join('\n')
     );
 
     const stats = await this.es.helpers.bulk({
@@ -138,6 +137,8 @@ export class ScoutReportDataStream {
       onDocument: () => {
         return { create: { _index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME } };
       },
+      refresh: false,
+      refreshOnCompletion: false,
     });
 
     this.log.info(`Uploaded ${stats.total} events in ${stats.time / 1000}s.`);
@@ -146,42 +147,4 @@ export class ScoutReportDataStream {
       this.log.warning(`Failed to upload ${stats.failed} events`);
     }
   }
-}
-
-/**
- * Upload events logged by a Scout reporter to the configured Scout Reporter ES instance
- *
- * @param eventLogPath Path to event log file
- * @param log Logger instance
- */
-export async function uploadScoutReportEvents(eventLogPath: string, log?: ToolingLog) {
-  const logger = log || new ToolingLog();
-
-  const warnSettingWasNotConfigured = (settingName: string) =>
-    logger.warning(`Won't upload Scout reporter events: ${settingName} was not configured`);
-
-  if (SCOUT_REPORTER_ES_URL === undefined) {
-    warnSettingWasNotConfigured('SCOUT_REPORTER_ES_URL');
-    return;
-  }
-
-  if (SCOUT_REPORTER_ES_API_KEY === undefined) {
-    warnSettingWasNotConfigured('SCOUT_REPORTER_ES_API_KEY');
-    return;
-  }
-
-  log?.info(`Connecting to Scout reporter ES URL ${SCOUT_REPORTER_ES_URL}`);
-  const es = await getValidatedESClient(
-    {
-      node: SCOUT_REPORTER_ES_URL,
-      auth: { apiKey: SCOUT_REPORTER_ES_API_KEY },
-      tls: {
-        rejectUnauthorized: SCOUT_REPORTER_ES_VERIFY_CERTS,
-      },
-    },
-    { log }
-  );
-
-  const reportDataStream = new ScoutReportDataStream(es, logger);
-  await reportDataStream.addEventsFromFile(eventLogPath);
 }

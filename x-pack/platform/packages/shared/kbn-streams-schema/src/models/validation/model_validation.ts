@@ -6,9 +6,10 @@
  */
 
 import { mapValues } from 'lodash';
-import { z } from '@kbn/zod';
-import { IModel, ModelRepresentation, OmitName } from '../core';
-import { Validation, validation } from './validation';
+import { z } from '@kbn/zod/v4';
+import type { IModel, ModelRepresentation, OmitUpsertProps } from '../core';
+import type { Validation } from './validation';
+import { validation } from './validation';
 
 // need explicit keys here to be able to generate Assert types (TS2775)
 export interface ModelValidation<TLeft extends IModel = any, TRight extends TLeft = any> {
@@ -18,17 +19,10 @@ export interface ModelValidation<TLeft extends IModel = any, TRight extends TLef
   UpsertRequest: Validation<TLeft['UpsertRequest'], TRight['UpsertRequest']>;
 }
 
-export function joinValidation<TLeft extends IModel, TRight extends TLeft>(
+export function joinValidation<TLeft extends IModel, TRights extends [TLeft, TLeft, ...TLeft[]]>(
   left: ModelValidation<any, TLeft>,
-  rights: Array<ModelValidation<any, TRight>>
-): ModelValidation<TLeft, TRight>;
-
-export function joinValidation<TLeft extends IModel, TRight1 extends TLeft, TRight2 extends TLeft>(
-  left: ModelValidation<any, TLeft>,
-  rights: [ModelValidation<any, TRight1>, ModelValidation<any, TRight2>]
-): ModelValidation<TLeft, TRight1 | TRight2>;
-
-export function joinValidation(left: ModelValidation, rights: ModelValidation[]) {
+  rights: { [K in keyof TRights]: ModelValidation<any, TRights[K]> }
+): ModelValidation<TLeft, TRights[number]> {
   function join<TKey extends keyof IModel>(key: TKey) {
     return validation(
       left[key].right,
@@ -50,21 +44,26 @@ export function joinValidation(left: ModelValidation, rights: ModelValidation[])
   };
 }
 
-type ModelOfSchema<TModelSchema extends ModelSchema> = {
-  [key in keyof TModelSchema & ModelRepresentation]: z.input<TModelSchema[key]>;
+export type ModelOfSchema<TModelSchema extends ModelSchema> = {
+  [key in keyof TModelSchema & ModelRepresentation]: z.output<TModelSchema[key]>;
 };
 
-type ModelSchema<TModel extends IModel = IModel> = {
+export type ModelSchema<TModel extends IModel = IModel> = {
   [key in keyof TModel & ModelRepresentation]: z.Schema<TModel[key]>;
 };
 
-export function modelValidation<TRightSchema extends ModelSchema>(
-  right: TRightSchema
-): ModelValidation<IModel, WithDefaults<TRightSchema>>;
-export function modelValidation<TLeft extends IModel, TRightSchema extends ModelSchema>(
+export function modelValidation<
+  TRightSchema extends ModelSchema,
+  TDefaults extends IModel = WithDefaults<TRightSchema>
+>(right: TRightSchema): ModelValidation<IModel, TDefaults>;
+export function modelValidation<
+  TLeft extends IModel,
+  TRightSchema extends ModelSchema,
+  TDefaults extends IModel = WithDefaults<TRightSchema>
+>(
   left: ModelValidation<any, TLeft>,
   right: TRightSchema
-): ModelValidation<TLeft, TLeft & WithDefaults<TRightSchema>>;
+): ModelValidation<TLeft, TLeft & TDefaults>;
 
 export function modelValidation(...args: [ModelValidation, ModelSchema] | [ModelSchema]) {
   if (args.length === 1) {
@@ -72,10 +71,10 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
 
     return modelValidation(
       {
-        Definition: validation(z.any(), z.object({})),
-        Source: validation(z.any(), z.object({})),
-        GetResponse: validation(z.any(), z.object({})),
-        UpsertRequest: validation(z.any(), z.object({})),
+        Definition: validation(z.any(), z.looseObject({})),
+        Source: validation(z.any(), z.looseObject({})),
+        GetResponse: validation(z.any(), z.looseObject({})),
+        UpsertRequest: validation(z.any(), z.looseObject({})),
       },
       right
     );
@@ -104,16 +103,42 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
       left.UpsertRequest,
       z.intersection(
         z.object({
-          // upsert doesn't allow name to be set
+          // upsert doesn't allow some properties to be set
           stream: z
-            .object({ name: z.undefined().optional() })
-            .passthrough()
-            // but the definition requires it, so we set a default
-            .transform((prev) => ({ ...prev, name: '.' }))
-            .pipe(rightPartial.Definition)
+            .looseObject({
+              name: z.undefined().optional(),
+              updated_at: z.undefined().optional(),
+              ingest: z
+                .looseObject({
+                  processing: z.looseObject({ updated_at: z.undefined().optional() }),
+                })
+                .optional(),
+            })
+            // but the definition requires them, so we set a default
+            .transform((prev) => ({
+              ...prev,
+              name: '.',
+              updated_at: new Date().toISOString(),
+              ingest: {
+                ...prev.ingest,
+                processing: { ...prev.ingest?.processing, updated_at: new Date().toISOString() },
+              },
+            }))
+            .transform((prev, ctx) => {
+              const result = rightPartial.Definition.safeParse(prev);
+              if (!result.success) {
+                for (const issue of result.error.issues) {
+                  ctx.addIssue(issue);
+                }
+                return prev;
+              }
+              return result.data;
+            })
             // that should be removed after
             .transform((prev) => {
               delete prev.name;
+              delete prev.updated_at;
+              delete prev.ingest?.processing?.updated_at;
               return prev;
             }),
         }),
@@ -130,12 +155,13 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
   };
 }
 
-type WithDefaults<TRightSchema extends ModelSchema> = {
-  Source: z.input<TRightSchema['Definition']>;
+interface WithDefaults<TRightSchema extends ModelSchema> {
+  Definition: z.output<TRightSchema['Definition']>;
+  Source: z.output<TRightSchema['Definition']>;
   GetResponse: {
-    stream: z.input<TRightSchema['Definition']>;
-  };
+    stream: z.output<TRightSchema['Definition']>;
+  } & z.output<TRightSchema['GetResponse']>;
   UpsertRequest: {
-    stream: OmitName<{} & z.input<TRightSchema['Definition']>>;
+    stream: OmitUpsertProps<{} & z.output<TRightSchema['Definition']>>;
   };
-} & ModelOfSchema<TRightSchema>;
+}

@@ -19,6 +19,23 @@ export interface ActionsStrategyResponse extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
 }
 
+export interface SingleQueryResultCounts {
+  total_rows: number;
+  responded_agents: number;
+  successful_agents: number;
+  error_agents: number;
+}
+
+export interface PackResultCounts {
+  total_rows: number;
+  queries_with_results: number;
+  queries_total: number;
+  successful_agents: number;
+  error_agents: number;
+}
+
+export type ResultCounts = SingleQueryResultCounts | PackResultCounts;
+
 export interface ActionDetails {
   action_id: string;
   expiration: string;
@@ -29,10 +46,13 @@ export interface ActionDetails {
   agent_policy_ids: string[];
   agents: string[];
   user_id?: string;
+  user_profile_uid?: string;
   pack_id?: string;
   pack_name?: string;
+  space_id?: string;
   pack_prebuilt?: boolean;
   status?: string;
+  result_counts?: ResultCounts;
   queries?: Array<{
     action_id: string;
     id: string;
@@ -46,7 +66,9 @@ export interface ActionDetails {
   }>;
 }
 
-export type ActionsRequestOptions = RequestOptionsPaginated;
+export interface ActionsRequestOptions extends RequestOptionsPaginated {
+  spaceId: string;
+}
 
 export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
   actionDetails: estypes.SearchHit<ActionDetails>;
@@ -55,6 +77,7 @@ export interface ActionDetailsStrategyResponse extends IEsSearchResponse {
 
 export interface ActionDetailsRequestOptions extends RequestOptions {
   actionId: string;
+  spaceId: string;
 }
 
 export interface ActionResultsStrategyResponse
@@ -82,6 +105,8 @@ export interface ActionResultsStrategyResponse
 
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
+  agentIds?: string[];
   startDate?: string;
   useNewDataStream?: boolean;
+  integrationNamespaces?: string[];
 }

@@ -9,15 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
-import React, {
-  useState,
-  useCallback,
-  Dispatch,
-  FocusEvent,
-  useContext,
-  useMemo,
-  ChangeEventHandler,
-} from 'react';
+import type { Dispatch, FocusEvent, ChangeEventHandler } from 'react';
+import React, { useState, useCallback, useContext, useMemo } from 'react';
 import { css } from '@emotion/react';
 
 import {
@@ -28,17 +21,12 @@ import {
   EuiIcon,
   EuiColorPickerSwatch,
   EuiButtonIcon,
-  EuiFieldNumberProps,
   useEuiTheme,
 } from '@elastic/eui';
 
 import { isValidColor } from '../../../color_manipulation';
-import {
-  PaletteContinuity,
-  checkIsMaxContinuity,
-  checkIsMinContinuity,
-  CustomPaletteParams,
-} from '../../../palettes';
+import type { PaletteContinuity, CustomPaletteParams } from '../../../palettes';
+import { checkIsMaxContinuity, checkIsMinContinuity } from '../../../palettes';
 
 import { RelatedIcon } from '../assets/related';
 import { getAutoBoundInformation, isLastItem } from './utils';
@@ -84,13 +72,11 @@ const getActionButton = (mode: ColorRangeItemMode) => {
 };
 
 const getAppend = (rangeType: CustomPaletteParams['rangeType'], mode: ColorRangeItemMode) => {
-  const items: EuiFieldNumberProps['append'] = [];
-
   if (rangeType === 'percent') {
-    items.push('%');
+    return '%';
   }
 
-  return items;
+  return undefined;
 };
 
 export function ColorRangeItem({

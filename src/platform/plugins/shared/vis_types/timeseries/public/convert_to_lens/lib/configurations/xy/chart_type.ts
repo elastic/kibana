@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SeriesType, SeriesTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { Series } from '../../../../../common/types';
+import type { SeriesType } from '@kbn/lens-common';
+import { SeriesTypes } from '@kbn/lens-common';
+import type { Series } from '../../../../../common/types';
 import { PANEL_TYPES } from '../../../../../common/enums';
 
 export const getChartType = (series: Series, type: PANEL_TYPES): SeriesType => {

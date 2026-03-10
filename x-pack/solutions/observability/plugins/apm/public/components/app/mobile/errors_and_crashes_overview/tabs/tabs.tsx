@@ -10,8 +10,6 @@ import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MobileErrorsOverview } from '../errors_overview';
 import { MobileCrashesOverview } from '../crashes_overview';
-import { isAndroidAgentName } from '../../../../../../common/agent_name';
-import { useApmServiceContext } from '../../../../../context/apm_service/use_apm_service_context';
 
 export enum MobileErrorTabIds {
   ERRORS = 'errors',
@@ -43,8 +41,6 @@ export function Tabs({
   mobileErrorTabId: MobileErrorTabIds;
   onTabClick: (nextTab: MobileErrorTabIds) => void;
 }) {
-  const { agentName } = useApmServiceContext();
-  const isAndroidAgent = isAndroidAgentName(agentName);
   const selectedTabId = mobileErrorTabId;
   const tabEntries = tabs.map((tab, index) => (
     <EuiTab
@@ -62,12 +58,8 @@ export function Tabs({
 
   return (
     <>
-      {!isAndroidAgent && (
-        <>
-          <EuiTabs>{tabEntries}</EuiTabs>
-          <EuiSpacer />
-        </>
-      )}
+      <EuiTabs>{tabEntries}</EuiTabs>
+      <EuiSpacer />
       {selectedTabId === MobileErrorTabIds.ERRORS && <MobileErrorsOverview />}
       {selectedTabId === MobileErrorTabIds.CRASHES && <MobileCrashesOverview />}
     </>

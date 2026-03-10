@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elasti
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useCallback } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -17,6 +18,7 @@ import {
   isServerlessAgentName,
 } from '../../../../../common/agent_name';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useServiceSloContext } from '../../../../context/service_slo/use_service_slo_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
@@ -47,7 +49,7 @@ export function ApmOverview() {
   const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
   const {
     query,
-    query: { kuery, environment, rangeFrom, rangeTo, transactionType },
+    query: { kuery, environment, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -82,10 +84,17 @@ export function ApmOverview() {
   const nonLatencyChartHeight = isSingleColumn ? latencyChartHeight : chartHeight;
   const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn ? 'column' : 'row';
 
+  const { hasSlos } = useServiceSloContext();
+
+  const trackEvent = useUiTracker({ app: 'apm' });
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
     false
   );
+  const dismissSloCallout = useCallback(() => {
+    setSloCalloutDismissed(true);
+    trackEvent({ metric: 'slo_callout_dismissed', metricType: METRIC_TYPE.CLICK });
+  }, [trackEvent, setSloCalloutDismissed]);
 
   const handleOnLoadTable = (key: keyof TablesLoadedState) =>
     setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
@@ -96,15 +105,12 @@ export function ApmOverview() {
 
   return (
     <>
-      {!sloCalloutDismissed && (
+      {!sloCalloutDismissed && !hasSlos && (
         <>
           <SloCallout
-            dismissCallout={() => {
-              setSloCalloutDismissed(true);
-            }}
+            dismissCallout={dismissSloCallout}
             serviceName={serviceName}
             environment={environment}
-            transactionType={transactionType}
           />
           <EuiSpacer />
         </>

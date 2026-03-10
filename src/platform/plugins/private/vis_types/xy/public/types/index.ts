@@ -8,4 +8,4 @@
  */
 
 export * from './constants';
-export * from './param';
+export type * from './param';

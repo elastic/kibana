@@ -14,8 +14,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/208138
-  describe.skip('search', () => {
+  describe('search', () => {
     describe('ES|QL', () => {
       it(`should return getColumns response in expected shape`, async () => {
         const resp = await supertest
@@ -30,16 +29,16 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { took, ...response } = resp.body.rawResponse;
-        expect(response).to.eql({
-          columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-          ],
-          is_partial: false,
-          values: [],
-        });
+        expect(response.columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+        ]);
+        expect(response.values).to.eql([]);
+        expect(response.values_loaded).to.eql(0);
+        expect(response.is_partial).to.eql(false);
+        expect(response.documents_found).to.eql(0);
       });
 
       it(`should return getValues response in expected shape`, async () => {
@@ -57,30 +56,33 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const { took, ...response } = resp.body.rawResponse;
-        expect(response).to.eql({
-          all_columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-            {
-              name: '@timestamp',
-              type: 'date',
-            },
-          ],
-          columns: [
-            {
-              name: 'geo.coordinates',
-              type: 'geo_point',
-            },
-            {
-              name: '@timestamp',
-              type: 'date',
-            },
-          ],
-          is_partial: false,
-          values: [['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z']],
-        });
+        expect(response).to.be.ok();
+        expect(response.all_columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+          {
+            name: '@timestamp',
+            type: 'date',
+          },
+        ]);
+        expect(response.columns).to.eql([
+          {
+            name: 'geo.coordinates',
+            type: 'geo_point',
+          },
+          {
+            name: '@timestamp',
+            type: 'date',
+          },
+        ]);
+        expect(response.documents_found).to.eql(3);
+        expect(response.is_partial).to.eql(false);
+        expect(response.values).to.eql([
+          ['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z'],
+        ]);
+        expect(response.values_loaded).to.eql(4);
       });
     });
   });

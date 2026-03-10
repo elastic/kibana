@@ -7,15 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, Type } from '@kbn/config-schema';
+jest.mock('./process_router', () => {
+  const module = jest.requireActual('./process_router');
+  return {
+    ...module,
+    processRouter: jest.fn(module.processRouter),
+  };
+});
+
+jest.mock('./process_versioned_router', () => {
+  const module = jest.requireActual('./process_versioned_router');
+  return {
+    ...module,
+    processVersionedRouter: jest.fn(module.processVersionedRouter),
+  };
+});
+
+import type { Type } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { generateOpenApiDocument } from './generate_oas';
-import {
-  createTestRouters,
-  createRouter,
-  createVersionedRouter,
-  CreateTestRouterArgs,
-} from './generate_oas.test.util';
+import { processRouter } from './process_router';
+import { processVersionedRouter } from './process_versioned_router';
+import type { CreateTestRouterArgs } from './generate_oas.test.util';
+import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
 import {
   sharedOas,
   createSharedZodSchema,
@@ -26,6 +41,10 @@ interface RecursiveType {
   name: string;
   self: undefined | RecursiveType;
 }
+
+afterEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
@@ -189,6 +208,76 @@ describe('generateOpenApiDocument', () => {
               }),
             ],
             versionedRouters: [],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('handles discriminator schemas', async () => {
+      const discriminatorSchema = schema.discriminatedUnion('type', [
+        schema.object(
+          { type: schema.literal('a'), value: schema.string() },
+          { meta: { id: 'my-a-my-team' } }
+        ),
+        schema.object(
+          { type: schema.literal('b'), value: schema.number() },
+          { meta: { id: 'my-b-my-team' } }
+        ),
+        schema.object(
+          { type: schema.string(), value: schema.boolean() },
+          { meta: { id: 'my-catch-all-my-team' } }
+        ),
+      ]);
+
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [
+              {
+                method: 'get',
+                path: '/foo/{id}',
+                options: { access: 'public' },
+                validationSchemas: {
+                  request: {
+                    body: discriminatorSchema,
+                  },
+                },
+                handler: jest.fn(),
+              },
+            ],
+          },
+        },
+        versionedRouters: {
+          testVersionedRouter: {
+            routes: [
+              {
+                method: 'get',
+                path: '/foo/{id}',
+                options: { access: 'public', security: { authz: { requiredPrivileges: ['foo'] } } },
+                handlers: [
+                  {
+                    fn: jest.fn(),
+                    options: {
+                      version: '99.99.99',
+                      validate: { request: { body: discriminatorSchema } },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+      expect(
+        await generateOpenApiDocument(
+          {
+            routers,
+            versionedRouters,
           },
           {
             title: 'test',
@@ -562,6 +651,7 @@ describe('generateOpenApiDocument', () => {
       '$name: $expectedState',
       async ({ routerConfig, expectedPath, expectedState }) => {
         const [routers, versionedRouters] = createTestRouters(routerConfig);
+        const env = { serverless: false, dummy: true };
         const result = await generateOpenApiDocument(
           {
             routers,
@@ -571,8 +661,22 @@ describe('generateOpenApiDocument', () => {
             title: 'test',
             baseUrl: 'https://test.oas',
             version: '99.99.99',
+            env,
           }
         );
+
+        // Assert that the env has been passed down as expected
+        if ((processRouter as jest.Mock).mock.calls.length) {
+          (processRouter as jest.Mock).mock.calls.forEach(([{ env: routerEnv }]) =>
+            expect(routerEnv).toEqual({ serverless: false, dummy: true })
+          );
+        }
+        if ((processVersionedRouter as jest.Mock).mock.calls.length) {
+          (processVersionedRouter as jest.Mock).mock.calls.forEach(
+            ([{ env: versionedRouterEnv }]) =>
+              expect(versionedRouterEnv).toEqual({ serverless: false, dummy: true })
+          );
+        }
 
         if (expectedState) {
           expect(result.paths[expectedPath]!.get).toMatchObject({

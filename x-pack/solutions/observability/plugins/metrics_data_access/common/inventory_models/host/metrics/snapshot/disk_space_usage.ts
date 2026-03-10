@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { MetricsUIAggregation } from '../../../types';
-export const diskSpaceUsage: MetricsUIAggregation = {
-  diskSpaceUsage: { max: { field: 'system.filesystem.used.pct' } },
+import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
+
+export const diskSpaceUsage: SchemaBasedAggregations = {
+  ecs: {
+    diskSpaceUsage: { max: { field: 'system.filesystem.used.pct' } },
+  },
+  semconv: {
+    diskSpaceUsage: { max: { field: 'metrics.system.filesystem.utilization' } },
+  },
 };

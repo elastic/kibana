@@ -1,0 +1,1444 @@
+{
+  "id": "@kbn/control-group-renderer",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.apiHasEditorConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasEditorConfig",
+        "description": [],
+        "signature": [
+          "(parentApi: unknown) => parentApi is ",
+          "HasEditorConfig"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.apiHasEditorConfig.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+            "lineNumber": 22,
+            "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.isControlGroupRendererApi",
+        "type": "Function",
+        "tags": [],
+        "label": "isControlGroupRendererApi",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRendererApi",
+            "text": "ControlGroupRendererApi"
+          }
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.isControlGroupRendererApi.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/utils.ts",
+            "lineNumber": 35,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.LazyControlGroupRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyControlGroupRenderer",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRendererProps",
+            "text": "ControlGroupRendererProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer_lazy.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.LazyControlGroupRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererProps",
+                "text": "ControlGroupRendererProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer_lazy.tsx",
+            "lineNumber": 21,
+            "columnNumber": 42,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlGroupCreationOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupCreationOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupCreationOptions.initialState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialState",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupCreationOptions.getEditorConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "getEditorConfig",
+            "description": [],
+            "signature": [
+              "(() => Omit<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupEditorConfig",
+                "text": "ControlGroupEditorConfig"
+              },
+              ", \"controlStateTransform\"> | undefined) | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlGroupEditorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupEditorConfig",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupEditorConfig.hideDataViewSelector",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideDataViewSelector",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupEditorConfig.hideAdditionalSettings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideAdditionalSettings",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupEditorConfig.defaultDataViewId",
+            "type": "string",
+            "tags": [],
+            "label": "defaultDataViewId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupEditorConfig.fieldFilterPredicate",
+            "type": "Function",
+            "tags": [],
+            "label": "fieldFilterPredicate",
+            "description": [],
+            "signature": [
+              "FieldFilterPredicate",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupEditorConfig.controlStateTransform",
+            "type": "Function",
+            "tags": [],
+            "label": "controlStateTransform",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlStateTransform",
+                "text": "ControlStateTransform"
+              },
+              "<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlGroupRendererProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupRendererProps",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.onApiAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "onApiAvailable",
+            "description": [],
+            "signature": [
+              "(api: ",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRendererApi",
+                "text": "ControlGroupRendererApi"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.ControlGroupRendererProps.onApiAvailable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "api",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRendererApi",
+                    "text": "ControlGroupRendererApi"
+                  }
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+                "lineNumber": 48,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.getCreationOptions",
+            "type": "Function",
+            "tags": [],
+            "label": "getCreationOptions",
+            "description": [],
+            "signature": [
+              "(initialState: ",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>, builder: { addDataControlFromField: (controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlState: Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }> & Partial<",
+              "FlattenedPinnedControlState",
+              ">, \"type\">, uiActionsService: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
+              },
+              ", controlId?: string | undefined) => Promise<void>; addOptionsListControl: (controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"field_name\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\" | \"display_settings\" | \"single_select\" | \"exclude\" | \"exists_selected\" | \"run_past_timeout\" | \"search_technique\" | \"selected_options\"> & Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void; addRangeSliderControl: (controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"field_name\" | \"step\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void; addTimeSliderControl: (controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlId?: string | undefined) => void; }) => Promise<Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupCreationOptions",
+                "text": "ControlGroupCreationOptions"
+              },
+              ">>"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.ControlGroupRendererProps.getCreationOptions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+                "lineNumber": 50,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.ControlGroupRendererProps.getCreationOptions.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "builder",
+                "description": [],
+                "signature": [
+                  "{ addDataControlFromField: (controlGroupState: Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>, controlState: Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }> & Partial<",
+                  "FlattenedPinnedControlState",
+                  ">, \"type\">, uiActionsService: ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.UiActionsPublicStart",
+                    "text": "UiActionsPublicStart"
+                  },
+                  ", controlId?: string | undefined) => Promise<void>; addOptionsListControl: (controlGroupState: Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"field_name\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\" | \"display_settings\" | \"single_select\" | \"exclude\" | \"exists_selected\" | \"run_past_timeout\" | \"search_technique\" | \"selected_options\"> & Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void; addRangeSliderControl: (controlGroupState: Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"field_name\" | \"step\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void; addTimeSliderControl: (controlGroupState: Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>, controlId?: string | undefined) => void; }"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+                "lineNumber": 51,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.viewMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "viewMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.ViewMode",
+                "text": "ViewMode"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.dataLoading",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataLoading",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRendererProps.compressed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_renderer.tsx",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlGroupRuntimeState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlGroupRuntimeState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<State>"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 96,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRuntimeState.initialChildControlState",
+            "type": "Object",
+            "tags": [],
+            "label": "initialChildControlState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlPanelsState",
+                "text": "ControlPanelsState"
+              },
+              "<State>"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlGroupRuntimeState.ignoreParentSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "ignoreParentSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/controls-schemas",
+                "scope": "server",
+                "docId": "kibKbnControlsSchemasPluginApi",
+                "section": "def-server.LegacyIgnoreParentSettings",
+                "text": "LegacyIgnoreParentSettings"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlPanelsState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ControlPanelsState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlPanelsState",
+            "text": "ControlPanelsState"
+          },
+          "<ControlState>"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlPanelsState.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[panelId: string]: ControlPanelState<ControlState>",
+            "description": [],
+            "signature": [
+              "[panelId: string]:  ",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlPanelState",
+                "text": "ControlPanelState"
+              },
+              "<ControlState>"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlGroupRendererApi",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlGroupRendererApi",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
+          },
+          "<unknown>, \"children$\" | \"addNewPanel\" | \"replacePanel\" | \"removePanel\"> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnifiedSearch",
+            "text": "PublishesUnifiedSearch"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasSerializedChildState",
+            "text": "HasSerializedChildState"
+          },
+          "<object> & Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          "> & { registerChildApi: (api: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          "<object>) => void; isCompressed?: (() => boolean) | undefined; } & ",
+          "HasEditorConfig",
+          " & Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.AppliesFilters",
+            "text": "AppliesFilters"
+          },
+          ", \"appliedFilters$\"> & ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.AppliesTimeslice",
+            "text": "AppliesTimeslice"
+          },
+          " & { reload: () => void; updateInput: (input: Partial<",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>>) => void; getInput$: () => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>>; getInput: () => ",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>; getControls: () => { [id: string]: ",
+          {
+            "pluginId": "@kbn/controls-schemas",
+            "scope": "server",
+            "docId": "kibKbnControlsSchemasPluginApi",
+            "section": "def-server.PinnedControlLayoutState",
+            "text": "PinnedControlLayoutState"
+          },
+          "; }; openAddDataControlFlyout: (options?: { controlStateTransform?: ",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlStateTransform",
+            "text": "ControlStateTransform"
+          },
+          "<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>> | undefined; } | undefined) => void; }"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlGroupStateBuilder",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlGroupStateBuilder",
+        "description": [],
+        "signature": [
+          "{ addDataControlFromField: (controlGroupState: Partial<",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>>, controlState: Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }> & Partial<",
+          "FlattenedPinnedControlState",
+          ">, \"type\">, uiActionsService: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsPublicStart",
+            "text": "UiActionsPublicStart"
+          },
+          ", controlId?: string | undefined) => Promise<void>; addOptionsListControl: (controlGroupState: Partial<",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"field_name\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\" | \"display_settings\" | \"single_select\" | \"exclude\" | \"exists_selected\" | \"run_past_timeout\" | \"search_technique\" | \"selected_options\"> & Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void; addRangeSliderControl: (controlGroupState: Partial<",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"field_name\" | \"step\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void; addTimeSliderControl: (controlGroupState: Partial<",
+          {
+            "pluginId": "@kbn/control-group-renderer",
+            "scope": "public",
+            "docId": "kibKbnControlGroupRendererPluginApi",
+            "section": "def-public.ControlGroupRuntimeState",
+            "text": "ControlGroupRuntimeState"
+          },
+          "<{}>>, controlId?: string | undefined) => void; }"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlPanelState",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlPanelState",
+        "description": [],
+        "signature": [
+          "ControlState & ",
+          "FlattenedPinnedControlState",
+          " & { type: string; order: number; }"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.ControlStateTransform",
+        "type": "Type",
+        "tags": [],
+        "label": "ControlStateTransform",
+        "description": [],
+        "signature": [
+          "(newState: Partial<State>, controlType: string) => Partial<State>"
+        ],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+        "lineNumber": 81,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlStateTransform.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "newState",
+            "description": [],
+            "signature": [
+              "{ [P in keyof State]?: State[P] | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.ControlStateTransform.$2",
+            "type": "string",
+            "tags": [],
+            "label": "controlType",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/types.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/control-group-renderer",
+        "id": "def-public.controlGroupStateBuilder",
+        "type": "Object",
+        "tags": [],
+        "label": "controlGroupStateBuilder",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.controlGroupStateBuilder.addDataControlFromField",
+            "type": "Function",
+            "tags": [],
+            "label": "addDataControlFromField",
+            "description": [],
+            "signature": [
+              "(controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlState: Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }> & Partial<",
+              "FlattenedPinnedControlState",
+              ">, \"type\">, uiActionsService: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicStart",
+                "text": "UiActionsPublicStart"
+              },
+              ", controlId?: string | undefined) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addDataControlFromField.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlGroupState",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 37,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addDataControlFromField.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controlState",
+                "description": [],
+                "signature": [
+                  "Omit<Readonly<{ title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }> & Partial<",
+                  "FlattenedPinnedControlState",
+                  ">, \"type\">"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addDataControlFromField.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "uiActionsService",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.UiActionsPublicStart",
+                    "text": "UiActionsPublicStart"
+                  }
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 39,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addDataControlFromField.$4",
+                "type": "string",
+                "tags": [],
+                "label": "controlId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 40,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.controlGroupStateBuilder.addOptionsListControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addOptionsListControl",
+            "description": [],
+            "signature": [
+              "(controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"field_name\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\" | \"display_settings\" | \"single_select\" | \"exclude\" | \"exists_selected\" | \"run_past_timeout\" | \"search_technique\" | \"selected_options\"> & Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addOptionsListControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlGroupState",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 63,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addOptionsListControl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controlState",
+                "description": [],
+                "signature": [
+                  "Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"config\" | \"sort\" | \"title\" | \"field_name\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\" | \"display_settings\" | \"single_select\" | \"exclude\" | \"exists_selected\" | \"run_past_timeout\" | \"search_technique\" | \"selected_options\"> & Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 64,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addOptionsListControl.$3",
+                "type": "string",
+                "tags": [],
+                "label": "controlId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 69,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.controlGroupStateBuilder.addRangeSliderControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addRangeSliderControl",
+            "description": [],
+            "signature": [
+              "(controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlState: Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"field_name\" | \"step\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">, controlId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addRangeSliderControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlGroupState",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 81,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addRangeSliderControl.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "controlState",
+                "description": [],
+                "signature": [
+                  "Omit<Omit<Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"optionsListControl\"; config: Readonly<{ sort?: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }> | undefined; title?: string | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; exclude?: boolean | undefined; exists_selected?: boolean | undefined; run_past_timeout?: boolean | undefined; search_technique?: \"prefix\" | \"wildcard\" | \"exact\" | undefined; selected_options?: (string | number)[] | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"rangeSliderControl\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"timeSlider\"; config: Readonly<{ start_percentage_of_time_range?: number | undefined; end_percentage_of_time_range?: number | undefined; is_anchored?: boolean | undefined; } & {}>; }> | Readonly<{ grow?: boolean | undefined; width?: \"small\" | \"medium\" | \"large\" | undefined; uid?: string | undefined; } & { type: \"esqlControl\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; single_select?: boolean | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>; }>, \"value\" | \"title\" | \"field_name\" | \"step\" | \"data_view_id\" | \"use_global_filters\" | \"ignore_validations\"> & Readonly<{ value?: string[] | undefined; title?: string | undefined; step?: number | undefined; use_global_filters?: boolean | undefined; ignore_validations?: boolean | undefined; } & { field_name: string; data_view_id: string; }>, \"type\">"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 82,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addRangeSliderControl.$3",
+                "type": "string",
+                "tags": [],
+                "label": "controlId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 86,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/control-group-renderer",
+            "id": "def-public.controlGroupStateBuilder.addTimeSliderControl",
+            "type": "Function",
+            "tags": [],
+            "label": "addTimeSliderControl",
+            "description": [],
+            "signature": [
+              "(controlGroupState: Partial<",
+              {
+                "pluginId": "@kbn/control-group-renderer",
+                "scope": "public",
+                "docId": "kibKbnControlGroupRendererPluginApi",
+                "section": "def-public.ControlGroupRuntimeState",
+                "text": "ControlGroupRuntimeState"
+              },
+              "<{}>>, controlId?: string | undefined) => void"
+            ],
+            "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addTimeSliderControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlGroupState",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/control-group-renderer",
+                    "scope": "public",
+                    "docId": "kibKbnControlGroupRendererPluginApi",
+                    "section": "def-public.ControlGroupRuntimeState",
+                    "text": "ControlGroupRuntimeState"
+                  },
+                  "<{}>>"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 98,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/control-group-renderer",
+                "id": "def-public.controlGroupStateBuilder.addTimeSliderControl.$2",
+                "type": "string",
+                "tags": [],
+                "label": "controlId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/controls/control-group-renderer/src/control_group_state_builder.ts",
+                "lineNumber": 99,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import type {
   GetAgentStatusResponse,
   GetOnePackagePolicyResponse,
@@ -20,6 +20,7 @@ import type {
   PolicyData,
   UIPolicyConfig,
   MaybeImmutable,
+  DeviceControlFields,
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
 import type { ImmutableMiddlewareAPI } from '../../../common/store';
@@ -128,6 +129,11 @@ export type MemoryProtectionOSes = KeysByValueCriteria<
 export type BehaviorProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
   { behavior_protection: ProtectionFields }
+>;
+
+export type DeviceControlOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { device_control?: DeviceControlFields }
 >;
 
 /** Returns an array of the policy OSes that have a ransomware protection field */

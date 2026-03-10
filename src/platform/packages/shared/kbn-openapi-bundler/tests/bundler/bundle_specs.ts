@@ -18,8 +18,9 @@ import {
   writeFileSync,
 } from 'fs';
 import { dump, load } from 'js-yaml';
-import { OpenAPIV3 } from 'openapi-types';
-import { bundle, BundlerConfig } from '../../src/openapi_bundler';
+import type { OpenAPIV3 } from 'openapi-types';
+import type { BundlerConfig } from '../../src/openapi_bundler';
+import { bundle } from '../../src/openapi_bundler';
 
 const ROOT_PATH = join(__dirname, '..');
 

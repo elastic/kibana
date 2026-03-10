@@ -12,8 +12,8 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../../../../types';
-import type { ConfigType } from '../../../../../../config';
 import type {
   RuleResponse,
   RuleToImport,
@@ -50,7 +50,9 @@ const fetchAvailableRuleAssetIds = async ({
   ruleAssetsClient: IPrebuiltRuleAssetsClient;
 }): Promise<string[]> => {
   const incomingRuleIds = rules.map((rule) => rule.rule_id);
-  const availableRuleAssetSpecifiers = await ruleAssetsClient.fetchLatestVersions(incomingRuleIds);
+  const availableRuleAssetSpecifiers = await ruleAssetsClient.fetchLatestVersions({
+    ruleIds: incomingRuleIds,
+  });
 
   return availableRuleAssetSpecifiers.map((specifier) => specifier.rule_id);
 };
@@ -95,7 +97,6 @@ const fetchMatchingAssets = async ({
  */
 export class RuleSourceImporter implements IRuleSourceImporter {
   private context: SecuritySolutionApiRequestHandlerContext;
-  private config: ConfigType;
   private ruleAssetsClient: IPrebuiltRuleAssetsClient;
   private ruleObjectsClient: IPrebuiltRuleObjectsClient;
   private latestPackagesInstalled: boolean = false;
@@ -103,22 +104,23 @@ export class RuleSourceImporter implements IRuleSourceImporter {
   private currentRulesById: Record<string, RuleResponse> = {};
   private rulesToImport: RuleSpecifier[] = [];
   private availableRuleAssetIds: Set<string> = new Set();
+  private logger: Logger;
 
   constructor({
-    config,
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
+    logger,
   }: {
-    config: ConfigType;
     context: SecuritySolutionApiRequestHandlerContext;
     prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
     prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
+    logger: Logger;
   }) {
-    this.config = config;
     this.ruleAssetsClient = prebuiltRuleAssetsClient;
     this.ruleObjectsClient = prebuiltRuleObjectsClient;
     this.context = context;
+    this.logger = logger;
   }
 
   /**
@@ -128,7 +130,7 @@ export class RuleSourceImporter implements IRuleSourceImporter {
    */
   public async setup(rules: RuleToImport[]): Promise<void> {
     if (!this.latestPackagesInstalled) {
-      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.config, this.context);
+      await ensureLatestRulesPackageInstalled(this.ruleAssetsClient, this.context, this.logger);
       this.latestPackagesInstalled = true;
     }
 
@@ -209,20 +211,20 @@ export class RuleSourceImporter implements IRuleSourceImporter {
 }
 
 export const createRuleSourceImporter = ({
-  config,
   context,
   prebuiltRuleAssetsClient,
   prebuiltRuleObjectsClient,
+  logger,
 }: {
-  config: ConfigType;
   context: SecuritySolutionApiRequestHandlerContext;
   prebuiltRuleAssetsClient: IPrebuiltRuleAssetsClient;
   prebuiltRuleObjectsClient: IPrebuiltRuleObjectsClient;
+  logger: Logger;
 }): RuleSourceImporter => {
   return new RuleSourceImporter({
-    config,
     context,
     prebuiltRuleAssetsClient,
     prebuiltRuleObjectsClient,
+    logger,
   });
 };

@@ -189,7 +189,7 @@ export const categorizationTestState = {
   invalidCategorization: [{ test: 'testinvalid' }],
   initialPipeline: categorizationInitialPipeline,
   results: { test: 'testresults' },
-  samplesFormat: { name: SamplesFormatName.Values.json },
+  samplesFormat: { name: SamplesFormatName.enum.json },
   stableSamples: [],
   reviewCount: 0,
   finalized: false,
