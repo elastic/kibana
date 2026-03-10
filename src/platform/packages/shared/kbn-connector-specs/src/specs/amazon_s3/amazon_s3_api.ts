@@ -114,7 +114,7 @@ async function parseAwsXmlResponse(
 }
 
 function urlEncodeS3ObjectKey(objectKey: string): string {
-  return encodeURIComponent(objectKey)
+  return objectKey
     .split('/')
     .map((segment) => encodeURIComponent(segment))
     .join('/');
@@ -144,7 +144,7 @@ export async function listAmazonS3Buckets(
     'bucket-region': bucketsRegion,
     'continuation-token': continuationToken,
     'max-buckets': maxBuckets?.toString(),
-    prefix,
+    'prefix': prefix,
   });
 
   const url = `https://${awsS3Host}/${queryString ? `?${queryString}` : ''}`;
@@ -191,7 +191,7 @@ export async function listAmazonS3BucketObjects(
     'list-type': '2',
     'continuation-token': continuationToken,
     'max-keys': maxKeys?.toString(),
-    prefix,
+    'prefix': prefix,
   });
 
   const url = `https://${awsS3Host}/${queryString ? `?${queryString}` : ''}`;

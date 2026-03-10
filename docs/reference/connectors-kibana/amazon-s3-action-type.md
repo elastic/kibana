@@ -41,6 +41,7 @@ List buckets
 List bucket objects
 :   List the objects in a given bucket
     - **bucket** (required) the bucket name to list the objects for
+    - **region** (optional) overrides the connector's configured AWS Region to list the objects for the specified bucket. If omitted, the connector's configured region is used.
     - **prefix** (optional) filter the bucket objects by the given prefix
     - **maxKeys** (optional) the maximum number of keys per page, defaults to 1000, limit of 1000. If there are more objects, a continuation token will be provided to retrieve the next page of results
     - **continuationToken** (optional) the token used to retrieve the next page of results.

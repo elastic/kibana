@@ -45,7 +45,7 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it('should listAmazonS3BucketObjects with a single bucket', async () => {
+  it('should listAmazonS3Buckets with a single bucket', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketsSingleBucket });
 
     const result = await listAmazonS3Buckets(mockContext, 'us-east-1');
@@ -62,7 +62,7 @@ describe('amazon_s3_api exports', () => {
     expect(mockClient.get).toBeCalledTimes(1);
   });
 
-  it('should listAmazonS3BucketObjects with multiple buckets', async () => {
+  it('should listAmazonS3Buckets with multiple buckets', async () => {
     mockClient.get.mockResolvedValueOnce({ data: responseListBucketsMultipleBuckets });
 
     const result = await listAmazonS3Buckets(mockContext, 'us-east-1');
@@ -190,6 +190,24 @@ describe('amazon_s3_api exports', () => {
     );
   });
 
+  it('should generate a Amazon S3 bucket object presigned url with spaces in key for URI encoding', async () => {
+    const nodeCrypto = await import('crypto');
+    Object.defineProperty(global, 'crypto', {
+      value: nodeCrypto,
+      writable: true,
+    });
+    const result = await generateAmazonS3BucketObjectPresignedUrl(
+      mockContext,
+      'test-bucket-name',
+      'test object key with spaces',
+      300,
+      'us-east-1'
+    );
+    expect(result).toMatch(
+      /^https:\/\/test-bucket-name\.s3\.us-east-1\.amazonaws\.com\/test%20object%20key%20with%20spaces\?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=.+&X-Amz-Date=.+&X-Amz-Expires=300&X-Amz-Signature=.+&X-Amz-SignedHeaders=.+$/
+    );
+  });
+
   it('should downloadAmazonS3BucketObject file', async () => {
     mockClient.get.mockResolvedValueOnce({
       headers: responseDownloadBucketObjectHeaders,
@@ -204,6 +222,30 @@ describe('amazon_s3_api exports', () => {
     expect(result).toEqual({
       bucket: 'test-bucket-name',
       key: 'test-object-key',
+      contentType: 'application/octet-stream',
+      contentLength: 12345,
+      lastModified: 'ISO_Timestamp',
+      etag: 'test-etag',
+      content: responseDownloadBucketObjectDataBase64,
+      encoding: 'base64',
+    });
+    expect(mockClient.get).toBeCalledTimes(1);
+  });
+
+  it('should downloadAmazonS3BucketObject file with spaces in key for URI encoding', async () => {
+    mockClient.get.mockResolvedValueOnce({
+      headers: responseDownloadBucketObjectHeaders,
+      data: responseDownloadBucketObjectData,
+    });
+    const result = await downloadAmazonS3BucketObject(
+      mockContext,
+      'test-bucket-name',
+      'test object key with spaces',
+      'us-east-1'
+    );
+    expect(result).toEqual({
+      bucket: 'test-bucket-name',
+      key: 'test object key with spaces',
       contentType: 'application/octet-stream',
       contentLength: 12345,
       lastModified: 'ISO_Timestamp',

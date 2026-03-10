@@ -58,7 +58,7 @@ export const AmazonS3: ConnectorSpec = {
     listBuckets: {
       isTool: true,
       input: z.object({
-        region: z.string().optional().describe('The AWS region to list buckets from'),
+        region: z.string().optional().describe('The optional AWS region to list buckets from'),
         prefix: z.string().optional().describe('The prefix to filter buckets by'),
       }),
       handler: async (ctx, input) => {
@@ -95,7 +95,7 @@ export const AmazonS3: ConnectorSpec = {
         region: z
           .string()
           .optional()
-          .describe('The region of the S3 bucket. If not specified, will attempt to auto-detect.'),
+          .describe('The optional region of the S3 bucket. If not specified, will attempt to auto-detect.'),
         prefix: z.string().optional().describe('The prefix to filter objects by'),
         continuationToken: z
           .string()
