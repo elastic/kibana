@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line import/no-nodejs-modules
 import crypto from 'crypto';
-import type { StackFrame } from '@kbn/workflows';
 import { buildStepExecutionId } from './build_step_execution_id';
+import type { StackFrame } from '../../..';
 
 describe('buildStepExecutionId', () => {
   describe('basic functionality', () => {

@@ -311,6 +311,15 @@ export class WorkflowContextManager {
   }
 
   private enrichStepContextAccordingToStepScope(stepContext: StepContext): void {
+    const stepExecutionsIndex =
+      this.workflowExecutionState.getWorkflowExecution().stepExecutionsIndex;
+
+    if (!stepExecutionsIndex) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
+      );
+    }
+
     let scopeStack = WorkflowScopeStack.fromStackFrames(
       this.workflowExecutionState.getWorkflowExecution().scopeStack
     );
@@ -328,7 +337,7 @@ export class WorkflowContextManager {
           executionId,
           stepId: topFrame.stepId,
           stackFrames: scopeStack.stackFrames,
-          indexName: this.workflowExecutionState.getWorkflowExecution().stepExecutionsIndex!,
+          indexName: stepExecutionsIndex,
           indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
         })
       );

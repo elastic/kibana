@@ -32,6 +32,14 @@ export async function cancelWorkflowIfRequested(
   workflowLogger: IWorkflowEventLogger,
   monitorAbortController?: AbortController
 ): Promise<void> {
+  const stepExecutionsIndex = workflowExecutionState.getWorkflowExecution().stepExecutionsIndex;
+
+  if (!stepExecutionsIndex) {
+    throw new Error(
+      'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
+    );
+  }
+
   if (!workflowExecutionState.getWorkflowExecution().cancelRequested) {
     try {
       const currentExecution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -68,7 +76,7 @@ export async function cancelWorkflowIfRequested(
       executionId: workflowExecutionState.getWorkflowExecution().id,
       stepId: scopeData.stepId,
       stackFrames: nodeStack.stackFrames,
-      indexName: workflowExecutionState.getWorkflowExecution().stepExecutionsIndex!,
+      indexName: stepExecutionsIndex,
       indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
     });
 

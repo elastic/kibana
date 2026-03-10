@@ -101,6 +101,12 @@ export class StepExecutionRuntimeFactory {
     const node = this.params.workflowExecutionGraph.getNode(nodeId);
     const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
 
+    if (!workflowExecution.stepExecutionsIndex) {
+      throw new Error(
+        'WorkflowExecutionState: Workflow execution must have step executions index to be loaded'
+      );
+    }
+
     // Guard against duplicate node entries in stack frames by removing self-references.
     // During workflow execution, a node may call enterScope() for itself before executing,
     // causing the node to appear on top of its own stack frames. This removes such self-references
@@ -111,7 +117,7 @@ export class StepExecutionRuntimeFactory {
       executionId: workflowExecution.id,
       stepId: node.stepId,
       stackFrames: modifiedStackFrames,
-      indexName: workflowExecution.stepExecutionsIndex!,
+      indexName: workflowExecution.stepExecutionsIndex,
       indexPattern: WORKFLOWS_STEP_EXECUTIONS_INDEX_PATTERN,
     });
 
