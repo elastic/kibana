@@ -39,13 +39,13 @@ export const deleteUsersAndRoles = async (
 
   try {
     await Promise.allSettled(usersToDelete.map((user) => security.user.delete(user.username)));
-  } catch {
-    // ignore -- index may have been deleted by migration
+  } catch (error) {
+    // ignore
   }
 
   try {
     await Promise.allSettled(rolesToDelete.map((role) => security.role.delete(role.name)));
-  } catch {
+  } catch (error) {
     // ignore
   }
 };
