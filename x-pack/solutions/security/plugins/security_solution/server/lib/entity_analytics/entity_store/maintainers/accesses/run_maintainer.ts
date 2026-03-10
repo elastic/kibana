@@ -15,6 +15,28 @@ import { INTEGRATION_CONFIGS, type AccessesIntegrationConfig } from './integrati
 import { postprocessEsqlResults } from './postprocess_records';
 import { upsertEntityRelationships } from './upsert_entities';
 
+/**
+ * Computes `accesses_frequently` and `accesses_infrequently` relationships for
+ * user entities by analysing authentication events across configured integrations.
+ *
+ * For each integration the flow is:
+ *
+ * 1. **Discover users** — A paginated composite aggregation scans the
+ *    integration's index for successful logon events within the lookback window
+ *    and returns unique user-identity buckets (up to COMPOSITE_PAGE_SIZE per page).
+ *
+ * 2. **Classify access patterns** — An ES|QL query, scoped to the users from
+ *    step 1 via a DSL filter, counts how many times each user accessed each
+ *    host. Hosts accessed more than 4 times are labelled `accesses_frequently`;
+ *    the rest are labelled `accesses_infrequently`.
+ *    If the index lacks `*.entity.id` fields the query is automatically retried
+ *    without those fields (verification_exception fallback).
+ *
+ * 3. **Upsert relationships** — After all integrations and pages have been
+ *    processed, the accumulated records are written to the entity store's
+ *    updates data stream so the extraction pipeline can merge them into the
+ *    latest entities index.
+ */
 export async function runMaintainer({
   esClient,
   logger,

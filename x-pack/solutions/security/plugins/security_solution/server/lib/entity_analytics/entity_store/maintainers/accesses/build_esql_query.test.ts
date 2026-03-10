@@ -96,6 +96,11 @@ describe('buildEsqlQuery', () => {
       const query = buildEsqlQuery('default');
       expect(query).toMatch(/BY actorUserId$/m);
     });
+
+    it('applies a LIMIT matching the composite page size', () => {
+      const query = buildEsqlQuery('default');
+      expect(query).toContain('| LIMIT 3500');
+    });
   });
 
   describe('consistency between skipEntityFields modes', () => {

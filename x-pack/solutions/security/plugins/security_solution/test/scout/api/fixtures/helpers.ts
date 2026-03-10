@@ -389,21 +389,54 @@ export async function bulkIngestEvents(
   return allDocs.length;
 }
 
+/**
+ * Waits until the data stream's shards are allocated and the expected number
+ * of documents is searchable. This is critical in serverless environments
+ * where shard allocation can be delayed.
+ */
+export async function waitForShardsAndDocuments(
+  esClient: EsClient,
+  indexName: string,
+  expectedMinDocs: number,
+  timeoutMs = 60_000
+): Promise<void> {
+  const start = Date.now();
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await esClient.cluster.health({
+        index: indexName,
+        wait_for_status: 'yellow',
+        timeout: '10s',
+      });
+
+      const countResult = await esClient.count({ index: indexName });
+      if (countResult.count >= expectedMinDocs) {
+        return;
+      }
+    } catch {
+      // shard may not be available yet in serverless
+    }
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+  }
+
+  throw new Error(
+    `Timed out waiting for shards and documents on "${indexName}" (expected >= ${expectedMinDocs} docs)`
+  );
+}
+
 export async function ensureDataStream(
   esClient: EsClient,
   config: IntegrationTestConfig
 ): Promise<void> {
-  await cleanupDataStream(esClient, config);
-
   await esClient.indices.putIndexTemplate({
     name: config.templateName,
     index_patterns: config.indexPatterns,
     data_stream: {},
-    priority: 500,
+    priority: 10000,
     template: {
       settings: {
         number_of_shards: 1,
-        number_of_replicas: 0,
       },
       mappings: {
         properties: config.templateMappings,
@@ -411,15 +444,33 @@ export async function ensureDataStream(
     },
   });
 
-  await esClient.indices.createDataStream({ name: config.indexName });
+  // If the data stream already exists from a previous run, delete documents
+  // but keep the data stream itself to avoid shard reallocation issues in serverless.
+  try {
+    await esClient.indices.getDataStream({ name: config.indexName });
+    await esClient.deleteByQuery({
+      index: config.indexName,
+      query: { match_all: {} },
+      refresh: true,
+    });
+  } catch {
+    // Data stream doesn't exist yet — it will be auto-created by esArchiver or first bulk ingest
+  }
 }
 
 export async function cleanupDataStream(
   esClient: EsClient,
   config: IntegrationTestConfig
 ): Promise<void> {
-  await esClient.indices.deleteDataStream({ name: config.indexName }).catch(() => {});
-  await esClient.indices.deleteIndexTemplate({ name: config.templateName }).catch(() => {});
+  try {
+    await esClient.deleteByQuery({
+      index: config.indexName,
+      query: { match_all: {} },
+      refresh: true,
+    });
+  } catch {
+    // Data stream might not exist
+  }
 }
 
 /**

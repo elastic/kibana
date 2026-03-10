@@ -1,0 +1,16 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-endpoint.events.security-default",
+    "id": "scout-seed-doc-001",
+    "index": ".ds-logs-endpoint.events.security-default-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:00:00Z",
+      "agent": { "id": "scout-seed-agent", "type": "endpoint", "version": "8.17.4" },
+      "data_stream": { "dataset": "endpoint.events.security", "namespace": "default", "type": "logs" },
+      "event": { "action": "log_on", "category": ["authentication"], "kind": "event", "module": "endpoint", "outcome": "success" },
+      "host": { "id": "seed-host-001", "name": "seed-host-001", "hostname": "seed-host-001", "ip": ["192.168.0.1"], "os": { "name": "Windows", "type": "windows" } },
+      "user": { "id": "seed-user-001", "name": "seed-user-001", "domain": "SCOUT-SEED" }
+    }
+  }
+}

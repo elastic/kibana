@@ -37,6 +37,6 @@ export const MAINTAINER_ROUTES = {
   GET: stripLeadingSlash(BASE_ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_GET),
 } as const;
 
-export const ENTITY_STORE_TAGS = [...tags.stateful.classic];
+export const ENTITY_STORE_TAGS = [...tags.stateful.classic, ...tags.serverless.security.complete];
 
 export const LATEST_INDEX = '.entities.v2.latest.security_default';

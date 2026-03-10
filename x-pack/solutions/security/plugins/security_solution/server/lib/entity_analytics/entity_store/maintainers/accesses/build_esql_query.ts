@@ -7,7 +7,7 @@
 
 import { euid } from '@kbn/entity-store/common';
 
-import { getIndexPattern } from './constants';
+import { getIndexPattern, COMPOSITE_PAGE_SIZE } from './constants';
 
 /**
  * Strips CASE branches that reference *.entity.* fields from an euid EVAL expression.
@@ -78,5 +78,6 @@ export function buildEsqlQuery(namespace: string, skipEntityFields: boolean = fa
 | STATS
     accesses_frequently   = VALUES(targets) WHERE access_type == "accesses_frequently",
     accesses_infrequently = VALUES(targets) WHERE access_type == "accesses_infrequently"
-  BY actorUserId`;
+  BY actorUserId
+| LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }

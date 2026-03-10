@@ -25,6 +25,13 @@ import {
   getExpectedRelationships,
 } from '../fixtures/helpers';
 
+/**
+ * Integration tests for the `accesses_frequently_and_infrequently` entity
+ * maintainer. For each configured integration a 16,000-document dataset of
+ * synthetic authentication events is ingested, the maintainer is triggered,
+ * and the resulting entity relationships are verified.
+ */
+
 /** Normalise a field that may be a single string or an array into a string[]. */
 function toArray(value: unknown): string[] {
   if (value == null) return [];
@@ -50,18 +57,25 @@ interface MaintainerEntry {
   lastErrorTimestamp: string | null;
 }
 
-const POLL_INTERVAL_MS = 2000;
-const POLL_TIMEOUT_MS = 120_000;
+const POLL_INTERVAL_MS = 3000;
+const POLL_TIMEOUT_MS = 150_000;
+const MAX_RESTART_ATTEMPTS = 5;
 
-async function waitForMaintainerRun(
+async function waitForMaintainerSuccess(
   apiClient: {
     get: (url: string, options?: Record<string, unknown>) => Promise<{ body: unknown }>;
+    put: (
+      url: string,
+      options?: Record<string, unknown>
+    ) => Promise<{ statusCode: number; body: unknown }>;
   },
+  esClient: { cluster: { health: (opts: Record<string, unknown>) => Promise<unknown> } },
   headers: Record<string, string>,
   maintainerId: string,
-  minRuns: number
+  indexName: string
 ): Promise<MaintainerEntry> {
   const start = Date.now();
+  let restarts = 0;
 
   while (Date.now() - start < POLL_TIMEOUT_MS) {
     const res = await apiClient.get(MAINTAINER_ROUTES.GET, {
@@ -71,14 +85,38 @@ async function waitForMaintainerRun(
     const body = res.body as { maintainers: MaintainerEntry[] };
     const entry = body.maintainers.find((m) => m.id === maintainerId);
 
-    if (entry && entry.runs >= minRuns) {
+    if (entry && entry.lastSuccessTimestamp) {
       return entry;
+    }
+
+    if (entry && entry.lastErrorTimestamp && !entry.lastSuccessTimestamp) {
+      if (restarts >= MAX_RESTART_ATTEMPTS) {
+        throw new Error(
+          `Maintainer "${maintainerId}" failed after ${restarts} restart(s). ` +
+            `State: ${JSON.stringify(entry.customState)}`
+        );
+      }
+      restarts++;
+      await apiClient
+        .put(MAINTAINER_ROUTES.STOP(maintainerId), { headers, responseType: 'json' })
+        .catch(() => {});
+
+      // Wait for shards to become available before restarting
+      await esClient.cluster
+        .health({ index: indexName, wait_for_status: 'yellow', timeout: '15s' })
+        .catch(() => {});
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+
+      await apiClient.put(MAINTAINER_ROUTES.START(maintainerId), {
+        headers,
+        responseType: 'json',
+      });
     }
 
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Maintainer "${maintainerId}" did not reach ${minRuns} run(s) within timeout`);
+  throw new Error(`Maintainer "${maintainerId}" did not complete a successful run within timeout`);
 }
 
 for (const integration of INTEGRATION_CONFIGS) {
@@ -93,7 +131,7 @@ for (const integration of INTEGRATION_CONFIGS) {
   apiTest.describe(`Accesses Maintainer [${integration.name}]`, { tag: ENTITY_STORE_TAGS }, () => {
     let defaultHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient, esArchiver }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
@@ -121,6 +159,15 @@ for (const integration of INTEGRATION_CONFIGS) {
       expect(installResponse.statusCode).toBe(201);
 
       await ensureDataStream(esClient, testConfig);
+
+      // Load a seed document via esArchiver to auto-create the data stream.
+      // In serverless, manually creating the data stream and bulk-ingesting
+      // leads to persistent `no_shard_available_action_exception` errors.
+      // Letting ES auto-create it through esArchiver avoids this.
+      await esArchiver.loadIfNeeded(
+        'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/elastic_defend_events'
+      );
+
       const ingestedCount = await bulkIngestEvents(esClient, testConfig);
       expect(ingestedCount).toBe(16000);
     });
@@ -145,17 +192,20 @@ for (const integration of INTEGRATION_CONFIGS) {
     });
 
     apiTest('Should compute access relationships from events', async ({ apiClient, esClient }) => {
+      apiTest.setTimeout(240_000);
+
       const startResponse = await apiClient.put(MAINTAINER_ROUTES.START(MAINTAINER_ID), {
         headers: defaultHeaders,
         responseType: 'json',
       });
       expect(startResponse.statusCode).toBe(200);
 
-      const maintainerEntry = await waitForMaintainerRun(
+      const maintainerEntry = await waitForMaintainerSuccess(
         apiClient,
+        esClient,
         defaultHeaders,
         MAINTAINER_ID,
-        1
+        testConfig.indexName
       );
 
       expect(maintainerEntry.customState).toBeDefined();
@@ -171,7 +221,7 @@ for (const integration of INTEGRATION_CONFIGS) {
           headers: defaultHeaders,
           responseType: 'json',
           body: {
-            fromDateISO: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+            fromDateISO: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
             toDateISO: new Date().toISOString(),
           },
         }
