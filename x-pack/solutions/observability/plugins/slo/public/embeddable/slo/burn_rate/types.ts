@@ -24,8 +24,7 @@ export interface EmbeddableProps {
   reloadSubject?: Subject<boolean>;
 }
 
-export type SloBurnRateEmbeddableState = BurnRateEmbeddableState;
-export type BurnRateApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
+export type BurnRateApi = DefaultEmbeddableApi<BurnRateEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle;
 

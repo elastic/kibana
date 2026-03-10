@@ -14,14 +14,14 @@ import type { SLOPublicPluginsStart } from '../../..';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLORepositoryClient } from '../../../types';
 import { Configuration } from './configuration';
-import type { SloBurnRateEmbeddableState } from './types';
+import type { BurnRateEmbeddableState } from './types';
 
 export async function openConfiguration(
   coreStart: CoreStart,
   pluginsStart: SLOPublicPluginsStart,
   sloClient: SLORepositoryClient,
-  initialState?: SloBurnRateEmbeddableState
-): Promise<SloBurnRateEmbeddableState> {
+  initialState?: BurnRateEmbeddableState
+): Promise<BurnRateEmbeddableState> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
   return new Promise(async (resolve, reject) => {

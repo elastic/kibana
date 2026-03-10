@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BurnRateEmbeddableState } from '../../../../server/lib/embeddables/burn_rate_schema';
+import type { BurnRateEmbeddableState } from '../types';
 import { transformBurnRateOut } from './transform_burn_rate_out';
 
 describe('transformBurnRateOut', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BurnRateEmbeddableState } from '../../../../server/lib/embeddables/burn_rate_schema';
+import type { BurnRateEmbeddableState } from '../types';
 
 export interface LegacyBurnRateState {
   sloId: string;
