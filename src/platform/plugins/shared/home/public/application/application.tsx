@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ScopedHistory, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
@@ -25,6 +25,8 @@ export const renderApp = async (
   // FIXME: use featureCatalogue.getFeatures$()
   const directories = featureCatalogue.get();
 
+  const root = createRoot(element);
+
   // Filters solutions by available nav links
   const navLinksSubscription = chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = featureCatalogue
@@ -35,15 +37,14 @@ export const renderApp = async (
         )
       );
 
-    render(
+    root.render(
       coreStart.rendering.addContext(
         <KibanaContextProvider services={{ ...coreStart }}>
           <SampleDataTabKibanaProvider {...{ coreStart, dataViews, trackUiMetric }}>
             <HomeApp directories={directories} solutions={solutions} />
           </SampleDataTabKibanaProvider>
         </KibanaContextProvider>
-      ),
-      element
+      )
     );
   });
 
@@ -55,7 +56,7 @@ export const renderApp = async (
   });
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
     unlisten();
     navLinksSubscription.unsubscribe();
   };
