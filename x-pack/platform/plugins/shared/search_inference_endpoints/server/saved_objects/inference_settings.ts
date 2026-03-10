@@ -6,14 +6,17 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { INFERENCE_SETTINGS_SO_TYPE } from '../../common/constants';
+import {
+  INFERENCE_SETTINGS_SO_TYPE,
+  INFERENCE_SETTINGS_NAMESPACE_TYPE,
+} from '../../common/constants';
 import { inferenceSettingsSchemaV1 } from './schema/v1';
 
 export const createInferenceSettingsSavedObjectType = (): SavedObjectsType => ({
   name: INFERENCE_SETTINGS_SO_TYPE,
   hidden: true,
   hiddenFromHttpApis: true,
-  namespaceType: 'single',
+  namespaceType: INFERENCE_SETTINGS_NAMESPACE_TYPE,
   mappings: {
     dynamic: false,
     properties: {},
