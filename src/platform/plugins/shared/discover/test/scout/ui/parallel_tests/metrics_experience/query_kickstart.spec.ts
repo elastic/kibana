@@ -39,7 +39,6 @@ spaceTest.describe(
 
     spaceTest('should run Search all metrics from recommended queries', async ({ pageObjects }) => {
       const { discover, discoverActions, metricsExperience } = pageObjects;
-      let selectedRecommendation = '';
       await discover.selectTextBaseLang();
 
       await spaceTest.step('open recommended queries from the ES|QL help menu', async () => {
@@ -47,26 +46,15 @@ spaceTest.describe(
       });
 
       await spaceTest.step('apply Search all metrics query recommendation', async () => {
-        selectedRecommendation = await discoverActions.runRecommendedEsqlQuery(
-          testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS,
-          testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_FIELDS_FALLBACK
+        await discoverActions.runRecommendedEsqlQuery(
+          testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS
         );
       });
 
       await spaceTest.step('render metrics grid using the recommended query', async () => {
-        await expect
-          .poll(async () => {
-            if (selectedRecommendation === testData.RECOMMENDED_QUERY_LABELS.SEARCH_ALL_METRICS) {
-              const gridVisible = await metricsExperience.grid.isVisible();
-              const paginationVisible = await metricsExperience.pagination.container.isVisible();
-              const cardCount = await metricsExperience.cards.count();
-              return gridVisible && paginationVisible && cardCount === PAGINATION.PAGE_SIZE;
-            }
-
-            const gridVisible = await metricsExperience.grid.isVisible();
-            return !gridVisible;
-          })
-          .toBe(true);
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.pagination.container).toBeVisible();
+        await expect(metricsExperience.cards).toHaveCount(PAGINATION.PAGE_SIZE);
       });
     });
   }

@@ -20,41 +20,21 @@ export class DiscoverActions {
     });
   }
 
-  async runRecommendedEsqlQuery(queryLabel: string, fallbackQueryLabel?: string): Promise<string> {
+  async runRecommendedEsqlQuery(queryLabel: string) {
     await this.openRecommendedQueriesPanel();
 
     const recommendedQueriesDialog = this.page.testSubj
       .locator('esql-menu-popover')
       .or(this.page.locator('[role="dialog"]'));
 
-    const primaryQueryOption = recommendedQueriesDialog.getByRole('button', {
+    const queryOption = recommendedQueriesDialog.getByRole('button', {
       exact: true,
       name: queryLabel,
     });
-    const fallbackQueryOption = fallbackQueryLabel
-      ? recommendedQueriesDialog.getByRole('button', {
-          exact: true,
-          name: fallbackQueryLabel,
-        })
-      : null;
 
-    if (await primaryQueryOption.isVisible()) {
-      await primaryQueryOption.click();
-      await this.waitUntilSearchingHasFinished();
-      return queryLabel;
-    } else if (
-      fallbackQueryLabel &&
-      fallbackQueryOption &&
-      (await fallbackQueryOption.isVisible())
-    ) {
-      await fallbackQueryOption.click();
-      await this.waitUntilSearchingHasFinished();
-      return fallbackQueryLabel;
-    } else {
-      throw new Error(
-        `Neither recommended query "${queryLabel}" nor fallback "${fallbackQueryLabel}" is available`
-      );
-    }
+    await expect(queryOption).toBeVisible();
+    await queryOption.click();
+    await this.waitUntilSearchingHasFinished();
   }
 
   async openRecommendedQueriesPanel() {

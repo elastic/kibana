@@ -23,7 +23,6 @@ export const ESQL_QUERIES = {
 
 export const RECOMMENDED_QUERY_LABELS = {
   SEARCH_ALL_METRICS: 'Search all metrics',
-  SEARCH_ALL_FIELDS_FALLBACK: 'Search all fields',
 } as const;
 
 export const METRICS_DIMENSION_FIELDS = {
