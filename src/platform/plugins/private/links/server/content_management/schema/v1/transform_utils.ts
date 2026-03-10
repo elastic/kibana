@@ -9,7 +9,6 @@
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import { omit } from 'lodash';
 import type { LinksItem } from '../../../../common/content_management';
 import type { Link, LinksState, StoredLink, StoredLinksState } from './types';
 import {
@@ -77,4 +76,4 @@ const transformOrderedLinks = <T extends Link[] | StoredLink[]>(
     .sort((linkA, linkB) => {
       return (linkA.order ?? 0) - (linkB.order ?? 0);
     })
-    .map((link) => omit(link, 'order')) as T;
+    .map(({ order, ...link }) => link) as T;
