@@ -30,6 +30,7 @@ import type { FeatureFlags } from './infra/feature_flags';
 import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/logs_extraction';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
+import type { ResolutionClient } from './domain/resolution';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {
@@ -52,6 +53,7 @@ export interface EntityStoreApiRequestHandlerContext {
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
   crudClient: CRUDClient;
+  resolutionClient: ResolutionClient;
   ccsLogsExtractionClient: CcsLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;

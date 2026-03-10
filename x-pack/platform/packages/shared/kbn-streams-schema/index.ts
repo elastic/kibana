@@ -19,6 +19,7 @@ export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,
   getStreamNameFromViewName,
+  getWiredStreamViewQuery,
 } from './src/models/query/view_name';
 
 export {
