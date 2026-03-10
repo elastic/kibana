@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { EuiButtonGroup, EuiCard } from '@elastic/eui';
 import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -44,6 +47,74 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_WIRED_STREAMS_AUTO_ENABLED_EVENT,
 } from '../common/telemetry_events';
+
+import { versionStore } from './application/version_switcher_store';
+import type { IngestHubVersion } from './application/version_switcher_store';
+
+const VERSION_OPTIONS = [
+  {
+    id: 'blockUx' as IngestHubVersion,
+    label: 'Block UX',
+    title: '',
+    toolTipContent: 'User lands in Kibana and is blocked and pushed to add data.',
+    toolTipProps: { position: 'top' as const, className: 'onboardingSwitcherTooltip' },
+  },
+  {
+    id: 'skipUx' as IngestHubVersion,
+    label: 'Skip UX',
+    title: '',
+    toolTipContent: 'User lands in Kibana and is pushed to add data but can skip the flow.',
+    toolTipProps: { position: 'top' as const, className: 'onboardingSwitcherTooltip' },
+  },
+];
+
+const VersionSwitcherNavControl: React.FC = () => {
+  const [active, setActive] = React.useState<IngestHubVersion>(versionStore.getSnapshot());
+  const [portalContainer] = React.useState(() => {
+    const el = document.createElement('div');
+    el.style.position = 'fixed';
+    el.style.bottom = '16px';
+    el.style.left = '16px';
+    el.style.zIndex = '2147483647';
+    document.body.appendChild(el);
+    return el;
+  });
+
+  React.useEffect(() => {
+    return () => {
+      document.body.removeChild(portalContainer);
+    };
+  }, [portalContainer]);
+
+  React.useEffect(() => {
+    return versionStore.subscribe(() => setActive(versionStore.getSnapshot()));
+  }, []);
+
+  return ReactDOM.createPortal(
+    <>
+      <style>{`.onboardingSwitcherTooltip { z-index: 2147483647 !important; }`}</style>
+      <EuiCard
+      layout="horizontal"
+      titleSize="xs"
+      title={<span style={{ fontSize: 13 }}>Onboarding Experience</span>}
+      description=""
+      paddingSize="s"
+      style={{ textAlign: 'center' }}
+    >
+      <EuiButtonGroup
+        legend="Onboarding Experience"
+        options={VERSION_OPTIONS}
+        idSelected={active}
+        onChange={(id) => versionStore.setVersion(id as IngestHubVersion)}
+        buttonSize="compressed"
+        color="text"
+        isFullWidth={false}
+      />
+    </EuiCard>
+    </>,
+    portalContainer
+  );
+};
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -180,7 +251,17 @@ export class ObservabilityOnboardingPlugin
       getLocator: () => this.locators?.onboarding,
     };
   }
-  public start(_core: CoreStart, _plugins: ObservabilityOnboardingPluginStartDeps) {
+  public start(core: CoreStart, _plugins: ObservabilityOnboardingPluginStartDeps) {
+    core.chrome.navControls.registerRight({
+      order: 9000,
+      mount: (element) => {
+        ReactDOM.render(<VersionSwitcherNavControl />, element, () => {});
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+    });
+
     return {
       locators: this.locators,
     };

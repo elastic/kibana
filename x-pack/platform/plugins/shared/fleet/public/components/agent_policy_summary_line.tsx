@@ -107,9 +107,15 @@ export const AgentPolicySummaryLine = memo<{
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false} css={MIN_WIDTH}>
+                <EuiFlexItem grow={true} css={MIN_WIDTH}>
                   <EuiLink
-                    className="eui-textBreakNormal"
+                    className={css`
+                      display: -webkit-box;
+                      -webkit-line-clamp: 2;
+                      -webkit-box-orient: vertical;
+                      overflow: hidden;
+                      word-break: break-all;
+                    `}
                     href={getHref('policy_details', { policyId: id })}
                     title={policyDisplayName}
                     data-test-subj="agentPolicyNameLink"
@@ -150,19 +156,7 @@ export const AgentPolicySummaryLine = memo<{
                 />
               }
             >
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem>
-                  <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText color="subdued" size="xs">
-                    <FormattedMessage
-                      id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
-                      defaultMessage="Outdated policy"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiIcon size="m" type="warning" color="warning" />
             </EuiToolTip>
           </EuiFlexItem>
         )}

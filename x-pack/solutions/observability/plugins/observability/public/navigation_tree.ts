@@ -418,7 +418,7 @@ function createNavTree({
         }),
         link: 'observabilityOnboarding:ingest-hub',
         renderAs: 'panelOpener',
-        icon: 'logstashInput',
+        icon: 'logoElastic',
         children: [
           {
             id: 'ingestHub_main',
@@ -452,9 +452,12 @@ function createNavTree({
             children: [
               {
                 link: 'observabilityOnboarding:ingest-hub-platform-migration',
-                title: i18n.translate('xpack.observability.obltNav.ingestHub.platformMigration', {
-                  defaultMessage: 'Platform Migration',
-                }),
+                title: i18n.translate(
+                  'xpack.observability.obltNav.ingestHub.platformMigration',
+                  {
+                    defaultMessage: 'Platform Migration',
+                  }
+                ),
               },
               {
                 link: 'observabilityOnboarding:ingest-hub-dashboards',
