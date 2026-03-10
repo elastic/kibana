@@ -17,6 +17,7 @@ import {
 } from '@kbn/discover-utils';
 import type { SearchHit } from '../../../../common/search_strategy';
 import { AddNote } from '../../../notes/components/add_note';
+import { DeleteConfirmModal } from '../../../notes/components/delete_confirm_modal';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { NOTES_LOADING_TEST_ID } from '../../../notes/components/test_ids';
 import { NotesList } from '../../../notes/components/notes_list';
@@ -28,6 +29,7 @@ import {
   ReqStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
+  selectNotesTablePendingDeleteIds,
 } from '../../../notes/store/notes.slice';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { AlertDataContext } from '../../../flyout_v2/investigation_guide/components/investigation_guide_view';
@@ -85,6 +87,7 @@ export const NotesDetailsContent = memo(
 
     const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
     const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, documentId));
+    const pendingDeleteIds = useSelector((state: State) => selectNotesTablePendingDeleteIds(state));
     const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
     const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
 
@@ -158,6 +161,7 @@ export const NotesDetailsContent = memo(
             </AddNote>
           </>
         )}
+        {pendingDeleteIds.length > 0 && <DeleteConfirmModal />}
       </AlertDataContext.Provider>
     );
   }
