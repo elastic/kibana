@@ -32,7 +32,7 @@ const requestWithoutRoutingCounter = meter.createCounter(
   'kibana.elasticsearch.cps.request_without_routing.count',
   {
     description: 'Count of Elasticsearch requests that bypassed CPS routing when CPS was enabled',
-    unit: 'requests',
+    unit: '{request}',
     valueType: ValueType.INT,
   }
 );
