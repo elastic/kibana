@@ -20,6 +20,14 @@ import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 const START = 'now-15m';
 const END = 'now';
 
+function getTopValueValues(
+  topValues: Record<string, Array<{ value: string; count: number }>>
+): Record<string, string[]> {
+  return Object.fromEntries(
+    Object.entries(topValues).map(([field, entries]) => [field, entries.map((e) => e.value).sort()])
+  );
+}
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
@@ -47,7 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await logsSynthtraceEsClient.clean();
     });
 
-    it('returns expected response structure', async () => {
+    it('returns all response sections', async () => {
       const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: { start: START, end: END },
@@ -55,23 +63,98 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(results).to.have.length(1);
 
-      const { histogram, totalCount, samples } = results[0].data;
+      const { histogram, totalCount, samples, categories, topValues } = results[0].data;
 
-      expect(histogram).to.be.an('array');
       expect(histogram.length).to.be.greaterThan(0);
-      expect(totalCount).to.be.greaterThan(0);
-      expect(samples).to.be.an('array');
+      expect(totalCount).to.be.greaterThan(1000);
       expect(samples.length).to.be.greaterThan(0);
-
-      for (const sample of samples) {
-        expect(sample).to.have.property('@timestamp');
-        expect(sample).to.have.property('_id');
-        expect(sample).to.have.property('_index');
-        expect(sample).to.have.property('message');
-      }
+      expect(categories.length).to.be.greaterThan(0);
+      expect(Object.keys(topValues).length).to.be.greaterThan(0);
     });
 
-    it('filters by service.name using kqlFilter', async () => {
+    it('returns expected sample fields', async () => {
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: { start: START, end: END },
+      });
+
+      const sampleFieldKeys = Object.keys(results[0].data.samples[0]).sort();
+      expect(sampleFieldKeys).to.eql([
+        '@timestamp',
+        '_id',
+        '_index',
+        'host.name',
+        'kubernetes.namespace',
+        'kubernetes.pod.name',
+        'log.level',
+        'message',
+        'service.name',
+      ]);
+    });
+
+    it('returns expected category patterns', async () => {
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: { start: START, end: END },
+      });
+
+      const categoryPatterns = results[0].data.categories.map((c) => c.pattern).sort();
+      expect(categoryPatterns).to.eql([
+        'CRON Running scheduled cleanup task',
+        'Connection pool exhausted cannot acquire connection within Active Idle',
+        'Connection pool utilization at connections in use',
+        'Email delivery delayed retrying in SMTP server slow',
+        'Email sent to customer successfully',
+        'Failed to validate stock for order inventory-service unavailable',
+        'GET /health OK',
+        'GET HTTP/1.1 via_upstream',
+        'Gateway POST /api/checkout upstream checkout-service',
+        'POST /api/checkout HTTP/1.1 via_upstream',
+        'Payment processed successfully',
+        'Processing order for customer',
+        'Query timeout after SELECT FROM products WHERE category_id full table scan detected missing index on category_id',
+        'Stock check for product completed',
+        'Timeout calling inventory-service after POST /api/inventory/validate-stock',
+        'filter kubernetes kubernetes.0 Merged new pod metadata',
+      ]);
+    });
+
+    it('returns expected topValues', async () => {
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: { start: START, end: END },
+      });
+
+      const values = getTopValueValues(results[0].data.topValues);
+
+      expect(Object.keys(values).sort()).to.eql([
+        'container.name',
+        'host.name',
+        'kubernetes.namespace',
+        'kubernetes.pod.name',
+        'log.level',
+        'service.environment',
+        'service.name',
+      ]);
+
+      expect(values['log.level']).to.eql(['error', 'info', 'warn']);
+      expect(values['service.environment']).to.eql(['production']);
+      expect(values['host.name']).to.eql(['synth-host']);
+      expect(values['kubernetes.namespace']).to.eql(['default', 'ingress', 'kube-system']);
+
+      expect(values['service.name']).to.eql([
+        'api-gateway',
+        'checkout-service',
+        'fluent-bit',
+        'inventory-service',
+        'load-balancer',
+        'notification-service',
+        'payment-service',
+        'task-scheduler',
+      ]);
+    });
+
+    it('filters results with kqlFilter', async () => {
       const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
@@ -82,16 +165,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const { samples, totalCount } = results[0].data;
-
-      expect(totalCount).to.be.greaterThan(0);
+      const { samples, categories } = results[0].data;
 
       for (const sample of samples) {
         expect(sample['service.name']).to.be('inventory-service');
       }
+
+      const categoryPatterns = categories.map((c) => c.pattern).sort();
+      expect(categoryPatterns).to.eql([
+        'Connection pool exhausted cannot acquire connection within Active Idle',
+        'Connection pool utilization at connections in use',
+        'GET /health OK',
+        'Query timeout after SELECT FROM products WHERE category_id full table scan detected missing index on category_id',
+        'Stock check for product completed',
+      ]);
     });
 
-    it('adds group dimension to histogram when groupBy is used', async () => {
+    it('groups histogram by field with groupBy', async () => {
       const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
         params: {
@@ -101,83 +191,65 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const { histogram } = results[0].data;
-
-      expect(histogram.length).to.be.greaterThan(0);
-
-      for (const bucket of histogram) {
-        expect(bucket).to.have.property('group');
-      }
+      const groups = [...new Set(results[0].data.histogram.map((b) => b.group))].sort();
+      expect(groups).to.eql(['error', 'info', 'warn']);
     });
 
-    it('respects the limit parameter for samples', async () => {
+    it('limits sample count with limit parameter', async () => {
       const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
         id: OBSERVABILITY_GET_LOGS_TOOL_ID,
-        params: {
-          start: START,
-          end: END,
-          limit: 3,
-        },
+        params: { start: START, end: END, limit: 3 },
       });
 
       expect(results[0].data.samples).to.have.length(3);
     });
 
-    describe('iterative filtering funnel', () => {
-      let broadCount: number;
-      let afterHealthCheckCount: number;
-      let afterLbCount: number;
-
-      it('starts broad with high totalCount dominated by noise', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
-          id: OBSERVABILITY_GET_LOGS_TOOL_ID,
-          params: { start: START, end: END, limit: 20, fields: ['message', 'service.name'] },
-        });
-
-        broadCount = results[0].data.totalCount;
-
-        expect(broadCount).to.be.greaterThan(100);
+    it('controls sample fields with fields parameter', async () => {
+      const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: {
+          start: START,
+          end: END,
+          fields: ['message', 'service.name'],
+        },
       });
 
-      it('reduces totalCount after excluding health checks', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
-          id: OBSERVABILITY_GET_LOGS_TOOL_ID,
-          params: {
-            start: START,
-            end: END,
-            kqlFilter: 'NOT message: "GET /health 200 OK"',
-            limit: 20,
-            fields: ['message', 'service.name'],
-          },
-        });
+      const sampleKeys = Object.keys(results[0].data.samples[0]).sort();
+      expect(sampleKeys).to.eql(['@timestamp', '_id', '_index', 'message', 'service.name']);
+    });
 
-        afterHealthCheckCount = results[0].data.totalCount;
-
-        expect(afterHealthCheckCount).to.be.lessThan(broadCount);
+    it('reduces results when iteratively excluding noise', async () => {
+      const broadResults = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: { start: START, end: END },
       });
+      const broadCount = broadResults[0].data.totalCount;
+      expect(broadCount).to.be.greaterThan(1000);
 
-      it('reduces totalCount further after also excluding load-balancer', async () => {
-        const results = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
-          id: OBSERVABILITY_GET_LOGS_TOOL_ID,
-          params: {
-            start: START,
-            end: END,
-            kqlFilter: 'NOT message: "GET /health 200 OK" AND NOT service.name: "load-balancer"',
-            limit: 20,
-            fields: ['message', 'service.name'],
-          },
-        });
-
-        afterLbCount = results[0].data.totalCount;
-
-        expect(afterLbCount).to.be.lessThan(afterHealthCheckCount);
-
-        const errorServices = new Set(
-          results[0].data.samples.map((s) => s['service.name'] as string)
-        );
-
-        expect(errorServices.has('load-balancer')).to.be(false);
+      const filteredResults = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: {
+          start: START,
+          end: END,
+          kqlFilter: 'NOT message: "GET /health 200 OK"',
+        },
       });
+      const filteredCount = filteredResults[0].data.totalCount;
+      expect(filteredCount).to.be.lessThan(broadCount);
+
+      const narrowResults = await agentBuilderApiClient.executeTool<GetLogsToolResult>({
+        id: OBSERVABILITY_GET_LOGS_TOOL_ID,
+        params: {
+          start: START,
+          end: END,
+          kqlFilter: 'NOT message: "GET /health 200 OK" AND NOT service.name: "load-balancer"',
+        },
+      });
+      const narrowCount = narrowResults[0].data.totalCount;
+      expect(narrowCount).to.be.lessThan(filteredCount);
+
+      const narrowServiceNames = getTopValueValues(narrowResults[0].data.topValues)['service.name'];
+      expect(narrowServiceNames).to.not.contain('load-balancer');
     });
   });
 }

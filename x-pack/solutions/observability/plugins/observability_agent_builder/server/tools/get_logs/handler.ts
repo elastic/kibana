@@ -11,8 +11,12 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { groupBy, mapValues, orderBy, sortBy, sumBy } from 'lodash';
 import moment from 'moment';
+import { computeSamplingProbability } from '../../utils/compute_sampling_probability';
+import { timeRangeFilter, kqlFilter as kqlFilterToDsl } from '../../utils/dsl_filters';
+import { getTypedSearch } from '../../utils/get_typed_search';
+import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { parseDatemath } from '../../utils/time';
-import { MAX_FIELD_VALUE_LENGTH } from './constants';
+import { FACET_FIELDS, MAX_FIELD_VALUE_LENGTH } from './constants';
 
 export function getDefaultBucketSize(startMs: number, endMs: number): string {
   const duration = moment.duration(endMs - startMs, 'ms');
@@ -43,11 +47,27 @@ interface LogSample {
   [key: string]: unknown;
 }
 
+interface LogCategory {
+  pattern: string;
+  count: number;
+  sample: LogSample;
+}
+
+interface TopValueEntry {
+  value: string;
+  count: number;
+}
+
 export interface GetLogsResult {
   histogram: HistogramBucket[];
   totalCount: number;
   samples: LogSample[];
+  categories: LogCategory[];
+  topValues: Record<string, TopValueEntry[]>;
 }
+
+const MAX_CATEGORIES = 30;
+const CATEGORIZATION_SAMPLE_SIZE = 10_000;
 
 export async function getLogsHandler({
   esClient,
@@ -79,7 +99,19 @@ export async function getLogsHandler({
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
 
-  return parseForkedResult(result, groupByField, fields);
+  const { histogram, totalCount, samples } = parseForkedResult(result, groupByField, fields);
+
+  const { categories, topValues } = await getCategoriesAndTopValues({
+    esClient,
+    index,
+    startMs,
+    endMs,
+    kqlFilter,
+    totalCount,
+    fields,
+  });
+
+  return { histogram, totalCount, samples, categories, topValues };
 }
 
 function buildEsqlQuery({
@@ -132,20 +164,22 @@ const FORK_ID_HISTOGRAM = 'fork1';
 const FORK_ID_TOTAL_COUNT = 'fork2';
 const FORK_ID_SAMPLES = 'fork3';
 
-const EMPTY_RESULT: GetLogsResult = { histogram: [], totalCount: 0, samples: [] };
+type ForkedResult = Omit<GetLogsResult, 'categories' | 'topValues'>;
+
+const EMPTY_FORKED_RESULT: ForkedResult = { histogram: [], totalCount: 0, samples: [] };
 
 function parseForkedResult(
   result: ESQLSearchResponse,
   groupByField: string | undefined,
   fields: string[]
-): GetLogsResult {
+): ForkedResult {
   if (!result.columns?.length || !result.values?.length) {
-    return EMPTY_RESULT;
+    return EMPTY_FORKED_RESULT;
   }
 
   const forkColumnIndex = result.columns.findIndex((column) => column.name === '_fork');
   if (forkColumnIndex < 0) {
-    return EMPTY_RESULT;
+    return EMPTY_FORKED_RESULT;
   }
 
   const resultsByForkId = splitResultByForkId(result, forkColumnIndex);
@@ -264,6 +298,120 @@ function splitResultByForkId(
     columns: columnsWithoutFork,
     values: rows.map((row) => row.filter((_, i) => i !== forkColumnIndex)),
   }));
+}
+
+async function getCategoriesAndTopValues({
+  esClient,
+  index,
+  startMs,
+  endMs,
+  kqlFilter,
+  totalCount,
+  fields,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  startMs: number;
+  endMs: number;
+  kqlFilter?: string;
+  totalCount: number;
+  fields: string[];
+}): Promise<{ categories: LogCategory[]; topValues: Record<string, TopValueEntry[]> }> {
+  if (totalCount === 0) {
+    return { categories: [], topValues: {} };
+  }
+
+  const samplingProbability = computeSamplingProbability({
+    totalHits: totalCount,
+    targetSampleSize: CATEGORIZATION_SAMPLE_SIZE,
+  });
+
+  const sampleFields = [...new Set([...ALWAYS_INCLUDED_FIELDS, ...fields])];
+
+  const search = getTypedSearch(esClient);
+
+  const topValueAggs = Object.fromEntries(
+    FACET_FIELDS.map((field) => [field, { terms: { field, size: 10 } }])
+  );
+
+  const response = await search({
+    index,
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...timeRangeFilter('@timestamp', { start: startMs, end: endMs }),
+          ...kqlFilterToDsl(kqlFilter),
+          { exists: { field: 'message' } },
+        ],
+      },
+    },
+    aggregations: {
+      sampler: {
+        random_sampler: { probability: samplingProbability, seed: 1 },
+        aggs: {
+          categories: {
+            categorize_text: {
+              field: 'message',
+              size: MAX_CATEGORIES,
+              min_doc_count: 1,
+            },
+            aggs: {
+              hit: {
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  fields: sampleFields,
+                  sort: [{ '@timestamp': { order: 'desc' as const } }],
+                },
+              },
+            },
+          },
+        },
+      },
+      ...topValueAggs,
+    },
+  });
+
+  const categoryBuckets = response.aggregations?.sampler?.categories?.buckets ?? [];
+  const categories = categoryBuckets.map((bucket) => {
+    const hit = bucket.hit?.hits?.hits?.[0];
+    const hitFields = hit
+      ? Object.fromEntries(
+          Object.entries(unwrapEsFields(hit.fields))
+            .filter(([, value]) => value != null)
+            .map(([name, value]) => [name, truncateFieldValue(value)])
+        )
+      : {};
+
+    return {
+      pattern: bucket.key,
+      count: bucket.doc_count,
+      sample: {
+        _id: hit?._id,
+        _index: hit?._index,
+        ...hitFields,
+      },
+    };
+  });
+
+  const aggs = response.aggregations as
+    | Record<string, { buckets: Array<{ key: string; doc_count: number }> }>
+    | undefined;
+
+  const topValues: Record<string, TopValueEntry[]> = {};
+  for (const field of FACET_FIELDS) {
+    const termsBuckets = aggs?.[field]?.buckets ?? [];
+    if (termsBuckets.length > 0) {
+      topValues[field] = termsBuckets.map((b) => ({
+        value: String(b.key),
+        count: b.doc_count,
+      }));
+    }
+  }
+
+  return { categories, topValues };
 }
 
 const SAFE_INDEX_PATTERN = /^[a-zA-Z0-9_.*,:\-]+$/;

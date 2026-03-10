@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
@@ -14,7 +14,7 @@ import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { parseDatemath } from '../../utils/time';
-import { DEFAULT_KEEP_FIELDS, OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
+import { DEFAULT_SAMPLE_FIELDS, OBSERVABILITY_GET_LOGS_TOOL_ID } from './constants';
 import type { GetLogsResult } from './handler';
 import { getDefaultBucketSize, getLogsHandler } from './handler';
 import { getLogsIndices } from '../../utils/get_logs_indices';
@@ -65,7 +65,7 @@ const getLogsSchema = z.object({
     ),
   fields: z
     .array(z.string())
-    .default(DEFAULT_KEEP_FIELDS)
+    .default(DEFAULT_SAMPLE_FIELDS)
     .describe('Fields to include in log samples. Overrides the default fields when provided.'),
 });
 
@@ -79,7 +79,7 @@ export function createGetLogsTool({
   const toolDefinition: BuiltinToolDefinition<typeof getLogsSchema> = {
     id: OBSERVABILITY_GET_LOGS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Searches and filters logs, returning a histogram trend, total count, and compact log samples in a single query.
+    description: `Searches and filters logs, returning a histogram trend, total count, compact log samples, and message pattern categories in a single query.
 
 When to use:
 - Investigating log spikes, errors, or anomalies by iteratively narrowing down with KQL filters
@@ -88,13 +88,17 @@ When to use:
 
 How to use (the "funnel" workflow):
 1. Start with a broad filter (or no kqlFilter) to see the landscape
-2. Review the totalCount and samples — identify noise (health checks, cron jobs, verbose info logs)
+2. Review the totalCount, categories, and samples — identify noise (health checks, cron jobs, verbose info logs)
 3. Call again with NOT clauses added to kqlFilter to exclude noise
-4. Repeat 3-5 times until samples show the root cause
+4. Repeat until categories shows fewer than 20 distinct patterns or samples show the root cause
 5. Use groupBy (e.g. "log.level") to slice the histogram for richer trend analysis
 
+Response includes:
+- categories: top message patterns by frequency (only when totalCount > 100). Use the number of categories to gauge noise diversity — fewer than 20 patterns means the dataset is focused enough to review.
+- topValues: top values with counts for key fields (log.level, service.name, host.name, etc.). Use these exact values when building kqlFilter or choosing a groupBy field — do not guess field values.
+
 When NOT to use:
-- For log pattern grouping/categorization, use get_log_groups
+- For detailed log pattern grouping with samples and exception analysis, use get_log_groups
 - For log rate spike/dip correlation analysis, use run_log_rate_analysis
 - For metrics or traces, use the dedicated metric/trace tools`,
     schema: getLogsSchema,

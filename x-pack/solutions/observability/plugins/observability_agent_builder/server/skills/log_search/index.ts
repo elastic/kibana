@@ -48,13 +48,14 @@ function buildLogSearchSkillContent(): string {
     ### Phase 1: Initial Peek
     ALWAYS start here. Call \`get_logs\` with groupBy="log.level".
     If the user mentions a specific service, host, or container, scope the query with a kqlFilter (e.g. \`service.name: "cart-service"\`). Otherwise, use no kqlFilter.
-    Read three things:
+    Read four things:
     - **totalCount**: How many logs match? This is an indicator of noise.
     - **histogram**: Is there a spike or dip? Note the timestamp if so. This is an indicator of a root cause.
     - **samples**: What do the logs look like? Health checks? Real errors? Cron noise?
+    - **categories**: How many distinct message patterns exist? Fewer than 20 patterns means the dataset is focused enough to review directly.
 
     Decision:
-    - totalCount < 500 → skip to Answer (small enough to review samples directly)
+    - categories has fewer than 20 patterns → skip to Answer (focused enough to review samples directly)
     - Spike in histogram → note the time, then Phase 2
     - totalCount > 10,000 → Phase 2
     - Otherwise → Phase 3 (moderate volume, start filtering directly)
@@ -93,11 +94,15 @@ function buildLogSearchSkillContent(): string {
       IMPORTANT: Use the exact values from the histogram breakdown — keyword fields like \`log.level\` are case-sensitive.
       If you're unsure of exact field values, use \`get_index_info\` with operation="get-field-values" to discover them.
 
-    Continue until totalCount < 500 or samples show the root cause.
+    Continue until:
+    - **categories** shows fewer than 20 distinct patterns (noise is sufficiently reduced), OR
+    - **totalCount** < 500, OR
+    - **samples** show the root cause
 
     RULES for this phase:
     - If you see a spike, narrow the time range (start/end) around it to isolate the incident window.
     - Use groupBy (e.g. "log.level" or "service.name") to understand the shape of the data.
+    - Check **categories** after each call — when patterns drop below 20, the remaining logs are focused enough to review.
     - You MUST call get_logs at least 3 times before moving on.
 
     ### Phase 4: Verify (Cross-check)
@@ -117,7 +122,7 @@ function buildLogSearchSkillContent(): string {
     1. ALWAYS start with \`get_logs\`. Never call another tool first.
     2. When excluding noise (Strategy A), accumulate NOT clauses. When zooming into a specific service or pattern (Strategy B), you may replace the filter entirely.
     3. Call \`get_logs\` at least 3 times before providing your answer.
-    4. If totalCount > 10,000 after filtering, you have too much noise. Keep filtering.
+    4. If totalCount > 10,000 or categories shows 20+ patterns after filtering, you have too much noise. Keep filtering.
     5. Before answering, ALWAYS run Phase 4 (Verify) — call \`get_log_groups\` without filters to check for error patterns you may have missed. Only then provide your answer.
     6. Before each tool call, explain what you see and why you're taking the next action.
     7. If a tool call returns an error, try a different approach. Do not retry the same failing call more than once.
@@ -160,16 +165,16 @@ function buildLogSearchSkillContent(): string {
     User: "Why are there errors in the checkout service?"
 
     **Phase 1**: get_logs(start="now-1h", end="now")
-    → totalCount: 42,000. Histogram shows spike at 14:05-14:10. Samples dominated by "GET /health" and fluent-bit noise.
+    → totalCount: 42,000. Categories: 28 patterns (too many — noisy). Histogram shows spike at 14:05-14:10. Samples dominated by "GET /health" and fluent-bit noise.
 
     **Phase 2**: run_log_rate_analysis(start="2026-02-25T13:50:00Z", end="2026-02-25T14:15:00Z")
     → Significant items: service.name="checkout" (p=0.001), error.message="OOMKilled" (p=0.003). Checkout is correlated with the spike.
 
     **Phase 3**: get_logs(kqlFilter="service.name: \\"checkout\\"", start="2026-02-25T14:00:00Z", end="2026-02-25T14:15:00Z", groupBy="log.level")
-    → totalCount: 320. Histogram shows errors concentrated at 14:07. Samples show OOMKilled events.
+    → totalCount: 320. Categories: 12 patterns (focused). Histogram shows errors concentrated at 14:07. Samples show OOMKilled events.
 
     **Phase 3**: get_logs(kqlFilter="service.name: (checkout OR payment) AND log.level: (ERROR OR WARN)", start="2026-02-25T14:05:00Z", end="2026-02-25T14:10:00Z", bucketSize="1m")
-    → totalCount: 89. OOMKilled in checkout at 14:07, followed by connection timeouts in payment-service.
+    → totalCount: 89. Categories: 5 patterns. OOMKilled in checkout at 14:07, followed by connection timeouts in payment-service.
     (Note: "ERROR" and "WARN" are the exact values observed in the Phase 1 histogram breakdown.)
 
     **Answer**: Checkout service OOMKilled at 14:07, causing cascading timeouts in payment-service.
