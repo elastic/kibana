@@ -36,6 +36,12 @@ interface MeteringStatsIndex {
 
 type StatsResponse = Record<string, MeteringStatsIndex>;
 
+interface CheckResult {
+  partitionedFieldMetadata: PartitionedFieldMetadata | null;
+  pattern: string;
+  error: string | null;
+}
+
 const fetchIndexStats = async (
   http: ReturnType<typeof useKibana>['services']['http'],
   indexName: string,
@@ -216,14 +222,7 @@ export const useAutoCheckIndices = ({ indexNames, enabled }: UseAutoCheckIndices
       try {
         // Track the current save promise to wait for it before proceeding to next index
         let currentSavePromise: Promise<void> | null = null;
-        let checkResult:
-          | {
-              partitionedFieldMetadata: PartitionedFieldMetadata | null;
-              pattern: string;
-              error: string | null;
-            }
-          | null
-          | undefined = null;
+        let checkResult: CheckResult | null = null;
 
         await checkIndex({
           abortController: abortController.current,
