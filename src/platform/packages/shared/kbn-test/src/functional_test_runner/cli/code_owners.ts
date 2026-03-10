@@ -26,16 +26,20 @@ const TEST_DIRECTORIES = [
 export async function checkFTRCodeOwnersCLI() {
   await run(
     async ({ log }) => {
-      const matcher = ignore().add(
+      const hasOwnerMatcher = ignore().add(
         getCodeOwnersEntries()
           .filter((entry) => entry.teams.length > 0)
           .map((entry) => entry.pattern)
       );
-      const hasOwner = (path: string): boolean => matcher.test(path).ignored;
+      const hasOwner = (path: string): boolean => hasOwnerMatcher.test(path).ignored;
+
+      const moonConfigMatcher = ignore().add(['**/moon.yml']);
+      const isMoonConfig = (path: string): boolean => moonConfigMatcher.test(path).ignored;
 
       const testFiles = await getRepoFiles(TEST_DIRECTORIES);
       const filesWithoutOwner = testFiles
         .filter((repoPath) => !hasOwner(repoPath.repoRel))
+        .filter((repoPath) => !isMoonConfig(repoPath.repoRel))
         .map((repoPath) => repoPath.repoRel);
 
       log.info(`Checked ${testFiles.length} test files in ${process.uptime().toFixed(2)}s`);
