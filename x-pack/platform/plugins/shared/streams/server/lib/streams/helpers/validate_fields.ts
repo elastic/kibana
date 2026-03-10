@@ -15,7 +15,7 @@ import {
   LOGS_ECS_STREAM_NAME,
   namespacePrefixes,
 } from '@kbn/streams-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
@@ -106,7 +106,7 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
 
 export async function validateSimulation(
   definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
-  scopedClusterClient: IScopedClusterClient
+  esClient: ElasticsearchClient
 ) {
   if (definition.ingest.processing.steps.length === 0) {
     return;
@@ -122,7 +122,7 @@ export async function validateSimulation(
       processors: transpileIngestPipeline(definition.ingest.processing).processors,
     },
   };
-  const simulationResult = await executePipelineSimulation(scopedClusterClient, simulationBody);
+  const simulationResult = await executePipelineSimulation(esClient, simulationBody);
   if (simulationResult.status === 'failure') {
     throw new MalformedFieldsError(simulationResult.error.message);
   }

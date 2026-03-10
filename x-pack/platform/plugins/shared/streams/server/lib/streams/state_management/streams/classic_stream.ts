@@ -256,10 +256,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     // Check for conflicts
     if (this._changes.lifecycle || this._changes.processing) {
       try {
-        const dataStreamResult =
-          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-            name: this._definition.name,
-          });
+        const dataStreamResult = await this.dependencies.esClient.indices.getDataStream({
+          name: this._definition.name,
+        });
 
         if (dataStreamResult.data_streams.length === 0) {
           // There is an index but no data stream
@@ -292,17 +291,16 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         this._definition.ingest.classic.field_overrides
       );
       if (mappings) {
-        const response =
-          (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-            method: 'PUT',
-            path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
-            body: {
-              properties: mappings,
-              _meta: {
-                managed_by: 'streams',
-              },
+        const response = (await this.dependencies.esClient.transport.request({
+          method: 'PUT',
+          path: `/_data_stream/${this._definition.name}/_mappings?dry_run=true`,
+          body: {
+            properties: mappings,
+            _meta: {
+              managed_by: 'streams',
             },
-          })) as DataStreamMappingsUpdateResponse;
+          },
+        })) as DataStreamMappingsUpdateResponse;
         if (response.data_streams.length === 0) {
           return {
             isValid: false,
@@ -357,12 +355,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
 
     await Promise.all([
       validateSettingsWithDryRun({
-        scopedClusterClient: this.dependencies.scopedClusterClient,
+        esClient: this.dependencies.esClient,
         streamName: this._definition.name,
         settings: this._definition.ingest.settings,
         isServerless: this.dependencies.isServerless,
       }),
-      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+      validateSimulation(this._definition, this.dependencies.esClient),
     ]);
 
     const queryStreamsValidation = validateQueryStreams({
@@ -687,7 +685,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     }
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
-      scopedClusterClient: this.dependencies.scopedClusterClient,
+      esClient: this.dependencies.esClient,
     });
 
     // For deletion operations, only return if there's an actual pipeline configured
@@ -712,7 +710,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
   private async getEffectiveSettings() {
     if (!this._effectiveSettings) {
       this._effectiveSettings = getDataStreamSettings(
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices
+        await this.dependencies.esClient.indices
           .getDataStreamSettings({ name: this._definition.name })
           .then((res) => res.data_streams[0])
       );
