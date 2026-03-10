@@ -207,6 +207,7 @@ describe('RuleResultsPreview', () => {
       error: null,
       groupingFields: ['host.name'],
       uniqueGroupCount: 2,
+      hasValidQuery: true,
     };
 
     it('renders a key icon for grouping field columns', () => {
