@@ -17,7 +17,11 @@ import {
   listAmazonS3BucketObjects,
   listAmazonS3Buckets,
 } from './amazon_s3_api';
-import type { ActionDownloadFileInput, ActionListBucketObjectsInput, ActionListBucketsInput } from './amazon_s3_types';
+import type {
+  ActionDownloadFileInput,
+  ActionListBucketObjectsInput,
+  ActionListBucketsInput,
+} from './amazon_s3_types';
 
 /**
  * Default maximum file size that can be downloaded (128 kilobytes)
@@ -95,7 +99,9 @@ export const AmazonS3: ConnectorSpec = {
         region: z
           .string()
           .optional()
-          .describe('The optional region of the S3 bucket. If not specified, will attempt to auto-detect.'),
+          .describe(
+            'The optional region of the S3 bucket. If not specified, will attempt to auto-detect.'
+          ),
         prefix: z.string().optional().describe('The prefix to filter objects by'),
         continuationToken: z
           .string()

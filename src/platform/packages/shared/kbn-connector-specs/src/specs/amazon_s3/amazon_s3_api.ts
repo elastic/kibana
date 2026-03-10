@@ -10,7 +10,13 @@
 import { Parser } from 'xml2js';
 import type { ActionContext } from '../../connector_spec';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_credentials_helpers';
-import type { AmazonS3BucketObjectListing, AmazonS3Bucket, AmazonS3BucketsListing, AmazonS3ObjectMetadata, AmazonS3Object } from './amazon_s3_types';
+import type {
+  AmazonS3BucketObjectListing,
+  AmazonS3Bucket,
+  AmazonS3BucketsListing,
+  AmazonS3ObjectMetadata,
+  AmazonS3Object,
+} from './amazon_s3_types';
 
 function createQueryString(params: Record<string, string | undefined>): string {
   const queryParams: Record<string, string> = {};
@@ -144,7 +150,7 @@ export async function listAmazonS3Buckets(
     'bucket-region': bucketsRegion,
     'continuation-token': continuationToken,
     'max-buckets': maxBuckets?.toString(),
-    'prefix': prefix,
+    prefix,
   });
 
   const url = `https://${awsS3Host}/${queryString ? `?${queryString}` : ''}`;
@@ -191,7 +197,7 @@ export async function listAmazonS3BucketObjects(
     'list-type': '2',
     'continuation-token': continuationToken,
     'max-keys': maxKeys?.toString(),
-    'prefix': prefix,
+    prefix,
   });
 
   const url = `https://${awsS3Host}/${queryString ? `?${queryString}` : ''}`;
