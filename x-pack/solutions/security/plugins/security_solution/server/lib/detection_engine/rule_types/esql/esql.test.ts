@@ -202,10 +202,9 @@ describe('esqlExecutor', () => {
       );
     });
 
-    it('should store transformedQuery and lastQuery in returned state', async () => {
+    it('should store lastQuery in returned state', async () => {
       const result = await esqlExecutor(mockedArguments);
 
-      expect(result.state).toHaveProperty('transformedQuery');
       expect(result.state).toHaveProperty('lastQuery', params.query);
     });
   });

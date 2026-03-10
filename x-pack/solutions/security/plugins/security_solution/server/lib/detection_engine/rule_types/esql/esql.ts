@@ -27,7 +27,7 @@ import {
   updateExcludedDocuments,
   initiateExcludedDocuments,
   getSourceDocument,
-  getTransformedQueryFromState,
+  getTransformedQuery,
   checkMissingIdFieldWarning,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
@@ -100,9 +100,8 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
-    const { query: transformedQuery, injectionFailureReason } = await getTransformedQueryFromState({
+    const { query: transformedQuery, injectionFailureReason } = await getTransformedQuery({
       originalQuery: ruleParams.query,
-      state,
       ruleExecutionLogger,
       isAggregating: isRuleAggregating,
     });
@@ -349,11 +348,7 @@ export const esqlExecutor = async ({
       state: {
         ...state,
         excludedDocuments,
-        ...(!isRuleAggregating && {
-          lastQuery: ruleParams.query,
-          transformedQuery,
-          injectionFailureReason,
-        }),
+        lastQuery: hasMvExpand ? ruleParams.query : undefined, // lastQuery is only relevant for mv_expand queries
       },
       ...(isLoggedRequestsEnabled ? { loggedRequests } : {}),
     };

@@ -7,7 +7,6 @@
 
 import { injectMetadataId } from '@kbn/securitysolution-utils';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import type { EsqlState } from '../types';
 import { validateEsqlQuery } from './validate_esql_query';
 
 export interface TransformedQueryResult {
@@ -17,31 +16,20 @@ export interface TransformedQueryResult {
 
 /**
  * Returns a transformed ES|QL query with `METADATA _id` injected (for deduplication).
- * Uses state-based caching to avoid re-transforming and re-validating on every execution.
- * On cache miss, validates the transformation via AST before using it.
+ * Validates the transformation via AST before using it.
  * Aggregating queries are returned unchanged — they don't produce document-level alerts.
  */
-export const getTransformedQueryFromState = async ({
+export const getTransformedQuery = async ({
   originalQuery,
-  state,
   ruleExecutionLogger,
   isAggregating,
 }: {
   originalQuery: string;
-  state: EsqlState;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   isAggregating: boolean;
 }): Promise<TransformedQueryResult> => {
   if (isAggregating) {
     return { query: originalQuery };
-  }
-
-  if (state.lastQuery === originalQuery && state.transformedQuery != null) {
-    ruleExecutionLogger.trace('Using state-based transformed ES|QL query');
-    return {
-      query: state.transformedQuery,
-      injectionFailureReason: state.injectionFailureReason,
-    };
   }
 
   let candidateQuery: string;
@@ -57,7 +45,6 @@ export const getTransformedQueryFromState = async ({
     };
   }
 
-  // if query not changed return early to avoid unnecessary validation
   if (candidateQuery === originalQuery) {
     return { query: originalQuery };
   }
