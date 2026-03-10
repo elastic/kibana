@@ -70,6 +70,7 @@ import { css, injectGlobal } from '@emotion/css';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import type { VisEditorsRegistry } from './vis_editors_registry';
@@ -545,6 +546,7 @@ export class VisualizationsPlugin
       dataViews,
       inspector,
       serverless,
+      cps,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -590,6 +592,10 @@ export class VisualizationsPlugin
     }
 
     registerActions(uiActions, data, types);
+
+    cps?.cpsManager?.registerAppAccess('visualize', (location: string) =>
+      location.includes('type:vega') ? ProjectRoutingAccess.EDITABLE : ProjectRoutingAccess.DISABLED
+    );
 
     return {
       ...types,

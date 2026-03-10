@@ -6,13 +6,9 @@
  */
 import { getFlattenedObject } from '@kbn/std';
 import type { SampleDocument } from '@kbn/streams-schema';
-import {
-  fieldDefinitionConfigSchema,
-  isDescendantOf,
-  Streams,
-  LOGS_ROOT_STREAM_NAME,
-} from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
+import { fieldDefinitionConfigSchema, isDescendantOf, Streams } from '@kbn/streams-schema';
+import { z } from '@kbn/zod/v4';
+import { LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
@@ -171,7 +167,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
@@ -332,7 +331,10 @@ export const schemaFieldsConflictsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<FieldsConflictsResponse> => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({
+      name: params.path.name,
+      esClient: scopedClusterClient.asCurrentUser,
+    });
 
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);

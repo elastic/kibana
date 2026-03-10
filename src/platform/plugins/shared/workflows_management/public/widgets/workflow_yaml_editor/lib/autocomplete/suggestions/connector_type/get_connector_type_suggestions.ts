@@ -12,10 +12,14 @@ import type { BuiltInStepType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
+  getBuiltInStepStability,
   IfStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WhileStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
 } from '@kbn/workflows';
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';
@@ -112,13 +116,19 @@ export function getConnectorTypeSuggestions(
     );
 
     matchingBuiltInTypes.forEach((stepType) => {
-      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType);
+      const snippetText = generateBuiltInStepSnippet(stepType.type as BuiltInStepType, {});
       const extendedRange = {
         startLineNumber: range.startLineNumber,
         endLineNumber: range.endLineNumber,
         startColumn: range.startColumn,
         endColumn: Math.max(range.endColumn, 1000),
       };
+
+      const stability = getBuiltInStepStability(stepType.type);
+      const detail =
+        stability === 'tech_preview'
+          ? 'Built-in workflow step (Tech Preview)'
+          : 'Built-in workflow step';
 
       suggestions.push({
         label: stepType.type,
@@ -128,8 +138,8 @@ export function getConnectorTypeSuggestions(
         range: extendedRange,
         documentation: stepType.description,
         filterText: stepType.type,
-        sortText: `!${stepType.type}`, // Priority prefix to sort before connector suggestions
-        detail: 'Built-in workflow step',
+        sortText: `!${stepType.type}`,
+        detail,
         preselect: false,
       });
     });
@@ -209,6 +219,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
       icon: monaco.languages.CompletionItemKind.Method,
     },
     {
+      schema: WhileStepSchema,
+      description:
+        'Repeat steps while condition is true (do-while semantics — first iteration always runs).',
+      icon: monaco.languages.CompletionItemKind.Method,
+    },
+    {
       schema: IfStepSchema,
       description: 'Execute steps conditionally based on a condition',
       icon: monaco.languages.CompletionItemKind.Keyword,
@@ -232,6 +248,16 @@ function getBuiltInStepTypesFromSchema(): Array<{
       schema: WaitStepSchema,
       description: 'Wait for a specified duration',
       icon: monaco.languages.CompletionItemKind.Constant,
+    },
+    {
+      schema: WorkflowExecuteStepSchema,
+      description: 'Execute another workflow (synchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
+    },
+    {
+      schema: WorkflowExecuteAsyncStepSchema,
+      description: 'Execute another workflow (asynchronous)',
+      icon: monaco.languages.CompletionItemKind.Function,
     },
   ];
 

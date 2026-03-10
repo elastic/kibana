@@ -44,6 +44,23 @@ const isGlobalSetupFile = (filename) => {
   return path.basename(filename) === 'global.setup.ts';
 };
 
+const ALLOWED_PLAYWRIGHT_CONFIG_NAMES = new Set([
+  'playwright.config.ts',
+  'parallel.playwright.config.ts',
+]);
+
+/**
+ * Checks if a file is a Playwright config with a non-standard name
+ * @param {string} filename
+ * @returns {boolean}
+ */
+const isNonStandardPlaywrightConfig = (filename) => {
+  const basename = path.basename(filename);
+  return (
+    basename.includes('playwright.config.ts') && !ALLOWED_PLAYWRIGHT_CONFIG_NAMES.has(basename)
+  );
+};
+
 /**
  * Gets the file extension from a filename
  * @param {string} filename
@@ -76,6 +93,9 @@ module.exports = {
         'Scout test files must end with .spec.ts extension. Found: "{{actual}}", expected: "{{expected}}"',
       invalidPath:
         'Scout test files must be located in scout{_*}/{ui,api}/{parallel_,}tests/ directories.',
+      invalidPlaywrightConfigName: `Scout Playwright config files must be named one of the following: ${[
+        ...ALLOWED_PLAYWRIGHT_CONFIG_NAMES,
+      ].join(', ')}. Found: "{{actual}}"`,
     },
     fixable: null,
     schema: [],
@@ -113,6 +133,20 @@ module.exports = {
         };
       }
     } else if (filename.includes('/test/scout') && filename.endsWith('.ts')) {
+      if (isNonStandardPlaywrightConfig(filename)) {
+        return {
+          Program(node) {
+            context.report({
+              node,
+              messageId: 'invalidPlaywrightConfigName',
+              data: {
+                actual: path.basename(filename),
+              },
+            });
+          },
+        };
+      }
+
       // File is in /test/scout but not in the correct subdirectory structure
       // Only report if it looks like a test file (has test/spec in name or is .ts)
       const basename = path.basename(filename, '.ts');

@@ -5,11 +5,47 @@
  * 2.0.
  */
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { IndexName, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
 const BATCH_SIZE = 5 * 1024 * 1024; // 5MB
 const RETRY_ON_CONFLICT = 3;
+
+export interface UpdateByQueryWithScriptOptions {
+  index: IndexName;
+  query: QueryDslQueryContainer;
+  script: string;
+  params: Record<string, unknown>;
+  signal?: AbortSignal;
+}
+
+export const updateByQueryWithScript = async (
+  esClient: ElasticsearchClient,
+  options: UpdateByQueryWithScriptOptions
+): Promise<{ updated: number; total: number }> => {
+  const { index, query, script, params, signal } = options;
+  const response = await esClient.updateByQuery(
+    {
+      index,
+      query,
+      refresh: true,
+      // Uses conflicts: 'proceed' so Elasticsearch continues on version conflicts.
+      // Conflicted documents are not updated.
+      conflicts: 'proceed',
+      wait_for_completion: true,
+      script: {
+        source: script,
+        lang: 'painless',
+        params,
+      },
+    },
+    { signal }
+  );
+  const updated = response.updated ?? 0;
+  const total = response.total ?? 0;
+  return { updated, total };
+};
 
 interface IngestEntitiesParams {
   esClient: ElasticsearchClient;

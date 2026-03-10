@@ -7,8 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PolicyArtifactsPageLabels } from '../artifacts/translations';
 
-export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
+export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS: Omit<
+  PolicyArtifactsPageLabels,
+  'layoutAboutMessage'
+> = Object.freeze({
   deleteModalTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.list.removeDialog.title',
     {
@@ -132,6 +136,10 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
   emptyUnexistingPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.empty.unexisting.action',
     { defaultMessage: 'Add host isolation exceptions' }
+  ),
+  emptyUnexistingImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.hostIsolationException.empty.unexisting.importAction',
+    { defaultMessage: 'Import host isolation exception list' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate(

@@ -12,6 +12,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import type { WorkflowsMeteringService } from '../metering';
+import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 
@@ -23,6 +24,7 @@ export async function runWorkflow({
   config,
   fakeRequest,
   dependencies,
+  workflowsExecutionEngine,
   meteringService,
 }: {
   workflowRunId: string;
@@ -32,6 +34,7 @@ export async function runWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
+  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
   // Span for setup/initialization phase
@@ -46,13 +49,34 @@ export async function runWorkflow({
     workflowTaskManager,
     workflowExecutionRepository,
     esClient,
-  } = await setupDependencies(workflowRunId, spaceId, logger, config, dependencies, fakeRequest);
+  } = await setupDependencies(
+    workflowRunId,
+    spaceId,
+    logger,
+    config,
+    dependencies,
+    fakeRequest,
+    workflowsExecutionEngine
+  );
   setupSpan?.end();
 
-  // Span for runtime initialization
+  // Span for runtime initialization (graph building, topsort, etc.)
   const startSpan = apm.startSpan('workflow runtime start', 'workflow', 'initialization');
-  await workflowRuntime.start();
-  startSpan?.end();
+  try {
+    await workflowRuntime.start();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logger.error(
+      `Workflow execution ${workflowRunId} failed during runtime start: ${errorMessage}`
+    );
+    if (errorStack) {
+      logger.error(`Workflow execution ${workflowRunId} runtime start error stack: ${errorStack}`);
+    }
+    throw error;
+  } finally {
+    startSpan?.end();
+  }
 
   // Span for the main execution loop
   const loopSpan = apm.startSpan('workflow execution loop', 'workflow', 'execution');

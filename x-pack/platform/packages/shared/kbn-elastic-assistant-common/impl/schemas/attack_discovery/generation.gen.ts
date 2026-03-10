@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type AttackDiscoveryGeneration = z.infer<typeof AttackDiscoveryGeneration>;
 export const AttackDiscoveryGeneration = z.object({

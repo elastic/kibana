@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Parser,
-  BasicPrettyPrinter,
-  isCommand,
-  isFunctionExpression,
-  type ESQLAstQueryExpression,
-} from '@kbn/esql-language';
+import { Parser, BasicPrettyPrinter, isCommand, isFunctionExpression } from '@elastic/esql';
+import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { replaceParameters } from '@kbn/esql-composer';
 import type { MetricField } from '../../../types';
 import { isLegacyHistogram } from '../legacy_histogram';
