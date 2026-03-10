@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -14,7 +14,7 @@ import {
   getDurationNumberInItsUnit,
   getTimeOptions,
   INVALID_NUMBER_KEYS,
-  parsePositiveIntegerInput,
+  POSITIVE_INTEGER_REGEX,
 } from '../utils';
 import type { FormValues } from '../types';
 
@@ -74,19 +74,38 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
   inputRef,
   numberPrependLabel,
 }) => {
-  const intervalNumber = useMemo(() => getDurationNumberInItsUnit(value || '2m'), [value]);
+  const effectiveValue = value || '2m';
 
-  const intervalUnit = useMemo(() => getDurationUnitValue(value || '2m'), [value]);
+  const intervalNumber = useMemo(
+    () => getDurationNumberInItsUnit(effectiveValue),
+    [effectiveValue]
+  );
+
+  const intervalUnit = useMemo(() => getDurationUnitValue(effectiveValue), [effectiveValue]);
+
+  const [localNumber, setLocalNumber] = useState<string>(String(intervalNumber ?? ''));
+
+  useEffect(() => {
+    setLocalNumber(String(intervalNumber ?? ''));
+  }, [intervalNumber]);
 
   const onIntervalNumberChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const parsedValue = parsePositiveIntegerInput(e.target.value);
-      if (parsedValue != null) {
+      const val = e.target.value.trim();
+      setLocalNumber(val);
+      if (POSITIVE_INTEGER_REGEX.test(val)) {
+        const parsedValue = parseInt(val, 10);
         onChange(`${parsedValue}${intervalUnit}`);
       }
     },
     [intervalUnit, onChange]
   );
+
+  const onBlur = useCallback(() => {
+    if (!POSITIVE_INTEGER_REGEX.test(localNumber)) {
+      setLocalNumber(String(intervalNumber ?? 1));
+    }
+  }, [localNumber, intervalNumber]);
 
   const onIntervalUnitChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -107,8 +126,9 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
         <EuiFieldNumber
           fullWidth
           isInvalid={!!errors}
-          value={intervalNumber}
+          value={localNumber}
           onChange={onIntervalNumberChange}
+          onBlur={onBlur}
           onKeyDown={onKeyDown}
           min={1}
           step={1}
@@ -121,7 +141,7 @@ const StateTransitionTimeframeInput: React.FC<StateTransitionTimeframeInputProps
         <EuiSelect
           fullWidth
           value={intervalUnit}
-          options={getTimeOptions(intervalNumber)}
+          options={getTimeOptions(intervalNumber ?? 1)}
           onChange={onIntervalUnitChange}
           data-test-subj="stateTransitionTimeframeUnitInput"
           aria-label={i18n.translate(

@@ -6,12 +6,13 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import { EuiFieldNumber } from '@elastic/eui';
 import { MAX_CONSECUTIVE_BREACHES } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
-import { INVALID_NUMBER_KEYS, parsePositiveIntegerInput } from '../utils';
+import { INVALID_NUMBER_KEYS } from '../utils';
+import { StateTransitionCountInput } from './state_transition_count_input';
+
 const DEFAULT_PENDING_COUNT = 2;
 
 interface StateTransitionCountFieldProps {
@@ -56,23 +57,13 @@ export const StateTransitionCountField: React.FC<StateTransitionCountFieldProps>
         },
       }}
       render={({ field: { value, onChange, ref }, fieldState: { error } }) => (
-        <EuiFieldNumber
-          value={value ?? DEFAULT_PENDING_COUNT}
-          onChange={(e) => {
-            const parsedValue = parsePositiveIntegerInput(e.target.value);
-            if (parsedValue != null && parsedValue <= MAX_CONSECUTIVE_BREACHES) {
-              onChange(parsedValue);
-            }
-          }}
+        <StateTransitionCountInput
+          value={value}
+          onChange={onChange}
           onKeyDown={onKeyDown}
-          min={1}
-          max={MAX_CONSECUTIVE_BREACHES}
-          step={1}
-          isInvalid={!!error}
-          data-test-subj="stateTransitionCountInput"
+          error={error}
           inputRef={ref}
-          fullWidth
-          prepend={prependLabel ? [prependLabel] : undefined}
+          prependLabel={prependLabel}
         />
       )}
     />

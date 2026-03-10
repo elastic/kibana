@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { StateTransitionCountField } from './state_transition_count_field';
 import { createFormWrapper } from '../../test_utils';
 
@@ -17,25 +17,6 @@ describe('StateTransitionCountField', () => {
     });
 
     expect(screen.getByTestId('stateTransitionCountInput')).toBeInTheDocument();
-  });
-
-  it('accepts a positive integer for count', () => {
-    render(<StateTransitionCountField />, {
-      wrapper: createFormWrapper({ kind: 'alert' }),
-    });
-
-    const input = screen.getByTestId('stateTransitionCountInput');
-    fireEvent.change(input, { target: { value: '3' } });
-    expect(input).toHaveValue(3);
-  });
-
-  it('applies max value of 1000', () => {
-    render(<StateTransitionCountField />, {
-      wrapper: createFormWrapper({ kind: 'alert' }),
-    });
-
-    const input = screen.getByTestId('stateTransitionCountInput');
-    expect(input).toHaveAttribute('max', '1000');
   });
 
   it('renders with pre-filled state transition count from form state', () => {
