@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_COLUMNS,
   MAX_SAVED_SEARCH_TABS,
   VIEW_MODE,
 } from '../../common';
@@ -22,7 +23,10 @@ const SCHEMA_SEARCH_BASE = schema.object({
   description: schema.string({ defaultValue: '' }),
 
   // Data grid
-  columns: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  columns: schema.arrayOf(schema.string(), {
+    defaultValue: [],
+    maxSize: MAX_SAVED_SEARCH_COLUMNS,
+  }),
   sort: schema.oneOf(
     [
       schema.arrayOf(schema.arrayOf(schema.string(), { maxSize: 2 })),

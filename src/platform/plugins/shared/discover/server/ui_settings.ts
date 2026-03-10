@@ -29,6 +29,7 @@ import {
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
 } from '@kbn/discover-utils';
+import { MAX_SAVED_SEARCH_COLUMNS } from '@kbn/saved-search-plugin/common';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
 export const getUiSettings: (
@@ -49,7 +50,7 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: enableValidations
-      ? schema.arrayOf(schema.string(), { maxSize: 50 })
+      ? schema.arrayOf(schema.string(), { maxSize: MAX_SAVED_SEARCH_COLUMNS })
       : schema.arrayOf(schema.string()),
   },
   [MAX_DOC_FIELDS_DISPLAYED]: {
