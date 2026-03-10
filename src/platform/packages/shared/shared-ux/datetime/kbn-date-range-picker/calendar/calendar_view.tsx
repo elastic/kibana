@@ -30,24 +30,12 @@ interface CalendarViewProps {
   weekStartsOn?: 0 | 1;
 }
 
-/** Compares CalendarView props by value so the memo skips re-renders when only object identity changes. */
-function areCalendarViewPropsEqual(prev: CalendarViewProps, next: CalendarViewProps): boolean {
-  return (
-    prev.year === next.year &&
-    prev.monthIndex === next.monthIndex &&
-    prev.weekStartsOn === next.weekStartsOn &&
-    prev.setRange === next.setRange &&
-    prev.range?.from?.getTime() === next.range?.from?.getTime() &&
-    prev.range?.to?.getTime() === next.range?.to?.getTime()
-  );
-}
-
 /**
  * Single-month calendar view backed by react-day-picker.
  * Memoized with a custom comparator to avoid re-rendering every visible
  * month when only the range object reference (not its timestamps) changes.
  */
-export const CalendarView = React.memo(function CalendarView({
+export const CalendarView = function CalendarView({
   year,
   monthIndex,
   range,
@@ -71,5 +59,4 @@ export const CalendarView = React.memo(function CalendarView({
       weekStartsOn={weekStartsOn}
     />
   );
-},
-areCalendarViewPropsEqual);
+};
