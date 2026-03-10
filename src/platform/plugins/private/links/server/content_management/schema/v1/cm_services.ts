@@ -77,6 +77,7 @@ export const linksArraySchema = schema.arrayOf(
   schema.oneOf([dashboardLinkSchema, externalLinkSchema]),
   {
     meta: { description: 'The list of links to display' },
+    maxSize: 9999, // For DoS prevention, no actual user will insert this many links
   }
 );
 
@@ -113,7 +114,11 @@ export const storedDashboardLinkSchema = dashboardLinkSchema.extends({
 export const storedLinksSchema = serializedTitlesSchema.extends({
   layout: layoutSchema,
   links: schema.arrayOf(
-    schema.oneOf([storedDashboardLinkSchema, externalLinkSchema.extends(baseLinkSavedObjectSchema)])
+    schema.oneOf([
+      storedDashboardLinkSchema,
+      externalLinkSchema.extends(baseLinkSavedObjectSchema),
+    ]),
+    { maxSize: 9999 } // For DoS prevention
   ),
 });
 
