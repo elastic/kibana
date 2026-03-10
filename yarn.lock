@@ -8178,6 +8178,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-alerts-close-reason@link:x-pack/platform/packages/shared/response-ops/alerts-close-reason":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-alerts-delete@link:x-pack/platform/packages/shared/response-ops/alerts-delete":
   version "0.0.0"
   uid ""

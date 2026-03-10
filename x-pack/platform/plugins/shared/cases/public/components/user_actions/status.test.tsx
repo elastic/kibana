@@ -65,8 +65,27 @@ describe('createStatusUserActionBuilder ', () => {
       </TestProviders>
     );
 
-    expect(screen.getByText('and synced alerts with close reason:')).toBeInTheDocument();
-    expect(screen.getByText('false_positive')).toBeInTheDocument();
+    expect(screen.getByText('and synced alerts with close reason')).toBeInTheDocument();
+    expect(screen.getByText('False Positive')).toBeInTheDocument();
     expect(screen.getByTestId('status-update-user-action-close-reason-badge')).toBeInTheDocument();
+  });
+
+  it('renders custom close reason values as-is', () => {
+    const userAction = getUserAction('status', UserActionActions.update, {
+      payload: { status: CaseStatuses.closed, closeReason: 'my custom reason' },
+    });
+    const builder = createStatusUserActionBuilder({
+      ...builderArgs,
+      userAction,
+    });
+
+    const createdUserAction = builder.build();
+    render(
+      <TestProviders>
+        <EuiCommentList comments={createdUserAction} />
+      </TestProviders>
+    );
+
+    expect(screen.getByText('my custom reason')).toBeInTheDocument();
   });
 });

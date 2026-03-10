@@ -7,8 +7,8 @@
 
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
-import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-close-reason';
 
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import type { AlertWorkflowStatus } from '../../../../../common/types';

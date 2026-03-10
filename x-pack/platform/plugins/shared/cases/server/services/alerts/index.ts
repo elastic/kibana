@@ -298,15 +298,15 @@ const getUpdateAlertsStatusScript = (status: STATUS_VALUES, reason?: string) => 
     if (ctx._source['${ALERT_WORKFLOW_STATUS}'] != null && ctx._source['${ALERT_WORKFLOW_STATUS}'] != params.status) {
       ctx._source['${ALERT_WORKFLOW_STATUS}'] = params.status;
       ctx._source['${ALERT_WORKFLOW_STATUS_UPDATED_AT}'] = params.updatedAt;
+      if (params.reason != null) {
+          ctx._source['${ALERT_WORKFLOW_REASON}'] = params.reason;
+      }
+      if (params.shouldRemoveWorkflowReason) {
+        ctx._source.remove('${ALERT_WORKFLOW_REASON}');
+      }
     }
     if (ctx._source.signal != null && ctx._source.signal.status != null) {
       ctx._source.signal.status = params.status;
-    }
-    if (params.reason != null) {
-        ctx._source['${ALERT_WORKFLOW_REASON}'] = params.reason;
-    }
-    if (params.shouldRemoveWorkflowReason) {
-      ctx._source.remove('${ALERT_WORKFLOW_REASON}');
     }
   `,
   lang: 'painless',

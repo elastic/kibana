@@ -11,8 +11,8 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { EuiContextMenu, EuiContextMenuItem } from '@elastic/eui';
-import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-close-reason';
 import type { GroupTakeActionItems } from '../../components/alerts_table/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../common/store';

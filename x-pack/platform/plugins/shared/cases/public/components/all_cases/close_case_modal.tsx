@@ -21,6 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { DEFAULT_CLOSING_REASON_OPTIONS } from '@kbn/response-ops-alerts-close-reason';
 
 import * as i18n from './translations';
 
@@ -30,14 +31,8 @@ interface ClosingReasonOption {
   key?: string;
 }
 
-const getDefaultClosingReasonOptions = (): Array<EuiSelectableOption<ClosingReasonOption>> => [
-  { label: i18n.CLOSE_CASE_MODAL_REASON_CLOSE_WITHOUT_REASON, key: undefined },
-  { label: i18n.CLOSE_CASE_MODAL_REASON_DUPLICATE, key: 'duplicate' },
-  { label: i18n.CLOSE_CASE_MODAL_REASON_FALSE_POSITIVE, key: 'false_positive' },
-  { label: i18n.CLOSE_CASE_MODAL_REASON_TRUE_POSITIVE, key: 'true_positive' },
-  { label: i18n.CLOSE_CASE_MODAL_REASON_BENIGN_POSITIVE, key: 'benign_positive' },
-  { label: i18n.CLOSE_CASE_MODAL_REASON_OTHER, key: 'other' },
-];
+const getDefaultClosingReasonOptions = (): Array<EuiSelectableOption<ClosingReasonOption>> =>
+  DEFAULT_CLOSING_REASON_OPTIONS;
 
 interface CloseCaseModalProps {
   closeReasonOptions: Array<EuiSelectableOption<ClosingReasonOption>>;

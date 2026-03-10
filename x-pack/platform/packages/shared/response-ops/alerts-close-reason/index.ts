@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { AlertsTable } from './components/alerts_table';
-export { AlertsTable } from './components/alerts_table';
-// Lazy load helper
-// eslint-disable-next-line import/no-default-export
-export default AlertsTable;
+export {
+  ALERT_CLOSING_REASON_PANEL_ID,
+  useBulkClosingReasonItems,
+} from './hooks/use_bulk_closing_reason_items';
+export {
+  DEFAULT_CLOSING_REASON_OPTIONS,
+  getDefaultClosingReasonLabel,
+} from './components/default_closing_reasons';

@@ -7,7 +7,7 @@
 
 import { useMemo, useCallback } from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
-import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-table';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-alerts-close-reason';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {

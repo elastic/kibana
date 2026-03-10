@@ -60,21 +60,46 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },
           },
         ]
       `);
+    });
+
+    it('updates workflow reason only when workflow status changes', async () => {
+      const args = [
+        {
+          id: 'alert-id-1',
+          index: '.siem-signals',
+          status: CaseStatuses.closed,
+          closingReason: 'false_positive',
+        },
+      ];
+
+      await alertService.updateAlertsStatus(args);
+
+      const scriptSource = esClient.updateByQuery.mock.calls[0][0].script.source;
+
+      expect(scriptSource).toMatch(
+        /if \(ctx\._source\['kibana\.alert\.workflow_status'\] != null && ctx\._source\['kibana\.alert\.workflow_status'\] != params\.status\) \{[\s\S]*if \(params\.reason != null\) {[\s\S]*ctx\._source\['kibana\.alert\.workflow_reason'\] = params\.reason;[\s\S]*if \(params\.shouldRemoveWorkflowReason\) {[\s\S]*ctx\._source\.remove\('kibana\.alert\.workflow_reason'\);[\s\S]*\}/
+      );
+      expect(
+        scriptSource.match(/ctx\._source\['kibana\.alert\.workflow_reason'\] = params\.reason;/g)
+      ).toHaveLength(1);
+      expect(
+        scriptSource.match(/ctx\._source\.remove\('kibana\.alert\.workflow_reason'\);/g)
+      ).toHaveLength(1);
     });
 
     it('buckets the alerts by index', async () => {
@@ -112,15 +137,15 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },
@@ -160,15 +185,15 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },
@@ -212,15 +237,15 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },
@@ -254,15 +279,15 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },
@@ -306,15 +331,15 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },
@@ -348,15 +373,15 @@ describe('updateAlertsStatus', () => {
             if (ctx._source['kibana.alert.workflow_status'] != null && ctx._source['kibana.alert.workflow_status'] != params.status) {
               ctx._source['kibana.alert.workflow_status'] = params.status;
               ctx._source['kibana.alert.workflow_status_updated_at'] = params.updatedAt;
+              if (params.reason != null) {
+                  ctx._source['kibana.alert.workflow_reason'] = params.reason;
+              }
+              if (params.shouldRemoveWorkflowReason) {
+                ctx._source.remove('kibana.alert.workflow_reason');
+              }
             }
             if (ctx._source.signal != null && ctx._source.signal.status != null) {
               ctx._source.signal.status = params.status;
-            }
-            if (params.reason != null) {
-                ctx._source['kibana.alert.workflow_reason'] = params.reason;
-            }
-            if (params.shouldRemoveWorkflowReason) {
-              ctx._source.remove('kibana.alert.workflow_reason');
             }
           ",
             },

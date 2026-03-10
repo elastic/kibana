@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
+import { getDefaultClosingReasonLabel } from '@kbn/response-ops-alerts-close-reason';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
@@ -37,7 +38,9 @@ const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
           <>
             <EuiFlexItem grow={false}>{i18n.SYNCED_ALERTS_CLOSE_REASON}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge>{closeReason}</EuiBadge>
+              <EuiBadge data-test-subj={`${userAction.id}-user-action-close-reason-badge`}>
+                {getDefaultClosingReasonLabel(closeReason)}
+              </EuiBadge>
             </EuiFlexItem>
           </>
         )}

@@ -69,3 +69,10 @@ export const CLOSING_REASON_OTHER = i18n.translate(
     defaultMessage: 'Other',
   }
 );
+
+export const CLOSING_REASON_AUTOMATED_CLOSURE = i18n.translate(
+  'xpack.responseOps.alertsTable.defaultClosingReason.automatedClosure',
+  {
+    defaultMessage: 'Automated closure',
+  }
+);

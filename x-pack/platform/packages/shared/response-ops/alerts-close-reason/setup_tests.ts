@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { AlertsTable } from './components/alerts_table';
-export { AlertsTable } from './components/alerts_table';
-// Lazy load helper
-// eslint-disable-next-line import/no-default-export
-export default AlertsTable;
+/* eslint-disable import/no-extraneous-dependencies */
+import '@testing-library/jest-dom';

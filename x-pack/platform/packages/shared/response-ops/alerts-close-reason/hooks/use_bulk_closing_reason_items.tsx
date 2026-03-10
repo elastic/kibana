@@ -6,20 +6,20 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import type { ContentPanelConfig, RenderContentPanelProps } from '../../types';
-import { ClosingReasonPanel } from './closing_reason_panel';
-import * as i18n from './translations';
+import type { ContentPanelConfig, RenderContentPanelProps } from '../types';
+import { ClosingReasonPanel } from '../components/closing_reason_panel';
+import * as i18n from '../translations';
 
 export const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID';
 
-export interface OnSubmitClosingReasonParams extends RenderContentPanelProps {
+interface OnSubmitClosingReasonParams extends RenderContentPanelProps {
   /**
    * The reason the item(s) are being closed
    */
   reason?: string;
 }
 
-export interface UseBulkClosingReasonItemsProps {
+interface UseBulkClosingReasonItemsProps {
   /**
    * Whether the closing reason action should be shown
    */
