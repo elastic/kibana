@@ -50,7 +50,9 @@ describe('ProfilesManager', () => {
     const scopedProfilesManager = mocks.profilesManagerMock.createScopedProfilesManager({
       scopedEbtManager: mocks.scopedEbtManagerMock,
     });
-    await scopedProfilesManager.resolveDataSourceProfile({});
+    await expect(scopedProfilesManager.resolveDataSourceProfile({})).resolves.toEqual({
+      didProfileChange: true,
+    });
     const profiles = scopedProfilesManager.getProfiles();
     expect(profiles).toEqual([
       {},
@@ -161,10 +163,12 @@ describe('ProfilesManager', () => {
       query: { esql: 'from *' },
     });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
-    await scopedProfilesManager.resolveDataSourceProfile({
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from *' },
-    });
+    await expect(
+      scopedProfilesManager.resolveDataSourceProfile({
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'from *' },
+      })
+    ).resolves.toEqual({ didProfileChange: false });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
   });
 
@@ -177,10 +181,12 @@ describe('ProfilesManager', () => {
       query: { esql: 'from *' },
     });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
-    await scopedProfilesManager.resolveDataSourceProfile({
-      dataSource: createEsqlDataSource(),
-      query: { esql: 'from logs-*' },
-    });
+    await expect(
+      scopedProfilesManager.resolveDataSourceProfile({
+        dataSource: createEsqlDataSource(),
+        query: { esql: 'from logs-*' },
+      })
+    ).resolves.toEqual({ didProfileChange: false });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(2);
   });
 
