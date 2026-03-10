@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { ScoutPage, test as baseTest, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import {
+  ScoutPage,
+  test as baseTest,
+  ObltTestFixtures,
+  ObltWorkerFixtures,
+  ScoutTestConfig,
+} from '@kbn/scout-oblt';
 import { SLOPageObjects, extendPageObjects } from './page_objects';
 
 export interface StreamsTestFixtures extends ObltTestFixtures {
@@ -17,13 +23,15 @@ export const test = baseTest.extend<StreamsTestFixtures, ObltWorkerFixtures>({
     {
       pageObjects,
       page,
+      config,
     }: {
       pageObjects: SLOPageObjects;
       page: ScoutPage;
+      config: ScoutTestConfig;
     },
     use: (pageObjects: SLOPageObjects) => Promise<void>
   ) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+    const extendedPageObjects = extendPageObjects(pageObjects, page, config);
     await use(extendedPageObjects);
   },
 });
