@@ -57,6 +57,12 @@ describe('isAgentOwner', () => {
       false
     );
   });
+
+  test("returns false when owner has username but current user doesn't (ownership requires both id or both username)", () => {
+    const ownerWithUsernameOnly: UserIdAndName = { username: 'alice' };
+    const userWithIdOnly: UserIdAndName = { id: 'user-id' };
+    expect(isAgentOwner({ owner: ownerWithUsernameOnly, currentUser: userWithIdOnly })).toBe(false);
+  });
 });
 
 describe('canChangeAgentVisibility', () => {
@@ -157,7 +163,7 @@ describe('hasAgentReadAccess', () => {
     ).toBe(false);
   });
 
-  test('defaults visibility to Public when not provided', () => {
+  test('when visibility is undefined (legacy agent), treats as Public so any user can read', () => {
     expect(
       hasAgentReadAccess({
         owner,
@@ -222,7 +228,7 @@ describe('hasAgentWriteAccess', () => {
     ).toBe(false);
   });
 
-  test('defaults visibility to Public when not provided', () => {
+  test('when visibility is undefined (legacy agent), treats as Public so any user can write', () => {
     expect(
       hasAgentWriteAccess({
         owner,

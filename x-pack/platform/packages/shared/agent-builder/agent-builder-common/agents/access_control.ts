@@ -21,7 +21,10 @@ export const isAgentOwner = ({
   if (owner.id !== undefined && currentUser.id !== undefined) {
     return owner.id === currentUser.id;
   }
-  return owner.username === currentUser.username;
+  if (owner.username !== undefined && currentUser.username !== undefined) {
+    return owner.username === currentUser.username;
+  }
+  return false;
 };
 
 export const canChangeAgentVisibility = ({
@@ -34,8 +37,9 @@ export const canChangeAgentVisibility = ({
   hasAgentVisibilityAccessOverride: boolean;
 }): boolean => hasAgentVisibilityAccessOverride || isAgentOwner({ owner, currentUser });
 
+/** Legacy agents without a visibility field are treated as Public. */
 export const hasAgentReadAccess = ({
-  visibility = AgentVisibility.Public,
+  visibility,
   owner,
   currentUser,
   hasAgentVisibilityAccessOverride,
@@ -44,13 +48,18 @@ export const hasAgentReadAccess = ({
   owner?: UserIdAndName;
   currentUser?: UserIdAndName | null;
   hasAgentVisibilityAccessOverride: boolean;
-}): boolean =>
-  hasAgentVisibilityAccessOverride ||
-  isAgentOwner({ owner, currentUser }) ||
-  visibility !== AgentVisibility.Private;
+}): boolean => {
+  const effectiveVisibility = visibility ?? AgentVisibility.Public;
+  return (
+    hasAgentVisibilityAccessOverride ||
+    isAgentOwner({ owner, currentUser }) ||
+    effectiveVisibility !== AgentVisibility.Private
+  );
+};
 
+/** Legacy agents without a visibility field are treated as Public. */
 export const hasAgentWriteAccess = ({
-  visibility = AgentVisibility.Public,
+  visibility,
   owner,
   currentUser,
   hasAgentVisibilityAccessOverride,
@@ -59,7 +68,11 @@ export const hasAgentWriteAccess = ({
   owner?: UserIdAndName;
   currentUser?: UserIdAndName | null;
   hasAgentVisibilityAccessOverride: boolean;
-}): boolean =>
-  hasAgentVisibilityAccessOverride ||
-  isAgentOwner({ owner, currentUser }) ||
-  visibility === AgentVisibility.Public;
+}): boolean => {
+  const effectiveVisibility = visibility ?? AgentVisibility.Public;
+  return (
+    hasAgentVisibilityAccessOverride ||
+    isAgentOwner({ owner, currentUser }) ||
+    effectiveVisibility === AgentVisibility.Public
+  );
+};

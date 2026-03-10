@@ -33,7 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import {
   filterToolsBySelection,
-  isAgentOwner,
+  hasAgentWriteAccess,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -88,7 +88,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { services } = useKibana();
   const experimentalFeaturesEnabled = isExperimentalFeaturesEnabled(services.uiSettings);
-  const { manageAgents } = useUiPrivileges();
+  const { manageAgents, hasAgentVisibilityAccessOverride } = useUiPrivileges();
   const { currentUser } = useCurrentUser({ enabled: experimentalFeaturesEnabled });
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
@@ -152,11 +152,16 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     onSaveError,
   });
 
-  const ownerIsCurrentUser = isAgentOwner({
-    owner: agentState?.created_by,
-    currentUser: currentUser ?? undefined,
-  });
-  const canEditAgent = !experimentalFeaturesEnabled || manageAgents || ownerIsCurrentUser;
+  const canEditAgent = !manageAgents
+    ? false
+    : !experimentalFeaturesEnabled
+    ? true
+    : hasAgentWriteAccess({
+        visibility: agentState?.visibility,
+        owner: agentState?.created_by,
+        currentUser: currentUser ?? undefined,
+        hasAgentVisibilityAccessOverride,
+      });
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },

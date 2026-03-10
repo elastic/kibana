@@ -17,7 +17,7 @@ import type { AgentProperties } from '../storage';
 
 const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_id !== undefined || source.created_by_name !== undefined
-    ? { id: source.created_by_id, username: source.created_by_name ?? 'unknown' }
+    ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
 
 export const hasReadAccess = ({
@@ -61,9 +61,11 @@ export const buildVisibilityReadFilter = ({ user }: { user: UserIdAndName }) => 
         },
       },
     },
-    { term: { created_by_name: user.username } },
   ];
 
+  if (user.username !== undefined) {
+    shouldClauses.push({ term: { created_by_name: user.username } });
+  }
   if (user.id !== undefined) {
     shouldClauses.push({ term: { created_by_id: user.id } });
   }

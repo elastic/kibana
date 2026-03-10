@@ -51,7 +51,7 @@ describe('hasReadAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true for non-owner when visibility is public (undefined => public)', () => {
+  it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
     expect(
       hasReadAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
@@ -96,7 +96,7 @@ describe('hasWriteAccess', () => {
     ).toBe(true);
   });
 
-  it('returns true for non-owner when visibility is public (undefined => public)', () => {
+  it('returns true for non-owner when visibility is undefined (legacy agent treated as public)', () => {
     const source = { ...baseSource, created_by_name: 'owner' };
     expect(
       hasWriteAccess({ source, user: nonOwnerUser, hasAgentVisibilityAccessOverride: false })
@@ -147,6 +147,16 @@ describe('buildVisibilityReadFilter', () => {
     expect(filter.bool.should).toEqual([
       { bool: { must_not: { term: { visibility: AgentVisibility.Private } } } },
       { term: { created_by_name: 'owner' } },
+    ]);
+  });
+
+  it('omits created_by_name clause when user.username is undefined', () => {
+    const userWithIdOnly = { id: 'user-1' };
+    const filter = buildVisibilityReadFilter({ user: userWithIdOnly });
+    expect(filter.bool.should).toHaveLength(2);
+    expect(filter.bool.should).toEqual([
+      { bool: { must_not: { term: { visibility: AgentVisibility.Private } } } },
+      { term: { created_by_id: 'user-1' } },
     ]);
   });
 });
