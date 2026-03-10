@@ -31,9 +31,9 @@ import {
   type TelemetryReporter,
 } from '../telemetry/events';
 
-const config = TasksConfig[EntityStoreTaskType.enum.storeUsage];
+const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
-const getStoreUsageTaskId = (namespace: string): string => `${config.type}:${namespace}`;
+const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
 
 const getStoreSize = (esClient: ElasticsearchClient, index: string, entityType: EntityType) =>
   esClient.count({
@@ -93,7 +93,7 @@ async function runTask({
   const namespace = taskInstance.state.namespace as string;
 
   if (!fakeRequest) {
-    logger.error('No fake request found, skipping store usage task');
+    logger.error('No fake request found, skipping status report task');
     return { state: { namespace } };
   }
 
@@ -161,13 +161,13 @@ async function runTask({
       logger.error(`Error reporting entity store health: ${e.message}`);
     }
   } catch (e) {
-    logger.error(`Error running store usage task: ${e.message}`);
+    logger.error(`Error running status report task: ${e.message}`);
   }
 
   return { state: { namespace } };
 }
 
-export function registerStoreUsageTask({
+export function registerStatusReportTask({
   taskManager,
   logger,
   core,
@@ -196,12 +196,12 @@ export function registerStoreUsageTask({
       },
     });
   } catch (e) {
-    logger.error(`Error registering store usage task: ${e.message}`);
+    logger.error(`Error registering status report task: ${e.message}`);
     throw e;
   }
 }
 
-export async function scheduleStoreUsageTask({
+export async function scheduleStatusReportTask({
   logger,
   taskManager,
   namespace,
@@ -215,7 +215,7 @@ export async function scheduleStoreUsageTask({
   try {
     await taskManager.ensureScheduled(
       {
-        id: getStoreUsageTaskId(namespace),
+        id: getStatusReportTaskId(namespace),
         taskType: config.type,
         schedule: { interval: config.interval },
         state: { namespace },
@@ -224,12 +224,12 @@ export async function scheduleStoreUsageTask({
       { request }
     );
   } catch (e) {
-    logger.error(`Error scheduling store usage task: ${e.message}`);
+    logger.error(`Error scheduling status report task: ${e.message}`);
     throw e;
   }
 }
 
-export async function stopStoreUsageTask({
+export async function stopStatusReportTask({
   taskManager,
   logger,
   namespace,
@@ -238,7 +238,7 @@ export async function stopStoreUsageTask({
   logger: Logger;
   namespace: string;
 }): Promise<void> {
-  const taskId = getStoreUsageTaskId(namespace);
+  const taskId = getStatusReportTaskId(namespace);
   await taskManager.removeIfExists(taskId);
-  logger.debug(`Removed store usage task: ${taskId}`);
+  logger.debug(`Removed status report task: ${taskId}`);
 }

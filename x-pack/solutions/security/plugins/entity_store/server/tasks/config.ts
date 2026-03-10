@@ -31,9 +31,9 @@ export const TasksConfig = {
     type: 'entity_store:v2:history_snapshot_task',
     timeout: '30m',
   },
-  [EntityStoreTaskType.enum.storeUsage]: {
-    title: 'Entity Store - Store Usage Task',
-    type: 'entity_store:v2:store_usage_task',
+  [EntityStoreTaskType.enum.statusReport]: {
+    title: 'Entity Store - Status Report Task',
+    type: 'entity_store:v2:status_report_task',
     timeout: '25s',
     interval: '1h',
   },

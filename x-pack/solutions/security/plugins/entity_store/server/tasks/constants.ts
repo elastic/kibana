@@ -12,5 +12,5 @@ export const EntityStoreTaskType = z.enum([
   'extractEntity',
   'entityMaintainer',
   'historySnapshot',
-  'storeUsage',
+  'statusReport',
 ]);
