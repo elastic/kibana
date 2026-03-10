@@ -69,7 +69,7 @@ import { RiskScoreCell } from './risk_score_cell';
 
 import { AdditionalControls } from './additional_controls';
 import { EntitiesEmptyState } from './empty_state';
-import { DataViewContext } from './index';
+import { DataViewContext } from '.';
 import { useStyles } from './hooks/use_styles';
 import { useFetchGridData } from './hooks/use_fetch_grid_data';
 import type { EntityURLStateResult } from './hooks/use_entity_url_state';

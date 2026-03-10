@@ -14,7 +14,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import { useContext, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { QUERY_KEY_GROUPING_DATA, QUERY_KEY_ENTITY_ANALYTICS } from '../constants';
-import { DataViewContext } from '../index';
+import { DataViewContext } from '..';
 
 export interface EntitiesGroupingAggregation {
   entityType?: {

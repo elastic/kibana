@@ -90,6 +90,9 @@ describe('groupStatsRenderer', () => {
     const stats = groupStatsRenderer(ENTITY_GROUPING_OPTIONS.ENTITY_TYPE, bucket);
 
     render(<>{stats[0].component}</>);
-    expect(screen.getByTestId(TEST_SUBJ_GROUPING_COUNTER).closest('[aria-label]') ?? screen.getByTestId(TEST_SUBJ_GROUPING_COUNTER)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(TEST_SUBJ_GROUPING_COUNTER).closest('[aria-label]') ??
+        screen.getByTestId(TEST_SUBJ_GROUPING_COUNTER)
+    ).toBeInTheDocument();
   });
 });

@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import dedent from 'dedent';
 import type { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
-import { DataViewContext } from '../index';
+import { DataViewContext } from '..';
 import type { EntityURLStateResult } from '../hooks/use_entity_url_state';
 import {
   ENTITY_FIELDS,

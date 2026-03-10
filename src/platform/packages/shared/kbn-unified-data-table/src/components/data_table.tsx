@@ -1132,10 +1132,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         </EuiFlexGroup>
       );
 
-      if (
-        !renderCustomToolbar &&
-        (inTableSearchControl || externalAdditionalControlsRight)
-      ) {
+      if (!renderCustomToolbar && (inTableSearchControl || externalAdditionalControlsRight)) {
         return {
           left: leftControls,
           right: (

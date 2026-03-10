@@ -11,9 +11,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { filterFieldsBySearch, FieldsSelectorTable } from './fields_selector_table';
 import { TestProviders } from '../../../../common/mock';
 
-const createMockField = (
-  overrides: Partial<DataViewField> & { name: string }
-): DataViewField =>
+const createMockField = (overrides: Partial<DataViewField> & { name: string }): DataViewField =>
   ({
     name: overrides.name,
     customLabel: overrides.customLabel ?? '',
@@ -134,9 +132,7 @@ describe('FieldsSelectorTable', () => {
     expect(
       screen.getByTestId('entity-analytics-fields-selector-item-entity.type')
     ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('entity-analytics-fields-selector-item-host.ip')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('entity-analytics-fields-selector-item-host.ip')).toBeInTheDocument();
   });
 
   it('checked state reflects the columns prop', () => {
@@ -194,9 +190,7 @@ describe('FieldsSelectorTable', () => {
       </TestProviders>
     );
 
-    const fieldsCount = screen.getByTestId(
-      'entityAnalytics:dataTable:fieldsModal:fieldsCount'
-    );
+    const fieldsCount = screen.getByTestId('entityAnalytics:dataTable:fieldsModal:fieldsCount');
     expect(fieldsCount).toHaveTextContent('3');
   });
 
@@ -226,9 +220,7 @@ describe('FieldsSelectorTable', () => {
 
     expect(screen.getByTestId('viewSelectorButton')).toHaveTextContent('View: selected');
 
-    const fieldsCount = screen.getByTestId(
-      'entityAnalytics:dataTable:fieldsModal:fieldsCount'
-    );
+    const fieldsCount = screen.getByTestId('entityAnalytics:dataTable:fieldsModal:fieldsCount');
     expect(fieldsCount).toHaveTextContent('1');
   });
 });
