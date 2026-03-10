@@ -95,10 +95,11 @@ describe('getActionOptions', () => {
 
     expect(flowControlGroup).toBeDefined();
     if (flowControlGroup && 'options' in flowControlGroup) {
-      expect(flowControlGroup.options).toHaveLength(5);
+      expect(flowControlGroup.options).toHaveLength(6);
       expect(flowControlGroup.options.map((opt) => opt.id)).toEqual([
         'if',
         'foreach',
+        'while',
         'wait',
         'workflow.execute',
         'workflow.executeAsync',
