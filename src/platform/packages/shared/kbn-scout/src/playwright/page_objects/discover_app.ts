@@ -360,4 +360,30 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
     await rowLocator.waitFor({ state: 'visible', timeout });
   }
+
+  /**
+   * Scrolls through the virtualized doc table grid to assert that the given
+   * text exists somewhere in the rendered rows. Necessary because virtual
+   * scrolling only keeps a subset of rows in the DOM at any time.
+   */
+  async expectDocTableToContainText(text: string) {
+    const docTable = this.page.testSubj.locator('discoverDocTable');
+    await expect(docTable).toBeVisible();
+
+    const grid = docTable.locator('.euiDataGrid__virtualized');
+    await grid.evaluate((el) => el.scrollTo(0, 0));
+
+    for (let i = 0; i < 50; i++) {
+      if ((await docTable.textContent())?.includes(text)) return;
+
+      const atBottom = await grid.evaluate((el) => {
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight) return true;
+        el.scrollBy(0, 200);
+        return false;
+      });
+      if (atBottom) break;
+    }
+
+    expect(false, `Expected doc table to contain text: "${text}"`).toBe(true);
+  }
 }
