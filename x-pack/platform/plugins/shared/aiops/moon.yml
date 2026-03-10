@@ -91,6 +91,7 @@ dependsOn:
   - '@kbn/discover-utils'
   - '@kbn/css-utils'
   - '@kbn/presentation-publishing-schemas'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod

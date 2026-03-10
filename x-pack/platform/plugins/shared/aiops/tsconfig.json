@@ -84,7 +84,8 @@
     "@kbn/esql-utils",
     "@kbn/discover-utils",
     "@kbn/css-utils",
-    "@kbn/presentation-publishing-schemas"
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/cps"
   ],
   "exclude": ["target/**/*"]
 }

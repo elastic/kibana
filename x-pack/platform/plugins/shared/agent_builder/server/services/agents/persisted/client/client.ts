@@ -34,6 +34,7 @@ import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateRequestToEs } from './converters';
 import { validateToolSelection } from './utils/tools';
 import { runToolRefCleanup } from '../tool_reference_cleanup';
+import { SYSTEM_USER_ID } from '../../../constants';
 import {
   buildVisibilityReadFilter,
   hasReadAccess,
@@ -46,6 +47,7 @@ export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<PersistedAgentDefinition>;
   create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
+  ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition>;
   update(agentId: string, profile: AgentUpdateRequest): Promise<PersistedAgentDefinition>;
   list(options?: AgentListOptions): Promise<PersistedAgentDefinition[]>;
   delete(options: AgentDeleteRequest): Promise<boolean>;
@@ -206,6 +208,32 @@ class AgentClientImpl implements AgentClient {
     });
 
     await this.storage.getClient().index({
+      document: attributes,
+    });
+
+    return this.get(profile.id);
+  }
+
+  async ensureDefaultAgent(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
+    // Intentionally skipping access checks when ensuring an agent exists
+    const defaultAgent = await this._get(profile.id);
+    if (defaultAgent) {
+      return fromEs(defaultAgent);
+    }
+
+    const now = new Date();
+    const documentId = `${this.space}_${profile.id}`;
+    const attributes = createRequestToEs({
+      profile,
+      space: this.space,
+      creationDate: now,
+      user: {
+        username: SYSTEM_USER_ID,
+      },
+    });
+
+    await this.storage.getClient().index({
+      id: documentId,
       document: attributes,
     });
 
