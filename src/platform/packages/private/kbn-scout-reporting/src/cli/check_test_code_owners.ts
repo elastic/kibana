@@ -13,6 +13,11 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 import { getCodeOwnersEntries } from '@kbn/code-owners';
 import ignore from 'ignore';
 
+const IGNORED_FILENAMES = ['moon.yml'];
+
+const isIgnoredFile = (repoRel: string): boolean =>
+  IGNORED_FILENAMES.some((fileName) => repoRel.endsWith(`/${fileName}`));
+
 // Scout test files live inside plugins/packages
 const SCOUT_TEST_PATTERNS = [
   ':(glob)src/platform/**/test/scout*/**/*.spec.ts',
@@ -56,7 +61,9 @@ export async function checkTestCodeOwnersCLI(): Promise<void> {
       const allMissing: string[] = [];
 
       for (const { label, patterns } of TEST_FILE_GROUPS) {
-        const files = await getRepoFiles(patterns);
+        const files = (await getRepoFiles(patterns)).filter(
+          (repoPath) => !isIgnoredFile(repoPath.repoRel)
+        );
         totalFiles += files.length;
 
         const missing = files
