@@ -250,6 +250,7 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     notification_policies: z.array(notificationPolicyRefSchema).optional().nullable(),
+    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
 
