@@ -44,6 +44,43 @@ import type {
 } from './types';
 import type { AlertingPluginsStart } from '../plugin';
 
+export interface ProvisioningRunContext {
+  coreStart: CoreStart;
+  plugins: AlertingPluginsStart;
+  uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  unsafeSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
+}
+
+export const createProvisioningRunContext = async (
+  core: CoreSetup<AlertingPluginsStart>
+): Promise<ProvisioningRunContext> => {
+  const [coreStart, plugins] = await core.getStartServices();
+  const uiamConvert = coreStart.security?.authc?.apiKeys?.uiam?.convert;
+  if (typeof uiamConvert !== 'function') {
+    throw new Error('UIAM convert API is not available');
+  }
+  const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+  });
+  const unsafeSavedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+  });
+  const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
+    UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+    API_KEY_PENDING_INVALIDATION_TYPE,
+  ]);
+  return {
+    coreStart,
+    plugins,
+    uiamConvert,
+    encryptedSavedObjectsClient,
+    unsafeSavedObjectsClient,
+    savedObjectsClient,
+  };
+};
+
 export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
 export const API_KEY_PROVISIONING_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
 const TASK_TIMEOUT = '5m';
@@ -179,40 +216,21 @@ export class UiamApiKeyProvisioningTask {
     core: CoreSetup<AlertingPluginsStart>
   ): Promise<{ state: LatestTaskStateSchema; runAt?: Date; error?: Error }> => {
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
-    const [coreStart, plugins] = await core.getStartServices();
-    const uiamConvert = coreStart.security?.authc?.apiKeys?.uiam?.convert;
-    if (typeof uiamConvert !== 'function') {
-      throw new Error('UIAM convert API is not available');
-    }
-
-    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    });
-    const unsafeSavedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-    });
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
-      UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-      API_KEY_PENDING_INVALIDATION_TYPE,
-    ]);
+    const context = await createProvisioningRunContext(core);
 
     const { apiKeysToConvert, provisioningStatusForSkippedRules, hasMoreToProvision } =
-      await this.getApiKeysToConvert(savedObjectsClient, encryptedSavedObjectsClient);
+      await this.getApiKeysToConvert(context);
 
     const { rulesWithUiamApiKeys, provisioningStatusForFailedConversions } =
-      await this.convertApiKeys(apiKeysToConvert, uiamConvert);
+      await this.convertApiKeys(apiKeysToConvert, context);
 
-    const provisioningStatusFromUpdate = await this.updateRules(
-      rulesWithUiamApiKeys,
-      unsafeSavedObjectsClient,
-      savedObjectsClient
-    );
+    const provisioningStatusFromUpdate = await this.updateRules(rulesWithUiamApiKeys, context);
 
     await this.updateProvisioningStatus(
       provisioningStatusForSkippedRules,
       provisioningStatusForFailedConversions,
       provisioningStatusFromUpdate,
-      savedObjectsClient
+      context
     );
 
     const nextState = { runs: state.runs + 1 };
@@ -229,7 +247,7 @@ export class UiamApiKeyProvisioningTask {
     provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs>,
     provisioningStatusForFailedConversions: Array<ProvisioningStatusDocs>,
     provisioningStatusFromUpdate: Array<ProvisioningStatusDocs>,
-    savedObjectsClient: SavedObjectsClientContract
+    context: ProvisioningRunContext
   ): Promise<void> => {
     const all = [
       ...provisioningStatusForSkippedRules,
@@ -240,7 +258,7 @@ export class UiamApiKeyProvisioningTask {
       return;
     }
     try {
-      await savedObjectsClient.bulkCreate(all, { overwrite: true });
+      await context.savedObjectsClient.bulkCreate(all, { overwrite: true });
       const counts = {
         skipped: provisioningStatusForSkippedRules.length,
         failedConversions: provisioningStatusForFailedConversions.length,
@@ -263,18 +281,19 @@ export class UiamApiKeyProvisioningTask {
   };
 
   private getApiKeysToConvert = async (
-    savedObjectsClient: SavedObjectsClientContract,
-    encryptedSavedObjectsClient: EncryptedSavedObjectsClient
+    context: ProvisioningRunContext
   ): Promise<GetApiKeysToConvertResult> => {
     try {
-      const excludeRulesFilter = await getExcludeRulesFilter(savedObjectsClient);
+      const excludeRulesFilter = await getExcludeRulesFilter(context.savedObjectsClient);
       const rulesFinder =
-        await encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
-          type: RULE_SAVED_OBJECT_TYPE,
-          perPage: GET_RULES_BATCH_SIZE,
-          namespaces: ['*'],
-          ...(excludeRulesFilter ? { filter: excludeRulesFilter } : {}),
-        });
+        await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+          {
+            type: RULE_SAVED_OBJECT_TYPE,
+            perPage: GET_RULES_BATCH_SIZE,
+            namespaces: ['*'],
+            ...(excludeRulesFilter ? { filter: excludeRulesFilter } : {}),
+          }
+        );
 
       const provisioningStatusForSkippedRules: Array<ProvisioningStatusDocs> = [];
       const apiKeysToConvert: Array<ApiKeyToConvert> = [];
@@ -319,7 +338,7 @@ export class UiamApiKeyProvisioningTask {
 
   private convertApiKeys = async (
     apiKeysToConvert: Array<ApiKeyToConvert>,
-    uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>
+    context: ProvisioningRunContext
   ): Promise<ConvertApiKeysResult> => {
     if (apiKeysToConvert.length === 0) {
       return {
@@ -331,7 +350,7 @@ export class UiamApiKeyProvisioningTask {
     const keys = apiKeysToConvert.map(({ attributes }) => attributes.apiKey!);
 
     try {
-      const convertResponse = await uiamConvert(keys);
+      const convertResponse = await context.uiamConvert(keys);
       if (convertResponse === null) {
         throw new Error('License required for the UIAM convert API is not enabled');
       }
@@ -381,15 +400,14 @@ export class UiamApiKeyProvisioningTask {
 
   private updateRules = async (
     rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId>,
-    unsafeSavedObjectsClient: SavedObjectsClientContract,
-    savedObjectsClient: SavedObjectsClientContract
+    context: ProvisioningRunContext
   ): Promise<Array<ProvisioningStatusDocs>> => {
     if (rulesWithUiamApiKeys.length === 0) {
       return [];
     }
     const ruleUpdates = buildRuleUpdatesForUiam(rulesWithUiamApiKeys);
     try {
-      const bulkRuleUpdateResponse = await unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
+      const bulkRuleUpdateResponse = await context.unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
 
       const uiamApiKeyByRuleId = new Map(
         rulesWithUiamApiKeys.map((r) => [r.ruleId, r.uiamApiKey] as const)
@@ -411,7 +429,7 @@ export class UiamApiKeyProvisioningTask {
         await bulkMarkApiKeysForInvalidation(
           { apiKeys: orphanedUiamApiKeys },
           this.logger,
-          savedObjectsClient
+          context.savedObjectsClient
         );
       }
 
@@ -424,7 +442,7 @@ export class UiamApiKeyProvisioningTask {
       await bulkMarkApiKeysForInvalidation(
         { apiKeys: orphanedUiamApiKeys },
         this.logger,
-        savedObjectsClient
+        context.savedObjectsClient
       );
       throw error;
     }
