@@ -15,7 +15,7 @@ export interface ScheduledExecutionBucket {
   key: [string, number];
   key_as_string: string;
   doc_count: number;
-  planned_time: { value: number; value_as_string: string };
+  planned_time: { value: number | null; value_as_string?: string };
   max_timestamp: { value: number; value_as_string: string };
   agent_count: { value: number };
   total_rows: { value: number };
@@ -111,7 +111,7 @@ export const processScheduledHistory = ({
       id: `${scheduleId}_${executionCount}`,
       sourceType: 'scheduled' as const,
       timestamp: bucket.max_timestamp.value_as_string,
-      plannedTime: bucket.planned_time.value_as_string,
+      plannedTime: bucket.planned_time.value_as_string ?? bucket.max_timestamp.value_as_string,
       queryText: packContext?.queryText ?? '',
       queryName: packContext?.queryName,
       source: 'Scheduled' as const,
