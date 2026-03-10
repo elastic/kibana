@@ -12,7 +12,7 @@ import type { ManagementApp, ManagementAppMountParams } from '@kbn/management-pl
 import {
   INFERENCE_ENDPOINTS_APP_ID,
   MODEL_SETTINGS_APP_ID,
-  MODEL_SETTINGS_PLUGIN_TITLE,
+  MODEL_SETTINGS_SECTION_TITLE,
   PLUGIN_TITLE,
 } from '../common/constants';
 import { docLinks } from '../common/doc_links';
@@ -33,10 +33,8 @@ export class SearchInferenceEndpointsPlugin
   private registerInferenceEndpoints?: ManagementApp;
   private registerModelSettings?: ManagementApp;
   private licenseSubscription?: Subscription;
-  private isServerless: boolean;
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<SearchInferenceEndpointsConfigType>();
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
@@ -64,14 +62,10 @@ export class SearchInferenceEndpointsPlugin
         },
       });
 
-    const isEnabled = isModelSettingsEnabled(core.uiSettings);
-    const shouldRegisterModelSettingsApp = this.isServerless
-      ? this.config.enableModelSettings && isEnabled
-      : isEnabled;
-    if (shouldRegisterModelSettingsApp) {
+    if (isModelSettingsEnabled(core.uiSettings)) {
       this.registerModelSettings = plugins.management.sections.section.machineLearning.registerApp({
         id: MODEL_SETTINGS_APP_ID,
-        title: MODEL_SETTINGS_PLUGIN_TITLE,
+        title: MODEL_SETTINGS_SECTION_TITLE,
         order: 2,
         async mount({ element, history }: ManagementAppMountParams) {
           const { renderModelSettingsApp } = await import('./model_settings_application');

@@ -20,9 +20,7 @@ export const PLUGIN_TITLE = i18n.translate(
   }
 );
 
-export const MODEL_SETTINGS_PLUGIN_ID = 'searchInferenceEndpointsModelSettings';
-export const MODEL_SETTINGS_PLUGIN_NAME = 'Model Settings';
-export const MODEL_SETTINGS_PLUGIN_TITLE = i18n.translate(
+export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.modelSettingsTitle',
   {
     defaultMessage: 'Model Settings',

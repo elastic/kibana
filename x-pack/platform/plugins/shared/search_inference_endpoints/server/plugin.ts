@@ -26,8 +26,6 @@ import type {
 import {
   INFERENCE_ENDPOINTS_APP_ID,
   MODEL_SETTINGS_APP_ID,
-  MODEL_SETTINGS_PLUGIN_ID,
-  MODEL_SETTINGS_PLUGIN_NAME,
   PLUGIN_ID,
   PLUGIN_NAME,
 } from '../common/constants';
@@ -71,7 +69,7 @@ export class SearchInferenceEndpointsPlugin
       app: [],
       catalogue: [],
       management: {
-        ml: [INFERENCE_ENDPOINTS_APP_ID],
+        ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
       },
       privileges: {
         all: {
@@ -79,7 +77,7 @@ export class SearchInferenceEndpointsPlugin
           api: [],
           catalogue: [],
           management: {
-            ml: [INFERENCE_ENDPOINTS_APP_ID],
+            ml: [INFERENCE_ENDPOINTS_APP_ID, MODEL_SETTINGS_APP_ID],
           },
           savedObject: {
             all: [],
@@ -97,44 +95,6 @@ export class SearchInferenceEndpointsPlugin
         },
       },
     });
-
-    if (this.config.enableModelSettings) {
-      plugins.features.registerKibanaFeature({
-        id: MODEL_SETTINGS_PLUGIN_ID,
-        minimumLicense: 'enterprise',
-        name: MODEL_SETTINGS_PLUGIN_NAME,
-        order: 2,
-        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        app: [],
-        catalogue: [],
-        management: {
-          ml: [MODEL_SETTINGS_APP_ID],
-        },
-        privileges: {
-          all: {
-            app: [],
-            api: [],
-            catalogue: [],
-            management: {
-              ml: [MODEL_SETTINGS_APP_ID],
-            },
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-          read: {
-            disabled: true,
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: [],
-          },
-        },
-      });
-    }
 
     return {};
   }
