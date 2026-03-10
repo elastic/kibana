@@ -32,15 +32,12 @@ export interface SmlData {
 }
 
 /**
- * Context passed to SML type hooks.
- * `spaceId` is set for getSmlData (event-driven indexing) and toAttachment,
- * but is absent when calling `list` (which fetches across all spaces).
+ * Context passed to SML type hooks (`list` and `getSmlData`).
  */
 export interface SmlContext {
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
-  spaceId?: string;
 }
 
 /**
@@ -151,8 +148,8 @@ export interface SmlCrawlerStateDocument {
   spaces: string[];
   created_at: string;
   updated_at: string;
-  /** Pending action set by the crawler. null when the action has been processed. */
-  update_action: 'create' | 'update' | 'delete' | null;
+  /** Pending action set by the crawler. undefined (field omitted) when the action has been processed. */
+  update_action: 'create' | 'update' | 'delete' | undefined;
 }
 
 /**

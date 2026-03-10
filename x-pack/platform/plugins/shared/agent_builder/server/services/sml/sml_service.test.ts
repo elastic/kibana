@@ -201,7 +201,7 @@ describe('SmlService', () => {
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(1);
-      const call = esClient.search.mock.calls[0][0];
+      const call = esClient.search.mock.calls[0]![0]!;
       expect(call.index).toBe(smlIndexName);
       expect(call.size).toBe(10);
       expect(call.allow_no_indices).toBe(true);
@@ -271,8 +271,8 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0][0];
-      expect(call.query.bool.must).toEqual([{ match_all: {} }]);
+      const call = esClient.search.mock.calls[0]![0]! as { query?: { bool?: { must?: unknown[] } } };
+      expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
     it('uses match_all for empty keywords', async () => {
@@ -292,8 +292,8 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0][0];
-      expect(call.query.bool.must).toEqual([{ match_all: {} }]);
+      const call = esClient.search.mock.calls[0]![0]! as { query?: { bool?: { must?: unknown[] } } };
+      expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
     it('maps response to SmlSearchResult', async () => {

@@ -351,15 +351,15 @@ describe('visualizationSmlType', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns undefined when resolve throws', async () => {
+    it('propagates errors from resolve to the caller', async () => {
       mockSavedObjectsClient.resolve.mockRejectedValue(new Error('Connection failed'));
 
-      const result = await visualizationSmlType.toAttachment!(
-        { attachment_reference_id: 'viz-1' } as never,
-        createContext() as never
-      );
-
-      expect(result).toBeUndefined();
+      await expect(
+        visualizationSmlType.toAttachment!(
+          { attachment_reference_id: 'viz-1' } as never,
+          createContext() as never
+        )
+      ).rejects.toThrow('Connection failed');
     });
 
     it('uses LensConfigBuilder to convert attributes', async () => {

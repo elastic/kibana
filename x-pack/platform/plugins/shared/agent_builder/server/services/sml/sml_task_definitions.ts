@@ -15,6 +15,28 @@ import type { Logger } from '@kbn/logging';
 import type { SmlCrawler } from './sml_crawler';
 import type { SmlTypeRegistry } from './sml_type_registry';
 
+/**
+ * Security model:
+ *
+ * The SML crawler runs as a Task Manager background task with internal
+ * credentials (`asInternalUser` / `createInternalRepository`). This is the
+ * standard Kibana pattern for background tasks that have no user context.
+ *
+ * The crawler indexes ALL content across ALL spaces into the SML system index.
+ * Access control is enforced at **query time**, not index time:
+ *
+ *  1. `searchSml` filters results to the requesting user's current space.
+ *  2. `filterResultsByPermissions` batch-checks the user's Kibana privileges
+ *     against each result's `permissions` array.
+ *  3. `checkItemsAccess` (used by `sml_attach`) performs the same privilege
+ *     check before allowing attachment resolution.
+ *
+ * When the security plugin is absent (development/testing), all results are
+ * returned unfiltered, following the standard Kibana open-access convention.
+ *
+ * SML type implementers are responsible for setting correct `permissions`
+ * arrays in their `getSmlData` hook (see `SmlTypeDefinition`).
+ */
 export const SML_CRAWLER_TASK_TYPE = 'agent_builder:sml_crawler';
 
 export interface SmlCrawlerTaskParams {

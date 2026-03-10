@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { SmlTypeDefinition } from './types';
 import {
   SML_CRAWLER_TASK_TYPE,
@@ -20,13 +21,8 @@ const mockRegistry = {
   get: jest.fn(),
   list: jest.fn().mockReturnValue([]),
 };
-const mockLogger = {
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  debug: jest.fn(),
-  get: jest.fn().mockReturnThis(),
-};
+const mockLogger = loggerMock.create();
+(mockLogger.get as jest.Mock).mockReturnValue(mockLogger);
 const mockGetCrawlerDeps = jest.fn().mockResolvedValue({
   crawler: mockCrawler,
   registry: mockRegistry,

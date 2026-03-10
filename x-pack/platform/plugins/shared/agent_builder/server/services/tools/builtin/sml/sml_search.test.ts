@@ -11,7 +11,14 @@ import type { SmlSearchResult } from '../../../sml';
 import { createSmlSearchTool } from './sml_search';
 
 const mockSearch = jest.fn();
-const getSmlService = jest.fn(() => ({ search: mockSearch }));
+const getSmlService = jest.fn(() => ({
+  search: mockSearch,
+  checkItemsAccess: jest.fn(),
+  indexAttachment: jest.fn(),
+  getDocuments: jest.fn(),
+  getTypeDefinition: jest.fn(),
+  listTypeDefinitions: jest.fn(),
+}));
 
 const mockContext = {
   spaceId: 'default',
@@ -64,7 +71,9 @@ describe('createSmlSearchTool', () => {
     ];
     mockSearch.mockResolvedValue({ results: hits, total: 1 });
     const tool = createSmlSearchTool({ getSmlService });
-    const result = await tool.handler({ keywords: ['cpu'] }, mockContext as any);
+    const result = (await tool.handler({ keywords: ['cpu'] }, mockContext as any)) as {
+      results: unknown[];
+    };
     expect(result.results).toHaveLength(1);
     const data = (result.results[0] as any).data;
     expect(data.total).toBe(1);
@@ -78,20 +87,22 @@ describe('createSmlSearchTool', () => {
       content: 'Chart content',
       score: 0.95,
     });
-    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
   });
 
   it('returns "No results found" when empty', async () => {
     mockSearch.mockResolvedValue({ results: [], total: 0 });
     const tool = createSmlSearchTool({ getSmlService });
-    const result = await tool.handler({ keywords: ['nonexistent'] }, mockContext as any);
+    const result = (await tool.handler({ keywords: ['nonexistent'] }, mockContext as any)) as {
+      results: unknown[];
+    };
     expect(result.results).toHaveLength(1);
     const data = (result.results[0] as any).data;
     expect(data.message).toBe('No results found in the Semantic Metadata Layer.');
     expect(data.keywords).toEqual(['nonexistent']);
     expect(data.total).toBe(0);
     expect(data.items).toEqual([]);
-    expect(result.results[0].type).toBe(ToolResultType.other);
+    expect((result.results[0] as { type: string }).type).toBe(ToolResultType.other);
   });
 
   it('uses default size when not provided', async () => {

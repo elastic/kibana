@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlCrawlerStateStorage } from './sml_crawler_state_storage';
@@ -45,13 +46,11 @@ const mockIndexer = {
   indexAttachment: jest.fn().mockResolvedValue(undefined),
 };
 
-const createMockLogger = () => ({
-  info: jest.fn(),
-  debug: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  get: jest.fn().mockReturnThis(),
-});
+const createMockLogger = () => {
+  const log = loggerMock.create();
+  log.get = jest.fn().mockReturnValue(log);
+  return log;
+};
 
 const createMockEsClient = (): jest.Mocked<ElasticsearchClient> => {
   const indices = {
@@ -133,20 +132,20 @@ describe('createSmlCrawler', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       expect(mockStateClient.bulk).toHaveBeenCalled();
-      const bulkCall = mockStateClient.bulk.mock.calls.find((c) =>
-        c[0].operations?.some(
+      const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'create'
         )
       );
       expect(bulkCall).toBeDefined();
-      const createOp = bulkCall![0].operations.find(
+      const createOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'create'
       );
       expect(createOp).toBeDefined();
-      expect(createOp.index.document.attachment_id).toBe('a');
-      expect(createOp.index.document.spaces).toEqual(['default']);
+      expect((createOp as any).index.document.attachment_id).toBe('a');
+      expect((createOp as any).index.document.spaces).toEqual(['default']);
     });
   });
 
@@ -167,7 +166,7 @@ describe('createSmlCrawler', () => {
                   spaces: ['default'],
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
@@ -179,19 +178,19 @@ describe('createSmlCrawler', () => {
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      const bulkCall = mockStateClient.bulk.mock.calls.find((c) =>
-        c[0].operations?.some(
+      const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'update'
         )
       );
       expect(bulkCall).toBeDefined();
-      const updateOp = bulkCall![0].operations.find(
+      const updateOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'update'
       );
       expect(updateOp).toBeDefined();
-      expect(updateOp.index.document.updated_at).toBe('2024-01-02');
+      expect((updateOp as any).index.document.updated_at).toBe('2024-01-02');
     });
   });
 
@@ -211,7 +210,7 @@ describe('createSmlCrawler', () => {
                   spaces: ['default'],
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
@@ -223,19 +222,19 @@ describe('createSmlCrawler', () => {
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      const bulkCall = mockStateClient.bulk.mock.calls.find((c) =>
-        c[0].operations?.some(
+      const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'delete'
         )
       );
       expect(bulkCall).toBeDefined();
-      const deleteOp = bulkCall![0].operations.find(
+      const deleteOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'delete'
       );
       expect(deleteOp).toBeDefined();
-      expect(deleteOp.index.document.attachment_id).toBe('deleted-item');
+      expect((deleteOp as any).index.document.attachment_id).toBe('deleted-item');
     });
   });
 
@@ -256,7 +255,7 @@ describe('createSmlCrawler', () => {
                   spaces: ['default'],
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
@@ -268,8 +267,8 @@ describe('createSmlCrawler', () => {
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c) =>
-        c[0].operations?.some((op: { index?: { document?: { update_action?: string } } }) =>
+      const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some((op: { index?: { document?: { update_action?: string } } }) =>
           ['create', 'update', 'delete'].includes(op.index?.document?.update_action ?? '')
         )
       );
@@ -295,7 +294,7 @@ describe('createSmlCrawler', () => {
                   spaces: ['default'],
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
@@ -307,24 +306,24 @@ describe('createSmlCrawler', () => {
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      const bulkCall = mockStateClient.bulk.mock.calls.find((c) =>
-        c[0].operations?.some(
+      const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'update'
         )
       );
       expect(bulkCall).toBeDefined();
-      const updateOp = bulkCall![0].operations.find(
+      const updateOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'update'
       );
       expect(updateOp).toBeDefined();
-      expect(updateOp.index.document.spaces).toEqual(['default', 'space-2']);
+      expect((updateOp as any).index.document.spaces).toEqual(['default', 'space-2']);
     });
   });
 
   describe('processQueue', () => {
-    it('for create/update calls indexer.indexAttachment then bulk ACKs with update_action null', async () => {
+    it('for create/update calls indexer.indexAttachment then bulk ACKs with update_action undefined', async () => {
       const definition = createMockDefinition({
         list: jest
           .fn()
@@ -337,6 +336,7 @@ describe('createSmlCrawler', () => {
             hits: [
               {
                 _id: 'test-type:a',
+                sort: ['a'],
                 _source: {
                   attachment_id: 'a',
                   attachment_type: 'test-type',
@@ -364,10 +364,10 @@ describe('createSmlCrawler', () => {
         })
       );
 
-      const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c) =>
-        c[0].operations?.some(
-          (op: { index?: { document?: { update_action?: string | null } } }) =>
-            op.index?.document?.update_action === null
+      const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: unknown } } }> }).operations?.some(
+          (op: { index?: { document?: { update_action?: unknown } } }) =>
+            op.index?.document !== undefined && op.index.document.update_action === undefined
         )
       );
       expect(ackBulkCalls.length).toBeGreaterThan(0);
@@ -388,17 +388,18 @@ describe('createSmlCrawler', () => {
                   spaces: ['default'],
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
           },
         })
-        .mockResolvedValue({
+        .mockResolvedValueOnce({
           hits: {
             hits: [
               {
                 _id: 'test-type:b',
+                sort: ['b'],
                 _source: {
                   attachment_id: 'b',
                   attachment_type: 'test-type',
@@ -410,7 +411,9 @@ describe('createSmlCrawler', () => {
               },
             ],
           },
-        });
+        })
+        .mockResolvedValue({ hits: { hits: [] } });
+      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -423,13 +426,13 @@ describe('createSmlCrawler', () => {
         })
       );
 
-      const deleteAckCalls = mockStateClient.bulk.mock.calls.filter((c) =>
-        c[0].operations?.some((op: { delete?: { _id?: string } }) => op.delete != null)
+      const deleteAckCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ delete?: { _id?: string } }> }).operations?.some((op: { delete?: { _id?: string } }) => op.delete != null)
       );
       expect(deleteAckCalls.length).toBeGreaterThan(0);
     });
 
-    it('batches all state ACK writes into a single bulk call', async () => {
+    it('batches all state ACK writes into a single bulk call per page', async () => {
       const definition = createMockDefinition({
         list: jest.fn().mockResolvedValue([
           { id: 'a', updatedAt: '2024-01-01', spaces: ['default'] },
@@ -443,6 +446,7 @@ describe('createSmlCrawler', () => {
             hits: [
               {
                 _id: 'test-type:a',
+                sort: ['a'],
                 _source: {
                   attachment_id: 'a',
                   attachment_type: 'test-type',
@@ -454,6 +458,7 @@ describe('createSmlCrawler', () => {
               },
               {
                 _id: 'test-type:b',
+                sort: ['b'],
                 _source: {
                   attachment_id: 'b',
                   attachment_type: 'test-type',
@@ -472,10 +477,10 @@ describe('createSmlCrawler', () => {
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
-      const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c) =>
-        c[0].operations?.some(
-          (op: { index?: { document?: { update_action?: string | null } }; delete?: unknown }) =>
-            op.index?.document?.update_action === null || op.delete != null
+      const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
+        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: unknown } }; delete?: unknown }> }).operations?.some(
+          (op: { index?: { document?: { update_action?: unknown } }; delete?: unknown }) =>
+            (op.index?.document !== undefined && op.index.document.update_action === undefined) || op.delete != null
         )
       );
       expect(ackBulkCalls.length).toBe(1);
@@ -486,11 +491,12 @@ describe('createSmlCrawler', () => {
       const definition = createMockDefinition({
         list: jest.fn().mockResolvedValue([]),
       });
-      mockStateClient.search.mockResolvedValueOnce({ hits: { hits: [] } }).mockResolvedValue({
+      mockStateClient.search.mockResolvedValueOnce({ hits: { hits: [] } }).mockResolvedValueOnce({
         hits: {
           hits: [
             {
               _id: undefined,
+              sort: ['no-id'],
               _source: {
                 attachment_id: 'no-id',
                 attachment_type: 'test-type',
@@ -500,7 +506,7 @@ describe('createSmlCrawler', () => {
             },
           ],
         },
-      });
+      }).mockResolvedValue({ hits: { hits: [] } });
 
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -526,17 +532,18 @@ describe('createSmlCrawler', () => {
                   space_id: 'default',
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
           },
         })
-        .mockResolvedValue({
+        .mockResolvedValueOnce({
           hits: {
             hits: [
               {
                 _id: 'test-type:old-doc',
+                sort: ['old-doc'],
                 _source: {
                   attachment_id: 'old-doc',
                   attachment_type: 'test-type',
@@ -548,7 +555,9 @@ describe('createSmlCrawler', () => {
               },
             ],
           },
-        });
+        })
+        .mockResolvedValue({ hits: { hits: [] } });
+      (esClient.count as jest.Mock).mockResolvedValue({ count: 1 });
 
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });
@@ -579,7 +588,7 @@ describe('createSmlCrawler', () => {
                   spaces: ['default'],
                   created_at: '2024-01-01',
                   updated_at: '2024-01-01',
-                  update_action: null,
+                  update_action: undefined,
                 },
               },
             ],
@@ -593,7 +602,7 @@ describe('createSmlCrawler', () => {
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('data integrity mismatch'));
       const createOp = mockStateClient.bulk.mock.calls
-        .flatMap((c) => c[0].operations ?? [])
+        .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
         .find(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'create'
@@ -647,7 +656,7 @@ describe('createSmlCrawler', () => {
           spaces: ['default'],
           created_at: '2024-01-01',
           updated_at: '2024-01-01',
-          update_action: null,
+          update_action: undefined,
         },
         sort: [`item-${i}`],
       }));
@@ -690,7 +699,7 @@ describe('createSmlCrawler', () => {
         expect.stringContaining('failed to load crawler state')
       );
       const createOp = mockStateClient.bulk.mock.calls
-        .flatMap((c) => c[0].operations ?? [])
+        .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
         .find(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'create'

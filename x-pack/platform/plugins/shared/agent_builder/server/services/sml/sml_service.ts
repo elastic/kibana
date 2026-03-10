@@ -89,10 +89,7 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
       },
       indexAttachment: async (params) => {
-        return this.indexer!.indexAttachment({
-          ...params,
-          spaces: params.spaces,
-        });
+        return this.indexer!.indexAttachment(params);
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
@@ -239,7 +236,7 @@ const checkItemsAccess = async ({
 
   let docPermissions: Map<string, string[]>;
   try {
-    const response = await esClient.search({
+    const response = await esClient.search<Pick<SmlDocument, 'id' | 'permissions'>>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -261,10 +258,12 @@ const checkItemsAccess = async ({
     });
 
     docPermissions = new Map(
-      response.hits.hits.map((hit) => {
-        const source = hit._source as Record<string, unknown>;
-        return [source.id as string, (source.permissions as string[]) ?? []];
-      })
+      response.hits.hits
+        .filter((hit) => hit._source != null)
+        .map((hit) => {
+          const source = hit._source!;
+          return [source.id ?? '', source.permissions ?? []] as [string, string[]];
+        })
     );
   } catch (error) {
     if (isNotFoundError(error)) {
@@ -359,7 +358,7 @@ const searchSml = async ({
   try {
     const contentQuery = buildContentQuery(keywords);
 
-    const response = await esClient.search({
+    const response = await esClient.search<SmlDocument>({
       index: smlIndexName,
       size,
       allow_no_indices: true,
@@ -395,21 +394,23 @@ const searchSml = async ({
         ? response.hits.total
         : response.hits.total?.value ?? 0;
 
-    const results: SmlSearchResult[] = response.hits.hits.map((hit) => {
-      const source = hit._source as Record<string, unknown>;
-      return {
-        id: source.id as string,
-        type: source.type as string,
-        title: (source.title as string) ?? '',
-        attachment_reference_id: source.attachment_reference_id as string,
-        content: (source.content as string) ?? '',
-        created_at: (source.created_at as string) ?? '',
-        updated_at: (source.updated_at as string) ?? '',
-        spaces: (source.spaces as string[]) ?? [],
-        permissions: (source.permissions as string[]) ?? [],
-        score: hit._score ?? 0,
-      };
-    });
+    const results: SmlSearchResult[] = response.hits.hits
+      .filter((hit) => hit._source != null)
+      .map((hit) => {
+        const source = hit._source!;
+        return {
+          id: source.id ?? '',
+          type: source.type ?? '',
+          title: source.title ?? '',
+          attachment_reference_id: source.attachment_reference_id ?? '',
+          content: source.content ?? '',
+          created_at: source.created_at ?? '',
+          updated_at: source.updated_at ?? '',
+          spaces: source.spaces ?? [],
+          permissions: source.permissions ?? [],
+          score: hit._score ?? 0,
+        };
+      });
 
     logger.debug(`SML search: returned ${results.length} result(s), total=${total}`);
 
@@ -442,7 +443,7 @@ const getDocumentsByIds = async ({
   if (ids.length === 0) return docMap;
 
   try {
-    const response = await esClient.search({
+    const response = await esClient.search<SmlDocument>({
       index: smlIndexName,
       size: ids.length,
       allow_no_indices: true,
@@ -463,17 +464,18 @@ const getDocumentsByIds = async ({
     });
 
     for (const hit of response.hits.hits) {
-      const source = hit._source as Record<string, unknown>;
+      if (!hit._source) continue;
+      const source = hit._source;
       const doc: SmlDocument = {
-        id: source.id as string,
-        type: source.type as string,
-        title: (source.title as string) ?? '',
-        attachment_reference_id: source.attachment_reference_id as string,
-        content: (source.content as string) ?? '',
-        created_at: (source.created_at as string) ?? '',
-        updated_at: (source.updated_at as string) ?? '',
-        spaces: (source.spaces as string[]) ?? [],
-        permissions: (source.permissions as string[]) ?? [],
+        id: source.id ?? '',
+        type: source.type ?? '',
+        title: source.title ?? '',
+        attachment_reference_id: source.attachment_reference_id ?? '',
+        content: source.content ?? '',
+        created_at: source.created_at ?? '',
+        updated_at: source.updated_at ?? '',
+        spaces: source.spaces ?? [],
+        permissions: source.permissions ?? [],
       };
       docMap.set(doc.id, doc);
     }

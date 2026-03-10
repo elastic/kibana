@@ -102,33 +102,29 @@ export const visualizationSmlType: SmlTypeDefinition = {
   },
 
   toAttachment: async (item, context) => {
-    try {
-      const resolveResult = await context.savedObjectsClient.resolve(
-        'lens',
-        item.attachment_reference_id
-      );
-      const savedObject = resolveResult.saved_object as { error?: { message?: string } };
-      if (savedObject?.error) {
-        return undefined;
-      }
-
-      const lensAttributes = toLensAttributes(
-        resolveResult.saved_object.attributes as LensAttributes,
-        resolveResult.saved_object.references
-      );
-      const lensApiConfig = toLensApiConfig(lensAttributes);
-
-      return {
-        type: VISUALIZATION_SML_TYPE,
-        data: {
-          query: lensAttributes.title ?? item.attachment_reference_id,
-          visualization: lensApiConfig as unknown as Record<string, unknown>,
-          chart_type: lensApiConfig.type,
-          esql: extractEsql(lensAttributes),
-        },
-      };
-    } catch {
+    const resolveResult = await context.savedObjectsClient.resolve(
+      'lens',
+      item.attachment_reference_id
+    );
+    const savedObject = resolveResult.saved_object as { error?: { message?: string } };
+    if (savedObject?.error) {
       return undefined;
     }
+
+    const lensAttributes = toLensAttributes(
+      resolveResult.saved_object.attributes as LensAttributes,
+      resolveResult.saved_object.references
+    );
+    const lensApiConfig = toLensApiConfig(lensAttributes);
+
+    return {
+      type: VISUALIZATION_SML_TYPE,
+      data: {
+        query: lensAttributes.title ?? item.attachment_reference_id,
+        visualization: lensApiConfig as unknown as Record<string, unknown>,
+        chart_type: lensApiConfig.type,
+        esql: extractEsql(lensAttributes),
+      },
+    };
   },
 };

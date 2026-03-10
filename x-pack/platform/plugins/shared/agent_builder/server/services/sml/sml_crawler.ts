@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -200,15 +201,22 @@ class SmlCrawlerImpl implements SmlCrawler {
         `SML crawler: writing ${operations.length} state operation(s) for type '${definition.id}'`
       );
       try {
-        await stateClient.bulk({
+        const bulkResponse = await stateClient.bulk({
           refresh: 'wait_for',
           operations: operations.map(({ id, document }) => ({
             index: { _id: id, document },
           })),
         });
-        this.logger.info(
-          `SML crawler: state operations written successfully for type '${definition.id}'`
-        );
+        if (bulkResponse.errors) {
+          const failedOps = bulkResponse.items.filter((item) => item.index?.error);
+          this.logger.warn(
+            `SML crawler: ${failedOps.length} state write(s) failed for type '${definition.id}': ${JSON.stringify(failedOps.slice(0, 3))}`
+          );
+        } else {
+          this.logger.info(
+            `SML crawler: state operations written successfully for type '${definition.id}'`
+          );
+        }
       } catch (error) {
         this.logger.error(
           `SML crawler: failed to update state for type '${definition.id}': ${
@@ -232,6 +240,7 @@ class SmlCrawlerImpl implements SmlCrawler {
 
   /**
    * Process all queued actions (non-null update_action) for a type.
+   * Uses `search_after` to paginate through all pending items.
    */
   private async processQueue({
     attachmentType,
@@ -244,103 +253,147 @@ class SmlCrawlerImpl implements SmlCrawler {
     savedObjectsClient: ISavedObjectsRepository;
     stateClient: ReturnType<SmlCrawlerStateStorage['getClient']>;
   }): Promise<void> {
-    const pendingResponse = await stateClient.search({
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            { term: { attachment_type: attachmentType } },
-            { exists: { field: 'update_action' } },
-          ],
-          must_not: [{ term: { update_action: '' } }],
-        },
-      },
-      size: 1000,
-    });
-
-    const pendingItems = pendingResponse.hits.hits;
-    if (pendingItems.length === 0) {
-      this.logger.info(`SML crawler: no pending actions to process for type '${attachmentType}'`);
-      return;
-    }
-
-    this.logger.info(
-      `SML crawler: processing ${pendingItems.length} pending action(s) for type '${attachmentType}'`
-    );
-
+    const pageSize = 1000;
+    const limit = pLimit(10);
     let processedCount = 0;
     let errorCount = 0;
-    const stateAckOps: Array<
-      { index: { _id: string; document: SmlCrawlerStateDocument } } | { delete: { _id: string } }
-    > = [];
+    let searchAfter: Array<string | number> | undefined;
+    let hasMore = true;
 
-    for (const hit of pendingItems) {
-      if (!hit._id) {
-        this.logger.warn('SML crawler: skipping hit without _id');
-        continue;
+    while (hasMore) {
+      const pendingResponse = await stateClient.search({
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { attachment_type: attachmentType } },
+              { exists: { field: 'update_action' } },
+            ],
+            must_not: [{ term: { update_action: '' } }],
+          },
+        },
+        size: pageSize,
+        sort: [{ attachment_id: 'asc' }],
+        ...(searchAfter ? { search_after: searchAfter } : {}),
+      });
+
+      const pendingItems = pendingResponse.hits.hits;
+      if (pendingItems.length === 0) {
+        if (processedCount === 0) {
+          this.logger.info(
+            `SML crawler: no pending actions to process for type '${attachmentType}'`
+          );
+        }
+        break;
       }
 
-      const doc = hit._source;
-      if (!doc || !doc.update_action) {
-        this.logger.debug(`SML crawler: skipping hit '${hit._id}' — no source or update_action`);
-        continue;
-      }
-
-      const normalized = normalizeStateDocument(
-        doc as SmlCrawlerStateDocument & { space_id?: string }
+      this.logger.info(
+        `SML crawler: processing batch of ${pendingItems.length} pending action(s) for type '${attachmentType}'`
       );
 
-      try {
-        this.logger.info(
-          `SML crawler: processing '${normalized.update_action}' for attachment '${normalized.attachment_id}' (type: ${normalized.attachment_type})`
-        );
+      const stateAckOps: Array<
+        | { index: { _id: string; document: SmlCrawlerStateDocument } }
+        | { delete: { _id: string } }
+      > = [];
 
-        await this.indexer.indexAttachment({
-          attachmentId: normalized.attachment_id,
-          attachmentType: normalized.attachment_type,
-          action: normalized.update_action,
-          spaces: normalized.spaces,
-          esClient,
-          savedObjectsClient,
-          logger: this.logger,
+      const indexPromises = pendingItems
+        .filter((hit) => {
+          if (!hit._id) {
+            this.logger.warn('SML crawler: skipping hit without _id');
+            return false;
+          }
+          const doc = hit._source;
+          if (!doc || !doc.update_action) {
+            this.logger.debug(
+              `SML crawler: skipping hit '${hit._id}' — no source or update_action`
+            );
+            return false;
+          }
+          return true;
+        })
+        .map((hit) => {
+          const doc = hit._source!;
+          const normalized = normalizeStateDocument(
+            doc as SmlCrawlerStateDocument & { space_id?: string }
+          );
+          const action = normalized.update_action!;
+
+          return limit(async () => {
+            try {
+              this.logger.info(
+                `SML crawler: processing '${action}' for attachment '${normalized.attachment_id}' (type: ${normalized.attachment_type})`
+              );
+
+              await this.indexer.indexAttachment({
+                attachmentId: normalized.attachment_id,
+                attachmentType: normalized.attachment_type,
+                action,
+                spaces: normalized.spaces,
+                esClient,
+                savedObjectsClient,
+                logger: this.logger,
+              });
+
+              if (action === 'delete') {
+                stateAckOps.push({ delete: { _id: hit._id! } });
+              } else {
+                stateAckOps.push({
+                  index: {
+                    _id: hit._id!,
+                    document: { ...normalized, update_action: undefined },
+                  },
+                });
+              }
+              processedCount++;
+            } catch (error) {
+              errorCount++;
+              this.logger.error(
+                `SML crawler: failed to process action '${action}' for '${
+                  normalized.attachment_id
+                }': ${(error as Error).message}`
+              );
+            }
+          });
         });
 
-        if (normalized.update_action === 'delete') {
-          stateAckOps.push({ delete: { _id: hit._id } });
-        } else {
-          stateAckOps.push({
-            index: {
-              _id: hit._id,
-              document: { ...normalized, update_action: null },
-            },
+      await Promise.all(indexPromises);
+
+      if (stateAckOps.length > 0) {
+        try {
+          const bulkResponse = await stateClient.bulk({
+            refresh: 'wait_for',
+            operations: stateAckOps,
           });
+          if (bulkResponse.errors) {
+            const failedOps = bulkResponse.items.filter(
+              (item) => (item.index?.error ?? item.delete?.error) !== undefined
+            );
+            this.logger.warn(
+              `SML crawler: ${failedOps.length} state ACK operation(s) failed for type '${attachmentType}': ${JSON.stringify(failedOps.slice(0, 3))}`
+            );
+          }
+        } catch (error) {
+          this.logger.error(
+            `SML crawler: failed to ACK state updates for type '${attachmentType}': ${
+              (error as Error).message
+            }`
+          );
         }
-        processedCount++;
-      } catch (error) {
-        errorCount++;
-        this.logger.error(
-          `SML crawler: failed to process action '${normalized.update_action}' for '${
-            normalized.attachment_id
-          }': ${(error as Error).message}`
-        );
+      }
+
+      if (pendingItems.length < pageSize) {
+        hasMore = false;
+      } else {
+        const lastHit = pendingItems[pendingItems.length - 1];
+        searchAfter = lastHit.sort as Array<string | number>;
       }
     }
 
-    if (stateAckOps.length > 0) {
-      try {
-        await stateClient.bulk({ refresh: 'wait_for', operations: stateAckOps });
-      } catch (error) {
-        this.logger.error(
-          `SML crawler: failed to ACK state updates for type '${attachmentType}': ${
-            (error as Error).message
-          }`
-        );
-      }
+    if (processedCount > 0 || errorCount > 0) {
+      this.logger.info(
+        `SML crawler: queue processing complete for type '${attachmentType}': ${processedCount} succeeded, ${errorCount} failed`
+      );
     }
-
-    this.logger.info(
-      `SML crawler: queue processing complete for type '${attachmentType}': ${processedCount} succeeded, ${errorCount} failed`
-    );
   }
 
   /**

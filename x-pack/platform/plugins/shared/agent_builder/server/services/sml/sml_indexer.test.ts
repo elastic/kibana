@@ -52,6 +52,8 @@ const createMockSmlTypeDefinition = (
 const createMockRegistry = (definition?: SmlTypeDefinition) => ({
   get: jest.fn().mockReturnValue(definition),
   list: jest.fn().mockReturnValue(definition ? [definition] : []),
+  register: jest.fn(),
+  has: jest.fn().mockReturnValue(!!definition),
 });
 
 const createIndexerParams = (
@@ -61,6 +63,7 @@ const createIndexerParams = (
     action: 'create' | 'update' | 'delete';
     spaces: string[];
     esClient: jest.Mocked<ElasticsearchClient>;
+    logger: ReturnType<typeof createMockLogger>;
   }> = {}
 ) => ({
   attachmentId: 'att-123',
@@ -68,7 +71,7 @@ const createIndexerParams = (
   action: 'create' as const,
   spaces: ['default'],
   esClient: createMockEsClient(),
-  savedObjectsClient: {},
+  savedObjectsClient: {} as any,
   logger: createMockLogger(),
   ...overrides,
 });
