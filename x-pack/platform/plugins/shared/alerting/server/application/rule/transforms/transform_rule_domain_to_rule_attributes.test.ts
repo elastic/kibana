@@ -66,6 +66,54 @@ describe('transformRuleDomainToRuleAttributes', () => {
     },
   };
 
+  test('should preserve lastEnabledAt when present', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule: { ...rule, lastEnabledAt: new Date('2024-01-15T10:00:00.000Z') },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.lastEnabledAt).toBe('2024-01-15T10:00:00.000Z');
+  });
+
+  test('should not include lastEnabledAt when absent', () => {
+    const result = transformRuleDomainToRuleAttributes({
+      rule,
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result).not.toHaveProperty('lastEnabledAt');
+  });
+
   test('should transform rule domain to rule attribute', () => {
     const result = transformRuleDomainToRuleAttributes({
       rule,
