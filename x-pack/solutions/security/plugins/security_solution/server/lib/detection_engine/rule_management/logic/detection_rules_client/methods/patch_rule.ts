@@ -8,7 +8,7 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type {
@@ -74,6 +74,19 @@ export const patchRule = async ({
     rulePatch,
   });
 
+  // Zod v4 materializes some defaulted optional fields on PATCH payloads (e.g. max_signals),
+  // even when the client did not send them. Filter to fields that are both defined and
+  // actually changed so RBAC decisions are based on effective user changes.
+  const rulePatchDefinedFields: Record<string, unknown> = {};
+  let allKeysUpdateable = true;
+
+  for (const [key, value] of Object.entries(rulePatchObjWithoutIds)) {
+    if (value !== undefined && !isEqual(value, (existingRule as Record<string, unknown>)[key])) {
+      rulePatchDefinedFields[key] = value;
+      allKeysUpdateable = allKeysUpdateable && isReadAuthEditField(key);
+    }
+  }
+
   /**
    * RBAC logic branch
    *
@@ -85,13 +98,10 @@ export const patchRule = async ({
    * method provided by the alerting rules client to update the rule fields individually. Otherwise the user
    * will need `all` privileges for rules.
    */
-  if (
-    !isEmpty(rulePatchObjWithoutIds) &&
-    Object.keys(rulePatchObjWithoutIds).every((key) => isReadAuthEditField(key))
-  ) {
+  if (!isEmpty(rulePatchDefinedFields) && allKeysUpdateable) {
     // We remove the `enabled` field from the `updateReadAuthEditRuleFields` as it only modifies `RuleParams` type fields
     // `enabled` is modified later if it exists in the PATCH object
-    const { enabled: unusedField, ...fieldsToPatch } = rulePatchObjWithoutIds;
+    const { enabled: unusedField, ...fieldsToPatch } = rulePatchDefinedFields;
 
     const appliedPatchWithReadPrivs: BulkEditResult<RuleParams> =
       await updateReadAuthEditRuleFields({

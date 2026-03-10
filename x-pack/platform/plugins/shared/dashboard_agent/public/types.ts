@@ -6,7 +6,9 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardAgentPluginPublicSetup {}
@@ -19,5 +21,7 @@ export interface DashboardAgentPluginPublicSetupDependencies {}
 
 export interface DashboardAgentPluginPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
-  share?: SharePluginStart;
+  dashboard: DashboardStart;
+  share: SharePluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

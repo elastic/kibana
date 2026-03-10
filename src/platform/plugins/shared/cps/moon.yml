@@ -19,11 +19,14 @@ project:
     sourceRoot: src/platform/plugins/shared/cps
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-http-server'
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/cps-utils'
   - '@kbn/es-query'
   - '@kbn/i18n-react'
+  - '@kbn/spaces-utils'
+  - '@kbn/cps-common'
 tags:
   - plugin
   - prod

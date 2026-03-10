@@ -746,6 +746,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'tickColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'domainColor');
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
+    this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
     this._setDefaultValue('transparent', 'config', 'background');
   }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IngestStreamSettings } from '@kbn/streams-schema';
 import { formatSettings } from './helpers';
 import type { ValidationResult } from '../stream_active_record/stream_active_record';
@@ -45,12 +45,12 @@ export function validateSettings({
 }
 
 export async function validateSettingsWithDryRun({
-  scopedClusterClient,
+  esClient,
   streamName,
   settings,
   isServerless,
 }: {
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   streamName: string;
   settings: IngestStreamSettings;
   isServerless: boolean;
@@ -65,17 +65,13 @@ export async function validateSettingsWithDryRun({
     return;
   }
 
-  const response = (await scopedClusterClient.asCurrentUser.indices.putDataStreamSettings({
+  const response = (await esClient.indices.putDataStreamSettings({
     name: streamName,
     settings: settingsToValidate,
     dry_run: true,
   })) as DataStreamSettingsResponse;
 
-  if (!response.data_streams || response.data_streams.length === 0) {
-    throw new Error(`Failed to validate stream settings for "${streamName}"`);
-  }
-
-  const error = response.data_streams.find(({ error: err }) => Boolean(err))?.error;
+  const error = response.data_streams?.find(({ error: err }) => Boolean(err))?.error;
   if (error) {
     throw new Error(`Invalid stream settings: ${error}`);
   }

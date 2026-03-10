@@ -55,6 +55,7 @@ import {
   AgentMigrateFlyout,
   ChangeAgentPrivilegeLevelFlyout,
 } from './components';
+import { AddCollectorFlyout } from './components/add_collector_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -98,6 +99,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
   const [agentToViewPolicy, setAgentToViewPolicy] = useState<Agent | undefined>(undefined);
   const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+
+  const [isAddCollectorFlyoutOpen, setAddCollectorFlyoutOpen] = useState(false);
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
@@ -315,6 +318,17 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
+      {isAddCollectorFlyoutOpen && (
+        <EuiPortal>
+          <AddCollectorFlyout
+            onClose={() => setAddCollectorFlyoutOpen(false)}
+            onClickViewAgents={() => {
+              setAddCollectorFlyoutOpen(false);
+              fetchData();
+            }}
+          />
+        </EuiPortal>
+      )}
       {isAgentActivityFlyoutOpen ? (
         <EuiPortal>
           <AgentActivityFlyout
@@ -541,6 +555,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
+        onClickAddCollector={() => setAddCollectorFlyoutOpen(true)}
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         shouldShowAgentActivityTour={showAgentActivityTour}

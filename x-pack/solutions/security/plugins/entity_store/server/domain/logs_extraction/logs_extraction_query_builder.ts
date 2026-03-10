@@ -27,9 +27,11 @@ const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 
 const MAIN_ENTITY_ID_FIELD = 'entity.id';
 const ENTITY_NAME_FIELD = 'entity.name';
+const ENTITY_TYPE_FIELD = 'entity.type';
 const TIMESTAMP_FIELD = '@timestamp';
 
 const METADATA_FIELDS = ['_index'];
+
 const DEFAULT_FIELDS_TO_KEEP = [
   TIMESTAMP_FIELD,
   MAIN_ENTITY_ID_FIELD,
@@ -38,6 +40,13 @@ const DEFAULT_FIELDS_TO_KEEP = [
   HASHED_ID_FIELD,
   ENGINE_METADATA_TYPE_FIELD,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+];
+
+const CCS_FIELDS_TO_KEEP = [
+  TIMESTAMP_FIELD,
+  ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  // Keep it for debug visibility purposes
+  ENGINE_METADATA_UNTYPED_ID_FIELD,
 ];
 
 const RECENT_DATA_PREFIX = 'recent';
@@ -127,7 +136,7 @@ export function buildLogsExtractionEsqlQuery({
   | STATS
     ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
     ${recentData('timestamp')} = MAX(${TIMESTAMP_FIELD}),
-    ${recentFieldStats(fields)}
+    ${aggregationStats(fields)}
     BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}` +
     // early sort, paginate and limit so we perform data retention operations (LOOKUP JOIN) only on documents
     // that are needed
@@ -160,19 +169,68 @@ export function buildLogsExtractionEsqlQuery({
   );
 }
 
-function recentFieldStats(fields: EntityField[]) {
+export interface CcsLogsExtractionQueryParams {
+  indexPatterns: string[];
+  entityDefinition: EntityDefinition;
+  fromDateISO: string;
+  toDateISO: string;
+  docsLimit: number;
+  recoveryId?: string;
+  pagination?: PaginationParams;
+}
+
+/**
+ * Builds ESQL for CCS-only extraction: same aggregation as main but no LOOKUP JOIN.
+ * Writes partial entities to updates with @timestamp = nowISO so the next run intakes them.
+ */
+export function buildCcsLogsExtractionEsqlQuery({
+  indexPatterns,
+  entityDefinition: { fields, type },
+  fromDateISO,
+  toDateISO,
+  docsLimit,
+  recoveryId,
+  pagination,
+}: CcsLogsExtractionQueryParams): string {
+  return (
+    `SET unmapped_fields="nullify";
+    ${buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })}` +
+    // Using the same structure as the main logs extraction re-use fields to perform the aggregation
+    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
+      withTypeId: true,
+    })}
+    | STATS
+      ${TIMESTAMP_FIELD} = MAX(${TIMESTAMP_FIELD}),
+      ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} = MIN(${TIMESTAMP_FIELD}),
+      ${aggregationStats(fields, false)}
+      BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
+      | EVAL
+        ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = ${recentData(
+      ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD
+    )},
+        ${ENGINE_METADATA_UNTYPED_ID_FIELD} = ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}
+    | SORT ${recentData(ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD)} ASC, ${recentData(
+      ENGINE_METADATA_UNTYPED_ID_FIELD
+    )} ASC
+    ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
+    | KEEP ${fieldsToKeep(fields, CCS_FIELDS_TO_KEEP)}
+    | LIMIT ${docsLimit}`
+  );
+}
+
+function aggregationStats(fields: EntityField[], renameToRecent: boolean = true) {
   return fields
     .map((field) => {
       const { retention, destination: dest, source } = field;
-      const recentDest = recentData(dest);
+      const finalDest = renameToRecent ? recentData(dest) : dest;
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${recentDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = TOP(MV_DEDUPE(${castedSrc}), ${retention.maxLength}) WHERE ${source} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${recentDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }
@@ -206,10 +264,13 @@ function mergedFieldStats(idFieldName: string, fields: EntityField[]) {
     .join(',\n ');
 }
 
-function fieldsToKeep(fields: EntityField[]) {
+function fieldsToKeep(
+  fields: EntityField[],
+  defaultFieldsToKeep: string[] = DEFAULT_FIELDS_TO_KEEP
+) {
   return fields
     .map(({ destination }) => destination)
-    .concat(DEFAULT_FIELDS_TO_KEEP)
+    .concat(defaultFieldsToKeep)
     .join(',\n ');
 }
 
@@ -232,7 +293,7 @@ function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
 
   if (entityTypeFallback) {
     // If type doesn't exist, fallback to the entity type fallback
-    evals.push(`entity.type = COALESCE(entity.type, "${entityTypeFallback}")`);
+    evals.push(`${ENTITY_TYPE_FIELD} = COALESCE(${ENTITY_TYPE_FIELD}, "${entityTypeFallback}")`);
   }
 
   return evals.join(',\n ');

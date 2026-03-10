@@ -23,6 +23,28 @@ test.describe(
       });
     });
 
+    test('Redirects to transaction list when transactionName is missing in URL', async ({
+      page,
+      pageObjects: { transactionDetailsPage },
+    }) => {
+      // Start from transaction details (beforeEach already navigated there), then remove
+      // the transactionName param to simulate a bad link or user editing the URL.
+      await test.step('Remove transactionName from URL', async () => {
+        await transactionDetailsPage.removeTransactionNameFromUrlAndNavigate();
+      });
+
+      await test.step('Redirects to transaction list instead of showing 404 or error', async () => {
+        await expect(page).toHaveURL(
+          new RegExp(`/services/${testData.SERVICE_OPBEANS_JAVA}/transactions(?:\\?|$)`)
+        );
+        await expect(page).not.toHaveURL(/\/transactions\/view/);
+      });
+
+      await test.step('Transaction list page loads with Transactions tab and no 404', async () => {
+        await transactionDetailsPage.expectTransactionListPageLoaded(testData.SERVICE_OPBEANS_JAVA);
+      });
+    });
+
     test('Renders the page with expected content', async ({ page }) => {
       await test.step('Renders headings', async () => {
         await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(

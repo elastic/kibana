@@ -7363,7 +7363,7 @@
         "; }"
       ],
       "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-      "lineNumber": 122,
+      "lineNumber": 123,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -7436,7 +7436,7 @@
         "<any>[]; }"
       ],
       "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-      "lineNumber": 132,
+      "lineNumber": 133,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -7454,7 +7454,7 @@
             ") => () => void"
           ],
           "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-          "lineNumber": 133,
+          "lineNumber": 134,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -7563,7 +7563,7 @@
             "> | undefined; editor?: { editUrl: string; editApp?: string | undefined; } | { onEdit: (savedObjectId: string) => Promise<void>; } | undefined; })[]; }>"
           ],
           "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-          "lineNumber": 134,
+          "lineNumber": 135,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -7579,7 +7579,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 135,
+              "lineNumber": 136,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7596,7 +7596,7 @@
                 "number"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 136,
+              "lineNumber": 137,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7620,7 +7620,7 @@
                 "[] | undefined"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 137,
+              "lineNumber": 138,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -7644,7 +7644,7 @@
                 "[] | undefined"
               ],
               "path": "src/platform/plugins/shared/visualizations/public/plugin.ts",
-              "lineNumber": 138,
+              "lineNumber": 139,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,

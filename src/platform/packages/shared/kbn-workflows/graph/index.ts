@@ -22,6 +22,10 @@ export type {
   EnterForeachNodeConfiguration,
   EnterForeachNodeConfigurationSchema,
   EnterForeachNode,
+  EnterWhileNodeConfiguration,
+  EnterWhileNodeConfigurationSchema,
+  EnterWhileNode,
+  ExitWhileNode,
   EnterIfNode,
   EnterRetryNode,
   ExitConditionBranchNode,
@@ -42,6 +46,10 @@ export type {
   EnterTimeoutZoneNode,
   ExitTimeoutZoneNode,
   GraphNodeUnion,
+  WorkflowExecuteGraphNode,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNode,
+  WorkflowExecuteAsyncGraphNodeSchema,
 } from './types';
 
 export {
@@ -51,11 +59,13 @@ export {
   isKibana,
   isWait,
   isEnterForeach,
+  isEnterWhile,
   isEnterIf,
   isEnterRetry,
   isEnterTryBlock,
   isEnterNormalPath,
   isExitForeach,
+  isExitWhile,
   isExitIf,
   isExitRetry,
   isExitTryBlock,
@@ -66,4 +76,5 @@ export {
   isExitStepTimeoutZone,
   isEnterWorkflowTimeoutZone,
   isExitWorkflowTimeoutZone,
+  shouldSuggestInnerSteps,
 } from './types';

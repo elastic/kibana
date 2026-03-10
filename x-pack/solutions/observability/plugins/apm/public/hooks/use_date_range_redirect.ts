@@ -9,6 +9,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
+import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
 
 export function useDateRangeRedirect() {
   const history = useHistory();
@@ -17,7 +18,7 @@ export function useDateRangeRedirect() {
 
   const { core, plugins } = useApmPluginContext();
 
-  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+  const timePickerTimeDefaults = core?.uiSettings?.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
 
@@ -32,10 +33,16 @@ export function useDateRangeRedirect() {
       ...query,
     };
 
-    history.replace({
-      ...location,
-      search: qs.stringify(nextQuery),
-    });
+    try {
+      history.replace({
+        ...location,
+        search: qs.stringify(nextQuery),
+      });
+    } catch (error) {
+      if (!isInactiveHistoryError(error)) {
+        throw error;
+      }
+    }
   };
 
   return {

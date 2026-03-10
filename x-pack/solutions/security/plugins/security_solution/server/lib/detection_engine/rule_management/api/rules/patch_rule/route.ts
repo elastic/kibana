@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   CUSTOM_HIGHLIGHTED_FIELDS_API_EDIT,
   ENABLE_DISABLE_RULES_API_PRIVILEGE,
