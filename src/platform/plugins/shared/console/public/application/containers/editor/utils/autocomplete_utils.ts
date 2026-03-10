@@ -312,6 +312,19 @@ export const getBodyCompletionItems = async (
   );
 };
 
+const getStructuralSnippet = (token: string) => {
+  if (token === '{') {
+    return '{$0}';
+  }
+  if (token === '[') {
+    return '[$0]';
+  }
+  return undefined;
+};
+
+const usesStructuralSnippet = ({ name }: Pick<ResultTerm, 'name'>): boolean =>
+  typeof name === 'string' && getStructuralSnippet(name) !== undefined;
+
 const getSuggestions = (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
@@ -358,6 +371,9 @@ const getSuggestions = (
     ? unquotedFieldWithDotMatch[1]
     : null;
   const isQuotedField = !!quotedFieldWithDotMatch;
+  const bodyContentLines = bodyContentBeforePosition.split('\n');
+  const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+  const isInsideQuotedString = hasUnclosedQuote(currentContentLine);
 
   // Adjust the range start column if we have a field with a dot
   let startColumn = wordUntilPosition.startColumn;
@@ -389,6 +405,10 @@ const getSuggestions = (
     filterTermsWithoutName(autocompleteSet)
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
       .filter((item) => {
+        if ((isInsideQuotedString || !context.addTemplate) && usesStructuralSnippet(item)) {
+          return false;
+        }
+
         if (fieldBeingTyped) {
           // Only show fields that start with what the user has typed so far
           return typeof item.name === 'string' && item.name.startsWith(fieldBeingTyped);
@@ -411,6 +431,7 @@ const getSuggestions = (
       })
   );
 };
+
 export const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
@@ -422,19 +443,22 @@ export const getInsertText = (
 
   let insertText = '';
   if (typeof name === 'string') {
-    const bodyContentLines = bodyContent.split('\n');
-    const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
-    if (hasUnclosedQuote(currentContentLine)) {
-      // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
-      insertText = '';
+    const structuralSnippet = getStructuralSnippet(name);
+    if (structuralSnippet) {
+      insertText = structuralSnippet;
     } else {
-      // The cursor is at the beginning of a field so the insert text should start with a quote
-      insertText = '"';
-    }
-    if (insertValue && insertValue !== '{' && insertValue !== '[') {
-      insertText += `${insertValue}"`;
-    } else {
-      insertText += `${name}"`;
+      const bodyContentLines = bodyContent.split('\n');
+      const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+      if (hasUnclosedQuote(currentContentLine)) {
+        // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
+        insertText = '';
+      } else {
+        // The cursor is at the beginning of a field so the insert text should start with a quote
+        insertText = '"';
+      }
+      // insertValue can override the inserted token, but structural tokens are inserted as snippets above
+      const insertableName = insertValue && !getStructuralSnippet(insertValue) ? insertValue : name;
+      insertText += `${insertableName}"`;
     }
   } else {
     insertText = name + '';
