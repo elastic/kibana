@@ -19,7 +19,7 @@ import {
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { InlineCastingType, PromQLFunctionParamType, SupportedDataType } from '../types';
 import { getFunctionDefinition, getFunctionForInlineCast } from './functions';
-import { getMatchingSignatures } from './signature_analysis';
+import { getMatchingSignatures } from './signatures';
 import { getColumnForASTNode } from './shared';
 import type { ESQLColumnData } from '../../registry/types';
 import { UnmappedFieldsStrategy } from '../../registry/types';

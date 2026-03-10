@@ -18,7 +18,7 @@ import {
   doesParamAcceptType,
   canAcceptMoreArgs,
   hasVariadicSignature,
-} from '../../../signature_analysis';
+} from '../../../signatures';
 import { getFunctionDefinition } from '../../../functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from '../../../shared';
 import { logicalOperators } from '../../../../all_operators';

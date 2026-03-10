@@ -14,7 +14,7 @@ import type { InlineCastingType } from '../../..';
 import type { ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getExpressionType } from '../expressions';
-import { getMatchingSignatures } from '../signature_analysis';
+import { getMatchingSignatures } from '../signatures';
 import { getFunctionDefinition, getFunctionForInlineCast } from '../functions';
 
 /**

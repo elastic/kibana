@@ -19,7 +19,7 @@ import {
   isAtRepeatingValuePosition,
   isAmbiguousPosition,
   pairKeywordAndTextTypes,
-} from '../../../signature_analysis';
+} from '../../../signatures';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';

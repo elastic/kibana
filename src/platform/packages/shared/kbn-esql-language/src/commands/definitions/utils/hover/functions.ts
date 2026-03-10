@@ -13,7 +13,7 @@ import { resolveArgumentTypes } from '../expressions';
 import type { UnmappedFieldsStrategy } from '../../../registry/types';
 import { type ESQLColumnData } from '../../../registry/types';
 import type { FunctionDefinition, PromQLFunctionDefinition } from '../../types';
-import { getMatchingSignatures } from '../signature_analysis';
+import { getMatchingSignatures } from '../signatures';
 
 /**
  * Formats a list of types with optional limiting and overflow indicator.

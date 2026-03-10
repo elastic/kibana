@@ -36,7 +36,7 @@ import type {
   SupportedDataType,
 } from '../../types';
 import { resolveArgumentTypes } from '../expressions';
-import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signature_analysis';
+import { getMatchingSignatures, getMaxMinNumberOfParams } from '../signatures';
 import { ColumnValidator } from './column';
 
 export function validateFunction({

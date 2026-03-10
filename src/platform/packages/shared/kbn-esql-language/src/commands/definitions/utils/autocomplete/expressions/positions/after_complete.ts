@@ -25,7 +25,7 @@ import {
   canAcceptMoreArgs,
   hasVariadicSignature,
   isTypeAcceptedAtPosition,
-} from '../../../signature_analysis';
+} from '../../../signatures';
 
 /**
  * Handler for autocomplete suggestions after complete expressions.

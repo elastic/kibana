@@ -20,7 +20,7 @@ import { getPosition, type ExpressionPosition } from './position';
 import { dispatchStates } from './positions/dispatcher';
 import type { MapParameters } from '../map_expression';
 import { DOUBLE_QUOTED_STRING_REGEX, getCommandMapExpressionSuggestions } from '../map_expression';
-import { extractSignatureMapParams } from '../../signature_analysis';
+import { extractSignatureMapParams } from '../../signatures';
 import type {
   ExpressionComputedMetadata,
   ExpressionContext,

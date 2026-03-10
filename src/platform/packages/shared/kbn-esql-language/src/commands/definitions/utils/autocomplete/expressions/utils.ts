@@ -21,7 +21,7 @@ import {
   getMaxMinNumberOfParams,
   getParamAtPosition,
   getParamDefsAtPosition,
-} from '../../signature_analysis';
+} from '../../signatures';
 import { removeFinalUnknownIdentiferArg } from '../../shared';
 import type { PreferredExpressionType } from './types';
 

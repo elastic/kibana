@@ -23,7 +23,7 @@ import {
   areParamsHomogeneous,
   hasBooleanSignature,
   getAcceptedParamTypes,
-} from '../../../../signature_analysis';
+} from '../../../../signatures';
 
 export interface OperatorRuleContext {
   expressionType: SupportedDataType | 'unknown';
