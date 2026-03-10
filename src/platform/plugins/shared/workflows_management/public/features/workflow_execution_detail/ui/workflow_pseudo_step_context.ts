@@ -32,7 +32,8 @@ export function buildTriggerContextFromExecution(
   if (isScheduled) {
     triggerType = 'scheduled';
   } else if (executionContext.event != null) {
-    if ((executionContext.event as Record<string, unknown>).alerts != null) {
+    const event = executionContext.event as Record<string, unknown>;
+    if (event.alerts != null || event.type === 'alert') {
       triggerType = 'alert';
     } else {
       triggerType = 'document';

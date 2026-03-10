@@ -49,12 +49,21 @@ describe('buildTriggerContextFromExecution', () => {
     });
   });
 
-  it('should detect alert trigger when context has a non-scheduled event', () => {
-    const result = buildTriggerContextFromExecution({ event: { type: 'alert', data: {} } });
+  it('should detect alert trigger when context event has alerts', () => {
+    const result = buildTriggerContextFromExecution({ event: { alerts: [{ id: 'a1' }] } });
 
     expect(result).toEqual({
       triggerType: 'alert',
-      input: { type: 'alert', data: {} },
+      input: { alerts: [{ id: 'a1' }] },
+    });
+  });
+
+  it('should detect document trigger when context has a non-scheduled, non-alert event', () => {
+    const result = buildTriggerContextFromExecution({ event: { type: 'other', data: {} } });
+
+    expect(result).toEqual({
+      triggerType: 'document',
+      input: { type: 'other', data: {} },
     });
   });
 
@@ -158,7 +167,7 @@ describe('buildTriggerStepExecutionFromContext', () => {
 
   it('should set correct stepId and stepType based on trigger type', () => {
     const alertExecution = createWorkflowExecution({
-      context: { event: { type: 'alert', data: {} } },
+      context: { event: { alerts: [{ id: 'a1' }] } },
     });
 
     const result = buildTriggerStepExecutionFromContext(alertExecution);
