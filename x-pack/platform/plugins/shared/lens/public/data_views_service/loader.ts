@@ -21,7 +21,6 @@ import type {
   IndexPatternMap,
   IndexPatternRef,
 } from '@kbn/lens-common';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 
@@ -212,7 +211,7 @@ export async function loadIndexPatterns({
 
   // Resolve time fields for ESQL data views
   const shouldResolveTimeFields = (spec: DataViewSpec) =>
-    spec.type === ESQL_TYPE && !spec.timeFieldName && spec.title;
+    spec.type === 'esql' && !spec.timeFieldName && spec.title;
   const esqlSpecsWithoutTimeField = adHocSpecs.filter((spec) => shouldResolveTimeFields(spec));
   const resolvedEsqlTimeFields: Record<string, string | undefined> =
     esqlSpecsWithoutTimeField.length && http

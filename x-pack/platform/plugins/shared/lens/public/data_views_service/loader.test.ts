@@ -7,7 +7,6 @@
 
 import type { DataViewsContract, DataViewField } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 import {
   ensureIndexPattern,
@@ -411,7 +410,7 @@ describe('loader', () => {
           [esqlSpecId]: {
             id: esqlSpecId,
             title: 'logs-*',
-            type: ESQL_TYPE,
+            type: 'esql',
           },
         },
         http: httpMock,
@@ -425,7 +424,7 @@ describe('loader', () => {
         expect.objectContaining({
           id: esqlSpecId,
           title: 'logs-*',
-          type: ESQL_TYPE,
+          type: 'esql',
           timeFieldName: '@timestamp',
         })
       );
@@ -471,7 +470,7 @@ describe('loader', () => {
             id: esqlSpecId,
             title: 'logs-*',
             name: 'logs-*',
-            type: ESQL_TYPE,
+            type: 'esql',
             timeFieldName: 'event.created',
           },
         },
