@@ -53,7 +53,6 @@ const isEntitySourceRef = (ref: SavedObjectReference): boolean =>
 const extractEntitySourceIds = (references: SavedObjectReference[]): string[] =>
   references.filter(isEntitySourceRef).map((ref) => ref.id);
 
-// TODO: Update WatchlistObject OpenAPI schema to include entitySourceIds
 const toWatchlistObject = (so: SavedObject<WatchlistSavedObjectAttributes>): WatchlistObject => ({
   ...so.attributes,
   id: so.id,

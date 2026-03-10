@@ -69,11 +69,7 @@ export const listEntitySourcesRoute = (
               request.params.watchlist_id
             );
 
-            const allSources = await client.list(request.query);
-            const body = {
-              ...allSources,
-              sources: allSources.sources.filter((source) => linkedSourceIds.includes(source.id)),
-            };
+            const body = await client.list(request.query, linkedSourceIds);
 
             return response.ok({ body });
           } catch (e) {
