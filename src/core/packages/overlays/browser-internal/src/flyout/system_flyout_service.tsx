@@ -11,7 +11,8 @@ import React from 'react';
 import { render } from 'react-dom';
 import { v4 as uuidV4 } from 'uuid';
 
-import { EuiFlyout, getFlyoutManagerStore, type EuiFlyoutMenuProps } from '@elastic/eui';
+import type { FlyoutSession, EuiFlyoutMenuProps } from '@elastic/eui';
+import { EuiFlyout, getFlyoutManagerStore } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -96,8 +97,14 @@ export class SystemFlyoutService {
               return;
             }
 
-            const { mainFlyoutId, childFlyoutId } = event.session;
-            const shouldClose = euiFlyoutId === mainFlyoutId || euiFlyoutId === childFlyoutId;
+            // TODO: remove the type cast once EUI supports child history: https://github.com/elastic/eui/pull/9409
+            const { mainFlyoutId, childFlyoutId, childHistory } = event.session as FlyoutSession & {
+              childHistory?: Array<{ flyoutId: string }>;
+            };
+            const shouldClose =
+              euiFlyoutId === mainFlyoutId ||
+              euiFlyoutId === childFlyoutId ||
+              childHistory?.some((entry) => entry.flyoutId === euiFlyoutId);
 
             if (shouldClose && !flyoutRef.isClosed) {
               flyoutRef.close();
