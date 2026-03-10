@@ -71,6 +71,9 @@ describe('transformWorkpadOut', () => {
 
       const references = [
         { id: 'test-id', name: 'element-id:savedObjectRef', type: 'lens' },
+        { id: 'test-id-3', name: 'other-element-id:savedObjectRef', type: 'lens' },
+        { id: 'test-id-4', name: 'other-element-id:savedObjectRef', type: 'lens' },
+        { id: 'test-id-5', name: 'other-element-id:savedObjectRef', type: 'lens' },
       ] as SavedObjectReference[];
 
       const transformedWorkpad = transformWorkpadOut(workpad, references);
