@@ -65,9 +65,7 @@ const schema = z.object({
   entityTypes: z
     .array(IdentifierType)
     .optional()
-    .describe(
-      'Filter by entity type(s): host, user, service, or generic. Matched against entity.EngineMetadata.Type.'
-    ),
+    .describe('Filter by entity type(s): host, user, service, or generic.'),
   riskScoreChangeInterval: z
     .string()
     .regex(
@@ -120,7 +118,7 @@ const schema = z.object({
     .array(z.string().min(1))
     .optional()
     .describe(
-      'Filter entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
+      'Filter for entities that belong to any of the specified watchlists (entity.attributes.watchlists).'
     ),
   managedOnly: z
     .boolean()
@@ -140,27 +138,43 @@ const schema = z.object({
     ),
   firstSeenAfter: z
     .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+    )
     .optional()
     .describe(
-      'ISO 8601 date string. Only returns entities first seen on or after this timestamp (entity.lifecycle.first_seen >= this value).'
+      'Filter for entities first seen after a certain date. Date must be in ISO 8601 datetime format.'
     ),
   firstSeenBefore: z
     .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+    )
     .optional()
     .describe(
-      'ISO 8601 date string. Only returns entities first seen on or before this timestamp (entity.lifecycle.first_seen <= this value).'
+      'Filter for entities first seen before a certain date. Date must be in ISO 8601 datetime format.'
     ),
   lastSeenAfter: z
     .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+    )
     .optional()
     .describe(
-      'ISO 8601 date string. Only returns entities last seen on or after this timestamp (entity.lifecycle.last_activity >= this value).'
+      'Filter for entities last seen after a certain date. Date must be in ISO 8601 datetime format.'
     ),
   lastSeenBefore: z
     .string()
+    .regex(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})?$/,
+      'Date must be in ISO 8601 format (e.g. "2024-01-15T12:00:00Z")'
+    )
     .optional()
     .describe(
-      'ISO 8601 date string. Only returns entities last seen on or before this timestamp (entity.lifecycle.last_activity <= this value).'
+      'Filter for entities last seen before a certain date. Date must be in ISO 8601 datetime format.'
     ),
   maxResults: z
     .number()
