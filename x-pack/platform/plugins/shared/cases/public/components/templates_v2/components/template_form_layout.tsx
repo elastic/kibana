@@ -5,66 +5,146 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { ReactNode } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageBody,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
-import type { TemplateFormValues } from './template_form';
-import { HeaderPage } from '../../header_page';
-import { TemplatePreview } from './template_preview';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { YamlEditorFormValues } from './template_form';
+import { useCasesTemplatesNavigation } from '../../../common/navigation';
+import { useDebouncedYamlEdit } from '../hooks/use_debounced_yaml_edit';
 import * as i18n from '../translations';
+import { componentStyles } from './template_form_layout.styles';
+import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
+import { TemplateFormHeader } from './template_form_header';
+import { TemplateResetModal } from './template_reset_modal';
+import { TemplateEditorLayout } from './template_editor_layout';
 
 interface TemplateFormLayoutProps {
-  form: UseFormReturn<TemplateFormValues>;
+  form: UseFormReturn<YamlEditorFormValues>;
   title: string;
-  formContent: ReactNode;
   isLoading?: boolean;
+  isSaving?: boolean;
+  onCreate: (data: YamlEditorFormValues) => Promise<void>;
+  isEdit?: boolean;
+  storageKey: string;
+  initialValue: string;
+  templateId?: string;
 }
 
 export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   form,
   title,
-  formContent,
   isLoading,
+  isSaving,
+  onCreate,
+  isEdit = false,
+  storageKey,
+  initialValue,
+  templateId,
 }) => {
+  const styles = useMemoCss(componentStyles);
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+
+  const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
+  const [previewWidth = defaultPreviewWidth, setPreviewWidth] = useLocalStorage(
+    TEMPLATE_PREVIEW_WIDTH_KEY,
+    defaultPreviewWidth
+  );
+
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isResetModalVisible, setIsResetModalVisible] = useState(false);
+  const [savedValue, setSavedValue] = useState(initialValue);
+
+  useEffect(() => {
+    setSavedValue(initialValue);
+  }, [initialValue]);
+
+  const {
+    value: yamlValue,
+    onChange: onYamlChange,
+    handleReset,
+    isSaving: isYamlSaving,
+    isSaved: isYamlSaved,
+  } = useDebouncedYamlEdit(
+    storageKey,
+    initialValue,
+    (newValue) => form.setValue('definition', newValue),
+    templateId
+  );
+
+  const hasChanges = yamlValue !== savedValue;
+
+  const handleResetClick = useCallback(() => {
+    setIsResetModalVisible(true);
+  }, []);
+
+  const handleResetConfirm = useCallback(() => {
+    handleReset();
+    setIsResetModalVisible(false);
+  }, [handleReset]);
+
+  const handleResetCancel = useCallback(() => {
+    setIsResetModalVisible(false);
+  }, []);
+
+  const handleSave = useCallback(() => {
+    setSubmitError(null);
+    form.handleSubmit(
+      async (data) => {
+        try {
+          await onCreate(data);
+          setSavedValue(data.definition);
+        } catch (e) {
+          setSubmitError(e?.message ?? i18n.FAILED_TO_SAVE_TEMPLATE);
+        }
+      },
+      () => {
+        setSubmitError(i18n.FIX_VALIDATION_ERRORS);
+      }
+    )();
+  }, [form, onCreate]);
+
   return (
     <FormProvider {...form}>
-      <EuiPageSection restrictWidth={false}>
-        <HeaderPage data-test-subj="case-configure-title" title={title} />
-        <EuiPageBody>
-          <EuiSpacer size="xs" />
-          {isLoading ? (
-            <EuiLoadingSpinner size="l" />
-          ) : (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={3}>
-                <EuiText>
-                  <h3>{i18n.YAML_EDITOR_TITLE}</h3>
-                </EuiText>
-                <EuiSpacer size="m" />
-                {formContent}
-                <EuiSpacer size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>
-                <EuiText>
-                  <h3>{i18n.INTERACTIVE_EDITOR_TITLE}</h3>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <TemplatePreview />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </EuiPageBody>
-      </EuiPageSection>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        css={[kbnFullBodyHeightCss(), styles.wrapper]}
+      >
+        <EuiFlexItem grow={false}>
+          <TemplateFormHeader
+            title={title}
+            isLoading={isLoading}
+            isSaving={isSaving}
+            hasChanges={hasChanges}
+            isEdit={isEdit}
+            submitError={submitError}
+            onBack={navigateToCasesTemplates}
+            onReset={handleResetClick}
+            onSave={handleSave}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
+          <TemplateEditorLayout
+            isLoading={isLoading}
+            yamlValue={yamlValue}
+            onYamlChange={onYamlChange}
+            isYamlSaving={isYamlSaving}
+            isYamlSaved={isYamlSaved}
+            previewWidth={previewWidth}
+            onPreviewWidthChange={setPreviewWidth}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {isResetModalVisible && (
+        <TemplateResetModal onCancel={handleResetCancel} onConfirm={handleResetConfirm} />
+      )}
     </FormProvider>
   );
 };

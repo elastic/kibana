@@ -882,7 +882,7 @@
           "\nFetches editor extensions from the registry based on the provided query string and active solution ID."
         ],
         "signature": [
-          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "(http: ",
           "HttpSetup",
           ", queryString: string, activeSolutionId: ",
           {
@@ -892,49 +892,80 @@
             "section": "def-common.ESQLRegistrySolutionId",
             "text": "ESQLRegistrySolutionId"
           },
-          ") => Promise<{ recommendedQueries: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.RecommendedQuery",
-            "text": "RecommendedQuery"
-          },
-          "[]; recommendedFields: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.RecommendedField",
-            "text": "RecommendedField"
-          },
-          "[]; }>"
+          ") => Promise<EditorExtensions>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
-        "lineNumber": 38,
+        "lineNumber": 91,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [
-          "A promise that resolves to the editor extensions."
-        ],
         "children": [
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getEditorExtensions.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
-            "label": "args",
-            "description": [],
-            "signature": [
-              "Args"
+            "label": "http",
+            "description": [
+              "The HTTP service to use for the request."
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
-            "lineNumber": 90,
-            "columnNumber": 73,
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+            "lineNumber": 92,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getEditorExtensions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "queryString",
+            "description": [
+              "The query string to search for extensions."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getEditorExtensions.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "activeSolutionId",
+            "description": [
+              "The active solution ID to filter extensions."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLRegistrySolutionId",
+                "text": "ESQLRegistrySolutionId"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/extensions.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
+        ],
+        "returnComment": [
+          "A promise that resolves to the editor extensions.\nResults are cached by index pattern so they are computed once per source and reused\nacross all consumers. While the user is still typing the source name the function\nreturns an empty result immediately without making any HTTP requests."
         ],
         "initialIsOpen": false
       },

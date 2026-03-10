@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import React from 'react';
 import { FormProvider, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';

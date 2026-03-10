@@ -6,6 +6,7 @@
  */
 
 import type { ToolSelection } from '../tools';
+import type { SkillSelection } from '../skills';
 import type { UserIdAndName } from '../base/users';
 
 /**
@@ -101,6 +102,12 @@ export interface AgentConfiguration {
    * List of tools exposed to the agent
    */
   tools: ToolSelection[];
+
+  /**
+   * Optional list of skills exposed to the agent.
+   * When undefined, all skills are available (backward compatibility).
+   */
+  skills?: SkillSelection[];
 
   /**
    * Optional list of workflow IDs. When set, these workflows run before the agent is executed.

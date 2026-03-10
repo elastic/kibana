@@ -89,7 +89,7 @@ export function IdleQueryStreamEntry({ streamName, onEdit }: IdleQueryStreamEntr
               href={router.link('/{key}/management/{tab}', {
                 path: { key: streamDetailsFetch.value.stream.name, tab: 'partitioning' },
               })}
-              data-test-subj="streamsAppQueryStreamEntryButton"
+              data-test-subj={`streamsAppQueryStreamEntryButton-${streamName}`}
               css={cssReact`
               min-width: 0;
             `}

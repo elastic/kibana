@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AboutSection } from '../components/about_section';
 import { InvestigationSection } from '../components/investigation_section';
+import { VisualizationsSection } from '../components/visualizations_section';
 
 const OVERVIEW_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.document.overview.overviewContentAriaLabel',
@@ -33,6 +34,8 @@ export const OverviewTab = memo(({ hit }: OverviewTabProps) => {
       <AboutSection hit={hit} />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection hit={hit} />
+      <EuiHorizontalRule margin="m" />
+      <VisualizationsSection hit={hit} />
     </EuiPanel>
   );
 });

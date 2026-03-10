@@ -254,7 +254,13 @@ export const TableSection = React.memo(
       (props) => {
         const attack = getAttack(props.selectedGroup, props.groupBucket);
         if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
-        return <AttacksGroupTakeActionItems attack={attack} closePopover={props.closePopover} />;
+        return (
+          <AttacksGroupTakeActionItems
+            attack={attack}
+            closePopover={props.closePopover}
+            telemetrySource="attacks_page_group_take_action"
+          />
+        );
       },
       [getAttack, statusFilter]
     );

@@ -7409,6 +7409,82 @@
       },
       {
         "parentPluginId": "@kbn/synthtrace",
+        "id": "def-server.sigEvents",
+        "type": "Object",
+        "tags": [],
+        "label": "sigEvents",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.sigEvents.DEFAULT_SERVICE_GRAPH",
+            "type": "Object",
+            "tags": [],
+            "label": "DEFAULT_SERVICE_GRAPH",
+            "description": [],
+            "signature": [
+              "{ edges: { source: string; target: string; protocol: string; }[]; services: ({ readonly name: \"claim-intake\"; readonly runtime: \"node\"; readonly infraDeps: readonly [\"kafka\", \"postgres\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"claims\"; }; readonly os: { readonly type: \"linux\"; readonly name: \"Debian GNU/Linux\"; readonly version: \"12 (bookworm)\"; }; }; readonly serviceLogs: { readonly success: readonly [\"Claim intake successful\", \"Claim intake completed\"]; readonly error: readonly [\"Failed to persist claim to database: connection timeout\", \"Claim validation failed: missing required field \\\"policy_id\\\"\", \"Unhandled error in claim pipeline: request processing aborted\"]; }; } | { readonly name: \"policy-lookup\"; readonly runtime: \"java\"; readonly infraDeps: readonly [\"postgres\", \"redis\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"claims\"; }; readonly os?: undefined; }; readonly serviceLogs?: undefined; } | { readonly name: \"fraud-check\"; readonly runtime: \"python\"; readonly infraDeps: readonly [\"elasticsearch\", \"mongodb\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"claims\"; }; readonly os?: undefined; }; readonly serviceLogs: { readonly success: readonly [\"Fraud check passed\", \"No fraud detected\", \"Risk score evaluated: insufficient transaction history, defaulting to manual review\"]; readonly error: readonly [\"Fraud detection model timeout: upstream scoring service unavailable\", \"Fraud check failed: scoring pipeline returned unexpected error\"]; }; } | { readonly name: \"payment-processor\"; readonly runtime: \"go\"; readonly infraDeps: readonly [\"kafka\", \"postgres\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"payments\"; }; readonly os?: undefined; }; readonly serviceLogs: { readonly success: readonly [\"Payment processed successfully\", \"Payment completed\"]; readonly error: readonly [\"Payment gateway rejected transaction: insufficient funds\", \"Duplicate payment detected: idempotency key already used\", \"Payment processing failed: downstream acquirer timeout after 30s\", \"Payment persistence failed: database transaction rolled back after timeout\", \"Event publish failed: unable to reach Kafka broker after 3 retries\"]; }; } | { readonly name: \"notification-dispatch\"; readonly runtime: \"node\"; readonly infraDeps: readonly [\"kafka\", \"redis\"]; readonly version: \"1.0.0\"; readonly deployment: { readonly k8s: { readonly namespace: \"notifications\"; }; readonly os?: undefined; }; readonly serviceLogs?: undefined; })[]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace",
+            "id": "def-server.sigEvents.buildLogsGenerator",
+            "type": "Function",
+            "tags": [],
+            "label": "buildLogsGenerator",
+            "description": [],
+            "signature": [
+              "<TServiceGraph extends ",
+              "ServiceGraph",
+              "<string> = ",
+              "ServiceGraph",
+              "<string>>(config: ",
+              "LogsGeneratorConfig",
+              "<TServiceGraph>) => { generator: (timestamp: number, index: number) => Log[]; manifest: ",
+              "LogsManifest",
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/index.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace",
+                "id": "def-server.sigEvents.buildLogsGenerator.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "LogsGeneratorConfig",
+                  "<TServiceGraph>"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/service_graph_logs/build_logs_generator.ts",
+                "lineNumber": 34,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/synthtrace",
         "id": "def-server.TRACE_CHANGE_POINTS_ANALYSIS_SPIKE_WINDOW",
         "type": "Object",
         "tags": [],

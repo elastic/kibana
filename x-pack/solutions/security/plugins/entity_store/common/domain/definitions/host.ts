@@ -7,7 +7,11 @@
 
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
-import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import {
+  getCommonFieldDescriptions,
+  getEntityFieldsDescriptions,
+  isNotEmptyCondition,
+} from './common_fields';
 
 // Mostly copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/host.ts
 
@@ -15,15 +19,15 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   type: 'host',
   name: `Security 'host' Entity Store Definition`,
   identityField: {
-    requiresOneOfFields: ['host.entity.id', 'host.id', 'host.name', 'host.hostname'],
-    euidFields: [
-      [{ field: 'host.entity.id' }],
-      [{ field: 'host.id' }],
-      [{ field: 'host.name' }, { separator: '.' }, { field: 'host.domain' }],
-      [{ field: 'host.hostname' }, { separator: '.' }, { field: 'host.domain' }],
-      [{ field: 'host.name' }],
-      [{ field: 'host.hostname' }],
-    ],
+    // Ranking mechanism for the identity field
+    euidFields: [[{ field: 'host.id' }], [{ field: 'host.name' }], [{ field: 'host.hostname' }]],
+    documentsFilter: {
+      or: [
+        isNotEmptyCondition('host.id'),
+        isNotEmptyCondition('host.name'),
+        isNotEmptyCondition('host.hostname'),
+      ],
+    },
   },
   entityTypeFallback: 'Host',
   indexPatterns: [],

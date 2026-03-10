@@ -84,6 +84,13 @@
       ]
     },
     {
+      "id": "security-ai-rules",
+      "name": "Security AI Rules",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
+      "tags": ["security", "ai-rules"],
+      "ciLabels": ["evals:security-ai-rules"]
+    },
+    {
       "id": "endpoint",
       "name": "Endpoint (Elastic Defend)",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-endpoint/playwright.config.ts",

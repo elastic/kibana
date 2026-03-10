@@ -39,8 +39,11 @@ dependsOn:
   - '@kbn/scout-security'
   - '@kbn/core-saved-objects-server'
   - '@kbn/std'
+  - '@kbn/object-utils'
   - '@kbn/es-query'
   - '@kbn/security-plugin'
+  - '@kbn/streamlang'
+  - '@kbn/safer-lodash-set'
 tags:
   - plugin
   - prod

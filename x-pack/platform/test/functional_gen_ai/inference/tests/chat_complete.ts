@@ -72,6 +72,55 @@ export const chatCompleteSuite = (
   { getService }: FtrProviderContext
 ) => {
   const supertest = getService('supertest');
+  const alertsDataViewId = 'security-solution-alert-default';
+  const profilesApi = '/internal/anonymization/profiles';
+
+  const findAlertsProfile = async () => {
+    const profileFindQuery = `${profilesApi}/_find?target_type=data_view&target_id=${encodeURIComponent(
+      alertsDataViewId
+    )}`;
+    const response = await supertest
+      .get(profileFindQuery)
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .expect(200);
+
+    return response.body;
+  };
+
+  const deleteAlertsProfileIfExists = async () => {
+    const findBody = await findAlertsProfile();
+    const profileId = findBody?.data?.[0]?.id as string | undefined;
+    if (!profileId) {
+      return;
+    }
+
+    await supertest
+      .delete(`${profilesApi}/${profileId}`)
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .expect(200);
+  };
+
+  const ensureAlertsDataViewExists = async () => {
+    await supertest
+      .post('/api/saved_objects/index-pattern/security-solution-alert-default')
+      .set('kbn-xsrf', 'true')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send({
+        attributes: {
+          title: '.alerts-security.alerts-default',
+          timeFieldName: '@timestamp',
+        },
+      })
+      .expect((res) => {
+        if (res.status !== 200 && res.status !== 409) {
+          throw new Error(`Failed to create alerts data view: ${res.status} ${res.text}`);
+        }
+      });
+  };
 
   describe('chatComplete API', () => {
     describe('streaming disabled', () => {
@@ -230,6 +279,54 @@ export const chatCompleteSuite = (
           );
           const emailMask = message.deanonymized_output.deanonymizations[0].entity.mask;
           expect(message.content.includes(emailMask)).to.be(false);
+        });
+
+        it('auto-creates alerts data view profile on first chat_complete for alerts target', async () => {
+          try {
+            await deleteAlertsProfileIfExists();
+            await ensureAlertsDataViewExists();
+
+            const before = await findAlertsProfile();
+            expect(before.total).to.be(0);
+
+            await supertest
+              .post(`/internal/inference/chat_complete`)
+              .set('kbn-xsrf', 'kibana')
+              .send({
+                connectorId,
+                temperature: 0.1,
+                system: 'Please answer the user question',
+                metadata: {
+                  anonymization: {
+                    target: {
+                      targetType: 'data_view',
+                      targetId: alertsDataViewId,
+                    },
+                  },
+                },
+                messages: [{ role: 'user', content: 'Give me a short hello response.' }],
+              })
+              .expect(200);
+
+            const after = await findAlertsProfile();
+            expect(after.total).to.be(1);
+            expect(after.data[0].name).to.be('Security Alerts Anonymization Profile');
+            expect(after.data[0].rules.fieldRules.length).to.be.greaterThan(100);
+            expect(
+              after.data[0].rules.fieldRules.find(
+                (rule: { field: string; anonymized: boolean }) =>
+                  rule.field === 'host.name' && rule.anonymized === true
+              )
+            ).to.not.be(undefined);
+            expect(
+              after.data[0].rules.fieldRules.find(
+                (rule: { field: string; anonymized: boolean }) =>
+                  rule.field === 'user.name' && rule.anonymized === true
+              )
+            ).to.not.be(undefined);
+          } finally {
+            await deleteAlertsProfileIfExists();
+          }
         });
       });
       describe('anonymization disabled', () => {

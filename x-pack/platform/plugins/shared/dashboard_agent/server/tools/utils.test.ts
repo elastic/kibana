@@ -65,7 +65,7 @@ describe('resolvePanelsFromAttachments', () => {
     });
 
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['viz-1'],
+      attachmentInputs: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
     });
@@ -90,7 +90,7 @@ describe('resolvePanelsFromAttachments', () => {
     });
 
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['unsupported-1'],
+      attachmentInputs: [{ attachmentId: 'unsupported-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments,
       logger: createMockLogger(),
     });
@@ -106,7 +106,7 @@ describe('resolvePanelsFromAttachments', () => {
 
   it('collects per-attachment failures without failing the whole operation', async () => {
     const result = await resolvePanelsFromAttachments({
-      attachmentIds: ['missing-id'],
+      attachmentInputs: [{ attachmentId: 'missing-id', grid: { x: 0, y: 0, w: 24, h: 9 } }],
       attachments: createAttachmentManager({}),
       logger: createMockLogger(),
     });
@@ -128,6 +128,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       },
     ];
 
@@ -168,6 +169,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       },
     ];
 
@@ -219,6 +221,7 @@ describe('upsertMarkdownPanel', () => {
         type: 'lens',
         panelId: 'panel-1',
         visualization: { type: 'Metric' },
+        grid: { x: 0, y: 0, w: 24, h: 9 },
       },
     ];
 

@@ -8,7 +8,7 @@
  */
 
 import type { Step, WorkflowYaml } from '@kbn/workflows';
-import { DynamicStepContextSchema, ForEachContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, ForEachContextSchema, WhileContextSchema } from '@kbn/workflows';
 import { expectZodSchemaEqual } from '@kbn/workflows/common/utils/zod/test_utils/expect_zod_schema_equal';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
@@ -195,6 +195,69 @@ describe('getContextSchemaForPath', () => {
     expect(Object.keys((context.shape as any).steps.shape).sort()).toEqual(
       ['first-step', 'second-step', 'if-split', 'if-true-1'].sort()
     );
+  });
+
+  it('should return while context for inner step of while loop', () => {
+    const definitionWithWhile = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {},
+      steps: [
+        {
+          name: 'poll_loop',
+          type: 'while',
+          condition: 'steps.poll_loop.check_status.output: "ready"',
+          steps: [
+            {
+              name: 'check_status',
+              type: 'console',
+            },
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
+    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
+      'steps',
+      0,
+      'steps',
+      0,
+    ]);
+    expect((context.shape as any).while).toBeDefined();
+    expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
+  });
+
+  it('should return while context for the condition field of a while step', () => {
+    const definitionWithWhile = {
+      version: '1' as const,
+      name: 'test-workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' as const }],
+      consts: {},
+      steps: [
+        {
+          name: 'poll_loop',
+          type: 'while',
+          condition: 'while.iteration < 10',
+          steps: [
+            {
+              name: 'check_status',
+              type: 'console',
+            },
+          ],
+        },
+      ],
+    } as WorkflowYaml;
+    const workflowGraphWithWhile = WorkflowGraph.fromWorkflowDefinition(definitionWithWhile);
+    const context = getContextSchemaForPath(definitionWithWhile, workflowGraphWithWhile, [
+      'steps',
+      0,
+      'condition',
+    ]);
+    expect((context.shape as any).while).toBeDefined();
+    expectZodSchemaEqual((context.shape as any).while, WhileContextSchema);
   });
 
   it('should return the context for first step in false branch of if-split', () => {

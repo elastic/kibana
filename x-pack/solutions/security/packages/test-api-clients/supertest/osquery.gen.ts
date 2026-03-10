@@ -53,6 +53,7 @@ import type {
   OsqueryGetLiveQueryResultsRequestQueryInput,
   OsqueryGetLiveQueryResultsRequestParamsInput,
 } from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
+import type { OsqueryGetUnifiedHistoryRequestQueryInput } from '@kbn/osquery-plugin/common/api/unified_history/unified_history.gen';
 import type {
   ReadAssetsStatusRequestQueryInput,
   UpdateAssetsStatusRequestQueryInput,
@@ -297,6 +298,18 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+      * Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
+
+      */
+  osqueryGetUnifiedHistory(props: OsqueryGetUnifiedHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/osquery/history', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Update a query pack using the pack ID.
 > info
 > You cannot update a prebuilt pack.
@@ -428,6 +441,9 @@ export interface OsqueryGetPacksDetailsProps {
 }
 export interface OsqueryGetSavedQueryDetailsProps {
   params: OsqueryGetSavedQueryDetailsRequestParamsInput;
+}
+export interface OsqueryGetUnifiedHistoryProps {
+  query: OsqueryGetUnifiedHistoryRequestQueryInput;
 }
 export interface OsqueryUpdatePacksProps {
   params: OsqueryUpdatePacksRequestParamsInput;

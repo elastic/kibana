@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { EuiThemeComputed } from '@elastic/eui';
-import { euiFontSizeFromScale } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { euiFontSizeFromScale, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { VisorMode } from './mode_selector';
 
@@ -15,117 +15,97 @@ export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
 export const MODE_SELECT_WIDTH_KQL = 80;
 export const MODE_SELECT_WIDTH_NL = 160;
+const VISOR_INNER_PADDING = '2px';
 // Cap the expanded NL textarea height to roughly a third of the viewport,
 // offset by 100px to leave room for the editor chrome above and below.
 // Matches the max-height used by the KQL QueryStringInput textarea.
 export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
-const visorGradientPadding = '1px';
-const visorGradient =
-  'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);';
 
 export const visorStyles = (
-  euiTheme: EuiThemeComputed,
+  euiThemeContext: UseEuiTheme,
   comboBoxWidth: number,
   isSpaceReduced: boolean,
   isVisible: boolean,
-  isDarkMode: boolean,
-  mode: VisorMode,
-  isNlToEsqlEnabled: boolean = false
+  mode: VisorMode
 ) => {
+  const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
   const modeSelectWidth = mode === VisorMode.KQL ? MODE_SELECT_WIDTH_KQL : MODE_SELECT_WIDTH_NL;
-  const visorBoxShadow = isDarkMode
-    ? '0px 6px 14px 0px rgba(137, 157, 170, 0.2)'
-    : '0px 6px 14px 0px rgba(11, 14, 22, 0.05)';
-  const visorInnerPadding = '2px';
-  const totalHeight = `calc(${euiTheme.size.xl} + 2*${visorGradientPadding})`;
+  const borderRadius = euiTheme.border.radius.medium;
 
-  const gradientBoxStyles = {
-    background: visorGradient,
-    padding: visorGradientPadding,
-    borderRadius: `calc(${euiTheme.size.s} + 1px)`,
-    boxShadow: visorBoxShadow,
-  };
+  const boxStyles = css`
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    border-radius: ${borderRadius};
+    ${euiShadow(euiThemeContext, 'xs')}
+  `;
 
   return {
-    visorContainer: {
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      width: isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}% )`,
-      margin: isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0',
-      height: isVisible ? `${totalHeight}` : '0',
-      opacity: isVisible ? 1 : 0,
-      pointerEvents: isVisible ? ('auto' as const) : ('none' as const),
-      transition: 'all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)',
-    },
-    visorWrapper: {
-      width: `calc(100% - ${euiTheme.size.xl})`,
-    },
-    visorGradientBox: {
-      ...gradientBoxStyles,
-    },
-    comboBoxWrapper: {
-      background: euiTheme.colors.backgroundBasePlain,
-      justifyContent: 'center',
-      paddingLeft: visorInnerPadding,
-      flexGrow: 1,
-      maxWidth: `${
-        isSpaceReduced ? `calc(${visorWidthPercentage * 100}% )` : `${comboBoxWidth}px`
-      }`,
-      overflow: 'hidden',
-      ...(!isNlToEsqlEnabled && {
-        borderBottomLeftRadius: euiTheme.size.s,
-        borderTopLeftRadius: euiTheme.size.s,
-      }),
-    },
-    closeButtonWrapper: {
-      ...gradientBoxStyles,
-      marginLeft: euiTheme.size.xs,
-    },
-    closeButton: {
-      borderRadius: euiTheme.size.s,
-      border: 'none',
-    },
-    separator: {
-      width: '1px',
-      height: euiTheme.size.xl,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      flexShrink: 0,
-      alignSelf: 'stretch',
-      position: 'relative' as const,
-      '&::after': {
-        content: '""',
-        position: 'absolute' as const,
-        top: '50%',
-        left: '0',
-        transform: 'translateY(-50%)',
-        width: '1px',
-        height: euiTheme.size.base,
-        backgroundColor: euiTheme.colors.borderBasePlain,
-      },
-    },
-    searchWrapper: css`
-      background: ${euiTheme.colors.backgroundBasePlain};
+    visorContainer: css`
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      width: ${isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}%)`};
+      margin: ${isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0'};
+      height: ${isVisible ? `calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING})` : '0'};
+      opacity: ${isVisible ? 1 : 0};
+      pointer-events: ${isVisible ? 'auto' : 'none'};
+      transition: all 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    `,
+    visorWrapper: css`
+      width: calc(100% - ${euiTheme.size.xl});
+    `,
+    visorBox: css`
+      ${boxStyles}
+    `,
+    comboBoxWrapper: css`
       justify-content: center;
-      border-bottom-right-radius: ${euiTheme.size.s};
-      border-top-right-radius: ${euiTheme.size.s};
-      padding-right: ${visorInnerPadding};
+      padding-left: ${euiTheme.size.xs};
+      flex-grow: 1;
+      max-width: ${isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`};
+      overflow: hidden;
+    `,
+    closeButtonWrapper: css`
+      ${boxStyles}
+      margin-left: ${euiTheme.size.xs};
+    `,
+    closeButton: css`
+      border-radius: ${borderRadius};
+      border: none;
+    `,
+    separator: css`
+      width: 1px;
+      height: ${euiTheme.size.xl};
+      flex-shrink: 0;
+      align-self: stretch;
+      position: relative;
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        width: 1px;
+        height: ${euiTheme.size.base};
+        background-color: ${euiTheme.colors.borderBasePlain};
+      }
+    `,
+    searchWrapper: css`
+      justify-content: center;
+      padding-right: ${euiTheme.size.xs};
 
       .euiFormControlLayout--group {
-        border-radius: ${euiTheme.size.s};
+        border-radius: ${borderRadius};
       }
       .euiFormControlLayout--group::after {
         border: none;
       }
 
       .euiFormControlLayout__append {
-        background-color: ${euiTheme.colors.backgroundBasePlain};
         &::before {
           border: none;
         }
       }
 
       .kbnQueryBar__textarea {
-        border-radius: ${euiTheme.size.s} !important;
+        border-radius: ${borderRadius} !important;
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;
@@ -138,10 +118,7 @@ export const visorStyles = (
       }
     `,
     modeSelectWrapper: css`
-      background: ${euiTheme.colors.backgroundBasePlain};
-      border-bottom-left-radius: ${euiTheme.size.s};
-      border-top-left-radius: ${euiTheme.size.s};
-      padding-left: ${visorInnerPadding};
+      padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
       flex-grow: 0;
       width: ${modeSelectWidth}px;
@@ -166,25 +143,22 @@ export const visorStyles = (
       }
     `,
     nlInputWrapper: css`
-      background: ${euiTheme.colors.backgroundBasePlain};
       height: ${euiTheme.size.xl};
-      border-bottom-right-radius: ${euiTheme.size.s};
-      border-top-right-radius: ${euiTheme.size.s};
-      padding-right: ${visorInnerPadding};
+      padding-right: ${euiTheme.size.xs};
       overflow: visible;
       position: relative;
     `,
     nlInput: css`
       box-shadow: none !important;
       border: none !important;
-      background-color: ${euiTheme.colors.backgroundBasePlain};
+      background-color: transparent;
       font-size: ${fontSize} !important;
-      padding: calc(${euiTheme.size.xs} + ${visorInnerPadding}) ${euiTheme.size.s} !important;
+      padding: calc(${euiTheme.size.xs} + ${VISOR_INNER_PADDING}) ${euiTheme.size.s} !important;
       margin: 0;
       resize: none;
       overflow: hidden;
       min-height: ${euiTheme.size.xl};
-      border-radius: ${euiTheme.size.s} !important;
+      border-radius: ${borderRadius} !important;
       position: relative;
       z-index: ${euiTheme.levels.flyout};
       &:focus,

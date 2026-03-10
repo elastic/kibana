@@ -280,6 +280,8 @@
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
     "@kbn/deeplinks-workflows",
-    "@kbn/core-rendering-browser"
+    "@kbn/core-rendering-browser",
+    "@kbn/anonymization-plugin",
+    "@kbn/anonymization-common"
   ]
 }

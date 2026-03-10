@@ -132,7 +132,7 @@
         "label": "ESQLMenu",
         "description": [],
         "signature": [
-          "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element"
+          "(props: { hideHistory?: boolean | undefined; onESQLDocsFlyoutVisibilityChanged?: ((isOpen: boolean) => void) | undefined; }) => React.JSX.Element | null"
         ],
         "path": "src/platform/plugins/shared/esql/public/lazy_esql_menu.tsx",
         "lineNumber": 38,

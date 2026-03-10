@@ -17,6 +17,7 @@ import {
   MergeStepSchema,
   ParallelStepSchema,
   WaitStepSchema,
+  WhileStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
 } from '@kbn/workflows';
@@ -215,6 +216,12 @@ function getBuiltInStepTypesFromSchema(): Array<{
     {
       schema: ForEachStepSchema,
       description: 'Execute steps for each item in a collection',
+      icon: monaco.languages.CompletionItemKind.Method,
+    },
+    {
+      schema: WhileStepSchema,
+      description:
+        'Repeat steps while condition is true (do-while semantics — first iteration always runs).',
       icon: monaco.languages.CompletionItemKind.Method,
     },
     {
