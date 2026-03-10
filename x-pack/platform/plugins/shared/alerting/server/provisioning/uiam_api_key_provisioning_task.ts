@@ -45,7 +45,7 @@ import type {
 import type { AlertingPluginsStart } from '../plugin';
 
 export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
-export const API_KEY_PROVISIONING_TASK_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
+export const API_KEY_PROVISIONING_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
 const TASK_TIMEOUT = '5m';
 export const GET_RULES_BATCH_SIZE = 300;
 /** Delay before the next run when more batches are pending (1 minute) */
@@ -121,24 +121,41 @@ export class UiamApiKeyProvisioningTask {
     });
   };
 
+  private scheduleProvisioningTask = async (
+    taskManager: TaskManagerStartContract
+  ): Promise<void> => {
+    await taskManager.ensureScheduled({
+      id: API_KEY_PROVISIONING_TASK_ID,
+      taskType: API_KEY_PROVISIONING_TASK_TYPE,
+      schedule: API_KEY_PROVISIONING_TASK_SCHEDULE,
+      state: emptyState,
+      params: {},
+    });
+    this.isTaskScheduled = true;
+    this.logger.info(
+      `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} scheduled`,
+      { tags: TAGS }
+    );
+  };
+
+  private unscheduleProvisioningTask = async (
+    taskManager: TaskManagerStartContract
+  ): Promise<void> => {
+    await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
+    this.isTaskScheduled = false;
+    this.logger.info(
+      `${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} removed`,
+      { tags: TAGS }
+    );
+  };
+
   private applyProvisioningFlag = async (
     enabled: boolean,
     taskManager: TaskManagerStartContract
   ): Promise<void> => {
     if (enabled && this.isTaskScheduled !== true) {
       try {
-        await taskManager.ensureScheduled({
-          id: API_KEY_PROVISIONING_TASK_ID,
-          taskType: API_KEY_PROVISIONING_TASK_TYPE,
-          schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
-          state: emptyState,
-          params: {},
-        });
-        this.isTaskScheduled = true;
-        this.logger.info(
-          `${PROVISION_UIAM_API_KEYS_FLAG} enabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} scheduled`,
-          { tags: TAGS }
-        );
+        await this.scheduleProvisioningTask(taskManager);
       } catch (e) {
         this.logger.error(
           `Error scheduling task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${getErrorMessage(e)}`,
@@ -147,12 +164,7 @@ export class UiamApiKeyProvisioningTask {
       }
     } else if (!enabled && this.isTaskScheduled === true) {
       try {
-        await taskManager.removeIfExists(API_KEY_PROVISIONING_TASK_ID);
-        this.isTaskScheduled = false;
-        this.logger.info(
-          `${PROVISION_UIAM_API_KEYS_FLAG} disabled - Task ${API_KEY_PROVISIONING_TASK_TYPE} removed`,
-          { tags: TAGS }
-        );
+        await this.unscheduleProvisioningTask(taskManager);
       } catch (e) {
         this.logger.error(
           `Error removing task ${API_KEY_PROVISIONING_TASK_TYPE}, received ${getErrorMessage(e)}`,

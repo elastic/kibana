@@ -16,7 +16,7 @@ import {
   API_KEY_PROVISIONING_TASK_TYPE,
   PROVISION_UIAM_API_KEYS_FLAG,
   TAGS,
-  API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
+  API_KEY_PROVISIONING_TASK_SCHEDULE,
   GET_RULES_BATCH_SIZE,
 } from './uiam_api_key_provisioning_task';
 import { emptyState } from './uiam_api_key_provisioning_task_state';
@@ -237,7 +237,7 @@ describe('UiamApiKeyProvisioningTask', () => {
       expect(ensureScheduled).toHaveBeenCalledWith({
         id: API_KEY_PROVISIONING_TASK_ID,
         taskType: API_KEY_PROVISIONING_TASK_TYPE,
-        schedule: API_KEY_PROVISIONING_TASK_TASK_SCHEDULE,
+        schedule: API_KEY_PROVISIONING_TASK_SCHEDULE,
         state: emptyState,
         params: {},
       });
