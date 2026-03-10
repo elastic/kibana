@@ -35,8 +35,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   describe('POST /internal/cloud_security_posture/graph', () => {
-    // TODO: fix once feature flag is enabled for the API
-    describe.skip('Feature flag', () => {
+    describe('Feature flag', () => {
       it('should return 404 when feature flag is not toggled', async () => {
         await postGraph(supertest, {
           query: {
