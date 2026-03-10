@@ -309,6 +309,20 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
     file: _file,
     ...scriptDefinition
   }: CreateScriptRequestBody): Promise<EndpointScript> {
+    if (scriptDefinition.fileType === 'archive' && !scriptDefinition.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".',
+        400
+      );
+    }
+
+    if (scriptDefinition.fileType === 'script' && scriptDefinition.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
+        400
+      );
+    }
+
     const logger = this.logger.get('create');
     const scriptId = uuidV4();
     const fileStream = _file as HapiReadableStream;
@@ -372,6 +386,20 @@ export class ScriptsLibraryClient implements ScriptsLibraryClientInterface {
       throw new ScriptLibraryError(
         `Script with id ${id} has a different version than the one provided in the request. Current version: ${currentScriptSoItem.version}, provided version: ${version}`,
         409
+      );
+    }
+
+    if (scriptUpdates.fileType === 'archive' && !scriptUpdates.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".',
+        400
+      );
+    }
+
+    if (scriptUpdates.fileType === 'script' && scriptUpdates.pathToExecutable) {
+      throw new ScriptLibraryError(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".',
+        400
       );
     }
 

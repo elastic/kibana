@@ -92,7 +92,34 @@ describe('scripts library client', () => {
       });
     });
 
-    it('should create a script entry (SO) with expected content', async () => {
+    it('should throw error when `fileType` is `archive` but no `pathToExecutable` is provided', async () => {
+      await expect(
+        scriptsClient.create(
+          ScriptsLibraryMock.generateCreateScriptBody({
+            fileType: 'archive',
+            pathToExecutable: undefined,
+          })
+        )
+      ).rejects.toThrow(
+        'pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".'
+      );
+    });
+
+    it('should throw error when `fileType` is `script` but `pathToExecutable` is provided', async () => {
+      // mock method generates valid body with `fileType` of `script`, so we can just add `pathToExecutable` to it to create invalid request payload
+      createBodyMock = ScriptsLibraryMock.generateCreateScriptBody({ fileType: 'script' });
+      await expect(
+        scriptsClient.create({ ...createBodyMock, pathToExecutable: '/test/script.sh' })
+      ).rejects.toThrow(
+        'pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".'
+      );
+    });
+
+    it('should create a `script` entry (SO) with expected content', async () => {
+      createBodyMock = ScriptsLibraryMock.generateCreateScriptBody({
+        fileType: 'script',
+        pathToExecutable: undefined,
+      });
       await scriptsClient.create(createBodyMock);
       const scriptSoId = soClientMock.create.mock.calls?.[0]?.[2]?.id;
 
@@ -510,6 +537,29 @@ describe('scripts library client', () => {
         updatedBy: 'elastic',
         version: 'WzgsMV0=',
       });
+    });
+
+    it('should throw error when fileType is `archive` and `pathToExecutable` is not provided', async () => {
+      await expect(() =>
+        scriptsClient.update({
+          id: '1-2-3',
+          fileType: 'archive',
+        })
+      ).rejects.toThrow(
+        `pathToExecutable is required when fileType is "archive". Please provide pathToExecutable or change fileType to "script".`
+      );
+    });
+
+    it('should throw error when fileType is `script` and `pathToExecutable` is provided', async () => {
+      await expect(() =>
+        scriptsClient.update({
+          id: '1-2-3',
+          fileType: 'script',
+          pathToExecutable: './main.sh',
+        })
+      ).rejects.toThrow(
+        `pathToExecutable is only applicable for fileType of "archive". Please remove pathToExecutable or change fileType to "archive".`
+      );
     });
 
     it('should update pathToExecutable for an archive script', async () => {
