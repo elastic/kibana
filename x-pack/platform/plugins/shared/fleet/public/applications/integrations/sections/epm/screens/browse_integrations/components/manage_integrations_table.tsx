@@ -304,7 +304,7 @@ export const ManageIntegrationsTable: React.FC<{
             {item.successfulDataStreamCount}/{item.totalDataStreamCount}
           </EuiBadge>
         ),
-        maxWidth: '80px',
+        width: '80px',
       },
       {
         field: 'version',
@@ -377,36 +377,68 @@ export const ManageIntegrationsTable: React.FC<{
         width: '124px',
       },
       {
-        field: 'status',
+        name: '',
+        render: (item: CreatedIntegrationRow) => {
+          if (canReviewApproveIntegration(item)) {
+            return (
+              <ManageIntegrationActions
+                integration={item}
+                canReviewApprove={true}
+                inlineActionType="reviewApprove"
+                showMenuButton={false}
+                onEdit={goToEditIntegration}
+                onDelete={deleteIntegration}
+                DataStreamResultsFlyoutComponent={
+                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                }
+                onFetchReviewDetails={fetchIntegrationReviewDetails}
+                onApproveAndDeploy={approveAndDeployIntegration}
+              />
+            );
+          }
+
+          if (item.status === 'failed' || item.status === 'cancelled') {
+            return (
+              <ManageIntegrationActions
+                integration={item}
+                canReviewApprove={false}
+                inlineActionType="editIntegration"
+                showMenuButton={false}
+                onEdit={goToEditIntegration}
+                onDelete={deleteIntegration}
+                DataStreamResultsFlyoutComponent={
+                  automaticImportVTwo?.components.DataStreamResultsFlyout
+                }
+                onFetchReviewDetails={fetchIntegrationReviewDetails}
+                onApproveAndDeploy={approveAndDeployIntegration}
+              />
+            );
+          }
+
+          return null;
+        },
+      },
+      {
         name: (
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.table.actions"
             defaultMessage="Actions"
           />
         ),
-        render: (status: TaskStatus, item: CreatedIntegrationRow) => {
-          const showInlineAction =
-            canReviewApproveIntegration(item) || status === 'failed' || status === 'cancelled';
-          const inlineActionType = canReviewApproveIntegration(item)
-            ? 'reviewApprove'
-            : 'editIntegration';
-
-          return (
-            <ManageIntegrationActions
-              integration={item}
-              canReviewApprove={canReviewApproveIntegration(item)}
-              inlineActionType={showInlineAction ? inlineActionType : undefined}
-              onEdit={goToEditIntegration}
-              onDelete={deleteIntegration}
-              DataStreamResultsFlyoutComponent={
-                automaticImportVTwo?.components.DataStreamResultsFlyout
-              }
-              onFetchReviewDetails={fetchIntegrationReviewDetails}
-              onApproveAndDeploy={approveAndDeployIntegration}
-            />
-          );
-        },
-        width: '200px',
+        width: '80px',
+        render: (item: CreatedIntegrationRow) => (
+          <ManageIntegrationActions
+            integration={item}
+            canReviewApprove={canReviewApproveIntegration(item)}
+            onEdit={goToEditIntegration}
+            onDelete={deleteIntegration}
+            DataStreamResultsFlyoutComponent={
+              automaticImportVTwo?.components.DataStreamResultsFlyout
+            }
+            onFetchReviewDetails={fetchIntegrationReviewDetails}
+            onApproveAndDeploy={approveAndDeployIntegration}
+          />
+        ),
       },
     ],
     [

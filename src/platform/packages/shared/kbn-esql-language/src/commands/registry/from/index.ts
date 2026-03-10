@@ -17,7 +17,7 @@ import { summary } from './summary';
 const fromCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
-  columnsAfter,
+  columnsAfter: (...args) => columnsAfter(...args),
   summary,
 };
 

@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
-  - '@kbn/react-kibana-context-render'
 tags:
   - plugin
   - prod

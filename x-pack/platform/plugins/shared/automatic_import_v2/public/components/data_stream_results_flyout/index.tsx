@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import { UIStateProvider } from '../integration_management/contexts';
-import { EditPipelineFlyout } from '../integration_management/management_contents/data_streams/edit_pipeline_flyout';
+import React, { Suspense } from 'react';
 import type { DataStreamResultsFlyoutComponent } from './types';
+
+const DataStreamResultsFlyout = React.lazy(() =>
+  import('./data_stream_results_flyout').then((module) => ({
+    default: module.DataStreamResultsFlyout,
+  }))
+);
 
 export const getDataStreamResultsFlyoutComponent = (): DataStreamResultsFlyoutComponent =>
   React.memo(function DataStreamResultsFlyoutLazy({ integrationId, dataStream, onClose }) {
     return (
-      <UIStateProvider>
-        <EditPipelineFlyout
+      <Suspense fallback={null}>
+        <DataStreamResultsFlyout
           integrationId={integrationId}
           dataStream={dataStream}
           onClose={onClose}
         />
-      </UIStateProvider>
+      </Suspense>
     );
   });

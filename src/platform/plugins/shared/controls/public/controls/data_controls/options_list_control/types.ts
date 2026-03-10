@@ -70,7 +70,6 @@ export type OptionsListComponentApi = PublishesField &
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
     uuid: string;
-    allowExpensiveQueries$: PublishingSubject<boolean>;
   };
 
 export interface OptionsListCustomStrings {

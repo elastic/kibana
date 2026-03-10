@@ -13,6 +13,7 @@ export const convertPersistedSkill = (
 ): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
+  basePath: '/skills',
   description: skill.description,
   content: skill.content,
   readonly: false,
@@ -22,5 +23,4 @@ export const convertPersistedSkill = (
     content: rc.content,
   })),
   getRegistryTools: () => skill.tool_ids ?? [],
-  // Persisted skills have no inline tools or basePath
 });

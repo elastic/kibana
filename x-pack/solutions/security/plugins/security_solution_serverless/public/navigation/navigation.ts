@@ -38,13 +38,13 @@ export const registerSolutionNavigation = async (
   );
   const workflowsUiEnabled = await firstValueFrom(workflowsUiEnabled$);
 
+  const templatesEnabled = services.cases.config.templatesEnabled;
+
   const navigationTree = shouldUseAINavigation
-    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled)
-    : await createNavigationTree(services, initialChatExperience);
+    ? createAiNavigationTree(initialChatExperience, workflowsUiEnabled, templatesEnabled)
+    : await createNavigationTree(services, initialChatExperience, templatesEnabled);
 
   services.securitySolution.setSolutionNavigationTree(navigationTree);
 
-  services.serverless.initNavigation('security', Rx.of(navigationTree), {
-    dataTestSubj: 'securitySolutionSideNav',
-  });
+  services.serverless.initNavigation('security', Rx.of(navigationTree));
 };

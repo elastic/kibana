@@ -24,7 +24,11 @@ import {
 import type { DownsamplePhase, IlmPhasesFlyoutFormInternal } from '../form';
 import { DOWNSAMPLE_PHASES } from '../form';
 import { DownsampleIntervalField } from '../form';
-import { getDoubledDurationFromPrevious, type PreservedTimeUnit } from '../../shared';
+import {
+  downsamplingHelpText,
+  getDoubledDurationFromPrevious,
+  type PreservedTimeUnit,
+} from '../../shared';
 import { TIME_UNIT_OPTIONS } from '../constants';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
@@ -91,11 +95,7 @@ export const DownsampleFieldSection = ({
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate('xpack.streams.editIlmPhasesFlyout.downsamplingHelp', {
-                  defaultMessage: 'Configure downsampling for this phase.',
-                })}
-              />
+              <EuiIconTip content={downsamplingHelpText} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

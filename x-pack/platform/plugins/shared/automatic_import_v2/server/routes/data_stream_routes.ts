@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod';
 import type { AutomaticImportV2PluginRequestHandlerContext } from '../types';
 import { buildAutomaticImportResponse } from './utils';
@@ -247,7 +247,7 @@ const getDataStreamResultsRoute = (
           const message = err instanceof Error ? err.message : String(err);
           const statusCode =
             message.includes('has not completed yet') ||
-            message.includes('failed and has no results')
+              message.includes('failed and has no results')
               ? 400
               : 500;
           return automaticImportResponse.error({ statusCode, body: err });

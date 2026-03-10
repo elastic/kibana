@@ -8,7 +8,9 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import reactElementToJSXString from 'react-element-to-jsx-string';
 import {
   EuiPanel,
   EuiSpacer,
@@ -28,17 +30,24 @@ import {
   useContentListSort,
   useContentListSearch,
   useContentListPagination,
+  useContentListFilters,
   useContentListConfig,
   useContentListSelection,
 } from '@kbn/content-list-provider';
 import type {
   ContentListItem,
   ContentListItemConfig,
+  ContentListServices,
   FindItemsParams,
   FindItemsResult,
 } from '@kbn/content-list-provider';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
+import {
+  MOCK_DASHBOARDS,
+  createMockFindItems,
+  extractTagIds,
+  mockTagsService,
+} from '@kbn/content-list-mock-data/storybook';
 import { ContentListTable } from './content_list_table';
 
 // =============================================================================
@@ -73,16 +82,14 @@ const createStoryFindItems = (options?: {
       return { items: [], total: 0 };
     }
 
-    // Use mock findItems for sorting logic.
     const mockFindItems = createMockFindItems({ items: availableItems });
     const result = await mockFindItems({
       searchQuery: params.searchQuery,
-      filters: {},
+      filters: params.filters,
       sort: params.sort ?? { field: 'title', direction: 'asc' },
       page: params.page,
     });
 
-    // Transform to ContentListItem format.
     return {
       items: result.items.map((item) => ({
         id: item.id,
@@ -90,11 +97,79 @@ const createStoryFindItems = (options?: {
         description: item.attributes.description,
         type: item.type,
         updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+        tags: extractTagIds(item.references),
       })),
       total: result.total,
+      counts: result.counts,
     };
   };
 };
+
+// =============================================================================
+// JSX Serialization
+// =============================================================================
+
+// NOTE: `formatComponentName`, `toJsx`, and `StateDiagnosticPanel` are
+// duplicated from `@kbn/content-list-docs/stories_helpers`. The docs package
+// depends on this table package, so importing back would create a circular
+// reference. If a shared storybook-helpers package is introduced, consolidate
+// these copies there.
+
+/**
+ * Part suffixes whose export names follow the `{Preset}{Part}` pattern
+ * (e.g. `NameColumn`, `EditAction`). Used as a fallback when the assembly
+ * `displayName` is unavailable at runtime.
+ */
+const PART_SUFFIXES = ['Column', 'Action'];
+
+/**
+ * Map assembly-generated `displayName` values to consumer-facing names.
+ *
+ * @see [`factory.ts`](../../../kbn-content-list-assembly/src/factory.ts) for the
+ * `generateDisplayName` function that produces assembly-style names.
+ */
+const formatComponentName = (element: React.ReactNode): string => {
+  const type = (element as ReactElement | undefined)?.type as unknown as
+    | { displayName?: string; name?: string }
+    | undefined;
+  const rawName: string = type?.displayName ?? type?.name ?? 'Unknown';
+
+  // Assembly names follow "Assembly.part[.preset]".
+  const segments = rawName.split('.');
+  if (segments.length >= 2) {
+    return segments
+      .slice(1)
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('.');
+  }
+
+  // Fallback: handle export names like `NameColumn` → `Column.Name`.
+  for (const suffix of PART_SUFFIXES) {
+    if (rawName.endsWith(suffix) && rawName !== suffix) {
+      return `${suffix}.${rawName.slice(0, -suffix.length)}`;
+    }
+  }
+
+  // Strip trailing `Component` from wrapper names.
+  if (rawName.endsWith('Component') && rawName !== 'Component') {
+    return rawName.slice(0, -'Component'.length);
+  }
+
+  return rawName;
+};
+
+/** Convert a React element to a formatted JSX string. */
+const toJsx = (element: ReactElement): string =>
+  reactElementToJSXString(element, {
+    displayName: formatComponentName,
+    showFunctions: true,
+    functionValue: (fn) => (fn.name ? `${fn.name}()` : '…'),
+    showDefaultProps: false,
+    sortProps: false,
+    useBooleanShorthandSyntax: true,
+    useFragmentShortSyntax: true,
+    filterProps: ['key'],
+  });
 
 // =============================================================================
 // State Diagnostic Panel
@@ -103,14 +178,8 @@ const createStoryFindItems = (options?: {
 interface StateDiagnosticPanelProps {
   /** Whether the panel is open by default. */
   defaultOpen?: boolean;
-  /** Whether the description is shown. */
-  showDescription?: boolean;
-  /** Whether the custom type column is shown. */
-  showTypeColumn?: boolean;
-  /** Whether the actions column is shown. */
-  showActions?: boolean;
-  /** Whether custom actions (Share, Archive) are mixed in alongside presets. */
-  showCustomActions?: boolean;
+  /** React element to serialize and display as JSX source code. */
+  element: ReactElement;
   /** Whether selection is enabled. */
   showSelection?: boolean;
 }
@@ -120,69 +189,18 @@ interface StateDiagnosticPanelProps {
  */
 const StateDiagnosticPanel = ({
   defaultOpen = false,
-  showDescription = true,
-  showTypeColumn = true,
-  showActions = false,
-  showCustomActions = false,
+  element,
   showSelection = false,
 }: StateDiagnosticPanelProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const { items, totalItems, isLoading, isFetching, error } = useContentListItems();
   const { field: sortField, direction: sortDirection } = useContentListSort();
   const { search } = useContentListSearch();
+  const { filters } = useContentListFilters();
   const pagination = useContentListPagination();
   const { selectedIds, selectedCount } = useContentListSelection();
   const config = useContentListConfig();
-
-  // Generate JSX code based on current configuration.
-  const tableJsx = useMemo(() => {
-    const parts: string[] = [];
-
-    if (showSelection) {
-      parts.push('<ContentListToolbar />');
-    }
-
-    const columnChildren: string[] = [];
-
-    // Name column with optional description.
-    if (showDescription) {
-      columnChildren.push('  <Column.Name showDescription />');
-    } else {
-      columnChildren.push('  <Column.Name showDescription={false} />');
-    }
-
-    // Custom type column.
-    if (showTypeColumn) {
-      columnChildren.push(`  <Column
-    id="type"
-    name="Type"
-    width="20%"
-    render={(item) => <EuiBadge>{item.type}</EuiBadge>}
-  />`);
-    }
-
-    // Actions column.
-    if (showActions) {
-      const actionLines = ['    <Action.Edit />'];
-
-      if (showCustomActions) {
-        actionLines.push(
-          `    <Action id="share" name="Share" icon="share" … />`,
-          `    <Action id="archive" name="Archive" icon="folderClosed" … />`
-        );
-      }
-
-      actionLines.push('    <Action.Delete />');
-
-      columnChildren.push(`  <Column.Actions>\n${actionLines.join('\n')}\n  </Column.Actions>`);
-    }
-
-    parts.push(`<ContentListTable title="…">
-${columnChildren.join('\n')}
-</ContentListTable>`);
-
-    return parts.join('\n');
-  }, [showDescription, showTypeColumn, showActions, showCustomActions, showSelection]);
+  const tableJsx = useMemo(() => toJsx(element), [element]);
 
   return (
     <>
@@ -274,6 +292,14 @@ ${columnChildren.join('\n')}
                   {JSON.stringify({ search, isFetching }, null, 2)}
                 </EuiCodeBlock>
               </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Filters</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify(filters, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
               {pagination.isSupported && (
                 <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
                   <EuiTitle size="xxs">
@@ -339,7 +365,7 @@ ${columnChildren.join('\n')}
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content Management/Content List/Table',
+  title: 'Content List/Components/Table',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -362,9 +388,11 @@ interface PlaygroundArgs {
   isLoading: boolean;
   isReadOnly: boolean;
   hasPagination: boolean;
+  hasTags: boolean;
   compressed: boolean;
   tableLayout: 'auto' | 'fixed';
   showDescription: boolean;
+  showTags: boolean;
   showTypeColumn: boolean;
   showActions: boolean;
   showCustomActions: boolean;
@@ -450,8 +478,74 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
     [addToast]
   );
 
+  // Build a display element representing the consumer-facing JSX.
+  // `toJsx()` (inside `StateDiagnosticPanel`) serializes it automatically.
+  const displayElement = useMemo(
+    () => (
+      <ContentListTable
+        title={`${args.entityNamePlural} table`}
+        compressed={args.compressed}
+        tableLayout={args.tableLayout}
+      >
+        <Column.Name showDescription={args.showDescription} showTags={args.showTags} />
+        <Column.UpdatedAt />
+        {args.showTypeColumn && (
+          <Column
+            id="type"
+            name="Type"
+            width="20%"
+            render={(item) => <EuiBadge color="hollow">{item.type ?? 'unknown'}</EuiBadge>}
+          />
+        )}
+        {args.showActions && (
+          <Column.Actions>
+            <Action.Edit />
+            {args.showCustomActions && (
+              <>
+                <Action
+                  id="share"
+                  name="Share"
+                  description="Share with team"
+                  icon="share"
+                  type="icon"
+                  onClick={handleShare}
+                />
+                <Action
+                  id="archive"
+                  name="Archive"
+                  description="Move to archive"
+                  icon="folderClosed"
+                  type="icon"
+                  onClick={handleArchive}
+                />
+              </>
+            )}
+            <Action.Delete />
+          </Column.Actions>
+        )}
+      </ContentListTable>
+    ),
+    [
+      args.entityNamePlural,
+      args.compressed,
+      args.tableLayout,
+      args.showDescription,
+      args.showTags,
+      args.showTypeColumn,
+      args.showActions,
+      args.showCustomActions,
+      handleShare,
+      handleArchive,
+    ]
+  );
+
+  const services: ContentListServices | undefined = useMemo(
+    () => (args.hasTags ? { tags: mockTagsService } : undefined),
+    [args.hasTags]
+  );
+
   // Key forces re-mount when configuration changes.
-  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.showActions}-${args.showSelection}`;
+  const key = `${args.hasItems}-${args.isLoading}-${args.isReadOnly}-${args.hasPagination}-${args.hasTags}-${args.showActions}-${args.showSelection}`;
 
   return (
     <>
@@ -468,7 +562,9 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           },
           pagination: args.hasPagination ? { initialPageSize: 10 } : (false as const),
           selection: args.showSelection,
+          tags: args.hasTags,
         }}
+        services={services}
       >
         <EuiPanel paddingSize="xl">
           <ContentListToolbar />
@@ -478,7 +574,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
             compressed={args.compressed}
             tableLayout={args.tableLayout}
           >
-            <Column.Name showDescription={args.showDescription} />
+            <Column.Name showDescription={args.showDescription} showTags={args.showTags} />
             <Column.UpdatedAt />
             {args.showTypeColumn && (
               <Column
@@ -518,10 +614,7 @@ const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
           {args.showDiagnostics && (
             <StateDiagnosticPanel
               defaultOpen
-              showDescription={args.showDescription}
-              showTypeColumn={args.showTypeColumn}
-              showActions={args.showActions}
-              showCustomActions={args.showCustomActions}
+              element={displayElement}
               showSelection={args.showSelection}
             />
           )}
@@ -542,12 +635,14 @@ export const Table: PlaygroundStory = {
     isLoading: false,
     isReadOnly: false,
     hasPagination: true,
+    hasTags: true,
     showTypeColumn: false,
     showActions: true,
     showCustomActions: false,
     showSelection: true,
     hasClickableRows: true,
     showDescription: true,
+    showTags: true,
     entityName: 'dashboard',
     entityNamePlural: 'dashboards',
     compressed: false,
@@ -585,6 +680,11 @@ export const Table: PlaygroundStory = {
       description: 'Enable pagination in provider config.',
       table: { category: 'Features' },
     },
+    hasTags: {
+      control: 'boolean',
+      description: 'Enable tag filtering. Provides a mock tags service.',
+      table: { category: 'Features' },
+    },
     compressed: {
       control: 'boolean',
       description: 'Use compact table style.',
@@ -600,6 +700,12 @@ export const Table: PlaygroundStory = {
       control: 'boolean',
       description: 'Show description in Name column.',
       table: { category: 'Columns' },
+    },
+    showTags: {
+      control: 'boolean',
+      description: 'Show tag badges in Name column. Clicking a tag toggles a filter.',
+      table: { category: 'Columns' },
+      if: { arg: 'hasTags' },
     },
     showTypeColumn: {
       control: 'boolean',

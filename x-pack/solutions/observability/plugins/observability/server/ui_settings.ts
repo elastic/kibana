@@ -445,7 +445,8 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     ),
     value: [],
     schema: schema.arrayOf(
-      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')]),
+      { maxSize: 2 }
     ),
     requiresPageReload: false,
     solutionViews: ['classic', 'oblt'],

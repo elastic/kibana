@@ -13,6 +13,8 @@ export const MOCK_IDP_LOGOUT_PATH = '/mock_idp/logout';
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';
+export const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
+  'essu_dev_TnpKcmMyVTFkMEo2WW5scU5XUm9PVWw2TVRNNmJqSXRVbWxTVEZNeVowNVRkMWhUVWpCd1l6SjBadz09AAAAAN10T0s=';
 
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS = 'api-keys';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS = 'users';

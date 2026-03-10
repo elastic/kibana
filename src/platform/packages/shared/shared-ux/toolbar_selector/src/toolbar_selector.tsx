@@ -191,6 +191,8 @@ export const ToolbarSelector = ({
       <EuiPopover
         id={dataTestSubj}
         ownFocus
+        anchorPosition="downLeft"
+        repositionToCrossAxis={false}
         initialFocus={
           searchable ? `#${dataTestSubj}SelectableInput` : `#${dataTestSubj}Selectable_listbox`
         }

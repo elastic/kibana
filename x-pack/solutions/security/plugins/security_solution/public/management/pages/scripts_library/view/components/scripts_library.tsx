@@ -27,6 +27,7 @@ import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 import { DiscardChangesModal } from './discard_changes_modal';
+import { NoDataEmptyPrompt } from './no_data_empty_prompt';
 
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
@@ -97,6 +98,11 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     enabled: canReadScriptsLibrary,
     retry: false,
   });
+
+  const doesDataExist = useMemo(
+    () => isFetched && scriptsData?.total !== undefined && scriptsData.total > 0,
+    [isFetched, scriptsData?.total]
+  );
 
   // update query state from URL params on page re-load or URL changes
   useEffect(() => {
@@ -223,14 +229,14 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
       data-test-subj={getTestId()}
       title={pageLabels.pageTitle}
       subtitle={pageLabels.pageAboutInfo}
-      hideHeader={false}
+      hideHeader={!doesDataExist}
       actions={
         canWriteScriptsLibrary ? (
           <EuiButton
             fill
             iconType="upload"
             onClick={() => onClickAction({ show: 'create' })}
-            data-test-subj={getTestId('uploadScriptButton')}
+            data-test-subj={getTestId('upload-script-button')}
           >
             {pageLabels.pageAddButtonTitle}
           </EuiButton>
@@ -272,7 +278,8 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
           data-test-subj={getTestId('delete-modal')}
         />
       )}
-      {isFetched && (
+
+      {doesDataExist ? (
         <ScriptsLibraryTable
           data-test-subj={getTestId('table')}
           items={tableItems}
@@ -285,6 +292,13 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
             field: scriptsData?.sortField as SortableScriptLibraryFields,
             direction: scriptsData?.sortDirection,
           }}
+        />
+      ) : (
+        <NoDataEmptyPrompt
+          onClick={() => onClickAction({ show: 'create' })}
+          canCreateScript={canWriteScriptsLibrary}
+          data-test-subj={getTestId('no-data-empty-prompt')}
+          isAddDisabled={isFetching}
         />
       )}
     </AdministrationListPage>

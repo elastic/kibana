@@ -17,6 +17,7 @@ import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
 import { Sidebar } from './components/side_bar';
 import { useBrowseIntegrationHook } from './hooks';
+import { useSetUrlCategory } from './hooks/url_categories';
 import { NoDataPrompt } from './components/no_data_prompt';
 import {
   ManageIntegrationsTable,
@@ -67,30 +68,25 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     [history, manageIntegrationsHref]
   );
 
+  const setUrlCategory = useSetUrlCategory();
   const {
     allCategories,
     initialSelectedCategory,
     selectedCategory,
     mainCategories,
-    onlyAgentlessFilter,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    setUrlandReplaceHistory,
     filteredCards,
     onCategoryChange,
+    availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
-    setUrlandReplaceHistory({
-      searchString: '',
-      categoryId: '',
-      subCategoryId: '',
-      onlyAgentless: onlyAgentlessFilter,
-    });
+    setUrlCategory({ category: '' }, { replace: true });
     return null;
   }
 

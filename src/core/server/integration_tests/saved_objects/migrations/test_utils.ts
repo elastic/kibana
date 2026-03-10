@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import fs from 'fs/promises';
-import JSON5 from 'json5';
+import { parse } from 'hjson';
 
 export const getDocVersion = () => {
   const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -46,5 +46,5 @@ export const parseLogFile = async (filePath: string): Promise<LogRecord[]> => {
   return logFileContent
     .split('\n')
     .filter(Boolean)
-    .map((str) => JSON5.parse(str)) as LogRecord[];
+    .map((str) => parse(str)) as LogRecord[];
 };
