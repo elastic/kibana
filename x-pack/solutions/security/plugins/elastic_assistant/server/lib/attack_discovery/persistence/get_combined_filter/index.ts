@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { isEmpty } from 'lodash/fp';
 
-import { ALERT_ATTACK_DISCOVERY_USERS } from '../../schedules/fields/field_names';
+import { ALERT_ATTACK_DISCOVERY_USERS } from '@kbn/elastic-assistant-common';
 
 /** A KQL "users field is empty" query */
 export const EMPTY_ALERT_ATTACK_DISCOVERY_USERS_KQL = `${ALERT_ATTACK_DISCOVERY_USERS}: ""`;

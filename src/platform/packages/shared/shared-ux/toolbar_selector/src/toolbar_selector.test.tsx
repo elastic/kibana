@@ -197,4 +197,49 @@ describe('ToolbarSelector', () => {
     expect(screen.getByText('Maximum selection limit reached')).toBeInTheDocument();
     expect(screen.getAllByLabelText('My Popover Title')).toHaveLength(3);
   });
+
+  it('uses buttonTooltipContent when provided instead of buttonLabel for tooltip', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorTooltipTest"
+        buttonLabel="Button Label"
+        buttonTooltipContent="Custom Tooltip Content"
+        options={options}
+        searchable={false}
+        singleSelection={true}
+      />
+    );
+
+    const button = screen.getByTestId('toolbarSelectorTooltipTestButton');
+    expect(screen.getByText('Button Label')).toBeInTheDocument();
+
+    await user.hover(button);
+
+    await waitFor(() => {
+      expect(screen.getByText('Custom Tooltip Content')).toBeInTheDocument();
+    });
+  });
+
+  it('falls back to buttonLabel for tooltip when buttonTooltipContent is not provided', async () => {
+    const user = userEvent.setup();
+    render(
+      <ToolbarSelector
+        data-test-subj="toolbarSelectorDefaultTooltipTest"
+        buttonLabel="Default Label"
+        options={options}
+        searchable={false}
+        singleSelection={true}
+      />
+    );
+
+    const button = screen.getByTestId('toolbarSelectorDefaultTooltipTestButton');
+    expect(screen.getByText('Default Label')).toBeInTheDocument();
+
+    await user.hover(button);
+
+    await waitFor(() => {
+      expect(screen.getByText('Default Label')).toBeInTheDocument();
+    });
+  });
 });

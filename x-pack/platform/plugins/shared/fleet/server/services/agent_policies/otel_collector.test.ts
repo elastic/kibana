@@ -705,6 +705,9 @@ describe('generateOtelcolConfig', () => {
               'traces/otlp': {
                 receivers: ['otlp'],
               },
+              'profiles/otlp': {
+                receivers: ['otlp'],
+              },
             },
           },
         },
@@ -752,6 +755,9 @@ describe('generateOtelcolConfig', () => {
                 receivers: ['otlp'],
               },
               traces: {
+                receivers: ['otlp'],
+              },
+              profiles: {
                 receivers: ['otlp'],
               },
             },
@@ -823,6 +829,16 @@ describe('generateOtelcolConfig', () => {
             ],
           },
         ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
       });
     });
 
@@ -864,6 +880,16 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.namespace"], "default")',
+            ],
+          },
+        ],
+        profile_statements: [
+          {
+            context: 'profile',
+            statements: [
+              'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },

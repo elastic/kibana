@@ -1125,11 +1125,11 @@
           "Plugin",
           "<",
           {
-            "pluginId": "uiActionsEnhanced",
+            "pluginId": "uiActions",
             "scope": "public",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-public.SetupContract",
-            "text": "SetupContract"
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsPublicSetup",
+            "text": "UiActionsPublicSetup"
           },
           ", ",
           {
@@ -1144,7 +1144,7 @@
           ">"
         ],
         "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-        "lineNumber": 44,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1169,7 +1169,7 @@
               " | undefined>"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-            "lineNumber": 47,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1185,7 +1185,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-            "lineNumber": 59,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1202,7 +1202,7 @@
                   "<object>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-                "lineNumber": 59,
+                "lineNumber": 53,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1225,15 +1225,15 @@
               "StartDependencies",
               ", unknown>, { uiActions, licensing }: SetupDependencies) => ",
               {
-                "pluginId": "uiActionsEnhanced",
+                "pluginId": "uiActions",
                 "scope": "public",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-public.SetupContract",
-                "text": "SetupContract"
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsPublicSetup",
+                "text": "UiActionsPublicSetup"
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-            "lineNumber": 61,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1252,7 +1252,7 @@
                   ", unknown>"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-                "lineNumber": 62,
+                "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1269,7 +1269,7 @@
                   "SetupDependencies"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-                "lineNumber": 63,
+                "lineNumber": 57,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1300,7 +1300,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-            "lineNumber": 77,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1316,7 +1316,7 @@
                   "CoreStart"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-                "lineNumber": 77,
+                "lineNumber": 71,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1333,7 +1333,7 @@
                   "StartDependencies"
                 ],
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-                "lineNumber": 77,
+                "lineNumber": 71,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1353,7 +1353,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-            "lineNumber": 94,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2481,7 +2481,7 @@
         "label": "validateUrlTemplate",
         "description": [],
         "signature": [
-          "(urlTemplate: { format?: \"handlebars_v1\" | undefined; template: string; }, scope: ",
+          "(url: string, scope: ",
           {
             "pluginId": "uiActionsEnhanced",
             "scope": "public",
@@ -2500,12 +2500,12 @@
           {
             "parentPluginId": "uiActionsEnhanced",
             "id": "def-public.validateUrlTemplate.$1",
-            "type": "Object",
+            "type": "string",
             "tags": [],
-            "label": "urlTemplate",
+            "label": "url",
             "description": [],
             "signature": [
-              "{ format?: \"handlebars_v1\" | undefined; template: string; }"
+              "string"
             ],
             "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "lineNumber": 55,
@@ -2789,751 +2789,6 @@
       },
       {
         "parentPluginId": "uiActionsEnhanced",
-        "id": "def-public.DrilldownDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "DrilldownDefinition",
-        "description": [
-          "\nThis is a convenience interface to register a drilldown. Drilldown has\nability to collect configuration from user. Once drilldown is executed it\nreceives the collected information together with the context of the\nuser's interaction.\n\n`Config` is a serializable object containing the configuration that the\ndrilldown is able to collect using UI.\n\n`ExecutionContext` is an object created in response to user's interaction\nand provided to the `execute` function of the drilldown. This object contains\ninformation about the action user performed."
-        ],
-        "signature": [
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "public",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-public.DrilldownDefinition",
-            "text": "DrilldownDefinition"
-          },
-          "<Config, ExecutionContext, FactoryContext>"
-        ],
-        "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-        "lineNumber": 20,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nGlobally unique identifier for this drilldown."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.isBeta",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isBeta",
-            "description": [
-              "\nIs this action factory not GA?\nAdds a beta badge on a list item representing this ActionFactory"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 44,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.minimalLicense",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "minimalLicense",
-            "description": [
-              "\nMinimal license level\nEmpty means no restrictions"
-            ],
-            "signature": [
-              "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 50,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.licenseFeatureName",
-            "type": "string",
-            "tags": [],
-            "label": "licenseFeatureName",
-            "description": [
-              "\nRequired when `minimalLicense` is used.\nIs a user-facing string. Has to be unique. Doesn't need i18n.\nThe feature's name will be displayed to Cloud end-users when they're billed based on their feature usage."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 56,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.order",
-            "type": "number",
-            "tags": [],
-            "label": "order",
-            "description": [
-              "\nDetermines the display order of the drilldowns in the flyout picker.\nHigher numbers are displayed first."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 63,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.createConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "createConfig",
-            "description": [
-              "\nFunction that returns default config for this drilldown."
-            ],
-            "signature": [
-              "(context: FactoryContext) => Config"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 69,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.createConfig.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "Context"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/public/ui/configurable.ts",
-                "lineNumber": 23,
-                "columnNumber": 27,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.CollectConfig",
-            "type": "Function",
-            "tags": [],
-            "label": "CollectConfig",
-            "description": [
-              "\nComponent that collects config for this drilldown.\n\n```tsx\nimport React from 'react';\nimport { CollectConfigProps } from 'src/platform/plugins/shared/kibana_utils/public';\n\ntype Props = CollectConfigProps<Config>;\n\nexport const CollectConfig: React.FC<Props> = () => {\n  return <div>Collecting config...'</div>;\n};\n```"
-            ],
-            "signature": [
-              "React.FunctionComponent<",
-              {
-                "pluginId": "kibanaUtils",
-                "scope": "public",
-                "docId": "kibKibanaUtilsPluginApi",
-                "section": "def-public.CollectConfigProps",
-                "text": "CollectConfigProps"
-              },
-              "<Config, FactoryContext>>"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 74,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.CollectConfig.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "node_modules/@types/react/ts5.0/index.d.ts",
-                "lineNumber": 1109,
-                "columnNumber": 10,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.CollectConfig.$2",
-                "type": "Any",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "any"
-                ],
-                "path": "node_modules/@types/react/ts5.0/index.d.ts",
-                "lineNumber": 1109,
-                "columnNumber": 20,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.isConfigValid",
-            "type": "Function",
-            "tags": [],
-            "label": "isConfigValid",
-            "description": [
-              "\nA validator function for the config object. Should always return a boolean."
-            ],
-            "signature": [
-              "(config: Config, context: FactoryContext) => boolean"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 90,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.isConfigValid.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "config",
-                "description": [],
-                "signature": [
-                  "Config"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/public/ui/configurable.ts",
-                "lineNumber": 28,
-                "columnNumber": 28,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.isConfigValid.$2",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "Context"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/public/ui/configurable.ts",
-                "lineNumber": 28,
-                "columnNumber": 44,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.isConfigurable",
-            "type": "Function",
-            "tags": [],
-            "label": "isConfigurable",
-            "description": [
-              "\nCompatibility check during drilldown creation.\nCould be used to filter out a drilldown if it's not compatible with the current context."
-            ],
-            "signature": [
-              "((context: FactoryContext) => boolean) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 95,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.isConfigurable.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "FactoryContext"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 99,
-                "columnNumber": 19,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.euiIcon",
-            "type": "string",
-            "tags": [],
-            "label": "euiIcon",
-            "description": [
-              "\nName of EUI icon to display when showing this drilldown to user."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 101,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.getDisplayName",
-            "type": "Function",
-            "tags": [],
-            "label": "getDisplayName",
-            "description": [
-              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user as the name of drilldown factory when configuring a drilldown."
-            ],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 106,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.actionMenuItem",
-            "type": "Function",
-            "tags": [],
-            "label": "actionMenuItem",
-            "description": [
-              "\nName of the drilldown instance displayed to the user at the moment of\ndrilldown execution. Should be internationalized."
-            ],
-            "signature": [
-              "React.FC<{ config: Omit<",
-              {
-                "pluginId": "uiActionsEnhanced",
-                "scope": "common",
-                "docId": "kibUiActionsEnhancedPluginApi",
-                "section": "def-common.SerializedAction",
-                "text": "SerializedAction"
-              },
-              "<Config>, \"factoryId\">; context: ExecutionContext | ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
-              },
-              "<ExecutionContext>; }> | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 112,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.isCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "isCompatible",
-            "description": [
-              "\nisCompatible during execution\nCould be used to prevent drilldown from execution"
-            ],
-            "signature": [
-              "((config: Config, context: ExecutionContext | ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
-              },
-              "<ExecutionContext>) => Promise<boolean>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 121,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.isCompatible.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "config",
-                "description": [],
-                "signature": [
-                  "Config"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 126,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.isCompatible.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ExecutionContext | ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionExecutionContext",
-                    "text": "ActionExecutionContext"
-                  },
-                  "<ExecutionContext>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 127,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.execute",
-            "type": "Function",
-            "tags": [],
-            "label": "execute",
-            "description": [
-              "\nImplements the \"navigation\" action of the drilldown. This happens when\nuser clicks something in the UI that executes a trigger to which this\ndrilldown was attached.\n"
-            ],
-            "signature": [
-              "(config: Config, context: ExecutionContext | ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
-              },
-              "<ExecutionContext>) => void"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 130,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.execute.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "config",
-                "description": [
-                  "Config object that user configured this drilldown with."
-                ],
-                "signature": [
-                  "Config"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 140,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.execute.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [
-                  "Object that represents context in which the underlying\n`UIAction` of this drilldown is being executed in."
-                ],
-                "signature": [
-                  "ExecutionContext | ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionExecutionContext",
-                    "text": "ActionExecutionContext"
-                  },
-                  "<ExecutionContext>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 141,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.getHref",
-            "type": "Function",
-            "tags": [],
-            "label": "getHref",
-            "description": [
-              "\nA link where drilldown should navigate on middle click or Ctrl + click."
-            ],
-            "signature": [
-              "((config: Config, context: ExecutionContext | ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionExecutionContext",
-                "text": "ActionExecutionContext"
-              },
-              "<ExecutionContext>) => Promise<string | undefined>) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 144,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.getHref.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "config",
-                "description": [],
-                "signature": [
-                  "Config"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 148,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "uiActionsEnhanced",
-                "id": "def-public.DrilldownDefinition.getHref.$2",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "context",
-                "description": [],
-                "signature": [
-                  "ExecutionContext | ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.ActionExecutionContext",
-                    "text": "ActionExecutionContext"
-                  },
-                  "<ExecutionContext>"
-                ],
-                "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-                "lineNumber": 149,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownDefinition.supportedTriggers",
-            "type": "Function",
-            "tags": [],
-            "label": "supportedTriggers",
-            "description": [
-              "\nList of triggers supported by this drilldown type\nThis is used in trigger picker when configuring drilldown"
-            ],
-            "signature": [
-              "() => string[]"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "lineNumber": 152,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActionsEnhanced",
-        "id": "def-public.DrilldownTemplate",
-        "type": "Interface",
-        "tags": [],
-        "label": "DrilldownTemplate",
-        "description": [
-          "\nTemplate for a pre-configured new drilldown, this gives ability to create a\ndrilldown from a template instead of user creating a drilldown from scratch.\nThis is used in \"drilldown cloning\" functionality, where drilldowns can be\ncloned from one dashboard panel to another."
-        ],
-        "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-        "lineNumber": 85,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nA string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 92,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.icon",
-            "type": "string",
-            "tags": [],
-            "label": "icon",
-            "description": [
-              "\nEUI icon display next to the description."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 97,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [
-              "\nA user facing text that provides information about the source of this template."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 102,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.factoryId",
-            "type": "string",
-            "tags": [],
-            "label": "factoryId",
-            "description": [
-              "\nDrilldown type, dynamic action factory ID."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 107,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [
-              "\nSuggested new name of the cloned drilldown. If a drilldown with such suggested\nname already exists at current place, a suffix like \" (copy 1)\" will be added."
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 112,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.triggers",
-            "type": "Array",
-            "tags": [],
-            "label": "triggers",
-            "description": [
-              "\nPre-selected triggers."
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 118,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "uiActionsEnhanced",
-            "id": "def-public.DrilldownTemplate.config",
-            "type": "Unknown",
-            "tags": [],
-            "label": "config",
-            "description": [
-              "\nPreliminary configuration of the new drilldown, to be used in the dynamicaction factory."
-            ],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "lineNumber": 123,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActionsEnhanced",
         "id": "def-public.DynamicActionManagerParams",
         "type": "Interface",
         "tags": [],
@@ -3628,9 +2883,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.EmbeddableApiContext",
+                "section": "def-common.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<boolean>"
@@ -3651,9 +2906,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.EmbeddableApiContext",
+                    "section": "def-common.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],
@@ -3989,36 +3244,58 @@
     "setup": {
       "parentPluginId": "uiActionsEnhanced",
       "id": "def-public.SetupContract",
-      "type": "Interface",
+      "type": "Type",
       "tags": [],
       "label": "SetupContract",
       "description": [],
       "signature": [
-        {
-          "pluginId": "uiActionsEnhanced",
-          "scope": "public",
-          "docId": "kibUiActionsEnhancedPluginApi",
-          "section": "def-public.SetupContract",
-          "text": "SetupContract"
-        },
-        " extends ",
+        "{ readonly registerAction: <Context extends object>(definition: ",
         {
           "pluginId": "uiActions",
           "scope": "public",
           "docId": "kibUiActionsPluginApi",
-          "section": "def-public.UiActionsPublicSetup",
-          "text": "UiActionsPublicSetup"
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
         },
-        ",Pick<",
-        "UiActionsServiceEnhancements",
-        ", \"registerDrilldown\">"
+        "<Context, {}>) => ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.Action",
+          "text": "Action"
+        },
+        "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+        {
+          "pluginId": "uiActions",
+          "scope": "public",
+          "docId": "kibUiActionsPluginApi",
+          "section": "def-public.ActionDefinition",
+          "text": "ActionDefinition"
+        },
+        "<any, {}>>) => void; }"
       ],
       "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-      "lineNumber": 31,
+      "lineNumber": 29,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -4050,65 +3327,11 @@
         ", \"getActionFactory\" | \"hasActionFactory\" | \"getActionFactories\">"
       ],
       "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-      "lineNumber": 35,
+      "lineNumber": 31,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "uiActionsEnhanced",
-          "id": "def-public.StartContract.DrilldownManager",
-          "type": "Function",
-          "tags": [],
-          "label": "DrilldownManager",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<",
-            "PublicDrilldownManagerProps",
-            ">"
-          ],
-          "path": "src/platform/plugins/shared/ui_actions_enhanced/public/plugin.ts",
-          "lineNumber": 41,
-          "columnNumber": 3,
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "uiActionsEnhanced",
-              "id": "def-public.StartContract.DrilldownManager.$1",
-              "type": "Uncategorized",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "lineNumber": 1109,
-              "columnNumber": 10,
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "uiActionsEnhanced",
-              "id": "def-public.StartContract.DrilldownManager.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "lineNumber": 1109,
-              "columnNumber": 20,
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        }
-      ],
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }

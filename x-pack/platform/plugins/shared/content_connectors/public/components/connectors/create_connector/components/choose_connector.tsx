@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -156,7 +157,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         'xpack.contentConnectors.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" />}
+      prepend={<EuiFormPrepend iconLeft={selectedConnector?.iconPath ?? 'plugs'} />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(

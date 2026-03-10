@@ -558,7 +558,7 @@ describe('AccessControlService', () => {
         );
       });
 
-      it('calls addAuditEventFn with all unauthorized types when access control check fails', () => {
+      it('calls addAuditEventFn with custom error message and RBAC unauthorized types when access control check fails', () => {
         const addAuditEventFn = jest.fn();
         const authorizationResult = makeAuthResult('partially_authorized', {
           dashboard: {
@@ -585,8 +585,14 @@ describe('AccessControlService', () => {
           })
         ).toThrow(/Access denied/);
 
-        // Should be called with all unauthorized types (deduplicated and sorted)
-        expect(addAuditEventFn).toHaveBeenCalledWith(['dashboard']);
+        // Should be called with only RBAC unauthorized types (not access control types)
+        expect(addAuditEventFn).toHaveBeenCalledWith(
+          'Access denied: Unable to perform manage access control for types dashboard. ' +
+            'The "update" privilege is required to change access control of objects owned by the current user. ' +
+            'Unable to manage access control for objects dashboard:obj-2: ' +
+            'the "manage_access_control" privilege is required to change access control of objects owned by another user.',
+          ['dashboard']
+        );
       });
 
       it('filters unauthorized objects to only include types that failed manage_access_control check', () => {

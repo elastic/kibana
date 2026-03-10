@@ -254,7 +254,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -298,7 +298,7 @@
                 "tags": [],
                 "label": "toastOrId",
                 "description": [
-                  "- a {@link Toast } returned by {@link ToastsApi.add } or its id"
+                  "- a {@link Toast} returned by {@link ToastsApi.add} or its id"
                 ],
                 "signature": [
                   "string | ",
@@ -344,7 +344,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -363,7 +363,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -411,7 +411,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -430,7 +430,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -478,7 +478,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -497,7 +497,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -545,7 +545,7 @@
                 "tags": [],
                 "label": "toastOrTitle",
                 "description": [
-                  "- a {@link ToastInput }"
+                  "- a {@link ToastInput}"
                 ],
                 "signature": [
                   "ToastInput"
@@ -564,7 +564,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- a {@link ToastOptions }"
+                  "- a {@link ToastOptions}"
                 ],
                 "signature": [
                   "ToastOptions",
@@ -629,7 +629,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link ErrorToastOptions }"
+                  "- {@link ErrorToastOptions}"
                 ],
                 "signature": [
                   "ErrorToastOptions"

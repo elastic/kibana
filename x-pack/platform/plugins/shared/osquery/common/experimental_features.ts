@@ -16,6 +16,8 @@ export const allowedExperimentalValues = Object.freeze({
    *     and the kebab row-action menus in list tables.
    *   - Renames "Live queries" tab to "History" and "Saved queries" to "Queries"
    *   - Introduces /history and /new routes, redirects legacy /live_queries paths
+   *   - Introduces search input and users filter
+   *   - Introduces scheduled responses support
    */
   queryHistoryRework: false,
 });

@@ -324,6 +324,10 @@
       }
     }
   },
+  "anonymization-salt": {
+    "dynamic": false,
+    "properties": {}
+  },
   "api_key_pending_invalidation": {
     "properties": {
       "apiKeyId": {
@@ -614,6 +618,9 @@
       "duration": {
         "type": "unsigned_long"
       },
+      "extended_fields": {
+        "type": "flattened"
+      },
       "external_service": {
         "properties": {
           "connector_name": {
@@ -695,6 +702,17 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "template": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "type": "object"
       },
       "title": {
         "fields": {
@@ -1502,6 +1520,11 @@
       "type": {
         "type": "keyword"
       }
+    }
+  },
+  "entity-store-global-state": {
+    "dynamic": false,
+    "properties": {
     }
   },
   "epm-packages": {
@@ -2960,6 +2983,9 @@
       "created_by": {
         "type": "keyword"
       },
+      "created_by_profile_uid": {
+        "type": "keyword"
+      },
       "data_stream_count": {
         "type": "integer"
       },
@@ -3127,6 +3153,21 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "markdown": {
+    "dynamic": false,
+    "properties": {
+      "content": {
+        "index": false,
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
       }
     }
   },
@@ -4642,6 +4683,23 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "watchlist-config": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "riskModifier": {
+        "type": "float"
       }
     }
   },

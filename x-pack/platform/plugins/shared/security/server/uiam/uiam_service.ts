@@ -55,6 +55,42 @@ export interface GrantUiamApiKeyResponse {
 }
 
 /**
+ * Represents a single key entry in the convert API keys request body.
+ */
+export interface ConvertUiamApiKeyRequestEntry {
+  type: 'elasticsearch';
+  key: string;
+  endpoint: string;
+}
+
+/**
+ * Represents the request body for converting API keys via UIAM.
+ */
+export interface ConvertUiamApiKeysRequestBody {
+  keys: ConvertUiamApiKeyRequestEntry[];
+}
+
+/**
+ * Represents the response from converting API keys via UIAM, containing per-key results.
+ */
+export interface ConvertUiamApiKeysResponse {
+  results: Array<
+    | {
+        status: 'success';
+        id: string;
+        key: string;
+        description: string;
+        organization_id: string;
+        internal: boolean;
+        role_assignments: Record<string, unknown>;
+        creation_date: string;
+        expiration_date: string | null;
+      }
+    | { status: 'failed'; code: string; message: string; resource: string | null; type: string }
+  >;
+}
+
+/**
  * The service that integrates with UIAM for user authentication and session management.
  */
 export interface UiamServicePublic {
@@ -102,6 +138,14 @@ export interface UiamServicePublic {
    * @param apiKey The API key to revoke; will be used for authentication on this request.
    */
   revokeApiKey(apiKeyId: string, apiKey: string): Promise<void>;
+
+  /**
+   * Converts Elasticsearch API keys into UIAM API keys. The Elasticsearch endpoint is injected
+   * automatically from the cloud.id configuration.
+   * @param keys The base64-encoded Elasticsearch API key values to convert.
+   * @returns A promise that resolves to a response containing per-key success/failure results.
+   */
+  convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse>;
 }
 
 /**
@@ -111,9 +155,11 @@ export class UiamService implements UiamServicePublic {
   readonly #logger: Logger;
   readonly #config: Required<UiamConfigType>;
   readonly #dispatcher: Agent | undefined;
+  readonly #elasticsearchUrl?: string;
 
-  constructor(logger: Logger, config: UiamConfigType) {
+  constructor(logger: Logger, config: UiamConfigType, elasticsearchUrl?: string) {
     this.#logger = logger;
+    this.#elasticsearchUrl = elasticsearchUrl;
 
     // Destructure existing config and re-create it again after validation to make TypeScript can infer the proper types.
     const { enabled, url, sharedSecret, ssl } = config;
@@ -278,6 +324,49 @@ export class UiamService implements UiamServicePublic {
       this.#logger.debug(`Successfully revoked API key: ${apiKeyId}`);
     } catch (err) {
       this.#logger.error(() => `Failed to revoke API key: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.convertApiKeys}.
+   */
+  async convertApiKeys(keys: string[]): Promise<ConvertUiamApiKeysResponse> {
+    if (!this.#elasticsearchUrl) {
+      throw new Error(
+        'Cannot convert API keys: Elasticsearch URL could not be resolved from cloud.id'
+      );
+    }
+
+    try {
+      this.#logger.debug(`Attempting to convert ${keys.length} API key(s).`);
+
+      const body: ConvertUiamApiKeysRequestBody = {
+        keys: keys.map((key) => ({
+          type: 'elasticsearch' as const,
+          key,
+          endpoint: this.#elasticsearchUrl!,
+        })),
+      };
+
+      const response = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/api-keys/_convert`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
+          },
+          body: JSON.stringify(body),
+          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+          dispatcher: this.#dispatcher,
+        })
+      );
+
+      this.#logger.debug(`Successfully converted API key(s).`);
+      return response;
+    } catch (err) {
+      this.#logger.error(() => `Failed to convert API keys: ${getDetailedErrorMessage(err)}`);
 
       throw err;
     }

@@ -1883,7 +1883,7 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History } instance"
+              "- {@link History} instance"
             ],
             "signature": [
               "History",
@@ -2427,7 +2427,7 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History } instance"
+              "- {@link History} instance"
             ],
             "signature": [
               "History",
@@ -2494,7 +2494,7 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History } instance"
+              "- {@link History} instance"
             ],
             "signature": [
               "History",
@@ -2543,7 +2543,7 @@
             "tags": [],
             "label": "storage",
             "description": [
-              "- Option {@link Storage } to use for storing state. By default window.sessionStorage."
+              "- Option {@link Storage} to use for storing state. By default window.sessionStorage."
             ],
             "signature": [
               "Storage"
@@ -2718,7 +2718,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -2794,7 +2794,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -2813,7 +2813,7 @@
             "tags": [],
             "label": "pureSelectors",
             "description": [
-              "- state selectors configuration object. Map of {@link PureSelectors }."
+              "- state selectors configuration object. Map of {@link PureSelectors}."
             ],
             "signature": [
               "PureSelectors"
@@ -2832,7 +2832,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- state container options {@link CreateStateContainerOptions }"
+              "- state container options {@link CreateStateContainerOptions}"
             ],
             "signature": [
               {
@@ -4181,7 +4181,7 @@
             "tags": [],
             "label": "stateSyncConfigs",
             "description": [
-              "- Array of {@link IStateSyncConfig } to sync"
+              "- Array of {@link IStateSyncConfig} to sync"
             ],
             "signature": [
               {
@@ -4348,7 +4348,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -4394,7 +4394,7 @@
             "tags": [],
             "label": "comparator",
             "description": [
-              "- {@link Comparator } function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+              "- {@link Comparator} function used to memoize previous result, to not"
             ],
             "signature": [
               {
@@ -4460,7 +4460,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -7312,7 +7312,7 @@
         "label": "url",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -7332,7 +7332,7 @@
               "<string>"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7429,7 +7429,7 @@
               "(val: string, pctEncodeSpaces?: boolean) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7474,7 +7474,7 @@
               "(params: string, key: string, value?: string | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7519,6 +7519,38 @@
                 "path": "src/platform/plugins/shared/kibana_utils/common/url/encode_uri_query.ts",
                 "lineNumber": 58,
                 "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.url.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.url.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/platform/plugins/shared/kibana_utils/common/url/validate_url.ts",
+                "lineNumber": 17,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -8245,7 +8277,7 @@
         "label": "url",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8265,7 +8297,7 @@
               "<string>"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8362,7 +8394,7 @@
               "(val: string, pctEncodeSpaces?: boolean) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8407,7 +8439,7 @@
               "(params: string, key: string, value?: string | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -8452,6 +8484,38 @@
                 "path": "src/platform/plugins/shared/kibana_utils/common/url/encode_uri_query.ts",
                 "lineNumber": 58,
                 "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-server.url.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-server.url.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/platform/plugins/shared/kibana_utils/common/url/validate_url.ts",
+                "lineNumber": 17,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -9514,7 +9578,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -9590,7 +9654,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition }."
+              "- state transitions configuration object. Map of {@link PureTransition}."
             ],
             "signature": [
               "PureTransitions"
@@ -9609,7 +9673,7 @@
             "tags": [],
             "label": "pureSelectors",
             "description": [
-              "- state selectors configuration object. Map of {@link PureSelectors }."
+              "- state selectors configuration object. Map of {@link PureSelectors}."
             ],
             "signature": [
               "PureSelectors"
@@ -9628,7 +9692,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- state container options {@link CreateStateContainerOptions }"
+              "- state container options {@link CreateStateContainerOptions}"
             ],
             "signature": [
               {
@@ -10458,7 +10522,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -10504,7 +10568,7 @@
             "tags": [],
             "label": "comparator",
             "description": [
-              "- {@link Comparator } function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+              "- {@link Comparator} function used to memoize previous result, to not"
             ],
             "signature": [
               {
@@ -10570,7 +10634,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer } which state to track."
+              "- {@link StateContainer} which state to track."
             ],
             "signature": [
               "Container"
@@ -10894,7 +10958,7 @@
                 "tags": [],
                 "label": "stats",
                 "description": [
-                  "Stats object containing the stats which were already\ncollected. This `stats` object shall not be mutated in-line."
+                  "Stats object containing the stats which were already"
                 ],
                 "signature": [
                   "Record<string, any>"
@@ -12710,7 +12774,7 @@
         "label": "url",
         "description": [],
         "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12730,7 +12794,7 @@
               "<string>"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 13,
+            "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12827,7 +12891,7 @@
               "(val: string, pctEncodeSpaces?: boolean) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12872,7 +12936,7 @@
               "(params: string, key: string, value?: string | undefined) => string"
             ],
             "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12917,6 +12981,38 @@
                 "path": "src/platform/plugins/shared/kibana_utils/common/url/encode_uri_query.ts",
                 "lineNumber": 58,
                 "columnNumber": 60,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.url.validate",
+            "type": "Function",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "(url: string) => { isValid: boolean; error?: string | undefined; invalidUrl?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/kibana_utils/common/url/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.url.validate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "url",
+                "description": [],
+                "path": "src/platform/plugins/shared/kibana_utils/common/url/validate_url.ts",
+                "lineNumber": 17,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false
               }

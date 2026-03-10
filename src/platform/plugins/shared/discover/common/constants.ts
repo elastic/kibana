@@ -26,6 +26,10 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
 // local storage key for the ES|QL to Dataviews transition modal
 export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 
+// local storage key for dismissing the tab menu "switch modes" callout
+export const DISCOVER_TAB_MENU_SWITCH_MODES_CALLOUT_KEY =
+  'discover.tabMenuSwitchModesCalloutDismissed';
+
 // local storage key for the query mode when starting a new discover session
 export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 

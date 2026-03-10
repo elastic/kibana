@@ -96,7 +96,7 @@
           "\nConfiguration for OpenTelemetry tracing"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -111,7 +111,7 @@
               "\nWhether OpenTelemetry tracing is enabled."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -126,7 +126,7 @@
               "\nAt which rate spans get sampled if a sampling decision\nneeds to be made. Should be between 0-1."
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -159,7 +159,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -190,6 +190,14 @@
             "text": "OTLPExportConfig"
           },
           "; } | { http: ",
+          {
+            "pluginId": "@kbn/tracing-config",
+            "scope": "common",
+            "docId": "kibKbnTracingConfigPluginApi",
+            "section": "def-common.OTLPExportConfig",
+            "text": "OTLPExportConfig"
+          },
+          "; } | { proto: ",
           {
             "pluginId": "@kbn/tracing-config",
             "scope": "common",
@@ -236,7 +244,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-tracing-config/src/schema.ts",
-        "lineNumber": 40,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

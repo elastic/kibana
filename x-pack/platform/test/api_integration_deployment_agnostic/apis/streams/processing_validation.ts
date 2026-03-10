@@ -21,9 +21,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      const body = {
+      const logsOtelBody = {
         stream: {
-          name: 'logs.validation_test',
+          name: 'logs.otel.validation_test',
         },
         where: {
           field: 'resource.attributes.host.name',
@@ -31,8 +31,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         status: 'enabled' as RoutingStatus,
       };
-      // Create a forked stream for validation testing
-      await forkStream(apiClient, 'logs', body);
+      const logsEcsBody = {
+        stream: {
+          name: 'logs.ecs.validation_test',
+        },
+        where: {
+          field: 'host.name',
+          eq: 'validation-test',
+        },
+        status: 'enabled' as RoutingStatus,
+      };
+      // Create forked streams for validation testing
+      await forkStream(apiClient, 'logs.otel', logsOtelBody);
+      await forkStream(apiClient, 'logs.ecs', logsEcsBody);
     });
 
     after(async () => {
@@ -70,7 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.validation_test',
+              name: 'logs.otel.validation_test',
             },
             body,
           },
@@ -112,7 +123,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
 
-      const response = await putStream(apiClient, 'logs.validation_test', body);
+      const response = await putStream(apiClient, 'logs.otel.validation_test', body);
+      expect(response).to.have.property('acknowledged', true);
+    });
+
+    it('should accept non-namespaced fields in logs.ecs wired streams', async () => {
+      const body: Streams.WiredStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} },
+            settings: {},
+            processing: {
+              steps: [
+                {
+                  action: 'set',
+                  to: 'asdasd', // ECS allows direct field names
+                  value: 'test',
+                  where: { always: {} },
+                },
+              ],
+            },
+            wired: {
+              routing: [],
+              fields: {},
+            },
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      const response = await putStream(apiClient, 'logs.ecs.validation_test', body);
       expect(response).to.have.property('acknowledged', true);
     });
 
@@ -153,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.validation_test',
+              name: 'logs.otel.validation_test',
             },
             body,
           },

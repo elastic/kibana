@@ -211,7 +211,7 @@
           ", query: string, isGroupAgg: boolean, isPreview?: boolean) => Promise<EsqlQueryHits>"
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-        "lineNumber": 74,
+        "lineNumber": 68,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -233,7 +233,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 75,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -250,7 +250,7 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 76,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -267,7 +267,7 @@
               "boolean"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 77,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -284,7 +284,7 @@
               "boolean"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 78,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -344,7 +344,7 @@
           "(columns: EsqlResultColumn[], row: EsqlResultRow) => EsqlDocument"
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-        "lineNumber": 66,
+        "lineNumber": 60,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -360,7 +360,7 @@
               "EsqlResultColumn[]"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 66,
+            "lineNumber": 60,
             "columnNumber": 31,
             "deprecated": false,
             "trackAdoption": false,
@@ -377,7 +377,7 @@
               "EsqlResultRow"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 66,
+            "lineNumber": 60,
             "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
@@ -413,7 +413,7 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-        "lineNumber": 211,
+        "lineNumber": 205,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -435,7 +435,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 211,
+            "lineNumber": 205,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -455,7 +455,7 @@
         "label": "EsqlTable",
         "description": [],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-        "lineNumber": 50,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -471,7 +471,7 @@
               "EsqlResultColumn[]"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 51,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -487,7 +487,7 @@
               "EsqlResultRow[]"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 52,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -503,7 +503,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 53,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -521,7 +521,7 @@
               "[] | undefined; }; } | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-            "lineNumber": 54,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -543,7 +543,7 @@
           "\"Alert ID\""
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-        "lineNumber": 63,
+        "lineNumber": 57,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -560,7 +560,7 @@
           "10"
         ],
         "path": "x-pack/platform/plugins/shared/stack_alerts/common/es_query/esql_query_utils.ts",
-        "lineNumber": 64,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

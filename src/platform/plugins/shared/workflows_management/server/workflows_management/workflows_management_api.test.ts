@@ -27,6 +27,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflow: jest.fn(),
       getWorkflowZodSchema: jest.fn(),
       createWorkflow: jest.fn(),
+      validateWorkflow: jest.fn(),
     } as any;
 
     mockGetWorkflowsExecutionEngine = jest.fn();
@@ -288,6 +289,18 @@ steps:
       lastUpdatedAt: '2023-01-01T00:00:00.000Z',
     };
 
+    const parsedMockWorkflow = {
+      name: 'Test Workflow',
+      enabled: true,
+      steps: [
+        {
+          name: 'step1',
+          action: 'test',
+          config: {},
+        },
+      ],
+    };
+
     beforeEach(() => {
       mockWorkflowsExecutionEngine = jest.mocked<WorkflowsExecutionEnginePluginStart>({} as any);
       mockWorkflowsExecutionEngine.executeWorkflow = jest.fn();
@@ -308,6 +321,12 @@ steps:
       mockWorkflowsExecutionEngine.executeWorkflow.mockResolvedValue({
         workflowExecutionId: 'test-execution-id',
       } as any);
+
+      mockWorkflowsService.validateWorkflow.mockResolvedValue({
+        valid: true,
+        diagnostics: [],
+        parsedWorkflow: parsedMockWorkflow as any,
+      });
     });
 
     const spaceId = 'default';
@@ -326,38 +345,19 @@ steps:
         });
 
         expect(result).toBe('test-execution-id');
-        expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-          expect.anything(),
+        expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+          mockWorkflowYaml,
           spaceId,
           mockRequest
         );
         expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
-          {
+          expect.objectContaining({
             id: 'test-workflow',
             name: 'Test Workflow',
             enabled: true,
-            definition: {
-              name: 'Test Workflow',
-              enabled: true,
-              steps: [
-                {
-                  name: 'step1',
-                  action: 'test',
-                  config: {},
-                },
-              ],
-            },
-            yaml: `name: Test Workflow
-enabled: true
-trigger:
-  schedule:
-    cron: "0 0 * * *"
-steps:
-  - name: step1
-    action: test
-    config: {}`,
+            yaml: mockWorkflowYaml,
             isTestRun: true,
-          },
+          }),
           {
             event: { type: 'test-event' },
             spaceId,
@@ -367,7 +367,12 @@ steps:
         );
       });
 
-      it('should throw error when YAML parsing fails', async () => {
+      it('should throw error when YAML validation fails', async () => {
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
+        });
+
         await expect(
           underTest.testWorkflow({
             workflowYaml: 'invalid: yaml: content',
@@ -458,6 +463,10 @@ steps:
         mockWorkflowsService.getWorkflow.mockResolvedValue({
           ...mockWorkflowDetailDto,
           yaml: 'invalid: yaml: content',
+        });
+        mockWorkflowsService.validateWorkflow.mockResolvedValue({
+          valid: false,
+          diagnostics: [{ severity: 'error', message: 'Invalid YAML', source: 'schema' }],
         });
 
         await expect(
@@ -550,7 +559,7 @@ steps:
         );
       });
 
-      it('should not use loose schema validation mode', async () => {
+      it('should delegate validation to workflowsService.validateWorkflow', async () => {
         await underTest.testWorkflow({
           workflowYaml: mockWorkflowYaml,
           inputs,
@@ -558,12 +567,47 @@ steps:
           request: mockRequest,
         });
 
-        expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-          { loose: false },
+        expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+          mockWorkflowYaml,
           spaceId,
           mockRequest
         );
       });
+    });
+  });
+
+  describe('validateWorkflow', () => {
+    it('should delegate to workflowsService.validateWorkflow', async () => {
+      const expectedResult = { valid: true, diagnostics: [] };
+      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+
+      const result = await api.validateWorkflow('name: Test', 'default', mockRequest);
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'name: Test',
+        'default',
+        mockRequest
+      );
+      expect(result).toBe(expectedResult);
+    });
+
+    it('should pass through diagnostics from service', async () => {
+      const expectedResult = {
+        valid: false,
+        diagnostics: [
+          { severity: 'error' as const, message: 'Required', source: 'schema', path: ['name'] },
+        ],
+      };
+      mockWorkflowsService.validateWorkflow.mockResolvedValue(expectedResult);
+
+      const result = await api.validateWorkflow('invalid: yaml', 'my-space', mockRequest);
+
+      expect(mockWorkflowsService.validateWorkflow).toHaveBeenCalledWith(
+        'invalid: yaml',
+        'my-space',
+        mockRequest
+      );
+      expect(result).toEqual(expectedResult);
     });
   });
 });
