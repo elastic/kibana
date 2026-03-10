@@ -10,8 +10,8 @@ description: Backport Kibana PRs to previous version branches. Use when the user
 Backporting copies a merged PR's commits to older version branches. The `kibanamachine` bot automates this via the `node scripts/backport` tool. The agent's role is to:
 
 1. Assess the current backport state for the given PR.
-2. Handle open backport PRs whose CI is failing (scenario B).
-3. For PRs with merge conflicts (scenario C): resolve trivial conflicts manually, or escalate non-trivial ones with a clear list of missing dependency PRs.
+2. Handle open backport PRs whose CI is failing.
+3. When the bot failed to create the PR due to merge conflicts: resolve trivial conflicts manually, or escalate non-trivial ones with a clear list of missing dependency PRs.
 
 ---
 
@@ -73,18 +73,18 @@ There can be **multiple** comment blocks. The most recent one per branch is auth
 
 ### Determine per-branch status
 
-For each intended target branch, determine:
+For each intended target branch, determine whether:
 
 - **Done / auto-merged**: A ✅ backport PR exists and is merged.
-- **Scenario B**: A ✅ backport PR exists (link in the table) but is still open (CI failing).
-- **Scenario C**: An ❌ row with "merge conflicts" - no backport PR was created. Check for dependency hints ("You might need to backport the following PRs to <branch>").
+- **PR created**: A ✅ backport PR exists (link in the table) but is still open (CI failing).
+- **PR NOT created**: An ❌ row with "merge conflicts" - no backport PR was created. Check for dependency hints ("You might need to backport the following PRs to <branch>").
 - **Not yet attempted**: No comment mentions this branch yet (bot may still be running).
 
 Use `gh pr view <BACKPORT_PR_NUMBER> --repo elastic/kibana --json state,statusCheckRollup` to verify open PR status and CI.
 
 ---
 
-## Step 2 - Scenario B: CI failures on an open backport PR
+## Step 2 - CI failures on an open backport PR
 
 For each open backport PR with CI failures:
 
@@ -108,7 +108,7 @@ For each open backport PR with CI failures:
 
 ---
 
-## Step 3 - Scenario C: Merge conflicts
+## Step 3 - Merge conflicts
 
 ### Check for dependency hints
 
