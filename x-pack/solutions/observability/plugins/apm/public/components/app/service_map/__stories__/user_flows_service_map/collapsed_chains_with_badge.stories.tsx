@@ -18,7 +18,7 @@ import {
   useEdgesState,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiFieldSearch, EuiFormLabel, EuiSpacer, EuiText } from '@elastic/eui';
 import { MockApmPluginStorybook } from '../../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { ServiceMapEdge as ServiceMapEdgeComponent } from '../../service_map_edge';
 import { DependencyNode } from '../../dependency_node';
@@ -362,7 +362,7 @@ function getVisibleNodeIds(expandedAnchors: Set<string>): Set<string> {
 }
 
 export const CollapsedChainsWithBadge: StoryFn = () => {
-  const [expandedAnchors, setExpandedAnchors] = useState<Set<string>>(new Set());
+  const [expandedAnchors, setExpandedAnchors] = useState<Set<string>>(new Set(['api-gateway']));
 
   const toggleExpand = useCallback((anchorId: string) => {
     setExpandedAnchors((prev) => {
@@ -377,6 +377,17 @@ export const CollapsedChainsWithBadge: StoryFn = () => {
   }, []);
 
   const visibleNodeIds = useMemo(() => getVisibleNodeIds(expandedAnchors), [expandedAnchors]);
+
+  /** Kuery filter driven by +/- badges: expanded anchors become OR service.name: "id" */
+  const searchBarKuery = useMemo(
+    () =>
+      expandedAnchors.size === 0
+        ? ''
+        : Array.from(expandedAnchors)
+            .map((id) => `service.name: "${id}"`)
+            .join(' OR '),
+    [expandedAnchors]
+  );
 
   const visibleNodes = useMemo(() => {
     return BASE_NODES.filter((n) => visibleNodeIds.has(n.id)).map((node) => {
@@ -422,8 +433,9 @@ export const CollapsedChainsWithBadge: StoryFn = () => {
           Visible by default: frontend → api-gateway → payment-service, order-service, user-service.
           Each end service has a primary badge with <strong>+3</strong>, <strong>+4</strong>, or{' '}
           <strong>+2</strong> for collapsed connections (order-service includes inventory-svc and
-          its dependency + service). Click the badge to expand (badge becomes −N); click again to
-          collapse.
+          its dependency + service). Click <strong>+</strong> to expand (adds{' '}
+          <code>OR service.name: &quot;&lt;service&gt;&quot;</code> to the search bar); click{' '}
+          <strong>−</strong> to collapse (removes it).
         </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
@@ -432,6 +444,17 @@ export const CollapsedChainsWithBadge: StoryFn = () => {
           Nodes: {nodes.length} | Edges: {edges.length} | Expanded anchors: {expandedAnchors.size}
         </p>
       </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFormLabel>Search (service map filter)</EuiFormLabel>
+      <EuiSpacer size="xs" />
+      <EuiFieldSearch
+        fullWidth
+        placeholder='Filter by service (e.g. service.name: "frontend-app"). Click + on a node to add; click − to remove.'
+        value={searchBarKuery}
+        readOnly
+        aria-label="Service map Kuery filter"
+        data-test-subj="serviceMapStorySearchBar"
+      />
       <EuiSpacer size="m" />
 
       <div style={{ height: getHeight(), width: '100%' }}>
