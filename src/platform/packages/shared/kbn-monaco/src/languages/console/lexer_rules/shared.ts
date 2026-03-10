@@ -128,7 +128,7 @@ xjsonRules.json_root = [
   // @ts-expect-error include a rule to start esql highlighting
   buildEsqlStartRule(true),
   // Include remaining xjson rules, filtering out the original brace rules
-  ...originalJsonRoot.filter((rule: any) => {
+  ...originalJsonRoot.filter((rule) => {
     // Filter out the original @push/@pop brace rules from xjson
     if (Array.isArray(rule) && rule.length >= 2) {
       const regex = rule[0];
@@ -153,8 +153,8 @@ const esqlRules = buildEsqlRules();
 /*
  Lexer rules that are shared between the Console editor and the Console output panel.
  */
-export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
-  ...(globals as any),
+export const consoleSharedLexerRules = {
+  ...globals,
   defaultToken: 'invalid',
   ...sqlLanguageAttributes,
   ...painlessLanguageAttributes,
@@ -196,4 +196,7 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
     // include esql rules
     ...esqlRules,
   },
-};
+  // Monarch rules are written as array literals (e.g. [/regex/, action]) which TypeScript
+  // infers as general arrays, not tuples. The IMonarchLanguageRule union requires tuples,
+  // so the tokenizer shape cannot satisfy IMonarchLanguage without a type-level override.
+} as monaco.languages.IMonarchLanguage;
