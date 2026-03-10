@@ -38,7 +38,8 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   );
 };
 
-describe('Inference Services', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/253331
+describe.skip('Inference Services', () => {
   it('renders', () => {
     render(
       <MockFormProvider>

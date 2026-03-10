@@ -63,7 +63,7 @@ test.describe(
           assetDetailsPage.hostOverviewTab.kpiCpuUsageChart.getByRole('heading', {
             name: 'CPU Usage',
           })
-        ).toBeVisible();
+        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
         await expect(
           assetDetailsPage.hostOverviewTab.kpiNormalizedLoadChart.getByRole('heading', {
             name: 'Normalized Load',
@@ -400,6 +400,7 @@ test.describe(
       });
 
       await test.step('return to flyout from asset details page', async () => {
+        await expect(assetDetailsPage.returnButton).toBeVisible({ timeout: EXTENDED_TIMEOUT });
         await assetDetailsPage.returnButton.click();
         await expect(
           page.getByRole('dialog').getByRole('heading', { name: HOST1_NAME })

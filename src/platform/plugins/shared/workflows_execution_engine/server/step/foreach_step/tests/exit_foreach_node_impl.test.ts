@@ -62,9 +62,7 @@ describe('ExitForeachNodeImpl', () => {
   describe('when there are more items to process', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
         index: 1,
-        item: 'item2',
         total: 3,
       });
     });
@@ -86,9 +84,7 @@ describe('ExitForeachNodeImpl', () => {
   describe('when no more items to process', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
         index: 2,
-        item: 'item3',
         total: 3,
       });
     });

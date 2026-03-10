@@ -22,13 +22,26 @@ import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getBulkDisableRuleActionSchemaMock,
+  getPerformBulkActionDuplicateSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
+import { validateRuleResponseActions as _validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { ConfigType } from '../../../../../../config';
 
 jest.mock('../../../../../machine_learning/authz');
 
 let bulkGetRulesMock: jest.Mock;
+
+const validateRuleResponseActionsMock = _validateRuleResponseActions as jest.Mock;
+
+jest.mock('../../../../../../endpoint/services', () => {
+  const actualModule = jest.requireActual('../../../../../../endpoint/services');
+  return {
+    ...actualModule,
+    validateRuleResponseActions: jest.fn(actualModule.validateRuleResponseActions),
+  };
+});
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -45,6 +58,10 @@ describe('Perform bulk action route', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
     bulkGetRulesMock = (await context.alerting.getRulesClient()).bulkGetRules as jest.Mock;
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
     clients.rulesClient.bulkDisableRules.mockResolvedValue({
@@ -765,6 +782,29 @@ describe('Perform bulk action route', () => {
         'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
+
+    it('validates endpoint response actions for duplicate bulk action', async () => {
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [mockRule],
+        errors: [],
+      });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: getPerformBulkActionDuplicateSchemaMock(),
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+
+      expect(validateRuleResponseActionsMock).toHaveBeenCalledWith({
+        endpointAuthz: expect.any(Object),
+        endpointService: expect.any(Object),
+        spaceId: 'default',
+        rulePayload: {},
+        existingRule: mockRule,
+      });
+    });
   });
 
   describe('gap range functionality', () => {
@@ -846,6 +886,10 @@ describe('Perform bulk action route, experimental feature bulkEditAlertSuppressi
     performBulkActionRoute(server.router, ml, {
       experimentalFeatures,
     } as ConfigType);
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
   });
 
   afterEach(() => {

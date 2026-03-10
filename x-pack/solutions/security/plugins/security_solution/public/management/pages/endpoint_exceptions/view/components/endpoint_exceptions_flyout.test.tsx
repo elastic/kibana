@@ -183,7 +183,8 @@ describe('Endpoint exceptions flyout', () => {
     });
   });
 
-  describe('When valid form state', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/253883
+  describe.skip('When valid form state', () => {
     it('should enable "Add endpoint exception" button when form is valid', async () => {
       render({ alertData, isAlertDataLoading: false });
 

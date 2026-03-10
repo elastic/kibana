@@ -14,25 +14,25 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { asyncForEachWithLimit, asyncMapWithLimit } from '@kbn/std';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { type TsProject, TS_PROJECTS } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
 import execa from 'execa';
 
-import {
-  updateRootRefsConfig,
-  cleanupRootRefsConfig,
-  ROOT_REFS_CONFIG_PATH,
-} from './root_refs_config';
 import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifacts';
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
+import { normalizeProjectPath } from './src/normalize_project_path';
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
   return path.startsWith('.') ? path : `./${path}`;
 };
 
-async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
+async function createTypeCheckConfigs(
+  log: SomeDevLog,
+  projects: TsProject[],
+  allProjects: TsProject[]
+) {
   const writes: Array<[path: string, content: string]> = [];
 
   // write tsconfig.type_check.json files for each project that is not the root
@@ -56,7 +56,7 @@ async function createTypeCheckConfigs(log: SomeDevLog, projects: TsProject[]) {
         paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
       },
       kbn_references: undefined,
-      references: project.getKbnRefs(TS_PROJECTS).map((refd) => {
+      references: project.getKbnRefs(allProjects).map((refd) => {
         queue.add(refd);
 
         return {
@@ -98,6 +98,8 @@ async function detectLocalChanges(): Promise<boolean> {
 
 run(
   async ({ log, flagsReader, procRunner }) => {
+    // Lazy-load so --help can run before TS project metadata is available.
+    const { TS_PROJECTS } = await import('@kbn/ts-projects');
     const shouldCleanCache = flagsReader.boolean('clean-cache');
     const shouldUseArchive = flagsReader.boolean('with-archive');
 
@@ -116,6 +118,10 @@ run(
       return;
     }
 
+    const { updateRootRefsConfig, cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import(
+      './root_refs_config'
+    );
+
     // if the tsconfig.refs.json file is not self-managed then make sure it has
     // a reference to every composite project in the repo
     await updateRootRefsConfig(log);
@@ -128,13 +134,13 @@ run(
       log.verbose('Skipping TypeScript cache restore because --with-archive was not provided.');
     }
 
-    const projectFilter = flagsReader.path('project');
+    const projectFilter = normalizeProjectPath(flagsReader.path('project'), log);
 
     const projects = TS_PROJECTS.filter(
       (p) => !p.isTypeCheckDisabled() && (!projectFilter || p.path === projectFilter)
     );
 
-    const created = await createTypeCheckConfigs(log, projects);
+    const created = await createTypeCheckConfigs(log, projects, TS_PROJECTS);
 
     let didTypeCheckFail = false;
     try {
@@ -157,7 +163,7 @@ run(
           ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
         ],
         env: {
-          NODE_OPTIONS: '--max-old-space-size=10240',
+          NODE_OPTIONS: '--max-old-space-size=12288',
         },
         cwd: REPO_ROOT,
         wait: true,

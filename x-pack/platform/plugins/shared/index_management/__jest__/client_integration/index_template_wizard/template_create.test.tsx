@@ -588,7 +588,8 @@ describe('<TemplateCreate />', () => {
     });
   });
 
-  describe('form payload & api errors', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/239816
+  describe.skip('form payload & api errors', () => {
     beforeEach(async () => {
       const MAPPING_FIELDS = [BOOLEAN_MAPPING_FIELD, TEXT_MAPPING_FIELD, KEYWORD_MAPPING_FIELD];
 

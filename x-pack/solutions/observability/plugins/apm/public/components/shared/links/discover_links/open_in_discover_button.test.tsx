@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { OpenInDiscoverButton } from './open_in_discover_button';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -27,11 +28,15 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 const MOCK_INDEX_PATTERN = 'traces-*';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
+jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
 const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
   typeof useApmServiceContext
+>;
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+  typeof useApmIndexSettingsContext
 >;
 const mockUseAnyOfApmParams = useAnyOfApmParams as jest.MockedFunction<any>;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
@@ -49,6 +54,9 @@ describe('OpenInDiscoverButton', () => {
   beforeEach(() => {
     mockUseApmServiceContext.mockReturnValue({
       serviceName,
+    } as any);
+
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [
         {
           configurationName: 'transaction',
@@ -333,8 +341,7 @@ describe('OpenInDiscoverButton', () => {
     mockUseAnyOfApmParams.mockReturnValue({
       query: {},
     });
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName,
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [],
       indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);

@@ -62,12 +62,10 @@ export const createListItemRoute = (router: ListsPluginRouter): void => {
             }
           }
           const createdListItem = await lists.createListItem({
-            deserializer: list.deserializer,
             id,
             listId,
             meta,
             refresh,
-            serializer: list.serializer,
             type: list.type,
             value,
           });

@@ -58,16 +58,16 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     const stepWith = withInputs || this.step.with || (this.step as any).configuration?.with;
     // Extract meta params (not forwarded as HTTP request params)
     const {
-      forceServerInfo = false,
-      forceLocalhost = false,
+      use_server_info = false,
+      use_localhost = false,
       debug = false,
       ...httpParams
     } = stepWith;
 
-    if (forceServerInfo && forceLocalhost) {
+    if (use_server_info && use_localhost) {
       throw new Error(
-        'Cannot set both forceServerInfo and forceLocalhost — they are mutually exclusive. ' +
-          'Use forceServerInfo to route via the internal server address, or forceLocalhost to route via localhost:5601.'
+        'Cannot set both use_server_info and use_localhost — they are mutually exclusive. ' +
+          'Use use_server_info to route via the internal server address, or use_localhost to route via localhost:5601.'
       );
     }
 
@@ -83,7 +83,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
       });
 
       // Get Kibana base URL (respecting force flags) and authentication
-      const kibanaUrl = this.getKibanaUrl(forceServerInfo, forceLocalhost);
+      const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
       const authHeaders = this.getAuthHeaders();
 
       // Generic approach like Dev Console - just forward the request to Kibana
@@ -119,7 +119,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
 
       const failure = this.handleFailure(stepWith, error);
       if (debug && failure.error) {
-        const kibanaUrl = this.getKibanaUrl(forceServerInfo, forceLocalhost);
+        const kibanaUrl = this.getKibanaUrl(use_server_info, use_localhost);
         failure.error = {
           type: failure.error.type,
           message: failure.error.message,
@@ -130,10 +130,10 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<KibanaAct
     }
   }
 
-  private getKibanaUrl(forceServerInfo = false, forceLocalhost = false): string {
+  private getKibanaUrl(use_server_info = false, use_localhost = false): string {
     const coreStart = this.stepExecutionRuntime.contextManager.getCoreStart();
     const { cloudSetup } = this.stepExecutionRuntime.contextManager.getDependencies();
-    return getKibanaUrl(coreStart, cloudSetup, forceServerInfo, forceLocalhost);
+    return getKibanaUrl(coreStart, cloudSetup, use_server_info, use_localhost);
   }
 
   private getAuthHeaders(): Record<string, string> {

@@ -13,14 +13,19 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '@kbn/apm-types';
 import { OpenErrorInDiscoverButton } from './open_error_in_discover_button';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
+jest.mock('../../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
 const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
   typeof useApmServiceContext
+>;
+const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as jest.MockedFunction<
+  typeof useApmIndexSettingsContext
 >;
 const mockUseAnyOfApmParams = useAnyOfApmParams as jest.MockedFunction<any>;
 const mockUseApmPluginContext = useApmPluginContext as jest.MockedFunction<
@@ -40,6 +45,9 @@ describe('OpenErrorInDiscoverButton', () => {
   beforeEach(() => {
     mockUseApmServiceContext.mockReturnValue({
       serviceName,
+    } as any);
+
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [
         {
           configurationName: 'error',
@@ -82,18 +90,6 @@ describe('OpenErrorInDiscoverButton', () => {
 
     mockUseApmServiceContext.mockReturnValue({
       serviceName: '',
-      indexSettings: [
-        {
-          configurationName: 'error',
-          defaultValue: MOCK_INDEX_PATTERN,
-        },
-        {
-          configurationName: 'test',
-          savedValue: 'fake-index',
-          defaultValue: 'fake-*',
-        },
-      ],
-      indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);
 
     mockUseAnyOfApmParams.mockReturnValue({
@@ -145,18 +141,6 @@ describe('OpenErrorInDiscoverButton', () => {
     };
     mockUseApmServiceContext.mockReturnValue({
       serviceName: '',
-      indexSettings: [
-        {
-          configurationName: 'error',
-          defaultValue: MOCK_INDEX_PATTERN,
-        },
-        {
-          configurationName: 'test',
-          savedValue: 'fake-index',
-          defaultValue: 'fake-*',
-        },
-      ],
-      indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -195,8 +179,7 @@ describe('OpenErrorInDiscoverButton', () => {
       query: {},
       path: { groupId: errorGroupId },
     });
-    mockUseApmServiceContext.mockReturnValue({
-      serviceName,
+    mockUseApmIndexSettingsContext.mockReturnValue({
       indexSettings: [],
       indexSettingsStatus: FETCH_STATUS.SUCCESS,
     } as any);

@@ -7,6 +7,11 @@ properties:
   apiUrl:
     type: string
     description: The Amazon Bedrock request URL.
+  region:
+    type: string
+    description: >
+      Optional AWS region for request signing. Required when using a custom endpoint URL that does not
+      include the region in the hostname (for example, `us-west-1`).
   defaultModel:
     type: string
     description: >

@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import type { ConnectionElement, ServiceMapExitSpan, ServiceMapService } from './types';
-import type { GroupedNode } from './types';
+import type {
+  ConnectionElement,
+  GroupedEdge,
+  GroupedNode,
+  ServiceMapExitSpan,
+  ServiceMapService,
+} from './types';
 import { groupResourceNodes } from './group_resource_nodes';
 import { getEdgeId, getExternalConnectionNode, getServiceConnectionNode } from './utils';
+
+type ResultElement = ConnectionElement | GroupedNode | GroupedEdge;
+
+const isEdge = (
+  el: ResultElement
+): el is { data: { id: string; source: string; target: string } } =>
+  'source' in el.data && 'target' in el.data;
 
 describe('groupResourceNodes', () => {
   const createService = (service: { serviceName: string; agentName: string }) =>
@@ -366,6 +378,143 @@ describe('groupResourceNodes', () => {
       const uniqueSubtypes = new Set(subtypes);
       expect(uniqueSubtypes.size).toBe(3); // kafka, rabbitmq, sqs
       expect(uniqueSubtypes).toEqual(new Set(['kafka', 'rabbitmq', 'sqs']));
+    });
+  });
+
+  describe('outgoing edges from grouped nodes', () => {
+    it('should remove outgoing edges from grouped messaging exit span nodes', () => {
+      const producerService = createService({
+        serviceName: 'order-service',
+        agentName: 'java',
+      });
+      const consumerService = createService({
+        serviceName: 'opentelemetry-demo',
+        agentName: 'nodejs',
+      });
+      const producerNode = mockServiceNode(producerService);
+      const consumerNode = mockServiceNode(consumerService);
+
+      // 4 kafka topics (enough to trigger grouping)
+      const kafkaOrders = mockExitSpanNode(
+        createExitSpan({
+          ...producerService,
+          spanType: 'messaging',
+          spanSubtype: 'kafka',
+          spanDestinationServiceResource: 'kafka/orders',
+        })
+      );
+      const kafkaPayments = mockExitSpanNode(
+        createExitSpan({
+          ...producerService,
+          spanType: 'messaging',
+          spanSubtype: 'kafka',
+          spanDestinationServiceResource: 'kafka/payments',
+        })
+      );
+      const kafkaNotifications = mockExitSpanNode(
+        createExitSpan({
+          ...producerService,
+          spanType: 'messaging',
+          spanSubtype: 'kafka',
+          spanDestinationServiceResource: 'kafka/notifications',
+        })
+      );
+      const kafkaAnalytics = mockExitSpanNode(
+        createExitSpan({
+          ...producerService,
+          spanType: 'messaging',
+          spanSubtype: 'kafka',
+          spanDestinationServiceResource: 'kafka/analytics',
+        })
+      );
+
+      const elements: ConnectionElement[] = [
+        producerNode,
+        consumerNode,
+        kafkaOrders,
+        kafkaPayments,
+        kafkaNotifications,
+        kafkaAnalytics,
+        // Incoming edges: producer -> kafka topics
+        createMockEdge(producerNode.data.id, kafkaOrders.data.id),
+        createMockEdge(producerNode.data.id, kafkaPayments.data.id),
+        createMockEdge(producerNode.data.id, kafkaNotifications.data.id),
+        createMockEdge(producerNode.data.id, kafkaAnalytics.data.id),
+        // Outgoing messaging edges: kafka topics -> consumer service
+        createMockEdge(kafkaOrders.data.id, consumerNode.data.id),
+        createMockEdge(kafkaPayments.data.id, consumerNode.data.id),
+      ];
+
+      const result = groupResourceNodes({ elements });
+
+      // The kafka topics should be grouped
+      const groupedNodes = result.elements.filter(
+        (p): p is GroupedNode => 'groupedConnections' in p.data
+      );
+      expect(groupedNodes.length).toBe(1);
+
+      // No edge should reference a non-existent node
+      const nodeIds = new Set(result.elements.filter((el) => !isEdge(el)).map((el) => el.data.id));
+      const edges = result.elements.filter(isEdge);
+
+      for (const edge of edges) {
+        expect(nodeIds.has(edge.data.source)).toBe(true);
+        expect(nodeIds.has(edge.data.target)).toBe(true);
+      }
+
+      // The group node should have an outgoing edge to consumer-service
+      const groupId = groupedNodes[0].data.id;
+      const outgoingFromGroup = edges.filter((e) => e.data.source === groupId);
+      expect(outgoingFromGroup).toHaveLength(1);
+      expect(outgoingFromGroup[0].data.target).toBe(consumerNode.data.id);
+    });
+
+    it('should not leave orphaned edges when a grouped node is the source of an edge', () => {
+      const service = createService({ serviceName: 'api-service', agentName: 'nodejs' });
+      const downstream = createService({ serviceName: 'downstream', agentName: 'nodejs' });
+      const serviceNode = mockServiceNode(service);
+      const downstreamNode = mockServiceNode(downstream);
+
+      const exitSpans = Array.from({ length: 4 }, (_, i) =>
+        mockExitSpanNode(
+          createExitSpan({
+            ...service,
+            spanType: 'messaging',
+            spanSubtype: 'kafka',
+            spanDestinationServiceResource: `kafka/topic-${i}`,
+          })
+        )
+      );
+
+      const elements: ConnectionElement[] = [
+        serviceNode,
+        downstreamNode,
+        ...exitSpans,
+        // Incoming edges (will be grouped)
+        ...exitSpans.map((span) => createMockEdge(serviceNode.data.id, span.data.id)),
+        // Outgoing edge from one grouped node to downstream
+        createMockEdge(exitSpans[0].data.id, downstreamNode.data.id),
+      ];
+
+      const result = groupResourceNodes({ elements });
+
+      // No orphaned edges
+      const allNodeIds = new Set(result.elements.filter((e) => !isEdge(e)).map((e) => e.data.id));
+      const orphanedEdges = result.elements
+        .filter(isEdge)
+        .filter((el) => !allNodeIds.has(el.data.source) || !allNodeIds.has(el.data.target));
+      expect(orphanedEdges).toHaveLength(0);
+
+      // The group node should have an outgoing edge to the downstream service
+      const groupedNodes = result.elements.filter(
+        (p): p is GroupedNode => 'groupedConnections' in p.data
+      );
+      expect(groupedNodes).toHaveLength(1);
+      const groupId = groupedNodes[0].data.id;
+      const outgoingFromGroup = result.elements
+        .filter(isEdge)
+        .filter((e) => e.data.source === groupId && e.data.target === downstreamNode.data.id);
+      expect(outgoingFromGroup).toHaveLength(1);
     });
   });
 
