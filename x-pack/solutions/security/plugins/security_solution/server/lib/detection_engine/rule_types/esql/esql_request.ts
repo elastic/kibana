@@ -83,14 +83,17 @@ export const performEsqlRequest = async ({
     });
     setLatestRequestDuration(asyncSearchStarted, loggedRequests);
 
+    if (asyncEsqlResponse.id) {
+      queryId = asyncEsqlResponse.id;
+    }
+
     if (!asyncEsqlResponse.is_running) {
       return asyncEsqlResponse as EsqlTable;
     }
 
-    if (!asyncEsqlResponse.id) {
+    if (!queryId) {
       throw new Error('Async ES|QL query is running but no query ID was returned');
     }
-    queryId = asyncEsqlResponse.id;
 
     // Poll for long-executing query
     while (true) {

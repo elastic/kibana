@@ -208,7 +208,6 @@ describe('ES|QL async search strategy', () => {
         expect(mockAsyncQueryStop).toBeCalled();
         const request = mockAsyncQueryStop.mock.calls[0][0];
         expect(request.id).toEqual(id);
-        );
       });
 
       it('should delete when aborted', async () => {
