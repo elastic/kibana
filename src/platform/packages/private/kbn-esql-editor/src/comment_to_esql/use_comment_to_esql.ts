@@ -27,6 +27,7 @@ interface CommentReviewState {
   generatedText: string;
   generatedLineStart: number;
   generatedLineEnd: number;
+  replacedLineNumber: number | null;
   isSurgical: boolean;
   sources: string[] | undefined;
 }
@@ -96,6 +97,28 @@ const markCommentInQuery = (fullText: string, commentLineNumber: number): string
     .join('\n');
 };
 
+const getPipeCommand = (line: string): string | null => {
+  const match = line.trim().match(/^\|\s*(\w+)/i);
+  return match ? match[1].toUpperCase() : null;
+};
+
+const detectReplacedLine = (
+  model: monaco.editor.ITextModel,
+  generatedLineStart: number,
+  generatedLineEnd: number
+): number | null => {
+  const lineAfterGenerated = generatedLineEnd + 1;
+  if (lineAfterGenerated > model.getLineCount()) return null;
+
+  const generatedPipe = getPipeCommand(model.getLineContent(generatedLineStart));
+  const nextPipe = getPipeCommand(model.getLineContent(lineAfterGenerated));
+
+  if (generatedPipe && nextPipe && generatedPipe === nextPipe) {
+    return lineAfterGenerated;
+  }
+  return null;
+};
+
 const isModelStillValid = (
   model: monaco.editor.ITextModel | undefined,
   commentLineNumber: number
@@ -150,19 +173,35 @@ export const useCommentToEsql = ({
 
     cleanup();
 
-    const commentLineContent = model.getLineContent(state.commentLineNumber);
-    const isLastLine = state.commentLineNumber === model.getLineCount();
-    editor.executeEdits('nl-to-esql-accept', [
-      {
+    const edits: monaco.editor.IIdentifiedSingleEditOperation[] = [];
+
+    if (state.replacedLineNumber) {
+      const replacedContent = model.getLineContent(state.replacedLineNumber);
+      const isReplacedLast = state.replacedLineNumber === model.getLineCount();
+      edits.push({
         range: new monaco.Range(
-          state.commentLineNumber,
+          state.replacedLineNumber,
           1,
-          isLastLine ? state.commentLineNumber : state.commentLineNumber + 1,
-          isLastLine ? commentLineContent.length + 1 : 1
+          isReplacedLast ? state.replacedLineNumber : state.replacedLineNumber + 1,
+          isReplacedLast ? replacedContent.length + 1 : 1
         ),
         text: null,
-      },
-    ]);
+      });
+    }
+
+    const commentLineContent = model.getLineContent(state.commentLineNumber);
+    const isLastLine = state.commentLineNumber === model.getLineCount();
+    edits.push({
+      range: new monaco.Range(
+        state.commentLineNumber,
+        1,
+        isLastLine ? state.commentLineNumber : state.commentLineNumber + 1,
+        isLastLine ? commentLineContent.length + 1 : 1
+      ),
+      text: null,
+    });
+
+    editor.executeEdits('nl-to-esql-accept', edits);
   }, [editorRef, editorModel, cleanup]);
 
   const rejectChange = useCallback(() => {
@@ -204,6 +243,16 @@ export const useCommentToEsql = ({
           options: {
             isWholeLine: true,
             className: CODE_ADDED_CLASS,
+          },
+        });
+      }
+
+      if (state.replacedLineNumber) {
+        decorations.push({
+          range: new monaco.Range(state.replacedLineNumber, 1, state.replacedLineNumber, 1),
+          options: {
+            isWholeLine: true,
+            className: COMMENT_REMOVED_CLASS,
           },
         });
       }
@@ -299,12 +348,15 @@ export const useCommentToEsql = ({
       generatedText
     );
 
+    const replacedLineNumber = detectReplacedLine(model, generatedLineStart, generatedLineEnd);
+
     showReview({
       commentLineNumber: targetComment.lineNumber,
       nlInstruction,
       generatedText,
       generatedLineStart,
       generatedLineEnd,
+      replacedLineNumber,
       isSurgical,
       sources,
     });
@@ -347,11 +399,14 @@ export const useCommentToEsql = ({
       generatedText
     );
 
+    const replacedLineNumber = detectReplacedLine(model, generatedLineStart, generatedLineEnd);
+
     showReview({
       ...state,
       generatedText,
       generatedLineStart,
       generatedLineEnd,
+      replacedLineNumber,
     });
   }, [editorRef, editorModel, cleanup, callRoute, showReview]);
 

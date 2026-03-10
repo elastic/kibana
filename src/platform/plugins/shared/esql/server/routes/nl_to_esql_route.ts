@@ -128,7 +128,9 @@ Other comment lines (without >>> <<<) are regular documentation comments — ign
 
 Your task: output ONLY the ES|QL pipe(s) that should replace the marked comment. Do not output the full query.
 Fence the replacement code with the esql tag. Do not explain it.
-Do not include any code that is already in the query.
+
+If the instruction asks to modify or extend an existing pipe command (e.g. "also add ...", "change ...", "add a column"),
+output the complete modified version of that pipe. Otherwise output only new pipe(s).
 
 <CurrentQuery>
 ${currentQuery}
