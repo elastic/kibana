@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, visualBuilder, lens, header } = getPageObjects([
@@ -19,15 +19,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('Gauge', function describeIndexTests() {
+  describe('Metric', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualBuilder.resetPage();
-      await visualBuilder.clickGauge();
-      await visualBuilder.clickDataTab('gauge');
+      await visualBuilder.clickMetric();
+      await visualBuilder.clickDataTab('metric');
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
@@ -35,13 +35,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
-      await header.waitUntilLoadingHasFinished();
-
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
 
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).to.eql('Count of records');
+    });
+
+    it('should draw static value', async () => {
+      await visualBuilder.selectAggType('Static Value');
+      await visualBuilder.setStaticValue(10);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('mtrVis');
+      await retry.try(async () => {
+        await lens.assertLayerCount(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(1);
+        expect(await dimensions[0].getVisibleText()).to.be('10');
+      });
     });
 
     it('should convert metric with params', async () => {
@@ -53,13 +68,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        // layer tabs hidden for gauge/metric visualizations
-        await lens.assertLayerCount(0);
+        await lens.assertLayerCount(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-        expect(dimensions).to.have.length(2);
+        expect(dimensions).to.have.length(1);
         expect(await dimensions[0].getVisibleText()).to.be('Count of bytes');
-        expect(await dimensions[1].getVisibleText()).to.be('overall_max(count(bytes))');
       });
     });
 
@@ -81,19 +94,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert color ranges', async () => {
-      await visualBuilder.setMetricsGroupByTerms('extension.raw');
-
-      await visualBuilder.clickPanelOptions('gauge');
-
+      await visualBuilder.clickPanelOptions('metric');
       await visualBuilder.setColorRuleOperator('>= greater than or equal');
       await visualBuilder.setColorRuleValue(10);
-      await visualBuilder.setColorPickerValue('#54B399', 2);
-
-      await visualBuilder.createColorRule();
-
-      await visualBuilder.setColorRuleOperator('>= greater than or equal');
-      await visualBuilder.setColorRuleValue(100, 1);
-      await visualBuilder.setColorPickerValue('#54A000', 4);
+      await visualBuilder.setColorPickerValue('#54B399');
 
       await header.waitUntilLoadingHasFinished();
 
@@ -110,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-        expect(dimensions).to.have.length(3);
+        expect(dimensions).to.have.length(1);
 
         await dimensions[0].click();
 
@@ -118,9 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([
-          { stop: '', color: 'rgba(104, 188, 0, 1)' },
           { stop: '10', color: 'rgba(84, 179, 153, 1)' },
-          { stop: '100', color: 'rgba(84, 160, 0, 1)' },
           { stop: '', color: undefined },
         ]);
       });
@@ -136,7 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should bring the ignore global filters configured at panel level over', async () => {
-      await visualBuilder.clickPanelOptions('gauge');
+      await visualBuilder.clickPanelOptions('metric');
       await visualBuilder.setIgnoreFilters(true);
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisualization();
