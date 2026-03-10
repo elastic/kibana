@@ -3,21 +3,18 @@ steps:
   - name: "Build base image"
     trigger: kibana-vm-images
     build:
-      meta_data:
-        env:
-          IMAGES_CONFIG: kibana/base_image.yml
+      env:
+        IMAGES_CONFIG: kibana/base_image.yml
   - name: "Build packages layer"
     trigger: kibana-vm-images
     build:
-      meta_data:
-        env:
-          IMAGES_CONFIG: kibana/packages_layer.yml
-          BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml"
+      env:
+        IMAGES_CONFIG: kibana/packages_layer.yml
+        BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml"
 
   - name: "Build image cache"
     trigger: kibana-vm-images
     build:
-      meta_data:
-        env:
-          IMAGES_CONFIG: kibana/image_cache.tpl.yml
-          BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml"
+      env:
+        IMAGES_CONFIG: kibana/image_cache.tpl.yml
+        BASE_IMAGES_CONFIG: "core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml"
