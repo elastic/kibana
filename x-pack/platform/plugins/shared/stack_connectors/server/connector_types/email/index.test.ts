@@ -528,7 +528,7 @@ describe('params validation', () => {
         { configurationUtilities }
       );
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: no [to], [cc], or [bcc] entries"`
+      `"error validating action params: at least one entry in [to], [cc], or [bcc] is required"`
     );
   });
 
@@ -1362,7 +1362,7 @@ describe('execute()', () => {
       Object {
         "actionId": "some-id",
         "errorSource": "user",
-        "message": "no [to], [cc], or [bcc] entries",
+        "message": "at least one entry in [to], [cc], or [bcc] is required",
         "status": "error",
       }
     `);
@@ -1387,7 +1387,7 @@ describe('execute()', () => {
       Object {
         "actionId": "some-id",
         "errorSource": "user",
-        "message": "no [to], [cc], or [bcc] entries",
+        "message": "at least one entry in [to], [cc], or [bcc] is required",
         "status": "error",
       }
     `);

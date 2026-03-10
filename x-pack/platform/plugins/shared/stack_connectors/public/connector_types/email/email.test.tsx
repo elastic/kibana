@@ -156,9 +156,9 @@ describe('action params validation', () => {
 
     expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
-        to: ['No To, Cc, or Bcc entry.  At least one entry is required.'],
-        cc: ['No To, Cc, or Bcc entry.  At least one entry is required.'],
-        bcc: ['No To, Cc, or Bcc entry.  At least one entry is required.'],
+        to: ['At least one recipient is required.'],
+        cc: ['At least one recipient is required.'],
+        bcc: ['At least one recipient is required.'],
         replyTo: [],
         message: [],
         subject: [],
@@ -177,9 +177,9 @@ describe('action params validation', () => {
 
     expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
-        to: ['No To, Cc, or Bcc entry.  At least one entry is required.'],
-        cc: ['No To, Cc, or Bcc entry.  At least one entry is required.'],
-        bcc: ['No To, Cc, or Bcc entry.  At least one entry is required.'],
+        to: ['At least one recipient is required.'],
+        cc: ['At least one recipient is required.'],
+        bcc: ['At least one recipient is required.'],
         replyTo: [],
         message: [],
         subject: [],

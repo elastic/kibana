@@ -182,7 +182,7 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
   const addrs = to.length + cc.length + bcc.length;
 
   if (addrs === 0) {
-    throw new Error('no [to], [cc], or [bcc] entries');
+    throw new Error('at least one entry in [to], [cc], or [bcc] is required');
   }
 
   try {
@@ -307,7 +307,7 @@ async function executor(
     return {
       status: 'error',
       actionId,
-      message: `no [to], [cc], or [bcc] entries`,
+      message: `at least one entry in [to], [cc], or [bcc] is required`,
       errorSource: TaskErrorSource.USER,
     };
   }
