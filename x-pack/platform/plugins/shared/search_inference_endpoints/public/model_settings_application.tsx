@@ -8,7 +8,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
@@ -20,7 +19,7 @@ export const renderModelSettingsApp = async (
   element: HTMLElement
 ) => {
   ReactDOM.render(
-    <KibanaRenderContextProvider {...core}>
+    core.rendering.addContext(
       <KibanaContextProvider services={{ ...core, ...services }}>
         <I18nProvider>
           <Router history={services.history}>
@@ -28,7 +27,7 @@ export const renderModelSettingsApp = async (
           </Router>
         </I18nProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
+    ),
     element
   );
 
