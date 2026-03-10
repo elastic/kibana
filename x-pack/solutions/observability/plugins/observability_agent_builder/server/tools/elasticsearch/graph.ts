@@ -20,6 +20,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import type { ToolHandlerReturn } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import {
   createErrorResult,
   type ModelProvider,
@@ -171,6 +172,22 @@ export const createElasticsearchToolGraph = async ({
     return plugins.llmTasks;
   };
 
+  // Check if OpenAPI spec documentation is installed
+  const isOpenApiSpecDocAvailable = async (
+    llmTasks: NonNullable<Awaited<ReturnType<typeof getLlmTasks>>>
+  ) => {
+    try {
+      return (
+        (await llmTasks.retrieveDocumentationAvailable({
+          inferenceId,
+          resourceType: ResourceTypes.openapiSpec,
+        })) ?? false
+      );
+    } catch {
+      return false;
+    }
+  };
+
   const model = await modelProvider.getDefaultModel();
 
   const routeEntry = async (state: StateType) => {
@@ -215,13 +232,30 @@ export const createElasticsearchToolGraph = async ({
       return {
         tools: [],
         toolOutput: {
+          results: [createErrorResult({ message: 'LLM Tasks plugin is not available' })],
+        },
+      };
+    }
+
+    // Check if OpenAPI spec documentation is installed
+    const isAvailable = await isOpenApiSpecDocAvailable(llmTasks);
+    if (!isAvailable) {
+      // Build the full settings URL using the request's base path (includes space prefix)
+      const basePath = core.http.basePath.get(request);
+      // Path to GenAI Settings within the management app
+      const GENAI_SETTINGS_APP_PATH = '/app/management/ai/genAiSettings';
+      const settingsUrl = `${basePath}${GENAI_SETTINGS_APP_PATH}`;
+
+      return {
+        tools: [],
+        toolOutput: {
           results: [
-            {
-              type: ToolResultType.error,
-              data: {
-                message: 'LLM Tasks plugin is not available',
+            createErrorResult({
+              message: `OpenAPI spec documentation is not installed. To use this tool, please install Elastic documentation from the GenAI Settings page: ${settingsUrl}. Do not perform any other tool calls, and provide the user with a link to install the documentation.`,
+              metadata: {
+                settingsUrl,
               },
-            },
+            }),
           ],
         },
       };
