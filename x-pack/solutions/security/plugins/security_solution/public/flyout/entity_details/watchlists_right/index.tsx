@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlyoutBody } from '@elastic/eui';
@@ -15,7 +15,7 @@ import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { WatchlistsFlyoutFooter } from './footer';
 import { WatchlistForm } from './watchlist_form';
 import { WatchlistsFlyoutHeader } from './watchlists_flyout_header';
-import { useCreateWatchlist } from './hooks';
+import { useCreateWatchlist, useGetWatchlist, useUpdateWatchlist } from './hooks';
 
 export type WatchlistsFlyoutMode = 'create' | 'edit';
 
@@ -46,18 +46,26 @@ export const WatchlistsFlyoutPanel = ({
         defaultMessage: 'Create watchlist',
       });
 
-  const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>({
-    name: watchlistName ?? '',
-    description: '',
-    riskModifier: 1.5,
-    managed: false,
-  });
+  const defaultWatchlist = useMemo<CreateWatchlistRequestBodyInput>(
+    () => ({
+      name: watchlistName ?? '',
+      description: '',
+      riskModifier: 1.5,
+      managed: false,
+    }),
+    [watchlistName]
+  );
+  const [initialWatchlist, setInitialWatchlist] =
+    useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
+  const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
+  const [hasUserEdits, setHasUserEdits] = useState(false);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => {
     setWatchlist((prev) => ({ ...prev, [key]: value }));
+    setHasUserEdits(true);
   };
 
   const { closeFlyout } = useExpandableFlyoutApi();
@@ -66,8 +74,50 @@ export const WatchlistsFlyoutPanel = ({
     spaceId,
     onSuccess: closeFlyout,
   });
+  const updateMutation = useUpdateWatchlist({
+    watchlistId,
+    watchlist,
+    spaceId,
+    onSuccess: closeFlyout,
+  });
+  const { initialWatchlist: fetchedWatchlist } = useGetWatchlist(
+    isEditMode ? watchlistId : undefined
+  );
 
-  const isDisabled = !watchlist.name.trim() || !watchlist.description?.trim();
+  useEffect(() => {
+    if (isEditMode || hasUserEdits) {
+      return;
+    }
+
+    setInitialWatchlist(defaultWatchlist);
+    setWatchlist(defaultWatchlist);
+  }, [defaultWatchlist, hasUserEdits, isEditMode]);
+
+  useEffect(() => {
+    if (!isEditMode || !fetchedWatchlist || hasUserEdits) {
+      return;
+    }
+
+    setInitialWatchlist(fetchedWatchlist);
+    setWatchlist(fetchedWatchlist);
+  }, [fetchedWatchlist, hasUserEdits, isEditMode]);
+
+  useEffect(() => {
+    if (isEditMode && watchlistId) {
+      setHasUserEdits(false);
+    }
+  }, [isEditMode, watchlistId]);
+
+  const isMissingId = isEditMode && !watchlistId;
+  const hasChanges = isEditMode
+    ? watchlist.name.trim() !== initialWatchlist.name.trim() ||
+      watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
+      watchlist.riskModifier !== initialWatchlist.riskModifier
+    : true;
+  const isDisabled =
+    isMissingId ||
+    (isEditMode ? !hasChanges : !watchlist.name.trim() || !watchlist.description?.trim());
+  const mutation = isEditMode ? updateMutation : createMutation;
 
   return (
     <>
@@ -78,8 +128,8 @@ export const WatchlistsFlyoutPanel = ({
       </WatchlistsFlyoutHeader>
       <EuiFlyoutBody />
       <WatchlistsFlyoutFooter
-        onSave={() => createMutation.mutate()}
-        isLoading={createMutation.isLoading}
+        onSave={() => mutation.mutate()}
+        isLoading={mutation.isLoading}
         isDisabled={isDisabled}
       />
     </>

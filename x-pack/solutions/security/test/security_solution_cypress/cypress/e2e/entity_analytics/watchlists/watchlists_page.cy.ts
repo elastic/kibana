@@ -36,7 +36,6 @@ describe(
     const WATCHLISTS_LIST_URL = `${WATCHLISTS_URL}/list`;
     const visitWatchlistsPage = () => {
       visit(ENTITY_ANALYTICS_WATCHLISTS_MANAGEMENT_URL);
-      cy.wait('@watchlistsPrivileges');
     };
 
     const interceptWatchlistsList = (
@@ -111,7 +110,6 @@ describe(
       }).as('watchlistsList');
 
       visitWatchlistsPage();
-      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
     });
 
@@ -122,7 +120,6 @@ describe(
       }).as('watchlistsList');
 
       visitWatchlistsPage();
-      cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_ERROR).should('exist');
     });
 
@@ -210,6 +207,11 @@ describe(
 
       interceptWatchlistsList(() => watchlists);
 
+      cy.intercept('GET', `${WATCHLISTS_URL}/${existingWatchlist.id}`, {
+        statusCode: 200,
+        body: existingWatchlist,
+      }).as('getWatchlist');
+
       cy.intercept('DELETE', `${WATCHLISTS_URL}/*`, (req) => {
         watchlists = [];
         req.reply({ statusCode: 200, body: { deleted: true } });
@@ -227,6 +229,56 @@ describe(
       cy.wait('@deleteWatchlist');
       cy.wait('@watchlistsList');
       cy.get(WATCHLISTS_MANAGEMENT_TABLE_EMPTY).should('exist');
+    });
+
+    it('updates a watchlist via edit mode', () => {
+      const existingWatchlist = buildWatchlist({
+        id: 'watchlist-2',
+        name: 'Editable Watchlist',
+        description: 'Original description',
+      });
+      const updatedName = 'Editable Watchlist Updated';
+      let watchlists = [existingWatchlist];
+
+      interceptWatchlistsList(() => watchlists);
+
+      cy.intercept('GET', `${WATCHLISTS_URL}/${existingWatchlist.id}`, {
+        statusCode: 200,
+        body: existingWatchlist,
+      }).as('getWatchlist');
+
+      cy.intercept('PUT', `${WATCHLISTS_URL}/*`, (req) => {
+        expect(req.body).to.include({
+          name: updatedName,
+          description: existingWatchlist.description,
+        });
+        watchlists = [
+          {
+            ...existingWatchlist,
+            name: updatedName,
+            updatedAt: new Date().toISOString(),
+          },
+        ];
+        req.reply({ statusCode: 200, body: watchlists[0] });
+      }).as('updateWatchlist');
+
+      visitWatchlistsPage();
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(existingWatchlist.name);
+
+      cy.get('[aria-label="Edit watchlist"]').click();
+      cy.wait('@getWatchlist');
+      cy.get('[data-test-subj="watchlist-flyout-header"]').contains('Edit watchlist');
+      cy.get('input[name="Enter Watchlist Description"]').should(
+        'have.value',
+        existingWatchlist.description
+      );
+      cy.get('input[name="Enter Watchlist Name"]').should('have.value', existingWatchlist.name);
+      cy.get('input[name="Enter Watchlist Name"]').clear();
+      cy.get('input[name="Enter Watchlist Name"]').type(updatedName);
+      cy.contains('button', 'Save').click();
+      cy.wait('@updateWatchlist');
+      cy.wait('@watchlistsList');
+      cy.get(WATCHLISTS_MANAGEMENT_TABLE).contains(updatedName);
     });
   }
 );

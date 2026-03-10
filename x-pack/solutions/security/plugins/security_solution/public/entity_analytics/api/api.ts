@@ -11,8 +11,11 @@ import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity
 import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
   CreateEntitySourceResponse,
   CreatePrivilegesImportIndexResponse,
+  CreateWatchlistRequestBodyInput,
+  CreateWatchlistResponse,
   DisableRiskEngineResponse,
   EnableRiskEngineResponse,
   EntityAnalyticsPrivileges,
@@ -22,9 +25,9 @@ import type {
   ListEntitiesRequestQuery,
   ListEntitiesResponse,
   ListEntitySourcesResponse,
-  PrivmonBulkUploadUsersCSVResponse,
   PrivMonHealthResponse,
   PrivMonPrivilegesResponse,
+  PrivmonBulkUploadUsersCSVResponse,
   ReadRiskEngineSettingsResponse,
   RiskEngineScheduleNowResponse,
   RiskEngineStatusResponse,
@@ -35,11 +38,13 @@ import type {
   SearchPrivilegesIndicesResponse,
   UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
-  ConfigureRiskEngineSavedObjectRequestBodyInput,
-  CreateWatchlistResponse,
-  CreateWatchlistRequestBodyInput,
 } from '../../../common/api/entity_analytics';
 import type { ListWatchlistsResponse } from '../../../common/api/entity_analytics/watchlists/management/list.gen';
+import type { GetWatchlistResponse } from '../../../common/api/entity_analytics/watchlists/management/get.gen';
+import type {
+  UpdateWatchlistRequestBodyInput,
+  UpdateWatchlistResponse,
+} from '../../../common/api/entity_analytics/watchlists/management/update.gen';
 import {
   API_VERSIONS,
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
@@ -489,11 +494,24 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const getWatchlist = async (params: { id: string; signal?: AbortSignal }) =>
+      http.fetch<GetWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        signal: params.signal,
+      });
+
     const createWatchlist = async (params: CreateWatchlistRequestBodyInput) =>
       http.fetch<CreateWatchlistResponse>(WATCHLISTS_URL, {
         version: API_VERSIONS.public.v1,
         method: 'POST',
         body: JSON.stringify(params),
+      });
+    const updateWatchlist = async (params: { id: string; body: UpdateWatchlistRequestBodyInput }) =>
+      http.fetch<UpdateWatchlistResponse>(`${WATCHLISTS_URL}/${params.id}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'PUT',
+        body: JSON.stringify(params.body),
       });
     const deleteWatchlist = async (params: { id: string }) =>
       http.fetch<{ deleted: true }>(`${WATCHLISTS_URL}/${params.id}`, {
@@ -526,6 +544,8 @@ export const useEntityAnalyticsRoutes = () => {
       fetchPrivilegeMonitoringPrivileges,
       fetchWatchlistPrivileges,
       createWatchlist,
+      getWatchlist,
+      updateWatchlist,
       deleteWatchlist,
       fetchRiskEngineSettings,
       calculateEntityRiskScore,

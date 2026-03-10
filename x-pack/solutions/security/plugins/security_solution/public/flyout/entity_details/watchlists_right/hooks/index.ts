@@ -6,3 +6,5 @@
  */
 
 export { useCreateWatchlist } from './use_create_watchlist';
+export { useGetWatchlist } from './use_get_watchlist';
+export { useUpdateWatchlist } from './use_update_watchlist';
