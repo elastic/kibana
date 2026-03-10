@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   // TODO: Remove when vislib is removed
-  describe('visualize app - replaced vislib group1', () => {
+  describe('visualize app - new charts library visualize group1', () => {
     before(async () => {
       log.debug('Starting visualize before method');
       await browser.setWindowSize(1280, 800);
@@ -34,6 +34,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.refresh();
     });
 
+    // Test replaced vislib chart types
     loadTestFile(require.resolve('./_area_chart'));
     loadTestFile(require.resolve('./_line_chart_split_series'));
     loadTestFile(require.resolve('./_line_chart_split_chart'));
