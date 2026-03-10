@@ -6,6 +6,14 @@
  */
 
 export {
+  type SkillSelection,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
+} from './skill_selection';
+export {
   type PublicSkillDefinition,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
@@ -16,5 +24,8 @@ export {
   skillUpdateRequestSchema,
   validateSkillId,
   skillIdMaxLength,
+  skillNameMaxLength,
   skillIdRegexp,
+  skillNameRegexp,
+  maxToolsPerSkill,
 } from './validation';
