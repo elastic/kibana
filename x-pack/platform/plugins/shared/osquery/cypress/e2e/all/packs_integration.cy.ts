@@ -246,7 +246,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           const item = find(response.body.items, ['policy_id', agentPolicyId]);
 
           expect(
-            item?.inputs[0].config?.osquery.value.packs[`default-${globalPack}`]
+            item?.inputs[0].config?.osquery.value.packs[`default--${globalPack}`]
           ).to.deep.include({
             shard: 100,
             queries: {},
@@ -305,7 +305,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           );
 
           expect(
-            shardPolicy?.inputs[0].config?.osquery.value.packs[`default-${shardPack}`]
+            shardPolicy?.inputs[0].config?.osquery.value.packs[`default--${shardPack}`]
           ).to.deep.include({
             shard: 15,
             queries: {},

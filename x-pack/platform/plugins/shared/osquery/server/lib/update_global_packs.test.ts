@@ -242,7 +242,7 @@ describe('updateGlobalPacksCreateCallback', () => {
       mockOsqueryContext
     );
 
-    expect(result.inputs[0].config?.osquery?.value?.packs?.['default-embedded-pack']).toEqual({
+    expect(result.inputs[0].config?.osquery?.value?.packs?.['default--embedded-pack']).toEqual({
       shard: 100,
       pack_id: 'pack-so-id-4',
       queries: {

@@ -230,7 +230,7 @@ describe(
             (policy: PackagePolicy) => policy.name === `Policy for ${DEFAULT_POLICY}`
           );
 
-          const packKey = `default-${packName}`;
+          const packKey = `default--${packName}`;
           const actualQueries = item?.inputs[0].config?.osquery.value.packs[packKey].queries;
           const sanitizedQueries = Object.fromEntries(
             Object.entries(actualQueries as Record<string, Record<string, unknown>>).map(

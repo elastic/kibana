@@ -171,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
       expect(
-        inputs[0].config.osquery.value.packs['default-TestPack'].queries.testQuery.query
+        inputs[0].config.osquery.value.packs['default--TestPack'].queries.testQuery.query
       ).to.be(singleLineQuery);
     });
 
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set(ELASTIC_HTTP_VERSION_HEADER, fleetApiVersion);
 
       expect(
-        inputs[0].config.osquery.value.packs['default-TestPack'].queries.testQuery.query
+        inputs[0].config.osquery.value.packs['default--TestPack'].queries.testQuery.query
       ).to.be(singleLineQuery);
     });
   });
