@@ -7,154 +7,167 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { euiShadow, transparentize, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const getProposedChangesStyles = () => css`
-  .wfDiffWrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    box-sizing: border-box;
-    position: relative;
-  }
+export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
 
-  /* View zone container — shows original (deleted) content */
-  .wfDiffContainer {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: rgba(238, 76, 72, 0.06);
-    border-left: 3px solid #ee4c48;
-    margin-right: 8px;
-    min-width: 0;
-  }
+  const successBg = transparentize(euiTheme.colors.success, 0.12);
+  const dangerBg = transparentize(euiTheme.colors.danger, 0.1);
+  const dangerBgSubtle = transparentize(euiTheme.colors.danger, 0.06);
 
-  .wfDiffCodeContainer {
-    padding: 0;
-  }
+  return css`
+    .wfDiffWrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-sizing: border-box;
+      position: relative;
+    }
 
-  .wfDiffLine {
-    display: flex;
-    background-color: rgba(238, 76, 72, 0.1);
-    opacity: 0.7;
-  }
+    .wfDiffContainer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: ${dangerBgSubtle};
+      margin-right: ${euiTheme.size.s};
+      min-width: 0;
+    }
 
-  .wfDiffLineContent {
-    flex: 1;
-    padding: 0 12px 0 0;
-    white-space: pre;
-  }
+    .wfDiffCodeContainer {
+      padding: 0;
+    }
 
-  /* Floating accept/decline pill */
-  .wfDiffButtonsPill {
-    display: flex;
-    align-items: center;
-    gap: 1px;
-    padding: 1px;
-    background: white;
-    border-radius: 4px;
-    box-shadow: 0px 0px 2px 0px rgba(43, 57, 79, 0.16), 0px 5px 16px 0px rgba(43, 57, 79, 0.14),
-      0px 10px 20px 0px rgba(43, 57, 79, 0.08);
-    position: absolute;
-    right: 24px;
-    top: 0;
-    z-index: 10;
-    pointer-events: auto;
-  }
+    .wfDiffLine {
+      display: flex;
+      background-color: ${dangerBg};
+      opacity: 0.7;
+    }
 
-  .wfDiffAcceptBtn,
-  .wfDiffDeclineBtn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 32px;
-    padding: 0 8px;
-    border-radius: 4px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    pointer-events: auto;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
-    white-space: nowrap;
-    outline: none;
-  }
+    .wfDiffLineContent {
+      flex: 1;
+      padding: 0 ${euiTheme.size.s} 0 0;
+      white-space: pre;
+    }
 
-  .wfDiffAcceptBtn {
-    color: #09724d;
-  }
+    .wfDiffButtonsPill {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      padding: 1px;
+      background: ${euiTheme.colors.backgroundBasePlain};
+      border-radius: ${euiTheme.border.radius.small};
+      ${euiShadow(euiThemeContext, 'm')}
+      position: absolute;
+      right: ${euiTheme.size.l};
+      top: 0;
+      z-index: ${euiTheme.levels.menu};
+      pointer-events: auto;
+    }
 
-  .wfDiffAcceptBtn:hover {
-    background: rgba(174, 232, 210, 0.2);
-  }
+    .wfDiffAcceptBtn,
+    .wfDiffDeclineBtn {
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      height: ${euiTheme.size.xl};
+      padding: 0 ${euiTheme.size.s};
+      border-radius: ${euiTheme.border.radius.small};
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      pointer-events: auto;
+      font-family: ${euiTheme.font.family};
+      font-weight: ${euiTheme.font.weight.medium};
+      font-size: ${euiTheme.size.m};
+      line-height: ${euiTheme.size.l};
+      white-space: nowrap;
+      outline: none;
+    }
 
-  .wfDiffAcceptBtn:active {
-    background: rgba(174, 232, 210, 0.35);
-  }
+    .wfDiffAcceptBtn {
+      color: ${euiTheme.colors.textSuccess};
+    }
 
-  .wfDiffAcceptBtn svg {
-    flex-shrink: 0;
-  }
+    .wfDiffAcceptBtn:hover {
+      background: ${transparentize(euiTheme.colors.success, 0.15)};
+    }
 
-  .wfDiffAcceptBtn kbd {
-    background: rgba(174, 232, 210, 0.2);
-    border: 1px solid #aee8d2;
-    padding: 3px 6px;
-    border-radius: 3px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 10px;
-    color: #09724d;
-    line-height: 10px;
-  }
+    .wfDiffAcceptBtn:active {
+      background: ${transparentize(euiTheme.colors.success, 0.25)};
+    }
 
-  .wfDiffDeclineBtn {
-    color: #a71627;
-  }
+    .wfDiffAcceptBtn svg {
+      flex-shrink: 0;
+    }
 
-  .wfDiffDeclineBtn:hover {
-    background: rgba(255, 199, 219, 0.2);
-  }
+    .wfDiffAcceptBtn kbd {
+      background: ${transparentize(euiTheme.colors.success, 0.15)};
+      border: 1px solid ${transparentize(euiTheme.colors.success, 0.4)};
+      padding: 3px ${euiTheme.size.xs};
+      border-radius: ${euiTheme.border.radius.small};
+      font-family: ${euiTheme.font.family};
+      font-weight: ${euiTheme.font.weight.medium};
+      font-size: ${euiTheme.size.s};
+      color: ${euiTheme.colors.textSuccess};
+      line-height: ${euiTheme.size.s};
+    }
 
-  .wfDiffDeclineBtn:active {
-    background: rgba(255, 199, 219, 0.35);
-  }
+    .wfDiffDeclineBtn {
+      color: ${euiTheme.colors.textDanger};
+    }
 
-  .wfDiffDeclineBtn svg {
-    flex-shrink: 0;
-  }
+    .wfDiffDeclineBtn:hover {
+      background: ${transparentize(euiTheme.colors.danger, 0.15)};
+    }
 
-  .wfDiffDeclineBtn kbd {
-    background: rgba(255, 199, 219, 0.2);
-    border: 1px solid #ffc7db;
-    padding: 3px 6px;
-    border-radius: 3px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 500;
-    font-size: 10px;
-    color: #a71627;
-    line-height: 10px;
-  }
+    .wfDiffDeclineBtn:active {
+      background: ${transparentize(euiTheme.colors.danger, 0.25)};
+    }
 
-  /* Glyph margin indicators */
-  .wfDiffGlyphAdd {
-    background-color: #24c292 !important;
-    width: 4px !important;
-    margin-left: 2px !important;
-    border-radius: 2px !important;
-  }
+    .wfDiffDeclineBtn svg {
+      flex-shrink: 0;
+    }
 
-  .wfDiffGlyphDelete {
-    background-color: #ee4c48 !important;
-    width: 4px !important;
-    margin-left: 2px !important;
-    border-radius: 2px !important;
-  }
+    .wfDiffDeclineBtn kbd {
+      background: ${transparentize(euiTheme.colors.danger, 0.15)};
+      border: 1px solid ${transparentize(euiTheme.colors.danger, 0.4)};
+      padding: 3px ${euiTheme.size.xs};
+      border-radius: ${euiTheme.border.radius.small};
+      font-family: ${euiTheme.font.family};
+      font-weight: ${euiTheme.font.weight.medium};
+      font-size: ${euiTheme.size.s};
+      color: ${euiTheme.colors.textDanger};
+      line-height: ${euiTheme.size.s};
+    }
 
-  /* New lines added to the model by a proposal */
-  .wfDiffLineAddBg {
-    background-color: rgba(36, 194, 146, 0.12) !important;
-  }
-`;
+    .wfDiffLineAddBg {
+      background-color: ${successBg} !important;
+    }
+
+    .wfDiffBulkBar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xs};
+      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+      background: ${euiTheme.colors.backgroundBasePlain};
+      border-top: ${euiTheme.border.thin};
+      ${euiShadow(euiThemeContext, 's')}
+      z-index: ${Number(euiTheme.levels.menu) + 1};
+      pointer-events: auto;
+    }
+
+    .wfDiffBulkCount {
+      font-family: ${euiTheme.font.family};
+      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-weight: ${euiTheme.font.weight.medium};
+      color: ${euiTheme.colors.textSubdued};
+      margin-right: auto;
+    }
+  `;
+};

@@ -9,6 +9,14 @@
 
 import { monaco } from '@kbn/monaco';
 
+const ICON_SVG_CHECK =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8.5l3 3 5-6.5"/></svg>';
+const ICON_SVG_CROSS =
+  '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>';
+
+const parseSvgIcon = (svgMarkup: string): Node =>
+  new DOMParser().parseFromString(svgMarkup, 'image/svg+xml').documentElement;
+
 export interface ProposedChange {
   proposalId: string;
   type: 'insert' | 'replace' | 'delete';
@@ -40,6 +48,9 @@ export class ProposalManager {
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private decorationCollections = new Map<string, monaco.editor.IEditorDecorationsCollection>();
   private options: ProposalManagerOptions = {};
+  private bulkBar: HTMLDivElement | null = null;
+  private bulkBarCountEl: HTMLSpanElement | null = null;
+  private bulkBarSpacerZoneId: string | null = null;
 
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
     this.editor = editor;
@@ -125,6 +136,7 @@ export class ProposalManager {
     });
 
     this.editor.revealLineInCenter(change.startLine);
+    this.updateBulkBar();
   }
 
   acceptProposal(proposalId: string): void {
@@ -133,6 +145,7 @@ export class ProposalManager {
 
     this.clearProposal(proposalId);
     this.options.onAccept?.(proposalId);
+    this.updateBulkBar();
   }
 
   rejectProposal(proposalId: string): void {
@@ -162,6 +175,7 @@ export class ProposalManager {
 
     this.clearProposal(proposalId);
     this.options.onReject?.(proposalId);
+    this.updateBulkBar();
   }
 
   acceptAll(): void {
@@ -188,6 +202,7 @@ export class ProposalManager {
 
   dispose(): void {
     this.rejectAll();
+    this.removeBulkBar();
 
     if (this.editor && this.keydownHandler) {
       const domNode = this.editor.getDomNode();
@@ -203,6 +218,96 @@ export class ProposalManager {
 
     this.keydownHandler = null;
     this.editor = null;
+  }
+
+  private updateBulkBar(): void {
+    const count = this.proposals.size;
+    if (count === 0) {
+      this.removeBulkBar();
+      return;
+    }
+    if (!this.bulkBar) {
+      this.createBulkBar();
+    }
+    if (this.bulkBarCountEl) {
+      this.bulkBarCountEl.textContent = `${count} pending change${count !== 1 ? 's' : ''}`;
+    }
+  }
+
+  private createBulkBar(): void {
+    const editorDom = this.editor?.getDomNode();
+    const container = editorDom?.parentElement;
+    if (!container) return;
+
+    container.style.position = 'relative';
+
+    const bar = document.createElement('div');
+    bar.className = 'wfDiffBulkBar';
+
+    const countSpan = document.createElement('span');
+    countSpan.className = 'wfDiffBulkCount';
+    bar.appendChild(countSpan);
+    this.bulkBarCountEl = countSpan;
+
+    const acceptAllBtn = document.createElement('button');
+    acceptAllBtn.className = 'wfDiffAcceptBtn';
+    acceptAllBtn.appendChild(parseSvgIcon(ICON_SVG_CHECK));
+    const acceptAllLabel = document.createElement('span');
+    acceptAllLabel.textContent = 'Accept All';
+    acceptAllBtn.appendChild(acceptAllLabel);
+    acceptAllBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    acceptAllBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.acceptAll();
+    });
+    bar.appendChild(acceptAllBtn);
+
+    const rejectAllBtn = document.createElement('button');
+    rejectAllBtn.className = 'wfDiffDeclineBtn';
+    rejectAllBtn.appendChild(parseSvgIcon(ICON_SVG_CROSS));
+    const rejectAllLabel = document.createElement('span');
+    rejectAllLabel.textContent = 'Reject All';
+    rejectAllBtn.appendChild(rejectAllLabel);
+    rejectAllBtn.addEventListener('mousedown', (e) => e.stopPropagation());
+    rejectAllBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.rejectAll();
+    });
+    bar.appendChild(rejectAllBtn);
+
+    container.appendChild(bar);
+    this.bulkBar = bar;
+
+    if (this.editor) {
+      const model = this.editor.getModel();
+      const lastLine = model?.getLineCount() ?? 1;
+      this.editor.changeViewZones((accessor) => {
+        const spacer = document.createElement('div');
+        this.bulkBarSpacerZoneId = accessor.addZone({
+          afterLineNumber: lastLine,
+          heightInPx: 44,
+          domNode: spacer,
+        });
+      });
+    }
+  }
+
+  private removeBulkBar(): void {
+    if (this.bulkBar) {
+      this.bulkBar.remove();
+      this.bulkBar = null;
+      this.bulkBarCountEl = null;
+
+      if (this.editor && this.bulkBarSpacerZoneId) {
+        const zoneId = this.bulkBarSpacerZoneId;
+        this.editor.changeViewZones((accessor) => {
+          accessor.removeZone(zoneId);
+        });
+        this.bulkBarSpacerZoneId = null;
+      }
+    }
   }
 
   private findNearestProposal(): PendingProposal | null {
@@ -301,10 +406,13 @@ export class ProposalManager {
 
     const acceptButton = document.createElement('button');
     acceptButton.className = 'wfDiffAcceptBtn';
-    acceptButton.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8.5l3 3 5-6.5"/></svg>' +
-      '<span>Accept</span>' +
-      '<kbd>Tab</kbd>';
+    acceptButton.appendChild(parseSvgIcon(ICON_SVG_CHECK));
+    const acceptLabel = document.createElement('span');
+    acceptLabel.textContent = 'Accept';
+    acceptButton.appendChild(acceptLabel);
+    const acceptKbd = document.createElement('kbd');
+    acceptKbd.textContent = 'Tab';
+    acceptButton.appendChild(acceptKbd);
     acceptButton.addEventListener('mousedown', (e) => e.stopPropagation());
     acceptButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -315,10 +423,13 @@ export class ProposalManager {
 
     const declineButton = document.createElement('button');
     declineButton.className = 'wfDiffDeclineBtn';
-    declineButton.innerHTML =
-      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>' +
-      '<span>Decline</span>' +
-      '<kbd>Esc</kbd>';
+    declineButton.appendChild(parseSvgIcon(ICON_SVG_CROSS));
+    const declineLabel = document.createElement('span');
+    declineLabel.textContent = 'Decline';
+    declineButton.appendChild(declineLabel);
+    const declineKbd = document.createElement('kbd');
+    declineKbd.textContent = 'Esc';
+    declineButton.appendChild(declineKbd);
     declineButton.addEventListener('mousedown', (e) => e.stopPropagation());
     declineButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -352,7 +463,6 @@ export class ProposalManager {
           options: {
             isWholeLine: true,
             className: 'wfDiffLineAddBg',
-            glyphMarginClassName: 'wfDiffGlyphAdd',
           },
         });
       }
