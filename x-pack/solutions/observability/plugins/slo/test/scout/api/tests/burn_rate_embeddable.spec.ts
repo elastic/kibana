@@ -8,15 +8,9 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
-import { apiTest } from '../fixtures';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH } from '../fixtures';
 
 const SLO_BURN_RATE_EMBEDDABLE_ID = 'SLO_BURN_RATE_EMBEDDABLE';
-const DASHBOARD_API_PATH = 'api/dashboards';
-const DASHBOARD_API_HEADERS = {
-  'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
-};
 
 apiTest.describe(
   'SLO Burn Rate Embeddable',
@@ -24,14 +18,31 @@ apiTest.describe(
   () => {
     let adminCredentials: RoleApiCredentials;
     let sloId: string;
+    const createdDashboardIds: string[] = [];
 
     apiTest.beforeAll(async ({ requestAuth, sloData }) => {
       await sloData.generateSloData();
       const sloResult = await sloData.addSLO();
-      if (sloResult && typeof sloResult === 'object' && 'id' in sloResult) {
-        sloId = (sloResult as { id: string }).id;
+      if (!sloResult || typeof sloResult !== 'object' || !('id' in sloResult)) {
+        throw new Error(`addSLO failed or returned invalid data: ${JSON.stringify(sloResult)}`);
       }
+      sloId = (sloResult as { id: string }).id;
       adminCredentials = await requestAuth.getApiKey('admin');
+    });
+
+    apiTest.afterAll(async ({ apiClient }) => {
+      for (const id of createdDashboardIds) {
+        try {
+          await apiClient.delete(`${DASHBOARD_API_PATH}/${id}`, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminCredentials.apiKeyHeader,
+            },
+          });
+        } catch {
+          // Ignore errors during cleanup
+        }
+      }
     });
 
     apiTest(
@@ -53,7 +64,7 @@ apiTest.describe(
 
         const response = await apiClient.post(DASHBOARD_API_PATH, {
           headers: {
-            ...DASHBOARD_API_HEADERS,
+            ...COMMON_HEADERS,
             ...adminCredentials.apiKeyHeader,
           },
           body: {
@@ -63,12 +74,14 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response.statusCode).toBe(200);
+        expect(response).toHaveStatusCode(200);
         expect(response.body.id).toBeDefined();
         expect(response.body.data).toBeDefined();
         expect(response.body.data.title).toBe(dashboardTitle);
         expect(response.body.data.panels).toBeDefined();
         expect(response.body.data.panels).toHaveLength(1);
+
+        createdDashboardIds.push(response.body.id);
 
         const createdPanel = response.body.data.panels[0];
         expect(createdPanel.type).toBe(SLO_BURN_RATE_EMBEDDABLE_ID);
@@ -96,7 +109,7 @@ apiTest.describe(
 
         const response = await apiClient.post(DASHBOARD_API_PATH, {
           headers: {
-            ...DASHBOARD_API_HEADERS,
+            ...COMMON_HEADERS,
             ...adminCredentials.apiKeyHeader,
           },
           body: {
@@ -107,6 +120,8 @@ apiTest.describe(
         });
 
         expect([400, 422]).toContain(response.statusCode);
+        expect(response.body).toBeDefined();
+        expect(response.body.message ?? response.body.error).toBeDefined();
       }
     );
   }
