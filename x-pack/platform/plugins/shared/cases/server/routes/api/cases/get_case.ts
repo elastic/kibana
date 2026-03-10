@@ -43,7 +43,7 @@ export const getCaseRoute = () =>
         });
 
         const { comments, ...caseWithoutComments } = res;
-
+        // empty array is returned for comments to comply with the API contract
         return response.ok({
           body: { ...caseWithoutComments, comments: [] },
         });
