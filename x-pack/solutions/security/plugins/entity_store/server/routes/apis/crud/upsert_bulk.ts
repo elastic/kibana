@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { ENTITY_STORE_ROUTES } from '../../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -53,7 +53,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
-        const { logger, assetManager, crudClient } = entityStoreCtx;
+        const { logger, assetManagerClient: assetManager, crudClient } = entityStoreCtx;
 
         logger.debug('CRUD Upsert Bulk api called');
         const { engines } = await assetManager.getStatus();

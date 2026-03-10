@@ -26,6 +26,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/management-settings-ids'
   - '@kbn/core-ui-settings-browser'
+  - '@kbn/rule-data-utils'
+  - '@kbn/alerts-as-data-utils'
 tags:
   - shared-common
   - package

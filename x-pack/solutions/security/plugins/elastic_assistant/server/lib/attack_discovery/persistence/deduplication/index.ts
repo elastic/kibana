@@ -7,9 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
-import type { AttackDiscoveries, Replacements } from '@kbn/elastic-assistant-common';
+import type {
+  AttackDiscoveries,
+  AttackDiscoveryAlertDocument,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 
-import type { AttackDiscoveryAlertDocument } from '../../schedules/types';
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 
 interface DeduplicateAttackDiscoveriesParams {
