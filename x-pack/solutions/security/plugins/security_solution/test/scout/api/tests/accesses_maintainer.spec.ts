@@ -23,6 +23,7 @@ import {
   ensureDataStream,
   cleanupDataStream,
   getExpectedRelationships,
+  waitForShardsAndDocuments,
 } from '../fixtures/helpers';
 
 /**
@@ -57,31 +58,77 @@ interface MaintainerEntry {
   lastErrorTimestamp: string | null;
 }
 
+interface ApiClient {
+  get: (url: string, options?: Record<string, unknown>) => Promise<{ body: unknown }>;
+  post: (
+    url: string,
+    options?: Record<string, unknown>
+  ) => Promise<{ statusCode: number; body: unknown }>;
+}
+
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 60_000;
 
-async function waitForMaintainerSuccess(
-  apiClient: {
-    get: (url: string, options?: Record<string, unknown>) => Promise<{ body: unknown }>;
-  },
+async function getMaintainerEntry(
+  apiClient: ApiClient,
   headers: Record<string, string>,
   maintainerId: string
+): Promise<MaintainerEntry | undefined> {
+  const res = await apiClient.get(MAINTAINER_ROUTES.GET, {
+    headers,
+    responseType: 'json',
+  });
+  const body = res.body as { maintainers: MaintainerEntry[] };
+  return body.maintainers.find((m) => m.id === maintainerId);
+}
+
+/**
+ * Calls the `run` endpoint, retrying on 500 which can happen when Task Manager
+ * hasn't finished registering the task after `init`.
+ */
+async function triggerMaintainerRun(
+  apiClient: ApiClient,
+  headers: Record<string, string>,
+  maintainerId: string,
+  maxAttempts = 5,
+  delayMs = 2000
+): Promise<void> {
+  let lastStatus = 0;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await apiClient.post(MAINTAINER_ROUTES.RUN(maintainerId), {
+      headers,
+      responseType: 'json',
+    });
+    lastStatus = res.statusCode;
+    if (lastStatus === 200) return;
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw new Error(`run/${maintainerId} returned ${lastStatus} after ${maxAttempts} attempts`);
+}
+
+/**
+ * Polls until the maintainer's `runs` count exceeds `minRuns` AND
+ * `lastSuccessTimestamp` is set, ensuring we wait for the *current* run
+ * rather than returning on stale state from a previous suite repetition.
+ */
+async function waitForMaintainerSuccess(
+  apiClient: ApiClient,
+  headers: Record<string, string>,
+  maintainerId: string,
+  minRuns: number = 0
 ): Promise<MaintainerEntry> {
   const start = Date.now();
 
   while (Date.now() - start < POLL_TIMEOUT_MS) {
-    const res = await apiClient.get(MAINTAINER_ROUTES.GET, {
-      headers,
-      responseType: 'json',
-    });
-    const body = res.body as { maintainers: MaintainerEntry[] };
-    const entry = body.maintainers.find((m) => m.id === maintainerId);
+    const entry = await getMaintainerEntry(apiClient, headers, maintainerId);
 
-    if (entry && entry.lastSuccessTimestamp) {
+    if (entry && entry.runs > minRuns && entry.lastSuccessTimestamp) {
       return entry;
     }
 
-    if (entry && entry.lastErrorTimestamp && !entry.lastSuccessTimestamp) {
+    if (entry && entry.runs > minRuns && entry.lastErrorTimestamp) {
       throw new Error(
         `Maintainer "${maintainerId}" failed. State: ${JSON.stringify(entry.customState)}`
       );
@@ -104,8 +151,11 @@ for (const integration of INTEGRATION_CONFIGS) {
 
   apiTest.describe(`Accesses Maintainer [${integration.name}]`, { tag: ENTITY_STORE_TAGS }, () => {
     let defaultHeaders: Record<string, string>;
+    let maintainerState: Record<string, unknown>;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient, esArchiver }) => {
+      apiTest.setTimeout(240_000);
+
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
@@ -137,6 +187,16 @@ for (const integration of INTEGRATION_CONFIGS) {
         responseType: 'json',
       });
       expect(initResponse.statusCode).toBe(200);
+
+      // Delete the data stream entirely to avoid tombstone accumulation from
+      // deleteByQuery across repeated runs. Tombstoned segments can cause
+      // ES|QL and composite aggregations to return partial results.
+      try {
+        await esClient.indices.deleteDataStream({ name: testConfig.indexName });
+      } catch {
+        // Data stream may not exist on the first run
+      }
+
       await ensureDataStream(esClient, testConfig);
 
       // Load a seed document via esArchiver to auto-create the data stream.
@@ -149,6 +209,47 @@ for (const integration of INTEGRATION_CONFIGS) {
 
       const ingestedCount = await bulkIngestEvents(esClient, testConfig);
       expect(ingestedCount).toBe(16000);
+
+      // Poll until all ingested docs are confirmed searchable before triggering
+      // the maintainer. Without this, ES|QL queries inside the maintainer may
+      // see a partial dataset, causing non-deterministic bucket counts.
+      await waitForShardsAndDocuments(esClient, testConfig.indexName, 16000);
+
+      // Trigger the maintainer run and wait for completion inside beforeAll so
+      // that all individual tests can assert on a stable, fully-populated state
+      // instead of depending on test execution order.
+      const entryBeforeRun = await getMaintainerEntry(apiClient, defaultHeaders, MAINTAINER_ID);
+      const runsBefore = entryBeforeRun?.runs ?? 0;
+
+      await triggerMaintainerRun(apiClient, defaultHeaders, MAINTAINER_ID);
+
+      const maintainerEntry = await waitForMaintainerSuccess(
+        apiClient,
+        defaultHeaders,
+        MAINTAINER_ID,
+        runsBefore
+      );
+
+      expect(maintainerEntry.customState).toBeDefined();
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      maintainerState = maintainerEntry.customState!;
+
+      // Force log extraction to populate the latest entity index
+      const extractionResponse = await apiClient.post(
+        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            fromDateISO: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            toDateISO: new Date().toISOString(),
+          },
+        }
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect((extractionResponse.body as Record<string, unknown>).success).toBe(true);
+
+      await esClient.indices.refresh({ index: LATEST_INDEX });
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
@@ -163,43 +264,10 @@ for (const integration of INTEGRATION_CONFIGS) {
       await cleanupDataStream(esClient, testConfig);
     });
 
-    apiTest('Should compute access relationships from events', async ({ apiClient, esClient }) => {
-      apiTest.setTimeout(120_000);
-
-      const runResponse = await apiClient.post(MAINTAINER_ROUTES.RUN(MAINTAINER_ID), {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-      expect(runResponse.statusCode).toBe(200);
-
-      const maintainerEntry = await waitForMaintainerSuccess(
-        apiClient,
-        defaultHeaders,
-        MAINTAINER_ID
-      );
-
-      expect(maintainerEntry.customState).toBeDefined();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const state = maintainerEntry.customState!;
-      expect(state.totalBuckets).toBe(6);
-      expect(state.totalAccessRecords).toBe(16);
-      expect(state.totalUpserted).toBe(16);
-
-      const extractionResponse = await apiClient.post(
-        ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
-        {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            fromDateISO: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-            toDateISO: new Date().toISOString(),
-          },
-        }
-      );
-      expect(extractionResponse.statusCode).toBe(200);
-      expect(extractionResponse.body.success).toBe(true);
-
-      await esClient.indices.refresh({ index: LATEST_INDEX });
+    apiTest('Should compute access relationships from events', async ({ esClient }) => {
+      expect(maintainerState.totalBuckets).toBe(6);
+      expect(maintainerState.totalAccessRecords).toBe(16);
+      expect(maintainerState.totalUpserted).toBe(16);
 
       const entities = await esClient.search({
         index: LATEST_INDEX,
