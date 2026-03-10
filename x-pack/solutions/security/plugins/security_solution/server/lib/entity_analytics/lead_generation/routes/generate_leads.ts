@@ -34,7 +34,37 @@ import { createTemporalStateModule } from '../observation_modules/temporal_state
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity, Lead } from '../types';
+
 const ENTITY_PAGE_SIZE = 1000;
+
+/**
+ * Fields retrieved from Entity Store records. Limits memory footprint by
+ * excluding large nested fields that observation modules do not need.
+ */
+const ENTITY_SOURCE_FIELDS = [
+  '@timestamp',
+  'entity.name',
+  'entity.type',
+  'entity.id',
+  'entity.risk',
+  'entity.attributes',
+  'entity.behaviors',
+  'entity.lifecycle',
+  'entity.relationships',
+  'user.name',
+  'user.id',
+  'user.email',
+  'user.full_name',
+  'user.roles',
+  'user.domain',
+  'host.name',
+  'host.id',
+  'host.hostname',
+  'host.ip',
+  'host.os.name',
+  'host.domain',
+  'asset.criticality',
+];
 
 const GenerateLeadsRequestBody = z.object({
   connectorId: z.string().optional(),
@@ -184,7 +214,7 @@ const fetchAllEntityStoreRecords = async (
           index,
           size: ENTITY_PAGE_SIZE,
           ignore_unavailable: true,
-          // _id tiebreaker ensures stable pagination across pages with same timestamp
+          _source: ENTITY_SOURCE_FIELDS,
           sort: [{ '@timestamp': { order: 'desc' } }, { _id: { order: 'asc' } }],
           ...(searchAfter ? { search_after: searchAfter } : {}),
           query: { match_all: {} },
