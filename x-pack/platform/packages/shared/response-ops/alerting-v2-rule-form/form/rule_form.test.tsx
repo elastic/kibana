@@ -16,6 +16,11 @@ import { createFormWrapper, createMockServices } from '../test_utils';
 jest.mock('./fields/rule_preview_panel', () => ({
   RulePreviewPanel: () => <div data-test-subj="mockRulePreviewPanel">Preview Panel</div>,
 }));
+
+// Mock NameField to avoid rendering inline edit title setup
+jest.mock('./fields/name_field', () => ({
+  NameField: () => <div data-test-subj="mockNameField">Rule Name</div>,
+}));
 const mockCreateRule = jest.fn();
 const mockUpdateRule = jest.fn();
 jest.mock('./hooks/use_create_rule', () => ({

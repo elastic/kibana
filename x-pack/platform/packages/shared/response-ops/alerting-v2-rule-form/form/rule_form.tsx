@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useRef, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,6 +29,7 @@ import {
 import { YamlRuleForm } from './yaml_rule_form';
 import { GuiRuleForm } from './gui_rule_form';
 import { RulePreviewPanel } from './fields/rule_preview_panel';
+import { NameField } from './fields/name_field';
 import { useCreateRule } from './hooks/use_create_rule';
 import { useUpdateRule } from './hooks/use_update_rule';
 import { RULE_FORM_ID } from './constants';
@@ -76,19 +84,8 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
 
   return (
     <>
-      <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            type="submit"
-            form={RULE_FORM_ID}
-            isLoading={isSubmitting}
-            fill
-            data-test-subj="ruleV2FormSubmitButton"
-          >
-            {submitLabel ?? defaultSubmitLabel}
-          </EuiButton>
-        </EuiFlexItem>
+      <EuiHorizontalRule />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {onCancel && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -100,6 +97,18 @@ const SubmissionButtons: React.FC<SubmissionButtonsProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            type="submit"
+            form={RULE_FORM_ID}
+            isLoading={isSubmitting}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="ruleV2FormSubmitButton"
+          >
+            {submitLabel ?? defaultSubmitLabel}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );
@@ -182,9 +191,20 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
 
   const formContent = (
     <>
-      {includeYaml && (
-        <>
-          <EuiFlexGroup justifyContent="flexEnd">
+      {isYamlMode ? (
+        includeYaml && (
+          <EditModeToggle
+            editMode={editMode}
+            onChange={handleModeChange}
+            disabled={isDisabled || isSubmitting}
+          />
+        )
+      ) : (
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem>
+            <NameField />
+          </EuiFlexItem>
+          {includeYaml && (
             <EuiFlexItem grow={false}>
               <EditModeToggle
                 editMode={editMode}
@@ -192,10 +212,10 @@ const RuleFormContent: React.FC<RuleFormProps> = ({
                 disabled={isDisabled || isSubmitting}
               />
             </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-        </>
+          )}
+        </EuiFlexGroup>
       )}
+      <EuiSpacer size="m" />
 
       {isYamlMode && includeYaml ? (
         <YamlRuleForm

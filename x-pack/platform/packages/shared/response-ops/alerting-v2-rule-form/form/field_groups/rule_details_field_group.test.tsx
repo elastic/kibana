@@ -27,19 +27,6 @@ describe('RuleDetailsFieldGroup', () => {
     expect(screen.queryByText('Rule details')).not.toBeInTheDocument();
   });
 
-  it('renders the name as an inline editable title with default text', () => {
-    const Wrapper = createFormWrapper();
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    // The inline edit title should show the default name in read mode
-    expect(screen.getByText('Untitled rule')).toBeInTheDocument();
-  });
-
   it('renders the tags field with optional label', () => {
     const Wrapper = createFormWrapper();
 
@@ -77,23 +64,6 @@ describe('RuleDetailsFieldGroup', () => {
     await userEvent.click(screen.getByText('Add description'));
 
     expect(screen.getByText('Description')).toBeInTheDocument();
-  });
-
-  it('renders with a pre-filled name', () => {
-    const Wrapper = createFormWrapper({
-      metadata: {
-        name: 'Pre-filled Rule',
-        enabled: true,
-      },
-    });
-
-    render(
-      <Wrapper>
-        <RuleDetailsFieldGroup />
-      </Wrapper>
-    );
-
-    expect(screen.getByText('Pre-filled Rule')).toBeInTheDocument();
   });
 
   it('does not render enabled or kind fields', () => {
