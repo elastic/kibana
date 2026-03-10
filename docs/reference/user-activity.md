@@ -124,4 +124,4 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | `service.node.roles` | Roles of {kib}: `["ui", "background_tasks"]` |
 | `service.state`      | The status of {kib}.                         |
 | `service.type`       | `kibana`                                     |
-| `service.version`    | Version of Kibana that emitted the event.    |
+| `service.version`    | Version of {kib} that emitted the event.    |
