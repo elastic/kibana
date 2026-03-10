@@ -66,6 +66,10 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       height: ${euiTheme.size.xl};
     }
     
+    .rdp-day_button {
+      border: ${euiTheme.border.width.thick} solid transparent;
+    }
+
     :not(.rdp-today) .rdp-day_button {
       font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
       font-weight: ${euiTheme.font.weight.regular};
