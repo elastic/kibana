@@ -150,26 +150,18 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
 
     .wfDiffBulkBar {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: ${euiTheme.size.m};
+      left: 50%;
+      transform: translateX(-50%);
       display: flex;
       align-items: center;
-      gap: ${euiTheme.size.xs};
-      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+      gap: 1px;
+      padding: 1px;
       background: ${euiTheme.colors.backgroundBasePlain};
-      border-top: ${euiTheme.border.thin};
-      ${euiShadow(euiThemeContext, 's')}
+      border-radius: ${euiTheme.border.radius.small};
+      ${euiShadow(euiThemeContext, 'm')}
       z-index: ${Number(euiTheme.levels.menu) + 1};
       pointer-events: auto;
-    }
-
-    .wfDiffBulkCount {
-      font-family: ${euiTheme.font.family};
-      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
-      font-weight: ${euiTheme.font.weight.medium};
-      color: ${euiTheme.colors.textSubdued};
-      margin-right: auto;
     }
   `;
 };
