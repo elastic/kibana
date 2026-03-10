@@ -3357,7 +3357,7 @@ paths:
                     updated_at: '2025-01-01T00:00:00.000Z'
                     version: 1.0.0
           description: Indicates a successful response
-      summary: Install a plugin from a GitHub URL or zip URL.
+      summary: Install a plugin
       tags:
         - agent builder
       x-codeSamples:
