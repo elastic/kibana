@@ -72,14 +72,20 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       await retry.try(async () => {
+        // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId2)}/api/alerts_fixture/saved_object/alert/${ruleId2}`)
           .set('kbn-xsrf', 'foo')
-          .send({ attributes: { name: 'bar' } })
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
           .expect(200);
       });
 
       await retry.try(async () => {
+        // there can be a successful execute before the error one
         const events = await getEventLog({
           getService,
           spaceId: spaceId2,
@@ -88,11 +94,12 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const errorEvents = events.filter((e) => e?.kibana?.alerting?.status === 'error');
+        const errorEvents = events.filter((event) => event?.kibana?.alerting?.status === 'error');
         expect(errorEvents.length).to.be.above(0);
       });
 
       await retry.try(async () => {
+        // there can be a successful execute before the error one
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -106,14 +113,20 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       await retry.try(async () => {
+        // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${ruleId}`)
           .set('kbn-xsrf', 'foo')
-          .send({ attributes: { name: 'bar' } })
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
           .expect(200);
       });
 
       await retry.try(async () => {
+        // there can be a successful execute before the error ones
         const events = await getEventLog({
           getService,
           spaceId,
@@ -127,6 +140,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       const kpiLogs = await retry.try(async () => {
+        // there can be a successful execute before the error one
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -136,6 +150,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password);
         expect(logResponse.statusCode).to.be(200);
+
         return logResponse.body;
       });
 
@@ -192,7 +207,8 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
 
       // Wait for successful executions before causing errors
       await retry.try(async () => {
-        const events1 = await getEventLog({
+        // check rule 1
+        const events = await getEventLog({
           getService,
           spaceId,
           type: 'alert',
@@ -200,11 +216,12 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const success1 = events1.filter((e) => e?.event?.outcome === 'success');
-        expect(success1.length).to.be.above(0);
+        const success = events.filter((e) => e?.event?.outcome === 'success');
+        expect(success.length).to.be.above(0);
       });
       await retry.try(async () => {
-        const events2 = await getEventLog({
+        // check rule 2
+        const events = await getEventLog({
           getService,
           spaceId: spaceId2,
           type: 'alert',
@@ -212,19 +229,25 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           provider: 'alerting',
           actions: new Map([['execute', { gte: 1 }]]),
         });
-        const success2 = events2.filter((e) => e?.event?.outcome === 'success');
-        expect(success2.length).to.be.above(0);
+        const success = events.filter((e) => e?.event?.outcome === 'success');
+        expect(success.length).to.be.above(0);
       });
 
       await retry.try(async () => {
+        // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId2)}/api/alerts_fixture/saved_object/alert/${ruleId2}`)
           .set('kbn-xsrf', 'foo')
-          .send({ attributes: { name: 'bar' } })
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
           .expect(200);
       });
 
       await retry.try(async () => {
+        // there can be a successful execute before the error one
         const events = await getEventLog({
           getService,
           spaceId: spaceId2,
@@ -238,6 +261,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       await retry.try(async () => {
+        // there can be a successful execute before the error one
         const logResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -251,14 +275,20 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       await retry.try(async () => {
+        // break AAD
         await supertest
           .put(`${getUrlPrefix(spaceId)}/api/alerts_fixture/saved_object/alert/${ruleId}`)
           .set('kbn-xsrf', 'foo')
-          .send({ attributes: { name: 'bar' } })
+          .send({
+            attributes: {
+              name: 'bar',
+            },
+          })
           .expect(200);
       });
 
       await retry.try(async () => {
+        // there can be a successful execute before the error one
         const events = await getEventLog({
           getService,
           spaceId,
@@ -272,6 +302,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
       });
 
       const kpiLogs = await retry.try(async () => {
+        // there can be a successful execute before the error one
         const namespacesParam = [spaceId, spaceId2].map((ns) => `namespaces=${ns}`).join('&');
         const logResponse = await supertestWithoutAuth
           .get(
@@ -282,6 +313,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
           .set('kbn-xsrf', 'foo')
           .auth(user.username, user.password);
         expect(logResponse.statusCode).to.be(200);
+
         return logResponse.body;
       });
 
