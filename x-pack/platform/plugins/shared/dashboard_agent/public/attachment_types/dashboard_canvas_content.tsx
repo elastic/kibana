@@ -244,6 +244,8 @@ export const DashboardCanvasContent = ({
           displayStyle="inPage"
           disableQueryLanguageSwitcher
           isDisabled={!dashboardApi}
+          dateRangeFrom={initialDashboardInput.timeRange.from}
+          dateRangeTo={initialDashboardInput.timeRange.to}
           onQuerySubmit={({ dateRange }) => {
             dashboardApi?.setTimeRange({ from: dateRange.from, to: dateRange.to });
           }}
