@@ -21,7 +21,11 @@ import React from 'react';
 
 interface FlyoutManagerEvent {
   type: 'CLOSE_SESSION';
-  session: { mainFlyoutId: string; childFlyoutId: string | null };
+  session: {
+    mainFlyoutId: string;
+    childFlyoutId: string | null;
+    childHistory?: Array<{ flyoutId: string; title: string }>;
+  };
 }
 
 const eventListeners = new Set<(event: FlyoutManagerEvent) => void>();
@@ -104,6 +108,39 @@ describe('SystemFlyoutService', () => {
 
       expect((ref as SystemFlyoutRef).isClosed).toBe(true);
       expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes child flyouts from childHistory when a CLOSE_SESSION event removes their session', () => {
+      const parentRef = systemFlyouts.open(<div>Parent</div>, {
+        id: 'parent-flyout-demo',
+        session: 'start',
+      });
+
+      const child1Ref = systemFlyouts.open(<div>Child 1</div>, {
+        id: 'child-flyout-demo-1',
+        session: 'inherit',
+      });
+
+      const child2Ref = systemFlyouts.open(<div>Child 2</div>, {
+        id: 'child-flyout-demo-2',
+        session: 'inherit',
+      });
+
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+
+      emitEvent({
+        type: 'CLOSE_SESSION',
+        session: {
+          mainFlyoutId: 'parent-flyout-demo',
+          childFlyoutId: 'child-flyout-demo-2',
+          childHistory: [{ flyoutId: 'child-flyout-demo-1', title: 'Child 1' }],
+        },
+      });
+
+      expect((parentRef as SystemFlyoutRef).isClosed).toBe(true);
+      expect((child1Ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect((child2Ref as SystemFlyoutRef).isClosed).toBe(true);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(3);
     });
 
     it('renders a system flyout to the DOM', () => {
