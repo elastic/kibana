@@ -15,8 +15,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { StandaloneRuleForm } from '@kbn/alerting-v2-rule-form';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
-import { useCreateRule } from '../../hooks/use_create_rule';
-import { useUpdateRule } from '../../hooks/use_update_rule';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 
