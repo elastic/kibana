@@ -45,17 +45,17 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
   },
 });
 
-const baseProps = createPartialObjectMock<AlertActionsProps<AdditionalContext>>({
+const baseProps = createPartialObjectMock<AlertActionsProps>({
   alert: mockAlert,
   rowIndex: 0,
   onExpandedAlertIndexChange: mockOnExpandedAlertIndexChange,
   onActionExecuted: mockOnActionExecuted,
 });
 
-const renderWithContext = (props: Partial<AlertActionsProps<AdditionalContext>> = {}) =>
+const renderWithContext = (props: Partial<AlertActionsProps> = {}) =>
   render(
     <AlertsTableContextProvider value={context}>
-      <ViewAlertDetailsAlertAction {...baseProps} {...props} />
+      <ViewAlertDetailsAlertAction<AdditionalContext> {...baseProps} {...props} />
     </AlertsTableContextProvider>
   );
 
