@@ -29,12 +29,12 @@ import {
 } from './uiam_api_key_provisioning_task_state';
 import { getExcludeRulesFilter } from './lib/get_exclude_rules_filter';
 import {
-  createSkippedRuleStatus,
   createFailedConversionStatus,
   createStatusFromBulkUpdateResult,
-} from './lib/provisioning_status_helpers';
+  classifyRuleForUiamProvisioning,
+  getErrorMessage,
+} from './lib/helpers';
 import { buildRuleUpdatesForUiam } from './lib/build_rule_updates_for_uiam';
-import { getErrorMessage } from './lib/error_utils';
 import type {
   ProvisioningStatusDocs,
   ApiKeyToConvert,
@@ -287,32 +287,11 @@ export class UiamApiKeyProvisioningTask {
           const response = firstBatch.value;
           hasMoreToProvision = response.total > response.saved_objects.length;
           for (const rule of response.saved_objects) {
-            const { id } = rule;
-            const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
-
-            if (!apiKey) {
-              provisioningStatusForSkippedRules.push(
-                createSkippedRuleStatus(id, 'The rule has no API key')
-              );
-              continue;
-            }
-            if (uiamApiKey) {
-              // this may happen if provision status update fails after adding the UIAM API key
-              provisioningStatusForSkippedRules.push(
-                createSkippedRuleStatus(id, 'The rule already has a UIAM API key')
-              );
-              continue;
-            }
-            if (apiKeyCreatedByUser === true) {
-              provisioningStatusForSkippedRules.push(
-                createSkippedRuleStatus(id, 'The API key was created by the user')
-              );
+            const result = classifyRuleForUiamProvisioning(rule);
+            if (result.action === 'skip') {
+              provisioningStatusForSkippedRules.push(result.status);
             } else {
-              apiKeysToConvert.push({
-                ruleId: id,
-                attributes: rule.attributes,
-                version: rule.version,
-              });
+              apiKeysToConvert.push(result.rule);
             }
           }
         }

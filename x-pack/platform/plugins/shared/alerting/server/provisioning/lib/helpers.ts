@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { RawRule } from '../../types';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
-import type { ProvisioningStatusDocs } from '../types';
+import type { ApiKeyToConvert, ProvisioningStatusDocs } from '../types';
+
+export const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 /**
  * Builds a provisioning status doc for a rule that was skipped (no API key, already has UIAM key, or user-created key).
@@ -76,3 +80,49 @@ export const createStatusFromBulkUpdateResult = (
       : {}),
   },
 });
+
+export interface RuleForClassification {
+  id: string;
+  attributes: RawRule;
+  version?: string;
+}
+
+export type ClassifyRuleResult =
+  | { action: 'skip'; status: ProvisioningStatusDocs }
+  | { action: 'convert'; rule: ApiKeyToConvert };
+
+/**
+ * Classifies a rule as either skip (with status doc) or convert (with rule payload).
+ * Skip: no API key, already has UIAM key, or user-created key.
+ * Convert: system-generated API key and no UIAM key yet.
+ */
+export const classifyRuleForUiamProvisioning = (
+  rule: RuleForClassification
+): ClassifyRuleResult => {
+  const { id } = rule;
+  const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
+
+  if (!apiKey) {
+    return { action: 'skip', status: createSkippedRuleStatus(id, 'The rule has no API key') };
+  }
+  if (uiamApiKey) {
+    return {
+      action: 'skip',
+      status: createSkippedRuleStatus(id, 'The rule already has a UIAM API key'),
+    };
+  }
+  if (apiKeyCreatedByUser === true) {
+    return {
+      action: 'skip',
+      status: createSkippedRuleStatus(id, 'The API key was created by the user'),
+    };
+  }
+  return {
+    action: 'convert',
+    rule: {
+      ruleId: id,
+      attributes: rule.attributes,
+      version: rule.version,
+    },
+  };
+};
