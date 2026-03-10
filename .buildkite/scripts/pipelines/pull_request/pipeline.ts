@@ -67,12 +67,18 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
     }
 
-    if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
+    if (
+      await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/kbn_handlebars\.yml$/,
+        /^src\/platform\/packages\/private\/kbn-handlebars/,
+      ])
+    ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
     }
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/response_ops\.yml$/,
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
@@ -87,7 +93,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/platform\/plugins\/shared\/cases/])) ||
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/response_ops_cases\.yml$/,
+        /^x-pack\/platform\/plugins\/shared\/cases/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites') ||
       ALL_UI_TEST_SUITES
     ) {
@@ -96,6 +105,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/apm_cypress\.yml$/,
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^src\/platform\/packages\/shared\/kbn-apm-synthtrace/,
       ])) ||
@@ -106,7 +116,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/solutions\/observability\/plugins\/profiling/])) ||
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/profiling_cypress\.yml$/,
+        /^x-pack\/solutions\/observability\/plugins\/profiling/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/profiling_cypress.yml'));
@@ -114,6 +127,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/fleet_cypress\.yml$/,
         /^x-pack\/platform\/plugins\/shared\/fleet/,
         /^x-pack\/test\/fleet_cypress/,
       ])) ||
@@ -125,6 +139,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/synthetics_plugin\.yml$/,
         /^x-pack\/solutions\/observability\/plugins/,
         /^package.json/,
         /^yarn.lock/,
@@ -137,6 +152,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/ai_infra_gen_ai\.yml$/,
         /^x-pack\/platform\/packages\/shared\/ai-infra/,
         /^x-pack\/platform\/plugins\/shared\/ai_infra/,
         /^x-pack\/platform\/plugins\/shared\/inference/,
@@ -190,7 +206,10 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     if (
-      (await doAnyChangesMatch([/.*stor(ies|y).*/])) ||
+      (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/storybooks\.yml$/,
+        /.*stor(ies|y).*/,
+      ])) ||
       GITHUB_PR_LABELS.includes('ci:build-storybooks')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/storybooks.yml'));
@@ -202,6 +221,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       ((await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/check_next_docs\.yml$/,
         /\.docnav\.json$/,
         /\.apidocs\.json$/,
         /\.devdocs\.json$/,
@@ -226,6 +246,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/defend_workflows\.yml$/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -243,6 +264,13 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai_assistant\.yml$/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/ai4dsoc\.yml$/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/automatic_import\.yml$/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/detection_engine\.yml$/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/entity_analytics\.yml$/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/explore\.yml$/,
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/rule_management\.yml$/,
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
@@ -291,6 +319,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/investigations\.yml$/,
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
         /^src\/platform\/packages\/shared\/kbn-doc-links/,
@@ -359,6 +388,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       ((await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/osquery_cypress\.yml$/,
         /^x-pack\/platform\/plugins\/shared\/osquery/,
         /^x-pack\/solutions\/security\/test\/osquery_cypress/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
@@ -374,6 +404,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     if (
       (await doAnyChangesMatch([
+        /^\.buildkite\/pipelines\/pull_request\/security_solution\/cloud_security_posture\.yml$/,
         /^x-pack\/packages\/kbn-cloud-security-posture/,
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
