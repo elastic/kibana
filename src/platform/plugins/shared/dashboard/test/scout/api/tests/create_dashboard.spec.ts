@@ -25,11 +25,12 @@ const createShortUniqueString = (prefix: string): string => {
   return `${prefix}-${now}-${rand}`;
 };
 
-apiTest.describe('dashboards - create', { tag: tags.stateful.classic }, () => {
+apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
-    editorCredentials = await requestAuth.getApiKey('editor');
+    // returns editor role in most deployment project and deployment types
+    editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
