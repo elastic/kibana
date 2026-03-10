@@ -24,6 +24,25 @@ import {
  */
 const MAX_DOWNLOAD_FILE_SIZE_BYTES = 128 * 1024;
 
+type ActionListBucketsInput = {
+  region?: string;
+  prefix?: string;
+};
+
+type ActionListBucketObjectsInput = {
+  bucket: string;
+  region?: string;
+  prefix?: string;
+  continuationToken?: string;
+  maxKeys?: number;
+};
+
+type ActionDownloadFileInput = {
+  bucket: string;
+  key: string;
+  maximumDownloadSizeBytes?: number;
+};
+
 export const AmazonS3: ConnectorSpec = {
   metadata: {
     id: '.amazon_s3',
@@ -61,10 +80,7 @@ export const AmazonS3: ConnectorSpec = {
         prefix: z.string().optional().describe('The prefix to filter buckets by'),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          region?: string;
-          prefix?: string;
-        };
+        const typedInput = input as ActionListBucketsInput;
 
         let buckets: { name?: string; creationDate?: string }[] = [];
 
@@ -114,13 +130,7 @@ export const AmazonS3: ConnectorSpec = {
           .default(1000),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          bucket: string;
-          region?: string;
-          prefix?: string;
-          continuationToken?: string;
-          maxKeys?: number;
-        };
+        const typedInput = input as ActionListBucketObjectsInput
 
         return await listAmazonS3BucketObjects(
           ctx,
@@ -147,11 +157,7 @@ export const AmazonS3: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          bucket: string;
-          key: string;
-          maximumDownloadSizeBytes?: number;
-        };
+        const typedInput = input as ActionDownloadFileInput;
 
         const metadata = await getAmazonS3BucketObjectMetadata(
           ctx,

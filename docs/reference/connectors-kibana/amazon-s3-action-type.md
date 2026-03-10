@@ -23,8 +23,8 @@ AWS Access Key ID
 AWS Secret Access Key
 :   The AWS Secret Access Key for the account to authenticate to S3.
 
-AWS region
-:   The AWS region to authenticate to.
+AWS Region
+:   The AWS Region to authenticate to.
 
 
 ## Test connectors [amazon-s3-action-configuration]
@@ -54,7 +54,7 @@ Download file
 
 ## Get API credentials [amazon-s3-api-credentials]
 
-To use the Amazon S3 connector, you need an AWS Access Key ID, Secret Access Key, and region for the account. Follow these steps to create or view your credentials:
+To use the Amazon S3 connector, you need an AWS Access Key ID, Secret Access Key, and Region for the account. Follow these steps to create or view your credentials:
 
 1. Sign in to the [AWS Management Console](https://console.aws.amazon.com/).
 2. Click on your account name in the top right corner and select **Security Credentials** from the dropdown menu.
@@ -69,7 +69,7 @@ If you do not see the **Security Credentials** link, reach out to your AWS admin
 6. Navigate to the **Security credentials** tab for the selected user.
 7. Under **Access keys**, you can view existing access keys (the Access Key ID is visible, but the Secret Access Key is only shown when first created).
 8. To create a new access key, click **Create access key** and choose the appropriate use case (for example, **Application running outside AWS**). Download the `.csv` file or copy both the **Access Key ID** and **Secret Access Key** immediately. The secret key is only shown once and cannot be retrieved later.
-1.  For the **AWS region**, select the region where your S3 buckets are located (for example, `us-east-1`, `eu-west-1`). You can find the region in the AWS console URL or in the S3 bucket details.
+1.  For the **AWS Region**, select the region where your S3 buckets are located (for example, `us-east-1`, `eu-west-1`). You can find the region in the AWS console URL or in the S3 bucket details.
 
 :::{tip}
 Make sure that the IAM user has the necessary S3 permissions (for example, `s3:ListBucket`, `s3:GetObject`) on the buckets you want the credentials to access for the connector to function properly.

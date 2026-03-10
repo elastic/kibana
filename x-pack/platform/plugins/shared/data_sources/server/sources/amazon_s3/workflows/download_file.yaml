@@ -18,7 +18,7 @@ inputs:
     type: number
     required: false
     default: 131072
-    description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB."
+    description: "Maximum file size in bytes that can be downloaded for the file content. If the file size exceeds this limit, a pre-signed URL will be returned for direct download from S3. Default is 128 KB. Don't ask to override this unless necessary to complete a task as it may run over the token count."
 steps:
   - name: downloadFile
     type: amazon_s3.downloadFile
@@ -26,7 +26,7 @@ steps:
     with:
       bucket: "${{ inputs.bucket }}"
       key: "${{ inputs.key }}"
-      maximumDownloadSizeBytes: "${{ inputs.maximumDownloadSizeBytes }}"
+      maximumDownloadSizeBytes: ${{ inputs.maximumDownloadSizeBytes }}
   - name: extract_content
     type: if
     condition: "${{ steps.downloadFile.output.content }}"

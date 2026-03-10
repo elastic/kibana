@@ -35,4 +35,4 @@ steps:
       region: "${{ inputs.region }}"
       prefix: "${{ inputs.prefix }}"
       continuationToken: "${{ inputs.continuationToken }}"
-      maxKeys: "${{ inputs.maxKeys }}"
+      maxKeys: ${{ inputs.maxKeys }}

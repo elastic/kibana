@@ -85,14 +85,18 @@ function createQueryQueryString(params: Record<string, string | undefined>): str
     .join('&');
 }
 
-function throwS3Error(error: unknown): void {
+function createAwsS3Error(error: unknown): Error {
   const awsError = error as {
     name?: string;
     message?: string;
     $metadata?: { httpStatusCode?: number };
   };
   if (awsError.name && awsError.message) {
-    throw new Error(`AWS S3 error (${awsError.name}): ${awsError.message}`);
+    return new Error(`AWS S3 error (${awsError.name}): ${awsError.message}`);
+  } else if (awsError.message) {
+    return new Error(`AWS S3 error: ${awsError.message}`);
+  } else {
+    return new Error(`Unknown AWS S3 error: ${JSON.stringify(error)}`);
   }
 }
 
@@ -218,10 +222,8 @@ export async function listAmazonS3Buckets(
       isTruncated: response.IsTruncated ? /true/i.test(response.IsTruncated as string) : false,
     };
   } catch (error: unknown) {
-    throwS3Error(error);
+    throw createAwsS3Error(error);
   }
-
-  return {} as AmazonS3BucketsListing;
 }
 
 export async function listAmazonS3BucketObjects(
@@ -264,10 +266,8 @@ export async function listAmazonS3BucketObjects(
       isTruncated: response.IsTruncated ? /true/i.test(response.IsTruncated as string) : false,
     };
   } catch (error: unknown) {
-    throwS3Error(error);
+    throw createAwsS3Error(error);
   }
-
-  return {} as AmazonS3BucketObjectListing;
 }
 
 export async function getAmazonS3BucketObjectMetadata(
@@ -301,9 +301,8 @@ export async function getAmazonS3BucketObjectMetadata(
       storageClass: rawResponse.headers['x-amz-storage-class'],
     };
   } catch (error: unknown) {
-    throwS3Error(error);
+    throw createAwsS3Error(error);
   }
-  return {} as AmazonS3ObjectMetadata;
 }
 
 export async function generateAmazonS3BucketObjectPresignedUrl(
@@ -396,7 +395,6 @@ export async function downloadAmazonS3BucketObject(
       encoding: 'base64',
     };
   } catch (error: unknown) {
-    throwS3Error(error);
+    throw createAwsS3Error(error);
   }
-  return {} as AmazonS3Object;
 }
