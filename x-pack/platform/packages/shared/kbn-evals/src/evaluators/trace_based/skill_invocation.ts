@@ -35,6 +35,7 @@ export function createSkillInvocationEvaluator({
       buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}"
 | STATS
+  total_spans = COUNT(*),
   total_tool_spans = COUNT(
     CASE(
       attributes.elastic.inference.span.kind == "TOOL",
@@ -52,20 +53,34 @@ export function createSkillInvocationEvaluator({
   )`,
       extractResult: (response) => {
         const row = response.values[0];
+        const totalSpansIndex = response.columns.findIndex(
+          (column) => column.name === 'total_spans'
+        );
         const totalToolSpansIndex = response.columns.findIndex(
           (column) => column.name === 'total_tool_spans'
         );
         const skillInvokedIndex = response.columns.findIndex(
           (column) => column.name === 'skill_invoked'
         );
-        const totalToolSpans = row?.[totalToolSpansIndex] as number | undefined;
-        const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
 
-        if (!totalToolSpans) {
+        if (totalSpansIndex === -1 || totalToolSpansIndex === -1 || skillInvokedIndex === -1) {
+          log.warning('Expected columns not found in trace query response');
           return null;
         }
 
-        return skillInvoked && skillInvoked > 0 ? 1 : 0;
+        const totalSpans = row?.[totalSpansIndex] as number | undefined;
+        const totalToolSpans = row?.[totalToolSpansIndex] as number | undefined;
+        const skillInvoked = row?.[skillInvokedIndex] as number | undefined;
+
+        if (!totalSpans) {
+          return null;
+        }
+
+        if (!totalToolSpans) {
+          return 0;
+        }
+
+        return (skillInvoked ?? 0) > 0 ? 1 : 0;
       },
       isResultValid: (result) => result !== null,
     },
