@@ -131,11 +131,11 @@ describe('autocomplete', () => {
       .filter((c) => c.metadata?.requiresTimeseriesSource === true)
       .map((c) => c.name.toUpperCase() + ' ');
 
-  /** Suggestion text for commands that have hiddenAfterCommands (not suggested when any of those commands appear in the pipeline) */
-  const getCommandsWithHiddenAfterCommandsSuggestionTexts = (): string[] =>
+  /** Suggestion text for commands that must not be suggested after STATS (notAfterCommands includes 'stats') */
+  const getNotAfterStatsSuggestionTexts = (): string[] =>
     esqlCommandRegistry
       .getAllCommands()
-      .filter((c) => (c.metadata?.hiddenAfterCommands?.length ?? 0) > 0)
+      .filter((c) => c.metadata?.notAfterCommands?.includes('stats') === true)
       .map((c) => c.name.toUpperCase() + ' ');
 
   describe('New command', () => {
@@ -172,9 +172,9 @@ describe('autocomplete', () => {
     });
   });
 
-  describe('command filtering by metadata (requiresTimeseriesSource, hiddenAfterCommands)', () => {
+  describe('command filtering by metadata (requiresTimeseriesSource, notAfterCommands)', () => {
     const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
-    const hiddenAfterCommandsSuggestionTexts = getCommandsWithHiddenAfterCommandsSuggestionTexts();
+    const notAfterStatsSuggestionTexts = getNotAfterStatsSuggestionTexts();
 
     it('does not suggest commands with requiresTimeseriesSource when source is not TS (e.g. after FROM)', async () => {
       const { suggest: suggestFn } = await setup();
@@ -192,22 +192,12 @@ describe('autocomplete', () => {
       }
     });
 
-    it('does not suggest commands with hiddenAfterCommands when a listed command is the previous command', async () => {
+    it('does not suggest commands with notAfterCommands including stats after STATS command', async () => {
       const { suggest: suggestFn } = await setup();
       const suggestedTexts = (await suggestFn('TS index | STATS x = count(*) | /')).map(
         (s) => s.text
       );
-      for (const text of hiddenAfterCommandsSuggestionTexts) {
-        expect(suggestedTexts).not.toContain(text);
-      }
-    });
-
-    it('does not suggest commands with hiddenAfterCommands when a listed command appears anywhere in the pipeline', async () => {
-      const { suggest: suggestFn } = await setup();
-      const suggestedTexts = (
-        await suggestFn('TS index | STATS AVG(field1) | EVAL test = "hello" | /')
-      ).map((s) => s.text);
-      for (const text of hiddenAfterCommandsSuggestionTexts) {
+      for (const text of notAfterStatsSuggestionTexts) {
         expect(suggestedTexts).not.toContain(text);
       }
     });
@@ -559,6 +549,7 @@ describe('autocomplete', () => {
     const commands = getNonSourceHeaderCommands();
     const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
     const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
+
     // Pipe command
     testSuggestions(
       'FROM a | E/',
