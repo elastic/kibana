@@ -66,8 +66,8 @@ const createMockSkill = (
   basePath: 'skills/platform',
   getRegistryTools: jest.fn().mockReturnValue([]),
   getInlineTools: jest.fn().mockReturnValue([]),
+  referencedContentCount: 0,
   ...overrides,
-  referencedContentCount: overrides.referencedContentCount ?? 0,
 });
 
 const createHookContext = ({

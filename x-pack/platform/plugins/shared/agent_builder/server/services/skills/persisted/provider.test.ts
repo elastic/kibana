@@ -23,8 +23,8 @@ const createMockPersistedSkill = (
   tool_ids: ['tool-a'],
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-02T00:00:00.000Z',
+  referenced_content_count: 0,
   ...overrides,
-  referenced_content_count: overrides.referenced_content_count ?? 0,
 });
 
 const createMockClient = (): jest.Mocked<SkillClient> => ({

@@ -12,9 +12,7 @@ import type {
 import type { SkillProperties } from './storage';
 import type { SkillDocument, SkillPersistedDefinition } from './types';
 
-export const fromEs = (
-  document: SkillDocument & { fields?: Record<string, unknown[]> }
-): SkillPersistedDefinition => {
+export const fromEs = (document: SkillDocument): SkillPersistedDefinition => {
   if (!document._source) {
     throw new Error('No source found on skill document');
   }

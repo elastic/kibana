@@ -20,8 +20,8 @@ const createMockInternalSkillDefinition = (
   readonly: true,
   basePath: 'skills/platform',
   getRegistryTools: () => [],
+  referencedContentCount: 0,
   ...overrides,
-  referencedContentCount: overrides.referencedContentCount ?? 0,
 });
 
 const createMockBuiltinProvider = (

@@ -111,9 +111,7 @@ class SkillClientImpl implements SkillClient {
       );
     }
 
-    return response.hits.hits.map((hit) =>
-      fromEs(hit as SkillDocument & { fields?: Record<string, unknown[]> })
-    );
+    return response.hits.hits.map((hit) => fromEs(hit as SkillDocument));
   }
 
   async create(createRequest: PersistedSkillCreateRequest): Promise<SkillPersistedDefinition> {

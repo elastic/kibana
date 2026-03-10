@@ -28,8 +28,8 @@ describe('skills utils', () => {
     content: 'This is the skill body content.',
     readonly: true,
     getRegistryTools: () => [],
+    referencedContentCount: 0,
     ...overrides,
-    referencedContentCount: overrides.referencedContentCount ?? 0,
   });
 
   describe('getSkillEntryPath', () => {
