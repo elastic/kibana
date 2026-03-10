@@ -15,7 +15,7 @@ import type {
   SortableScriptLibraryFields,
 } from '../../../../../../common/endpoint/types';
 import type { ListScriptsRequestQuery } from '../../../../../../common/api/endpoint';
-import { useToasts } from '../../../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { SCRIPT_LIBRARY_LABELS as pageLabels } from '../../translations';
 import { AdministrationListPage } from '../../../../components/administration_list_page';
@@ -28,6 +28,7 @@ import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
 import { DiscardChangesModal } from './discard_changes_modal';
 import { NoDataEmptyPrompt } from './no_data_empty_prompt';
+import { NewPageBanner } from './new_page_banner/new_page_banner';
 
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
@@ -55,6 +56,15 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
       showFromUrl === 'details'
     );
   }, [canWriteScriptsLibrary, showFromUrl]);
+
+  const { storage } = useKibana().services;
+  const [showNewPageBanner, setShowNewPageBanner] = useState(
+    storage.get('securitySolution.scriptsLibrary.showNewPageBanner') ?? true
+  );
+  const onBannerDismiss = useCallback(() => {
+    setShowNewPageBanner(false);
+    storage.set('securitySolution.scriptsLibrary.showNewPageBanner', false);
+  }, [storage]);
 
   const [selectedItemForFlyout, setSelectedItemForFlyout] = useState<undefined | EndpointScript>(
     undefined
@@ -225,83 +235,90 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   }, [scriptsLibraryFetchError, toasts, isFetching]);
 
   return (
-    <AdministrationListPage
-      data-test-subj={getTestId()}
-      title={pageLabels.pageTitle}
-      subtitle={pageLabels.pageAboutInfo}
-      hideHeader={!doesDataExist}
-      actions={
-        canWriteScriptsLibrary ? (
-          <EuiButton
-            fill
-            iconType="upload"
+    <>
+      {showNewPageBanner && <NewPageBanner onDismiss={onBannerDismiss} />}
+
+      <AdministrationListPage
+        data-test-subj={getTestId()}
+        title={pageLabels.pageTitle}
+        subtitle={pageLabels.pageAboutInfo}
+        hideHeader={!doesDataExist}
+        actions={
+          canWriteScriptsLibrary ? (
+            <EuiButton
+              fill
+              iconType="upload"
+              onClick={() => onClickAction({ show: 'create' })}
+              data-test-subj={getTestId('upload-script-button')}
+            >
+              {pageLabels.pageAddButtonTitle}
+            </EuiButton>
+          ) : null
+        }
+      >
+        {shouldShowFlyoutForm && (
+          <EndpointScriptFlyout
+            queryParams={queryParams}
+            onCloseFlyout={onCloseFlyout}
+            onClickAction={onClickAction}
+            onSuccess={onSuccessCreateOrEdit}
+            show={showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete'>}
+            scriptItem={selectedItemForFlyout}
+            data-test-subj={getTestId(`endpointScriptFlyout-${showFromUrl}`)}
+          />
+        )}
+
+        {showDiscardChangesModal && (
+          <DiscardChangesModal
+            data-test-subj={getTestId('discard-changes-modal')}
+            show={
+              showFromUrl as Exclude<
+                Required<ScriptsLibraryUrlParams>['show'],
+                'delete' | 'details'
+              >
+            }
+            onCancel={() => setShowDiscardChangesModal(false)}
+            onConfirm={() => {
+              setShowDiscardChangesModal(false);
+              onConfirmCloseFlyout();
+            }}
+          />
+        )}
+
+        {selectedItemForDelete && (
+          <EndpointScriptDeleteModal
+            scriptName={selectedItemForDelete.name}
+            scriptId={selectedItemForDelete.id}
+            onSuccess={onDeleteModalSuccess}
+            onCancel={onDeleteModalCancel}
+            data-test-subj={getTestId('delete-modal')}
+          />
+        )}
+
+        {doesDataExist ? (
+          <ScriptsLibraryTable
+            data-test-subj={getTestId('table')}
+            items={tableItems}
+            isLoading={isFetching}
+            onChange={onChangeScriptsTable}
+            onClickAction={onClickAction}
+            queryParams={queryParams}
+            totalItemCount={totalItemCount}
+            sort={{
+              field: scriptsData?.sortField as SortableScriptLibraryFields,
+              direction: scriptsData?.sortDirection,
+            }}
+          />
+        ) : (
+          <NoDataEmptyPrompt
             onClick={() => onClickAction({ show: 'create' })}
-            data-test-subj={getTestId('upload-script-button')}
-          >
-            {pageLabels.pageAddButtonTitle}
-          </EuiButton>
-        ) : null
-      }
-    >
-      {shouldShowFlyoutForm && (
-        <EndpointScriptFlyout
-          queryParams={queryParams}
-          onCloseFlyout={onCloseFlyout}
-          onClickAction={onClickAction}
-          onSuccess={onSuccessCreateOrEdit}
-          show={showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete'>}
-          scriptItem={selectedItemForFlyout}
-          data-test-subj={getTestId(`endpointScriptFlyout-${showFromUrl}`)}
-        />
-      )}
-
-      {showDiscardChangesModal && (
-        <DiscardChangesModal
-          data-test-subj={getTestId('discard-changes-modal')}
-          show={
-            showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete' | 'details'>
-          }
-          onCancel={() => setShowDiscardChangesModal(false)}
-          onConfirm={() => {
-            setShowDiscardChangesModal(false);
-            onConfirmCloseFlyout();
-          }}
-        />
-      )}
-
-      {selectedItemForDelete && (
-        <EndpointScriptDeleteModal
-          scriptName={selectedItemForDelete.name}
-          scriptId={selectedItemForDelete.id}
-          onSuccess={onDeleteModalSuccess}
-          onCancel={onDeleteModalCancel}
-          data-test-subj={getTestId('delete-modal')}
-        />
-      )}
-
-      {doesDataExist ? (
-        <ScriptsLibraryTable
-          data-test-subj={getTestId('table')}
-          items={tableItems}
-          isLoading={isFetching}
-          onChange={onChangeScriptsTable}
-          onClickAction={onClickAction}
-          queryParams={queryParams}
-          totalItemCount={totalItemCount}
-          sort={{
-            field: scriptsData?.sortField as SortableScriptLibraryFields,
-            direction: scriptsData?.sortDirection,
-          }}
-        />
-      ) : (
-        <NoDataEmptyPrompt
-          onClick={() => onClickAction({ show: 'create' })}
-          canCreateScript={canWriteScriptsLibrary}
-          data-test-subj={getTestId('no-data-empty-prompt')}
-          isAddDisabled={isFetching}
-        />
-      )}
-    </AdministrationListPage>
+            canCreateScript={canWriteScriptsLibrary}
+            data-test-subj={getTestId('no-data-empty-prompt')}
+            isAddDisabled={isFetching}
+          />
+        )}
+      </AdministrationListPage>
+    </>
   );
 });
 
