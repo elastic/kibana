@@ -27,15 +27,6 @@ import type {
   SearchMessagesInput,
 } from './types';
 
-export {
-  ListJoinedTeamsInputSchema,
-  ListChannelsInputSchema,
-  ListChannelMessagesInputSchema,
-  ListChatsInputSchema,
-  ListChatMessagesInputSchema,
-  SearchMessagesInputSchema,
-} from './types';
-
 /**
  * Returns the base path for user-scoped Microsoft Graph API endpoints.
  * When a userId is provided, returns `/users/{userId}` (for app-only auth).
