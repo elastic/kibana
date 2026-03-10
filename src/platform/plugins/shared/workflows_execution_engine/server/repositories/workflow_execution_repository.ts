@@ -126,15 +126,23 @@ export class WorkflowExecutionRepository {
    *   was current when the execution was created.
    */
   public async updateWorkflowExecution(
-    workflowExecution: Partial<EsWorkflowExecution>,
-    targetIndex?: string
+    workflowExecution: Partial<EsWorkflowExecution>
   ): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for update');
     }
 
+    const result = decodeEncodedWorkflowExecutionId(workflowExecution.id);
+
+    if (!result.success) {
+      throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
+    }
+
     await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: targetIndex ?? this.indexName,
+      index: resolveIndex({
+        indexSuffix: result.indexSuffix,
+        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+      }),
       id: workflowExecution.id,
       refresh: false,
       doc: workflowExecution,
@@ -156,16 +164,27 @@ export class WorkflowExecutionRepository {
       return;
     }
 
-    updates.forEach((update) => {
+    const operations = updates.flatMap((update) => {
       if (!update.id) {
         throw new Error('Workflow execution ID is required for bulk update');
       }
+
+      const result = decodeEncodedWorkflowExecutionId(update.id);
+      if (!result.success) {
+        throw new Error(`Failed to decode workflow execution ID: ${result.error}`);
+      }
+
+      const index = resolveIndex({
+        indexSuffix: result.indexSuffix,
+        indexPattern: WORKFLOWS_EXECUTIONS_INDEX_PATTERN,
+      });
+
+      return [{ update: { _index: index, _id: update.id } }, { doc: update }];
     });
 
     const bulkResponse = await this.esClient.bulk({
       refresh: true,
-      index: this.indexName,
-      body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
+      operations,
     });
 
     if (bulkResponse.errors) {

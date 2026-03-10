@@ -136,7 +136,7 @@ export class WorkflowExecutionState {
     this.stepDocumentsChanges.clear();
     await this.workflowStepExecutionRepository.bulkUpsert(
       stepDocumentsChanges,
-      this.workflowExecution.stepExecutionsIndex
+      this.workflowExecution.stepExecutionsIndex!
     );
   }
 
@@ -151,17 +151,14 @@ export class WorkflowExecutionState {
     const changes = this.workflowDocumentChanges;
     this.workflowDocumentChanges = undefined;
 
-    await this.workflowExecutionRepository.updateWorkflowExecution(
-      {
-        ...changes,
-        id: this.workflowExecution.id,
-        // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
-        stepExecutionIds: Array.from(this.stepExecutions.values())
-          .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-          .map((step) => step.id),
-      },
-      this.workflowExecution.executionsIndex
-    );
+    await this.workflowExecutionRepository.updateWorkflowExecution({
+      ...changes,
+      id: this.workflowExecution.id,
+      // Include all step execution IDs sorted by execution order for O(1) mget lookup on read side
+      stepExecutionIds: Array.from(this.stepExecutions.values())
+        .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
+        .map((step) => step.id),
+    });
   }
 
   private createStep(step: Partial<EsWorkflowStepExecution>) {

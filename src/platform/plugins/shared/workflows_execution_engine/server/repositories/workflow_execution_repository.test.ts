@@ -625,23 +625,26 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('bulkUpdateWorkflowExecutions', () => {
-    it('should successfully bulk update multiple workflow executions', async () => {
+    it('should successfully bulk update multiple workflow executions across backing indexes', async () => {
+      const encodedId1 = createEncodedId();
+      const encodedId2 = createEncodedId();
+
       esClient.bulk.mockResolvedValue({
         errors: false,
         items: [
-          { update: { _id: 'exec-1', status: 200 } },
-          { update: { _id: 'exec-2', status: 200 } },
+          { update: { _id: encodedId1, status: 200 } },
+          { update: { _id: encodedId2, status: 200 } },
         ],
       });
 
       await repository.bulkUpdateWorkflowExecutions([
         {
-          id: 'exec-1',
+          id: encodedId1,
           status: ExecutionStatus.CANCELLED,
           cancelRequested: true,
         },
         {
-          id: 'exec-2',
+          id: encodedId2,
           status: ExecutionStatus.CANCELLED,
           cancelRequested: true,
         },
@@ -649,12 +652,23 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(esClient.bulk).toHaveBeenCalledWith({
         refresh: true,
-        index: WORKFLOWS_EXECUTIONS_INDEX,
-        body: [
-          { update: { _id: 'exec-1' } },
-          { doc: { id: 'exec-1', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
-          { update: { _id: 'exec-2' } },
-          { doc: { id: 'exec-2', status: ExecutionStatus.CANCELLED, cancelRequested: true } },
+        operations: [
+          { update: { _index: TEST_BACKING_INDEX, _id: encodedId1 } },
+          {
+            doc: {
+              id: encodedId1,
+              status: ExecutionStatus.CANCELLED,
+              cancelRequested: true,
+            },
+          },
+          { update: { _index: TEST_BACKING_INDEX, _id: encodedId2 } },
+          {
+            doc: {
+              id: encodedId2,
+              status: ExecutionStatus.CANCELLED,
+              cancelRequested: true,
+            },
+          },
         ],
       });
     });
@@ -679,13 +693,16 @@ describe('WorkflowExecutionRepository', () => {
     });
 
     it('should throw error with details when bulk operation has errors', async () => {
+      const encodedId1 = createEncodedId();
+      const encodedId2 = createEncodedId();
+
       esClient.bulk.mockResolvedValue({
         errors: true,
         items: [
-          { update: { _id: 'exec-1', status: 200 } },
+          { update: { _id: encodedId1, status: 200 } },
           {
             update: {
-              _id: 'exec-2',
+              _id: encodedId2,
               error: { type: 'document_missing_exception', reason: 'document missing' },
               status: 404,
             },
@@ -696,11 +713,11 @@ describe('WorkflowExecutionRepository', () => {
       await expect(
         repository.bulkUpdateWorkflowExecutions([
           {
-            id: 'exec-1',
+            id: encodedId1,
             status: ExecutionStatus.CANCELLED,
           },
           {
-            id: 'exec-2',
+            id: encodedId2,
             status: ExecutionStatus.CANCELLED,
           },
         ])

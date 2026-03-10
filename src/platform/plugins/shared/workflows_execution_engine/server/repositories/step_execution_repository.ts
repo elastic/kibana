@@ -101,7 +101,7 @@ export class StepExecutionRepository {
    */
   public async bulkUpsert(
     stepExecutions: Array<Partial<EsWorkflowStepExecution>>,
-    targetIndex?: string
+    targetIndex: string
   ): Promise<void> {
     if (stepExecutions.length === 0) {
       return;
@@ -115,7 +115,7 @@ export class StepExecutionRepository {
 
     const bulkResponse = await this.esClient.bulk({
       refresh: false,
-      index: targetIndex ?? this.indexName,
+      index: targetIndex,
       body: stepExecutions.flatMap((stepExecution) => [
         { update: { _id: stepExecution.id } },
         { doc: stepExecution, doc_as_upsert: true },
