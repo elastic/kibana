@@ -61,11 +61,13 @@ import type {
   FlowContinueNode,
   GraphNodeUnion,
   KibanaGraphNode,
+  LoopEnterNode,
   WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraphType,
 } from '../types';
+import { isLoopEnterNode } from '../types';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
 
 const flowControlStepTypes = new Set(['if', 'foreach', 'while', 'flow.break', 'flow.continue']);
@@ -927,10 +929,10 @@ function createWhileGraph(
   return graph;
 }
 
-function findEnclosingLoop(context: GraphBuildContext): GraphNodeUnion {
+function findEnclosingLoop(context: GraphBuildContext): LoopEnterNode {
   for (let i = context.stack.length - 1; i >= 0; i--) {
     const node = context.stack[i];
-    if (node.type === 'enter-foreach' || node.type === 'enter-while') {
+    if (isLoopEnterNode(node)) {
       return node;
     }
   }
@@ -948,10 +950,7 @@ function visitFlowBreakStep(
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
 
-  const loopExitNodeId =
-    enclosingLoop.type === 'enter-foreach'
-      ? (enclosingLoop as EnterForeachNode).exitNodeId
-      : (enclosingLoop as EnterWhileNode).exitNodeId;
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
 
   const flowBreakNode: FlowBreakNode = {
     id: stepId,
@@ -973,10 +972,7 @@ function visitFlowContinueStep(
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
 
-  const loopExitNodeId =
-    enclosingLoop.type === 'enter-foreach'
-      ? (enclosingLoop as EnterForeachNode).exitNodeId
-      : (enclosingLoop as EnterWhileNode).exitNodeId;
+  const { exitNodeId: loopExitNodeId } = enclosingLoop;
 
   const flowContinueNode: FlowContinueNode = {
     id: stepId,

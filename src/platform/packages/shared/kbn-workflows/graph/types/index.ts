@@ -106,5 +106,7 @@ export {
   isExitWorkflowTimeoutZone,
   isFlowBreak,
   isFlowContinue,
+  isLoopEnterNode,
   shouldSuggestInnerSteps,
 } from './guards';
+export type { LoopEnterNode } from './guards';

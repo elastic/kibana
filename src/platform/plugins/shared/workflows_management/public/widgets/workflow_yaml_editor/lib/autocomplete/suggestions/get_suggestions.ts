@@ -8,6 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
@@ -29,7 +30,7 @@ import type {
   ExtendedAutocompleteContext,
 } from '../context/autocomplete.types';
 
-const loopStepTypes = new Set(['foreach', 'while']);
+const loopStepTypes = new Set<string>(LoopStepTypes);
 
 /**
  * Checks whether the current cursor position in the YAML document is inside

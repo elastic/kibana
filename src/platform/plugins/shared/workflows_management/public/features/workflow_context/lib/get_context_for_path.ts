@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import type { Document } from 'yaml';
-import type { WorkflowYaml } from '@kbn/workflows';
+import type { LoopStepType, WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema, WhileContextSchema } from '@kbn/workflows';
 import { isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod/v4';
@@ -94,7 +94,7 @@ function getStepContextSchemaEnrichmentEntries(
   workflowExecutionGraph: WorkflowGraph,
   stepId: string
 ) {
-  const enrichments: { key: 'foreach' | 'while'; value: z.ZodType }[] = [];
+  const enrichments: { key: LoopStepType; value: z.ZodType }[] = [];
   const stack = workflowExecutionGraph.getNodeStack(stepId);
 
   for (const nodeId of stack) {

@@ -673,9 +673,14 @@ const StepSchema = z.lazy(() =>
 );
 export type Step = z.infer<typeof StepSchema>;
 
-export const BuiltInStepTypes = [
+export const LoopStepTypes = [
   ForEachStepSchema.shape.type.value,
   WhileStepSchema.shape.type.value,
+] as const;
+export type LoopStepType = (typeof LoopStepTypes)[number];
+
+export const BuiltInStepTypes = [
+  ...LoopStepTypes,
   IfStepSchema.shape.type.value,
   ParallelStepSchema.shape.type.value,
   MergeStepSchema.shape.type.value,

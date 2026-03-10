@@ -54,6 +54,7 @@ export type {
   WorkflowExecuteGraphNodeSchema,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteAsyncGraphNodeSchema,
+  LoopEnterNode,
 } from './types';
 
 export {
@@ -82,5 +83,6 @@ export {
   isExitWorkflowTimeoutZone,
   isFlowBreak,
   isFlowContinue,
+  isLoopEnterNode,
   shouldSuggestInnerSteps,
 } from './types';

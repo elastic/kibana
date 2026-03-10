@@ -40,6 +40,8 @@ import type {
   ExitTryBlockNode,
 } from './nodes/on_failure_nodes';
 import type { GraphNodeUnion } from './nodes/union';
+import type { LoopStepType } from '../../spec/schema';
+import { LoopStepTypes } from '../../spec/schema';
 
 export const isAtomic = (node: GraphNodeUnion): node is AtomicGraphNode => node.type === 'atomic';
 
@@ -72,6 +74,11 @@ export const isExitForeach = (node: GraphNodeUnion): node is ExitForeachNode =>
 
 export const isEnterWhile = (node: GraphNodeUnion): node is EnterWhileNode =>
   node.type === 'enter-while';
+
+export type LoopEnterNode = Extract<GraphNodeUnion, { type: `enter-${LoopStepType}` }>;
+const loopEnterNodeTypes = new Set(LoopStepTypes.map((t) => `enter-${t}`));
+export const isLoopEnterNode = (node: GraphNodeUnion): node is LoopEnterNode =>
+  loopEnterNodeTypes.has(node.type);
 
 export const isExitWhile = (node: GraphNodeUnion): node is ExitWhileNode =>
   node.type === 'exit-while';
