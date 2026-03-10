@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, memo, useEffect, useState, useRef } from 'react';
+import React, { useCallback, memo, useEffect, useState, useMemo } from 'react';
 
 import { debounce } from 'lodash';
 import {
@@ -54,10 +54,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const styles = useStyles();
   const resizerStyles = useResizerButtonStyles();
 
-  const panelStorage = useRef<PanelStorage | null>(null);
-  if (panelStorage.current === null) {
-    panelStorage.current = new PanelStorage();
-  }
+  const panelStorage = useMemo(() => new PanelStorage(), []);
 
   // only used to hide content
   const { currentTextObject } = useEditorReadContext();
@@ -75,7 +72,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   // used for showing a loading state when fetching autocomplete entities
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
 
-  const [firstPanelSize, secondPanelSize] = panelStorage.current.getPanelSize();
+  const [firstPanelSize, secondPanelSize] = panelStorage.getPanelSize();
 
   const isVerticalLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
 
@@ -122,7 +119,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
         css={styles.fullHeightPanel}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
         onPanelWidthChange={(sizes) =>
-          panelStorage.current?.setPanelSize(sizes as { inputPanel: number; outputPanel: number })
+          panelStorage.setPanelSize(sizes as { inputPanel: number; outputPanel: number })
         }
         data-test-subj="consoleEditorContainer"
       >
