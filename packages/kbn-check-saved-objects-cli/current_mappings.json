@@ -737,6 +737,47 @@
       }
     }
   },
+  "cases-attachments": {
+    "dynamic": false,
+    "properties": {
+      "attachmentId": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "properties": {
+          "username": {
+            "type": "keyword"
+          }
+        }
+      },
+      "data": {
+        "properties": {
+          "content": {
+            "type": "text"
+          }
+        }
+      },
+      "metadata": {
+        "properties": {
+          "actionType": {
+            "type": "keyword"
+          }
+        }
+      },
+      "pushed_at": {
+        "type": "date"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
+      }
+    }
+  },
   "cases-comments": {
     "dynamic": false,
     "properties": {
@@ -846,6 +887,56 @@
   "cases-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "cases-templates": {
+    "dynamic": false,
+    "properties": {
+      "author": {
+        "type": "keyword"
+      },
+      "definition": {
+        "type": "text"
+      },
+      "deletedAt": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "fieldCount": {
+        "type": "integer"
+      },
+      "fieldNames": {
+        "type": "keyword"
+      },
+      "isDefault": {
+        "type": "boolean"
+      },
+      "isLatest": {
+        "type": "boolean"
+      },
+      "lastUsedAt": {
+        "type": "date"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "owner": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "templateId": {
+        "type": "keyword"
+      },
+      "templateVersion": {
+        "type": "integer"
+      },
+      "usageCount": {
+        "type": "integer"
+      }
+    }
   },
   "cases-user-actions": {
     "dynamic": false,

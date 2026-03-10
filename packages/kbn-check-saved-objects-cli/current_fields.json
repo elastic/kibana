@@ -213,6 +213,19 @@
     "updated_by.profile_uid",
     "updated_by.username"
   ],
+  "cases-attachments": [
+    "attachmentId",
+    "created_at",
+    "created_by",
+    "created_by.username",
+    "data",
+    "data.content",
+    "metadata",
+    "metadata.actionType",
+    "pushed_at",
+    "type",
+    "updated_at"
+  ],
   "cases-comments": [
     "actions",
     "actions.type",
@@ -250,6 +263,23 @@
     "updatedAt"
   ],
   "cases-telemetry": [],
+  "cases-templates": [
+    "author",
+    "definition",
+    "deletedAt",
+    "description",
+    "fieldCount",
+    "fieldNames",
+    "isDefault",
+    "isLatest",
+    "lastUsedAt",
+    "name",
+    "owner",
+    "tags",
+    "templateId",
+    "templateVersion",
+    "usageCount"
+  ],
   "cases-user-actions": [
     "action",
     "created_at",
