@@ -454,7 +454,7 @@ describe(
             cy.visit(lensUrl);
           });
         cy.getBySel('lnsWorkspace').should('exist');
-        cy.getBySel('breadcrumbs').contains(`Action pack_${packName}_${savedQueryName}`);
+        cy.getBySel('breadcrumbs').contains(`Action pack_default--${packName}_${savedQueryName}`);
       });
     });
 
@@ -499,8 +499,7 @@ describe(
           .eq(0)
           .should('have.attr', 'href')
           .then(($href) => {
-            // Verify the correct action_id filter is encoded in the URL
-            const actionId = `pack_${packName}_${savedQueryName}`;
+            const actionId = `pack_default--${packName}_${savedQueryName}`;
             expect($href).to.include(encodeURIComponent(actionId));
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);

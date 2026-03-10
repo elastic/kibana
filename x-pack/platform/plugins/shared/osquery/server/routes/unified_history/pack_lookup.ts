@@ -15,7 +15,8 @@ export interface PackLookupEntry {
 }
 
 export const buildPackLookup = (
-  packSOs: Array<{ id: string; attributes: PackSavedObject }>
+  packSOs: Array<{ id: string; attributes: PackSavedObject }>,
+  spaceId?: string
 ): Map<string, PackLookupEntry> => {
   const lookup = new Map<string, PackLookupEntry>();
 
@@ -34,8 +35,13 @@ export const buildPackLookup = (
         lookup.set(query.schedule_id, entry);
       }
 
-      const osqueryScheduleId = `pack_${packName}_${query.id}`;
-      lookup.set(osqueryScheduleId, entry);
+      const legacyKey = `pack_${packName}_${query.id}`;
+      lookup.set(legacyKey, entry);
+
+      if (spaceId) {
+        const spacePrefixedKey = `pack_${spaceId}--${packName}_${query.id}`;
+        lookup.set(spacePrefixedKey, entry);
+      }
     }
   }
 

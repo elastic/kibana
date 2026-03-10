@@ -33,7 +33,7 @@ describe('buildPackLookup', () => {
     });
   });
 
-  test('maps by osquery-format schedule name', () => {
+  test('maps by legacy osquery-format schedule name', () => {
     const packSOs = [makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1' }])];
 
     const lookup = buildPackLookup(packSOs);
@@ -45,13 +45,33 @@ describe('buildPackLookup', () => {
     });
   });
 
+  test('maps by space-prefixed osquery-format key when spaceId is provided', () => {
+    const packSOs = [makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1' }])];
+
+    const lookup = buildPackLookup(packSOs, 'default');
+    const entry = {
+      packId: 'pack-1',
+      packName: 'my_pack',
+      queryName: 'q1',
+      queryText: 'SELECT 1',
+    };
+
+    expect(lookup.get('pack_default--my_pack_q1')).toEqual(entry);
+    expect(lookup.get('pack_my_pack_q1')).toEqual(entry);
+  });
+
   test('maps by both UUID and osquery format when schedule_id is present', () => {
     const packSOs = [
       makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1', schedule_id: 'uuid-abc' }]),
     ];
 
     const lookup = buildPackLookup(packSOs);
-    const entry = { packId: 'pack-1', packName: 'my_pack', queryName: 'q1', queryText: 'SELECT 1' };
+    const entry = {
+      packId: 'pack-1',
+      packName: 'my_pack',
+      queryName: 'q1',
+      queryText: 'SELECT 1',
+    };
 
     expect(lookup.get('uuid-abc')).toEqual(entry);
     expect(lookup.get('pack_my_pack_q1')).toEqual(entry);
@@ -100,6 +120,14 @@ describe('buildPackLookup', () => {
       queryName: 'q1',
       queryText: 'SELECT 3',
     });
+  });
+
+  test('does not register space-prefixed keys when spaceId is omitted', () => {
+    const packSOs = [makePackSO('pack-1', 'my_pack', [{ id: 'q1', query: 'SELECT 1' }])];
+
+    const lookup = buildPackLookup(packSOs);
+    expect(lookup.has('pack_default--my_pack_q1')).toBe(false);
+    expect(lookup.has('pack_my_pack_q1')).toBe(true);
   });
 
   test('returns empty map for empty input', () => {

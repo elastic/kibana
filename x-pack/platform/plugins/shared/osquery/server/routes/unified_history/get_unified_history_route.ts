@@ -269,7 +269,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
             packSOs = [];
           }
 
-          const packLookup = buildPackLookup(packSOs);
+          const packLookup = buildPackLookup(packSOs, spaceId);
 
           const allScheduledRows: ScheduledHistoryRow[] = scheduledBuckets.map((bucket) => {
             const scheduleId = bucket.key[0];
