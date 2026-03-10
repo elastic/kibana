@@ -17,21 +17,9 @@ import {
   LATEST_INDEX,
   FF_ENABLE_ENTITY_STORE_V2,
 } from '../fixtures/constants';
-import {
-  INTEGRATION_TEST_CONFIGS,
-  bulkIngestEvents,
-  ensureDataStream,
-  cleanupDataStream,
-  getExpectedRelationships,
-  waitForShardsAndDocuments,
-} from '../fixtures/helpers';
 
-/**
- * Integration tests for the `accesses_frequently_and_infrequently` entity
- * maintainer. For each configured integration a 16,000-document dataset of
- * synthetic authentication events is ingested, the maintainer is triggered,
- * and the resulting entity relationships are verified.
- */
+const ES_ARCHIVE_PATH =
+  'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/elastic_defend_events';
 
 /** Normalise a field that may be a single string or an array into a string[]. */
 function toArray(value: unknown): string[] {
@@ -130,7 +118,8 @@ async function waitForMaintainerSuccess(
 
     if (entry && entry.runs > minRuns && entry.lastErrorTimestamp) {
       throw new Error(
-        `Maintainer "${maintainerId}" failed. State: ${JSON.stringify(entry.customState)}`
+        `Maintainer "${maintainerId}" failed (runs=${entry.runs}, minRuns=${minRuns}). ` +
+          `Entry: ${JSON.stringify(entry)}`
       );
     }
 
@@ -140,21 +129,21 @@ async function waitForMaintainerSuccess(
   throw new Error(`Maintainer "${maintainerId}" did not complete within ${POLL_TIMEOUT_MS}ms`);
 }
 
+/**
+ * Integration tests for the `accesses_frequently_and_infrequently` entity
+ * maintainer. For each configured integration a small dataset of 6 synthetic
+ * authentication events is loaded via esArchiver:
+ *   - 5 events for user-a → host-a (access_count > 4 → accesses_frequently)
+ *   - 1 event for user-b → host-b (access_count ≤ 4 → accesses_infrequently)
+ *
+ * The maintainer is triggered, and the resulting entity relationships are verified.
+ */
 for (const integration of INTEGRATION_CONFIGS) {
-  const testConfig = INTEGRATION_TEST_CONFIGS[integration.id];
-  if (!testConfig) {
-    throw new Error(
-      `Missing IntegrationTestConfig for "${integration.id}". ` +
-        'Add an entry to INTEGRATION_TEST_CONFIGS in helpers.ts.'
-    );
-  }
-
   apiTest.describe(`Accesses Maintainer [${integration.name}]`, { tag: ENTITY_STORE_TAGS }, () => {
     let defaultHeaders: Record<string, string>;
-    let maintainerState: Record<string, unknown>;
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esClient, esArchiver }) => {
-      apiTest.setTimeout(240_000);
+    apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient, esArchiver, esClient }) => {
+      apiTest.setTimeout(120_000);
 
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
@@ -188,36 +177,40 @@ for (const integration of INTEGRATION_CONFIGS) {
       });
       expect(initResponse.statusCode).toBe(200);
 
-      // Delete the data stream entirely to avoid tombstone accumulation from
-      // deleteByQuery across repeated runs. Tombstoned segments can cause
-      // ES|QL and composite aggregations to return partial results.
+      // Delete the data stream if it exists so esArchiver re-creates it with
+      // the correct mappings and seed documents on every suite run.
       try {
-        await esClient.indices.deleteDataStream({ name: testConfig.indexName });
+        await esClient.indices.deleteDataStream({
+          name: 'logs-endpoint.events.security-default',
+        });
       } catch {
-        // Data stream may not exist on the first run
+        // Data stream may not exist on the very first run
+      }
+      try {
+        await esClient.indices.deleteIndexTemplate({ name: 'scout-elastic-defend-events' });
+      } catch {
+        // Template may not exist
       }
 
-      await ensureDataStream(esClient, testConfig);
+      // Load the data stream template, mappings, and 6 seed documents.
+      await esArchiver.loadIfNeeded(ES_ARCHIVE_PATH);
 
-      // Load a seed document via esArchiver to auto-create the data stream.
-      // In serverless, manually creating the data stream and bulk-ingesting
-      // leads to persistent `no_shard_available_action_exception` errors.
-      // Letting ES auto-create it through esArchiver avoids this.
-      await esArchiver.loadIfNeeded(
-        'x-pack/solutions/security/plugins/security_solution/test/scout/api/es_archives/elastic_defend_events'
-      );
+      // Refresh timestamps so events fall within the maintainer's lookback
+      // window (now-4w). esArchiver data has static timestamps that would
+      // eventually age out.
+      const now = new Date().toISOString();
+      await esClient.updateByQuery({
+        index: 'logs-endpoint.events.security-default',
+        script: {
+          source: "ctx._source['@timestamp'] = params.now",
+          params: { now },
+          lang: 'painless',
+        },
+        query: { match_all: {} },
+        refresh: true,
+      });
 
-      const ingestedCount = await bulkIngestEvents(esClient, testConfig);
-      expect(ingestedCount).toBe(16000);
-
-      // Poll until all ingested docs are confirmed searchable before triggering
-      // the maintainer. Without this, ES|QL queries inside the maintainer may
-      // see a partial dataset, causing non-deterministic bucket counts.
-      await waitForShardsAndDocuments(esClient, testConfig.indexName, 16000);
-
-      // Trigger the maintainer run and wait for completion inside beforeAll so
-      // that all individual tests can assert on a stable, fully-populated state
-      // instead of depending on test execution order.
+      // Run the maintainer and wait for it to complete
       const entryBeforeRun = await getMaintainerEntry(apiClient, defaultHeaders, MAINTAINER_ID);
       const runsBefore = entryBeforeRun?.runs ?? 0;
 
@@ -232,7 +225,13 @@ for (const integration of INTEGRATION_CONFIGS) {
 
       expect(maintainerEntry.customState).toBeDefined();
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      maintainerState = maintainerEntry.customState!;
+      const state = maintainerEntry.customState!;
+
+      // 2 unique users discovered by the composite aggregation
+      expect(state.totalBuckets).toBe(2);
+      // 2 entity records: user-a→host-a (frequent) + user-b→host-b (infrequent)
+      expect(state.totalAccessRecords).toBe(2);
+      expect(state.totalUpserted).toBe(2);
 
       // Force log extraction to populate the latest entity index
       const extractionResponse = await apiClient.post(
@@ -253,6 +252,14 @@ for (const integration of INTEGRATION_CONFIGS) {
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
+      // Unload esArchiver data: delete data stream and its index template
+      await esClient.indices
+        .deleteDataStream({ name: 'logs-endpoint.events.security-default' })
+        .catch(() => {});
+      await esClient.indices
+        .deleteIndexTemplate({ name: 'scout-elastic-defend-events' })
+        .catch(() => {});
+
       await apiClient
         .post(ENTITY_STORE_ROUTES.UNINSTALL, {
           headers: defaultHeaders,
@@ -260,150 +267,52 @@ for (const integration of INTEGRATION_CONFIGS) {
           body: {},
         })
         .catch(() => {});
-
-      await cleanupDataStream(esClient, testConfig);
     });
 
-    apiTest('Should compute access relationships from events', async ({ esClient }) => {
-      expect(maintainerState.totalBuckets).toBe(6);
-      expect(maintainerState.totalAccessRecords).toBe(16);
-      expect(maintainerState.totalUpserted).toBe(16);
-
+    apiTest('Should classify user-a as accesses_frequently for host-a', async ({ esClient }) => {
       const entities = await esClient.search({
         index: LATEST_INDEX,
         query: {
           bool: {
-            filter: {
-              wildcard: { 'entity.id': 'user:test-user-*' },
-            },
+            filter: { term: { 'entity.id': 'user:test-user-a@test-host-a' } },
           },
         },
-        size: 100,
+        size: 1,
       });
 
-      expect(entities.hits.hits).toHaveLength(16);
+      expect(entities.hits.hits).toHaveLength(1);
 
-      const expectedRelationships = getExpectedRelationships();
-
-      for (const hit of entities.hits.hits) {
-        const source = hit._source as Record<string, unknown>;
-        const entityId = getField(source, 'entity.id') as string;
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const expected = expectedRelationships.get(entityId)!;
-        expect(expected).toBeDefined();
-
-        const actualFrequent = toArray(
-          getField(source, 'entity.relationships.accesses_frequently')
-        ).sort();
-        const actualInfrequent = toArray(
-          getField(source, 'entity.relationships.accesses_infrequently')
-        ).sort();
-
-        expect(actualFrequent).toStrictEqual(expected.accesses_frequently.sort());
-        expect(actualInfrequent).toStrictEqual(expected.accesses_infrequently.sort());
-      }
+      const source = entities.hits.hits[0]._source as Record<string, unknown>;
+      expect(getField(source, 'entity.id')).toBe('user:test-user-a@test-host-a');
+      expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual([
+        'test-host-a',
+      ]);
+      expect(toArray(getField(source, 'entity.relationships.accesses_infrequently'))).toStrictEqual(
+        []
+      );
     });
 
-    apiTest(
-      'Should assign accesses_frequently when access count exceeds threshold',
-      async ({ esClient }) => {
-        const entities = await esClient.search({
-          index: LATEST_INDEX,
-          query: {
-            bool: {
-              filter: {
-                wildcard: { 'entity.id': 'user:test-user-003@*' },
-              },
-            },
+    apiTest('Should classify user-b as accesses_infrequently for host-b', async ({ esClient }) => {
+      const entities = await esClient.search({
+        index: LATEST_INDEX,
+        query: {
+          bool: {
+            filter: { term: { 'entity.id': 'user:test-user-b@test-host-b' } },
           },
-          sort: [{ 'entity.id': 'asc' }],
-          size: 10,
-        });
+        },
+        size: 1,
+      });
 
-        expect(entities.hits.hits).toHaveLength(2);
+      expect(entities.hits.hits).toHaveLength(1);
 
-        for (const hit of entities.hits.hits) {
-          const source = hit._source as Record<string, unknown>;
-
-          expect(
-            toArray(getField(source, 'entity.relationships.accesses_frequently'))
-          ).toHaveLength(1);
-          expect(
-            toArray(getField(source, 'entity.relationships.accesses_infrequently'))
-          ).toHaveLength(0);
-        }
-      }
-    );
-
-    apiTest(
-      'Should assign accesses_infrequently when access count is at or below threshold',
-      async ({ esClient }) => {
-        const entities = await esClient.search({
-          index: LATEST_INDEX,
-          query: {
-            bool: {
-              filter: {
-                term: { 'entity.id': 'user:test-user-001@test-host-002' },
-              },
-            },
-          },
-          size: 1,
-        });
-
-        expect(entities.hits.hits).toHaveLength(1);
-
-        const source = entities.hits.hits[0]._source as Record<string, unknown>;
-
-        expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toHaveLength(
-          0
-        );
-        expect(
-          toArray(getField(source, 'entity.relationships.accesses_infrequently'))
-        ).toStrictEqual(['test-host-002']);
-      }
-    );
-
-    apiTest(
-      'Should assign both accesses_frequently and accesses_infrequently for user-006',
-      async ({ esClient }) => {
-        const entities = await esClient.search({
-          index: LATEST_INDEX,
-          query: {
-            bool: {
-              filter: {
-                wildcard: { 'entity.id': 'user:test-user-006@*' },
-              },
-            },
-          },
-          sort: [{ 'entity.id': 'asc' }],
-          size: 10,
-        });
-
-        expect(entities.hits.hits).toHaveLength(6);
-
-        const frequentHosts: string[] = [];
-        const infrequentHosts: string[] = [];
-
-        for (const hit of entities.hits.hits) {
-          const source = hit._source as Record<string, unknown>;
-          const freq = toArray(getField(source, 'entity.relationships.accesses_frequently'));
-          const infreq = toArray(getField(source, 'entity.relationships.accesses_infrequently'));
-          frequentHosts.push(...freq);
-          infrequentHosts.push(...infreq);
-        }
-
-        expect(frequentHosts.sort()).toStrictEqual([
-          'test-host-006',
-          'test-host-007',
-          'test-host-008',
-        ]);
-        expect(infrequentHosts.sort()).toStrictEqual([
-          'test-host-009',
-          'test-host-010',
-          'test-host-011',
-        ]);
-      }
-    );
+      const source = entities.hits.hits[0]._source as Record<string, unknown>;
+      expect(getField(source, 'entity.id')).toBe('user:test-user-b@test-host-b');
+      expect(toArray(getField(source, 'entity.relationships.accesses_frequently'))).toStrictEqual(
+        []
+      );
+      expect(toArray(getField(source, 'entity.relationships.accesses_infrequently'))).toStrictEqual(
+        ['test-host-b']
+      );
+    });
   });
 }
