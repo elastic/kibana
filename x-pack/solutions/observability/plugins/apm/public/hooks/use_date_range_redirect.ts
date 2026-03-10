@@ -7,9 +7,19 @@
 import qs from 'query-string';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { useMemo } from 'react';
+import datemath from '@kbn/datemath';
+import type { Moment } from 'moment';
 import type { TimePickerTimeDefaults } from '../components/shared/date_picker/typings';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
+
+function tryParseDate(
+  date: string | string[] | null | undefined,
+  options?: Parameters<typeof datemath.parse>[1]
+): Moment | undefined {
+  return typeof date === 'string' ? datemath.parse(date, options) : undefined;
+}
 
 export function useDateRangeRedirect() {
   const history = useHistory();
@@ -24,13 +34,25 @@ export function useDateRangeRedirect() {
 
   const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
 
-  const isDateRangeSet = 'rangeFrom' in query && 'rangeTo' in query;
+  const isDateRangeSet = useMemo(() => {
+    const start = tryParseDate(query.rangeFrom);
+    const end = tryParseDate(query.rangeTo, { roundUp: true });
+
+    return Boolean(start?.isValid() && end?.isValid());
+  }, [query.rangeFrom, query.rangeTo]);
 
   const redirect = () => {
+    const start = tryParseDate(query.rangeFrom);
+    const end = tryParseDate(query.rangeTo, { roundUp: true });
+
     const nextQuery = {
-      rangeFrom: timePickerSharedState.from ?? timePickerTimeDefaults.from,
-      rangeTo: timePickerSharedState.to ?? timePickerTimeDefaults.to,
       ...query,
+      rangeFrom: start?.isValid()
+        ? query.rangeFrom
+        : timePickerSharedState.from ?? timePickerTimeDefaults.from,
+      rangeTo: end?.isValid()
+        ? query.rangeTo
+        : timePickerSharedState.to ?? timePickerTimeDefaults.to,
     };
 
     try {
