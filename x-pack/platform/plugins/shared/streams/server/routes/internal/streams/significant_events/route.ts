@@ -10,8 +10,7 @@ import {
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
 import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
@@ -173,12 +172,9 @@ const readAllSignificantEventsRoute = createServerRoute({
       bucketSize: z.string().describe('Size of time buckets for aggregation'),
       query: z.string().optional().describe('Query string to filter significant events queries'),
       streamNames: z
-        .preprocess(
-          (val) => (typeof val === 'string' ? [val] : val),
-          z.array(z.string()).optional()
-        )
+        .union([z.string().transform((val) => [val]), z.array(z.string())])
+        .optional()
         .describe('Stream names to filter significant events'),
-      ruleBacked: BooleanFromString.optional().describe('Filter by rule-backed status'),
     }),
   }),
   options: {
@@ -203,7 +199,7 @@ const readAllSignificantEventsRoute = createServerRoute({
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { from, to, bucketSize, query, streamNames, ruleBacked } = params.query;
+    const { from, to, bucketSize, query, streamNames } = params.query;
 
     return readSignificantEventsFromAlertsIndices(
       {
@@ -212,7 +208,6 @@ const readAllSignificantEventsRoute = createServerRoute({
         bucketSize,
         query,
         streamNames,
-        filters: { ruleBacked },
       },
       { queryClient, scopedClusterClient }
     );
