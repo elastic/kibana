@@ -119,7 +119,9 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
       <EuiResizableContainer
         css={styles.fullHeightPanel}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
-        onPanelWidthChange={(sizes) => panelStorage.current?.setPanelSize(sizes)}
+        onPanelWidthChange={(sizes) =>
+          panelStorage.current?.setPanelSize(sizes as { inputPanel: number; outputPanel: number })
+        }
         data-test-subj="consoleEditorContainer"
       >
         {(EuiResizablePanel, EuiResizableButton) => (
@@ -129,6 +131,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
               minSize={PANEL_MIN_SIZE}
               tabIndex={0}
               paddingSize="none"
+              id="inputPanel"
             >
               <EuiSplitPanel.Outer
                 grow={true}
@@ -185,6 +188,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
               minSize={PANEL_MIN_SIZE}
               tabIndex={0}
               paddingSize="none"
+              id="outputPanel"
             >
               <EuiSplitPanel.Outer
                 borderRadius="none"

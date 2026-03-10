@@ -34,7 +34,7 @@ export class PanelStorage {
     return [INITIAL_PANEL_SIZE, INITIAL_PANEL_SIZE];
   }
 
-  setPanelSize(sizes: Record<string, number>): void {
-    this.debouncedSave(Object.values(sizes));
+  setPanelSize({ inputPanel, outputPanel }: { inputPanel: number; outputPanel: number }): void {
+    this.debouncedSave([inputPanel, outputPanel]);
   }
 }
