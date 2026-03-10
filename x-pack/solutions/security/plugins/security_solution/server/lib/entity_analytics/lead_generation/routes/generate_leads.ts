@@ -25,7 +25,7 @@ import {
   type LeadGenerationMode,
 } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
-import { APP_ID } from '../../../../../common';
+import { APP_ID, DEFAULT_ALERTS_INDEX } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
@@ -34,8 +34,6 @@ import { createTemporalStateModule } from '../observation_modules/temporal_state
 import { createBehavioralAnalysisModule } from '../observation_modules/alert_analysis_module';
 import type { Entity } from '../../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity, Lead } from '../types';
-
-const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
 const ENTITY_PAGE_SIZE = 1000;
 
 const GenerateLeadsRequestBody = z.object({
@@ -121,7 +119,7 @@ export const generateLeadsRoute = (
             createBehavioralAnalysisModule({
               esClient,
               logger,
-              alertsIndexPattern: ALERTS_INDEX_PATTERN,
+              alertsIndexPattern: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
             })
           );
 
@@ -230,7 +228,7 @@ const entityRecordToLeadEntity = (record: Entity): LeadEntity => {
 // Lead formatting
 // ---------------------------------------------------------------------------
 
-const formatLeadForResponse = (lead: Lead, executionId: string) => ({
+export const formatLeadForResponse = (lead: Lead, executionId: string) => ({
   id: lead.id,
   title: lead.title,
   byline: lead.byline,
@@ -256,7 +254,7 @@ const formatLeadForResponse = (lead: Lead, executionId: string) => ({
   executionId,
 });
 
-type FormattedLead = ReturnType<typeof formatLeadForResponse>;
+export type FormattedLead = ReturnType<typeof formatLeadForResponse>;
 
 // ---------------------------------------------------------------------------
 // Persistence — gap-free replace pattern:
@@ -264,7 +262,7 @@ type FormattedLead = ReturnType<typeof formatLeadForResponse>;
 //   2. Delete any docs whose executionId differs (stale from previous runs).
 // ---------------------------------------------------------------------------
 
-const persistLeads = async (
+export const persistLeads = async (
   esClient: ElasticsearchClient,
   spaceId: string,
   mode: LeadGenerationMode,
