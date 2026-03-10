@@ -60,6 +60,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
     [selectedSources, selectedSet, onSelectedSourcesChanged]
   );
 
+
   const togglePopover = useCallback(() => setIsOpen((prev) => !prev), []);
   const closePopover = useCallback(() => setIsOpen(false), []);
 
@@ -95,6 +96,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
         <EuiFilterSelectItem
           key={key}
           checked={selectedSet.has(key) ? 'on' : undefined}
+          // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
           onClick={() => handleToggle(key)}
           data-test-subj={`history-source-filter-${key}`}
         >

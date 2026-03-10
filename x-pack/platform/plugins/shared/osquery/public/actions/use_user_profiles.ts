@@ -9,29 +9,21 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from '../common/lib/kibana';
-import type { SearchHit } from '../../common/search_strategy';
 import type { LiveHistoryRow } from '../../common/api/unified_history/types';
 
-type ProfileSource = SearchHit[] | LiveHistoryRow[];
-
-const extractUids = (items: ProfileSource): string[] => {
+const extractUids = (items: LiveHistoryRow[]): string[] => {
   const uidSet = new Set<string>();
 
   for (const item of items) {
-    if ('userProfileUid' in item && item.userProfileUid) {
+    if (item.userProfileUid) {
       uidSet.add(item.userProfileUid);
-    } else if ('fields' in item) {
-      const uid = (item.fields?.user_profile_uid as string[] | undefined)?.[0];
-      if (uid) {
-        uidSet.add(uid);
-      }
     }
   }
 
   return Array.from(uidSet).sort();
 };
 
-export const useBulkGetUserProfiles = (actionItems: ProfileSource) => {
+export const useBulkGetUserProfiles = (actionItems: LiveHistoryRow[]) => {
   const { userProfile } = useKibana().services;
 
   const uidList = useMemo(() => extractUids(actionItems), [actionItems]);

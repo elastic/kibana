@@ -238,16 +238,14 @@ describe('UnifiedHistoryTable', () => {
     expect(screen.getByText('Rule')).toBeInTheDocument();
   });
 
-  it('details button navigates via history.push', () => {
+  it('details button has correct href for navigation', () => {
     const row = createMockLiveRow({ actionId: 'action-42' });
     mockHistory({ data: [row] });
 
     renderWithProviders(<UnifiedHistoryTable />);
 
     const detailsButtons = screen.getAllByLabelText('Details');
-    detailsButtons[0].click();
-
-    expect(mockPush).toHaveBeenCalledWith('/history/action-42');
+    expect(detailsButtons[0].closest('a')).toHaveAttribute('href', '/history/action-42');
   });
 
   it('play button navigates to /new for single query', () => {

@@ -35,7 +35,7 @@ import type {
 import { useUnifiedHistory } from './use_unified_history';
 import { useCursorPagination } from './use_cursor_pagination';
 import { useBulkGetUserProfiles } from './use_user_profiles';
-import { useKibana } from '../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../common/lib/kibana';
 import { pagePathGetters } from '../common/page_paths';
 import { usePacks } from '../packs/use_packs';
 import { RunByColumn } from './components/run_by_column';
@@ -51,44 +51,29 @@ const PACKS_CONFIG = { isLive: false } as const;
 const isLiveRow = (row: UnifiedHistoryRow): row is LiveHistoryRow => row.sourceType === 'live';
 
 const isScheduledRow = (row: UnifiedHistoryRow): row is ScheduledHistoryRow =>
-  row.sourceType === 'scheduled';
+  row.sourceType === 'scheduled' && row.scheduleId != null && row.executionCount != null;
 
 interface HistoryDetailsButtonProps {
   row: UnifiedHistoryRow;
 }
 
 const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
-  const { push } = useHistory();
-
-  const sourceType = row.sourceType;
-  const scheduleId = isScheduledRow(row) ? row.scheduleId : undefined;
-  const executionCount = isScheduledRow(row) ? row.executionCount : undefined;
-  const actionId = isLiveRow(row) ? row.actionId : undefined;
-
   const path = useMemo(() => {
-    if (sourceType === 'scheduled' && scheduleId != null && executionCount != null) {
+    if (isScheduledRow(row)) {
       return pagePathGetters.history_scheduled_details({
-        scheduleId,
-        executionCount: String(executionCount),
+        scheduleId: row.scheduleId,
+        executionCount: String(row.executionCount),
       });
     }
 
-    if (actionId) {
-      return pagePathGetters.history_details({ liveQueryId: actionId });
+    if (isLiveRow(row) && row.actionId) {
+      return pagePathGetters.history_details({ liveQueryId: row.actionId });
     }
 
     return undefined;
-  }, [sourceType, scheduleId, executionCount, actionId]);
+  }, [row]);
 
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (path) {
-        push(path);
-      }
-    },
-    [path, push]
-  );
+  const navProps = useRouterNavigate(path ?? '');
 
   const detailsText = i18n.translate(
     'xpack.osquery.liveQueryActions.table.viewDetailsActionButton',
@@ -99,7 +84,7 @@ const HistoryDetailsButton: React.FC<HistoryDetailsButtonProps> = ({ row }) => {
     <EuiToolTip position="top" content={detailsText} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="visTable"
-        onClick={handleClick}
+        {...navProps}
         isDisabled={!path}
         aria-label={detailsText}
       />
@@ -177,10 +162,6 @@ const UnifiedHistoryTableComponent = () => {
     [resetPagination]
   );
 
-  const handleRefresh = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
   const handlePageSizeChange = useCallback(
     (size: number) => {
       setPageSize(size);
@@ -207,13 +188,12 @@ const UnifiedHistoryTableComponent = () => {
 
   const renderQueryColumn = useCallback(
     (_: unknown, row: UnifiedHistoryRow) => {
-      const displayName = row.queryName ?? (row.packName ? undefined : null);
-
-      if (displayName || (isLiveRow(row) && row.packName)) {
+      // Scheduled rows: show query name (if available) with pack badge
+      if (isScheduledRow(row) && (row.queryName || row.packName)) {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
-            <EuiFlexItem grow={false}>{displayName ?? row.packName}</EuiFlexItem>
-            {!isLiveRow(row) && row.packName && displayName && row.packId && (
+            <EuiFlexItem grow={false}>{row.queryName ?? row.packName}</EuiFlexItem>
+            {row.packName && row.packId && row.queryName && (
               <EuiFlexItem grow={false}>
                 <EuiBadge
                   iconType="package"
@@ -229,6 +209,12 @@ const UnifiedHistoryTableComponent = () => {
         );
       }
 
+      // Live pack rows: show pack name
+      if (isLiveRow(row) && row.packName) {
+        return <>{row.packName}</>;
+      }
+
+      // Single query rows: show truncated SQL
       const singleLine = removeMultilines(row.queryText);
       const content = singleLine.length > 90 ? `${singleLine.substring(0, 90)}...` : singleLine;
 
@@ -493,7 +479,11 @@ const UnifiedHistoryTableComponent = () => {
 
   const hasMore = historyData?.hasMore ?? false;
 
-  const handlePageChange = useCallback(
+  // pageCount drives the navigation arrows: when hasMore is true we advertise
+  // one extra page so the forward arrow stays enabled.
+  const pageCount = hasMore ? pageIndex + 2 : pageIndex + 1;
+
+  const handlePageClick = useCallback(
     (newPage: number) => {
       if (newPage > pageIndex && hasMore) {
         handleNextPage();
@@ -503,8 +493,6 @@ const UnifiedHistoryTableComponent = () => {
     },
     [pageIndex, hasMore, handleNextPage, goToPage]
   );
-
-  const pageCount = hasMore ? pageIndex + 2 : pageIndex + 1;
 
   if (isLoading) {
     return <EuiSkeletonText lines={10} />;
@@ -522,7 +510,7 @@ const UnifiedHistoryTableComponent = () => {
         startDate={startDate}
         endDate={endDate}
         onTimeChange={handleTimeChange}
-        onRefresh={handleRefresh}
+        onRefresh={refetch}
       />
       <EuiSpacer size="m" />
       <EuiBasicTable
@@ -539,7 +527,7 @@ const UnifiedHistoryTableComponent = () => {
       <EuiTablePagination
         activePage={pageIndex}
         pageCount={pageCount}
-        onChangePage={handlePageChange}
+        onChangePage={handlePageClick}
         itemsPerPage={pageSize}
         itemsPerPageOptions={ITEMS_PER_PAGE_OPTIONS}
         onChangeItemsPerPage={handlePageSizeChange}

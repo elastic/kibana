@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { ScheduledExecutionBucket, PackSO } from './process_scheduled_history';
 import {
   resolvePackFilterForKuery,
   processScheduledHistory,
   getPacksForSpace,
-  ScheduledExecutionBucket,
-  PackSO,
 } from './process_scheduled_history';
 
 const createMockBucket = (
@@ -29,20 +28,33 @@ const createMockBucket = (
     ...overrides,
   } as ScheduledExecutionBucket);
 
-const createMockPackSO = (overrides: Partial<PackSO> = {}): PackSO => ({
-  id: 'pack-1',
-  attributes: {
-    name: 'Test Pack',
-    queries: [
-      {
-        schedule_id: 'schedule-1',
-        name: 'uptime',
-        id: 'q1',
-        query: 'SELECT * FROM uptime',
-      },
-    ],
-  } as PackSO['attributes'],
-  ...overrides,
+const defaultPackAttributes: PackSO['attributes'] = {
+  saved_object_id: 'pack-1',
+  name: 'Test Pack',
+  description: undefined,
+  queries: [
+    {
+      schedule_id: 'schedule-1',
+      name: 'uptime',
+      id: 'q1',
+      query: 'SELECT * FROM uptime',
+      interval: 3600,
+    },
+  ],
+  enabled: true,
+  created_at: '2024-01-01T00:00:00.000Z',
+  created_by: 'elastic',
+  updated_at: '2024-01-01T00:00:00.000Z',
+  updated_by: 'elastic',
+  shards: [],
+  references: [],
+};
+
+const createMockPackSO = (
+  overrides: { id?: string; attributes?: Partial<PackSO['attributes']> } = {}
+): PackSO => ({
+  id: overrides.id ?? 'pack-1',
+  attributes: { ...defaultPackAttributes, ...overrides.attributes },
 });
 
 describe('process_scheduled_history', () => {
@@ -60,20 +72,15 @@ describe('process_scheduled_history', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({ id: 'pack-1', attributes: { name: 'Pack 1', queries: [] } });
-      expect(mockFind).toHaveBeenCalledWith(
-        expect.objectContaining({ perPage: 1000 })
-      );
+      expect(mockFind).toHaveBeenCalledWith(expect.objectContaining({ perPage: 1000 }));
     });
   });
 
   describe('resolvePackFilterForKuery', () => {
     it('returns packIds when pack name matches', () => {
-      const packSOs: PackSO[] = [
-        { id: 'pack-1', attributes: { name: 'uptime pack', queries: [] } as PackSO['attributes'] },
-        {
-          id: 'pack-2',
-          attributes: { name: 'uptime checks', queries: [] } as PackSO['attributes'],
-        },
+      const packSOs = [
+        createMockPackSO({ id: 'pack-1', attributes: { name: 'uptime pack', queries: [] } }),
+        createMockPackSO({ id: 'pack-2', attributes: { name: 'uptime checks', queries: [] } }),
       ];
 
       const result = resolvePackFilterForKuery(packSOs, 'uptime');
@@ -82,17 +89,16 @@ describe('process_scheduled_history', () => {
     });
 
     it('returns scheduleIds when query matches', () => {
-      const packSOs: PackSO[] = [
-        {
-          id: 'pack-1',
+      const packSOs = [
+        createMockPackSO({
           attributes: {
             name: 'My Pack',
             queries: [
-              { schedule_id: 'sched-1', name: 'uptime', id: 'q1', query: 'select 1' },
-              { schedule_id: 'sched-2', name: 'os', id: 'q2', query: 'select 2' },
+              { schedule_id: 'sched-1', name: 'uptime', id: 'q1', query: 'select 1', interval: 60 },
+              { schedule_id: 'sched-2', name: 'os', id: 'q2', query: 'select 2', interval: 60 },
             ],
-          } as PackSO['attributes'],
-        },
+          },
+        }),
       ];
 
       const result = resolvePackFilterForKuery(packSOs, 'uptime');

@@ -51,7 +51,11 @@ describe('processLiveHistory', () => {
   it('maps hits to rows and builds sortValuesMap', async () => {
     const hits = [
       createLiveHit({ fields: { action_id: ['a1'] }, sort: [1000, 1] }),
-      createLiveHit({ _source: { action_id: 'a2' }, fields: { action_id: ['a2'] }, sort: [2000, 2] }),
+      createLiveHit({
+        _source: { action_id: 'a2' },
+        fields: { action_id: ['a2'] },
+        sort: [2000, 2],
+      }),
     ];
     const result = await processLiveHistory({
       liveHits: hits,

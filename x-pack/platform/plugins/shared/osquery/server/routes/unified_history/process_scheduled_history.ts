@@ -15,7 +15,7 @@ export interface ScheduledExecutionBucket {
   key: [string, number];
   key_as_string: string;
   doc_count: number;
-  planned_time: { value: number | null; value_as_string?: string };
+  planned_time: { value: number; value_as_string: string };
   max_timestamp: { value: number; value_as_string: string };
   agent_count: { value: number };
   total_rows: { value: number };
@@ -34,7 +34,10 @@ export interface ResolvePackFilterResult {
   scheduleIds?: string[];
 }
 
-export type PackSO = { id: string; attributes: PackSavedObject };
+export interface PackSO {
+  id: string;
+  attributes: PackSavedObject;
+}
 
 /**
  * Fetches all pack saved objects for the current space.

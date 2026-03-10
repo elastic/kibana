@@ -119,9 +119,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           // Fetch all packs once — used for both kuery filtering and
           // resolving query names on scheduled rows.
-          const packSOs = includeScheduled
-            ? await getPacksForSpace(spaceScopedClient)
-            : [];
+          const packSOs = includeScheduled ? await getPacksForSpace(spaceScopedClient) : [];
 
           let packIdsForQuery: string[] | undefined;
           let scheduleIdsForQuery: string[] | undefined;

@@ -32,6 +32,9 @@ const makeScheduledRow = (overrides: Record<string, unknown> = {}): UnifiedHisto
   successCount: undefined,
   errorCount: undefined,
   totalRows: undefined,
+  scheduleId: 'sched-1',
+  executionCount: 1,
+  plannedTime: '2024-06-01T00:00:00.000Z',
   ...overrides,
 });
 
