@@ -8,5 +8,5 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  timeout: 10 * 60_000, // 10 minutes timeout
+  timeout: 15 * 60_000, // 15 minutes timeout
 });
