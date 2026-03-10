@@ -44,7 +44,7 @@ jest.mock('./use_unified_history');
 jest.mock('./use_user_profiles');
 jest.mock('../packs/use_packs');
 jest.mock('../common/use_persisted_page_size', () => ({
-  usePersistedPageSize: () => [20, jest.fn()],
+  usePersistedPageSize: () => [10, jest.fn()],
   PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
 }));
 
@@ -152,7 +152,7 @@ describe('UnifiedHistoryTable', () => {
 
     expect(useUnifiedHistoryMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        pageSize: 20,
+        pageSize: 10,
         startDate: 'now-24h',
         endDate: 'now',
       })
