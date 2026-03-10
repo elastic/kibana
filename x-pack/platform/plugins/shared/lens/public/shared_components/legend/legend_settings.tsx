@@ -267,7 +267,7 @@ export function shouldDisplayTable(legendValues: LegendValue[]) {
   return legendValues.some((v) => v !== LegendValue.CurrentAndLastValue);
 }
 
-const legendLayoutOptions: Array<{ id: string; label: string; layout: LegendLayout }> = [
+const legendLayoutButtonOptions: Array<{ id: string; label: string; layout?: LegendLayout }> = [
   {
     id: 'legend_layout_list',
     label: i18n.translate('xpack.lens.shared.legendLayout.list', {
@@ -276,11 +276,11 @@ const legendLayoutOptions: Array<{ id: string; label: string; layout: LegendLayo
     layout: LegendLayout.List,
   },
   {
-    id: 'legend_layout_table',
-    label: i18n.translate('xpack.lens.shared.legendLayout.table', {
-      defaultMessage: 'Table',
+    id: 'legend_layout_grid',
+    label: i18n.translate('xpack.lens.shared.legendLayout.grid', {
+      defaultMessage: 'Grid',
     }),
-    layout: LegendLayout.Table,
+    layout: undefined,
   },
 ];
 
@@ -361,6 +361,9 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
 
   const showsLegendTitleSetting = isTableLayout && !!onLegendTitleChange;
 
+  const legendLayoutIdSelected =
+    layout === LegendLayout.List ? 'legend_layout_list' : 'legend_layout_grid';
+
   return (
     <>
       <EuiFormRow
@@ -410,13 +413,12 @@ export function LegendSettings<LegendStats extends LegendValue = XYLegendValue>(
                 data-test-subj="lens-legend-layout-btn"
                 buttonSize="compressed"
                 type="single"
-                options={legendLayoutOptions}
-                idSelected={
-                  legendLayoutOptions.find(({ layout: optionLayout }) => optionLayout === layout)
-                    ?.id
-                }
+                options={legendLayoutButtonOptions}
+                idSelected={legendLayoutIdSelected}
                 onChange={(id) => {
-                  const next = legendLayoutOptions.find(({ id: optionId }) => optionId === id);
+                  const next = legendLayoutButtonOptions.find(
+                    ({ id: optionId }) => optionId === id
+                  );
                   onLayoutChange?.(next?.layout);
                 }}
               />

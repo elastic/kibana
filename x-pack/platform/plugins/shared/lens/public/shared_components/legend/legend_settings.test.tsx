@@ -166,26 +166,41 @@ describe('Legend Settings', () => {
     });
 
     expect(screen.getByTestId('lens-legend-layout-btn')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Table' }));
-    expect(onLayoutChange).toHaveBeenCalledWith(LegendLayout.Table);
+    fireEvent.click(screen.getByRole('button', { name: 'Grid' }));
+    expect(onLayoutChange).toHaveBeenCalledWith(undefined);
   });
 
-  it('should show no layout selection when layout is undefined', async () => {
+  it('should allow switching between Grid and List layouts', async () => {
     const onLayoutChange = jest.fn();
-    await renderLegendSettingsPopover({
-      position: Position.Bottom,
-      location: 'outside',
-      layout: undefined,
-      onLayoutChange,
-    });
 
-    const listButton = screen.getByRole('button', { name: 'List' });
-    const tableButton = screen.getByRole('button', { name: 'Table' });
-    expect(listButton).not.toHaveAttribute('aria-pressed', 'true');
-    expect(tableButton).not.toHaveAttribute('aria-pressed', 'true');
+    const StatefulLayout = () => {
+      const [layout, setLayout] = React.useState<LegendLayout | undefined>(undefined);
+      return (
+        <LegendSettingsPopover
+          {...defaultProps}
+          position={Position.Bottom}
+          location="outside"
+          layout={layout}
+          onLayoutChange={(nextLayout) => {
+            onLayoutChange(nextLayout);
+            setLayout(nextLayout);
+          }}
+        />
+      );
+    };
 
-    fireEvent.click(listButton);
+    render(<StatefulLayout />);
+    await userEvent.click(screen.getByRole('button', { name: 'Legend' }));
+
+    const gridButton = screen.getByRole('button', { name: 'Grid' });
+    expect(gridButton).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'List' }));
     expect(onLayoutChange).toHaveBeenCalledWith(LegendLayout.List);
+    expect(screen.getByRole('button', { name: 'Grid' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Grid' }));
+    expect(onLayoutChange).toHaveBeenCalledWith(undefined);
   });
 
   it('should show pixel truncation input when list layout is selected', async () => {

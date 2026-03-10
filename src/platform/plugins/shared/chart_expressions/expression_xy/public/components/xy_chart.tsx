@@ -53,7 +53,6 @@ import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { PersistedState } from '@kbn/visualizations-common';
 import {
   DEFAULT_LEGEND_SIZE,
-  LegendLayout,
   LegendSizeToPixels,
   getAccessorByDimension,
   getColumnByAccessor,
@@ -861,16 +860,15 @@ export function XYChart({
                     color: undefined, // removes background for embeddables
                   },
                   legend: {
-                    labelOptions: {
-                      maxLines:
-                        legend.shouldTruncate && legend.layout !== LegendLayout.List
-                          ? legend?.maxLines ?? 1
-                          : 0,
-                      widthLimit:
-                        legend.shouldTruncate && legend.layout === LegendLayout.List
-                          ? legend.widthLimit ?? 250
-                          : 0,
-                    },
+                    labelOptions: legend.shouldTruncate
+                      ? {
+                          maxLines: 0,
+                          widthLimit: 0,
+                        }
+                      : {
+                          maxLines: legend?.maxLines ?? 1,
+                          widthLimit: legend.widthLimit ?? 250,
+                        },
                   },
                   // if not title or labels are shown for axes, add some padding if required by reference line markers
                   chartMargins: {
