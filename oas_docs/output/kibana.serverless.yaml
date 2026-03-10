@@ -61789,6 +61789,10 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  affected_streams:
+                                    items:
+                                      type: string
+                                    type: array
                                   esql:
                                     type: object
                                     properties:
@@ -61813,6 +61817,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - affected_streams
                                   - esql
                               type: array
                             rules:
@@ -61881,6 +61886,10 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  affected_streams:
+                                    items:
+                                      type: string
+                                    type: array
                                   esql:
                                     type: object
                                     properties:
@@ -61905,6 +61914,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - affected_streams
                                   - esql
                               type: array
                             rules:
@@ -61980,6 +61990,10 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  affected_streams:
+                                    items:
+                                      type: string
+                                    type: array
                                   esql:
                                     type: object
                                     properties:
@@ -62004,6 +62018,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - affected_streams
                                   - esql
                               type: array
                             rules:
@@ -62072,6 +62087,10 @@ paths:
                               items:
                                 type: object
                                 properties:
+                                  affected_streams:
+                                    items:
+                                      type: string
+                                    type: array
                                   esql:
                                     type: object
                                     properties:
@@ -62096,6 +62115,7 @@ paths:
                                 required:
                                   - id
                                   - title
+                                  - affected_streams
                                   - esql
                               type: array
                             rules:
@@ -62171,6 +62191,10 @@ paths:
                           items:
                             type: object
                             properties:
+                              affected_streams:
+                                items:
+                                  type: string
+                                type: array
                               esql:
                                 type: object
                                 properties:
@@ -62195,6 +62219,7 @@ paths:
                             required:
                               - id
                               - title
+                              - affected_streams
                               - esql
                           type: array
                         rules:
@@ -63093,6 +63118,10 @@ paths:
                           index:
                             type: object
                             properties:
+                              affected_streams:
+                                items:
+                                  type: string
+                                type: array
                               esql:
                                 type: object
                                 properties:
@@ -63117,6 +63146,7 @@ paths:
                             required:
                               - id
                               - title
+                              - affected_streams
                               - esql
                         required:
                           - index
@@ -63224,6 +63254,16 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                category:
+                  enum:
+                    - operational
+                    - error
+                    - resource_health
+                    - configuration
+                    - security
+                  type: string
+                description:
+                  type: string
                 esql:
                   additionalProperties: false
                   type: object
@@ -63236,11 +63276,28 @@ paths:
                   items:
                     type: string
                   type: array
+                model:
+                  type: string
                 severity_score:
                   type: number
+                source:
+                  enum:
+                    - ai_generated
+                    - user_created
+                    - predefined
+                  type: string
+                tags:
+                  items:
+                    type: string
+                  type: array
                 title:
                   description: A non-empty string.
                   minLength: 1
+                  type: string
+                type:
+                  enum:
+                    - match
+                    - stats
                   type: string
               required:
                 - title

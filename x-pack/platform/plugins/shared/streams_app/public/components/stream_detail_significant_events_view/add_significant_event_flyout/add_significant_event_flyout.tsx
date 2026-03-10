@@ -89,7 +89,9 @@ export function AddSignificantEventFlyout({
     isEditMode ? 'manual' : initialFlow
   );
   const flowRef = useRef<Flow | undefined>(selectedFlow);
-  const [queries, setQueries] = useState<StreamQuery[]>([{ ...defaultQuery(), ...query }]);
+  const [queries, setQueries] = useState<StreamQuery[]>([
+    { ...defaultQuery({ streamName: definition.stream.name }), ...query },
+  ]);
   const [canSave, setCanSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -167,16 +169,23 @@ export function AddSignificantEventFlyout({
           .filter((nextQuery) => validateEsqlQuery(nextQuery.esql.query).isInvalid === false)
           .map((nextQuery) => ({
             id: v4(),
+            affected_streams: [definition.stream.name],
             esql: nextQuery.esql,
             title: nextQuery.title,
             severity_score: nextQuery.severity_score,
             evidence: nextQuery.evidence,
+            type: nextQuery.type,
+            category: nextQuery.category,
+            source: nextQuery.source,
+            model: nextQuery.model,
+            description: nextQuery.description,
+            tags: nextQuery.tags,
           }))
       );
     }
 
     prevTaskStatusRef.current = task?.status;
-  }, [task]);
+  }, [definition.stream.name, task]);
 
   const parsedQueries = useMemo(() => {
     return streamQuerySchema.array().safeParse(queries);
@@ -187,9 +196,9 @@ export function AddSignificantEventFlyout({
       flowRef.current = selectedFlow;
       setIsSubmitting(false);
       setCanSave(false);
-      setQueries([defaultQuery()]);
+      setQueries([defaultQuery({ streamName: definition.stream.name })]);
     }
-  }, [selectedFlow]);
+  }, [definition.stream.name, selectedFlow]);
 
   const generateQueries = () => {
     if (!aiFeatures?.genAiConnectors.selectedConnector) {
@@ -363,14 +372,20 @@ export function AddSignificantEventFlyout({
                         case 'manual':
                           onSave({
                             type: 'single',
-                            query: queries[0],
+                            query: {
+                              ...queries[0],
+                              source: 'user_created',
+                            },
                             isUpdating: isEditMode,
                           }).finally(() => setIsSubmitting(false));
                           break;
                         case 'ai':
                           onSave({
                             type: 'multiple',
-                            queries,
+                            queries: queries.map((nextQuery) => ({
+                              ...nextQuery,
+                              source: 'ai_generated',
+                            })),
                           }).finally(() => setIsSubmitting(false));
                           break;
                       }

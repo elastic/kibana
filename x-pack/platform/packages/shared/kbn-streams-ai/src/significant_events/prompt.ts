@@ -83,6 +83,9 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                     title: {
                       type: 'string',
                     },
+                    description: {
+                      type: 'string',
+                    },
                     category: {
                       type: 'string',
                       enum: [
@@ -105,7 +108,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                       },
                     },
                   },
-                  required: ['esql', 'title', 'category', 'severity_score'],
+                  required: ['esql', 'title', 'description', 'category', 'severity_score'],
                 },
               },
             },

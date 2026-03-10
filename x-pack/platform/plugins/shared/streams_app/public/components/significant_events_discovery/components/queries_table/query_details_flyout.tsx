@@ -14,7 +14,9 @@ import {
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiDescriptionListDescription,
   EuiDescriptionList,
+  EuiDescriptionListTitle,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,12 +37,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { StreamsESQLEditor } from '../../../esql_query_editor';
-import type { SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { InfoPanel } from '../../../info_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { SeveritySelector } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/severity_selector';
+import { useFetchQueryOccurrencesChartData } from '../../../../hooks/use_fetch_queries_occurrences_chart_data';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import {
   BACKED_STATUS_COLUMN,
@@ -58,18 +61,34 @@ import { formatLastOccurredAt } from './utils';
 import { AssetImage } from '../../../asset_image';
 
 interface QueryDetailsFlyoutProps {
-  item: SignificantEventItem;
+  item: StreamQuery;
+  unbackedQueryIds: string[];
   isSaving: boolean;
   isDeleting: boolean;
   onClose: () => void;
-  onSave: (updatedQuery: SignificantEventItem['query'], streamName: string) => Promise<void>;
+  onSave: (updatedQuery: StreamQuery, streamName: string) => Promise<void>;
   onDelete: (queryId: string, streamName: string) => Promise<void>;
+}
+
+interface QueryInformationRowProps {
+  title: string;
+  children: React.ReactNode;
 }
 
 const DEFAULT_QUERY_PLACEHOLDER = '--';
 
+function QueryInformationRow({ title, children }: QueryInformationRowProps) {
+  return (
+    <EuiDescriptionList type="column" columnWidths={[1, 2]} compressed>
+      <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+      <EuiDescriptionListDescription>{children}</EuiDescriptionListDescription>
+    </EuiDescriptionList>
+  );
+}
+
 export function QueryDetailsFlyout({
   item,
+  unbackedQueryIds,
   isSaving,
   isDeleting,
   onClose,
@@ -83,83 +102,61 @@ export function QueryDetailsFlyout({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [title, setTitle] = useState(item.query.title);
+  const [title, setTitle] = useState(item.title);
   const [query, setQuery] = useState(getQueryInputValue(item));
-  const [severityScore, setSeverityScore] = useState(item.query.severity_score);
+  const [severityScore, setSeverityScore] = useState(item.severity_score);
+  const { data: queryOccurrencesChartData } = useFetchQueryOccurrencesChartData({
+    queryId: item.id,
+  });
 
   useEffect(() => {
     setIsActionsPopoverOpen(false);
     setIsDeleteModalVisible(false);
     setIsEditMode(false);
-    setTitle(item.query.title);
+    setTitle(item.title);
     setQuery(getQueryInputValue(item));
-    setSeverityScore(item.query.severity_score);
+    setSeverityScore(item.severity_score);
   }, [item]);
 
   const lastOccurredAt = useMemo(
-    () => formatLastOccurredAt(item.occurrences, DEFAULT_QUERY_PLACEHOLDER),
-    [item.occurrences]
+    () => formatLastOccurredAt(queryOccurrencesChartData?.buckets ?? [], DEFAULT_QUERY_PLACEHOLDER),
+    [queryOccurrencesChartData?.buckets]
   );
   const hasDetectedOccurrences = useMemo(
-    () => item.occurrences.some((occurrence) => occurrence.y > 0),
-    [item.occurrences]
+    () => (queryOccurrencesChartData?.buckets ?? []).some((occurrence) => occurrence.y > 0),
+    [queryOccurrencesChartData?.buckets]
   );
   const isSaveDisabled = !title.trim() || !query.trim() || isSaving;
+  const primaryStreamName = item.affected_streams[0];
 
   const handleCancelEdit = () => {
     setIsEditMode(false);
-    setTitle(item.query.title);
+    setTitle(item.title);
     setQuery(getQueryInputValue(item));
-    setSeverityScore(item.query.severity_score);
+    setSeverityScore(item.severity_score);
   };
   const handleSaveQuery = async () => {
+    if (!primaryStreamName) {
+      return;
+    }
+
     await onSave(
       {
-        ...item.query,
+        ...item,
         title: title.trim(),
         esql: { query: query.trim() },
         severity_score: severityScore,
       },
-      item.stream_name
+      primaryStreamName
     );
     setIsEditMode(false);
   };
 
-  const infoListItems = [
-    {
-      title: QUERY_LABEL,
-      description: (
-        <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
-          {getDisplayQueryValue(item)}
-        </EuiCodeBlock>
-      ),
-    },
-    {
-      title: IMPACT_COLUMN,
-      description: <SeverityBadge score={item.query.severity_score} />,
-    },
-    {
-      title: LAST_OCCURRED_COLUMN,
-      description: <EuiText size="s">{lastOccurredAt}</EuiText>,
-    },
-    {
-      title: STREAM_COLUMN,
-      description: <EuiBadge color="hollow">{item.stream_name}</EuiBadge>,
-    },
-    {
-      title: BACKED_STATUS_COLUMN,
-      description: (
-        <EuiToolTip
-          content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
-        >
-          <span tabIndex={0}>
-            {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
-            {!item.rule_backed && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
-          </span>
-        </EuiToolTip>
-      ),
-    },
-  ];
+  const isBacked = !unbackedQueryIds.includes(item.id);
+  const description = item.description?.trim();
+  const model = item.model?.trim();
+  const evidence = (item.evidence ?? []).map((value) => value.trim()).filter(Boolean);
+  const source = item.source;
 
   return (
     <>
@@ -175,7 +172,7 @@ export function QueryDetailsFlyout({
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiTitle size="m">
-                <h2 id={flyoutTitleId}>{item.query.title}</h2>
+                <h2 id={flyoutTitleId}>{item.title}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -249,27 +246,95 @@ export function QueryDetailsFlyout({
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <InfoPanel title={QUERY_INFORMATION_TITLE}>
-                  {infoListItems.map((listItem, index) => (
-                    <React.Fragment key={listItem.title}>
-                      <EuiDescriptionList
-                        type="column"
-                        columnWidths={[1, 2]}
-                        compressed
-                        listItems={[listItem]}
-                      />
-                      {index < infoListItems.length - 1 && <EuiHorizontalRule margin="m" />}
-                    </React.Fragment>
-                  ))}
+                  <QueryInformationRow title={QUERY_LABEL}>
+                    <EuiCodeBlock language="esql" paddingSize="none" transparentBackground>
+                      {getDisplayQueryValue(item)}
+                    </EuiCodeBlock>
+                  </QueryInformationRow>
+                  {description && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={DESCRIPTION_LABEL}>
+                        <EuiText size="s">{description}</EuiText>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  {model && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={MODEL_LABEL}>
+                        <EuiText size="s">{model}</EuiText>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  {evidence.length > 0 && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={EVIDENCE_LABEL}>
+                        <EuiFlexGroup direction="column" gutterSize="xs">
+                          {evidence.map((evidenceItem, index) => (
+                            <Fragment key={`${evidenceItem}-${index}`}>
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s">{evidenceItem}</EuiText>
+                              </EuiFlexItem>
+                              {index < evidence.length - 1 ? (
+                                <EuiHorizontalRule margin="xs" />
+                              ) : null}
+                            </Fragment>
+                          ))}
+                        </EuiFlexGroup>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  {source && (
+                    <>
+                      <EuiHorizontalRule margin="m" />
+                      <QueryInformationRow title={SOURCE_LABEL}>
+                        <EuiBadge color="hollow">{getSourceDisplayName(source)}</EuiBadge>
+                      </QueryInformationRow>
+                    </>
+                  )}
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={IMPACT_COLUMN}>
+                    <SeverityBadge score={item.severity_score} />
+                  </QueryInformationRow>
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={LAST_OCCURRED_COLUMN}>
+                    <EuiText size="s">{lastOccurredAt}</EuiText>
+                  </QueryInformationRow>
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={STREAM_COLUMN}>
+                    <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+                      {item.affected_streams.map((streamName) => (
+                        <EuiFlexItem grow={false} key={streamName}>
+                          <EuiBadge color="hollow">{streamName}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  </QueryInformationRow>
+                  <EuiHorizontalRule margin="m" />
+                  <QueryInformationRow title={BACKED_STATUS_COLUMN}>
+                    <EuiToolTip
+                      content={isBacked ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
+                    >
+                      <span tabIndex={0}>
+                        {isBacked && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
+                        {!isBacked && (
+                          <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>
+                        )}
+                      </span>
+                    </EuiToolTip>
+                  </QueryInformationRow>
                 </InfoPanel>
               </EuiFlexItem>
               <EuiFlexItem>
                 <InfoPanel title={OCCURRENCES_COLUMN}>
                   {hasDetectedOccurrences ? (
                     <SparkPlot
-                      id={`query-details-occurrences-${item.query.id}`}
+                      id={`query-details-occurrences-${item.id}`}
                       name={OCCURRENCES_TOOLTIP_NAME}
                       type="bar"
-                      timeseries={item.occurrences}
+                      timeseries={queryOccurrencesChartData?.buckets ?? []}
                       annotations={[]}
                       height={160}
                     />
@@ -355,7 +420,11 @@ export function QueryDetailsFlyout({
             setIsDeleteModalVisible(false);
           }}
           onConfirm={async () => {
-            await onDelete(item.query.id, item.stream_name);
+            if (!primaryStreamName) {
+              return;
+            }
+
+            await onDelete(item.id, primaryStreamName);
             setIsDeleteModalVisible(false);
           }}
           cancelButtonText={CANCEL_BUTTON_LABEL}
@@ -371,13 +440,26 @@ export function QueryDetailsFlyout({
   );
 }
 
-function getQueryInputValue(item: SignificantEventItem) {
-  return item.query.esql?.query ?? '';
+function getQueryInputValue(query: StreamQuery) {
+  return query.esql?.query ?? '';
 }
 
-function getDisplayQueryValue(item: SignificantEventItem) {
-  const queryText = getQueryInputValue(item);
+function getDisplayQueryValue(query: StreamQuery) {
+  const queryText = getQueryInputValue(query);
   return queryText || DEFAULT_QUERY_PLACEHOLDER;
+}
+
+function getSourceDisplayName(source: NonNullable<StreamQuery['source']>): string {
+  switch (source) {
+    case 'ai_generated':
+      return SOURCE_AI_GENERATED_BADGE_LABEL;
+    case 'user_created':
+      return SOURCE_USER_CREATED_BADGE_LABEL;
+    case 'predefined':
+      return SOURCE_PREDEFINED_BADGE_LABEL;
+    default:
+      return source;
+  }
 }
 
 const QUERY_INFORMATION_TITLE = i18n.translate(
@@ -398,6 +480,41 @@ const QUERY_NAME_LABEL = i18n.translate(
 const QUERY_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
+);
+
+const DESCRIPTION_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.descriptionLabel',
+  { defaultMessage: 'Description' }
+);
+
+const MODEL_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.modelLabel',
+  { defaultMessage: 'Model' }
+);
+
+const EVIDENCE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.evidenceLabel',
+  { defaultMessage: 'Evidence' }
+);
+
+const SOURCE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceLabel',
+  { defaultMessage: 'Source' }
+);
+
+const SOURCE_AI_GENERATED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceAiGeneratedBadgeLabel',
+  { defaultMessage: 'AI generated' }
+);
+
+const SOURCE_USER_CREATED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourceUserCreatedBadgeLabel',
+  { defaultMessage: 'Created manually' }
+);
+
+const SOURCE_PREDEFINED_BADGE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.sourcePredefinedBadgeLabel',
+  { defaultMessage: 'Predefined' }
 );
 
 const SEVERITY_LABEL = i18n.translate(

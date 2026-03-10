@@ -205,11 +205,15 @@ const expectedDashboard = {
 const expectedQueriesResponse = {
   queries: [
     {
+      affected_streams: [TEST_STREAM_NAME],
       id: '12345',
       title: 'Test',
       esql: {
         query: `FROM ${TEST_STREAM_NAME},${TEST_STREAM_NAME}.* METADATA _id, _source | WHERE KQL("atest")`,
       },
+      type: 'match',
+      category: 'operational',
+      tags: [],
     },
   ],
 };

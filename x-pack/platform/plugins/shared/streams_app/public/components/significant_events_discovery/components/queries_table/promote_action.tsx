@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/use_fetch_discovery_queries';
 import { useFetchErrorToast } from '../../../../hooks/use_fetch_error_toast';
-import { type SignificantEventItem } from '../../../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/use_queries_api';
 import { PROMOTE_QUERY_ACTION_TITLE, getPromoteQuerySuccessToast } from './translations';
 
-export function PromoteAction({ item }: { item: SignificantEventItem }) {
+export function PromoteAction({ query, unbacked }: { query: StreamQuery; unbacked: string[] }) {
   const queryClient = useQueryClient();
   const { promote } = useQueriesApi();
   const {
@@ -29,27 +29,25 @@ export function PromoteAction({ item }: { item: SignificantEventItem }) {
     onSuccess: (_result, variables) => {
       const promotedQueryCount = variables.queryIds?.length ?? 0;
       if (promotedQueryCount === 1) {
-        toasts.addSuccess(getPromoteQuerySuccessToast(item.query.title));
+        toasts.addSuccess(getPromoteQuerySuccessToast(query.title));
       }
       queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ['unbackedQueriesCount'] });
     },
     onError: showFetchErrorToast,
   });
+  const isBacked = !unbacked.includes(query.id);
 
   return (
-    <EuiToolTip
-      content={!item.rule_backed ? PROMOTE_QUERY_ACTION_TITLE : ''}
-      disableScreenReaderOutput
-    >
+    <EuiToolTip content={!isBacked ? PROMOTE_QUERY_ACTION_TITLE : ''} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="plusInCircle"
         aria-label={PROMOTE_QUERY_ACTION_TITLE}
         isLoading={promoteMutation.isLoading}
-        isDisabled={item.rule_backed || promoteMutation.isLoading}
+        isDisabled={isBacked || promoteMutation.isLoading}
         onClick={() => {
           promoteMutation.mutate({
-            queryIds: [item.query.id],
+            queryIds: [query.id],
           });
         }}
       />

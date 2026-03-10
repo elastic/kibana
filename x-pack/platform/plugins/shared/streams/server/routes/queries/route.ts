@@ -98,10 +98,17 @@ const upsertQueryRoute = createServerRoute({
     const definition = await streamsClient.getStream(streamName);
     await queryClient.upsert(definition, {
       id: queryId,
+      affected_streams: [streamName],
       title: body.title,
       esql: body.esql,
       severity_score: body.severity_score,
       evidence: body.evidence,
+      description: body.description,
+      tags: body.tags,
+      type: body.type,
+      category: body.category,
+      source: body.source,
+      model: body.model,
     });
 
     return {

@@ -36,6 +36,7 @@ export class QueryService {
     const [core, pluginStart] = await this.coreSetup.getStartServices();
 
     const soClient = core.savedObjects.getScopedClient(request);
+    const scopedClusterClient = core.elasticsearch.client.asScoped(request);
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
@@ -118,6 +119,7 @@ export class QueryService {
         storageClient: adapter.getClient(),
         soClient,
         rulesClient,
+        scopedClusterClient,
         logger: this.logger,
       },
       isSignificantEventsEnabled

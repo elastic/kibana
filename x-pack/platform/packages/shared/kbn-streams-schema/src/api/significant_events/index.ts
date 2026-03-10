@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { EsqlQuery, StreamQuery } from '../../queries';
+import type { StreamQuery } from '../../queries';
 import type { TaskStatus } from '../../tasks/types';
 
 /**
@@ -36,7 +36,6 @@ interface SignificantEventOccurrence {
 }
 
 type SignificantEventsResponse = StreamQuery & {
-  stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
@@ -54,12 +53,7 @@ type SignificantEventsPreviewResponse = Pick<
   'occurrences' | 'change_points' | 'esql'
 >;
 
-interface GeneratedSignificantEventQuery {
-  title: string;
-  esql: EsqlQuery;
-  severity_score: number;
-  evidence?: string[];
-}
+type GeneratedSignificantEventQuery = Omit<StreamQuery, 'id' | 'affected_streams'>;
 
 type SignificantEventsGenerateResponse = Observable<
   ServerSentEventBase<

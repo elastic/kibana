@@ -9,7 +9,6 @@ import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers/v4';
 import { primitive } from '../shared/record_types';
-import type { SignificantEventsResponse } from '../api/significant_events';
 
 export interface EsqlQuery {
   query: string;
@@ -24,11 +23,32 @@ interface StreamQueryBase {
   title: string;
 }
 
+export const streamQueryTypeSchema = z.enum(['match', 'stats']).optional();
+export const streamQueryCategorySchema = z
+  .enum(['operational', 'error', 'resource_health', 'configuration', 'security'])
+  .optional();
+export const streamQuerySourceSchema = z
+  .enum(['ai_generated', 'user_created', 'predefined'])
+  .optional();
+
+export type StreamQueryType = z.infer<typeof streamQueryTypeSchema>;
+export type StreamQueryCategory = z.infer<typeof streamQueryCategorySchema>;
+export type StreamQuerySource = z.infer<typeof streamQuerySourceSchema>;
+
 export interface StreamQuery extends StreamQueryBase {
+  affected_streams: string[];
   esql: EsqlQuery;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
   evidence?: string[];
+  description?: string;
+  type?: StreamQueryType;
+  category?: StreamQueryCategory;
+  tags?: string[];
+  source?: StreamQuerySource;
+  model?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 const streamQueryBaseSchema = z.object({
@@ -37,6 +57,7 @@ const streamQueryBaseSchema = z.object({
 }) satisfies z.Schema<StreamQueryBase>;
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
+  affected_streams: z.array(z.string()),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   esql: esqlQuerySchema,
@@ -54,16 +75,45 @@ export const upsertStreamQueryRequestSchema = z.object({
   esql: esqlQuerySchema,
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
+  description: z.string().optional(),
+  type: streamQueryTypeSchema,
+  category: streamQueryCategorySchema,
+  tags: z.array(z.string()).optional(),
+  source: streamQuerySourceSchema,
+  model: z.string().optional(),
 });
 
+export type RuleUnbackedFilter = 'exclude' | 'include' | 'only';
+
+export interface QueryLinkFilters {
+  ruleUnbacked?: RuleUnbackedFilter;
+}
+
+export interface GetQueriesFilters {
+  streamName?: string | string[];
+  type?: StreamQueryType[];
+  category?: StreamQueryCategory[];
+  source?: StreamQuerySource[];
+  search?: string;
+  ruleUnbacked?: RuleUnbackedFilter;
+}
+
+export interface QueryRuleOccurrencesHistogramBucket {
+  date: string;
+  count: number;
+}
+
+export interface QueryRuleOccurrences {
+  buckets: QueryRuleOccurrencesHistogramBucket[];
+  total: number;
+}
+
 export interface QueriesGetResponse {
-  queries: SignificantEventsResponse[];
+  queries: StreamQuery[];
+  unbacked: string[];
   page: number;
   perPage: number;
   total: number;
 }
 
-export interface QueriesOccurrencesGetResponse {
-  occurrences_histogram: Array<{ x: string; y: number }>;
-  total_occurrences: number;
-}
+export type QueriesOccurrencesGetResponse = QueryRuleOccurrences;

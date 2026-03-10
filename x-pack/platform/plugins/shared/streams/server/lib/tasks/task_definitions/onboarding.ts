@@ -278,10 +278,18 @@ export async function persistQueries(
     queries.map((query) => ({
       index: {
         id: v4(),
+        affected_streams: [streamName],
         esql: query.esql,
         title: query.title,
+        description: query.description,
         severity_score: query.severity_score,
         evidence: query.evidence,
+        category: query.category,
+        type: query.type,
+        source: query.source,
+        model: query.model,
+        tags: query.tags,
+        created_at: query.created_at,
       },
     })),
     { createRules: false }

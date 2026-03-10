@@ -15,7 +15,6 @@ import { useFetchErrorToast } from './use_fetch_error_toast';
 
 export interface SignificantEventItem {
   query: StreamQuery;
-  stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
   rule_backed: boolean;
@@ -91,10 +90,9 @@ export const useFetchSignificantEvents = (
       }) => {
         return {
           significant_events: significantEvents.map((series) => {
-            const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
+            const { occurrences, change_points, rule_backed, ...rest } = series;
             return {
               query: rest,
-              stream_name,
               change_points,
               occurrences: occurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),

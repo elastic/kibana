@@ -81,9 +81,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           queries: [
             {
+              affected_streams: [STREAM_NAME],
               id: 'aaa',
               title: 'OOM Error',
               esql: { query: esqlQuery },
+              type: 'match',
+              tags: [],
             },
           ],
         });
@@ -92,9 +95,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const streamDefinition = await getStream(apiClient, STREAM_NAME);
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
+          affected_streams: [STREAM_NAME],
           id: 'aaa',
           title: 'OOM Error',
           esql: { query: esqlQuery },
+          type: 'match',
+          category: 'operational',
+          tags: [],
         });
       });
 
@@ -121,12 +128,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           queries: [
             {
+              affected_streams: [STREAM_NAME],
               id: 'logs.otel.queries-test.query1',
               title: 'should not be deleted',
               esql: {
                 query:
                   'FROM logs.queries-test,logs.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
+              type: 'match',
+              tags: [],
             },
           ],
         });
@@ -163,12 +173,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           queries: [
             {
+              affected_streams: ['logs.otel.queries-test.child'],
               id: 'logs.otel.queries-test.child.query1',
               title: 'must be deleted',
               esql: {
                 query:
                   'FROM logs.queries-test.child,logs.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
+              type: 'match',
+              tags: [],
             },
           ],
         });
@@ -179,20 +192,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...emptyAssets,
           queries: [
             {
+              affected_streams: ['logs.otel.queries-test.child.first'],
               id: 'logs.otel.queries-test.child.first.query1',
               title: 'must be deleted',
               esql: {
                 query:
                   'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
+              type: 'match',
+              tags: [],
             },
             {
+              affected_streams: ['logs.otel.queries-test.child.first'],
               id: 'logs.otel.queries-test.child.first.query2',
               title: 'must be deleted',
               esql: {
                 query:
                   'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
               },
+              type: 'match',
+              tags: [],
             },
           ],
         });
@@ -265,9 +284,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...classicPutBody,
           queries: [
             {
+              affected_streams: [indexName],
               id: 'aaa',
               title: 'OOM Error',
               esql: { query: esqlQuery },
+              type: 'match',
+              tags: [],
             },
           ],
         });
@@ -276,9 +298,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
+          affected_streams: [indexName],
           id: 'aaa',
           title: 'OOM Error',
           esql: { query: esqlQuery },
+          type: 'match',
+          category: 'operational',
+          tags: [],
         });
 
         await clean();

@@ -72,12 +72,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         upsertRequest({
           queries: [
             {
+              affected_streams: ['logs.otel.branch_a.child1.nested'],
               id: 'my-error-query',
               title: 'error query',
               esql: {
                 query:
                   'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
               },
+              type: 'match',
+              tags: [],
             },
           ],
         })
@@ -257,12 +260,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )!;
         expect(leafEntry.request.queries).to.eql([
           {
+            affected_streams: ['logs.otel.branch_a.child1.nested'],
             id: 'my-error-query',
             title: 'error query',
             esql: {
               query:
                 'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
             },
+            type: 'match' as const,
+            category: 'operational' as const,
+            tags: [],
           },
         ]);
       });
@@ -508,12 +515,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )) as Streams.WiredStream.GetResponse;
         expect(createdStream.queries).to.eql([
           {
+            affected_streams: ['logs.otel.branch_c.nested'],
             id: 'my-error-query',
             title: 'error query',
             esql: {
               query:
                 'FROM logs.otel.branch_c.nested, logs.otel.branch_c.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
             },
+            type: 'match' as const,
+            category: 'operational' as const,
+            tags: [],
           },
         ]);
       });
@@ -766,12 +777,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...emptyAssets,
                 queries: [
                   {
+                    affected_streams: ['logs.otel.branch_a.child1.nested'],
                     id: 'my-error-query',
                     title: 'error query',
                     esql: {
                       query:
                         'FROM logs.otel.branch_a.child1.nested,logs.otel.branch_a.child1.nested.* METADATA _id, _source | WHERE KQL("message: ERROR")',
                     },
+                    type: 'match',
+                    tags: [],
                   },
                 ],
               },

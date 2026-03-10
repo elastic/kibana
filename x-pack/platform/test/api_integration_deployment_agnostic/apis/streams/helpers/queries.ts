@@ -6,17 +6,11 @@
  */
 
 import type { StreamQuery } from '@kbn/streams-schema';
-import { v4 } from 'uuid';
 
-export function defaultQuery({ streamName }: { streamName: string }): StreamQuery {
-  return {
-    id: v4(),
-    title: '',
-    esql: {
-      query: '',
-    },
-    affected_streams: [streamName],
-    type: 'match',
-    tags: [],
-  };
+export function removeDynamicQueryFields(
+  query: StreamQuery
+): Omit<StreamQuery, 'created_at' | 'updated_at'> {
+  const { created_at, updated_at, ...partialQuery } = query;
+
+  return partialQuery;
 }

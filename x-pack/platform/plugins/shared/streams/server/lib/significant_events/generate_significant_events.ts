@@ -63,9 +63,20 @@ export async function generateSignificantEventDefinitions(
   return {
     queries: queries.map((query) => ({
       title: query.title,
+      description: query.description,
       esql: { query: ensureMetadata(query.esql) },
       severity_score: query.severity_score,
       evidence: query.evidence,
+      category: query.category,
+      source: 'ai_generated',
+      model: connectorId,
+      created_at: new Date().toISOString(),
+      /**
+       * Only `match` types are supported for now.
+       * Support for STATS queries: https://github.com/elastic/streams-program/issues/851
+       */
+      type: 'match',
+      tags: [],
     })),
     tokensUsed,
     toolUsage,

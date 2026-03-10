@@ -22,6 +22,7 @@ import {
   putStream,
 } from './helpers/requests';
 import type { RoleCredentials } from '../../services';
+import { removeDynamicQueryFields } from './helpers/queries';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -89,18 +90,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('lists queries when defined on the stream', async () => {
       const queries = [
         {
+          affected_streams: [STREAM_NAME],
           id: v4(),
           title: 'OutOfMemoryError',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'OutOfMemoryError'")`,
           },
+          type: 'match' as const,
+          category: 'operational' as const,
+          tags: [],
         },
         {
+          affected_streams: [STREAM_NAME],
           id: v4(),
           title: 'cluster_block_exception',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'cluster_block_exception'")`,
           },
+          type: 'match' as const,
+          category: 'operational' as const,
+          tags: [],
         },
       ];
 
@@ -128,11 +137,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('PUT /api/streams/{name}/queries/{queryId}', () => {
       it('inserts a query when inexistant', async () => {
         const query = {
+          affected_streams: [STREAM_NAME],
           id: v4(),
           title: 'initial title',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'initial query'")`,
           },
+          type: 'match' as const,
+          category: 'operational' as const,
+          tags: [],
         };
         const upsertQueryResponse = await apiClient
           .fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
@@ -149,7 +162,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-        expect(getQueriesResponse.queries).to.eql([query]);
+        expect(getQueriesResponse.queries).length(1);
+        expect(getQueriesResponse.queries.map(removeDynamicQueryFields)).to.eql([query]);
 
         const rules = await alertingApi.searchRules(roleAuthc, '');
         expect(rules.body.data).to.have.length(1);
@@ -158,11 +172,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the query and create a new rule when updating an existing query esql', async () => {
         const query = {
+          affected_streams: [STREAM_NAME],
           id: 'first',
           title: 'initial title',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
+          type: 'match' as const,
+          category: 'operational' as const,
+          tags: [],
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -187,11 +205,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-        expect(getQueriesResponse.queries).to.eql([
+        expect(getQueriesResponse.queries.map(removeDynamicQueryFields)).to.eql([
           {
+            affected_streams: [STREAM_NAME],
             id: query.id,
             title: query.title,
             esql: { query: updatedEsql },
+            type: 'match',
+            category: 'operational' as const,
+            tags: [],
           },
         ]);
 
@@ -203,11 +225,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the query and the rule when updating an existing query title', async () => {
         const query = {
+          affected_streams: [STREAM_NAME],
           id: 'first',
           title: 'initial title',
           esql: {
             query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("initial query")`,
           },
+          type: 'match' as const,
+          category: 'operational' as const,
+          tags: [],
         };
         await putStream(apiClient, STREAM_NAME, {
           stream,
@@ -231,11 +257,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(upsertQueryResponse.acknowledged).to.be(true);
 
         const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-        expect(getQueriesResponse.queries).to.eql([
+        expect(getQueriesResponse.queries).length(1);
+        expect(getQueriesResponse.queries.map(removeDynamicQueryFields)).to.eql([
           {
+            affected_streams: [STREAM_NAME],
             id: query.id,
             title: 'updated title',
             esql: { query: query.esql.query },
+            type: 'match',
+            category: 'operational' as const,
+            tags: [],
           },
         ]);
 
@@ -253,11 +284,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...emptyAssets,
         queries: [
           {
+            affected_streams: [STREAM_NAME],
             id: queryId,
             title: 'Significant Query',
             esql: {
               query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message:'query'")`,
             },
+            type: 'match',
+            tags: [],
           },
         ],
       });
@@ -288,25 +322,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('bulks insert and remove queries', async () => {
       const firstQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'first',
         title: 'first query',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 1")`,
         },
+        type: 'match' as const,
+        category: 'operational' as const,
+        tags: [],
       };
       const secondQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'second',
         title: 'second query',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 2")`,
         },
+        type: 'match' as const,
+        category: 'operational' as const,
+        tags: [],
       };
       const thirdQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'third',
         title: 'third query',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3")`,
         },
+        type: 'match' as const,
+        category: 'operational' as const,
+        tags: [],
       };
       await putStream(apiClient, STREAM_NAME, {
         stream,
@@ -316,18 +362,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const initialRules = await alertingApi.searchRules(roleAuthc, '');
 
       const newQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'fourth',
         title: 'fourth query',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 4")`,
         },
+        type: 'match' as const,
+        category: 'operational' as const,
+        tags: [],
       };
       const updateThirdQuery = {
+        affected_streams: [STREAM_NAME],
         id: 'third',
         title: 'third query',
         esql: {
           query: `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("query 3 updated")`,
         },
+        type: 'match' as const,
+        category: 'operational' as const,
+        tags: [],
       };
 
       const bulkResponse = await apiClient
@@ -361,7 +415,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(bulkResponse).to.have.property('acknowledged', true);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
-      expect(getQueriesResponse.queries).to.eql([firstQuery, updateThirdQuery, newQuery]);
+      expect(getQueriesResponse.queries.map(removeDynamicQueryFields)).to.eql([
+        firstQuery,
+        updateThirdQuery,
+        newQuery,
+      ]);
 
       const updatedRules = await alertingApi.searchRules(roleAuthc, '');
       expect(updatedRules.body.data).to.have.length(3);

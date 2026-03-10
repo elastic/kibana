@@ -171,12 +171,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           // Add a significant event query that should survive snapshot/restore
           queries: [
             {
+              affected_streams: ['logs.otel.web-app'],
               id: 'slow-requests',
               title: 'Slow Requests',
               esql: {
                 query:
                   'FROM logs.web-app,logs.web-app.* METADATA _id, _source | WHERE KQL("attributes.response_time_ms > 100")',
               },
+              type: 'match',
+              tags: [],
             },
           ],
         };
