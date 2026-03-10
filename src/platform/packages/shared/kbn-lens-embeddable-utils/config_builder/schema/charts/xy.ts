@@ -765,7 +765,7 @@ export const xyStateSchemaESQL = schema.object(
     layers: schema.arrayOf(xyDataLayerSchemaESQL, {
       minSize: 1,
       maxSize: 1,
-      meta: { description: 'Chart layers (minimum 1 required)' },
+      meta: { description: 'Only single layer ESQL charts are supported ' },
     }),
   },
   {
