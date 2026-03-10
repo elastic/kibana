@@ -1,9 +1,8 @@
-summary: Retrieves information about a case. The response omits comments; use the find case comments API to retrieve them. totalComment reflects the actual number of user comments.
+summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
 value: 
   {
     "id":"31cdada0-02c1-11ed-85f2-4f7c222ca2fa",
     "version":"WzM2LDFd",
-     "comments":[],
     "totalComment":1,
     "totalAlerts":1,
     "title":"Case title 1",

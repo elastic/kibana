@@ -797,7 +797,7 @@ paths:
       summary: Get case information
       operationId: getCaseDefaultSpace
       description: |
-        Returns case details. The response does not include a comments property; use the find case comments API to retrieve comments. The totalComment field reflects the actual number of user comments on the case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Returns case details. The response does not include a comments property;  use the find case comments API to retrieve comments. The totalComment field  reflects the actual number of user comments on the case. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       tags:
         - cases
       parameters:
@@ -808,11 +808,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/case_response_properties'
+                $ref: '#/components/schemas/case_response_get_case'
               examples:
                 getDefaultCaseResponse:
                   $ref: '#/components/examples/get_case_response'
-                getDefaultObservabilityCaseReponse:
+                getDefaultObservabilityCaseResponse:
                   $ref: '#/components/examples/get_case_observability_response'
         '401':
           description: Authorization information is missing or invalid.
@@ -958,7 +958,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/case_response_properties'
+                $ref: '#/components/schemas/find_comments_response'
+              examples:
+                findCaseCommentsResponse:
+                  $ref: '#/components/examples/find_case_comments_response'
         '401':
           description: Authorization information is missing or invalid.
           content:
@@ -1732,7 +1735,8 @@ components:
           type: boolean
           example: true
         extractObservables:
-          description: Auto extracts observables
+          description: |
+            When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
           type: boolean
           example: false
     case_severity:
@@ -2659,6 +2663,144 @@ components:
             The version of the connector. To retrieve the version value, use the get configuration API.
           type: string
           example: WzIwMiwxXQ==
+    case_response_get_case:
+      title: Get case response
+      description: |
+        Case details returned by the get case API. The comments property is not included in the response. Use the find case comments API to retrieve comments. totalComment reflects the actual number of user comments.
+      type: object
+      required:
+        - closed_at
+        - closed_by
+        - connector
+        - created_at
+        - created_by
+        - description
+        - duration
+        - external_service
+        - id
+        - owner
+        - settings
+        - severity
+        - status
+        - tags
+        - title
+        - totalAlerts
+        - totalComment
+        - updated_at
+        - updated_by
+        - version
+      properties:
+        assignees:
+          $ref: '#/components/schemas/assignees'
+        category:
+          type: string
+          description: The case category.
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+        closed_by:
+          $ref: '#/components/schemas/case_response_closed_by_properties'
+        connector:
+          title: Case response properties for connectors
+          oneOf:
+            - $ref: '#/components/schemas/connector_properties_none'
+            - $ref: '#/components/schemas/connector_properties_cases_webhook'
+            - $ref: '#/components/schemas/connector_properties_jira'
+            - $ref: '#/components/schemas/connector_properties_resilient'
+            - $ref: '#/components/schemas/connector_properties_servicenow'
+            - $ref: '#/components/schemas/connector_properties_servicenow_sir'
+            - $ref: '#/components/schemas/connector_properties_swimlane'
+          discriminator:
+            propertyName: type
+            mapping:
+              .none: '#/components/schemas/connector_properties_none'
+              .cases-webhook: '#/components/schemas/connector_properties_cases_webhook'
+              .jira: '#/components/schemas/connector_properties_jira'
+              .resilient: '#/components/schemas/connector_properties_resilient'
+              .servicenow: '#/components/schemas/connector_properties_servicenow'
+              .servicenow-sir: '#/components/schemas/connector_properties_servicenow_sir'
+              .swimlane: '#/components/schemas/connector_properties_swimlane'
+        created_at:
+          type: string
+          format: date-time
+          example: '2022-05-13T09:16:17.416Z'
+        created_by:
+          $ref: '#/components/schemas/case_response_created_by_properties'
+        customFields:
+          type: array
+          description: Custom field values for the case.
+          items:
+            type: object
+            properties:
+              key:
+                description: |
+                  The unique identifier for the custom field. The key value must exist in the case configuration settings.
+                type: string
+              type:
+                description: |
+                  The custom field type. It must match the type specified in the case configuration settings.
+                type: string
+                enum:
+                  - text
+                  - toggle
+              value:
+                description: |
+                  The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
+                oneOf:
+                  - type: string
+                    minLength: 1
+                    maxLength: 160
+                    nullable: true
+                  - type: boolean
+        description:
+          type: string
+          example: A case description.
+        duration:
+          type: integer
+          description: |
+            The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
+          nullable: true
+          example: 120
+        external_service:
+          $ref: '#/components/schemas/external_service'
+        id:
+          type: string
+          example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+        owner:
+          $ref: '#/components/schemas/owner'
+        settings:
+          $ref: '#/components/schemas/settings'
+        severity:
+          $ref: '#/components/schemas/case_severity'
+        status:
+          $ref: '#/components/schemas/case_status'
+        tags:
+          type: array
+          items:
+            type: string
+          example:
+            - tag-1
+        title:
+          type: string
+          example: Case title 1
+        totalAlerts:
+          type: integer
+          example: 0
+        totalComment:
+          type: integer
+          description: The number of user comments on the case. Use the find case comments API to retrieve comment content.
+          example: 1
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_by:
+          $ref: '#/components/schemas/case_response_updated_by_properties'
+        version:
+          type: string
+          example: WzUzMiwxXQ==
     alert_response_properties:
       type: object
       properties:
@@ -2849,6 +2991,29 @@ components:
         mapping:
           alert: '#/components/schemas/update_alert_comment_request_properties'
           user: '#/components/schemas/update_user_comment_request_properties'
+    find_comments_response:
+      title: Find case comments response
+      type: object
+      required:
+        - comments
+        - page
+        - per_page
+        - total
+      properties:
+        comments:
+          type: array
+          description: Paginated list of user comments for the case.
+          items:
+            $ref: '#/components/schemas/user_comment_response_properties'
+        page:
+          type: integer
+          description: The current page index.
+        per_page:
+          type: integer
+          description: The number of items per page.
+        total:
+          type: integer
+          description: The total number of comments.
     actions:
       type: string
       enum:
@@ -3666,12 +3831,12 @@ components:
         - tag 1
         - tag 2
     get_case_response:
-      summary: Retrieves information about a case. The response omits comments; use the find case comments API to retrieve them. totalComment reflects the actual number of user comments.
+      summary: Get case response. Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
         id: 31cdada0-02c1-11ed-85f2-4f7c222ca2fa
         version: WzM2LDFd
         totalComment: 1
-        totalAlerts: 0
+        totalAlerts: 1
         title: Case title 1
         tags:
           - tag 1
@@ -3714,7 +3879,7 @@ components:
           fields: null
         external_service: null
     get_case_observability_response:
-      summary: Retrieves information about an Observability case. The response omits comments; use the find case comments API to retrieve them. totalComment reflects the actual number of user comments.
+      summary: Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.
       value:
         description: An Observability case description.
         owner: observability
@@ -3898,6 +4063,28 @@ components:
           type: .none
           fields: null
         external_service: null
+    find_case_comments_response:
+      summary: Paginated list of user comments for a case
+      value:
+        page: 1
+        per_page: 20
+        total: 1
+        comments:
+          - id: 8048b460-fe2b-11ec-b15d-779a7c8bbcc3
+            version: WzIzLDFd
+            type: user
+            owner: cases
+            comment: A new comment
+            created_at: '2023-10-07T19:32:13.104Z'
+            created_by:
+              email: null
+              full_name: null
+              username: elastic
+              profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            pushed_at: null
+            pushed_by: null
+            updated_at: null
+            updated_by: null
     get_comment_response:
       summary: A single user comment retrieved from a case
       value:

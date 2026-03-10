@@ -1,4 +1,4 @@
-summary: Retrieves information about an Observability case. The response omits comments; use the find case comments API to retrieve them. totalComment reflects the actual number of user comments.
+summary: Get case response (Observability). Comments are not included; use the find case comments API. totalComment reflects the actual count.
 value: 
   {
   "description": "An Observability case description.",
@@ -48,5 +48,4 @@ value:
   "version": "WzI0NywyXQ==",
   "totalComment": 1,
   "totalAlerts": 1,
-  "comments": [],
 }
