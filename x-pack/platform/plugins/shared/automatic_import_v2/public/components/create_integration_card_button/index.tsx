@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { CreateIntegrationSideCardButton } from './create_integration_card_button';
+import React, { Suspense } from 'react';
 import type { CreateIntegrationSideCardButtonComponent } from './types';
+
+const CreateIntegrationSideCardButton = React.lazy(() =>
+  import('./create_integration_card_button').then((module) => ({
+    default: module.CreateIntegrationSideCardButton,
+  }))
+);
 
 export const getCreateIntegrationSideCardButtonLazy =
   (): CreateIntegrationSideCardButtonComponent =>
-    React.memo(function CreateIntegrationSideCardButtonLazy(props) {
-      return <CreateIntegrationSideCardButton {...props} />;
+    React.memo(function CreateIntegrationSideCardButtonLazy() {
+      return (
+        <Suspense fallback={null}>
+          <CreateIntegrationSideCardButton />
+        </Suspense>
+      );
     });

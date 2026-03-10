@@ -22,6 +22,7 @@ import { dispatchOperators } from '../operators/dispatcher';
 import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { shouldSuggestOperators } from './after_complete/should_suggest_operators';
+import { normalizePreferredExpressionTypes } from '../utils';
 
 /**
  * Suggests completions after an operator (e.g., field = |, field IN |)
@@ -251,15 +252,17 @@ async function handleIncompleteOperator(
   }
 
   if (reason === 'wrongTypes') {
-    if (leftArgType && options.preferredExpressionType) {
+    const preferredTypes = normalizePreferredExpressionTypes(options.preferredExpressionType);
+
+    if (leftArgType && preferredTypes.length) {
       if (
-        leftArgType !== options.preferredExpressionType &&
+        !preferredTypes.includes(leftArgType) &&
         leftArgType !== 'unknown' &&
         leftArgType !== 'unsupported'
       ) {
         builder.addOperators({
           leftParamType: leftArgType,
-          returnTypes: [options.preferredExpressionType],
+          returnTypes: preferredTypes,
         });
       }
     }

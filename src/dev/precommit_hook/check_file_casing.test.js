@@ -26,4 +26,12 @@ describe('dev/precommit_hook/check_file_casing', () => {
       })
     ).resolves.toBeUndefined();
   });
+
+  it('skips paths nested under hidden directories', async () => {
+    await expect(
+      checkFileCasing(noopLog, ['.hidden_dir/team-space/INVALID_NAME.md'], getSnakeCase, {
+        ignorePatterns: ['**/.*', '**/.*/**'],
+      })
+    ).resolves.toBeUndefined();
+  });
 });

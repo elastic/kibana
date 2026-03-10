@@ -55,7 +55,7 @@ import { getLlmType } from '../utils';
 import { MAX_GENERATION_ATTEMPTS, MAX_HALLUCINATION_FAILURES } from './translations';
 
 const KB_REQUIRED_TYPES: Set<DefendInsightType> = new Set([
-  DefendInsightType.Enum.policy_response_failure,
+  DefendInsightType.enum.policy_response_failure,
 ]);
 
 function addGenerationInterval(
@@ -213,13 +213,13 @@ export async function handleToolError({
       authenticatedUser,
     });
 
-    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.Enum.canceled) {
+    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.enum.canceled) {
       return;
     }
     await dataClient.updateDefendInsight({
       defendInsightUpdateProps: {
         insights: [],
-        status: DefendInsightStatus.Enum.failed,
+        status: DefendInsightStatus.enum.failed,
         id: defendInsightId,
         replacements: latestReplacements,
         backingIndex: currentInsight.backingIndex,
@@ -260,7 +260,7 @@ export async function createDefendInsight(
       insightType,
       apiConfig,
       insights: [],
-      status: DefendInsightStatus.Enum.running,
+      status: DefendInsightStatus.enum.running,
     },
     authenticatedUser,
   });
@@ -280,9 +280,9 @@ const extractInsightsForTelemetryReporting = (
   insights: DefendInsights
 ): string[] => {
   switch (insightType) {
-    case DefendInsightType.Enum.incompatible_antivirus:
+    case DefendInsightType.enum.incompatible_antivirus:
       return insights.map((insight) => insight.group);
-    case DefendInsightType.Enum.policy_response_failure:
+    case DefendInsightType.enum.policy_response_failure:
       return insights.map((insight) => insight.group);
     default:
       return [];
@@ -319,7 +319,7 @@ export async function updateDefendInsights({
       id: defendInsightId,
       authenticatedUser,
     });
-    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.Enum.canceled) {
+    if (currentInsight === null || currentInsight?.status === DefendInsightStatus.enum.canceled) {
       return;
     }
     const endTime = moment();
@@ -328,7 +328,7 @@ export async function updateDefendInsights({
     const updateProps = {
       eventsContextCount,
       insights: insights ?? undefined,
-      status: DefendInsightStatus.Enum.succeeded,
+      status: DefendInsightStatus.enum.succeeded,
       ...(!eventsContextCount || !insights
         ? {}
         : {
@@ -584,7 +584,7 @@ export const handleGraphError = async ({
     await dataClient.updateDefendInsight({
       defendInsightUpdateProps: {
         insights: [],
-        status: DefendInsightStatus.Enum.failed,
+        status: DefendInsightStatus.enum.failed,
         id: defendInsightId,
         replacements: latestReplacements,
         backingIndex: currentInsight.backingIndex,

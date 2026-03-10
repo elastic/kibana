@@ -14,7 +14,7 @@ import { createPublicStepDefinition } from '../../step_registry/types';
 export const dataMapStepDefinition = createPublicStepDefinition({
   ...dataMapStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/list').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/mapping').then(({ icon }) => ({
       default: icon,
     }))
   ),
