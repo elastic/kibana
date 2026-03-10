@@ -31,6 +31,12 @@ jest.mock('./lib/get_exclude_rules_filter', () => ({
   getExcludeRulesFilter: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock('../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
+  bulkMarkApiKeysForInvalidation: jest.fn().mockResolvedValue(undefined),
+}));
+
+import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+
 function createMockCore(uiamConvert: jest.Mock): {
   coreSetup: CoreSetup;
   coreStart: CoreStart;
@@ -1065,6 +1071,82 @@ describe('UiamApiKeyProvisioningTask', () => {
       );
       expect(uiamConvert).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      const orphanedKey = Buffer.from('essu_0:uiam-key-1').toString('base64');
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [orphanedKey] },
+        logger,
+        savedObjectsClient
+      );
+    });
+
+    it('calls bulkMarkApiKeysForInvalidation for rules that fail in bulkUpdate response', async () => {
+      (bulkMarkApiKeysForInvalidation as jest.Mock).mockClear();
+      const uiamConvert = jest.fn().mockResolvedValue({
+        results: [
+          createConvertSuccessResult({ key: 'uiam-a', id: 'essu_0' }),
+          createConvertSuccessResult({ key: 'uiam-b', id: 'essu_1' }),
+        ],
+      } as ConvertUiamAPIKeysResponse);
+
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'r1',
+          attributes: { apiKey: 'es-a', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+        createRuleSavedObject({
+          id: 'r2',
+          attributes: { apiKey: 'es-b', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'r1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+          {
+            id: 'r2',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: { error: 'Conflict', message: 'Conflict', statusCode: 409 },
+          },
+        ],
+      });
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+      await runner.run();
+
+      const orphanedKeyForR2 = Buffer.from('essu_1:uiam-b').toString('base64');
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+      expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+        { apiKeys: [orphanedKeyForR2] },
+        logger,
+        savedObjectsClient
+      );
     });
 
     it('handles mixed success and failed convert results', async () => {

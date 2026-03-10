@@ -18,7 +18,9 @@ import type { RawRule } from '../types';
 import {
   RULE_SAVED_OBJECT_TYPE,
   UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+  API_KEY_PENDING_INVALIDATION_TYPE,
 } from '../saved_objects';
+import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { UiamApiKeyProvisioningStatus } from '../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import {
   stateSchemaByVersion,
@@ -180,6 +182,7 @@ export class UiamApiKeyProvisioningTask {
     });
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
       UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+      API_KEY_PENDING_INVALIDATION_TYPE,
     ]);
 
     const { apiKeysToConvert, provisioningStatusForSkippedRules, hasMoreToProvision } =
@@ -190,7 +193,8 @@ export class UiamApiKeyProvisioningTask {
 
     const provisioningStatusFromUpdate = await this.updateRules(
       rulesWithUiamApiKeys,
-      unsafeSavedObjectsClient
+      unsafeSavedObjectsClient,
+      savedObjectsClient
     );
 
     await this.updateProvisioningStatus(
@@ -388,7 +392,8 @@ export class UiamApiKeyProvisioningTask {
 
   private updateRules = async (
     rulesWithUiamApiKeys: Array<UiamApiKeyByRuleId>,
-    unsafeSavedObjectsClient: SavedObjectsClientContract
+    unsafeSavedObjectsClient: SavedObjectsClientContract,
+    savedObjectsClient: SavedObjectsClientContract
   ): Promise<Array<ProvisioningStatusDocs>> => {
     if (rulesWithUiamApiKeys.length === 0) {
       return [];
@@ -396,12 +401,43 @@ export class UiamApiKeyProvisioningTask {
     const ruleUpdates = buildRuleUpdatesForUiam(rulesWithUiamApiKeys);
     try {
       const bulkRuleUpdateResponse = await unsafeSavedObjectsClient.bulkUpdate(ruleUpdates);
-      return bulkRuleUpdateResponse.saved_objects.map(createStatusFromBulkUpdateResult);
+
+      const uiamApiKeyByRuleId = new Map(
+        rulesWithUiamApiKeys.map((r) => [r.ruleId, r.uiamApiKey] as const)
+      );
+      const statusDocs: Array<ProvisioningStatusDocs> = [];
+      const orphanedUiamApiKeys: string[] = [];
+
+      for (const so of bulkRuleUpdateResponse.saved_objects) {
+        statusDocs.push(createStatusFromBulkUpdateResult(so));
+        if (so.error) {
+          const uiamApiKey = uiamApiKeyByRuleId.get(so.id);
+          if (uiamApiKey) {
+            orphanedUiamApiKeys.push(uiamApiKey);
+          }
+        }
+      }
+
+      if (orphanedUiamApiKeys.length > 0) {
+        await bulkMarkApiKeysForInvalidation(
+          { apiKeys: orphanedUiamApiKeys },
+          this.logger,
+          savedObjectsClient
+        );
+      }
+
+      return statusDocs;
     } catch (error) {
       const message = error.message ?? String(error);
       this.logger.error(`Error bulk updating rules with UIAM API keys: ${message}`, {
         error: { stack_trace: error.stack, tags: TAGS },
       });
+      const orphanedUiamApiKeys = rulesWithUiamApiKeys.map((r) => r.uiamApiKey);
+      await bulkMarkApiKeysForInvalidation(
+        { apiKeys: orphanedUiamApiKeys },
+        this.logger,
+        savedObjectsClient
+      );
       throw error;
     }
   };
