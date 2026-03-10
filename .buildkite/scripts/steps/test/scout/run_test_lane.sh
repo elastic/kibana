@@ -79,6 +79,7 @@ read_load_ids() {
 # Start the Scout test server in the background and wait for it to become ready
 start_server() {
   local timeout_seconds="$1"
+  mkdir -p "$(dirname "$SCOUT_SERVER_LOG")"
 
   echo "--- Starting test server (timeout: ${timeout_seconds}s)"
 
