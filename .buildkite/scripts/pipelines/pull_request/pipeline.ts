@@ -26,7 +26,8 @@ import { emitPipeline, getAgentImageConfig } from '#pipeline-utils';
       `steps:
   - label: 'Jest Checkpoint Retry Repro'
     key: jest-checkpoint-repro
-    command: >-
+    command: |-
+      .buildkite/scripts/bootstrap.sh
       node ./scripts/jest_all
       --configs=".buildkite/scripts/pipelines/pull_request/jest_retry_repro/pass/jest.config.js,.buildkite/scripts/pipelines/pull_request/jest_retry_repro/fail/jest.config.js"
       --coverage=false
