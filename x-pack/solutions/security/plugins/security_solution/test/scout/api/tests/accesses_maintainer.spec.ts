@@ -237,7 +237,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       }
     });
 
-    apiTest.skip(
+    apiTest(
       'Should assign accesses_frequently when access count exceeds threshold',
       async ({ esClient }) => {
         const entities = await esClient.search({
@@ -268,7 +268,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       }
     );
 
-    apiTest.skip(
+    apiTest(
       'Should assign accesses_infrequently when access count is at or below threshold',
       async ({ esClient }) => {
         const entities = await esClient.search({
@@ -296,7 +296,7 @@ for (const integration of INTEGRATION_CONFIGS) {
       }
     );
 
-    apiTest.skip(
+    apiTest(
       'Should assign both accesses_frequently and accesses_infrequently for user-006',
       async ({ esClient }) => {
         const entities = await esClient.search({

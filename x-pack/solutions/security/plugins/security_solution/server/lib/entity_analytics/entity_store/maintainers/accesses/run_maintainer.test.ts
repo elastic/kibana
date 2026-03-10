@@ -7,6 +7,7 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { runMaintainer } from './run_maintainer';
 import { COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { CompositeAfterKey, ProcessedEntityRecord } from './types';
@@ -78,6 +79,7 @@ function createEsqlResponse(columns: EsqlColumn[] = [], values: unknown[][] = []
 describe('runMaintainer', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
+  const crudClient = { upsertEntitiesBulk: jest.fn() } as unknown as EntityStoreCRUDClient;
   let mockIntegration: AccessesIntegrationConfig;
 
   beforeEach(() => {
@@ -97,6 +99,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -125,6 +128,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -141,6 +145,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -164,6 +169,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -191,6 +197,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -223,6 +230,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -244,6 +252,7 @@ describe('runMaintainer', () => {
           esClient,
           logger,
           namespace: 'default',
+          crudClient,
           integrations: [mockIntegration],
         })
       ).rejects.toThrow('search_phase_execution_exception');
@@ -263,6 +272,7 @@ describe('runMaintainer', () => {
           esClient,
           logger,
           namespace: 'default',
+          crudClient,
           integrations: [mockIntegration],
         })
       ).rejects.toThrow('verification_exception');
@@ -315,11 +325,12 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
       expect(mockUpsertEntityRelationships).toHaveBeenCalledTimes(1);
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(esClient, logger, 'default', [
+      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(crudClient, logger, [
         ...page1Records,
         ...page2Records,
       ]);
@@ -334,10 +345,11 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(esClient, logger, 'default', []);
+      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(crudClient, logger, []);
     });
   });
 
@@ -371,13 +383,14 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [integration1, integration2],
       });
 
       expect(esClient.search).toHaveBeenCalledTimes(2);
       expect(integration1.buildCompositeAggQuery).toHaveBeenCalledTimes(1);
       expect(integration2.buildCompositeAggQuery).toHaveBeenCalledTimes(1);
-      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(esClient, logger, 'default', [
+      expect(mockUpsertEntityRelationships).toHaveBeenCalledWith(crudClient, logger, [
         ...records1,
         ...records2,
       ]);
@@ -399,6 +412,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [integration1, integration2],
       });
 
@@ -418,6 +432,7 @@ describe('runMaintainer', () => {
           esClient,
           logger,
           namespace: 'default',
+          crudClient,
           integrations: [mockIntegration],
         })
       ).rejects.toThrow('index_not_found_exception');
@@ -440,6 +455,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -462,6 +478,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'custom-ns',
+        crudClient,
         integrations: [mockIntegration],
       });
 
@@ -477,6 +494,7 @@ describe('runMaintainer', () => {
         esClient,
         logger,
         namespace: 'default',
+        crudClient,
         integrations: [mockIntegration],
       });
 

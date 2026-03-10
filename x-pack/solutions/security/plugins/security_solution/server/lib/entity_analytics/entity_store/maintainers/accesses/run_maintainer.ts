@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EntityMaintainerState } from '@kbn/entity-store/server';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 
 import { LOOKBACK_WINDOW, COMPOSITE_PAGE_SIZE, MAX_ITERATIONS } from './constants';
 import type { CompositeAfterKey, CompositeBucket, ProcessedEntityRecord } from './types';
@@ -41,13 +41,15 @@ export async function runMaintainer({
   esClient,
   logger,
   namespace,
+  crudClient,
   integrations = INTEGRATION_CONFIGS,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   namespace: string;
+  crudClient: EntityStoreCRUDClient;
   integrations?: AccessesIntegrationConfig[];
-}): Promise<EntityMaintainerState> {
+}) {
   let totalBuckets = 0;
   let totalAccessRecords = 0;
   let totalUpserted = 0;
@@ -165,7 +167,7 @@ export async function runMaintainer({
     } while (afterKey);
   }
 
-  totalUpserted = await upsertEntityRelationships(esClient, logger, namespace, allRecords);
+  totalUpserted = await upsertEntityRelationships(crudClient, logger, allRecords);
 
   return {
     totalBuckets,

@@ -16,8 +16,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { EntityStoreSetupContract } from './types';
-export type {
-  RegisterEntityMaintainerConfig,
-  EntityMaintainerState,
-} from './tasks/entity_maintainers/types';
-export { CRUDClient } from './domain/crud/crud_client';
+export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { CRUDClient } from '@kbn/entity-store/server';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
@@ -28,16 +27,14 @@ function buildEntityDoc(record: ProcessedEntityRecord): Entity {
 }
 
 export async function upsertEntityRelationships(
-  esClient: ElasticsearchClient,
+  crudClient: EntityStoreCRUDClient,
   logger: Logger,
-  namespace: string,
   records: ProcessedEntityRecord[]
 ): Promise<number> {
   if (records.length === 0) return 0;
 
   const entityType: EntityType = 'user';
 
-  const crudClient = new CRUDClient({ esClient, logger, namespace });
   const entities = records.map((r) => ({ type: entityType, doc: buildEntityDoc(r) }));
 
   logger.info(`Upserting ${entities.length} entity relationship records via CRUD bulk API`);
