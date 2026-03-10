@@ -80,6 +80,7 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/scout",
+    "@kbn/encrypted-saved-objects-shared",
   ],
   "exclude": ["target/**/*"]
 }
