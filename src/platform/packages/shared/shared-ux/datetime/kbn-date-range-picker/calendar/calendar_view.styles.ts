@@ -33,7 +33,7 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
     .rdp-month_caption {
       color: ${euiTheme.colors.textHeading};
       display: flex;
-      font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;
+      font-size: ${euiTheme.font.scale.s * euiTheme.base}px;
       font-weight: ${euiTheme.font.weight.bold};
       height: calc(${euiTheme.size.xl} + ${euiTheme.size.xs});
       justify-content: center;
