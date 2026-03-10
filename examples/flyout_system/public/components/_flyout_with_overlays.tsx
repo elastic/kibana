@@ -138,7 +138,6 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
   }, [childFlyoutRefB]);
 
   const openChildFlyoutA = useCallback(() => {
-    handleCloseChildFlyoutB(); // Ensure only one child flyout is open at a time
     childFlyoutRefA.current = overlays.openSystemFlyout(
       <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />,
       {
@@ -163,10 +162,9 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       }
     );
     setIsChildFlyoutAOpen(true);
-  }, [childSize, childMaxWidth, overlays, title, childFlyoutRefA, handleCloseChildFlyoutB]);
+  }, [childSize, childMaxWidth, overlays, title, childFlyoutRefA]);
 
   const openChildFlyoutB = useCallback(() => {
-    handleCloseChildFlyoutA(); // Ensure only one child flyout is open at a time
     childFlyoutRefB.current = overlays.openSystemFlyout(
       <ChildFlyoutContent childSize={childSize} childMaxWidth={childMaxWidth} />,
       {
@@ -191,7 +189,7 @@ const FlyoutContent: React.FC<FlyoutContentProps> = React.memo((props) => {
       }
     );
     setIsChildFlyoutBOpen(true);
-  }, [childSize, childMaxWidth, overlays, title, childFlyoutRefB, handleCloseChildFlyoutA]);
+  }, [childSize, childMaxWidth, overlays, title, childFlyoutRefB]);
 
   return (
     <>
