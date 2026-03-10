@@ -22,30 +22,29 @@ export interface PerformMatchSearchResponse {
 }
 
 // --- Search & extraction configuration ---
-// All settings can be overridden via environment variables for eval runs.
 
 // When true, use ES|QL TOP_SNIPPETS command to generate snippets from the documents
 // returned via the RRF retriever. When false, rely on Elasticsearch's highlighter to generate snippets.
-const useSnippets = process.env.USE_SNIPPETS !== 'false';
+const useSnippets = true;
 // The maximum number of snippets to return for each matching document. The number of returned snippets
 // may be lower than this depending on the content in the returned document.
 // Only applicable when useSnippets = true.
-const numSnippets = parseInt(process.env.NUM_SNIPPETS ?? '2', 10);
+const numSnippets = 2;
 // The number of words to use when chunking fields for snippet generation.
 // Only applicable when useSnippets = true.
-const numWords = parseInt(process.env.NUM_WORDS ?? '750', 10);
+const numWords = 750;
 
 // The reranker inference ID to use. We assume this reranker is always available.
-const rerankInferenceID = process.env.RERANK_INFERENCE_ID ?? '.jina-reranker-v3';
+const rerankInferenceID = '.jina-reranker-v3';
 // When true, perform RERANK on the documents that were returned via the RRF retriever.
-const rerankCandidateDocs = process.env.RERANK_CANDIDATE_DOCS !== 'false';
+const rerankCandidateDocs = true;
 // When true, perform an additional rerank operation on the generated snippets for each document.
-const rerankSnippets = process.env.RERANK_SNIPPETS !== 'false';
+const rerankSnippets = true;
 
 // Number of candidate documents to retrieve for doc reranking
-const rankWindowSize = parseInt(process.env.RANK_WINDOW_SIZE ?? '20', 10);
+const rankWindowSize = 20;
 // Number of candidate snippets to extract per doc for snippet reranking
-const snippetRankWindowSize = parseInt(process.env.SNIPPET_RANK_WINDOW_SIZE ?? '10', 10);
+const snippetRankWindowSize = 10;
 
 // --- End configuration ---
 
