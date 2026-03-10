@@ -133,13 +133,19 @@ describe('createSmlCrawler', () => {
 
       expect(mockStateClient.bulk).toHaveBeenCalled();
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
+        ).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'create'
         )
       );
       expect(bulkCall).toBeDefined();
-      const createOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
+      const createOp = (
+        bulkCall![0] as {
+          operations?: Array<{ index?: { document?: { update_action?: string } } }>;
+        }
+      ).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'create'
       );
@@ -179,13 +185,19 @@ describe('createSmlCrawler', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
+        ).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'update'
         )
       );
       expect(bulkCall).toBeDefined();
-      const updateOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
+      const updateOp = (
+        bulkCall![0] as {
+          operations?: Array<{ index?: { document?: { update_action?: string } } }>;
+        }
+      ).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'update'
       );
@@ -223,13 +235,19 @@ describe('createSmlCrawler', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
+        ).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'delete'
         )
       );
       expect(bulkCall).toBeDefined();
-      const deleteOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
+      const deleteOp = (
+        bulkCall![0] as {
+          operations?: Array<{ index?: { document?: { update_action?: string } } }>;
+        }
+      ).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'delete'
       );
@@ -268,7 +286,9 @@ describe('createSmlCrawler', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       const stateWriteCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some((op: { index?: { document?: { update_action?: string } } }) =>
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
+        ).operations?.some((op: { index?: { document?: { update_action?: string } } }) =>
           ['create', 'update', 'delete'].includes(op.index?.document?.update_action ?? '')
         )
       );
@@ -307,13 +327,19 @@ describe('createSmlCrawler', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       const bulkCall = mockStateClient.bulk.mock.calls.find((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.some(
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }
+        ).operations?.some(
           (op: { index?: { document?: { update_action?: string } } }) =>
             op.index?.document?.update_action === 'update'
         )
       );
       expect(bulkCall).toBeDefined();
-      const updateOp = (bulkCall![0] as { operations?: Array<{ index?: { document?: { update_action?: string } } }> }).operations?.find(
+      const updateOp = (
+        bulkCall![0] as {
+          operations?: Array<{ index?: { document?: { update_action?: string } } }>;
+        }
+      ).operations?.find(
         (op: { index?: { document?: { update_action?: string } } }) =>
           op.index?.document?.update_action === 'update'
       );
@@ -365,7 +391,9 @@ describe('createSmlCrawler', () => {
       );
 
       const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: unknown } } }> }).operations?.some(
+        (
+          c[0] as { operations?: Array<{ index?: { document?: { update_action?: unknown } } }> }
+        ).operations?.some(
           (op: { index?: { document?: { update_action?: unknown } } }) =>
             op.index?.document !== undefined && op.index.document.update_action === undefined
         )
@@ -427,7 +455,9 @@ describe('createSmlCrawler', () => {
       );
 
       const deleteAckCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ delete?: { _id?: string } }> }).operations?.some((op: { delete?: { _id?: string } }) => op.delete != null)
+        (c[0] as { operations?: Array<{ delete?: { _id?: string } }> }).operations?.some(
+          (op: { delete?: { _id?: string } }) => op.delete != null
+        )
       );
       expect(deleteAckCalls.length).toBeGreaterThan(0);
     });
@@ -478,9 +508,17 @@ describe('createSmlCrawler', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       const ackBulkCalls = mockStateClient.bulk.mock.calls.filter((c: unknown[]) =>
-        (c[0] as { operations?: Array<{ index?: { document?: { update_action?: unknown } }; delete?: unknown }> }).operations?.some(
+        (
+          c[0] as {
+            operations?: Array<{
+              index?: { document?: { update_action?: unknown } };
+              delete?: unknown;
+            }>;
+          }
+        ).operations?.some(
           (op: { index?: { document?: { update_action?: unknown } }; delete?: unknown }) =>
-            (op.index?.document !== undefined && op.index.document.update_action === undefined) || op.delete != null
+            (op.index?.document !== undefined && op.index.document.update_action === undefined) ||
+            op.delete != null
         )
       );
       expect(ackBulkCalls.length).toBe(1);
@@ -491,22 +529,25 @@ describe('createSmlCrawler', () => {
       const definition = createMockDefinition({
         list: jest.fn().mockResolvedValue([]),
       });
-      mockStateClient.search.mockResolvedValueOnce({ hits: { hits: [] } }).mockResolvedValueOnce({
-        hits: {
-          hits: [
-            {
-              _id: undefined,
-              sort: ['no-id'],
-              _source: {
-                attachment_id: 'no-id',
-                attachment_type: 'test-type',
-                spaces: ['default'],
-                update_action: 'create',
+      mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: undefined,
+                sort: ['no-id'],
+                _source: {
+                  attachment_id: 'no-id',
+                  attachment_type: 'test-type',
+                  spaces: ['default'],
+                  update_action: 'create',
+                },
               },
-            },
-          ],
-        },
-      }).mockResolvedValue({ hits: { hits: [] } });
+            ],
+          },
+        })
+        .mockResolvedValue({ hits: { hits: [] } });
 
       const crawler = createSmlCrawler({ indexer: mockIndexer, logger });
       await crawler.crawl({ definition, esClient, savedObjectsClient });

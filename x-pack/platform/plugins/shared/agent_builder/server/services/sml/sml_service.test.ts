@@ -271,7 +271,9 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as { query?: { bool?: { must?: unknown[] } } };
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { must?: unknown[] } };
+      };
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
@@ -292,7 +294,9 @@ describe('SmlService', () => {
         request,
       });
 
-      const call = esClient.search.mock.calls[0]![0]! as { query?: { bool?: { must?: unknown[] } } };
+      const call = esClient.search.mock.calls[0]![0]! as {
+        query?: { bool?: { must?: unknown[] } };
+      };
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 

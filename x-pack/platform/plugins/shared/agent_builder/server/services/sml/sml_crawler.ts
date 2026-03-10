@@ -210,7 +210,9 @@ class SmlCrawlerImpl implements SmlCrawler {
         if (bulkResponse.errors) {
           const failedOps = bulkResponse.items.filter((item) => item.index?.error);
           this.logger.warn(
-            `SML crawler: ${failedOps.length} state write(s) failed for type '${definition.id}': ${JSON.stringify(failedOps.slice(0, 3))}`
+            `SML crawler: ${failedOps.length} state write(s) failed for type '${
+              definition.id
+            }': ${JSON.stringify(failedOps.slice(0, 3))}`
           );
         } else {
           this.logger.info(
@@ -292,8 +294,7 @@ class SmlCrawlerImpl implements SmlCrawler {
       );
 
       const stateAckOps: Array<
-        | { index: { _id: string; document: SmlCrawlerStateDocument } }
-        | { delete: { _id: string } }
+        { index: { _id: string; document: SmlCrawlerStateDocument } } | { delete: { _id: string } }
       > = [];
 
       const indexPromises = pendingItems
@@ -369,7 +370,11 @@ class SmlCrawlerImpl implements SmlCrawler {
               (item) => (item.index?.error ?? item.delete?.error) !== undefined
             );
             this.logger.warn(
-              `SML crawler: ${failedOps.length} state ACK operation(s) failed for type '${attachmentType}': ${JSON.stringify(failedOps.slice(0, 3))}`
+              `SML crawler: ${
+                failedOps.length
+              } state ACK operation(s) failed for type '${attachmentType}': ${JSON.stringify(
+                failedOps.slice(0, 3)
+              )}`
             );
           }
         } catch (error) {
