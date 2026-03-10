@@ -7,17 +7,12 @@
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
-import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
-import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
-import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { generateEsql } from '..';
 import { extractTextContent } from '../../langchain';
-import type { VisualizationConfig } from './types';
+import { chartTypeRegistry } from './chart_type_registry';
+import type { VisualizationConfig } from './chart_type_registry';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
@@ -34,6 +29,11 @@ import { createGenerateConfigPrompt } from './prompts';
 
 // Regex to extract JSON from markdown code blocks
 const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+
+const validateConfigForChartType = (
+  chartType: SupportedChartType,
+  config: unknown
+): VisualizationConfig => chartTypeRegistry[chartType].schema.validate(config);
 
 /**
  * Helper to extract ESQL queries from a visualization config.
@@ -131,6 +131,8 @@ export const createVisualizationGraph = (
         events,
         logger,
         esClient: esClient.asCurrentUser,
+        additionalInstructions:
+          'Use human-readable column aliases in STATS/EVAL (e.g. `Unique Visitors` not `unique_visitors`). Wrap multi-word aliases in backticks.',
       });
 
       if (!generateEsqlResponse.query) {
@@ -298,22 +300,7 @@ export const createVisualizationGraph = (
         };
       } else {
         // Validate configuration based on chart type
-        let validatedConfig: VisualizationConfig | null = null;
-        if (state.chartType === SupportedChartType.Metric) {
-          validatedConfig = esqlMetricState.validate(config);
-        } else if (state.chartType === SupportedChartType.Gauge) {
-          validatedConfig = gaugeStateSchemaESQL.validate(config);
-        } else if (state.chartType === SupportedChartType.Tagcloud) {
-          validatedConfig = tagcloudStateSchemaESQL.validate(config);
-        } else if (state.chartType === SupportedChartType.XY) {
-          validatedConfig = xyStateSchema.validate(config);
-        } else if (state.chartType === SupportedChartType.RegionMap) {
-          validatedConfig = regionMapStateSchemaESQL.validate(config);
-        } else if (state.chartType === SupportedChartType.Heatmap) {
-          validatedConfig = heatmapStateSchemaESQL.validate(config);
-        } else {
-          throw new Error(`Unsupported chart type: ${state.chartType}`);
-        }
+        const validatedConfig = validateConfigForChartType(state.chartType, config);
 
         logger.debug('Configuration validated successfully');
         action = {

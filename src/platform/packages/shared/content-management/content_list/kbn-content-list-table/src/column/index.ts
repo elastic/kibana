@@ -9,7 +9,14 @@
 
 // Declarative components and props.
 export { Column, type ColumnProps } from './part';
-export { NameColumn, type NameColumnProps, NameCell, type NameCellProps } from './name';
+export {
+  NameColumn,
+  type NameColumnProps,
+  NameCell,
+  type NameCellProps,
+  NameCellTags,
+  type NameCellTagsProps,
+} from './name';
 export { ActionsColumn, type ActionsColumnProps } from './actions';
 export {
   UpdatedAtColumn,

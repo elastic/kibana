@@ -14,8 +14,8 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
