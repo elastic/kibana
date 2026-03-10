@@ -32,7 +32,7 @@ export const ExternalLinkOptionsEditor = ({ options, onOptionChange }: Props) =>
           })}
           checked={options.open_in_new_tab ?? DEFAULT_EXTERNAL_LINK_OPTIONS.open_in_new_tab}
           onChange={() => onOptionChange({ open_in_new_tab: !options.open_in_new_tab })}
-          data-test-subj="urlDrilldownopen_in_new_tab"
+          data-test-subj="urlDrilldownOpenInNewTab"
         />
         <EuiSpacer size="s" />
         <EuiSwitch
