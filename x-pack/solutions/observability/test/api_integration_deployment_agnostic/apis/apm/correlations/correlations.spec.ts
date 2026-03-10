@@ -47,6 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     start: '2020',
     end: '2021',
     kuery: '',
+    includeHistogram: true,
   });
 
   describe('latency and failure rate correlations api', () => {
