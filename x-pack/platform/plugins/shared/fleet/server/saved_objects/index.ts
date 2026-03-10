@@ -1313,7 +1313,8 @@ export const getSavedObjectTypes = (
                       type: schema.string(),
                       version: schema.maybe(schema.string()),
                       deferred: schema.maybe(schema.boolean()),
-                    })
+                    }),
+                    { maxSize: 10000 }
                   )
                 ),
                 latest_install_failed_attempts: schema.maybe(schema.any()),
@@ -1339,10 +1340,12 @@ export const getSavedObjectTypes = (
                               tsdb: schema.maybe(schema.boolean()),
                             },
                             { unknowns: 'ignore' }
-                          )
+                          ),
+                          { maxSize: 10 }
                         )
                       ),
-                    })
+                    }),
+                    { maxSize: 1000 }
                   )
                 ),
                 previous_version: schema.maybe(schema.string()),
@@ -1366,7 +1369,8 @@ export const getSavedObjectTypes = (
                       type: schema.string(),
                       version: schema.maybe(schema.string()),
                       deferred: schema.maybe(schema.boolean()),
-                    })
+                    }),
+                    { maxSize: 10000 }
                   )
                 ),
                 latest_install_failed_attempts: schema.maybe(schema.any()),
@@ -1392,10 +1396,12 @@ export const getSavedObjectTypes = (
                               tsdb: schema.maybe(schema.boolean()),
                             },
                             { unknowns: 'ignore' }
-                          )
+                          ),
+                          { maxSize: 10 }
                         )
                       ),
-                    })
+                    }),
+                    { maxSize: 1000 }
                   )
                 ),
                 previous_version: schema.maybe(schema.string()),
