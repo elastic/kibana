@@ -138,7 +138,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_ccr_read_exceptions',
         'alerting:monitoring_shard_size',
         'alerting:observability.rules.custom_threshold',
-        'alerting:security.attack_discovery.data_generator',
         'alerting:siem.eqlRule',
         'alerting:siem.esqlRule',
         'alerting:siem.indicatorRule',
