@@ -156,7 +156,11 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
               if (ingest?.processing && 'updated_at' in ingest.processing) {
                 delete ingest.processing.updated_at;
               }
-              if (!hadProcessing && ingest?.processing && Object.keys(ingest.processing).length === 0) {
+              if (
+                !hadProcessing &&
+                ingest?.processing &&
+                Object.keys(ingest.processing).length === 0
+              ) {
                 delete ingest.processing;
               }
               if (!hadIngest && ingest && Object.keys(ingest).length === 0) {

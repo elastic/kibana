@@ -66,7 +66,9 @@ export async function resolveKibanaUrl(kibanaHostname: string, log?: ToolingLog)
   } catch (error: unknown) {
     const errorObj = typeof error === 'object' && error !== null ? error : undefined;
     const code =
-      errorObj && 'code' in errorObj && typeof (errorObj as Record<string, unknown>).code === 'string'
+      errorObj &&
+      'code' in errorObj &&
+      typeof (errorObj as Record<string, unknown>).code === 'string'
         ? ((errorObj as Record<string, unknown>).code as string)
         : undefined;
     const message = error instanceof Error ? error.message : String(error);
