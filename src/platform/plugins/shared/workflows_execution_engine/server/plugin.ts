@@ -35,6 +35,7 @@ import { getAuthenticatedUser } from './lib/get_user';
 import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execution_telemetry_client';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
@@ -335,6 +336,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
               const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId);
               if (!workflow) {
@@ -433,6 +435,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
+              workflowExecution.stepExecutionsWriteIndex =
+                await stepExecutionRepository.resolveWriteIndex();
+
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
@@ -489,9 +494,9 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(
-      coreStart.elasticsearch.client.asInternalUser
-    );
+    const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    const workflowExecutionRepository = new WorkflowExecutionRepository(internalEsClient);
+    const stepExecutionRepo = new StepExecutionRepository(internalEsClient);
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -547,6 +552,8 @@ export class WorkflowsExecutionEnginePlugin
       if (concurrencyGroupKey) {
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
+
+      workflowExecution.stepExecutionsWriteIndex = await stepExecutionRepo.resolveWriteIndex();
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
@@ -702,7 +709,7 @@ export class WorkflowsExecutionEnginePlugin
         coreStart.security,
         coreStart.elasticsearch.client
       );
-      const workflowExecution = {
+      const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId: workflow.spaceId,
         stepId,
@@ -715,6 +722,7 @@ export class WorkflowsExecutionEnginePlugin
         createdAt: workflowCreatedAt.toISOString(),
         executedBy,
         triggeredBy,
+        stepExecutionsWriteIndex: await stepExecutionRepo.resolveWriteIndex(),
       };
 
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);

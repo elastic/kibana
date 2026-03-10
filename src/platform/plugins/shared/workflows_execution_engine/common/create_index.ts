@@ -17,6 +17,17 @@ interface CreateIndexOptions {
   logger?: Logger;
 }
 
+interface SetupRolloverIndexOptions {
+  esClient: ElasticsearchClient;
+  aliasName: string;
+  indexPattern: string;
+  initialIndex: string;
+  ilmPolicyName: string;
+  mappings: MappingTypeMapping;
+  rolloverMaxAge: string;
+  logger?: Logger;
+}
+
 export const createIndexWithMappings = async ({
   esClient,
   indexName,
@@ -89,6 +100,147 @@ export const createOrUpdateIndex = async ({
     }
   } catch (error) {
     logger?.error(`Failed to create or update index ${indexName}: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * Sets up a rollover-managed index with ILM policy, index template, and
+ * bootstraps the initial write index if it doesn't already exist.
+ *
+ * After setup:
+ * - `aliasName` points to one or more backing indexes (e.g. -000001, -000002, …)
+ * - The latest backing index is the write index
+ * - ILM automatically rolls over based on `rolloverMaxAge`
+ * - Reads via `aliasName` fan out across all backing indexes
+ */
+export const setupRolloverIndex = async ({
+  esClient,
+  aliasName,
+  indexPattern,
+  initialIndex,
+  ilmPolicyName,
+  mappings,
+  rolloverMaxAge,
+  logger,
+}: SetupRolloverIndexOptions): Promise<void> => {
+  await ensureIlmPolicy({ esClient, ilmPolicyName, rolloverMaxAge, logger });
+  await ensureIndexTemplate({
+    esClient,
+    aliasName,
+    indexPattern,
+    ilmPolicyName,
+    mappings,
+    logger,
+  });
+  await bootstrapWriteIndex({ esClient, aliasName, initialIndex, mappings, logger });
+};
+
+const ensureIlmPolicy = async ({
+  esClient,
+  ilmPolicyName,
+  rolloverMaxAge,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  ilmPolicyName: string;
+  rolloverMaxAge: string;
+  logger?: Logger;
+}): Promise<void> => {
+  try {
+    await esClient.ilm.putLifecycle({
+      name: ilmPolicyName,
+      policy: {
+        phases: {
+          hot: {
+            actions: {
+              rollover: {
+                max_age: rolloverMaxAge,
+              },
+            },
+          },
+        },
+      },
+    });
+    logger?.debug(`ILM policy ${ilmPolicyName} created/updated (max_age: ${rolloverMaxAge})`);
+  } catch (error) {
+    logger?.error(`Failed to create ILM policy ${ilmPolicyName}: ${error}`);
+    throw error;
+  }
+};
+
+const ensureIndexTemplate = async ({
+  esClient,
+  aliasName,
+  indexPattern,
+  ilmPolicyName,
+  mappings,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  aliasName: string;
+  indexPattern: string;
+  ilmPolicyName: string;
+  mappings: MappingTypeMapping;
+  logger?: Logger;
+}): Promise<void> => {
+  try {
+    await esClient.indices.putIndexTemplate({
+      name: aliasName,
+      index_patterns: [indexPattern],
+      template: {
+        settings: {
+          index: {
+            lifecycle: {
+              name: ilmPolicyName,
+              rollover_alias: aliasName,
+            },
+          },
+        },
+        mappings,
+      },
+    });
+    logger?.debug(`Index template ${aliasName} created/updated`);
+  } catch (error) {
+    logger?.error(`Failed to create index template ${aliasName}: ${error}`);
+    throw error;
+  }
+};
+
+const bootstrapWriteIndex = async ({
+  esClient,
+  aliasName,
+  initialIndex,
+  mappings,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  aliasName: string;
+  initialIndex: string;
+  mappings: MappingTypeMapping;
+  logger?: Logger;
+}): Promise<void> => {
+  try {
+    const aliasExists = await esClient.indices.existsAlias({ name: aliasName });
+    if (aliasExists) {
+      logger?.debug(`Alias ${aliasName} already exists, skipping bootstrap`);
+      return;
+    }
+
+    await esClient.indices.create({
+      index: initialIndex,
+      aliases: {
+        [aliasName]: { is_write_index: true },
+      },
+      mappings,
+    });
+    logger?.debug(`Bootstrapped write index ${initialIndex} with alias ${aliasName}`);
+  } catch (error) {
+    if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+      logger?.debug(`Write index ${initialIndex} already exists (created by another process)`);
+      return;
+    }
+    logger?.error(`Failed to bootstrap write index ${initialIndex}: ${error}`);
     throw error;
   }
 };

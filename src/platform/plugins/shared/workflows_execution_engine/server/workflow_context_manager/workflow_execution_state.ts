@@ -119,7 +119,10 @@ export class WorkflowExecutionState {
     const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
 
     this.stepDocumentsChanges.clear();
-    await this.workflowStepExecutionRepository.bulkUpsert(stepDocumentsChanges);
+    await this.workflowStepExecutionRepository.bulkUpsert(
+      stepDocumentsChanges,
+      this.workflowExecution.stepExecutionsWriteIndex
+    );
   }
 
   public async flush(): Promise<void> {

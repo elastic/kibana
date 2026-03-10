@@ -18,6 +18,25 @@ export class StepExecutionRepository {
   constructor(private esClient: ElasticsearchClient) {}
 
   /**
+   * Resolves the current write index backing the step executions alias.
+   * This is called once when a workflow execution starts so the backing
+   * index name can be pinned on the execution document, ensuring all
+   * step docs for that execution land in the same backing index even
+   * if ILM rolls over mid-execution.
+   */
+  public async resolveWriteIndex(): Promise<string> {
+    const aliasInfo = await this.esClient.indices.getAlias({ name: this.indexName });
+    for (const [indexName, indexAliases] of Object.entries(aliasInfo)) {
+      const alias = indexAliases.aliases[this.indexName];
+      if (alias?.is_write_index) {
+        return indexName;
+      }
+    }
+    // Fallback: single-index setup (no alias) or pre-rollover state
+    return this.indexName;
+  }
+
+  /**
    * Searches for step executions by workflow execution ID.
    *
    * @param executionId - The ID of the workflow execution to search for step executions.
@@ -55,7 +74,15 @@ export class StepExecutionRepository {
     });
   }
 
-  public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
+  /**
+   * @param targetIndex When provided, writes go to this specific backing index
+   *   instead of the alias. Used to pin all step docs for one workflow execution
+   *   to the backing index that was current when the execution started.
+   */
+  public async bulkUpsert(
+    stepExecutions: Array<Partial<EsWorkflowStepExecution>>,
+    targetIndex?: string
+  ): Promise<void> {
     if (stepExecutions.length === 0) {
       return;
     }
@@ -67,8 +94,8 @@ export class StepExecutionRepository {
     });
 
     const bulkResponse = await this.esClient.bulk({
-      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
-      index: this.indexName,
+      refresh: false,
+      index: targetIndex ?? this.indexName,
       body: stepExecutions.flatMap((stepExecution) => [
         { update: { _id: stepExecution.id } },
         { doc: stepExecution, doc_as_upsert: true },
