@@ -15,14 +15,19 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListFooter } from '@kbn/content-list-footer';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { createStoryFindItems, StateDiagnosticPanel } from './stories_helpers';
+import {
+  createMockFavoritesClient,
+  createStoryFindItems,
+  mockTagsService,
+  StateDiagnosticPanel,
+} from './stories_helpers';
 
 // =============================================================================
 // Storybook Meta
 // =============================================================================
 
 const meta: Meta = {
-  title: 'Content List/Core Features',
+  title: 'Content List/Core Features + Extended',
   decorators: [
     (Story) => (
       <div style={{ padding: '20px', maxWidth: '1200px' }}>
@@ -35,29 +40,27 @@ const meta: Meta = {
 export default meta;
 
 // =============================================================================
-// Core Features Story
+// Core Features + Extended Story (MS3)
 // =============================================================================
 
 const { Column, Action } = ContentListTable;
+const { Filters } = ContentListToolbar;
 
 /**
- * Wrapper component for the MS1 story.
+ * Wrapper component for the MS3 "Core + Tags + Starred" story.
  *
- * MS1 (Graph / Files Management migration) requires the "Core" feature set:
- * search, sorting, pagination, updatedAt column, actions, selection, and
- * delete.  This story is progressively updated as each PR lands.
+ * MS3 (Dashboards migration) requires Core + Tags + Starred. This story
+ * demonstrates the full extended feature set: tag filtering, tag badges in the
+ * Name column, the starred toggle filter, and the star icon column.
  *
- * Current state of MS1 features:
- * - [x] Sorting (PR 1 — Provider Foundation)
- * - [x] Table + Toolbar + Columns (PR 2 — UI Foundation)
- * - [x] Pagination (PR 3)
- * - [x] UpdatedAt column (PR 5)
- * - [x] Actions column (PR 6)
- * - [x] Delete orchestration (PR 8)
- * - [x] Search (PR 4)
- * - [x] Selection + bulk bar (PR 7)
+ * Current state of MS3 features:
+ * - [x] Tags filter popover — include/exclude, Cmd/Ctrl+click (PR 9)
+ * - [x] Tag badges in Name column — click to filter (PR 9)
+ * - [x] Search bar ↔ filter sync — `tag:name` parsed to `filters.tag` (PR 9)
+ * - [x] Starred column — star icon toggle per row
+ * - [x] Starred filter — toggle to show only starred items
  */
-const CoreFeaturesWrapper = () => {
+const CoreTagsStarredFeaturesWrapper = () => {
   const labels = useMemo(
     () => ({
       entity: 'dashboard',
@@ -66,10 +69,12 @@ const CoreFeaturesWrapper = () => {
     []
   );
 
+  const favoritesClient = useMemo(() => createMockFavoritesClient(), []);
+
   const dataSource = useMemo(() => {
-    const findItems = createStoryFindItems({ totalItems: 30 });
+    const findItems = createStoryFindItems({ totalItems: 30, favoritesClient });
     return { findItems };
-  }, []);
+  }, [favoritesClient]);
 
   const features = useMemo(
     () => ({
@@ -86,14 +91,15 @@ const CoreFeaturesWrapper = () => {
         ],
       },
       pagination: { initialPageSize: 20 },
+      tags: true as const,
+      starred: true as const,
     }),
     []
   );
 
   const itemConfig = useMemo(
     () => ({
-      getHref: (item: ContentListItem) => `#/dashboard/${item.id}`,
-      onEdit: (item: ContentListItem) => alert(`Edit: ${item.title}`),
+      getHref: (item: ContentListItem) => `#/dashboards/${item.id}`,
       onDelete: async (_items: ContentListItem[]) => {
         await new Promise((resolve) => setTimeout(resolve, 300));
       },
@@ -104,10 +110,10 @@ const CoreFeaturesWrapper = () => {
   const tableChildren = useMemo(
     () => (
       <>
-        <Column.Name showDescription />
+        <Column.Starred />
+        <Column.Name showDescription showTags showStarred />
         <Column.UpdatedAt />
         <Column.Actions>
-          <Action.Edit />
           <Action.Delete />
         </Column.Actions>
       </>
@@ -118,37 +124,57 @@ const CoreFeaturesWrapper = () => {
   const displayElement = useMemo(
     () => (
       <ContentListProvider
-        id="core-features"
+        id="core-tags-starred-features"
         labels={labels}
         dataSource={dataSource}
         features={features}
         item={itemConfig}
+        services={{ tags: mockTagsService, favorites: favoritesClient }}
       >
-        <ContentListToolbar />
+        <ContentListToolbar>
+          <Filters>
+            <Filters.Starred />
+            <Filters.Tags />
+            <Filters.Sort />
+          </Filters>
+        </ContentListToolbar>
         <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
         <ContentListFooter />
       </ContentListProvider>
     ),
-    [labels, dataSource, features, itemConfig, tableChildren]
+    [labels, dataSource, features, itemConfig, favoritesClient, tableChildren]
   );
 
   return (
-    <ContentListProvider id="core-features" {...{ labels, dataSource, features }} item={itemConfig}>
+    <ContentListProvider
+      id="core-tags-starred-features"
+      labels={labels}
+      dataSource={dataSource}
+      features={features}
+      item={itemConfig}
+      services={{ tags: mockTagsService, favorites: favoritesClient }}
+    >
       <EuiTitle size="s">
-        <h2>Core Features</h2>
+        <h2>Core Features + Extended</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
         <p>
-          The minimum feature set required to migrate the simplest <code>TableListView</code>{' '}
-          consumers (Graph, Files Management) to Content List. Core = Search + Sort + Pagination +
-          UpdatedAt + Actions + Selection + Delete.
+          Core + Tags + Starred — the feature set required to migrate Dashboards to Content List.
+          Demonstrates the starred toggle filter and star icon column (backed by{' '}
+          <code>services.favorites</code>), combined with tag filtering and tag badges from MS2.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <ContentListToolbar />
+          <ContentListToolbar>
+            <Filters>
+              <Filters.Starred />
+              <Filters.Tags />
+              <Filters.Sort />
+            </Filters>
+          </ContentListToolbar>
         </EuiFlexItem>
         <EuiFlexItem>
           <ContentListTable title="dashboards table">{tableChildren}</ContentListTable>
@@ -165,20 +191,19 @@ const CoreFeaturesWrapper = () => {
 };
 
 /**
- * The "Core" feature set: the minimum capabilities required to migrate the
- * simplest `TableListView` consumers (Graph, Files Management) to Content
- * List.
+ * The "Extended" feature set: Core + Tags + Starred.
  *
- * **Core** = Search + Sort + Pagination + UpdatedAt + Actions + Selection + Delete
+ * Required by the Dashboards migration (MS3). Builds on MS2 (Tags) and adds:
+ * - `services.favorites` on the provider wires the favorites client.
+ * - `features.starred: true` enables starred state and the `Filters.Starred` preset.
+ * - `Column.Starred` renders a star icon toggle in a narrow leading column.
+ * - `Filters.Starred` in the toolbar renders a toggle to show only starred items.
  *
- * This story is intentionally non-configurable — it represents the
- * opinionated, production-like composition that a consumer like Graph or
- * Files Management would use. It demonstrates the two-layer architecture:
- * a `ContentListProvider` that owns data-fetching and state, with
- * composable `ContentListToolbar`, `ContentListTable`, and
- * `ContentListFooter` children that read from the provider via context.
+ * **Try:** Click the star icon in any row to mark it as a favorite. Toggle the
+ * "Starred" filter in the toolbar to narrow the list to only starred items.
+ * Tag filtering and badge-click-to-filter from MS2 are also active.
  */
-export const CoreFeatures: StoryObj = {
-  name: 'Core Features',
-  render: () => <CoreFeaturesWrapper />,
+export const CoreTagsStarredFeatures: StoryObj = {
+  name: 'Core Features + Extended',
+  render: () => <CoreTagsStarredFeaturesWrapper />,
 };

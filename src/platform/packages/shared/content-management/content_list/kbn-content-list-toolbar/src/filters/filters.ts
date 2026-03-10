@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import { filtersPart } from './part';
 import { SortFilter } from './sort';
 import { TagFilter } from './tags';
+import { StarredFilter } from './starred';
 
 /**
  * Props for the {@link Filters} container component.
@@ -49,4 +50,5 @@ const FiltersComponent = filtersPart.createComponent<FiltersProps>();
 export const Filters = Object.assign(FiltersComponent, {
   Sort: SortFilter,
   Tags: TagFilter,
+  Starred: StarredFilter,
 });
