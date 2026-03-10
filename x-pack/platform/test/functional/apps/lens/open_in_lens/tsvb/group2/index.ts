@@ -6,7 +6,7 @@
  */
 
 import type { EsArchiver } from '@kbn/es-archiver';
-import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile, getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -17,7 +17,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - TSVB Open in Lens', () => {
+  describe('lens app - TSVB Open in Lens - group 2', () => {
     const esArchive = 'x-pack/platform/test/fixtures/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -63,18 +63,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    after(async () => {
-      await esArchiver.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-    });
-
-    loadTestFile(require.resolve('./dashboard'));
-    loadTestFile(require.resolve('./metric'));
     loadTestFile(require.resolve('./gauge'));
-    loadTestFile(require.resolve('./timeseries'));
-    loadTestFile(require.resolve('./top_n'));
-    loadTestFile(require.resolve('./table'));
+    loadTestFile(require.resolve('./metric'));
   });
 }
