@@ -25,7 +25,8 @@ import {
   type LeadGenerationMode,
 } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
-import { APP_ID, DEFAULT_ALERTS_INDEX } from '../../../../../common';
+import { APP_ID } from '../../../../../common';
+import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
@@ -149,7 +150,7 @@ export const generateLeadsRoute = (
             createBehavioralAnalysisModule({
               esClient,
               logger,
-              alertsIndexPattern: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
+              alertsIndexPattern: getAlertsIndex(spaceId),
             })
           );
 
