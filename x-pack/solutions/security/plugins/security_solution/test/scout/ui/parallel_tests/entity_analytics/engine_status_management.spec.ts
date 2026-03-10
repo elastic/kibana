@@ -38,7 +38,7 @@ spaceTest.describe(
 
     spaceTest(
       'Engine Status tab appears after enabling entity analytics and shows components table',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, apiServices }) => {
         spaceTest.setTimeout(180000);
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
@@ -47,6 +47,7 @@ spaceTest.describe(
           await managementPage.waitForStatusLoaded();
           await managementPage.toggleEntityAnalytics();
           await managementPage.waitForStatusLoaded();
+          await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 60000);
           await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
             timeout: 60000,
           });

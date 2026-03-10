@@ -36,6 +36,7 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await managementPage.navigate();
+        await managementPage.waitForStatusLoaded();
         await managementPage.navigateToAssetCriticalityTab();
 
         await expect(managementPage.assetCriticalityTab).toHaveAttribute('aria-selected', 'true');
@@ -52,10 +53,13 @@ spaceTest.describe(
         const managementPage = pageObjects.entityAnalyticsManagementPage;
 
         await managementPage.navigate();
+        await managementPage.waitForStatusLoaded();
         await managementPage.navigateToAssetCriticalityTab();
 
         await expect(managementPage.assetCriticalityTab).toHaveAttribute('aria-selected', 'true');
-        await expect(managementPage.assetCriticalityIssueCallout).toBeVisible({ timeout: 30000 });
+        await expect(managementPage.assetCriticalityInsufficientPrivilegesCallout).toBeVisible({
+          timeout: 30000,
+        });
         await expect(managementPage.assetCriticalityFileUploadSection).toBeHidden();
       }
     );
