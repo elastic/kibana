@@ -12,7 +12,6 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { nodeBuilder } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
 import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatch_step_tokens';
@@ -50,7 +49,7 @@ export interface NotificationPolicySavedObjectServiceContract {
     attrs: NotificationPolicySavedObjectAttributes;
     version: string;
   }): Promise<{ id: string; version?: string }>;
-  bulkGetDecryptedByIds(ids: string[]): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
+  findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]>;
   delete(params: { id: string }): Promise<void>;
   find(params: { page: number; perPage: number }): Promise<{
     saved_objects: Array<{
@@ -164,25 +163,10 @@ export class NotificationPolicySavedObjectService
     });
   }
 
-  public async bulkGetDecryptedByIds(
-    ids: string[]
-  ): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
-    if (ids.length === 0) {
-      return [];
-    }
-
-    const filter = nodeBuilder.or(
-      ids.map((id) =>
-        nodeBuilder.is(
-          `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.id`,
-          `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}:${id}`
-        )
-      )
-    );
-
+  public async findAllDecrypted(): Promise<NotificationPolicySavedObjectBulkGetItem[]> {
     const finder =
       await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<NotificationPolicySavedObjectAttributes>(
-        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, filter }
+        { type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE }
       );
 
     const results: NotificationPolicySavedObjectBulkGetItem[] = [];

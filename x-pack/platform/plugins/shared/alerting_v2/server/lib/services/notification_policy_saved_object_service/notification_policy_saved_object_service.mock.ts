@@ -21,7 +21,7 @@ export function createNotificationPolicySavedObjectService(): {
   notificationPolicySavedObjectService: NotificationPolicySavedObjectService;
   mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   mockEncryptedSavedObjectsClient: jest.Mocked<EncryptedSavedObjectsClient>;
-  mockBulkGetDecryptedByIds: jest.SpyInstance;
+  mockFindAllDecrypted: jest.SpyInstance;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
   const mockSavedObjectsClientFactory = jest.fn().mockReturnValue(mockSavedObjectsClient);
@@ -34,14 +34,14 @@ export function createNotificationPolicySavedObjectService(): {
     mockEncryptedSavedObjectsClient
   );
 
-  const mockBulkGetDecryptedByIds = jest
-    .spyOn(notificationPolicySavedObjectService, 'bulkGetDecryptedByIds')
+  const mockFindAllDecrypted = jest
+    .spyOn(notificationPolicySavedObjectService, 'findAllDecrypted')
     .mockResolvedValue([]);
 
   return {
     notificationPolicySavedObjectService,
     mockSavedObjectsClient,
     mockEncryptedSavedObjectsClient,
-    mockBulkGetDecryptedByIds,
+    mockFindAllDecrypted,
   };
 }

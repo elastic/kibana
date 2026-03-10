@@ -16,9 +16,9 @@ import {
 describe('EvaluateMatchersStep', () => {
   const step = new EvaluateMatchersStep();
 
-  it('returns matched pairs for episodes with catch-all policies', async () => {
+  it('returns matched pairs for episodes with global catch-all policies', async () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({ id: 'p1' });
 
     const state = createDispatcherPipelineState({
@@ -52,9 +52,9 @@ describe('EvaluateMatchersStep', () => {
 });
 
 describe('evaluateMatchers', () => {
-  it('matches episode to all catch-all policies on its rule', () => {
+  it('matches episode to all global catch-all policies', () => {
     const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1', 'p2'] });
+    const rule = createRule({ id: 'r1' });
     const p1 = createNotificationPolicy({ id: 'p1' });
     const p2 = createNotificationPolicy({ id: 'p2' });
 
@@ -78,18 +78,9 @@ describe('evaluateMatchers', () => {
     expect(matched).toHaveLength(0);
   });
 
-  it('skips policies that are not found', () => {
-    const episode = createAlertEpisode({ rule_id: 'r1' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['missing-policy'] });
-
-    const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map());
-
-    expect(matched).toHaveLength(0);
-  });
-
   it('does not match when KQL matcher evaluates to false', () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'inactive' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({ id: 'p1', matcher: 'episode_status: active' });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -99,7 +90,7 @@ describe('evaluateMatchers', () => {
 
   it('matches when KQL matcher evaluates to true', () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({ id: 'p1', matcher: 'episode_status: active' });
 
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
@@ -115,7 +106,7 @@ describe('evaluateMatchers', () => {
       episode_status: 'active',
       group_hash: 'critical-group',
     });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({
       id: 'p1',
       matcher: 'episode_status: active and group_hash: critical-group',
@@ -128,7 +119,7 @@ describe('evaluateMatchers', () => {
 
   it('matches with complex KQL using OR operator', () => {
     const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'recovering' });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({
       id: 'p1',
       matcher: 'episode_status: active or episode_status: recovering',
@@ -145,7 +136,7 @@ describe('evaluateMatchers', () => {
       episode_status: 'active',
       group_hash: 'normal-group',
     });
-    const rule = createRule({ id: 'r1', notificationPolicyIds: ['p1'] });
+    const rule = createRule({ id: 'r1' });
     const policy = createNotificationPolicy({
       id: 'p1',
       matcher: 'episode_status: active and group_hash: critical-group',
@@ -154,5 +145,96 @@ describe('evaluateMatchers', () => {
     const matched = evaluateMatchers([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
 
     expect(matched).toHaveLength(0);
+  });
+
+  describe('rule label scoping', () => {
+    it('matches when policy has no ruleLabels (global)', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', labels: ['production'] });
+      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: [] });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('matches when policy ruleLabels overlap with rule labels', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', labels: ['production', 'critical'] });
+      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: ['critical'] });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(1);
+    });
+
+    it('does not match when policy ruleLabels do not overlap with rule labels', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', labels: ['staging'] });
+      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: ['production'] });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('does not match when rule has no labels and policy has ruleLabels', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1' });
+      const rule = createRule({ id: 'r1', labels: [] });
+      const policy = createNotificationPolicy({ id: 'p1', ruleLabels: ['production'] });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([['p1', policy]])
+      );
+
+      expect(matched).toHaveLength(0);
+    });
+
+    it('applies both rule label scoping and KQL matcher', () => {
+      const episode = createAlertEpisode({ rule_id: 'r1', episode_status: 'active' });
+      const rule = createRule({ id: 'r1', labels: ['production'] });
+      const matchingPolicy = createNotificationPolicy({
+        id: 'p1',
+        ruleLabels: ['production'],
+        matcher: 'episode_status: active',
+      });
+      const nonMatchingLabelPolicy = createNotificationPolicy({
+        id: 'p2',
+        ruleLabels: ['staging'],
+        matcher: 'episode_status: active',
+      });
+      const nonMatchingKqlPolicy = createNotificationPolicy({
+        id: 'p3',
+        ruleLabels: ['production'],
+        matcher: 'episode_status: inactive',
+      });
+
+      const matched = evaluateMatchers(
+        [episode],
+        new Map([['r1', rule]]),
+        new Map([
+          ['p1', matchingPolicy],
+          ['p2', nonMatchingLabelPolicy],
+          ['p3', nonMatchingKqlPolicy],
+        ])
+      );
+
+      expect(matched).toHaveLength(1);
+      expect(matched[0].policy.id).toBe('p1');
+    });
   });
 });
