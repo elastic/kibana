@@ -11,7 +11,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { v4 as uuidV4 } from 'uuid';
 
-import type { FlyoutSession, EuiFlyoutMenuProps } from '@elastic/eui';
+import type { EuiFlyoutMenuProps } from '@elastic/eui';
 import { EuiFlyout, getFlyoutManagerStore } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -97,10 +97,7 @@ export class SystemFlyoutService {
               return;
             }
 
-            // TODO: remove the type cast once EUI supports child history: https://github.com/elastic/eui/pull/9409
-            const { mainFlyoutId, childFlyoutId, childHistory } = event.session as FlyoutSession & {
-              childHistory?: Array<{ flyoutId: string }>;
-            };
+            const { mainFlyoutId, childFlyoutId, childHistory } = event.session;
             const shouldClose =
               euiFlyoutId === mainFlyoutId ||
               euiFlyoutId === childFlyoutId ||
