@@ -243,6 +243,60 @@
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withActiveInferenceSpan.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 29,
+            "columnNumber": 7,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withActiveInferenceSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "lineNumber": 29,
+            "columnNumber": 21,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-tracing",
+                "id": "def-server.withActiveInferenceSpan.$2.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "span",
+                "description": [],
+                "signature": [
+                  "Span",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+                "lineNumber": 29,
+                "columnNumber": 26,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
         "initialIsOpen": false
       },
       {

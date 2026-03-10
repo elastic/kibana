@@ -32,8 +32,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
 
-  // Dashboards
-  'platform.dashboard.manage_dashboard',
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
@@ -50,7 +48,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
-  'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
 ] as const;
 

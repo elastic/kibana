@@ -15,7 +15,7 @@ import type {
   ControlTriggerSource,
   TelemetryLatencyProps,
 } from '@kbn/esql-types';
-import { BasicPrettyPrinter, Parser } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   hasLimitBeforeAggregate,
   missingSortBeforeLimit,
@@ -76,6 +76,11 @@ export class ESQLEditorTelemetryService {
       value1: payload.queryLength,
       key2: 'query_lines' as const,
       value2: payload.queryLines,
+
+      ...(payload.callbacksDuration !== undefined
+        ? { key3: 'callbacks_duration' as const, value3: Math.round(payload.callbacksDuration) }
+        : {}),
+
       meta: {
         ...(payload.sessionId ? { session_id: payload.sessionId } : {}),
         ...(payload.isInitialLoad !== undefined ? { is_initial_load: payload.isInitialLoad } : {}),

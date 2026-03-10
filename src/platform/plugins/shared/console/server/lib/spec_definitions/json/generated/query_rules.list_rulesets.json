@@ -17,6 +17,7 @@
       "_query_rules"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-query-rules-list-rulesets",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-query-rules-list-rulesets",
     "availability": {
       "stack": true,
       "serverless": true

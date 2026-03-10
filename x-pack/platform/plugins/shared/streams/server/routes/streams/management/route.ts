@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
 import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
@@ -93,12 +93,21 @@ export const getStreamsStatusRoute = createServerRoute({
   handler: async ({
     request,
     getScopedClients,
-  }): Promise<{ enabled: boolean | 'conflict'; can_manage: boolean }> => {
+  }): Promise<{
+    logs: boolean | 'conflict';
+    'logs.otel': boolean | 'conflict';
+    'logs.ecs': boolean | 'conflict';
+    can_manage: boolean;
+  }> => {
     const { streamsClient } = await getScopedClients({ request });
 
     const privileges = await streamsClient.getPrivileges('logs,logs.*');
+    const streamStatus = await streamsClient.checkStreamStatus();
 
-    return { enabled: await streamsClient.checkStreamStatus(), can_manage: privileges.manage };
+    return {
+      ...streamStatus,
+      can_manage: privileges.manage,
+    };
   },
 });
 

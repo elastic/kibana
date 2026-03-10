@@ -35,13 +35,16 @@ import type {
   DetectedField,
   ProcessingSimulationResponse,
 } from '@kbn/streams-schema';
-import { getInheritedFieldsFromAncestors, Streams } from '@kbn/streams-schema';
-import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { validateStreamlang } from '@kbn/streamlang';
-import { getRoot } from '@kbn/streams-schema/src/shared/hierarchy';
+import {
+  getInheritedFieldsFromAncestors,
+  getRoot,
+  LOGS_ECS_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
+import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
+import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {
   normalizeGeoPointsInObject,
   detectGeoPointPatternsFromDocuments,
@@ -121,9 +124,12 @@ export const simulateProcessing = async ({
     .map(([name]) => name);
 
   // Validate the Streamlang DSL before attempting simulation
+  const rootStream = getRoot(params.path.name);
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
   const validationResult = validateStreamlang(params.body.processing, {
     reservedFields,
-    streamType: Streams.WiredStream.Definition.is(stream) ? 'wired' : 'classic',
+    streamType: isWiredStream ? 'wired' : 'classic',
+    skipNamespaceValidation: isWiredStream && rootStream === LOGS_ECS_STREAM_NAME,
   });
 
   if (!validationResult.isValid) {

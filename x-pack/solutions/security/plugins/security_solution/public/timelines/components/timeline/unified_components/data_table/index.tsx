@@ -56,6 +56,7 @@ import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { OverviewTab } from '../../../../../flyout_v2/document/tabs/overview_tab';
+import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -129,19 +130,18 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       tabType: activeTab,
     });
 
+    const { services } = useKibana();
     const {
-      services: {
-        uiSettings,
-        fieldFormats,
-        storage,
-        dataViewFieldEditor,
-        notifications: { toasts: toastsService },
-        telemetry,
-        theme,
-        data: dataPluginContract,
-        overlays,
-      },
-    } = useKibana();
+      uiSettings,
+      fieldFormats,
+      storage,
+      dataViewFieldEditor,
+      notifications: { toasts: toastsService },
+      telemetry,
+      theme,
+      data: dataPluginContract,
+      overlays,
+    } = services;
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
@@ -182,12 +182,16 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       (eventData: DataTableRecord & TimelineItem) => {
         if (newFlyoutSystemEnabled) {
           const hit: DataTableRecord = buildDataTableRecord(eventData.raw);
-          overlays.openSystemFlyout(<OverviewTab hit={hit} />, {
-            // @ts-ignore EUI to fix this typing issue
-            resizable: true,
-            type: 'overlay',
-            ownFocus: false,
-          });
+          overlays.openSystemFlyout(
+            flyoutProviders({ services, children: <OverviewTab hit={hit} /> }),
+            {
+              ownFocus: false,
+              // @ts-ignore EUI to fix this typing issue
+              resizable: true,
+              size: 's',
+              type: 'overlay',
+            }
+          );
         } else {
           const isAttackRow = isAttackDiscoveryRow(eventData);
           const indexName = eventData.ecs._index ?? '';
@@ -216,7 +220,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           });
         }
       },
-      [newFlyoutSystemEnabled, overlays, openFlyout, timelineId, telemetry]
+      [newFlyoutSystemEnabled, overlays, services, timelineId, openFlyout, telemetry]
     );
 
     const onSetExpandedDoc = useCallback(

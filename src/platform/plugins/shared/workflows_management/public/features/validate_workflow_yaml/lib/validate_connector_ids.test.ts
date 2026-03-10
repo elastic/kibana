@@ -243,6 +243,19 @@ describe('validateConnectorIds', () => {
       expect(results).toHaveLength(0);
     });
 
+    it('should skip validation for Liquid-style template {{ inputs.connectorId }}', () => {
+      const connectorIdItems: ConnectorIdItem[] = [
+        createConnectorIdItem({
+          key: '{{ inputs.connectorId }}',
+          connectorType: 'slack',
+        }),
+      ];
+
+      const results = validateConnectorIds(connectorIdItems, mockConnectorTypes, '');
+
+      expect(results).toHaveLength(0);
+    });
+
     it('should validate connector that does not match reference pattern', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({

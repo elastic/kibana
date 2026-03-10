@@ -12,6 +12,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
+import type { AttachmentServiceStart } from '../attachments';
 
 // Mock persistence module
 const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
@@ -67,6 +68,16 @@ describe('AgentExecutionService', () => {
     getScopedClient: mockGetScopedClient,
   } as any;
 
+  const meteringService = {
+    reportExecution: jest.fn(),
+  } as any;
+
+  const attachmentsService: AttachmentServiceStart = {
+    validate: jest.fn().mockImplementation(async (attachment) => ({ valid: true, attachment })),
+    getTypeDefinition: jest.fn(),
+    getRegisteredTypeIds: jest.fn().mockReturnValue([]),
+  };
+
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
@@ -74,8 +85,11 @@ describe('AgentExecutionService', () => {
     inference: {} as any,
     conversationService: {} as any,
     agentService: {} as any,
+    runAgent: jest.fn(),
+    attachmentsService,
     uiSettings,
     savedObjects,
+    meteringService,
   });
 
   beforeEach(() => {
@@ -183,6 +197,30 @@ describe('AgentExecutionService', () => {
           }),
         })
       );
+    });
+
+    it('validates attachments and throws on invalid attachment', async () => {
+      (attachmentsService.validate as jest.Mock).mockResolvedValue({
+        valid: false,
+        error: 'boom',
+      });
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        service.executeAgent({
+          request,
+          params: {
+            agentId: 'agent-1',
+            nextInput: {
+              message: 'hello',
+              attachments: [{ type: 'some_type', data: { foo: 'bar' } }],
+            },
+          },
+        })
+      ).rejects.toThrow('Attachment validation failed: boom');
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
     });
 
     it('should return a live observable that emits events from the agent stream', async () => {

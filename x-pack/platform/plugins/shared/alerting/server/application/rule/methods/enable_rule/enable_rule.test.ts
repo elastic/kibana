@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -84,6 +85,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 setGlobalDate();
@@ -804,5 +807,194 @@ describe('enable()', () => {
     await rulesClient.enableRule({ id: '1' });
     expect(alertsService.clearAlertFlappingHistory).toHaveBeenCalledTimes(0);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
+  });
+
+  describe('missing UIAM API key tagging', () => {
+    test('should add missing UIAM API key tag when enabling rule with missing UIAM key in serverless', async () => {
+      // Set up serverless environment with feature flag enabled
+      const featureFlags = coreFeatureFlagsMock.createStart();
+      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+
+      const serverlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+        isServerless: true,
+        featureFlags,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: false,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: null, // Missing UIAM key
+          schedule: { interval: '10s' },
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      await serverlessRulesClient.enableRule({ id: '1' });
+
+      // Verify the missing UIAM key tag was added
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'alert',
+        '1',
+        expect.objectContaining({
+          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should add missing UIAM API key tag when enabling rule without existing API key', async () => {
+      // Set up serverless environment with feature flag enabled
+      const featureFlags = coreFeatureFlagsMock.createStart();
+      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+
+      const serverlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+        isServerless: true,
+        // To signal that user does not create the API key
+        isAuthenticationTypeAPIKey: () => false,
+        featureFlags,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: false,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: null, // No existing API key
+          apiKeyOwner: null,
+          apiKeyCreatedByUser: null,
+          schedule: { interval: '10s' },
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      // Mock API key creation where UIAM key is missing
+      rulesClientParams.createAPIKey.mockResolvedValueOnce({
+        apiKeysEnabled: true,
+        result: { id: '123', name: '123', api_key: 'abc' },
+        // uiamResult is undefined/null - UIAM key creation failed
+      });
+
+      await serverlessRulesClient.enableRule({ id: '1' });
+
+      // Verify the missing UIAM key tag was added
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'alert',
+        '1',
+        expect.objectContaining({
+          tags: expect.arrayContaining(['existing-tag', 'Missing Universal Api Key']),
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should not add missing UIAM API key tag when UIAM key is present', async () => {
+      // Set up serverless environment with feature flag enabled
+      const featureFlags = coreFeatureFlagsMock.createStart();
+      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+
+      const serverlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+        isServerless: true,
+        featureFlags,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: false,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: Buffer.from('456:def').toString('base64'), // UIAM key present
+          schedule: { interval: '10s' },
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      await serverlessRulesClient.enableRule({ id: '1' });
+
+      // Verify the missing UIAM key tag was NOT added
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'alert',
+        '1',
+        expect.objectContaining({
+          tags: ['existing-tag'], // Only original tags
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should not add missing UIAM API key tag in non-serverless environment', async () => {
+      // Non-serverless environment (default rulesClientParams.isServerless = false)
+      const featureFlags = coreFeatureFlagsMock.createStart();
+      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
+
+      const nonServerlessRulesClient = new RulesClient({
+        ...rulesClientParams,
+        featureFlags,
+      });
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        id: '1',
+        type: 'alert',
+        attributes: {
+          enabled: false,
+          name: 'my rule',
+          tags: ['existing-tag'],
+          alertTypeId: 'myType',
+          consumer: 'myApp',
+          apiKey: Buffer.from('123:abc').toString('base64'),
+          apiKeyOwner: 'elastic',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: null, // Missing UIAM key but not serverless
+          schedule: { interval: '10s' },
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [],
+        version: '123',
+      });
+
+      await nonServerlessRulesClient.enableRule({ id: '1' });
+
+      // Verify the missing UIAM key tag was NOT added (non-serverless)
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        'alert',
+        '1',
+        expect.objectContaining({
+          tags: ['existing-tag'], // Only original tags
+        }),
+        expect.anything()
+      );
+    });
   });
 });

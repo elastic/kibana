@@ -22,6 +22,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Data stream namespace(s) to be included in rule execution.' },
+    },
+  },
   'securitySolution:maxUnassociatedNotes': {
     type: 'integer',
     _meta: { description: 'The maximum number of allowed unassociated notes' },
@@ -31,6 +38,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Default value of the setting was changed.' },
   },
   'securitySolution:alertTags': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'securitySolution:alertCloseReasons': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
@@ -135,10 +146,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'securitySolution:enableCcsWarning': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -507,10 +514,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       _meta: { description: 'Non-default value of setting.' },
     },
   },
-  'agentBuilder:dashboardTools': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'agentBuilder:navEnabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -529,7 +532,11 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'workflows:ui:enabled': {
     type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
+    _meta: { description: 'Whether Elastic Workflows and related experiences are enabled.' },
+  },
+  'workflows:aiAgent:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Whether AI-powered workflow authoring assistance is enabled.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -608,6 +615,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmEnableTransactionProfiling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmUseUnifiedTraceWaterfall': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -728,6 +739,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable Query streams in Streams',
     },
   },
+  'observability:streamsEnableWiredStreamViews': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable ES|QL views for wired streams',
+    },
+  },
   'observability:enableDiagnosticMode': {
     type: 'boolean',
     _meta: {
@@ -744,6 +761,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Restrict to default AI connector only',
+    },
+  },
+  'agentBuilder:prePromptWorkflowIds': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: {
+        description: 'Pre-prompt workflow IDs',
+      },
     },
   },
   'securitySolution:entityStoreEnableV2': {

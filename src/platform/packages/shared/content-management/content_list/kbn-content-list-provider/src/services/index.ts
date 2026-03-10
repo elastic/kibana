@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Services module for content list provider.
- */
-
-// Placeholder - services will be exported here.
-export {};
+export type { ContentListServices } from './types';

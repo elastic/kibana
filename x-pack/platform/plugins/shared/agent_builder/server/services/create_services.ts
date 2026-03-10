@@ -21,6 +21,7 @@ import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 import { createAgentExecutionService, createTaskHandler } from './execution';
+import { createMeteringService, type MeteringService } from './metering';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -28,6 +29,7 @@ interface ServiceInstances {
   attachments: AttachmentService;
   hooks: HooksService;
   skills: SkillService;
+  metering: MeteringService;
 }
 
 export class ServiceManager {
@@ -35,21 +37,28 @@ export class ServiceManager {
   public internalSetup?: InternalSetupServices;
   public internalStart?: InternalStartServices;
 
-  setupServices({ logger, workflowsManagement }: ServiceSetupDeps): InternalSetupServices {
+  setupServices({
+    logger,
+    workflowsManagement,
+    cloud,
+    usageApi,
+  }: ServiceSetupDeps): InternalSetupServices {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       hooks: new HooksService(),
       skills: createSkillService(),
+      metering: createMeteringService({ cloud, usageApi, logger: logger.get('metering') }),
     };
 
     this.internalSetup = {
-      tools: this.services.tools.setup({ logger, workflowsManagement }),
-      agents: this.services.agents.setup({ logger }),
+      tools: this.services.tools.setup({ logger: logger.get('tools'), workflowsManagement }),
+      agents: this.services.agents.setup({ logger: logger.get('agents') }),
       attachments: this.services.attachments.setup(),
-      hooks: this.services.hooks.setup({ logger }),
+      hooks: this.services.hooks.setup({ logger: logger.get('hooks') }),
       skills: this.services.skills.setup(),
+      metering: this.services.metering,
     };
 
     return this.internalSetup;
@@ -83,7 +92,6 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
-    const skillsServiceStart = this.services.skills.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -94,13 +102,19 @@ export class ServiceManager {
       actions,
     });
 
+    const skillsServiceStart = this.services.skills.start({
+      elasticsearch,
+      spaces,
+      logger: logger.get('skills'),
+      getToolRegistry: tools.getRegistry,
+    });
+
     const agents = this.services.agents.start({
       spaces,
       security,
       elasticsearch,
       uiSettings,
       savedObjects,
-      getRunner,
       toolsService: tools,
     });
 
@@ -120,6 +134,7 @@ export class ServiceManager {
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
       trackingService,
+      analyticsService,
       hooks,
     });
     runner = runnerFactory.getRunner();
@@ -142,11 +157,13 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
       uiSettings,
       savedObjects,
       spaces,
       trackingService,
       analyticsService,
+      meteringService: this.services.metering,
     });
 
     const execution = createAgentExecutionService({
@@ -157,10 +174,13 @@ export class ServiceManager {
       inference,
       conversationService: conversations,
       agentService: agents,
+      runAgent: runner.runAgent,
+      attachmentsService: attachments,
       uiSettings,
       savedObjects,
       trackingService,
       analyticsService,
+      meteringService: this.services.metering,
     });
 
     this.internalStart = {

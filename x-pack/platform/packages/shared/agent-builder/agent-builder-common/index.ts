@@ -16,6 +16,7 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  attachmentTools,
   filestoreTools,
   defaultAgentToolIds,
   editableToolTypes,
@@ -54,6 +55,7 @@ export {
   AgentBuilderErrorUtils,
   isInternalError,
   isToolNotFoundError,
+  isSkillNotFoundError,
   isAgentBuilderError,
   isAgentNotFoundError,
   isConversationNotFoundError,
@@ -66,6 +68,7 @@ export {
   createAgentBuilderError,
   createInternalError,
   createToolNotFoundError,
+  createSkillNotFoundError,
   createAgentNotFoundError,
   createConversationNotFoundError,
   createBadRequestError,
@@ -75,6 +78,7 @@ export {
   type AgentBuilderError,
   type AgentBuilderInternalError,
   type AgentBuilderToolNotFoundError,
+  type AgentBuilderSkillNotFoundError,
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderBadRequestError,
@@ -93,6 +97,7 @@ export { EsResourceType } from './base/resources';
 export {
   agentBuilderDefaultAgentId,
   AgentType,
+  AgentVisibility,
   AgentExecutionErrorCode,
   type AgentDefinition,
   type AgentConfiguration,
@@ -167,6 +172,29 @@ export {
   isToolProgressEvent,
   isPromptRequestEvent,
 } from './chat';
+export {
+  type PublicSkillDefinition,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
+  type SkillReferencedContent,
+  type SkillSelection,
+  allSkillsSelectionWildcard,
+  allBuiltInSkillsSelection,
+  skillMatchSelection,
+  hasSkillSelectionWildcard,
+  getExplicitSkillIds,
+  skillCreateRequestSchema,
+  skillUpdateRequestSchema,
+  validateSkillId,
+  skillIdMaxLength,
+  skillNameMaxLength,
+  skillIdRegexp,
+  skillNameRegexp,
+  maxToolsPerSkill,
+} from './skills';
 export * from './telemetry';
-export { AGENT_WORKFLOWS_FEATURE_FLAG } from './feature_flags';
-export { getLatestVersion, type VersionedAttachment } from './attachments';
+export {
+  getLatestVersion,
+  type VersionedAttachment,
+  type UpdateOriginResponse,
+} from './attachments';

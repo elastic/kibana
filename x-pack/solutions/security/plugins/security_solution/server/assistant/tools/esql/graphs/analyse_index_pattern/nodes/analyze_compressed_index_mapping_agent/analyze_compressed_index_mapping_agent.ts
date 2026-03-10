@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { Command } from '@langchain/langgraph';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { mapFieldDescriptorToNestedObject } from '../../../../tools/inspect_index_mapping_tool/inspect_index_utils';

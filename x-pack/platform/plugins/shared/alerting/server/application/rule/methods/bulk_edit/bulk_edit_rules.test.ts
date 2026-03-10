@@ -15,6 +15,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -101,6 +102,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   alertsService: null,
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 const paramsModifier = jest.fn();
 

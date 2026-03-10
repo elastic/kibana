@@ -12,6 +12,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
 import { getLiveQueryResultsRoute } from './get_live_query_results_route';
 import { findLiveQueryRoute } from './find_live_query_route';
+import { getHistoryUsersRoute } from './get_history_users_route';
 
 export const initLiveQueryRoutes = (
   router: IRouter<DataRequestHandlerContext>,
@@ -21,4 +22,5 @@ export const initLiveQueryRoutes = (
   createLiveQueryRoute(router, context);
   getLiveQueryDetailsRoute(router, context);
   getLiveQueryResultsRoute(router, context);
+  getHistoryUsersRoute(router, context);
 };
