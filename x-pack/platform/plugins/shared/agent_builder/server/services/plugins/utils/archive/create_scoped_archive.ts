@@ -21,6 +21,9 @@ import type { ZipArchive } from './open_zip_archive';
  * may be nested inside it.
  */
 export const createScopedArchive = (archive: ZipArchive, prefix: string): ZipArchive => {
+  if (prefix === '') {
+    return archive;
+  }
   const normalizedPrefix = prefix.endsWith('/') ? prefix : `${prefix}/`;
   return new ScopedZipArchive(archive, normalizedPrefix);
 };

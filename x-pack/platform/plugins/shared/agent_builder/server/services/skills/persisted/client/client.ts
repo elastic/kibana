@@ -147,7 +147,7 @@ class SkillClientImpl implements SkillClient {
 
     await this.storage.getClient().bulk({
       operations: allAttributes.map((attributes) => ({
-        index: { document: attributes, _id: attributes.id },
+        index: { document: attributes },
       })),
       throwOnFail: true,
     });

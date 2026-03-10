@@ -24,7 +24,12 @@ export const saveUploadedFile = async (
   const fileName = `tmp/${randomUUID()}.zip`;
   const { fullPath } = getSafePath(fileName, VOLUME);
   const writeStream = createWriteStream(fileName, VOLUME);
-  await pipeline(stream, writeStream);
+  try {
+    await pipeline(stream, writeStream);
+  } catch (err) {
+    await deleteFile(fileName, { volume: VOLUME }).catch(() => {});
+    throw err;
+  }
   return {
     filePath: fullPath,
     cleanup: () => deleteFile(fileName, { volume: VOLUME }).catch(() => {}),

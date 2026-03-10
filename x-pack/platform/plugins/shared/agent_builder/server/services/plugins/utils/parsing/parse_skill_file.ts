@@ -13,7 +13,7 @@ export interface ParsedSkillFileResult {
   content: string;
 }
 
-const frontmatterRegex = /^---\s*\n([\s\S]*?)---\s*\n?([\s\S]*)$/;
+const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)---\s*\r?\n?([\s\S]*)$/;
 
 /**
  * Parses a SKILL.md file content, extracting YAML frontmatter metadata

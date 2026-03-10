@@ -112,4 +112,20 @@ describe('parseSkillFile', () => {
 
     expect(result.content).toBe('Content with leading space.');
   });
+
+  it('parses frontmatter with CRLF line endings', () => {
+    const raw = [
+      '---',
+      'name: crlf-skill',
+      'description: A CRLF skill',
+      '---',
+      '',
+      'Content.',
+    ].join('\r\n');
+
+    const result = parseSkillFile(raw);
+
+    expect(result.meta).toEqual({ name: 'crlf-skill', description: 'A CRLF skill' });
+    expect(result.content).toBe('Content.');
+  });
 });

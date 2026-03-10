@@ -113,6 +113,18 @@ describe('createScopedArchive', () => {
 
     expect(inner.close).toHaveBeenCalled();
   });
+
+  it('returns the original archive unchanged when prefix is empty', () => {
+    const inner = createMockArchive({
+      'plugin.json': '{}',
+      'skills/my-skill/SKILL.md': 'content',
+    });
+
+    const scoped = createScopedArchive(inner, '');
+
+    expect(scoped).toBe(inner);
+    expect(scoped.getEntryPaths()).toEqual(['plugin.json', 'skills/my-skill/SKILL.md']);
+  });
 });
 
 describe('detectArchiveRootPrefix', () => {

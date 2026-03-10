@@ -69,4 +69,18 @@ describe('saveUploadedFile', () => {
 
     await expect(cleanup()).resolves.toBeUndefined();
   });
+
+  it('deletes the temp file when the pipeline fails', async () => {
+    const writeStream = new PassThrough();
+    writeStream.destroy(new Error('write error'));
+    mockCreateWriteStream.mockReturnValue(writeStream);
+
+    const input = Readable.from(Buffer.from('zip content'));
+
+    await expect(saveUploadedFile(input)).rejects.toThrow();
+
+    expect(mockDeleteFile).toHaveBeenCalledWith('tmp/test-uuid-1234.zip', {
+      volume: 'agent_builder',
+    });
+  });
 });
