@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_TABS,
   VIEW_MODE,
 } from '../../common';
 
@@ -151,7 +152,12 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
 });
 
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
-  tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
+  tabs: schema.maybe(
+    schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, {
+      minSize: 1,
+      maxSize: MAX_SAVED_SEARCH_TABS,
+    })
+  ),
 });
 
 const { columns, grid, hideChart, isTextBasedQuery, kibanaSavedObjectMeta, rowHeight, sort } =
@@ -166,7 +172,10 @@ export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.exten
   kibanaSavedObjectMeta: schema.maybe(kibanaSavedObjectMeta),
   rowHeight: schema.maybe(rowHeight),
   sort: schema.maybe(sort),
-  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 }),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, {
+    minSize: 1,
+    maxSize: MAX_SAVED_SEARCH_TABS,
+  }),
 });
 
 const CONTROL_GROUP_JSON_SCHEMA = {
@@ -182,7 +191,10 @@ const SCHEMA_DISCOVER_SESSION_TAB_VERSION_8 = SCHEMA_DISCOVER_SESSION_TAB.extend
 
 export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.extends({
   ...CONTROL_GROUP_JSON_SCHEMA,
-  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, {
+    minSize: 1,
+    maxSize: MAX_SAVED_SEARCH_TABS,
+  }),
 });
 
 // We need to flatten the schema type here to avoid this error:
@@ -212,7 +224,10 @@ const SCHEMA_DISCOVER_SESSION_TAB_VERSION_10 = SCHEMA_DISCOVER_SESSION_TAB_VERSI
 });
 
 export const SCHEMA_SEARCH_MODEL_VERSION_10 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
-  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, { minSize: 1 }),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, {
+    minSize: 1,
+    maxSize: MAX_SAVED_SEARCH_TABS,
+  }),
 });
 
 const { tabs: tabsV10, ...restV10Props } = SCHEMA_SEARCH_MODEL_VERSION_10.getPropSchemas();

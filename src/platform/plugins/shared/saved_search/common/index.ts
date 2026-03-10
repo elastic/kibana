@@ -33,6 +33,7 @@ export {
   LATEST_VERSION,
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
+  MAX_SAVED_SEARCH_TABS,
 } from './constants';
 
 export { toSavedSearchAttributes } from './service/saved_searches_utils';

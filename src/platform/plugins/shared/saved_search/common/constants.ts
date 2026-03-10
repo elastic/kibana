@@ -16,4 +16,6 @@ export const LATEST_VERSION = 1;
 export const MIN_SAVED_SEARCH_SAMPLE_SIZE = 1;
 export const MAX_SAVED_SEARCH_SAMPLE_SIZE = 10000;
 
+export const MAX_SAVED_SEARCH_TABS = 25;
+
 export type SavedSearchContentType = typeof SavedSearchType;
