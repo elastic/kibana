@@ -209,14 +209,6 @@ export async function ensureOtelDemo({
     log,
   });
 
-  // Create a data view for logs (useful for Discover and dashboards)
-  await createDataView({
-    kibanaUrl,
-    username: elasticsearchUsername,
-    password: elasticsearchPassword,
-    log,
-  });
-
   // Stop any existing deployment
   log.debug('Removing existing deployment');
   await down(log, namespace, demoConfig.displayName);
