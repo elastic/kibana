@@ -32,7 +32,7 @@ const createWrapper = () => {
 describe('useDeleteRule', () => {
   const mockDeleteRule = jest.fn();
   const mockAddSuccess = jest.fn();
-  const mockAddError = jest.fn();
+  const mockAddDanger = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -44,7 +44,7 @@ describe('useDeleteRule', () => {
         return { deleteRule: mockDeleteRule } as any;
       }
       if (service === 'notifications') {
-        return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
+        return { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } } as any;
       }
       return undefined as any;
     });
@@ -54,24 +54,23 @@ describe('useDeleteRule', () => {
     mockDeleteRule.mockResolvedValue(undefined);
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1' });
+    result.current.mutate('rule-1');
 
     await waitFor(() => {
       expect(mockDeleteRule).toHaveBeenCalledWith('rule-1');
-      expect(mockAddSuccess).toHaveBeenCalledWith({ title: expect.any(String) });
-      expect(mockAddError).not.toHaveBeenCalled();
+      expect(mockAddSuccess).toHaveBeenCalledWith(expect.any(String));
+      expect(mockAddDanger).not.toHaveBeenCalled();
     });
   });
 
-  it('should show an error toast when deletion fails', async () => {
-    const error = new Error('delete failed');
-    mockDeleteRule.mockRejectedValue(error);
+  it('should show a danger toast when deletion fails', async () => {
+    mockDeleteRule.mockRejectedValue(new Error('delete failed'));
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1' });
+    result.current.mutate('rule-1');
 
     await waitFor(() => {
-      expect(mockAddError).toHaveBeenCalledWith(error, { title: expect.any(String) });
+      expect(mockAddDanger).toHaveBeenCalledWith(expect.any(String));
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
   });
@@ -81,7 +80,7 @@ describe('useDeleteRule', () => {
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1' }, { onSuccess });
+    result.current.mutate('rule-1', { onSuccess });
 
     await waitFor(() => {
       expect(onSuccess).toHaveBeenCalledTimes(1);
@@ -90,16 +89,15 @@ describe('useDeleteRule', () => {
   });
 
   it('should not invoke per-call onSuccess when deletion fails', async () => {
-    const error = new Error('delete failed');
-    mockDeleteRule.mockRejectedValue(error);
+    mockDeleteRule.mockRejectedValue(new Error('delete failed'));
     const onSuccess = jest.fn();
     const { result } = renderHook(() => useDeleteRule(), { wrapper: createWrapper() });
 
-    result.current.mutate({ id: 'rule-1' }, { onSuccess });
+    result.current.mutate('rule-1', { onSuccess });
 
     await waitFor(() => {
       expect(onSuccess).not.toHaveBeenCalled();
-      expect(mockAddError).toHaveBeenCalled();
+      expect(mockAddDanger).toHaveBeenCalled();
     });
   });
 });

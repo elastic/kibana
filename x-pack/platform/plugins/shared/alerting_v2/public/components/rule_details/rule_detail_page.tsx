@@ -45,16 +45,13 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
     setShowDeleteConfirmation(true);
   };
 
-  const handleRuleDelete = () => {
+  const handleRuleDelete = async () => {
     setShowDeleteConfirmation(false);
-    deleteRule(
-      { id: rule.id },
-      {
-        onSuccess: () => {
-          history.push('/');
-        },
-      }
-    );
+    deleteRule(rule.id, {
+      onSuccess: () => {
+        history.push('/');
+      },
+    });
   };
 
   const configurationListItems = [

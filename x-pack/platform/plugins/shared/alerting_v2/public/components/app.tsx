@@ -31,10 +31,10 @@ export const App = () => {
       <Route path="/notification_policies">
         <ListNotificationPoliciesPage />
       </Route>
-      <Route path="/">
+      <Route exact path="/:ruleId" component={RuleDetailsRoute} />
+      <Route exact path="/">
         <RulesListPage />
       </Route>
-      <Route exact path="/:ruleId" component={RuleDetailsRoute} />
     </Routes>
   );
 };

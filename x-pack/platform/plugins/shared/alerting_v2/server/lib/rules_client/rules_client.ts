@@ -229,7 +229,7 @@ export class RulesClient {
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
     let existingAttrs: RuleSavedObjectAttributes;
@@ -248,7 +248,7 @@ export class RulesClient {
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: true,
-      updatedBy: userProfileUid,
+      updatedBy: username,
       updatedAt: nowIso,
     };
 
@@ -283,7 +283,7 @@ export class RulesClient {
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    const username = await this.userService.getCurrentUsername();
     const nowIso = new Date().toISOString();
 
     let existingAttrs: RuleSavedObjectAttributes;
@@ -302,7 +302,7 @@ export class RulesClient {
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
       enabled: false,
-      updatedBy: userProfileUid,
+      updatedBy: username,
       updatedAt: nowIso,
     };
 

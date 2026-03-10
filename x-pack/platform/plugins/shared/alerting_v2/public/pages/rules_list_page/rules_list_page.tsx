@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiHorizontalRule,
   EuiPageHeader,
   EuiPopover,
@@ -32,6 +33,7 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { DeleteConfirmationModal } from '../../components/rule/delete_confirmation_modal';
 import { paths } from '../../constants';
 
@@ -100,6 +102,8 @@ export const RulesListPage = () => {
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
 
+  useBreadcrumbs('rules_list');
+
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
@@ -134,8 +138,14 @@ export const RulesListPage = () => {
       name: <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />,
       width: '20%',
       truncateText: true,
-      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) =>
-        metadata?.name ?? rule.id,
+      render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
+        <EuiLink
+          onClick={() => navigateToUrl(basePath.prepend(paths.ruleDetails(rule.id)))}
+          data-test-subj={`ruleDetailsLink-${rule.id}`}
+        >
+          {metadata?.name ?? rule.id}
+        </EuiLink>
+      ),
     },
     {
       field: 'evaluation',
