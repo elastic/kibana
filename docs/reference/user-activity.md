@@ -123,7 +123,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 
 | **Field** | **Description** |
 | --- | --- |
-| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log, with some standardized optional fields (in the following rows) for normalization purposes. |
+| `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. |
 
 ### Service fields
 
