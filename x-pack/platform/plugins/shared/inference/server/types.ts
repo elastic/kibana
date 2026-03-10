@@ -157,7 +157,6 @@ export interface InferenceServerStart {
   /**
    * Lists available Elasticsearch inference endpoints, optionally filtered by task type.
    *
-   * @param request - The Kibana request to scope the operation to
    * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
    * @returns A promise that resolves to an array of inference endpoints
    */
@@ -167,7 +166,6 @@ export interface InferenceServerStart {
    * Retrieves a specific Elasticsearch inference endpoint by its ID.
    *
    * @param inferenceId - The unique identifier of the inference endpoint
-   * @param request - The Kibana request to scope the operation to
    * @returns A promise that resolves to the inference endpoint metadata
    * @throws Error if the endpoint does not exist
    */
