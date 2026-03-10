@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolveLinkInfo, resolveLinks } from './resolve_links';
+import { resolveLinkInfo, resolveLinks, serializeResolvedLinks } from './resolve_links';
 import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
+import type { ResolvedLink } from '../types';
 
 jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({
   fetchDashboard: async (id: string) => {
@@ -86,5 +87,20 @@ describe('resolveLinks', () => {
     const resolvedLinks = await resolveLinks(links);
     expect(resolvedLinks[0].id).toEqual('generated-id-1');
     expect(resolvedLinks[1].id).toEqual('generated-id-2');
+  });
+});
+
+describe('serializeResolvedLinks', () => {
+  it('strips uuids from links before saving', async () => {
+    const links: ResolvedLink[] = [
+      {
+        type: DASHBOARD_LINK_TYPE,
+        destination: '404',
+        id: '1',
+        title: 'Link 1',
+      },
+    ];
+    const serializedLinks = serializeResolvedLinks(links);
+    expect('id' in serializedLinks[0]).toBe(false);
   });
 });

@@ -18,7 +18,7 @@ import { LinksStrings } from '../components/links_strings';
 
 export function serializeResolvedLinks(resolvedLinks: ResolvedLink[]) {
   return resolvedLinks
-    .map(({ title, description, error, ...linkToSave }) => linkToSave)
+    .map(({ title, description, error, id, ...linkToSave }) => linkToSave)
     .map(
       // fiilter out null values which may have been introduced by the session state backup (undefined values are serialized as null).
       (link) =>
@@ -31,7 +31,7 @@ export function serializeResolvedLinks(resolvedLinks: ResolvedLink[]) {
 export async function resolveLinks(links: Link[] = []) {
   const resolvedLinkInfos = await Promise.all(
     links.map(async (link) => {
-      return { ...link, ...(await resolveLinkInfo(link)), id: link.id ?? uuidv4() };
+      return { ...link, ...(await resolveLinkInfo(link)), id: uuidv4() };
     })
   );
   return resolvedLinkInfos;
