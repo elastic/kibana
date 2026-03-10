@@ -43,6 +43,8 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
       display: flex;
       background-color: ${dangerBg};
       opacity: 0.7;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
     .wfDiffLineContent {
