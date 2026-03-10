@@ -30,6 +30,7 @@ import {
 } from '@kbn/agent-builder-server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { getElasticsearchPrompt } from './prompts';
 import { progressMessages } from './i18n';
 import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
@@ -111,9 +112,10 @@ const isValidLangchainTool = (tool: Tool, esClient: IScopedClusterClient): boole
   }
 };
 
-const parseToolResponse = (
-  toolMessage: BaseMessage
-): { name: string; response: unknown; console_request?: string } => {
+const parseToolResponse = async (
+  toolMessage: BaseMessage,
+  chatModel?: BaseChatModel
+): Promise<{ name: string; response: unknown; console_request?: string }> => {
   const parsedContent = JSON.parse(toolMessage.content as string);
   if (parsedContent.error) {
     return {
@@ -122,7 +124,7 @@ const parseToolResponse = (
       console_request: parsedContent.consoleRequest,
     };
   }
-  const truncatedContent = truncateJsonResponse(parsedContent.response);
+  const truncatedContent = await truncateJsonResponse(parsedContent.response, { chatModel });
 
   return {
     name: toolMessage.name || 'unknown',
@@ -345,7 +347,7 @@ export const createElasticsearchToolGraph = async ({
     const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
     const toolNodeResult = await toolNode.invoke(state.messages);
     const toolMessage = toolNodeResult[toolNodeResult.length - 1];
-    const toolResponse = parseToolResponse(toolMessage);
+    const toolResponse = await parseToolResponse(toolMessage, model.chatModel);
 
     return {
       toolOutput: {
