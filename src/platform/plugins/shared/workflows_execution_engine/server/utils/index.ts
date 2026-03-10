@@ -8,7 +8,10 @@
  */
 
 export { parseDuration } from './parse-duration/parse-duration';
-export { buildStepExecutionId } from '@kbn/workflows/server/utils';
+export {
+  generateEncodedStepExecutionId,
+  decodeEncodedStepExecutionId,
+} from '@kbn/workflows/server/utils';
 export { stringifyStackFrames } from './stringify_stack_frames';
 export { getKibanaUrl, buildWorkflowExecutionUrl } from './get_kibana_url';
 export { generateExecutionTaskScope } from './generate_execution_task_scope';
