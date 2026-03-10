@@ -31,7 +31,6 @@ import {
 import type { FeaturesPrivileges } from '@kbn/security-plugin-types-common';
 import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
 import type {
-  ExceptionListItem,
   FindExceptionListItemsRequestQueryInput,
   FindExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
@@ -136,13 +135,12 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
         const CURRENT_SPACE_OWNER_TAG = buildSpaceOwnerIdTag(CURRENT_SPACE_ID);
         const OTHER_SPACE_OWNER_TAG = buildSpaceOwnerIdTag(OTHER_SPACE_ID);
 
-        const supertest: Record<
-          (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-          Record<'none' | 'read' | 'all' | 'allWithGlobalArtifactManagementPrivilege', TestAgent>
-        > = {} as Record<
+        type SupertestContainer = Record<
           (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
           Record<'none' | 'read' | 'all' | 'allWithGlobalArtifactManagementPrivilege', TestAgent>
         >;
+
+        const supertest: SupertestContainer = {} as SupertestContainer;
 
         before(async () => {
           for (const artifact of ENDPOINT_ARTIFACTS) {
@@ -180,10 +178,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
         ENDPOINT_ARTIFACTS.forEach((artifact) => {
           describe(`Importing ${artifact.name}`, () => {
-            let fetchArtifacts: (
-              spaceId: string,
-              sortField?: string
-            ) => Promise<ExceptionListItem[]>;
+            let fetchArtifacts: ReturnType<typeof getFetchArtifacts>;
 
             before(() => {
               fetchArtifacts = getFetchArtifacts(endpointOpsAnalystSupertest, log, artifact.listId);
@@ -680,6 +675,91 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                 });
               });
 
+              describe('when trying to import "single" namespace', () => {
+                beforeEach(async () => {
+                  await deleteExceptionList(endpointOpsAnalystSupertest, artifact.listId, 'single');
+                });
+
+                afterEach(async () => {
+                  await deleteExceptionList(endpointOpsAnalystSupertest, artifact.listId, 'single');
+                });
+
+                it("should skip validation when all lists/items are in 'single' namespace (similarly to pre-create hook)", async () => {
+                  await endpointArtifactTestResources.createList(artifact.listId);
+
+                  await endpointOpsAnalystSupertest
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log))
+                    .attach(
+                      'file',
+                      buildImportBuffer(
+                        artifact.listId,
+                        [
+                          {
+                            item_id: 'per-policy-artifact',
+                            tags: [
+                              buildSpaceOwnerIdTag(
+                                'not-existing-space-to-trigger-validation-error'
+                              ),
+                            ],
+                            namespace_type: 'single',
+                          },
+                        ],
+                        'single'
+                      ),
+                      'import_data.ndjson'
+                    )
+                    .expect(200)
+                    .expect({
+                      errors: [],
+                      success: true,
+                      success_count: 2,
+                      success_exception_lists: true,
+                      success_count_exception_lists: 1,
+                      success_exception_list_items: true,
+                      success_count_exception_list_items: 1,
+                    } as ImportExceptionsResponseSchema);
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                  expect(items.length).toEqual(0);
+                });
+
+                it('should fail when namespaces are mixed - as it counts as multiple lists', async () => {
+                  await endpointArtifactTestResources.createList(artifact.listId);
+
+                  await supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege
+                    .post(`${EXCEPTION_LIST_URL}/_import`)
+                    .set('kbn-xsrf', 'true')
+                    .on('error', createSupertestErrorLogger(log).ignoreCodes([400]))
+                    .attach(
+                      'file',
+                      buildImportBuffer(artifact.listId, [
+                        {
+                          item_id: 'global-artifact-with-single-namespace',
+                          tags: [CURRENT_SPACE_OWNER_TAG, GLOBAL_ARTIFACT_TAG],
+                          namespace_type: 'single',
+                        },
+                        {
+                          item_id: 'per-policy-artifact-with-agnostic-namespace',
+                          tags: [CURRENT_SPACE_OWNER_TAG],
+                          namespace_type: 'agnostic',
+                        },
+                      ]),
+                      'import_data.ndjson'
+                    )
+                    .expect(400)
+                    .expect(
+                      anEndpointArtifactErrorOf(
+                        'Importing multiple Endpoint artifact exception list types at the same time is not supported'
+                      )
+                    );
+
+                  const items = await fetchArtifacts(CURRENT_SPACE_ID);
+                  expect(items.length).toEqual(0);
+                });
+              });
+
               it('should return conflict on list, but import artifacts when list exist without deleting existing ones', async () => {
                 await endpointArtifactTestResources.createList(artifact.listId);
                 await endpointArtifactTestResources.createArtifact(artifact.listId, {
@@ -957,7 +1037,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
                   .expect(400)
                   .expect(
                     anEndpointArtifactErrorOf(
-                      'Importing multiple Endpoint artifact exception lists is not supported'
+                      'Importing multiple Endpoint artifact exception list types at the same time is not supported'
                     )
                   );
               });
@@ -1339,14 +1419,14 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
 
 const getFetchArtifacts =
   (supertest: TestAgent, log: ToolingLog, listId: string) =>
-  async (spaceId: string, sortField?: string) => {
+  async (spaceId: string, sortField?: string, namespace: 'agnostic' | 'single' = 'agnostic') => {
     const { body }: { body: FindExceptionListItemsResponse } = await supertest
       .get(addSpaceIdToPath('/', spaceId, `${EXCEPTION_LIST_ITEM_URL}/_find`))
       .set('kbn-xsrf', 'true')
       .on('error', createSupertestErrorLogger(log))
       .query({
         list_id: listId,
-        namespace_type: 'agnostic',
+        namespace_type: namespace,
         sort_field: sortField ?? undefined,
         sort_order: sortField ? 'asc' : undefined,
       } as FindExceptionListItemsRequestQueryInput)
@@ -1379,7 +1459,8 @@ const anEndpointArtifactErrorOf = (message: string) => (res: { body: { message: 
 
 const buildImportBuffer = (
   listId: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number],
-  itemsArray: Partial<ExceptionListItemSchema>[] = [{}, {}, {}]
+  itemsArray: Partial<ExceptionListItemSchema>[] = [{}, {}, {}],
+  listNamespace: 'agnostic' | 'single' = 'agnostic'
 ): Buffer => {
   const generator = new ExceptionsListItemGenerator();
 
@@ -1387,7 +1468,7 @@ const buildImportBuffer = (
 
   return Buffer.from(
     `
-      ${buildListInfo(listId)}
+      ${buildListInfo(listId, listNamespace)}
       ${items.map((item) => JSON.stringify(item)).join('\n')}
       ${JSON.stringify(buildDetails({ exported_exception_list_item_count: items.length }))}
       `,
@@ -1395,7 +1476,7 @@ const buildImportBuffer = (
   );
 };
 
-const buildListInfo = (listId: string): string => {
+const buildListInfo = (listId: string, namespace: 'agnostic' | 'single' = 'agnostic'): string => {
   const listInfo = Object.values(ENDPOINT_ARTIFACT_LISTS).find((listDefinition) => {
     return listDefinition.id === listId;
   }) ?? {
@@ -1404,7 +1485,7 @@ const buildListInfo = (listId: string): string => {
     description: `random description for ${listId}`,
   };
 
-  return `{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${listInfo.description}","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${listInfo.name}","namespace_type":"agnostic","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}`;
+  return `{"_version":"WzEsMV0=","created_at":"2025-08-21T14:20:07.012Z","created_by":"kibana","description":"${listInfo.description}","id":"${listId}","immutable":false,"list_id":"${listId}","name":"${listInfo.name}","namespace_type":"${namespace}","os_types":[],"tags":[],"tie_breaker_id":"034d07f4-fa33-43bb-adfa-6f6bda7921ce","type":"endpoint","updated_at":"2025-08-21T14:20:07.012Z","updated_by":"kibana","version":1}`;
 };
 
 const buildDetails = (override: Partial<ExportExceptionDetails> = {}): ExportExceptionDetails => ({
@@ -1416,3 +1497,14 @@ const buildDetails = (override: Partial<ExportExceptionDetails> = {}): ExportExc
   missing_exception_lists_count: 0,
   ...override,
 });
+
+const deleteExceptionList = async (
+  supertest: TestAgent,
+  listId: string,
+  namespace: 'single' | 'agnostic'
+) =>
+  supertest
+    .delete(`${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=${namespace}`)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(({ status }) => expect([200, 404]).toContain(status));

@@ -15,6 +15,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import {
   buildSpaceOwnerIdTag,
   hasArtifactOwnerSpaceId,
@@ -37,6 +38,14 @@ import {
 } from '../validators';
 import { buildSpaceDataFilter } from '../utils';
 
+const MULTIPLE_TYPES_OF_ENDPOINT_ARTIFACT_IMPORT_NOT_ALLOWED = i18n.translate(
+  'xpack.securitySolution.importValidator.multipleTypesOfEndpointArtifactImportNotAllowed',
+  {
+    defaultMessage:
+      'Importing multiple Endpoint artifact exception list types at the same time is not supported',
+  }
+);
+
 export const getExceptionsPreImportHandler = (
   endpointAppContext: EndpointAppContextService
 ): ExceptionsListPreImportServerExtension['callback'] => {
@@ -55,28 +64,28 @@ export const getExceptionsPreImportHandler = (
 
     // --- Below are the validations/operations when Import/Export is allowed for all endpoint artifacts based on FF ---
 
-    const importedListIds = new Set<string>();
+    const importedListIdsAndNamespaces = new Set<string>();
     for (const item of [...data.lists, ...data.items]) {
       if ('list_id' in item) {
-        importedListIds.add(item.list_id);
+        importedListIdsAndNamespaces.add(`${item.list_id}:${item.namespace_type}`);
       }
     }
 
     const hasEndpointArtifact = ENDPOINT_ARTIFACT_LIST_IDS.some((endpointListId) =>
-      importedListIds.has(endpointListId)
+      importedListIdsAndNamespaces.has(`${endpointListId}:agnostic`)
     );
 
     if (!hasEndpointArtifact) {
       return { data, overwrite };
     }
 
-    if (importedListIds.size > 1) {
+    if (importedListIdsAndNamespaces.size > 1) {
       throw new EndpointArtifactExceptionValidationError(
-        'Importing multiple Endpoint artifact exception lists is not supported'
+        MULTIPLE_TYPES_OF_ENDPOINT_ARTIFACT_IMPORT_NOT_ALLOWED
       );
     }
 
-    const importedListId = Array.from(importedListIds)[0];
+    const importedListId = Array.from(importedListIdsAndNamespaces)[0].split(':')[0];
 
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp({ listId: importedListId })) {
