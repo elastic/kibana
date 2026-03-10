@@ -50,6 +50,10 @@ export function generateOtelcolConfig(
       const otelInputs: OTelCollectorConfig[] = (input?.streams ?? []).map((stream) => {
         // Avoid dots in keys, as they can create subobjects in agent config.
         const suffix = (input.id + '-' + stream.id).replaceAll('.', '-');
+        // Extract signal types from pipeline IDs
+        const signalTypes = stream.service?.pipelines
+          ? extractSignalTypesFromPipelines(stream.service?.pipelines)
+          : [];
         const attributesTransform = generateOTelAttributesTransform(
           stream.data_stream.type ? stream.data_stream.type : 'logs',
           stream.data_stream.dataset,
@@ -58,11 +62,13 @@ export function generateOtelcolConfig(
             : 'default',
           suffix,
           packageInfo,
-          stream.service?.pipelines
+          signalTypes
         );
+        const hasTracesPipeline = signalTypes.includes('traces');
 
         const shouldAddAPMConfig =
-          stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true;
+          (stream.data_stream.type === dataTypes.Traces || hasTracesPipeline) &&
+          stream[USE_APM_VAR_NAME] === true;
 
         let otelConfig: OTelCollectorConfig = {
           ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
@@ -208,17 +214,15 @@ function generateOTelAttributesTransform(
   namespace: string,
   suffix: string,
   packageInfo?: PackageInfo,
-  streamPipelines?: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
+  signalTypes?: string[]
 ): Record<OTelCollectorComponentID, any> {
   const dynamicSignalTypes = hasDynamicSignalTypes(packageInfo);
 
   let transformStatements: Record<string, any> = {};
 
-  if (dynamicSignalTypes && streamPipelines) {
-    // When dynamic_signal_types is true, extract signal types from pipeline IDs
-    // and generate transforms for each. This allows the collector to route data
+  if (dynamicSignalTypes && signalTypes) {
+    // When dynamic_signal_types is true, generate transforms for each signal type. This allows the collector to route data
     // to the appropriate datastreams based on the pipelines configured in the policy.
-    const signalTypes = extractSignalTypesFromPipelines(streamPipelines);
     // Generate transforms for each signal type found in pipelines
     signalTypes.forEach((signalType) => {
       const typeTransforms = generateOtelTypeTransforms(signalType, dataset, namespace);
