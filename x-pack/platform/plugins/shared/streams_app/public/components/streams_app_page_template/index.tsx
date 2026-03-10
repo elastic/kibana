@@ -42,6 +42,7 @@ StreamsAppPageTemplate.Body = ({
         display: flex;
         flex-direction: column;
         height: 100%;
+        min-width: 0;
         ${noPadding ? 'padding: 0px;' : ''}
       `,
     }}

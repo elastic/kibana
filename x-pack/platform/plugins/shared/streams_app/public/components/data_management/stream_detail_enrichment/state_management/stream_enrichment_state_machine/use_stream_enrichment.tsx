@@ -21,7 +21,12 @@ import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import type { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
+import type {
+  StreamEnrichmentActorSnapshot,
+  StreamEnrichmentEvent,
+  StreamEnrichmentInput,
+  StreamEnrichmentServiceDependencies,
+} from './types';
 import type {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,
@@ -35,17 +40,30 @@ const consoleInspector = createConsoleInspector();
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
-export const useStreamEnrichmentSelector = StreamEnrichmentContext.useSelector;
+interface StreamEnrichmentService {
+  send: (event: StreamEnrichmentEvent) => void;
+  getSnapshot: () => StreamEnrichmentActorSnapshot;
+}
+
+const useStreamEnrichmentService = (): StreamEnrichmentService => {
+  return StreamEnrichmentContext.useActorRef() as unknown as StreamEnrichmentService;
+};
+
+export const useStreamEnrichmentSelector = <T,>(
+  selector: (state: StreamEnrichmentActorSnapshot) => T
+): T => {
+  return StreamEnrichmentContext.useSelector(selector as (snapshot: unknown) => T);
+};
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
 export const useGetStreamEnrichmentState = () => {
-  const service = StreamEnrichmentContext.useActorRef();
+  const service = useStreamEnrichmentService();
   return useCallback(() => service.getSnapshot(), [service]);
 };
 
 export const useStreamEnrichmentEvents = () => {
-  const service = StreamEnrichmentContext.useActorRef();
+  const service = useStreamEnrichmentService();
 
   return useMemo(
     () => ({
@@ -204,7 +222,7 @@ const ListenForDefinitionChanges = ({
   children,
   definition,
 }: React.PropsWithChildren<Omit<StreamEnrichmentInput, 'grokCollection'>>) => {
-  const service = StreamEnrichmentContext.useActorRef();
+  const service = useStreamEnrichmentService();
 
   useEffect(() => {
     service.send({ type: 'stream.received', definition });

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Direction, EuiSearchBarProps, CriteriaWithPagination, Query } from '@elastic/eui';
 import {
@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
+import type { SuggestionBulkStatusItem } from '@kbn/streams-plugin/common';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { Streams, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
@@ -41,10 +42,14 @@ import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RetentionColumn } from './retention_column';
+import { SuggestionStatusColumn } from './suggestion_status_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
+import { useKibana } from '../../hooks/use_kibana';
+import { useAIFeatures } from '../../hooks/use_ai_features';
 import {
   NAME_COLUMN_HEADER,
   RETENTION_COLUMN_HEADER,
@@ -55,6 +60,8 @@ import {
   DATA_QUALITY_COLUMN_HEADER,
   DOCUMENTS_COLUMN_HEADER,
   FAILURE_STORE_PERMISSIONS_ERROR,
+  SUGGESTION_COLUMN_HEADER,
+  SUGGESTION_COLUMN_HEADER_ARIA_LABEL,
 } from './translations';
 import { DeprecatedLogsBadge, DiscoverBadgeButton, QueryStreamBadge } from '../stream_badges';
 
@@ -65,6 +72,19 @@ const datePickerStyle = css`
     height: 40px;
   }
 `;
+
+// This makes the table horizontaly scrollable if space is thight,
+// but keeps the header and footers in place.
+const scrollableTableStyle = css`
+  overflow-x: auto;
+
+  > *:not(table) {
+    position: sticky;
+    left: 0;
+  }
+`;
+
+const SUGGESTION_STATUS_POLLING_INTERVAL_MS = 2000;
 
 export function StreamsTreeTable({
   loading,
@@ -84,6 +104,12 @@ export function StreamsTreeTable({
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
   const { getStepPropsByStepId } = useStreamsTour();
+  const {
+    streams: { streamsRepositoryClient },
+  } = useKibana().dependencies.start;
+
+  const aiFeatures = useAIFeatures();
+  const isAIEnabled = aiFeatures !== null && !aiFeatures.loading && aiFeatures.enabled;
 
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -104,6 +130,22 @@ export function StreamsTreeTable({
   });
 
   const docCountsFetch = getStreamDocCounts();
+
+  const suggestionStatusResult = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!isAIEnabled) {
+        return Promise.resolve([] as SuggestionBulkStatusItem[]);
+      }
+      return streamsRepositoryClient.fetch(
+        'GET /internal/streams/_pipeline_suggestion/_bulk_status',
+        {
+          signal,
+        }
+      );
+    },
+    [streamsRepositoryClient, isAIEnabled],
+    { disableToastOnError: true }
+  );
 
   const totalDocsResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
@@ -161,6 +203,44 @@ export function StreamsTreeTable({
 
     return qualities;
   }, [docsByStream, degradedByStream, failedByStream]);
+
+  const suggestionStatusByStream = React.useMemo(() => {
+    if (!suggestionStatusResult.value) {
+      return {};
+    }
+    type StatusItem = (typeof suggestionStatusResult.value)[number];
+    return suggestionStatusResult.value.reduce<Record<string, StatusItem>>((acc, item) => {
+      acc[item.stream] = item;
+      return acc;
+    }, {});
+  }, [suggestionStatusResult]);
+
+  const isSuggestionStatusInitialLoading =
+    suggestionStatusResult.loading && !suggestionStatusResult.value;
+
+  const hasInProgressSuggestions = React.useMemo(() => {
+    if (!suggestionStatusResult.value) {
+      return false;
+    }
+    return suggestionStatusResult.value.some((item) => item.pipelineInProgressCount > 0);
+  }, [suggestionStatusResult.value]);
+
+  const suggestionRefreshRef = useRef(suggestionStatusResult.refresh);
+  suggestionRefreshRef.current = suggestionStatusResult.refresh;
+
+  useEffect(() => {
+    if (!hasInProgressSuggestions) {
+      return;
+    }
+
+    const intervalId = setInterval(() => {
+      suggestionRefreshRef.current();
+    }, SUGGESTION_STATUS_POLLING_INTERVAL_MS);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [hasInProgressSuggestions]);
 
   const docCountsLoaded = !!totalDocsResult.value;
   const qualityLoaded =
@@ -343,12 +423,14 @@ export function StreamsTreeTable({
     <EuiInMemoryTable<TableRow>
       loading={loading}
       data-test-subj="streamsTable"
+      className={scrollableTableStyle}
       columns={[
         {
           field: 'nameSortKey',
           name: nameColumnHeader,
           sortable: (row: TableRow) => row.rootNameSortKey,
           dataType: 'string',
+          width: '300px',
           render: (_: unknown, item: TableRow) => {
             // Only show expand/collapse if tree mode is active and has children
             const treeMode = shouldComposeTree(sortField);
@@ -497,6 +579,29 @@ export function StreamsTreeTable({
               '-'
             ),
         },
+        ...(isAIEnabled
+          ? [
+              {
+                field: 'suggestion',
+                name: (
+                  <span aria-label={SUGGESTION_COLUMN_HEADER_ARIA_LABEL}>
+                    {SUGGESTION_COLUMN_HEADER}
+                  </span>
+                ),
+                width: '130px',
+                sortable: false,
+                align: 'center' as const,
+                render: (_: unknown, item: TableRow) =>
+                  item.data_stream ? (
+                    <SuggestionStatusColumn
+                      streamName={item.stream.name}
+                      status={suggestionStatusByStream[item.stream.name]}
+                      isLoading={isSuggestionStatusInitialLoading}
+                    />
+                  ) : null,
+              },
+            ]
+          : []),
         {
           field: 'retentionMs',
           name: (

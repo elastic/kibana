@@ -74,22 +74,80 @@ export class TaskClient<TaskType extends string> {
     const task = await this.get<TParams, TPayload>(id);
 
     if (task.status === TaskStatus.InProgress) {
-      return isStale(task.created_at) ? { status: TaskStatus.Stale } : { status: task.status };
+      return isStale(task.created_at)
+        ? { status: TaskStatus.Stale, created_at: task.created_at }
+        : { status: task.status, created_at: task.created_at };
     } else if (task.status === TaskStatus.Failed) {
       return {
         status: TaskStatus.Failed,
         error: task.task.error,
+        created_at: task.created_at,
       };
     } else if (task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged) {
       return {
         status: task.status,
+        created_at: task.created_at,
         ...task.task.payload,
       };
     }
 
     return {
       status: task.status,
+      created_at: task.created_at,
     };
+  }
+
+  /**
+   * Gets statuses for all tasks of a given type.
+   * Optionally filters by task IDs.
+   * Returns a map of task ID to status (with stale detection for in-progress tasks).
+   */
+  public async getStatusesByType<TParams extends {} = {}, TPayload extends {} = {}>(
+    taskType: TaskType,
+    taskIds?: string[]
+  ): Promise<Map<string, { status: TaskStatus; payload?: TPayload; created_at: string }>> {
+    const query: {
+      bool: { filter: Array<{ term: { type: TaskType } } | { terms: { id: string[] } }> };
+    } = {
+      bool: {
+        filter: [{ term: { type: taskType } }],
+      },
+    };
+
+    if (taskIds && taskIds.length > 0) {
+      query.bool.filter.push({ terms: { id: taskIds } });
+    }
+
+    const response = await this.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query,
+    });
+
+    const results = new Map<
+      string,
+      { status: TaskStatus; payload?: TPayload; created_at: string }
+    >();
+
+    for (const hit of response.hits.hits) {
+      const task = hit._source as PersistedTask<TParams, TPayload>;
+      let status: TaskStatus;
+
+      if (task.status === TaskStatus.InProgress) {
+        status = isStale(task.created_at) ? TaskStatus.Stale : task.status;
+      } else {
+        status = task.status;
+      }
+
+      const payload =
+        task.status === TaskStatus.Completed || task.status === TaskStatus.Acknowledged
+          ? task.task.payload
+          : undefined;
+
+      results.set(task.id, { status, payload, created_at: task.created_at });
+    }
+
+    return results;
   }
 
   public async schedule<TParams extends {} = {}>({

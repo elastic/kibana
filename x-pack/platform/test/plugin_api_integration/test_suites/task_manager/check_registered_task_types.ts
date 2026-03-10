@@ -243,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
         'streams_features_identification',
         'streams_insights_discovery',
         'streams_onboarding',
+        'streams_pipeline_suggestion',
         'streams_significant_events_queries_generation',
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:invalidate_api_keys',
