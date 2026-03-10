@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import type { Logger, CoreSetup, SavedObjectsClientContract, CoreStart } from '@kbn/core/server';
+import type { Logger, CoreSetup, CoreStart } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-  IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import {
-  RULE_SAVED_OBJECT_TYPE,
-  UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-  API_KEY_PENDING_INVALIDATION_TYPE,
-} from '../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { bulkMarkApiKeysForInvalidation } from '../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { UiamApiKeyProvisioningStatus } from '../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import {
@@ -26,16 +19,18 @@ import {
   emptyState,
   type LatestTaskStateSchema,
 } from './uiam_api_key_provisioning_task_state';
-import { getExcludeRulesFilter } from './lib/get_exclude_rules_filter';
 import {
   createFailedConversionStatus,
   createStatusFromBulkUpdateResult,
+  createProvisioningRunContext,
   classifyRuleForUiamProvisioning,
   fetchFirstBatchOfRulesToConvert,
   getErrorMessage,
-} from './lib/helpers';
-import { buildRuleUpdatesForUiam } from './lib/build_rule_updates_for_uiam';
+  getExcludeRulesFilter,
+  buildRuleUpdatesForUiam,
+} from './lib';
 import type {
+  ProvisioningRunContext,
   ProvisioningStatusDocs,
   ApiKeyToConvert,
   GetApiKeysToConvertResult,
@@ -43,54 +38,15 @@ import type {
   ConvertApiKeysResult,
 } from './types';
 import type { AlertingPluginsStart } from '../plugin';
-
-export interface ProvisioningRunContext {
-  coreStart: CoreStart;
-  plugins: AlertingPluginsStart;
-  uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
-  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  unsafeSavedObjectsClient: SavedObjectsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
-}
-
-export const createProvisioningRunContext = async (
-  core: CoreSetup<AlertingPluginsStart>
-): Promise<ProvisioningRunContext> => {
-  const [coreStart, plugins] = await core.getStartServices();
-  const uiamConvert = coreStart.security?.authc?.apiKeys?.uiam?.convert;
-  if (typeof uiamConvert !== 'function') {
-    throw new Error('UIAM convert API is not available');
-  }
-  const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-  });
-  const unsafeSavedObjectsClient = coreStart.savedObjects.getUnsafeInternalClient({
-    includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-  });
-  const savedObjectsClient = coreStart.savedObjects.createInternalRepository([
-    UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-    API_KEY_PENDING_INVALIDATION_TYPE,
-  ]);
-  return {
-    coreStart,
-    plugins,
-    uiamConvert,
-    encryptedSavedObjectsClient,
-    unsafeSavedObjectsClient,
-    savedObjectsClient,
-  };
-};
-
-export const PROVISION_UIAM_API_KEYS_FLAG = 'alerting.rules.provisionUiamApiKeys';
-export const API_KEY_PROVISIONING_TASK_SCHEDULE: IntervalSchedule = { interval: '1m' };
-const TASK_TIMEOUT = '5m';
-/** Delay before the next run when more batches are pending (1 minute) */
-const RESCHEDULE_DELAY_MS = 60000;
-
-export const API_KEY_PROVISIONING_TASK_ID = 'api_key_provisioning';
-export const API_KEY_PROVISIONING_TASK_TYPE = `alerting:${API_KEY_PROVISIONING_TASK_ID}`;
-
-export const TAGS = ['serverless', 'alerting', 'uiam-api-key-provisioning', 'background-task'];
+import {
+  PROVISION_UIAM_API_KEYS_FLAG,
+  API_KEY_PROVISIONING_TASK_ID,
+  API_KEY_PROVISIONING_TASK_TYPE,
+  API_KEY_PROVISIONING_TASK_SCHEDULE,
+  TASK_TIMEOUT,
+  RESCHEDULE_DELAY_MS,
+  TAGS,
+} from './constants';
 
 export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
@@ -152,9 +108,11 @@ export class UiamApiKeyProvisioningTask {
       return;
     }
 
-    core.featureFlags.getBooleanValue$(PROVISION_UIAM_API_KEYS_FLAG, false).subscribe((enabled) => {
-      this.applyProvisioningFlag(enabled, taskManager).catch(() => {});
-    });
+    core.featureFlags
+      .getBooleanValue$(PROVISION_UIAM_API_KEYS_FLAG, false)
+      .subscribe((enabled: boolean) => {
+        this.applyProvisioningFlag(enabled, taskManager).catch(() => {});
+      });
   };
 
   private scheduleProvisioningTask = async (

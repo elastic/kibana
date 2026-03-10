@@ -13,8 +13,7 @@ import {
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import { convertRuleIdsToKueryNode } from '../../lib/convert_rule_ids_to_kuery_node';
-
-const GET_STATUS_BATCH_SIZE = 500;
+import { GET_STATUS_BATCH_SIZE } from '../constants';
 
 /**
  * Returns a KQL filter that excludes rules which already have provisioning status

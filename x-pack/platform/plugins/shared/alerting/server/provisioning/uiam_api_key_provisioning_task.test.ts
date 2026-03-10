@@ -10,15 +10,15 @@ import { loggingSystemMock, coreMock, savedObjectsRepositoryMock } from '@kbn/co
 import type { CoreSetup, CoreStart } from '@kbn/core/server';
 import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { UiamApiKeyProvisioningTask } from './uiam_api_key_provisioning_task';
 import {
-  UiamApiKeyProvisioningTask,
   API_KEY_PROVISIONING_TASK_ID,
   API_KEY_PROVISIONING_TASK_TYPE,
   PROVISION_UIAM_API_KEYS_FLAG,
   TAGS,
   API_KEY_PROVISIONING_TASK_SCHEDULE,
-} from './uiam_api_key_provisioning_task';
-import { GET_RULES_BATCH_SIZE } from './lib/helpers';
+} from './constants';
+import { GET_RULES_BATCH_SIZE } from './lib';
 import { emptyState } from './uiam_api_key_provisioning_task_state';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import {

@@ -5,8 +5,21 @@
  * 2.0.
  */
 
+import type { CoreStart, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { AlertingPluginsStart } from '../plugin';
 import type { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { RawRule } from '../types';
+
+export interface ProvisioningRunContext {
+  coreStart: CoreStart;
+  plugins: AlertingPluginsStart;
+  uiamConvert: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
+  encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
+  unsafeSavedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
+}
 
 export interface ProvisioningStatusDocs {
   type: typeof UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE;
