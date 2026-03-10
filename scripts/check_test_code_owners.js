@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-void require('@kbn/test').checkTestCodeOwnersCLI();
+void require('@kbn/scout-reporting').cli.checkTestCodeOwnersCLI();

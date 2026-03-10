@@ -8,4 +8,3 @@
  */
 
 export { runFtrCli } from './ftr';
-export { checkTestCodeOwnersCLI } from './code_owners';
