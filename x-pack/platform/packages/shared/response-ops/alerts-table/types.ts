@@ -117,8 +117,6 @@ export interface Ecs {
  *
  * We don't use the full cases service interface to avoid circular dependencies
  */
-export type CasesOwner = 'securitySolution' | 'observability' | 'cases';
-
 export interface CasesService {
   ui: {
     getCasesContext: () => FC<any>;
@@ -129,7 +127,7 @@ export interface CasesService {
   };
   helpers: {
     groupAlertsByRule: (items: any[]) => any[];
-    canUseCases: (owners: CasesOwner[]) => any;
+    canUseCases: (owners: Array<'securitySolution' | 'observability' | 'cases'>) => any;
     getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
     getObservablesFromEcs: (ecsArray: any[][]) => Observable[];
   };
@@ -570,7 +568,7 @@ export interface PublicAlertsDataGridProps
    */
   casesConfiguration?: {
     featureId: string;
-    owner: CasesOwner[];
+    owner: Parameters<CasesService['helpers']['canUseCases']>[0];
     appId?: string;
     syncAlerts?: boolean;
     extractObservables?: boolean;
