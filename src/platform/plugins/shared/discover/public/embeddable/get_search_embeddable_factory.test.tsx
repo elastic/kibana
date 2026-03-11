@@ -420,18 +420,22 @@ describe('saved search embeddable', () => {
       });
       await waitOneTick(); // wait for build to complete
 
-      expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
-        dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
-        dataView: dataViewMock,
-        query: api.savedSearch$.getValue().searchSource.getField('query'),
+      await waitFor(() => {
+        expect(resolveDataSourceProfileSpy).toHaveBeenCalledWith({
+          dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+          dataView: dataViewMock,
+          query: api.savedSearch$.getValue().searchSource.getField('query'),
+        });
       });
-      resolveDataSourceProfileSpy.mockReset();
+      resolveDataSourceProfileSpy.mockClear();
       expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
 
       // trigger a refetch
       dashboadFilters.next([{ meta: {} }]);
-      await waitOneTick();
-      expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
+
+      await waitFor(() => {
+        expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
+      });
     });
 
     it('should pass cell renderers from profile', async () => {
