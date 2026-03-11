@@ -52,9 +52,7 @@ function getCheckpointIdentity(
   relConfigPath: string,
   shard: string | undefined
 ): { identity: string; key: string } {
-  const identity = shard
-    ? annotateConfigWithShard(relConfigPath, shard)
-    : relConfigPath;
+  const identity = shard ? annotateConfigWithShard(relConfigPath, shard) : relConfigPath;
   return { identity, key: getCheckpointKey(identity) };
 }
 
