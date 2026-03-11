@@ -111,7 +111,9 @@ export const FigmaConnector: ConnectorSpec = {
     listProjectFiles: {
       isTool: false,
       input: z.object({
-        projectId: z.string().describe('Figma project ID (from list with type teamProjects or project URL)'),
+        projectId: z
+          .string()
+          .describe('Figma project ID (from list with type teamProjects or project URL)'),
       }),
       handler: async (ctx, input: Figma.ListProjectFilesInput) => {
         const response = await ctx.client.get(
@@ -140,7 +142,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/users-endpoints/#get-me
     whoAmI: {
       input: z.object({}),
-      handler: async (ctx, _): Promise<Figma.WhoAmIResult> => {
+      handler: async (ctx): Promise<Figma.WhoAmIResult> => {
         const response = await ctx.client.get(`${FIGMA_API_BASE}/v1/me`);
         const data = response.data as Figma.WhoAmIResult;
         return {
