@@ -83,7 +83,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.email == "alice@example.com") AND (((event.module == "okta") OR (data_stream.dataset LIKE "okta*")) OR ((event.module == "entityanalytics_okta") OR (data_stream.dataset LIKE "entityanalytics_okta*"))))'
+        '((user.email == "alice@example.com") AND (((event.module == "okta") OR STARTS_WITH(data_stream.dataset, "okta")) OR ((event.module == "entityanalytics_okta") OR STARTS_WITH(data_stream.dataset, "entityanalytics_okta"))))'
       );
     });
 
@@ -104,7 +104,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.name == "alice") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND (user.domain IS NULL OR user.domain == "") AND (((event.module == "azure") OR (data_stream.dataset LIKE "azure*")) OR ((event.module == "entityanalytics_entra_id") OR (data_stream.dataset LIKE "entityanalytics_entra_id*"))))'
+        '((user.name == "alice") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND (user.domain IS NULL OR user.domain == "") AND (((event.module == "azure") OR STARTS_WITH(data_stream.dataset, "azure")) OR ((event.module == "entityanalytics_entra_id") OR STARTS_WITH(data_stream.dataset, "entityanalytics_entra_id"))))'
       );
     });
 
@@ -115,7 +115,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.id == "user-id-42") AND (user.email IS NULL OR user.email == "") AND (((event.module == "o365") OR (data_stream.dataset LIKE "o365*")) OR ((event.module == "o365_metrics") OR (data_stream.dataset LIKE "o365_metrics*"))))'
+        '((user.id == "user-id-42") AND (user.email IS NULL OR user.email == "") AND (((event.module == "o365") OR STARTS_WITH(data_stream.dataset, "o365")) OR ((event.module == "o365_metrics") OR STARTS_WITH(data_stream.dataset, "o365_metrics"))))'
       );
     });
 
@@ -130,7 +130,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.email == "alice@example.com") AND (((event.module == "okta") OR (data_stream.dataset LIKE "okta*")) OR ((event.module == "entityanalytics_okta") OR (data_stream.dataset LIKE "entityanalytics_okta*"))))'
+        '((user.email == "alice@example.com") AND (((event.module == "okta") OR STARTS_WITH(data_stream.dataset, "okta")) OR ((event.module == "entityanalytics_okta") OR STARTS_WITH(data_stream.dataset, "entityanalytics_okta"))))'
       );
     });
 
@@ -141,7 +141,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.name == "jane") AND (user.domain == "corp.com") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND ((event.module == "entityanalytics_ad") OR (data_stream.dataset LIKE "entityanalytics_ad*")))'
+        '((user.name == "jane") AND (user.domain == "corp.com") AND (user.email IS NULL OR user.email == "") AND (user.id IS NULL OR user.id == "") AND ((event.module == "entityanalytics_ad") OR STARTS_WITH(data_stream.dataset, "entityanalytics_ad")))'
       );
     });
 
@@ -152,7 +152,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.email == "romulo@elastic.co") AND ((event.module == "aws") OR (data_stream.dataset LIKE "aws*")))'
+        '((user.email == "romulo@elastic.co") AND ((event.module == "aws") OR STARTS_WITH(data_stream.dataset, "aws")))'
       );
     });
 
@@ -163,7 +163,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       });
 
       expect(result).toBe(
-        '((user.email == "romulo@elastic.co") AND ((event.module == "aws") OR (data_stream.dataset LIKE "aws*")))'
+        '((user.email == "romulo@elastic.co") AND ((event.module == "aws") OR STARTS_WITH(data_stream.dataset, "aws")))'
       );
     });
   });

@@ -9,7 +9,6 @@ import { conditionToESQL } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
   FieldEvaluation,
-  FieldEvaluationSource,
   EntityType,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
@@ -20,6 +19,7 @@ import {
   getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
+  getSourceFieldNames,
   isEuidField,
   isEuidSeparator,
 } from './commons';
@@ -163,22 +163,6 @@ function escapeEsqlString(s: string): string {
   return s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
-function getSourceFieldNames(sources: FieldEvaluationSource[]): {
-  exactMatchFields: string[];
-  prefixMatchFields: string[];
-} {
-  const exactMatchFields: string[] = [];
-  const prefixMatchFields: string[] = [];
-  for (const source of sources) {
-    if ('field' in source) {
-      exactMatchFields.push(source.field);
-    } else {
-      prefixMatchFields.push(source.firstChunkOfField);
-    }
-  }
-  return { exactMatchFields, prefixMatchFields };
-}
-
 function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpec): string {
   const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
   const allSourceFields = [...exactMatchFields, ...prefixMatchFields];
@@ -190,7 +174,7 @@ function buildSourceClauseEsql(evaluation: FieldEvaluation, spec: SourceMatchSpe
   const disjuncts = spec.values.map((v) => {
     const escaped = escapeEsqlString(v);
     const exactConds = exactMatchFields.map((f) => `(${f} == "${escaped}")`);
-    const prefixConds = prefixMatchFields.map((f) => `(${f} LIKE "${escaped}*")`);
+    const prefixConds = prefixMatchFields.map((f) => `STARTS_WITH(${f}, "${escaped}")`);
     const parts = [...exactConds, ...prefixConds];
     return parts.length === 1 ? parts[0] : `(${parts.join(' OR ')})`;
   });

@@ -16,13 +16,14 @@ import {
   getFieldValue,
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
+  getSourceFieldNames,
 } from './commons';
 import {
   applyFieldEvaluations,
   getSourceMatchSpec,
   type SourceMatchSpec,
 } from './field_evaluations';
-import type { FieldEvaluation, FieldEvaluationSource } from '../definitions/entity_schema';
+import type { FieldEvaluation } from '../definitions/entity_schema';
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
@@ -151,22 +152,6 @@ export function getEuidDslFilterBasedOnDocument(
   }
 
   return dsl;
-}
-
-function getSourceFieldNames(sources: FieldEvaluationSource[]): {
-  exactMatchFields: string[];
-  prefixMatchFields: string[];
-} {
-  const exactMatchFields: string[] = [];
-  const prefixMatchFields: string[] = [];
-  for (const source of sources) {
-    if ('field' in source) {
-      exactMatchFields.push(source.field);
-    } else {
-      prefixMatchFields.push(source.firstChunkOfField);
-    }
-  }
-  return { exactMatchFields, prefixMatchFields };
 }
 
 function buildSourceClauseDsl(
