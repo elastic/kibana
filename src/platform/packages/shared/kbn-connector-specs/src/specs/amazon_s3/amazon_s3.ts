@@ -141,11 +141,7 @@ export const AmazonS3: ConnectorSpec = {
           ),
       }),
       handler: async (ctx, input: ActionDownloadFileInput) => {
-        const metadata = await getAmazonS3BucketObjectMetadata(
-          ctx,
-          input.bucket,
-          input.key
-        );
+        const metadata = await getAmazonS3BucketObjectMetadata(ctx, input.bucket, input.key);
         if (!metadata) {
           throw new Error('Failed to retrieve file metadata');
         }
